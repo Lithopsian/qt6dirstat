@@ -1,5 +1,5 @@
 # QDirStat
-<img src="https://github.com/Lithopsian/qt6dirstat/tree/main/src/icons/qdirstat.svg" height="64">
+<img src="https://github.com/Lithopsian/qt6dirstat/blob/main/src/icons/qdirstat.svg" height="64">
 
 Qt-based directory statistics
 
@@ -14,7 +14,7 @@ Updated: 2024-04-03
 
 ## Screenshot
 
-[<img width="900" src="https://github.com/Lithopsian/qt6dirstat/tree/main/screenshots/QDirStat-main-win.png">](https://github.com/Lithopsian/qt6dirstat/tree/main/screenshots/QDirStat-main-win.png)
+[<img width="900" src="https://github.com/Lithopsian/qt6dirstat/blob/main/screenshots/QDirStat-main-win.png">](https://github.com/Lithopsian/qt6dirstat/blob/main/screenshots/QDirStat-main-win.png)
 
 _Main window screenshot - notice the multi-selection in the tree and the treemap_
 
@@ -91,21 +91,11 @@ You can donate any amount of your choice via PayPal:
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EYJXAVLGNRR5W)
 
 
-## Latest Stable Release
-
-**QDirStat V1.8.1**
-
-See the [release announcement](https://github.com/shundhammer/qdirstat/releases).
-
-Download installable binary packages for various Linux distributions here:
-[Ready-made packages](#ready-made-packages)
-
-
 
 ## History
 
 
-This is just a rough summary. For more details, see [DevHistory.md](doc/DevHistory.md).
+See [DevHistory.md](doc/DevHistory.md) for history of QDirStat.
 
 
 
