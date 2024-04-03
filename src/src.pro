@@ -87,9 +87,9 @@ SOURCES	  = main.cpp			\
 	    LocateFilesWindow.cpp	\
 	    Logger.cpp			\
 	    MainWindow.cpp		\
-	    MainWindowHelp.cpp	\
+	    MainWindowActions.cpp	\
+	    MainWindowHelp.cpp		\
 	    MainWindowLayout.cpp	\
-	    MainWindowMenus.cpp		\
 	    MainWindowUnpkg.cpp		\
 	    MimeCategorizer.cpp		\
 	    MimeCategory.cpp		\
@@ -137,7 +137,6 @@ HEADERS	  =				\
 	    AdaptiveTimer.h		\
 	    Attic.h			\
 	    BreadcrumbNavigator.h	\
-	    BrokenLibc.h                \
 	    BucketsTableModel.h		\
 	    BusyPopup.h			\
 	    Cleanup.h			\
