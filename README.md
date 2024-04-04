@@ -40,42 +40,26 @@ supported;
 - a number of crashes and freezes have been fixed, as well as lot of less serious problems;
 - there is an extra tab in the settings dialog for the Treemap, and the settings on the general
 tab now take effect without having to restart the program;
-- the cache mechanism
+- the cache mechanism has been expanded to include the full mode, uid, gid, and file
+allocations, so it captures essentially everything used in the program;
+- better behaviour with dark themes: font colours follow the theme better or are configurable;
+icons are generally colourful although a specific dark theme icon set might be better;
+- the file details panel has been improved and there are literally hundreds of other small
+interface improvements or just plain changes that I liked;
+- the footprint is noticeably reduced with the use of newer compiler features and minor
+streamlining of many code branches.
 
-- Package manager support:
-  - Show what software package a system file belongs to.
-  - [Packages view](doc/Pkg-View.md) showing disk usage of installed software
-    packages and their individual files.
-  - [Unpackaged files view](doc/Unpkg-View.md) showing what files in system
-    directories do not belong to any installed software package.
-
-- New views:
-  - Disk usage per file type (by filename extension).
-  - File size histogram view.
-  - [File Age View](doc/File-Age-Stats.md)
-  - Free, used and reserved disk size for each mounted filesystem (like _df_)
-
-See section [_New Features_](#new-features) for more details.
-
+I've probably broken some things along the way, so my apologies in advance.  I'm testing now and
+will look into any issues you find.
 
 ## Table of Contents
 
 1. [Screenshot](#screenshot)
-1. [Latest Stable Release](#latest-stable-release)
-1. [Latest News](#latest-news)
-1. [History](#history)
 1. [Related Software](#related-software): KDirStat, WinDirStat, K4DirStat and more
-1. [Motivation / Rant: Why?](#motivation--rant-why)
-1. [Features](#features)
-1. [MacOS X Compatibility](#macos-x-compatibility)
-1. [Windows Compatibility](#windows-compatibility)
-1. [Ready-made Packages](#ready-made-packages)
-1. [QDirStat Docker Containers](#qdirstat-docker-containers)
 1. [Building](#building)
 1. [Contributing](#contributing)
 1. [Troubleshooting](#troubleshooting)
 1. [Further Reading](#further-reading)
-1. [Packaging Status](#packaging-status)
 1. [Donate](#donate)
 
 
@@ -89,14 +73,6 @@ If you find it useful, please consider donating.
 You can donate any amount of your choice via PayPal:
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EYJXAVLGNRR5W)
-
-
-
-## History
-
-
-See [DevHistory.md](doc/DevHistory.md) for history of QDirStat.
-
 
 
 
@@ -149,7 +125,7 @@ in the Wiki.
 
 Make sure you have a working Qt5 or Qt6 build environment installed. This includes:
 
-- C++ compiler (gcc recommended)
+- C++-compatible compiler (gcc recommended)
 - Qt runtime environment
 - Qt header files
 - libz (compression lib) runtime and header file
@@ -158,19 +134,19 @@ If anything doesn't work, first of all **make sure you can build any of the
 simple examples supplied with Qt**, e.g. the
 [calculator example](http://doc.qt.io/qt-5/qtwidgets-widgets-calculator-example.html).
 
-You will also need a C++11-compatible compiler, but that is almost all of them.
 
 #### Ubuntu
 
 Install the required packages for building:
 
-    sudo apt-get install build-essential qtbase5-dev zlib1g-dev
+    sudo apt-get install build-essential qtbase5-dev/qt6-base-dev zlib1g-dev
 
 Dependent packages will be added automatically.
 
 Recommended packages for developers:
 
-    sudo apt-get install qttools5-dev-tools qtbase5-doc qtbase5-doc-html qtbase5-examples
+    sudo apt-get install qttools5-dev-tools/qt6-base-dev-tools qtbase5-doc/qt6-base-doc
+     qtbase5-doc-html/qt6-base-doc-html qtbase5-examples/qt6-base-examples
 
 See also
 
@@ -185,7 +161,7 @@ environment variable to build against the correct version.
 Install the required packages for building:
 
     sudo zypper install -t pattern devel_C_C++
-    sudo zypper install libQt5Widgets-devel libqt5-qttools zlib-devel
+    sudo zypper install libQt5Widgets-devel libqt5-qttools zlib-devel qt6?
 
 If you have both Qt5 and Qt6 development environments installed, make sure that the
 correct version of 'qmake' is the first in your $PATH.
@@ -250,15 +226,6 @@ See file [Troubleshooting.md](doc/Troubleshooting.md)
 - [Spatry's QDirStat Review on YouTube](https://www.youtube.com/watch?v=ysm4-x_5ftI)
 
 Of course, don't forget to check out the [doc directory](doc/).
-
-
-## Packaging Status
-
-Repology: QDirStat versions in Linux / BSD distributions:
-
-[![Repology](https://repology.org/badge/tiny-repos/qdirstat.svg)](https://repology.org/metapackage/qdirstat/versions)
-
-(click for details)
 
 
 ## Donate
