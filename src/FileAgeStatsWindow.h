@@ -180,7 +180,7 @@ namespace QDirStat
 	FileAgeStats           * _stats 			{ nullptr };
         PercentBarDelegate     * _filesPercentBarDelegate	{ nullptr };
         PercentBarDelegate     * _sizePercentBarDelegate	{ nullptr };
-	Subtree                  _subtree			{ nullptr };
+	Subtree                  _subtree;
         bool                     _startGapsWithCurrentYear	{ true };
 
     };	// class FileAgeStatsWindow

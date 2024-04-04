@@ -191,9 +191,9 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::FileTypeStatsWindow *   _ui;
-        Subtree                     _subtree	{ nullptr };
-	FileTypeStats *		    _stats	{ nullptr };
+	Ui::FileTypeStatsWindow * _ui;
+        Subtree                   _subtree;
+	FileTypeStats           * _stats	{ nullptr };
 
     };
 
