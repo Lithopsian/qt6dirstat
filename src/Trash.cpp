@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QFile>
+#include <QProcessEnvironment>
 #include <QTextStream>
 
 #include "Trash.h"
@@ -36,7 +37,7 @@ static dev_t device( const QString & path )
 	logError() << "stat( " << path << " ) failed: "
 		   << formatErrno() << Qt::endl;
 
-	dev = static_cast<dev_t>( -1 );
+	dev = dev_t( -1 );
     }
 
     return dev;
@@ -85,10 +86,10 @@ Trash::Trash()
 {
     const dev_t homeDevice = device( QDir::homePath() );
 
-    const QByteArray xdg_data_home = qgetenv( "XDG_DATA_HOME" );
+    const QString xdg_data_home = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString() );
 
     const QString homeTrash =
-	xdg_data_home.isEmpty() ? QDir::homePath() + "/.local/share" : QString::fromUtf8( xdg_data_home );
+	xdg_data_home.isEmpty() ? QDir::homePath() + "/.local/share" : xdg_data_home;
 
     _homeTrashDir = new TrashDir( homeTrash + "/Trash", homeDevice );
     CHECK_NEW( _homeTrashDir );

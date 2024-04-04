@@ -169,7 +169,7 @@ bool SysUtil::runningAsRoot()
 
 bool SysUtil::runningWithSudo()
 {
-    return !qgetenv( "SUDO_USER" ).isEmpty();
+    return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty();
 }
 
 /*

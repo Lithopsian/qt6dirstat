@@ -12,10 +12,12 @@
 // different functions by the same name that behave differently? SORT OUT YOUR
 // STUFF before you become a general PITA to the working software developers!
 #define DONT_DEPRECATE_STRERROR
+
 #include <unistd.h> // chown()
 #include <errno.h>
 
 #include <QCoreApplication>
+#include <QProcessEnvironment>
 
 #include "Settings.h"
 #include "SettingsHelpers.h"
@@ -85,8 +87,8 @@ static void moveGroups( const QString & groupPrefix,
  **/
 static void fixFileOwner( const QString & filename )
 {
-    const QString sudoUid = QString::fromUtf8( qgetenv( "SUDO_UID" ) );
-    const QString sudoGid = QString::fromUtf8( qgetenv( "SUDO_GID" ) );
+    const QString sudoUid = QProcessEnvironment::systemEnvironment().value( "SUDO_UID", QString() );
+    const QString sudoGid = QProcessEnvironment::systemEnvironment().value( "SUDO_GID", QString() );
 
     if ( !sudoUid.isEmpty() && !sudoGid.isEmpty() )
     {
