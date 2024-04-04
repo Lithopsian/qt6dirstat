@@ -28,13 +28,13 @@ using SysUtil::haveCommand;
 
 
 bool DpkgPkgManager::isPrimaryPkgManager() const
-{return false;
+{
     return tryRunCommand( "/usr/bin/dpkg -S /usr/bin/dpkg", QRegularExpression( "^dpkg:.*" ) );
 }
 
 
 bool DpkgPkgManager::isAvailable() const
-{return false;
+{
     return haveCommand( "/usr/bin/dpkg" );
 }
 
