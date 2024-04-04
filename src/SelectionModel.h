@@ -54,11 +54,6 @@ namespace QDirStat
 	FileInfo * currentItem() const { return _currentItem; }
 
 	/**
-	 * Return the current branch or 0 if there is none.
-	 **/
-//	FileInfo * currentBranch() const { return _currentBranch; }
-
-	/**
 	 * Return the DirTreeModel of this object.
 	 **/
 	DirTreeModel * dirTreeModel() const { return _dirTreeModel; }
@@ -175,6 +170,7 @@ namespace QDirStat
 	 **/
 	void currentBranchChanged( const QModelIndex & branch );
 
+
     protected slots:
 
 	/**
@@ -207,7 +203,6 @@ namespace QDirStat
 
 	DirTreeModel	* _dirTreeModel;
 	FileInfo	* _currentItem		{ nullptr };
-//	FileInfo	* _currentBranch	{ nullptr };
 	FileInfoSet	  _selectedItems;
 	bool		  _selectedItemsDirty	{ false };
 	bool		  _verbose		{ false };
@@ -262,16 +257,16 @@ namespace QDirStat
     signals:
 
 	// From QItemSelectionModel
-	void selectionChanged	 ( const QItemSelection & selected, const QItemSelection & deselected );
-	void currentChanged	 ( const QModelIndex & current, const QModelIndex & previous );
-	void currentColumnChanged( const QModelIndex & current, const QModelIndex & previous );
-	void currentRowChanged	 ( const QModelIndex & current, const QModelIndex & previous );
+//	void selectionChanged	 ( const QItemSelection & selected, const QItemSelection & deselected );
+//	void currentChanged	 ( const QModelIndex & current, const QModelIndex & previous );
+//	void currentColumnChanged( const QModelIndex & current, const QModelIndex & previous );
+//	void currentRowChanged	 ( const QModelIndex & current, const QModelIndex & previous );
 
 	// from SelectionModel
-	void selectionChanged();
+//	void selectionChanged();
 	void selectionChanged( const FileInfoSet & selectedItems );
 	void currentItemChanged( FileInfo * newCurrent, const FileInfo * oldCurrent );
-	void currentBranchChanged( FileInfo * newItem );
+//	void currentBranchChanged( const QModelIndex & branch );
 
     };	// class SelectionModelProxy
 

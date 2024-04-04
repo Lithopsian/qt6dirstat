@@ -15,7 +15,7 @@
 #include "Exception.h"
 #include "Logger.h"
 
-#define VERBOSE_SELECTION	0
+#define VERBOSE_SELECTION 0
 
 using namespace QDirStat;
 
@@ -43,7 +43,6 @@ void SelectionModel::clear()
     _selectedItems.clear();
     _selectedItemsDirty = true;
     _currentItem = nullptr;
-//    _currentBranch = nullptr;
 
     clearSelection();
 }
@@ -215,8 +214,6 @@ void SelectionModel::updateCurrentBranch( FileInfo * newItem )
     FileInfo * newBranch = newItem->isDirInfo() ? newItem->toDirInfo() : newItem->parent();
     if ( !oldItem || !oldItem->isInSubtree( newBranch ) )
 	emit currentBranchChanged( _dirTreeModel->modelIndex( newItem ) );
-
-//    _currentBranch = newItem;
 }
 
 
@@ -276,7 +273,13 @@ void SelectionModel::dumpSelectedItems()
 SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * parent ):
     QObject ( parent )
 {
-    // Most of these aren't used at the moment
+    connect( master, qOverload<const FileInfoSet &>( &SelectionModel::selectionChanged ),
+	     this,   qOverload<const FileInfoSet &>( &SelectionModelProxy::selectionChanged ) );
+
+    connect( master, &SelectionModel::currentItemChanged,
+	     this,   &SelectionModelProxy::currentItemChanged );
+
+    // The signals below aren't used at the moment
 //    connect( master, qOverload<const QItemSelection &, const QItemSelection &>( &QItemSelectionModel::selectionChanged ),
 //	     this,   qOverload<const QItemSelection &, const QItemSelection &>( &SelectionModelProxy::selectionChanged ) );
 
@@ -291,12 +294,6 @@ SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * par
 
 //    connect( master, qOverload<>( &SelectionModel::selectionChanged ),
 //	     this,   qOverload<>( &SelectionModelProxy::selectionChanged ) );
-
-    connect( master, qOverload<const FileInfoSet &>( &SelectionModel::selectionChanged ),
-	     this,   qOverload<const FileInfoSet &>( &SelectionModelProxy::selectionChanged ) );
-
-    connect( master, &SelectionModel::currentItemChanged,
-	     this,   &SelectionModelProxy::currentItemChanged );
 
 //    connect( master, &SelectionModel::currentBranchChanged,
 //	     this,   &SelectionModelProxy::currentBranchChanged );
