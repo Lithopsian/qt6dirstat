@@ -35,40 +35,44 @@ using SysUtil::haveCommand;
 RpmPkgManager::RpmPkgManager()
 {
     readSettings();
+}
 
-    if ( haveCommand( "/usr/bin/rpm" ) )
-	_rpmCommand = "/usr/bin/rpm";
-    else
-	_rpmCommand = "/bin/rpm"; // for old SUSE / Red Hat distros
 
-    // Notice that it is not enough to rely on a symlink /bin/rpm ->
+/**
+ * Determine the path to the rpm command for this system - may not
+ * actually exist.
+ **/
+static QString rpmCommand()
+{
+    // Note that it is not enough to rely on a symlink /bin/rpm ->
     // /usr/bin/rpm: While recent SUSE distros have that symlink (and maybe Red
     // Hat and Fedora as well?), rpm as a secondary package manager on Ubuntu
     // does not have such a link; they only have /usr/bin/rpm.
-    //
-    // Also intentionally never leaving _rpmCommand empty if it is not
-    // available to avoid unpleasant surprises if a caller tries to use any
-    // other method of this class that refers to it.
+    if ( haveCommand( "/usr/bin/rpm" ) )
+	return "/usr/bin/rpm";
+
+    // Return something to try although it may not exist
+    return "/bin/rpm"; // for old SUSE / Red Hat distros
 }
 
 
 bool RpmPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( QString( "%1 -qf %1" ).arg( _rpmCommand ),
+    return tryRunCommand( QString( "%1 -qf %1" ).arg( rpmCommand() ),
 			  QRegularExpression( "^rpm.*" ) );
 }
 
 
 bool RpmPkgManager::isAvailable() const
 {
-    return haveCommand( _rpmCommand );
+    return haveCommand( rpmCommand() );
 }
 
 
 QString RpmPkgManager::owningPkg( const QString & path ) const
 {
     int exitCode = -1;
-    const QString output = runCommand(	_rpmCommand,
+    const QString output = runCommand(	rpmCommand(),
 					{ "-qf", "--queryformat", "%{name}", path },
 					&exitCode );
 
@@ -87,7 +91,7 @@ PkgInfoList RpmPkgManager::installedPkg() const
     QElapsedTimer timer;
     timer.start();
 
-    const QString output = runCommand(	_rpmCommand,
+    const QString output = runCommand(	rpmCommand(),
 					{ "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
 					&exitCode,
 					LONG_CMD_TIMEOUT_SEC );
@@ -136,7 +140,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 QString RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
 {
     return QString( "%1 -ql %2" )
-	.arg( _rpmCommand )
+	.arg( rpmCommand() )
 	.arg( queryName( pkg ) );
 }
 
@@ -171,7 +175,7 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
 PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
 {
     int exitCode = -1;
-    QString output = runCommand( _rpmCommand,
+    QString output = runCommand( rpmCommand(),
 				 { "-qa", "--qf", "[%{=NAME}-%{=VERSION}-%{=RELEASE}.%{=ARCH} | %{FILENAMES}\n]" },
 				 &exitCode,
 				 LONG_CMD_TIMEOUT_SEC );

@@ -24,9 +24,6 @@ namespace QDirStat
     {
     public:
 
-	PacManPkgManager() {}
-//	virtual ~PacManPkgManager() {}
-
 	/**
 	 * Return the name of this package manager.
 	 *

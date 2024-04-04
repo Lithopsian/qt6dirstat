@@ -32,7 +32,6 @@ namespace QDirStat
     public:
 
 	RpmPkgManager();
-//	virtual ~RpmPkgManager() {}
 
 	/**
 	 * Return the name of this package manager.
@@ -173,7 +172,6 @@ namespace QDirStat
 
 	// Data members
 
-	QString _rpmCommand;
 	int	_getPkgListWarningSec;
 
     }; // class RpmPkgManager

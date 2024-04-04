@@ -38,12 +38,11 @@ bool SysUtil::tryRunCommand( const QString		& commandLine,
 
     if ( exitCode != 0 )
     {
-	// logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << "\"" << Qt::endl;
+	logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << "\"" << Qt::endl;
 	return false;
     }
 
     const bool expected = expectedResult.match( output ).hasMatch();
-    // logDebug() << "Expected: " << expected << Qt::endl;
 
     return expected;
 }
@@ -85,7 +84,7 @@ QString SysUtil::runCommand( const QString &	 command,
     if ( exitCode_ret )
 	*exitCode_ret = -1;
 
-    if ( ! haveCommand( command ) )
+    if ( !haveCommand( command ) )
     {
 	logInfo() << "Command not found: " << command << Qt::endl;
 	return "ERROR: Command not found";
@@ -114,7 +113,7 @@ QString SysUtil::runCommand( const QString &	 command,
 	    if ( exitCode_ret )
 		*exitCode_ret = process.exitCode();
 
-	    if ( ! ignoreErrCode && process.exitCode() )
+	    if ( !ignoreErrCode && process.exitCode() )
 	    {
 		logError() << "Command exited with exit code "
 			   << process.exitCode() << ": "
@@ -134,7 +133,7 @@ QString SysUtil::runCommand( const QString &	 command,
 	output = "ERROR: Timeout or crash\n\n" + output;
     }
 
-    if ( logOutput || ( process.exitCode() != 0 && ! ignoreErrCode ) )
+    if ( logOutput || ( process.exitCode() != 0 && !ignoreErrCode ) )
     {
         const QString logOutput = output.trimmed();
 
@@ -170,13 +169,13 @@ bool SysUtil::runningAsRoot()
 
 bool SysUtil::runningWithSudo()
 {
-    return ! qgetenv( "SUDO_USER" ).isEmpty();
+    return !qgetenv( "SUDO_USER" ).isEmpty();
 }
 
 /*
 bool SysUtil::runningAsTrueRoot()
 {
-    return runningAsRoot() && ! runningWithSudo();
+    return runningAsRoot() && !runningWithSudo();
 }
 */
 
