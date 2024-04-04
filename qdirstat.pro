@@ -18,7 +18,7 @@
 TEMPLATE = subdirs
 CONFIG  += ordered
 
-SUBDIRS  = src scripts doc doc/stats man
+SUBDIRS  = src # scripts doc doc/stats man
 
 macx {
     # FIXME: Prevent build failure because of missing main() (issue #131)
