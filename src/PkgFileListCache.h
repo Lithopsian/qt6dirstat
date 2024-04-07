@@ -104,10 +104,11 @@ namespace QDirStat
 
     private:
 
-	const PkgManager *	    _pkgManager;
-	LookupType		    _lookupType;
-	QMultiMap<QString, QString> _pkgFileNames;
-	QSet<QString>		    _fileNames;
+	const PkgManager           * _pkgManager;
+	LookupType		     _lookupType;
+	QMultiHash<QString, QString> _pkgFileNames;
+	QSet<QString>		     _fileNames;
+
     };
 }	// namespace QDirStat
 
