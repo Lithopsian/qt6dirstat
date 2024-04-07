@@ -74,13 +74,6 @@ static QString toplevel( const QString & rawPath )
 
 using namespace QDirStat;
 
-/*
-Trash * Trash::instance()
-{
-    static Trash _instance;
-    return &_instance;
-}
-*/
 
 Trash::Trash()
 {
@@ -212,6 +205,12 @@ void Trash::empty()
 
 
 
+/**
+ * Create a directory if it doesn't exist. This throws an exception if
+ * 'doThrow' is 'true'.
+ *
+ * Return 'true' if success, 'false' if error (and doThrow is 'false').
+ **/
 static bool ensureDirExists( const QString & path,
 				mode_t		mode,
 				bool		doThrow )

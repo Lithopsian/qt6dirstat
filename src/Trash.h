@@ -14,7 +14,6 @@
 
 #include <QObject>
 #include <QMap>
-#include <QStringBuilder>
 
 
 namespace QDirStat
@@ -43,14 +42,6 @@ namespace QDirStat
         Trash();
 
         /**
-         * Return the singleton object for this class. The first use will create
-         * the singleton. Notice that the static methods all access the singleton,
-         * too, so the first call to any of those static methods will already
-         * create the singleton.
-         **/
-    //    static Trash * instance();
-
-        /**
          * Throw a file or directory into the trash.
          * Return 'true' on success, 'false' on error.
          **/
@@ -72,25 +63,16 @@ namespace QDirStat
          **/
     //    static void empty();
 
-        /**
-         * Return the device of file or directory 'path'.
-         **/
-    //    static dev_t device( const QString & path );
 
-
-    private:
-
-        /**
-         * Find the toplevel directory (the mount point) for the device that 'path'
-         * is on.
-         **/
-    //    static QString toplevel( const QString & path );
+    protected:
 
         /**
          * Return the trash dir for 'path'.
          **/
         TrashDir * trashDir( const QString & path );
 
+
+    private:
 
         //
         // Data members
@@ -132,11 +114,6 @@ namespace QDirStat
         QString path() const { return _path; }
 
         /**
-         * Return the device (as returned from stat()) for this trash directory.
-         **/
-    //    dev_t device() const { return _device; }
-
-        /**
          * Create a name that is unique within this trash directory.
          * If no file or directory with 'name' exists yet in Trash/files or
          * Trash/info, append a number.
@@ -165,22 +142,13 @@ namespace QDirStat
         /**
          * Return the path of the "files" subdirectory of this trash dir.
          **/
-        QString filesPath() const { return _path % "/files"; }
+        QString filesPath() const { return _path + "/files"; }
 
         /**
          * Return the path of the "info" subdirectory of this trash dir.
          **/
-        QString infoPath() const { return _path % "/info"; }
+        QString infoPath() const { return _path + "/info"; }
 
-        /**
-         * Create a directory if it doesn't exist. This throws an exception if
-         * 'doThrow' is 'true'.
-         *
-         * Return 'true' if success, 'false' if error (and doThrow is 'false').
-         **/
-//        static bool ensureDirExists( const QString & dir,
-  //                   mode_t		 mode,
-    //                 bool		 doThrow = false );
 
         //
         // Data members
