@@ -15,6 +15,7 @@
 #include "DirTreeModel.h"
 #include "Exception.h"
 #include "FileInfo.h"
+#include "FormatUtil.h"
 #include "Logger.h"
 
 #define SPARSE_COLOR_NORMAL "#FF22AA"
@@ -90,13 +91,8 @@ void SizeColDelegate::paint( QPainter			* painter,
 
 	// Use the model font since it may be bold (for dominant items)
 	painter->setFont( index.data( Qt::FontRole ).value<QFont>() );
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 ))
-	const int allocWidth = QFontMetrics( painter->font() ).width( allocText );
-	const int linksWidth = QFontMetrics( painter->font() ).width( linksText );
-#else
-	const int allocWidth = QFontMetrics( painter->font() ).horizontalAdvance( allocText );
-	const int linksWidth = QFontMetrics( painter->font() ).horizontalAdvance( linksText );
-#endif
+	const int allocWidth = textWidth( painter->font(), allocText );
+	const int linksWidth = textWidth( painter->font(), linksText );
 	rect.setWidth( rect.width() - allocWidth - linksWidth - RIGHT_MARGIN );
 	painter->setPen( palette.color( disabled ? QPalette::Disabled : QPalette::Normal,
 					selected ? QPalette::HighlightedText : QPalette::WindowText ) );
@@ -118,19 +114,15 @@ void SizeColDelegate::paint( QPainter			* painter,
 
 
 QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
-                                 const QModelIndex	    & index) const
+                                 const QModelIndex          & index) const
 {
     const QStringList data = index.data( RawDataRole ).toStringList();
     if ( data.size() == 2 || data.size() == 3 )
     {
 	const QString text = data.join( "" );
-	const QFontMetrics fontMetrics( index.data( Qt::FontRole ).value<QFont>() );
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 ))
-	const int width  = fontMetrics.width( text ) + LEFT_MARGIN + RIGHT_MARGIN;
-#else
-	const int width  = fontMetrics.horizontalAdvance( text ) + LEFT_MARGIN + RIGHT_MARGIN;
-#endif
-	const int height = fontMetrics.height() + TOP_MARGIN + BOTTOM_MARGIN;
+	const QFont font = index.data( Qt::FontRole ).value<QFont>();
+	const int width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
+	const int height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
 	const QSize size( width, height );
 #if 0
 	logDebug() << "size hint for \"" << text << "\": " << width << ", " << height << Qt::endl;

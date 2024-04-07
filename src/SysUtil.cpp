@@ -38,7 +38,7 @@ bool SysUtil::tryRunCommand( const QString		& commandLine,
 
     if ( exitCode != 0 )
     {
-	logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << "\"" << Qt::endl;
+	//logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << "\"" << Qt::endl;
 	return false;
     }
 
@@ -86,7 +86,7 @@ QString SysUtil::runCommand( const QString &	 command,
 
     if ( !haveCommand( command ) )
     {
-	logInfo() << "Command not found: " << command << Qt::endl;
+	//logInfo() << "Command not found: " << command << Qt::endl;
 	return "ERROR: Command not found";
     }
 

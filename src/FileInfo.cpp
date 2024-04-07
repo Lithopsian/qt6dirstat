@@ -35,10 +35,10 @@
 using namespace QDirStat;
 
 
-FileInfo::FileInfo( DirInfo	  * parent,
-		    DirTree	  * tree,
-		    const QString & filename,
-		    struct stat	  * statInfo ):
+FileInfo::FileInfo( DirInfo           * parent,
+		    DirTree           * tree,
+		    const QString     & filename,
+		    const struct stat & statInfo ):
     /**
      * Constructor from a stat buffer (i.e. based on an lstat() call).
      * This is the standard case.
@@ -50,14 +50,14 @@ FileInfo::FileInfo( DirInfo	  * parent,
     _isIgnored { false },
     _hasUidGidPerm { true }
 {
-    CHECK_PTR( statInfo );
+//    CHECK_PTR( statInfo );
 
-    _device	   = statInfo->st_dev;
-    _mode	   = statInfo->st_mode;
-    _links	   = statInfo->st_nlink;
-    _uid	   = statInfo->st_uid;
-    _gid	   = statInfo->st_gid;
-    _mtime	   = statInfo->st_mtime;
+    _device	   = statInfo.st_dev;
+    _mode	   = statInfo.st_mode;
+    _links	   = statInfo.st_nlink;
+    _uid	   = statInfo.st_uid;
+    _gid	   = statInfo.st_gid;
+    _mtime	   = statInfo.st_mtime;
 
     if ( isSpecial() )
     {
@@ -68,8 +68,8 @@ FileInfo::FileInfo( DirInfo	  * parent,
     }
     else
     {
-	_size		= statInfo->st_size;
-	_blocks		= statInfo->st_blocks;
+	_size		= statInfo.st_size;
+	_blocks		= statInfo.st_blocks;
 
 	if ( _blocks == 0 && _size > 0 )
 	{
@@ -232,10 +232,12 @@ bool FileInfo::isInSubtree( const FileInfo *subtree ) const
 }
 
 
-FileInfo * FileInfo::locate( QString url, bool findPseudoDirs )
+FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 {
-    if ( !_tree || ( !url.startsWith( _name ) && this != _tree->root() ) )
+    if ( !_tree || ( !locateUrl.startsWith( _name ) && this != _tree->root() ) )
 	return nullptr;
+
+    QString url = locateUrl;
 
     if ( this != _tree->root() )		// The root item is invisible
     {

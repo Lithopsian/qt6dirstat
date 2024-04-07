@@ -107,19 +107,19 @@ void OutputWindow::addProcess( QProcess * process )
 }
 
 
-void OutputWindow::addCommandLine( const QString commandline )
+void OutputWindow::addCommandLine( const QString & commandline )
 {
     addText( commandline, _commandTextColor );
 }
 
 
-void OutputWindow::addStdout( const QString output )
+void OutputWindow::addStdout( const QString & output )
 {
     addText( output, _stdoutColor );
 }
 
 
-void OutputWindow::addStderr( const QString output )
+void OutputWindow::addStderr( const QString & output )
 {
     _errorCount++;
     addText( output, _stderrColor );
@@ -135,18 +135,13 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     if ( rawText.isEmpty() )
 	return;
 
-    QString text = rawText;
-
-    if ( !text.endsWith( "\n" ) )
-	text += "\n";
-
     _ui->terminal->moveCursor( QTextCursor::End );
     QTextCursor cursor( _ui->terminal->textCursor() );
 
     QTextCharFormat format;
     format.setForeground( QBrush( textColor ) );
     cursor.setCharFormat( format );
-    cursor.insertText( text );
+    cursor.insertText( rawText.endsWith( "\n" ) ? rawText : rawText + "\n" );
 }
 
 

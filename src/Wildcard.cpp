@@ -13,7 +13,7 @@ using namespace QDirStat;
 
 
 #if (QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 ))
-QString Wildcard::wildcardToRegularExpression(QString pattern,
+QString Wildcard::wildcardToRegularExpression(const QString & pattern,
                                               QDirStat::WildcardConversionOptions options)
 {
     const qsizetype wclen = pattern.size();

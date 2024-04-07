@@ -255,7 +255,7 @@ void LocalDirReadJob::startReading()
 	    {
 		if ( S_ISDIR( statInfo.st_mode ) )	// directory child?
 		{
-		    DirInfo *subDir = new DirInfo( _dir, _tree, entryName, &statInfo );
+		    DirInfo *subDir = new DirInfo( _dir, _tree, entryName, statInfo );
 		    CHECK_NEW( subDir );
 
 		    processSubDir( entryName, subDir );
@@ -299,7 +299,7 @@ void LocalDirReadJob::startReading()
                         statInfo.st_nlink = 1;
                     }
 #endif
-		    FileInfo * child = new FileInfo( _dir, _tree, entryName, &statInfo );
+		    FileInfo * child = new FileInfo( _dir, _tree, entryName, statInfo );
 		    CHECK_NEW( child );
 
 		    if ( checkIgnoreFilters( entryName ) )

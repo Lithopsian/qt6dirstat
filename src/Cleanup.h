@@ -68,8 +68,8 @@ namespace QDirStat
 	 **/
 	Cleanup( QObject            * parent,
 		 bool                 active,
-		 QString              title,
-		 QString              command,
+		 const QString      & title,
+		 const QString      & command,
 		 bool                 recurse,
 		 bool                 askForConfirmation,
 		 RefreshPolicy        refreshPolicy,

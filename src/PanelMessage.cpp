@@ -52,7 +52,7 @@ void PanelMessage::connectDetailsLink( const QObject * receiver,
 }
 
 
-void PanelMessage::setDetailsUrl( const QString url )
+void PanelMessage::setDetailsUrl( const QString & url )
 {
     _detailsUrl = url;
     connectDetailsLink( this, SLOT( openDetailsUrl() ) );

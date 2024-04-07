@@ -359,12 +359,9 @@ bool MountPoints::readStorageInfo()
     for ( const QStorageInfo & mount : mountedVolumes )
     {
         const QString device( QString::fromUtf8( mount.device() ) );
+        const QString mountOptions = mount.isReadOnly() ? "ro" : QString();
+
         QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
-        QString mountOptions;
-
-        if ( mount.isReadOnly() )
-            mountOptions += "ro";
-
         if ( fsType == "fuseblk" && _ntfsDevices.contains( device ) )
             fsType = "ntfs";
 

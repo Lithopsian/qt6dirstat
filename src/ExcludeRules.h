@@ -151,7 +151,7 @@ namespace QDirStat
 	* FixedString and Wildcard patterns in this class are automatically
 	* anchored and so all matches are "exact".
 	**/
-	bool isMatch( const QString string ) const
+	bool isMatch( const QString & string ) const
 	    { return QRegularExpression::match( string ).hasMatch(); }
 
 	/**

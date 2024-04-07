@@ -31,7 +31,7 @@ Attic::Attic( DirTree * tree,
 }
 
 
-FileInfo * Attic::locate( QString url, bool findPseudoDirs )
+FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
 {
     if ( !_tree || !_parent )
 	return nullptr;

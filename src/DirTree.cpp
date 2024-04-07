@@ -682,7 +682,7 @@ FileInfo * DirTree::stat( const QString & url,
 
 	if ( S_ISDIR( statInfo.st_mode ) )	// directory?
 	{
-	    DirInfo * dir = new DirInfo( parent, tree, name, &statInfo );
+	    DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
 	    CHECK_NEW( dir );
 
 	    if ( parent )
@@ -700,7 +700,7 @@ FileInfo * DirTree::stat( const QString & url,
 	}
 	else					// no directory
 	{
-	    FileInfo * file = new FileInfo( parent, tree, name, &statInfo );
+	    FileInfo * file = new FileInfo( parent, tree, name, statInfo );
 	    CHECK_NEW( file );
 
 	    if ( parent )

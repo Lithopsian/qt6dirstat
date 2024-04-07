@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>       // ALLPERMS
 
+#include <QFontMetrics>
 #include <QObject>
 #include <QString>
 #include <QTextStream>
@@ -155,6 +156,25 @@ namespace QDirStat
      * Returns a three-letter abbreviation for the requested month.
      **/
     QString monthAbbreviation( short month );
+
+    /**
+     * Returns the height in pixels of the given font.
+     **/
+    inline int fontHeight( const QFont & font )
+	{ return QFontMetrics( font ).height(); }
+
+    /**
+     * Returns the width in pixels of the given text rendered using
+     * the given font.
+     **/
+    inline int textWidth( const QFont & font, const QString & text )
+	{
+#if (QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 ))
+	    return QFontMetrics( font ).width( text );
+#else
+	    return QFontMetrics( font ).horizontalAdvance( text );
+#endif
+	}
 
     /**
      * Human-readable output of a file size in a debug stream.

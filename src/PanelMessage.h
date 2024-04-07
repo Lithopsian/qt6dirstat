@@ -69,7 +69,7 @@ namespace QDirStat
 	 * Connect the "Details..." hyperlink to a web URL that will be opened
 	 * in an external browser.
 	 **/
-//	void setDetailsUrl( const QString url );
+//	void setDetailsUrl( const QString & url );
 
 	/**
 	 * Return the URL set with setDetailsUrl().

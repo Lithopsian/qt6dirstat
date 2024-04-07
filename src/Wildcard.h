@@ -65,13 +65,13 @@ namespace QDirStat
 	/**
 	 * Returns whether the given string matches this regular expression.
 	 **/
-	bool isMatch( const QString string ) const { return match( string ).hasMatch(); }
+	bool isMatch( const QString & string ) const { return match( string ).hasMatch(); }
 
 	/**
 	 * Convenience function to match the QRegExp syntax.  Matches in this class
 	 * are always "exact" anchored matches.
 	 **/
-	bool exactMatch( const QString string ) const { return isMatch( string ); }
+	bool exactMatch( const QString & string ) const { return isMatch( string ); }
 
 	/**
 	 * Returns whether this wildcard has an empty QRegularExpression
@@ -83,7 +83,7 @@ namespace QDirStat
 	 * from a wildcard-style string.
 	 **/
 	static QRegularExpression wildcardRegularExpression( const QString & pattern,
-							     PatternOptions options )
+							     PatternOptions  options )
 	    { return QRegularExpression( wildcardToRegularExpression( pattern ), options ); }
 
 	/**
@@ -92,7 +92,7 @@ namespace QDirStat
 	 * whether the pattern is already anchored.
 	 **/
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
-	static QString anchoredPattern( const QString expression )
+	static QString anchoredPattern( const QString & expression )
 	    { return QString() + QLatin1String( "\\A(?:" ) + expression + QLatin1String( ")\\z" ); }
 #endif
 
@@ -103,7 +103,7 @@ namespace QDirStat
 	 * so the function is overloaded here.
 	 **/
 #if (QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 ))
-	static QString wildcardToRegularExpression( const QString pattern,
+	static QString wildcardToRegularExpression( const QString & pattern,
 						    QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
 #endif
 
