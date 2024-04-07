@@ -29,14 +29,14 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	virtual QString name() const { return "pacman"; }
+	QString name() const override { return "pacman"; }
 
 	/**
 	 * Check if RPM is active on the currently running system.
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	virtual bool isPrimaryPkgManager() const override;
+	bool isPrimaryPkgManager() const override;
 
 	/**
 	 * Check if the rpm command is available on the currently running
@@ -44,7 +44,7 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	virtual bool isAvailable() const override;
+	bool isAvailable() const override;
 
 	/**
 	 * Return the owning package of a file or directory with full path
@@ -56,7 +56,7 @@ namespace QDirStat
 	 *
 	 *   /usr/bin/rpm -qf ${path}
 	 **/
-	virtual QString owningPkg( const QString & path ) const override;
+	QString owningPkg( const QString & path ) const override;
 
 
         //-----------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace QDirStat
          *
 	 * Reimplemented from PkgManager.
          **/
-        virtual bool supportsGetInstalledPkg() const override
+        bool supportsGetInstalledPkg() const override
             { return true; }
 
         /**
@@ -79,7 +79,7 @@ namespace QDirStat
          *
 	 * Reimplemented from PkgManager.
          **/
-        virtual PkgInfoList installedPkg() const override;
+        PkgInfoList installedPkg() const override;
 
         /**
          * Return 'true' if this package manager supports getting the file list
@@ -87,7 +87,7 @@ namespace QDirStat
          *
 	 * Reimplemented from PkgManager.
          **/
-        virtual bool supportsFileList() const override
+        bool supportsFileList() const override
             { return true; }
 
         /**
@@ -96,7 +96,7 @@ namespace QDirStat
          *
 	 * Reimplemented from PkgManager.
          **/
-        virtual QString fileListCommand( const PkgInfo * pkg ) const override
+        QString fileListCommand( const PkgInfo * pkg ) const override
 	    { return QString( "/usr/bin/pacman -Qlq %1" ).arg( pkg->baseName() ); }
 
         /**
@@ -104,7 +104,7 @@ namespace QDirStat
          *
 	 * Reimplemented from PkgManager.
          **/
-        virtual QStringList parseFileList( const QString & output ) const override
+        QStringList parseFileList( const QString & output ) const override
 	    { return output.split( "\n" ); }
 
 
