@@ -86,8 +86,8 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	FileInfo * locate( QString url,
-			   bool    findPseudoDirs = false ) override;
+	FileInfo * locate( const QString & url,
+			   bool            findPseudoDirs ) override;
 
     };	// class Attic
 
