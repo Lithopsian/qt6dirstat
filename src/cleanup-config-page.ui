@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>CleanupConfigPage</class>
  <widget class="QWidget" name="CleanupConfigPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>563</width>
+    <height>563</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <widget class="QSplitter" name="splitter">
@@ -23,6 +31,9 @@
            <width>200</width>
            <height>300</height>
           </size>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
         </widget>
        </item>
@@ -152,6 +163,9 @@
            <property name="toolTip">
             <string>&lt;p style='white-space:pre'&gt;Enter a title for this cleanup action; this will show&lt;br/&gt;in the menus (use '&amp;' for keyboard shortcuts)&lt;/p&gt;</string>
            </property>
+           <property name="maxLength">
+            <number>40</number>
+           </property>
            <property name="placeholderText">
             <string>required</string>
            </property>
@@ -215,15 +229,13 @@ will be executed once for each selected item</string>
           <item>
            <widget class="QLabel" name="miniHelpLabel">
             <property name="toolTip">
-             <string>These are the macros you can use in the command.
-Both %p and %n always contain only one item.
-If multiple items are selected, the command will be
-executed multiple times.</string>
+             <string>&lt;p style=&quot;white-space: pre&quot;&gt;These variables expand into file or directory names:&lt;br/&gt;commands will be executed in the selected directory or the parent&lt;br/&gt;directory of files; if multiple items are selected, the command will be&lt;br/&gt;executed once for each item, or once per directory if %d is used.&lt;/p&gt;</string>
             </property>
             <property name="text">
-             <string>%p - Full path
+             <string>%d - Directory name with full path
 %n - File / directory name without path
-%d - Directory name with full path</string>
+%p - Full path
+</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -309,6 +321,14 @@ executed multiple times.</string>
              <number>0</number>
             </property>
             <widget class="QWidget" name="worksForPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>234</width>
+               <height>136</height>
+              </rect>
+             </property>
              <attribute name="label">
               <string>Works For...</string>
              </attribute>
@@ -318,7 +338,7 @@ executed multiple times.</string>
                 <item>
                  <widget class="QCheckBox" name="worksForDirCheckBox">
                   <property name="toolTip">
-                   <string>Check this if the command can be applied to directories</string>
+                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%d and %p expand to the full path of the directory;&lt;br/&gt;%n expands to the name of the directory without the path.&lt;/p&gt;</string>
                   </property>
                   <property name="text">
                    <string>&amp;Directories</string>
@@ -328,7 +348,7 @@ executed multiple times.</string>
                 <item>
                  <widget class="QCheckBox" name="worksForFilesCheckBox">
                   <property name="toolTip">
-                   <string>Check this if the command can be applied to files</string>
+                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%n expands to the name of the file with no path;&lt;br/&gt;%d and %p expand to the full path of the parent directory.&lt;/p&gt;</string>
                   </property>
                   <property name="text">
                    <string>&amp;Files</string>
@@ -338,7 +358,7 @@ executed multiple times.</string>
                 <item>
                  <widget class="QCheckBox" name="worksForDotEntriesCheckBox">
                   <property name="toolTip">
-                   <string>&lt;p style='white-space:pre'&gt;Check this if the command can be applied to the &lt;Files&gt; entries&lt;br/&gt;in the tree which group together all the files in a directory&lt;/p&gt;</string>
+                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to &amp;lt;Files&amp;gt; pseudo-dirs:&lt;br/&gt;%d and %p expand to the full path of the parent directory;&lt;br/&gt;%n expands to the string &quot;&amp;lt;Files&amp;gt;&quot;.&lt;br/&gt;&lt;b&gt;The command is always executed in the parent directory.&lt;/b&gt;&lt;/p&gt;</string>
                   </property>
                   <property name="text">
                    <string>&lt;Files&gt; pseudo &amp;entries</string>
@@ -363,6 +383,14 @@ executed multiple times.</string>
              </layout>
             </widget>
             <widget class="QWidget" name="outputWindowPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>234</width>
+               <height>136</height>
+              </rect>
+             </property>
              <attribute name="label">
               <string>Output Window</string>
              </attribute>
@@ -485,6 +513,14 @@ executed multiple times.</string>
              </layout>
             </widget>
             <widget class="QWidget" name="shellPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>234</width>
+               <height>136</height>
+              </rect>
+             </property>
              <attribute name="label">
               <string>Shell</string>
              </attribute>
@@ -510,7 +546,7 @@ executed multiple times.</string>
                    <bool>true</bool>
                   </property>
                   <property name="currentText">
-                   <string/>
+                   <string>$SHELL (login shell)</string>
                   </property>
                   <item>
                    <property name="text">
@@ -584,7 +620,7 @@ executed multiple times.</string>
   <include location="../../qdirstat-master/src/icons.qrc"/>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
-  <include location="../../../../home/iann/.designer/backup/icons.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections/>
 </ui>

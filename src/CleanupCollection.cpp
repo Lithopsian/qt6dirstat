@@ -15,17 +15,17 @@
 #include "StdCleanup.h"
 #include "Cleanup.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "FormatUtil.h"
+#include "Logger.h"
 #include "OutputWindow.h"
 #include "Refresher.h"
 #include "SelectionModel.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Trash.h"
-#include "Logger.h"
-#include "Exception.h"
 
-#define MAX_URLS_IN_CONFIRMATION_POPUP 7
+#define MAX_URLS_IN_CONFIRMATION_POPUP 9
 
 using namespace QDirStat;
 
@@ -162,14 +162,15 @@ void CleanupCollection::updateActions()
 {
     const FileInfoSet sel = _selectionModel->selectedItems();
 
-    const bool empty		= sel.isEmpty();
-    const bool dirSelected	= sel.containsDir();
-    const bool fileSelected	= sel.containsFile();
+    const bool empty            = sel.isEmpty();
+    const bool dirSelected      = sel.containsDir();
+    const bool fileSelected     = sel.containsFile();
     const bool pkgSelected      = sel.containsPkg();
+    const bool atticSelected    = sel.containsAttic();
     const bool dotEntrySelected = sel.containsDotEntry();
-    const bool busy		= sel.containsBusyItem();
-    const bool treeBusy		= sel.treeIsBusy();
-    const bool canCleanup	= !pkgSelected && !busy && !empty;
+    const bool busy             = sel.containsBusyItem();
+    const bool treeBusy         = sel.treeIsBusy();
+    const bool canCleanup       = !atticSelected && !pkgSelected && !busy && !empty;
 
     for ( Cleanup * cleanup : _cleanupList )
     {
@@ -274,19 +275,13 @@ void CleanupCollection::execute()
     connect( outputWindow, &OutputWindow::lastProcessFinished,
 	     this,	   &CleanupCollection::cleanupFinished );
 
-
     // Process the raw FileInfoSet to eliminate duplicates.  For Cleanups
-    // bot containing the %p or %n variables, create a de-duplicated list of
+    // not containing the %p or %n variables, create a de-duplicated list of
     // directories (including the parents of any file items or pseudo-
     // directories).  Note that the set is not normalised so that the Cleanup
     // can be performed on both an item and one of its ancestors.
     for ( FileInfo * item : cleanup->deDuplicateParents( selection ) )
-    {
-	if ( cleanup->worksFor( item ) )
-	    cleanup->execute( item, outputWindow );
-	else
-	    logWarning() << "Cleanup " << cleanup << " does not work for " << item << Qt::endl;
-    }
+	cleanup->execute( item, outputWindow );
 
     if ( cleanup->refreshPolicy() == Cleanup::AssumeDeleted )
     {
@@ -313,74 +308,87 @@ void CleanupCollection::execute()
 
 bool CleanupCollection::confirmation( Cleanup * cleanup, const FileInfoSet & items )
 {
-    // Pad the title to avoid tiny dialog boxes
-    const QString title = pad( cleanup->cleanTitle(), 40 );
+    // QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
+    // "white-space: pre", but only up to about 100 characters
+    // So elide ridiculously long names and add enough spaces to the title to avoid wrapping
+    const QFont font = QGuiApplication::font();
+    const int spaceWidth = textWidth( font, " " );
 
-    QString msg = "<html>";
-    if ( items.size() == 1 ) // The most common case
+    const QString msg = [ cleanup, &items, &font, spaceWidth ]()
     {
-	const FileInfo * item = items.first();
-	const QString name = item->debugUrl().toHtmlEscaped();
+	if ( items.size() == 1 )
+	{
+	    const FileInfo * item = items.first();
+	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
 
-	if ( item->isDir() || item->isPseudoDir() )
-	    msg += tr( "<h3>%1</h3>for <b>directory</b> %2" ).arg( title ).arg( name );
-	else
-	    msg += tr( "<h3>%1</h3>for file %2" ).arg( title ).arg( name );
+	    // Pad the title to avoid tiny dialog boxes
+	    const int spaces = qMax( textWidth( font, name ) / spaceWidth, 40 );
+	    const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+	    const QString itemType = item->isDirInfo() ? tr( "for directory" ) : tr( "for file" );
 
-	msg += "<br>";
-    }
-    else // Multiple items selected
-    {
+	    return QString( "<h3>%1</h3>%2: %3<br/>" ).arg( title ).arg( itemType ).arg( name );
+	}
+
+	const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
+	const QStringList files = filteredUrls( items, false, true ); // then files
+
 	QStringList urls;
-	if ( items.containsDir() && items.containsFile() )
+	if ( !dirs.isEmpty() )
 	{
-	    QStringList dirs	= filteredUrls( items, true, false );  // dirs
-	    QStringList nonDirs = filteredUrls( items, false, true  ); // nonDirs
-
-	    dirs    = dirs.mid	 ( 0, MAX_URLS_IN_CONFIRMATION_POPUP );
-	    nonDirs = nonDirs.mid( 0, MAX_URLS_IN_CONFIRMATION_POPUP );
-
-	    urls << dirs << "" << nonDirs;
+	    urls << tr( "<u>for directories:</u>" );
+	    urls << dirs;
 	}
-	else // !isMixed
+	if ( !files.isEmpty() )
 	{
-	    // Build a list of the first few selected items (7 max)
-	    urls = filteredUrls( items, true, true ); // dirs + nonDirs
-	    urls = urls.mid( 0, MAX_URLS_IN_CONFIRMATION_POPUP );
+	    urls << tr( "<u>for files:</u>" );
+	    urls << files;
 	}
 
-	if ( urls.size() < items.size() ) // Only displaying part of the items?
-	{
-	    urls << "...";
+	if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
 	    urls << tr( "<i>(%1 items total)</i>" ).arg( items.size() );
-	}
 
-	msg += tr( "<h3>%1</h3> for:<br>\n%2<br>" ).arg( title ).arg( urls.join( "<br>" ) );
-    }
+	// Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
+	int spaces = 40;
+	for ( const QString & line : urls )
+	{
+	    const int lineSpaces = textWidth( font, line ) / spaceWidth;
+	    if ( lineSpaces > spaces )
+		spaces = lineSpaces;
+	}
+	const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+
+	return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>" ) );
+    }();
 
     const int ret = QMessageBox::question( qApp->activeWindow(),
-					   tr( "Please Confirm" ), // title
-					   msg,		     // text
+					   tr( "Please Confirm" ),
+					   whitespacePre( msg ),
 					   QMessageBox::Yes | QMessageBox::No );
+
     return ret == QMessageBox::Yes;
 }
 
 
 QStringList CleanupCollection::filteredUrls( const FileInfoSet & items,
-					     bool		 dirs,
-					     bool		 nonDirs ) const
+					     bool                dirs,
+					     bool                files )
 {
     QStringList urls;
 
     for ( const auto item : items )
     {
-	const QString name = item->debugUrl().toHtmlEscaped();
+	const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
 
-	if ( item->isDirInfo() && dirs )
-	    urls << tr( "<b>directory</b> %1" ).arg( name );
+	if ( ( item->isDirInfo() && dirs ) || ( !item->isDirInfo() && files ) )
+	{
+	    if ( urls.size() >= MAX_URLS_IN_CONFIRMATION_POPUP )
+	    {
+		urls << "...";
+		return urls;
+	    }
 
-	if ( !item->isDirInfo() && nonDirs )
 	    urls << name;
+	}
     }
 
     return urls;

@@ -10,6 +10,7 @@
 #define CleanupCollection_h
 
 #include <QList>
+#include <QObject>
 #include <QPointer>
 #include <QStringList>
 
@@ -194,18 +195,15 @@ namespace QDirStat
 	 * Ask user for confirmation to execute a cleanup action for
 	 * 'items'. Returns 'true' if user accepts, 'false' otherwise.
 	 **/
-	bool confirmation( Cleanup * cleanup, const FileInfoSet & items );
+	static bool confirmation( Cleanup * cleanup, const FileInfoSet & items );
 
 	/**
 	 * Return the URLs for the selected item types in 'items':
-	 * Directories, non-directories, or both.
-	 *
-	 * 'extraHighlight' indicates that some very strong extra highlighting
-	 * should be done to mark directories.
+	 * directories (including dot entries) or files.
 	 **/
-	QStringList filteredUrls( const FileInfoSet & items,
-				  bool		      dirs,
-				  bool		      nonDirs ) const;
+	static QStringList filteredUrls( const FileInfoSet & items,
+					 bool                dirs,
+					 bool                files );
 
 	/**
 	 * Update all menus that have the 'keepUpdated' flag set.
