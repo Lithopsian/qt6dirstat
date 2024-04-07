@@ -416,7 +416,7 @@ namespace QDirStat
 	    item->setFont( font );
 	}
 	void setBold( QGraphicsTextItem * item ) { setBold<QGraphicsTextItem>( item ); }
-	void setBold( QGraphicsSimpleTextItem * item ) { setBold<QGraphicsSimpleTextItem>( item ); }
+//	void setBold( QGraphicsSimpleTextItem * item ) { setBold<QGraphicsSimpleTextItem>( item ); }
 
 
     private:

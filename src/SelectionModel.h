@@ -56,7 +56,7 @@ namespace QDirStat
 	/**
 	 * Return the DirTreeModel of this object.
 	 **/
-	DirTreeModel * dirTreeModel() const { return _dirTreeModel; }
+//	DirTreeModel * dirTreeModel() const { return _dirTreeModel; }
 
 	/**
 	 * Set 'verbose' mode: Log each selection change.

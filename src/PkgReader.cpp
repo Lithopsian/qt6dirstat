@@ -22,12 +22,13 @@
 #define DEFAULT_PARALLEL_PROCESSES	10
 #define DEFAULT_CACHE_PKG_LIST_SIZE	300
 
+
 using namespace QDirStat;
+
 
 PkgReader::PkgReader( DirTree * tree ):
     _tree { tree }
 {
-    // logInfo() << Qt::endl;
     readSettings();
 }
 
@@ -35,79 +36,34 @@ PkgReader::PkgReader( DirTree * tree ):
 PkgReader::~PkgReader()
 {
     writeSettings();
-
-    // Intentionally NOT deleting the PkgInfo * items of _pkgList:
-    // They are now owned by the DirTree.
 }
 
 
-void PkgReader::read( const PkgFilter & filter )
-{
-    //logInfo() << "Reading " << filter << Qt::endl;
-
-    _pkgList = PkgQuery::installedPkg();
-    filterPkgList( filter );
-
-    if ( _pkgList.isEmpty() )
-    {
-	_tree->sendFinished();
-	return;
-    }
-
-    handleMultiPkg();
-    addPkgToTree();
-
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-
-    if ( pkgManager && pkgManager->supportsFileListCache() && _pkgList.size() >= _minCachePkgListSize )
-	createCachePkgReadJobs();
-    else
-	createAsyncPkgReadJobs();
-
-    // Ownership of the PkgInfo * items in _pkgList was transferred to the
-    // tree, so intentionally NOT calling qDeleteItems( _pkgList ) !
-
-    _pkgList.clear();
-    _multiPkg.clear();
-}
-
-
-void PkgReader::filterPkgList( const PkgFilter & filter )
+/**
+ * Filter the package list: Remove those package that don't match the
+ * filter.
+ **/
+static void filterPkgList( PkgInfoList & pkgList, const PkgFilter & filter )
 {
     if ( filter.filterMode() == PkgFilter::SelectAll )
 	return;
 
-    PkgInfoList matches;
-
-    for ( PkgInfo * pkg : _pkgList )
+    for ( PkgInfo * pkg : pkgList )
     {
 	if ( filter.matches( pkg->baseName() ) )
-	{
-	    // logDebug() << "Selecting pkg " << pkg << Qt::endl;
-	    matches << pkg;
-	}
+	    pkgList.removeAll( pkg );
     }
-
-    _pkgList = matches;
 }
 
 
-void PkgReader::handleMultiPkg()
+/**
+ * Create a suitable display names for a package: Packages that are
+ * only installed in one version or for one architecture will simply
+ * keep their base name; others will have the version and/or the
+ * architecture appended so the user can tell them apart.
+ **/
+static void createDisplayName( const QString & pkgName, const PkgInfoList & pkgList )
 {
-    _multiPkg.clear();
-
-    for ( PkgInfo * pkg : _pkgList )
-	_multiPkg.insert( pkg->baseName(), pkg );
-
-    for ( const QString & pkgName : _multiPkg.uniqueKeys() )
-	createDisplayName( pkgName );
-}
-
-
-void PkgReader::createDisplayName( const QString & pkgName )
-{
-    const PkgInfoList pkgList = _multiPkg.values( pkgName );
-
     if ( pkgList.size() < 2 )
 	return;
 
@@ -155,7 +111,48 @@ void PkgReader::createDisplayName( const QString & pkgName )
 }
 
 
-void PkgReader::addPkgToTree()
+/**
+ * Handle packages that are installed in multiple versions or for
+ * multiple architectures: Assign a different display name to each of
+ * them.
+ **/
+static void handleMultiPkg( const PkgInfoList & pkgList, MultiPkgInfo & multiPkg )
+{
+    for ( PkgInfo * pkg : pkgList )
+	multiPkg.insert( pkg->baseName(), pkg );
+
+    for ( const QString & pkgName : multiPkg.uniqueKeys() )
+	createDisplayName( pkgName, multiPkg.values( pkgName ) );
+}
+
+
+void PkgReader::read( const PkgFilter & filter )
+{
+    //logInfo() << "Reading " << filter << Qt::endl;
+
+    PkgInfoList pkgList = PkgQuery::installedPkg();
+    filterPkgList( pkgList, filter );
+
+    if ( pkgList.isEmpty() )
+    {
+	_tree->sendFinished();
+	return;
+    }
+
+    MultiPkgInfo multiPkg;
+    handleMultiPkg( pkgList, multiPkg );
+    addPkgToTree( pkgList );
+
+    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
+
+    if ( pkgManager && pkgManager->supportsFileListCache() && pkgList.size() >= _minCachePkgListSize )
+	createCachePkgReadJobs( pkgList );
+    else
+	createAsyncPkgReadJobs( pkgList );
+}
+
+
+void PkgReader::addPkgToTree( const PkgInfoList & pkgList )
 {
     CHECK_PTR( _tree );
     CHECK_PTR( _tree->root() );
@@ -164,7 +161,7 @@ void PkgReader::addPkgToTree()
     CHECK_NEW( top );
     _tree->root()->insertChild( top );
 
-    for ( PkgInfo * pkg : _pkgList )
+    for ( PkgInfo * pkg : pkgList )
     {
 	pkg->setTree( _tree );
 	top->insertChild( pkg );
@@ -175,31 +172,30 @@ void PkgReader::addPkgToTree()
 }
 
 
-void PkgReader::createCachePkgReadJobs()
+void PkgReader::createCachePkgReadJobs( const PkgInfoList & pkgList )
 {
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     CHECK_PTR( pkgManager );
 
-    QSharedPointer<PkgFileListCache> fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
     // The shared pointer will take care of deleting the cache when the last
     // job that uses it is destroyed.
-
+    QSharedPointer<PkgFileListCache> fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
     if ( !fileListCache )
     {
 	logError() << "Creating the file list cache failed" << Qt::endl;
 	return;
     }
 
-    for ( PkgInfo * pkg : _pkgList )
+    for ( PkgInfo * pkg : pkgList )
     {
-	CachePkgReadJob * job = new CachePkgReadJob( this, _tree, pkg, fileListCache );
+	CachePkgReadJob * job = new CachePkgReadJob( _tree, pkg, _verboseMissingPkgFiles, fileListCache );
 	CHECK_NEW( job );
 	_tree->addJob( job );
     }
 }
 
 
-void PkgReader::createAsyncPkgReadJobs()
+void PkgReader::createAsyncPkgReadJobs( const PkgInfoList & pkgList )
 {
     //logDebug() << Qt::endl;
 
@@ -208,13 +204,13 @@ void PkgReader::createAsyncPkgReadJobs()
     processStarter->setAutoDelete( true );
     processStarter->setMaxParallel( _maxParallelProcesses );
 
-    for ( PkgInfo * pkg : _pkgList )
+    for ( PkgInfo * pkg : pkgList )
     {
 	QProcess * process = createReadFileListProcess( pkg );
 
 	if ( process )
 	{
-	    AsyncPkgReadJob * job = new AsyncPkgReadJob( this, _tree, pkg, process );
+	    AsyncPkgReadJob * job = new AsyncPkgReadJob( _tree, pkg, _verboseMissingPkgFiles, process );
 	    CHECK_NEW( job );
 	    _tree->addBlockedJob( job );
 	    processStarter->add( process );
@@ -292,13 +288,13 @@ int PkgReadJob::_cacheHits  = 0;
 int PkgReadJob::_lstatCalls = 0;
 
 
-PkgReadJob::PkgReadJob( PkgReader * reader,
-		        DirTree   * tree,
-			PkgInfo   * pkg  ):
+PkgReadJob::PkgReadJob( DirTree   * tree,
+			PkgInfo   * pkg,
+			bool        verboseMissingPkgFiles ):
     QObject (),
     DirReadJob ( tree, pkg ),
-    _reader { reader },
-    _pkg { pkg }
+    _pkg { pkg },
+    _verboseMissingPkgFiles { verboseMissingPkgFiles }
 {
     ++_activeJobs;
 }
@@ -382,7 +378,7 @@ void PkgReadJob::addFile( const QString & fileListPath )
 	    {
 		//Packaged file not actually on disk, just log it
 		//parent->setReadState( DirError );
-		if ( _reader->verboseMissingPkgFiles() )
+		if ( _verboseMissingPkgFiles )
 		    logWarning() << _pkg << ": missing: " << fileListPath << Qt::endl;
 
 		return;
@@ -495,17 +491,17 @@ bool PkgReadJob::lstat( struct stat & statInfo, const QString & path )
 
 
 
-AsyncPkgReadJob::AsyncPkgReadJob( PkgReader * reader,
-				  DirTree   * tree,
+AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 				  PkgInfo   * pkg,
+				  bool        verboseMissingPkgFiles,
 				  QProcess  * readFileListProcess ):
-    PkgReadJob ( reader, tree, pkg ),
+    PkgReadJob ( tree, pkg, verboseMissingPkgFiles ),
     _readFileListProcess { readFileListProcess }
 {
     if ( _readFileListProcess )
     {
 	connect( _readFileListProcess, qOverload<int, QProcess::ExitStatus>( &QProcess::finished ),
-		 this,		       &AsyncPkgReadJob::readFileListFinished );
+		 this,                 &AsyncPkgReadJob::readFileListFinished );
     }
 }
 
@@ -513,22 +509,18 @@ AsyncPkgReadJob::AsyncPkgReadJob( PkgReader * reader,
 void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
 					    QProcess::ExitStatus exitStatus )
 {
-    CHECK_PTR( _readFileListProcess );
-    CHECK_PTR( _pkg );
-    CHECK_PTR( _pkg->pkgManager() );
-
     if ( exitStatus != QProcess::NormalExit )
     {
-	logError() << "Get file list command crashed for " << _pkg << Qt::endl;
+	logError() << "Get file list command crashed for " << pkg() << Qt::endl;
     }
     else if ( exitCode != 0 )
     {
-	logError() << "Get file list command exit status " << exitStatus << " for " << _pkg << Qt::endl;
+	logError() << "Get file list command exit status " << exitStatus << " for " << pkg() << Qt::endl;
     }
     else // ok
     {
 	const QString output = QString::fromUtf8( _readFileListProcess->readAll() );
-	_fileList = _pkg->pkgManager()->parseFileList( output );
+	_fileList = pkg()->pkgManager()->parseFileList( output );
 	_tree->unblock( this ); // schedule this job
 	_readFileListProcess->deleteLater();
 
@@ -536,8 +528,8 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
     }
 
     // There was an error of some sort, logged above
-    _pkg->setReadState( DirError );
-    _tree->sendReadJobFinished( _pkg );
+    pkg()->setReadState( DirError );
+    _tree->sendReadJobFinished( pkg() );
 
     delete _readFileListProcess;
     _readFileListProcess = nullptr;
@@ -556,25 +548,24 @@ QStringList AsyncPkgReadJob::fileList()
 
 
 
-
 QStringList CachePkgReadJob::fileList()
 {
-    if ( _fileListCache && _fileListCache->pkgManager() == _pkg->pkgManager() )
+    if ( !_fileListCache || _fileListCache->pkgManager() != pkg()->pkgManager() )
     {
-	const QString pkgName = _pkg->pkgManager()->queryName( _pkg );
+	logDebug() << "Falling back to the simple PkgQuery::fileList() for " << pkg() << Qt::endl;
 
-	if ( _fileListCache->containsPkg( pkgName ) )
-            return _fileListCache->fileList( pkgName );
-//            _fileListCache->remove( pkgName ); // making a QHash smaller is no help
-
-	if ( _fileListCache->containsPkg( _pkg->name() ) )
-	    return _fileListCache->fileList( _pkg->name() );
-//            _fileListCache->remove( _pkg->name() );
-
-        return QStringList();
+	return PkgQuery::fileList( pkg() );
     }
 
-    logDebug() << "Falling back to the simple PkgQuery::fileList() for " << _pkg << Qt::endl;
+    const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
 
-    return PkgQuery::fileList( _pkg );
+    if ( _fileListCache->containsPkg( pkgName ) )
+	return _fileListCache->fileList( pkgName );
+//            _fileListCache->remove( pkgName ); // making a QHash smaller is no help
+
+    if ( _fileListCache->containsPkg( pkg()->name() ) )
+	return _fileListCache->fileList( pkg()->name() );
+//            _fileListCache->remove( pkg()->name() );
+
+    return QStringList();
 }

@@ -21,12 +21,6 @@
 
 namespace QDirStat
 {
-    class DirTree;
-    class FileTypeStats;
-    class MimeCategory;
-    class SelectionModel;
-
-
     /**
      * Modeless dialog to display search results after clicking "locate" in the
      * file type stats window.

@@ -76,7 +76,7 @@ namespace QDirStat
 	 * Set the path from a FileInfo item.
          * A null item clears the path.
 	 **/
-	void setPath( FileInfo * item );
+	void setPath( const FileInfo * item );
 
 
     signals:
@@ -118,7 +118,7 @@ namespace QDirStat
          * Fill the internal _breadcrumbs with content by traversing up the
          * tree from 'item' to the toplevel.
          **/
-        void fillBreadcrumbs( FileInfo * item );
+        void fillBreadcrumbs( const FileInfo * item );
 
         /**
          * Generate HTML from _breadcrumbs

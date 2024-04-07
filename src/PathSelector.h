@@ -133,13 +133,13 @@ namespace QDirStat
 	 * Use QListWidgetItem::setIcon() to set an icon.
 	 **/
 	PathSelectorItem( const QString & path,
-			  PathSelector *  parent = nullptr );
+			  PathSelector  * parent = nullptr );
 
 	/**
 	 * Constructor for a mount point.
 	 * Use QListWidgetItem::setIcon() to set an icon.
 	 **/
-	PathSelectorItem( MountPoint *	 mountPoint,
+	PathSelectorItem( MountPoint   * mountPoint,
 			  PathSelector * parent = nullptr );
 
 	/**
@@ -151,7 +151,7 @@ namespace QDirStat
 	 * Return the mount point or 0 if this is a plain path without a mount
 	 * point.
 	 **/
-	MountPoint * mountPoint() { return _mountPoint; }
+	const MountPoint * mountPoint() { return _mountPoint; }
 
 
     private:

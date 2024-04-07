@@ -72,13 +72,10 @@ void ExcludeRulesConfigPage::applyChanges()
     // Build a list of the working rules to write out to the settings file
     ExcludeRuleList rules;
     for ( int i = 0; i < listWidget()->count(); ++i )
-    {
-	ExcludeRule * rule = EXCLUDE_RULE_CAST( value( listWidget()->item( i ) ) );
-	rules << rule;
-    }
+	rules << EXCLUDE_RULE_CAST( value( listWidget()->item( i ) ) );
 
     // Check if anything changed before writing, just for fun
-    ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
+    const ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
     ExcludeRuleListIterator it = excludeRules->cbegin();
     for ( int i = 0; i < rules.size() || it != excludeRules->cend(); ++i, ++it )
     {

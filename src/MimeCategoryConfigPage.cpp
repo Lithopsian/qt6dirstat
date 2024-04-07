@@ -420,7 +420,7 @@ void MimeCategoryConfigPage::load( void * value )
      if ( updatesLocked() )
 	return;
 
-    MimeCategory * category = CATEGORY_CAST( value );
+    const MimeCategory * category = CATEGORY_CAST( value );
     //logDebug() << category << " (" << value << ")" << Qt::endl;
 
     // Populate the name and pattern fields from this category

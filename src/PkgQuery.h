@@ -74,8 +74,9 @@ namespace QDirStat
         /**
          * Return the list of files and directories owned by a package.
          **/
-        static QStringList fileList( PkgInfo * pkg )
+        static QStringList fileList( const PkgInfo * pkg )
 	    { return instance()->getFileList( pkg ); }
+
 
     protected:
 

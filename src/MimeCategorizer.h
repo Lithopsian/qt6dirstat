@@ -28,9 +28,10 @@ namespace QDirStat
      * any file with that suffix.  Pairs with an empty regular expression will
      * always be the last pair in a list.
      **/
-    typedef QPair<Wildcard, MimeCategory *> WildcardPair;
-    typedef QList<MimeCategory *>           MimeCategoryList;
-
+    typedef QPair<Wildcard, const MimeCategory *> WildcardPair;
+    typedef QList<const MimeCategory *>           MimeCategoryList;
+    typedef QHash<QString, const MimeCategory *>  ExactMatches;
+    typedef QMultiHash<QString, WildcardPair>     SuffixMatches;
 
     class FileInfo;
 
@@ -184,15 +185,15 @@ namespace QDirStat
 	     * *
 	     * This provides an extremely lookup for each filename.
 	     **/
-	    void addExactKeys( MimeCategory * category );
+	    void addExactKeys( const MimeCategory * category );
 
 	    /**
 	     * Add one filename/category combination to a map.
 	     **/
-	    void addExactKey( QHash<QString, MimeCategory *> & keys,
-					      QBitArray & lengths,
-					      const QString & key,
-					      MimeCategory * category );
+	    void addExactKey( ExactMatches       & keys,
+			      QBitArray          & lengths,
+			      const QString      & key,
+			      const MimeCategory * category );
 
 	    /**
 	     * Add all suffixes from both suffix lists in the category as keys with a value
@@ -206,27 +207,27 @@ namespace QDirStat
 	     *
 	     * This provides a really fast lookup for each suffix.
 	     **/
-	    void addSuffixKeys( MimeCategory * category );
+	    void addSuffixKeys( const MimeCategory * category );
 
 	    /**
 	     * Adds one simple suffix to one suffix map.
 	     **/
-	    void addSuffixKey( QMultiHash<QString, WildcardPair> & suffixes,
-					       const QString & suffix,
-					       MimeCategory * category );
+	    void addSuffixKey( SuffixMatches       & suffixes,
+			       const QString       & suffix,
+			       const MimeCategory  * category );
 
 	    /**
 	     * Add regular expressions which include a suffix to the suffix maps.
 	     * This allows a more specific wildcard to override a plain suffix match and
 	     * reduces the need for matching filenames individually against every regular expression.
 	     **/
-	    void addWildcardKeys( MimeCategory * category );
+	    void addWildcardKeys( const MimeCategory * category );
 
 	    /**
 	     * Add regular expression patterns which do not include a suffix pattern to a plain list
 	     * of pairs, each containing the regular expression and the corresponding category.
 	     **/
-	    void buildWildcardLists( MimeCategory * category );
+	    void buildWildcardLists( const MimeCategory * category );
 
 	    /**
 	     * Iterate over all categories to find categories by name.
@@ -239,7 +240,7 @@ namespace QDirStat
 	     * the regular expressions or has en empty regular expression, indicating a
 	     * plain suffix pattern.
 	     **/
-	    const MimeCategory * matchWildcardSuffix( const QMultiHash<QString, WildcardPair> & map,
+	    const MimeCategory * matchWildcardSuffix( const SuffixMatches & map,
 						      const QString & filename,
 						      const QString & suffix ) const;
 
@@ -289,13 +290,13 @@ namespace QDirStat
 	    const MimeCategory *_symlinkCategory;
 	    const MimeCategory _emptyCategory;
 
-	    QHash<QString, MimeCategory *>	_caseInsensitiveExact;
-	    QHash<QString, MimeCategory *>	_caseSensitiveExact;
-	    QMultiHash<QString, WildcardPair>	_caseInsensitiveSuffixes;
-	    QMultiHash<QString, WildcardPair>	_caseSensitiveSuffixes;
-	    QList<WildcardPair>			_wildcards;
-	    QBitArray				_caseInsensitiveLengths;
-	    QBitArray				_caseSensitiveLengths;
+	    ExactMatches        _caseInsensitiveExact;
+	    ExactMatches        _caseSensitiveExact;
+	    SuffixMatches       _caseInsensitiveSuffixes;
+	    SuffixMatches       _caseSensitiveSuffixes;
+	    QList<WildcardPair> _wildcards;
+	    QBitArray           _caseInsensitiveLengths;
+	    QBitArray           _caseSensitiveLengths;
 
 	    QReadWriteLock _lock;
 

@@ -70,18 +70,18 @@ namespace QDirStat
 	/**
 	 * Return the path where the device is mounted to.
 	 **/
-	QString path() const { return _path; }
+	const QString & path() const { return _path; }
 
 	/**
 	 * Return the filesystem type as string ("ext4", "btrfs", "none").
 	 **/
-	QString filesystemType() const { return _filesystemType; }
+	const QString & filesystemType() const { return _filesystemType; }
 
 	/**
 	 * Return the individual mount options as a list of strings
 	 * ["rw", "nosuid", "nodev", "relatime", "rsize=32768"].
 	 **/
-	QStringList mountOptions() const { return _mountOptions; }
+	const QStringList & mountOptions() const { return _mountOptions; }
 
 	/**
 	 * Return the mount options as one comma-separated string.
@@ -292,7 +292,7 @@ namespace QDirStat
 	 * The result is sorted by the order in which the filesystems were
 	 * mounted (the same as in /proc/mounts or in /etc/mtab).
 	 **/
-	static QList<MountPoint *> allMountPoints() { return instance()->_mountPointList; }
+	static const QList<MountPoint *> & allMountPoints() { return instance()->_mountPointList; }
 
 	/**
 	 * Return 'true' if size information for mount points is available.

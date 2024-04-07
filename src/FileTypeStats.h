@@ -192,8 +192,8 @@ namespace QDirStat
 	// Data members
 	//
 
-	MimeCategory *		_otherCategory;
-	MimeCategorizer *	_mimeCategorizer;
+	const MimeCategory    * _otherCategory;
+	MimeCategorizer       * _mimeCategorizer;
 
 	StringFileSizeMap	_suffixSum;
 	StringIntMap		_suffixCount;

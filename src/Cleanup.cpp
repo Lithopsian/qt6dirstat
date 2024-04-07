@@ -25,7 +25,7 @@ using namespace QDirStat;
 
 
 Cleanup::Cleanup( const Cleanup * other ):
-    Cleanup ( 0, other->_active, other->_title, other->_command,
+    Cleanup ( nullptr, other->_active, other->_title, other->_command,
 	      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
 	      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
 	      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
@@ -426,7 +426,7 @@ static QString expandDesktopSpecificApps( const QString & unexpanded )
 
 FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
 {
-    // Only change when the command doesn't act on individual files
+    // Only change the list when the command doesn't act on individual files
     if ( _command.contains( "%n" ) || _command.contains( "%p" ) )
 	return sel;
 

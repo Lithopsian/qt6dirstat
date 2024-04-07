@@ -43,11 +43,6 @@ namespace QDirStat
 	{}
 
         /**
-         * Destructor.
-         **/
-//        virtual ~BucketsTableModel() {}
-
-        /**
          * Return the associated histogram view.
          **/
         const HistogramView * histogram() const { return _histogram; }

@@ -359,12 +359,12 @@ void HeaderTweaker::writeSettings()
     settings.endGroup();
 
     // Write column layouts to settings
-    for ( ColumnLayout * layout : _layouts )
+    for ( const ColumnLayout * layout : _layouts )
 	writeLayoutSettings( layout );
 }
 
 
-void HeaderTweaker::writeLayoutSettings( ColumnLayout * layout )
+void HeaderTweaker::writeLayoutSettings( const ColumnLayout * layout ) const
 {
     CHECK_PTR( layout );
 

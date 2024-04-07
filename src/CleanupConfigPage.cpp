@@ -82,10 +82,7 @@ void CleanupConfigPage::applyChanges()
     // Build a list of the working cleanups to write out to the settings file
     CleanupList cleanups;
     for ( int i = 0; i < listWidget()->count(); ++i )
-    {
-	Cleanup * cleanup = CLEANUP_CAST( value( listWidget()->item( i ) ) );
-	cleanups << cleanup;
-    }
+	cleanups << CLEANUP_CAST( value( listWidget()->item( i ) ) );
 
     // Check if anything changed before writing, just for fun
     CleanupCollection * collection = ActionManager::cleanupCollection();
@@ -204,7 +201,7 @@ void CleanupConfigPage::load( void * value )
     if ( updatesLocked() )
 	return;
 
-    Cleanup * cleanup = CLEANUP_CAST( value );
+    const Cleanup * cleanup = CLEANUP_CAST( value );
     if ( !cleanup )
     {
 	enableEditWidgets( false );

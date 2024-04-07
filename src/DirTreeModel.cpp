@@ -994,11 +994,11 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
     if ( item->readError()  ) return _unreadableDirIcon;
     if ( item->isDir()      ) return item->isMountPoint() ? _mountPointIcon : _dirIcon;
     // else FileInfo
-    if ( item->isFile()	       )   return _fileIcon;
-    if ( item->isSymLink()     )   return _symlinkIcon;
-    if ( item->isBlockDevice() )   return _blockDeviceIcon;
-    if ( item->isCharDevice()  )   return _charDeviceIcon;
-    if ( item->isSpecial()     )   return _specialIcon;
+    if ( item->isFile()	       ) return _fileIcon;
+    if ( item->isSymLink()     ) return _symlinkIcon;
+    if ( item->isBlockDevice() ) return _blockDeviceIcon;
+    if ( item->isCharDevice()  ) return _charDeviceIcon;
+    if ( item->isSpecial()     ) return _specialIcon;
 
     return QIcon();
 }

@@ -120,16 +120,16 @@ namespace QDirStat
 	 * objects from the DirInfo constructor.
 	 *
 	 **/
-	FileInfo( DirInfo	* parent,
-		  DirTree	* tree,
-		  const QString	& filename,
-		  mode_t	  mode,
-		  FileSize	  size,
-		  FileSize	  allocatedSize,
-		  bool		  withUidGidPerm,
-		  uid_t		  uid,
-		  gid_t		  gid,
-		  time_t	  mtime ):
+	FileInfo( DirInfo       * parent,
+		  DirTree       * tree,
+		  const QString & filename,
+		  mode_t          mode,
+		  FileSize        size,
+		  FileSize        allocatedSize,
+		  bool            withUidGidPerm,
+		  uid_t           uid,
+		  gid_t           gid,
+		  time_t          mtime ):
 	    FileInfo ( parent,
 		       tree,
 		       filename,
@@ -150,9 +150,9 @@ namespace QDirStat
 	 * PkgInfo and pseudo-directories and to create dummy nodes in some error
 	 * situations.
 	 **/
-	FileInfo( DirInfo	* parent,
-		  DirTree	* tree,
-		  const QString	& filename ):
+	FileInfo( DirInfo       * parent,
+		  DirTree       * tree,
+		  const QString & filename ):
 	    FileInfo ( parent, tree, filename, 0, 0, 0, false, 0, 0, 0, false, 0, 1 )
 	{}
 
@@ -160,10 +160,10 @@ namespace QDirStat
 	 * Constructor from a stat buffer (i.e. based on an lstat() call).  It is
 	 * expected that this will be used for all "real" files.
 	 **/
-	FileInfo( DirInfo	* parent,
-		  DirTree	* tree,
-		  const QString	& filename,
-		  struct stat	* statInfo );
+	FileInfo( DirInfo           * parent,
+		  DirTree           * tree,
+		  const QString     & filename,
+		  const struct stat & statInfo );
 
 	/**
 	 * Suppress copy and assignment constructors (this is not a QObject)
@@ -204,7 +204,7 @@ namespace QDirStat
 	 * requested for "/usr/share/man". Notice, however, that the entry for
 	 * "/usr/share/man/man1" will only return "man1" in this example.
 	 **/
-	QString name() const { return _name; }
+	const QString & name() const { return _name; }
 
 	/**
 	 * Returns the base name of this object, i.e. the last path component,
@@ -530,7 +530,7 @@ namespace QDirStat
 	 * silently ignores the value passed here and does nothing. Derived
 	 * classes may want to overwrite this.
 	 **/
-	virtual void setExcluded( bool ) { return; }
+	virtual void setExcluded( bool ) {}
 
 	/**
 	 * Returns whether or not this is a mount point.  Always false for a
@@ -545,7 +545,7 @@ namespace QDirStat
 	 * This default implementation silently ignores the value passed and
 	 * does nothing. Derived classes may want to overwrite this.
 	 **/
-	virtual void setMountPoint( bool ) { return; }
+	virtual void setMountPoint( bool ) {}
 
 	/**
 	 * Returns true if this subtree is finished reading.  Files have no
@@ -553,7 +553,7 @@ namespace QDirStat
 	 * so the default implementation always returns 'true'; derived
 	 * classes should overwrite this.
 	 **/
-	virtual bool isFinished() { return true; }
+	virtual bool isFinished() const { return true; }
 
 	/**
 	 * Returns true if this subtree is busy, i.e. it is not finished
@@ -569,7 +569,7 @@ namespace QDirStat
 	 * number reaches zero, the entire subtree is done.
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int pendingReadJobs() { return 0; }
+	virtual int pendingReadJobs() const { return 0; }
 
 	/**
 	 * Return 'true' if the filesystem can report block sizes.
@@ -617,7 +617,7 @@ namespace QDirStat
 	/**
 	 * Set the "next" pointer.
 	 **/
-	void  setNext( FileInfo *newNext ) { _next = newNext; }
+	void setNext( FileInfo *newNext ) { _next = newNext; }
 
 	/**
 	 * Returns the first child of this item or 0 if there is none.
@@ -660,7 +660,7 @@ namespace QDirStat
 	 * 'findPseudoDirs' specifies if locating pseudo directories like "dot
 	 * entries" (".../<Files>") or "attics" (".../<Ignored>") is desired.
 	 **/
-	virtual FileInfo * locate( QString url, bool findPseudoDirs = false );
+	virtual FileInfo * locate( const QString & url, bool findPseudoDirs );
 
 	/**
 	 * Insert a child into the children list.

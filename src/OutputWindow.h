@@ -110,7 +110,7 @@ public:
     /**
      * Return the text color for commands in the terminal area.
      **/
-    QColor commandTextColor() const { return _commandTextColor; }
+    const QColor & commandTextColor() const { return _commandTextColor; }
 
     /**
      * Set the text color for commands in the terminal area.
@@ -121,7 +121,7 @@ public:
     /**
      * Return the text color for stdout output in the terminal area.
      **/
-    QColor stdoutColor() const { return _stdoutColor; }
+    const QColor & stdoutColor() const { return _stdoutColor; }
 
     /**
      * Set the text color for stdout output in the terminal area.
@@ -132,7 +132,7 @@ public:
     /**
      * Return the text color for stderr output in the terminal area.
      **/
-    QColor stderrColor() const { return _stderrColor; }
+    const QColor & stderrColor() const { return _stderrColor; }
 
     /**
      * Set the text color for stderr output in the terminal area.
@@ -144,7 +144,7 @@ public:
     /**
      * Return the background color of the terminal area.
      **/
-    QColor terminalBackground() const { return _terminalBackground; }
+    const QColor & terminalBackground() const { return _terminalBackground; }
 
     /**
      * Set the background color of the terminal area.
@@ -176,19 +176,19 @@ public slots:
      * Add a command line to show in the output area.
      * This is typically displayed in white.
      **/
-    void addCommandLine( const QString commandline );
+    void addCommandLine( const QString & commandline );
 
     /**
      * Add one or more lines of stdout to show in the output area.
      * This is typically displayed in amber.
      **/
-    void addStdout( const QString output );
+    void addStdout( const QString &output );
 
     /**
      * Add one or more lines of stderr to show in the output area.
      * This is typically displayed in red.
      **/
-    void addStderr( const QString output );
+    void addStderr( const QString & output );
 
     /**
      * Kill all processes this class watches.

@@ -41,7 +41,7 @@ BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
 }
 
 
-void BreadcrumbNavigator::setPath( FileInfo * item )
+void BreadcrumbNavigator::setPath( const FileInfo * item )
 {
     //logDebug() << Qt::endl;
     fillBreadcrumbs( item );
@@ -50,7 +50,7 @@ void BreadcrumbNavigator::setPath( FileInfo * item )
 }
 
 
-void BreadcrumbNavigator::fillBreadcrumbs( FileInfo * item )
+void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
 {
     _breadcrumbs.clear();
 

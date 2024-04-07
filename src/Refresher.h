@@ -44,7 +44,7 @@ namespace QDirStat
 	 *
 	 * All items are assumed to belong to the same DirTree.
 	 **/
-	Refresher( QObject * parent, const FileInfoSet items ):
+	Refresher( QObject * parent, const FileInfoSet & items ):
 	    QObject ( parent ),
 	    _items { items }
 	{}
@@ -61,7 +61,7 @@ namespace QDirStat
 
     private:
 
-	FileInfoSet _items;
+	const FileInfoSet _items;
     };
 
 }	// namespace QDirStat

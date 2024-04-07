@@ -193,7 +193,7 @@ namespace QDirStat
 
 	Ui::FileTypeStatsWindow * _ui;
         Subtree                   _subtree;
-	FileTypeStats           * _stats	{ nullptr };
+	const FileTypeStats     * _stats { nullptr };
 
     };
 

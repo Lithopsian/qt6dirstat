@@ -18,7 +18,6 @@ namespace QDirStat
 {
     class PercentileStats;
 
-
     /**
      * Abstract base class to walk recursively through a FileInfo tree to check
      * for each tree item whether or not it should be used for further

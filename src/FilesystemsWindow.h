@@ -190,16 +190,16 @@ namespace QDirStat
 
 	// Getters
 
-	QString	 device()	  const { return _device;	  }
-	QString	 mountPath()	  const { return _mountPath;	  }
-	QString	 fsType()	  const { return _fsType;	  }
-	FileSize totalSize()	  const { return _totalSize;	  }
-	FileSize usedSize()	  const { return _usedSize;	  }
-	FileSize reservedSize()	  const { return _reservedSize;	  }
-	FileSize freePercent()	  const { return 100.0 * _freeSize / _totalSize; }
-	FileSize freeSize()	  const { return _freeSize;	  }
-	bool	 isNetworkMount() const { return _isNetworkMount; }
-	bool	 isReadOnly()	  const { return _isReadOnly;	  }
+	const QString & device()    const { return _device;	  }
+	const QString & mountPath() const { return _mountPath;	  }
+	const QString & fsType()    const { return _fsType;	  }
+	FileSize totalSize()        const { return _totalSize;	  }
+	FileSize usedSize()         const { return _usedSize;	  }
+	FileSize reservedSize()     const { return _reservedSize;	  }
+	FileSize freePercent()      const { return 100.0 * _freeSize / _totalSize; }
+	FileSize freeSize()         const { return _freeSize;	  }
+	bool	 isNetworkMount()   const { return _isNetworkMount; }
+	bool	 isReadOnly()       const { return _isReadOnly;	  }
 
     protected:
 

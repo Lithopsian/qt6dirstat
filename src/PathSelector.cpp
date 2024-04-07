@@ -148,7 +148,7 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
 
 
 PathSelectorItem::PathSelectorItem( const QString & path,
-				    PathSelector *  parent ):
+				    PathSelector  * parent ):
     QListWidgetItem ( path, parent ),
     _path { path },
     _mountPoint { nullptr }
@@ -157,7 +157,7 @@ PathSelectorItem::PathSelectorItem( const QString & path,
 }
 
 
-PathSelectorItem::PathSelectorItem( MountPoint *   mountPoint,
+PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 				    PathSelector * parent ):
     QListWidgetItem ( parent ),
     _path { mountPoint->path() },

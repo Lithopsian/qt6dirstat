@@ -273,13 +273,13 @@ namespace QDirStat
 	 * Return exclude rules specific to this tree (as opposed to the global
 	 * ones stored in the ExcludeRules singleton) or 0 if there are none.
 	 **/
-	ExcludeRules * excludeRules() const { return _excludeRules; }
+	const ExcludeRules * excludeRules() const { return _excludeRules; }
 
 	/**
 	 * Return exclude rules specific to this tree (as opposed to the global
 	 * ones stored in the ExcludeRules singleton) or 0 if there are none.
 	 **/
-	ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules; }
+	const ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules; }
 
 	/**
 	 * Set exclude rules from the settings file.  The tree will create its

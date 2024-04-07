@@ -351,20 +351,19 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 {
     CHECK_PTR( pkg );
 
+#if 0
     QString name = pkg->baseName();
 
-#if 0
     if ( pkg->isMultiVersion() )
 	name += "_" + pkg->version();
 
     if ( pkg->isMultiArch() )
 	name += ":" + pkg->arch();
-#endif
-
-    if ( pkg->arch() != "all" )
-	name += ":" + pkg->arch();
 
     return name;
+#else
+    return pkg->arch() == "all" ? pkg->baseName() : pkg->baseName() + ":" + pkg->arch();
+#endif
 }
 
 

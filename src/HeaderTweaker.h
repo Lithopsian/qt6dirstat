@@ -229,7 +229,7 @@ namespace QDirStat
 	/**
 	 * Write the settings for a layout.
 	 **/
-	void writeLayoutSettings( ColumnLayout * layout );
+	void writeLayoutSettings( const ColumnLayout * layout ) const;
 
 
     private:
@@ -253,7 +253,7 @@ namespace QDirStat
     class ColumnLayout
     {
     public:
-	ColumnLayout( const QString name ):
+	ColumnLayout( const QString & name ):
 	    name { name }
 	{}
 
