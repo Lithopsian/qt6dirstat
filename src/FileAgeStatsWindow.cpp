@@ -247,7 +247,7 @@ YearsList FileAgeStatsWindow::findGaps()
     if ( years.isEmpty() )
         return gaps;
 
-    const short lastYear = _startGapsWithCurrentYear ? FileAgeStats::thisYear() : years.last();
+    const short lastYear = _startGapsWithCurrentYear ? _stats->thisYear() : years.last();
     if ( lastYear - years.first() == years.count() - 1 )
         return gaps;
 

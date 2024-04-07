@@ -18,7 +18,9 @@
 using namespace QDirStat;
 
 
-FileAgeStats::FileAgeStats( const FileInfo * subtree )
+FileAgeStats::FileAgeStats( const FileInfo * subtree ):
+    _thisYear { static_cast<short>( QDate::currentDate().year() ) },
+    _thisMonth { static_cast<short>( QDate::currentDate().month() ) }
 {
     CHECK_PTR( subtree );
 
@@ -158,28 +160,4 @@ YearStats * FileAgeStats::monthStats( short year, short month )
     }
 
     return nullptr;
-}
-
-
-short FileAgeStats::thisYear()
-{
-    static short _thisYear = QDate::currentDate().year();
-
-    return _thisYear;
-}
-
-
-short FileAgeStats::thisMonth()
-{
-    static short _thisMonth = QDate::currentDate().month();
-
-    return _thisMonth;
-}
-
-
-short FileAgeStats::lastYear()
-{
-    static short _lastYear = thisYear() - 1;
-
-    return _lastYear;
 }

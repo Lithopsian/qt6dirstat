@@ -95,17 +95,17 @@ namespace QDirStat
         /**
          * Return the current year.
          **/
-        static short thisYear();
+        short thisYear() const { return _thisYear; }
 
         /**
          * Return the current month (1-12).
          **/
-        static short thisMonth();
+        short thisMonth() const { return _thisMonth; }
 
         /**
          * Return the year before the current year.
          **/
-        static short lastYear();
+        short lastYear() const { return _thisYear - 1; }
 
 
     protected:
@@ -156,6 +156,9 @@ namespace QDirStat
 
         YearStats       _thisYearMonthStats[ 12 ];
         YearStats       _lastYearMonthStats[ 12 ];
+
+	short		_thisYear;
+	short		_thisMonth;
 
     };  // class FileAgesStats
 
