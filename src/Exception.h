@@ -42,14 +42,14 @@ public:
      * Notice this text is intended for developers or admins, not for end
      * users.
      */
-    virtual QString what() const { return _what; }
+    QString what() const { return _what; }
 
     /**
      * Return the class name of this exception as string.
      *
      * Derived classes should reimplement this and return their own name.
      */
-    virtual QString className() const { return "Exception"; }
+    QString className() const { return "Exception"; }
 
     /**
      * Return the source file name where the exception was thrown.
