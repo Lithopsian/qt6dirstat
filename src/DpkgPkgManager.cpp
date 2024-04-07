@@ -27,6 +27,27 @@ using SysUtil::tryRunCommand;
 using SysUtil::haveCommand;
 
 
+static QString resolvePath( const QString & pathname )
+{
+    const QFileInfo fileInfo( pathname );
+
+    // a directory that is a symlink in root (eg. /lib) is resolved
+    if ( fileInfo.dir().isRoot() && fileInfo.isDir() ) // first test doesn't access the filesystem
+    {
+	const QString realpath = fileInfo.canonicalFilePath();
+	//logDebug() << pathname << " " << realpath << Qt::endl;
+	return realpath.isEmpty() ? pathname : realpath;
+    }
+
+    // in all other cases, only symlinks in the parent path are resolved
+    const QString filename = fileInfo.fileName();
+    const QString pathInfo = fileInfo.path();
+    const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
+    //logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
+    return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + "/" + filename : pathname;
+}
+
+
 bool DpkgPkgManager::isPrimaryPkgManager() const
 {
     return tryRunCommand( "/usr/bin/dpkg -S /usr/bin/dpkg", QRegularExpression( "^dpkg:.*" ) );
@@ -41,7 +62,7 @@ bool DpkgPkgManager::isAvailable() const
 
 QString DpkgPkgManager::owningPkg( const QString & path ) const
 {
-   // Try first with the full (possibly symlinked) path
+    // Try first with the full (possibly symlinked) path
     const QFileInfo fileInfo( path );
     int exitCode = -1;
     QString output = runCommand( "/usr/bin/dpkg",
@@ -268,7 +289,7 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
     const QStringList splitOutput = output.split( "\n" );
     for ( const QString & line : splitOutput )
     {
-	if ( ! line.isEmpty() )
+	if ( !line.isEmpty() )
 	{
 	    QStringList fields = line.split( " | " );
 
@@ -313,37 +334,16 @@ QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 
 	    // this line contains the new location for the file from this package
 	    const QStringList fields = line.split( ": " );
-	    const QString divertedFile = fields.last();
+	    const QString & divertedFile = fields.last();
 
 	    if ( fields.size() == 2 && !divertedFile.isEmpty() )
 		fileList << resolvePath(divertedFile);
 	}
-	else if ( line != "/." && ! isPackageDivert( line ) )
-	    fileList << resolvePath(line);
+	else if ( line != "/." && !isPackageDivert( line ) )
+	    fileList << resolvePath( line );
     }
 
     return fileList;
-}
-
-
-QString DpkgPkgManager::resolvePath( const QString & pathname ) const
-{
-    const QFileInfo fileInfo( pathname );
-
-    // a directory that is a symlink in root (eg. /lib) is resolved
-    if ( fileInfo.dir().isRoot() && fileInfo.isDir() ) // first test doesn't access the filesystem
-    {
-	const QString realpath = fileInfo.canonicalFilePath();
-	//logDebug() << pathname << " " << realpath << Qt::endl;
-	return realpath.isEmpty() ? pathname : realpath;
-    }
-
-    // in all other cases, only symlinks in the parent path are resolved
-    const QString filename = fileInfo.fileName();
-    const QString pathInfo = fileInfo.path();
-    const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
-    //logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
-    return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + "/" + filename : pathname;
 }
 
 
@@ -480,7 +480,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	    continue;
 
 	for ( const QString & pkgName : packages.split( ", " ) )
-	    if ( ! pkgName.isEmpty() )
+	    if ( !pkgName.isEmpty() )
 		cache->add( pkgName, pathname );
     }
 

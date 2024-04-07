@@ -51,10 +51,10 @@ DirInfo::DirInfo( DirInfo       * parent,
 }
 
 
-DirInfo::DirInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & name,
-		  struct stat   * statInfo ):
+DirInfo::DirInfo( DirInfo           * parent,
+		  DirTree           * tree,
+		  const QString     & name,
+		  const struct stat & statInfo ):
     FileInfo ( parent,
 		 tree,
 		 name,
@@ -448,7 +448,7 @@ int DirInfo::errSubDirCount()
 }
 
 
-bool DirInfo::isFinished()
+bool DirInfo::isFinished() const
 {
     return !isBusy();
 }
@@ -1136,4 +1136,21 @@ void DirInfo::finishReading( DirReadState readState )
     setReadState( readState );
     finalizeLocal();
     _tree->sendReadJobFinished( this );
+}
+
+
+FileInfo * DirInfo::locateChild( const QString & pathComponent ) const
+{
+    if ( pathComponent.isEmpty() )
+        return nullptr;
+
+    for ( FileInfoIterator it( this ); *it; ++it )
+    {
+        //logDebug() << "Checking " << (*it)->name() << " in " << subtree << " for " << pathComponent << Qt::endl;
+
+        if ( (*it)->name() == pathComponent )
+            return *it;
+    }
+
+    return nullptr;
 }

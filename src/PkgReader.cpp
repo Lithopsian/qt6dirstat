@@ -286,7 +286,7 @@ void PkgReader::writeSettings()
 
 
 
-QMap<QString, struct stat> PkgReadJob::_statCache;
+QHash<QString, struct stat> PkgReadJob::_statCache;
 int PkgReadJob::_activeJobs = 0;
 int PkgReadJob::_cacheHits  = 0;
 int PkgReadJob::_lstatCalls = 0;
@@ -335,7 +335,7 @@ void PkgReadJob::reportCacheStats()
 
 void PkgReadJob::startReading()
 {
-    // logInfo() << "Reading " << _pkg << Qt::endl;
+    //logInfo() << "Reading " << _pkg << Qt::endl;
 
     CHECK_PTR( _pkg );
 
@@ -366,22 +366,21 @@ void PkgReadJob::addFile( const QString & fileListPath )
 
     // logDebug() << "Adding " << fileListPath << " to " << _pkg << Qt::endl;
 
-    QStringList remaining = fileListPath.split( "/", Qt::SkipEmptyParts );
     QStringList currentPath;
-    DirInfo *	parent = _pkg;
+    DirInfo * parent = _pkg;
 
-    while ( !remaining.isEmpty() )
+    const QStringList components = fileListPath.split( "/", Qt::SkipEmptyParts );
+    for ( const QString & currentComponent : components )
     {
-	const QString currentName = remaining.takeFirst();
-	currentPath << currentName;
+	currentPath << currentComponent;
 
-	FileInfo * newParent = _pkg->locate( parent, QStringList() << currentName );
-
+	FileInfo * newParent = parent->locateChild( currentComponent );
 	if ( !newParent )
 	{
 	    newParent = createItem( currentPath, _tree, parent );
 	    if ( !newParent )
 	    {
+		//Packaged file not actually on disk, just log it
 		//parent->setReadState( DirError );
 		if ( _reader->verboseMissingPkgFiles() )
 		    logWarning() << _pkg << ": missing: " << fileListPath << Qt::endl;
@@ -393,10 +392,9 @@ void PkgReadJob::addFile( const QString & fileListPath )
 	    // logDebug() << "Created " << newParent << Qt::endl;
 	}
 
-	if ( !remaining.isEmpty() )
+	if ( currentComponent != components.constLast() )
 	{
 	    parent = newParent->toDirInfo();
-
 	    if ( !parent )
 	    {
 		logWarning() << newParent << " should be a directory, but is not" << Qt::endl;
@@ -409,14 +407,10 @@ void PkgReadJob::addFile( const QString & fileListPath )
 
 void PkgReadJob::finalizeAll( DirInfo * subtree )
 {
-    FileInfo * child = subtree->firstChild();
-
-    while ( child )
+    for ( FileInfo * child = subtree->firstChild(); child; child = child->next() )
     {
 	if ( child->isDirInfo() )
 	    finalizeAll( child->toDirInfo() );
-
-	child = child->next();
     }
 
     if ( !subtree->readError() )
@@ -430,19 +424,18 @@ FileInfo * PkgReadJob::createItem( const QStringList & pathComponents,
 				   DirTree	     * tree,
 				   DirInfo	     * parent )
 {
-    struct stat * statInfo;
     const QString path = QString( "/" ) + pathComponents.join( "/" );
 
     // logDebug() << "path: \"" << path << "\"" << Qt::endl;
 
-    statInfo = this->lstat( path );
+    struct stat statInfo;
 
-    if ( !statInfo ) // lstat() failed
+    if ( !PkgReadJob::lstat( statInfo, path ) ) // lstat() failed
 	return nullptr;
 
-    const QString name = pathComponents.last();
+    const QString & name = pathComponents.last();
 
-    if ( S_ISDIR( statInfo->st_mode ) )		// directory?
+    if ( S_ISDIR( statInfo.st_mode ) )		// directory?
     {
 	DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
 	CHECK_NEW( dir );
@@ -465,27 +458,23 @@ FileInfo * PkgReadJob::createItem( const QStringList & pathComponents,
 }
 
 
-struct stat * PkgReadJob::lstat( const QString & path )
+bool PkgReadJob::lstat( struct stat & statInfo, const QString & path )
 {
-    static struct stat statInfo;
-
     if ( _statCache.contains( path ) )
     {
         ++_cacheHits;
-        // logDebug() << "stat cache hit for " << path << Qt::endl;
+        //logDebug() << "stat cache hit for " << path << Qt::endl;
         statInfo = _statCache.value( path );
-    }
-    else
-    {
-        const int result = ::lstat( path.toUtf8(), &statInfo );
-        ++_lstatCalls;
-
-        if ( result != 0 )
-            return nullptr;	// lstat() failed
-
-        _statCache.insert( path, statInfo );
+	return true;
     }
 
+    const int result = ::lstat( path.toUtf8(), &statInfo );
+    ++_lstatCalls;
+
+    if ( result != 0 )
+	return false;	// lstat() failed
+
+    _statCache.insert( path, statInfo );
     if ( S_ISDIR( statInfo.st_mode ) )	// directory?
     {
 	// Zero the directory's own size fields to prevent them from
@@ -493,13 +482,12 @@ struct stat * PkgReadJob::lstat( const QString & path )
 	// counted in each package that uses the directory, and a directory
 	// with a large own size and only a tiny file that belongs to that
 	// package would completely dwarf the package file in the treemap.
-
 	statInfo.st_size   = 0;
 	statInfo.st_blocks = 0;
 	statInfo.st_mtime  = 0;
     }
 
-    return &statInfo;
+    return true;
 }
 
 
@@ -540,7 +528,7 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
     else // ok
     {
 	const QString output = QString::fromUtf8( _readFileListProcess->readAll() );
-	_fileList      = _pkg->pkgManager()->parseFileList( output );
+	_fileList = _pkg->pkgManager()->parseFileList( output );
 	_tree->unblock( this ); // schedule this job
 	_readFileListProcess->deleteLater();
 
@@ -558,6 +546,7 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
     // Don't add anything after finished() since this deletes this job!
 }
 
+
 QStringList AsyncPkgReadJob::fileList()
 {
     return _fileList;
@@ -573,20 +562,16 @@ QStringList CachePkgReadJob::fileList()
     if ( _fileListCache && _fileListCache->pkgManager() == _pkg->pkgManager() )
     {
 	const QString pkgName = _pkg->pkgManager()->queryName( _pkg );
-        QStringList fileList;
 
 	if ( _fileListCache->containsPkg( pkgName ) )
-	{
-            fileList = _fileListCache->fileList( pkgName );
-            _fileListCache->remove( pkgName );
-	}
-	else if ( _fileListCache->containsPkg( _pkg->name() ) )
-	{
-	    fileList = _fileListCache->fileList( _pkg->name() );
-            _fileListCache->remove( _pkg->name() );
-	}
+            return _fileListCache->fileList( pkgName );
+//            _fileListCache->remove( pkgName ); // making a QHash smaller is no help
 
-        return fileList;
+	if ( _fileListCache->containsPkg( _pkg->name() ) )
+	    return _fileListCache->fileList( _pkg->name() );
+//            _fileListCache->remove( _pkg->name() );
+
+        return QStringList();
     }
 
     logDebug() << "Falling back to the simple PkgQuery::fileList() for " << _pkg << Qt::endl;

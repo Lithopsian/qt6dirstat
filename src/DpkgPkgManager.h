@@ -114,9 +114,6 @@ namespace QDirStat
     {
     public:
 
-	DpkgPkgManager() {}
-//	virtual ~DpkgPkgManager() {}
-
 	/**
 	 * Return the name of this package manager.
 	 *
@@ -243,7 +240,7 @@ namespace QDirStat
 	 * Resolves symlinks in the directory path of a file string.  If the file itself
 	 * is a symlink, this is kept unresolved.
 	*/
-	QString resolvePath( const QString & pathname ) const;
+//	QString resolvePath( const QString & pathname ) const;
 
 	/**
 	 * Return whether a given dpkg query line represents a diversion

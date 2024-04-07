@@ -16,7 +16,7 @@ using namespace QDirStat;
 
 #define CHECK_LOOKUP_TYPE(wanted)					  \
 do {									  \
-    if ( ( _lookupType & (wanted) ) != (wanted) )			 \
+    if ( ( _lookupType & (wanted) ) != (wanted) )			  \
 	THROW( Exception( "Cache not set up for this type of lookup" ) ); \
 } while ( false )
 

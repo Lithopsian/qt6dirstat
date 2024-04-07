@@ -226,10 +226,9 @@ namespace QDirStat
 
         /**
          * Do an lstat() syscall for 'path' or fetch the result from a cache.
-         * Return 0 if lstat() fails. Ownership of the returned value is not
-         * transferred to the caller, so don't delete it!
+         * Return false if lstat() fails.
          **/
-        struct stat * lstat( const QString & path );
+        static bool lstat( struct stat & statInfo, const QString & path );
 
         /**
          * Recursively finalize all directories in the subtree.
@@ -249,13 +248,14 @@ namespace QDirStat
 
         // Data members
 
-	PkgReader	* _reader;
-	PkgInfo		* _pkg;
+        static QHash<QString, struct stat> _statCache;
 
-        static QMap<QString, struct stat> _statCache;
-        static int                        _activeJobs;
-        static int                        _cacheHits;
-        static int                        _lstatCalls;
+	PkgReader  * _reader;
+	PkgInfo    * _pkg;
+
+        static int   _activeJobs;
+        static int   _cacheHits;
+        static int   _lstatCalls;
 
     };	// class PkgReadJob
 

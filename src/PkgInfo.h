@@ -162,8 +162,9 @@ namespace QDirStat
          * Locate a path that is already split up into its components within a
          * subtree: Return the corresponding FileInfo or 0 if not found.
          **/
-        FileInfo * locate( DirInfo *           subtree,
-                           const QStringList & pathComponents );
+//        FileInfo * locate( DirInfo           * subtree,
+//                           const QStringList & pathComponents );
+//        FileInfo * locate( const QString & pathComponent );
 
         /**
          * Returns the name of the "root" package summary item url (ie. "Pkg:/").
@@ -177,14 +178,15 @@ namespace QDirStat
          * Locate a path in this PkgInfo subtree:
          * Return the corresponding FileInfo or 0 if not found.
          **/
-        FileInfo * locate( const QString & path );
+//        FileInfo * locate( const QString & path );
 
         /**
          * Locate a path that is already split up into its components in this
          * PkgInfo subtree: Return the corresponding FileInfo or 0 if not
          * found.
          **/
-        FileInfo * locate( const QStringList & pathComponents ) { return locate( this, pathComponents ); }
+//        FileInfo * locate( const QStringList & pathComponents )
+//	    { return locate( this, pathComponents ); }
 
         /**
          * Returns the package scheme prefix.

@@ -16,7 +16,7 @@
 
 using namespace QDirStat;
 
-
+/*
 FileInfo * PkgInfo::locate( const QString & path )
 {
     QStringList components = path.split( "/", Qt::SkipEmptyParts );
@@ -42,22 +42,37 @@ FileInfo * PkgInfo::locate( const QString & path )
 
     return locate( this, components );
 }
+*/
+/*
+FileInfo * PkgInfo::locate( DirInfo       * subtree,
+                            const QString & pathComponent )
+{
+    if ( !subtree || pathComponent.isEmpty() )
+        return nullptr;
 
+    for ( FileInfoIterator it( subtree ); *it; ++it )
+    {
+        //logDebug() << "Checking " << (*it)->name() << " in " << subtree << " for " << pathComponent << Qt::endl;
 
+        if ( (*it)->name() == pathComponent )
+            return *it;
+    }
+
+    return nullptr;
+}*/
+/*
 FileInfo * PkgInfo::locate( DirInfo *           subtree,
                             const QStringList & pathComponents )
 {
     // logDebug() << "Locating /" << pathComponents.join( "/" ) << " in " << subtree << Qt::endl;
 
-    if ( ! subtree || pathComponents.isEmpty() )
+    if ( !subtree || pathComponents.isEmpty() )
         return nullptr;
 
     QStringList   components = pathComponents;
     const QString wanted     = components.takeFirst();
 
-    FileInfoIterator it( subtree );
-
-    while ( *it )
+    for ( FileInfoIterator it( subtree ); *it; ++it )
     {
         // logDebug() << "Checking " << (*it)->name() << " in " << subtree << " for " << wanted << Qt::endl;
 
@@ -70,15 +85,14 @@ FileInfo * PkgInfo::locate( DirInfo *           subtree,
             }
             else
             {
-                if ( ! (*it)->isDirInfo() )
+                if ( !(*it)->isDirInfo() )
                     return nullptr;
                 else
                     return locate( (*it)->toDirInfo(), components );
             }
         }
-
-        ++it;
     }
 
     return nullptr;
 }
+*/

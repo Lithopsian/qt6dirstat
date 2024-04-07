@@ -36,10 +36,10 @@ namespace QDirStat
 	/**
 	 * Constructor from a stat buffer (i.e. based on an lstat() call).
 	 **/
-	DirInfo( DirInfo       * parent,
-		 DirTree       * tree,
-		 const QString & name,
-		 struct stat   * statInfo );
+	DirInfo( DirInfo           * parent,
+		 DirTree           * tree,
+		 const QString     & name,
+		 const struct stat & statInfo );
 
 	/**
 	 * Constructor from the raw fields, used by the cache reader.
@@ -250,7 +250,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	bool isFinished() override;
+	bool isFinished() const override;
 
 	/**
 	 * Returns true if this subtree is busy, i.e. it is not finished
@@ -266,7 +266,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int pendingReadJobs() override { return _pendingReadJobs; }
+	int pendingReadJobs() const override { return _pendingReadJobs; }
 
 	/**
 	 * Delete the dot entry if it is empty, i.e. it does not have any
@@ -534,6 +534,11 @@ namespace QDirStat
 	 * signals and finalize the directory (clean up dot entries etc.).
 	 **/
 	void finishReading( DirReadState readState );
+
+	/**
+	 * Locate a direct child of this directory by name.
+	 **/
+        FileInfo * locateChild( const QString & pathComponent ) const;
 
 
     protected:

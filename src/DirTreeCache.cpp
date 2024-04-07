@@ -493,7 +493,7 @@ void CacheReader::addItem()
 
 	// Try the easy way first - the starting point of this cache
 	if ( !parent && _parent )
-	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path ) );
+	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path, false ) );
 
 #if DEBUG_LOCATE_PARENT
 	if ( parent )
