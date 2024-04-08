@@ -255,6 +255,8 @@ void MainWindow::readSettings()
     const bool showMenuBar	= settings.value( "ShowMenuBar",	      true  ).toBool();
     const bool showStatusBar	= settings.value( "ShowStatusBar",	      true  ).toBool();
 
+    _ui->fileDetailsView->setLabelLimit( settings.value( "FileDetailsLabelLimit", 0 ).toInt() );
+
     settings.endGroup();
 
     settings.beginGroup( "MainWindow-Subwindows" );
@@ -301,18 +303,20 @@ void MainWindow::writeSettings()
     QDirStat::Settings settings;
     settings.beginGroup( "MainWindow" );
 
-    settings.setValue( "ShowTreemap",	   _ui->actionShowTreemap->isChecked() );
-    settings.setValue( "TreemapOnSide",	   _ui->actionTreemapAsSidePanel->isChecked() );
+    settings.setValue( "ShowTreemap",      _ui->actionShowTreemap->isChecked() );
+    settings.setValue( "TreemapOnSide",    _ui->actionTreemapAsSidePanel->isChecked() );
     settings.setValue( "VerboseSelection", _verboseSelection );
 
-    settings.setValue( "Layout",	   currentLayoutName()                   );
-    settings.setValue( "ShowMenuBar",	   _ui->actionShowMenuBar->isChecked()   );
-    settings.setValue( "ShowStatusBar",	   _ui->actionShowStatusBar->isChecked() );
+    settings.setValue( "Layout",           currentLayoutName()                   );
+    settings.setValue( "ShowMenuBar",      _ui->actionShowMenuBar->isChecked()   );
+    settings.setValue( "ShowStatusBar",    _ui->actionShowStatusBar->isChecked() );
 
     settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout );
     settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout );
-    settings.setValue( "UrlInWindowTitle",	   _urlInWindowTitle );
-    settings.setValue( "UseTreemapHover",	   _ui->treemapView->useTreemapHover() );
+    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle );
+    settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover() );
+
+    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit() );
 
     settings.setValue( "State", saveState() );
 

@@ -16,8 +16,6 @@
 #include "MountPoints.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
-//#include "Settings.h"
-//#include "SettingsHelpers.h"
 #include "SystemFileChecker.h"
 #include "SysUtil.h"
 #include "FormatUtil.h"
@@ -51,7 +49,6 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
     _ui->setupUi( this );
 
     clear();
-//    readSettings();
 
     connect( MimeCategorizer::instance(), &MimeCategorizer::categoriesChanged,
              this,                        &FileDetailsView::categoriesChanged );
@@ -60,7 +57,6 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
 
 FileDetailsView::~FileDetailsView()
 {
-//    writeSettings(); DirTreeModel does this
     delete _ui;
 }
 
@@ -590,23 +586,6 @@ void FileDetailsView::setLabelLimited( QLabel * label, const QString & text )
     label->setText( limitedText );
 }
 
-/*
-void FileDetailsView::readSettings()
-{
-    Settings settings;
-    settings.beginGroup( "DetailsPanel" );
-
-    _dirReadErrColor = readColorEntry( settings, "DirReadErrColor", QColor( Qt::red ) );
-
-    settings.endGroup();
-}
-*/
-/*
-void FileDetailsView::writeSettings()
-{
-    return; // DirTreeModel does this for us
-}
-*/
 
 const QString & FileDetailsView::mimeCategory( const FileInfo * fileInfo )
 {

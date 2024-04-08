@@ -67,6 +67,19 @@ namespace QDirStat
 	 **/
 	static QString readStateMsg( int readState );
 
+	/**
+	 * Return the label limit, i.e. the maximum number of characters for
+	 * certain fields that can otherwise grow out of bounds.
+	 **/
+	int labelLimit() const { return _labelLimit; }
+
+	/**
+	 * Set the label limit. Notice that if a label needs to be limited, it
+	 * will get three characters less than this value to compensate for the
+	 * "..." ellipsis that indicates that it was cut off.
+	 **/
+	void setLabelLimit( int newLimit ) { _labelLimit = newLimit; }
+
 
     protected slots:
 
@@ -105,35 +118,12 @@ namespace QDirStat
 	void showPkgSummary( PkgInfo * pkgInfo );
 
 	/**
-	 * Return the label limit, i.e. the maximum number of characters for
-	 * certain fields that can otherwise grow out of bounds.
-	 **/
-	int labelLimit() const { return _labelLimit; }
-
-	/**
-	 * Set the label limit. Notice that if a label needs to be limited, it
-	 * will get three characters less than this value to compensate for the
-	 * "..." ellipsis that indicates that it was cut off.
-	 **/
-	void setLabelLimit( int newLimit ) { _labelLimit = newLimit; }
-
-	/**
 	 * Activate a page of this widget stack. This is similar to
 	 * setCurrentWidget(), but it also hides all the other pages to
 	 * minimize the screen space requirements: No extra space is reserved
 	 * for any of the other pages which might be larger than this one.
 	 **/
 	void setCurrentPage( QWidget *page );
-
-	/**
-	 * Read parameters from settings file.
-	 **/
-//	void readSettings();
-
-	/**
-	 * Write parameters to settings file.
-	 **/
-//	void writeSettings();
 
 	/**
 	 * Return the MIME category of a file.
@@ -178,9 +168,7 @@ namespace QDirStat
 	QString dirColorStyle( const DirInfo * dir ) const;
 
 	// Boilerplate widget setting methods
-
 	static QString subtreeMsg( const DirInfo * dir );
-//	static QString pkgMsg( const PkgInfo * pkg );
 
 	void showFileInfo( FileInfo * file );
 	void showFilePkgInfo( const FileInfo * file );
@@ -199,11 +187,11 @@ namespace QDirStat
 	// Data members
 
 	Ui::FileDetailsView * _ui;
-	AdaptiveTimer	    * _pkgUpdateTimer;
-	int		      _labelLimit;
-//	QColor		      _dirReadErrColor; // now using the theme-dependant value from the tree model
+	AdaptiveTimer       * _pkgUpdateTimer;
+	int                   _labelLimit;
 
     };	// class FileDetailsView
+
 }	// namespace QDirStat
 
 #endif // FileDetailsView_h
