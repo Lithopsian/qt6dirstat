@@ -26,7 +26,7 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 {
     CHECK_NEW( _otherCategory );
     CHECK_PTR( _mimeCategorizer );
-
+logDebug() << Qt::endl;
     if ( subtree && subtree->checkMagicNumber() )
     {
         collect( subtree );
@@ -34,7 +34,7 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
         removeCruft();
         removeEmpty();
         sanityCheck();
-    }
+    }logDebug() << Qt::endl;
 }
 
 

@@ -286,9 +286,9 @@ namespace QDirStat
 
 	    MimeCategoryList _categories;
 
-	    const MimeCategory *_executableCategory;
-	    const MimeCategory *_symlinkCategory;
-	    const MimeCategory _emptyCategory;
+	    const MimeCategory * _executableCategory;
+	    const MimeCategory * _symlinkCategory;
+	    const MimeCategory   _emptyCategory;
 
 	    ExactMatches        _caseInsensitiveExact;
 	    ExactMatches        _caseSensitiveExact;

@@ -10,7 +10,6 @@
 #define PkgFileListCache_h
 
 #include <QString>
-#include <QMultiMap>
 #include <QSet>
 
 

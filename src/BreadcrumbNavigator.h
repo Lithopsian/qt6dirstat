@@ -62,7 +62,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~BreadcrumbNavigator() override {}
+	~BreadcrumbNavigator() override =default;
 
 	/**
 	 * Explicitly clear the path.

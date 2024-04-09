@@ -66,7 +66,7 @@ OutputWindow::~OutputWindow()
 	qDeleteAll( _processList );
     }
 
-    writeSettings();
+//    writeSettings();  // nothing can be changed while the program is running
     delete _ui;
 }
 
@@ -496,33 +496,33 @@ void OutputWindow::readSettings()
     QDirStat::Settings settings;
     settings.beginGroup( "OutputWindow" );
 
-    _terminalBackground	 = readColorEntry( settings, "TerminalBackground", QColor( Qt::black  ) );
-    _commandTextColor	 = readColorEntry( settings, "CommandTextColor"	 , QColor( Qt::white  ) );
-    _stdoutColor	 = readColorEntry( settings, "StdoutTextColor"	 , QColor( 0xff, 0xaa, 0x00 ) );
-    _stderrColor	 = readColorEntry( settings, "StdErrTextColor"	 , QColor( Qt::red    ) );
-    _terminalDefaultFont = readFontEntry ( settings, "TerminalFont"	 , _ui->terminal->font() );
+    _terminalBackground  = readColorEntry( settings, "TerminalBackground", QColor( Qt::black        ) );
+    _commandTextColor    = readColorEntry( settings, "CommandTextColor"  , QColor( Qt::white        ) );
+    _stdoutColor         = readColorEntry( settings, "StdoutTextColor"   , QColor( 0xff, 0xaa, 0x00 ) );
+    _stderrColor         = readColorEntry( settings, "StdErrTextColor"   , QColor( Qt::red          ) );
+    _terminalDefaultFont = readFontEntry ( settings, "TerminalFont"      , _ui->terminal->font()      );
 
     settings.endGroup();
 
     _ui->terminal->setFont( _terminalDefaultFont );
 }
 
-
+/*
 void OutputWindow::writeSettings()
 {
     QDirStat::Settings settings;
     settings.beginGroup( "OutputWindow" );
 
     writeColorEntry( settings, "TerminalBackground", _terminalBackground  );
-    writeColorEntry( settings, "CommandTextColor"  , _commandTextColor	  );
-    writeColorEntry( settings, "StdoutTextColor"   , _stdoutColor	  );
-    writeColorEntry( settings, "StdErrTextColor"   , _stderrColor	  );
-    writeFontEntry ( settings, "TerminalFont"	   , _terminalDefaultFont );
+    writeColorEntry( settings, "CommandTextColor"  , _commandTextColor    );
+    writeColorEntry( settings, "StdoutTextColor"   , _stdoutColor         );
+    writeColorEntry( settings, "StdErrTextColor"   , _stderrColor         );
+    writeFontEntry ( settings, "TerminalFont"      , _terminalDefaultFont );
     settings.setValue( "DefaultShowTimeoutMillisec", defaultShowTimeout() );
 
     settings.endGroup();
 }
-
+*/
 
 int OutputWindow::defaultShowTimeout()
 {

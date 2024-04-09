@@ -10,8 +10,6 @@
 #ifndef FileTypeStats_h
 #define FileTypeStats_h
 
-#include <QMap>
-
 #include "ui_file-type-stats-window.h"
 #include "FileSize.h"
 
@@ -31,10 +29,10 @@ namespace QDirStat
 
     typedef QPair<QString, const MimeCategory *>	MapCategory;
 
-    typedef QMap<MapCategory, FileSize>			StringFileSizeMap;
-    typedef QMap<MapCategory, int>			StringIntMap;
-    typedef QMap<const MimeCategory *, FileSize>	CategoryFileSizeMap;
-    typedef QMap<const MimeCategory *, int>		CategoryIntMap;
+    typedef QHash<MapCategory, FileSize>		StringFileSizeMap;
+    typedef QHash<MapCategory, int>			StringIntMap;
+    typedef QHash<const MimeCategory *, FileSize>	CategoryFileSizeMap;
+    typedef QHash<const MimeCategory *, int>		CategoryIntMap;
 
     typedef StringFileSizeMap::const_iterator		StringFileSizeMapIterator;
     typedef CategoryFileSizeMap::const_iterator 	CategoryFileSizeMapIterator;

@@ -13,12 +13,12 @@
 #include <sys/stat.h>
 
 #include <QObject>
-#include <QMap>
 
 
 namespace QDirStat
 {
     class TrashDir;
+
     typedef QMap<dev_t, TrashDir *> TrashDirMap;
 
     /**
@@ -78,8 +78,8 @@ namespace QDirStat
         // Data members
         //
 
-        TrashDir	* _homeTrashDir { nullptr };
-        TrashDirMap   _trashDirs;
+        TrashDir  * _homeTrashDir { nullptr };
+        TrashDirMap _trashDirs;
 
     };	// class Trash
 
@@ -149,6 +149,7 @@ namespace QDirStat
          **/
         QString infoPath() const { return _path + "/info"; }
 
+    private:
 
         //
         // Data members

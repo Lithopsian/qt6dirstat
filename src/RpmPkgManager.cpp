@@ -232,7 +232,6 @@ void RpmPkgManager::readSettings()
     // Write the value right back to the settings if it isn't there already:
     // Since package manager objects are never really destroyed, this can't
     // reliably be done in the destructor.
-
     settings.setDefaultValue( "GetRpmPkgListWarningSec", _getPkgListWarningSec );
     settings.endGroup();
 }

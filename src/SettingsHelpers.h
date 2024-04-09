@@ -24,8 +24,8 @@ namespace QDirStat
      * Read a color in RGB format (#RRGGBB) from the settings.
      **/
     QColor readColorEntry( const QSettings & settings,
-			   const char	   * entryName,
-			   const QColor	   & fallback );
+			   const char      * entryName,
+			   const QColor    & fallback );
 
     /**
      * Write a color in RGB format (#RRGGBB) to the settings.
@@ -38,16 +38,16 @@ namespace QDirStat
      * Read a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) from the
      * settings.
      **/
-    QList<QColor> readColorListEntry( const QSettings	  & settings,
-				      const char	  * entryName,
+    QList<QColor> readColorListEntry( const QSettings     & settings,
+				      const char          * entryName,
 				      const QList<QColor> & fallback );
 
     /**
      * Write a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) to the
      * settings.
      **/
-    void writeColorListEntry( QSettings		  & settings,
-			      const char	  * entryName,
+    void writeColorListEntry( QSettings           & settings,
+			      const char          * entryName,
 			      const QList<QColor> & colors );
 
     /**
@@ -55,7 +55,7 @@ namespace QDirStat
      * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
      **/
     QFont readFontEntry( const QSettings & settings,
-                         const char	 * entryName,
+                         const char      * entryName,
                          const QFont     & fallback );
 
     /**
@@ -71,31 +71,31 @@ namespace QDirStat
      * Read an enum value in string format from the settings.
      * 'enumMapping' maps each valid enum value to the corresponding string.
      **/
-    int readEnumEntry( const QSettings & settings,
-		       const char      * entryName,
-		       int		 fallback,
+    int readEnumEntry( const QSettings           & settings,
+		       const char                * entryName,
+		       int                         fallback,
 		       const SettingsEnumMapping & enumMapping );
 
     /**
      * Write an enum value in string format to the settings.
      * 'enumMapping' maps each valid enum value to the corresponding string.
      **/
-    void writeEnumEntry( QSettings  & settings,
-			 const char * entryName,
-			 int	      enumValue,
+    void writeEnumEntry( QSettings                 & settings,
+			 const char                * entryName,
+			 int                         enumValue,
 			 const SettingsEnumMapping & enumMapping );
 
     /**
      * Read window settings (size and position) from the settings and apply
      * them.
      **/
-    void readWindowSettings( QWidget *       widget,
+    void readWindowSettings( QWidget       * widget,
                              const QString & settingsGroup );
 
     /**
      * Write window settings (size and position) to the settings.
      **/
-    void writeWindowSettings( QWidget *       widget,
+    void writeWindowSettings( QWidget       * widget,
                               const QString & settingsGroup );
 
 }	// namespace QDirStat

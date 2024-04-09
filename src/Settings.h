@@ -79,8 +79,8 @@ namespace QDirStat
 	/**
 	 * Set a value, but only if that key is not already in the settings.
 	 **/
-	void setDefaultValue( const QString & key, bool		   newValue );
-	void setDefaultValue( const QString & key, int		   newValue );
+	void setDefaultValue( const QString & key, bool            newValue );
+	void setDefaultValue( const QString & key, int             newValue );
 	void setDefaultValue( const QString & key, const QString & newValue );
 
 	/**
@@ -109,21 +109,6 @@ namespace QDirStat
 	 * program was started with 'sudo'.
 	 **/
 	static void fixFileOwners();
-
-
-    protected:
-
-	/**
-	 * Change the owner of the config file to the user in the $SUDO_UID /
-	 * $SUDO_GID environment variables (if set).
-	 **/
-//	static void fixFileOwner( const QString & filename );
-
-	/**
-	 * Move all settings groups starting with 'groupPrefix' from settings
-	 * object 'from' to settings object 'to'.
-	 **/
-//	void moveGroups( const QString & groupPrefix, Settings * from, Settings * to );
 
 
     private:
@@ -165,33 +150,6 @@ namespace QDirStat
 
 
     /**
-     * Specialized settings class for MIME categories.
-     *
-     * The general idea is that those settings are stored in a separate file so
-     * that entire file can easily replaced by a site administrator.
-     **/
-    class MimeCategorySettings: public Settings
-    {
-	Q_OBJECT
-
-    public:
-
-	/**
-	 * Constructor.
-	 **/
-	MimeCategorySettings();
-
-
-    protected:
-	/**
-	 * Migrate settings of the common settings (the main config file) to
-	 * this one.
-	 **/
-	void migrate();
-    };
-
-
-    /**
      * Specialized settings class for exclude rules.
      *
      * The general idea is that those settings are stored in a separate file so
@@ -207,6 +165,33 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	ExcludeRuleSettings();
+
+
+    protected:
+	/**
+	 * Migrate settings of the common settings (the main config file) to
+	 * this one.
+	 **/
+	void migrate();
+    };
+
+
+    /**
+     * Specialized settings class for MIME categories.
+     *
+     * The general idea is that those settings are stored in a separate file so
+     * that entire file can easily replaced by a site administrator.
+     **/
+    class MimeCategorySettings: public Settings
+    {
+	Q_OBJECT
+
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	MimeCategorySettings();
 
 
     protected:

@@ -11,8 +11,9 @@
 
 
 #include <QHeaderView>
-#include <QMap>
+
 #include "DataColumns.h"
+
 
 class QHeaderView;
 class QAction;
@@ -238,11 +239,11 @@ namespace QDirStat
 	// Data members
 	//
 
-	DirTreeView		      * _treeView;
-	QHeaderView		      * _header;
-	int				_currentSection	{ -1 };
-	QMap<QString, ColumnLayout *>	_layouts;
-	ColumnLayout *			_currentLayout	{ nullptr };
+	DirTreeView                  * _treeView;
+	QHeaderView                  * _header;
+	int                            _currentSection	{ -1 };
+	QHash<QString, ColumnLayout *> _layouts;
+	ColumnLayout                 * _currentLayout	{ nullptr };
 
     };	// class HeaderTweaker
 

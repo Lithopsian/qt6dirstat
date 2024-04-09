@@ -212,8 +212,10 @@ public slots:
 
     /**
      * Write parameters to the settings.
+     *
+     * Not currently used as none of the settings can be changed from within the program.
      **/
-    void writeSettings();
+//    void writeSettings();
 
 
 protected slots:

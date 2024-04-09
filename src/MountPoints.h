@@ -13,7 +13,6 @@
 #include <QString>
 #include <QStringList>
 #include <QList>
-#include <QMap>
 #include <QTextStream>
 
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 ))
@@ -372,12 +371,12 @@ namespace QDirStat
 	// Data members
 	//
 
-	QList<MountPoint *>	    _mountPointList;
-	QMap<QString, MountPoint *> _mountPointMap;
-        QStringList                 _ntfsDevices;
-	bool			    _isPopulated	{ false };
-	bool			    _hasBtrfs		{ false };
-	bool			    _checkedForBtrfs	{ false };
+	QList<MountPoint *>	     _mountPointList;
+	QHash<QString, MountPoint *> _mountPointMap;
+        QStringList                  _ntfsDevices;
+	bool			     _isPopulated	{ false };
+	bool			     _hasBtrfs		{ false };
+	bool			     _checkedForBtrfs	{ false };
 
     }; // class MountPoints
 

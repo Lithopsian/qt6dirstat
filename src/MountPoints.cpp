@@ -155,7 +155,7 @@ MountPoint * MountPoints::findByPath( const QString & path )
 {
     instance()->ensurePopulated();
 
-    return instance()->_mountPointMap.value( path, 0 );
+    return instance()->_mountPointMap.value( path, nullptr );
 }
 
 
@@ -179,7 +179,7 @@ MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 	    pathComponents.removeLast();
 	    path = QString( "/" ) + pathComponents.join( "/" );
 
-	    mountPoint = instance()->_mountPointMap.value( path, 0 );
+	    mountPoint = instance()->_mountPointMap.value( path, nullptr );
 	}
     }
 

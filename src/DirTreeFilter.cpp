@@ -79,9 +79,9 @@ DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager )
 {
     CHECK_PTR( pkgManager );
 
-    logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;
+    //logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;
     _fileListCache = pkgManager->createFileListCache( PkgFileListCache::LookupGlobal );
-    logInfo() << "Done." << Qt::endl;
+    //logInfo() << "Done." << Qt::endl;
 }
 
 

@@ -182,9 +182,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 	const MimeCategory * category = it.key();
 	if ( category )
 	{
-	    //
             // Add a category item
-            //
 	    FileSize sum = it.value();
             int count = _stats->categoryCount( category );
 	    FileTypeItem * catItem = addCategoryItem( category->name(), count, sum );
@@ -209,9 +207,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     int	     otherCount = 0;
     FileSize otherSum	= 0LL;
 
-    //
     // Create items for each individual suffix (below a category)
-    //
     for ( StringFileSizeMapIterator it = _stats->suffixSumBegin(); it != _stats->suffixSumEnd(); ++it )
     {
 	const QString & suffix = it.key().first;
@@ -222,8 +218,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
 	if ( category )
 	{
-	    QTreeWidgetItem * parentItem = categoryItem.value( category, 0 );
-
+	    QTreeWidgetItem * parentItem = categoryItem.value( category, nullptr );
 	    if ( parentItem )
 	    {
 		parentItem->addChild( item );

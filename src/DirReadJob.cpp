@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 #include <QMutableListIterator>
-#include <QMultiMap>
 
 #include "DirReadJob.h"
 #include "DirTree.h"
@@ -190,9 +189,9 @@ LocalDirReadJob::~LocalDirReadJob()
 void LocalDirReadJob::startReading()
 {
     struct dirent * entry;
-    struct stat	    statInfo;
+    struct stat     statInfo;
     const QString   defaultCacheName = DEFAULT_CACHE_NAME;
-    DIR *	    diskDir;
+    DIR           * diskDir;
 
     // logDebug() << _dir << Qt::endl;
 

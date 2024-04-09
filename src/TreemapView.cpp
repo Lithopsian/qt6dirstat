@@ -11,7 +11,6 @@
 
 #include "TreemapView.h"
 #include "TreemapTile.h"
-//#include "CleanupCollection.h"
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "MimeCategorizer.h"
@@ -33,12 +32,6 @@ TreemapView::TreemapView( QWidget * parent ):
     readSettings();
 
     QThreadPool::globalInstance()->setMaxThreadCount(100);
-
-    // Very important, the resize/rescale can get ugly without this
-//    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-//    setVerticalScrollBarPolicy	( Qt::ScrollBarAlwaysOff );
-//    setRenderHints( QPainter::SmoothPixmapTransform );
-//    setOptimizationFlags( DontAdjustForAntialiasing | DontSavePainterState );
 
     connect( &_watcher,  &QFutureWatcher<TreemapTile *>::finished,
              this,       &TreemapView::treemapFinished );
@@ -544,14 +537,12 @@ void TreemapView::resizeEvent( QResizeEvent * event )
         if ( _tree && _tree->firstToplevel() )
         {
             //logDebug() << "Redisplaying suppressed treemap" << Qt::endl;
-//            scheduleRebuildTreemap( _rootTile->orig() );
             rebuildTreemap( _tree->firstToplevel() );
         }
     }
     else
     {
         //logDebug() << "Auto-resizing treemap" << Qt::endl;
-//        scheduleRebuildTreemap( _rootTile->orig() );
         rebuildTreemap( _rootTile->orig() );
 
         const QSize *newSize = &event->size();
@@ -579,7 +570,6 @@ void TreemapView::showTreemap()
 
     if ( !isVisible() )
         show();
-//        scheduleRebuildTreemap( _tree->firstToplevel() );
 
     enable();
 }
@@ -587,7 +577,7 @@ void TreemapView::showTreemap()
 
 void TreemapView::disable()
 {
-    logDebug() << "Disabling treemap view" << Qt::endl;
+//    logDebug() << "Disabling treemap view" << Qt::endl;
     _disabled = true;
     clear();
 
@@ -597,9 +587,9 @@ void TreemapView::disable()
 
 void TreemapView::enable()
 {
-    logDebug() << "Enabling treemap view" << Qt::endl;
+//    logDebug() << "Enabling treemap view" << Qt::endl;
     _disabled = false;
-//        scheduleRebuildTreemap( _tree->firstToplevel() );
+
     // Use the slow function to pick up any saved root on a refresh
     rebuildTreemapSlot(); // will emit treemapChanged() when complete
 }
