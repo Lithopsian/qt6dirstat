@@ -232,7 +232,7 @@ namespace QDirStat
 	 * Like url(), this is somewhat expensive since it recurses up the
 	 * tree, but it stops when a PkgInfo node is found there.
 	 **/
-	virtual QString path() const;
+	QString path() const;
 
 	/**
 	 * Very much like FileInfo::url(), but with "/<Files>" appended if this
@@ -240,7 +240,7 @@ namespace QDirStat
 	 *
 	 * Note that the QTextStream operator<< outputs exactly this.
 	 **/
-	virtual QString debugUrl() const;
+	QString debugUrl() const;
 
 	/**
 	 * Returns the major and minor device numbers of the device this file
@@ -504,7 +504,7 @@ namespace QDirStat
 	 * Derived classes are free to overwrite this, but this default
 	 * implementation should work well enough.
 	 **/
-	virtual float subtreePercent();
+	float subtreePercent();
 
 	/**
 	 * Return the percentage of this subtree's allocated size in regard to
@@ -515,7 +515,7 @@ namespace QDirStat
 	 * Derived classes are free to overwrite this, but this default
 	 * implementation should work well enough.
 	 **/
-	virtual float subtreeAllocatedPercent();
+	float subtreeAllocatedPercent();
 
 	/**
 	 * Returns 'true' if this had been excluded while reading.
@@ -694,7 +694,7 @@ namespace QDirStat
 	 * Return 'true' if this is a pseudo directory: A "dot entry" or an
 	 * "attic".
 	 **/
-	virtual bool isPseudoDir() const { return isDotEntry() || isAttic(); }
+	bool isPseudoDir() const { return isDotEntry() || isAttic(); }
 
 	/**
 	 * Returns true if this is a "Dot Entry".

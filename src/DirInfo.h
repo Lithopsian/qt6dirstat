@@ -535,11 +535,6 @@ namespace QDirStat
 	 **/
 	void finishReading( DirReadState readState );
 
-	/**
-	 * Locate a direct child of this directory by name.
-	 **/
-        FileInfo * locateChild( const QString & pathComponent ) const;
-
 
     protected:
 

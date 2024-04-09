@@ -9,7 +9,6 @@
 #ifndef PkgReader_h
 #define PkgReader_h
 
-#include <QMap>
 #include <QProcess>
 #include <QSharedPointer>
 
@@ -19,12 +18,9 @@
 
 namespace QDirStat
 {
-    // Forward declarations
     class DirTree;
     class PkgFileListCache;
     class PkgFilter;
-
-    typedef QMultiMap<QString, PkgInfo *> MultiPkgInfo;
 
     /**
      * A class for reading information about installed packages.
@@ -48,13 +44,13 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~PkgReader();
+//	~PkgReader();
 
 	/**
-	 * Suppress copy and assignment constructors (would need a deep copy)
+	 * Suppress copy and assignment constructors (not a QObject)
 	 **/
-	PkgReader( const PkgReader & ) = delete;
-	PkgReader & operator=( const PkgReader & ) = delete;
+//	PkgReader( const PkgReader & ) = delete;
+//	PkgReader & operator=( const PkgReader & ) = delete;
 
 	/**
 	 * Read installed packages from the system's package manager(s), select
@@ -74,16 +70,13 @@ namespace QDirStat
 
 	/**
 	 * Write parameters to the settings file.
+	 *
+	 * Currently not done because the settings can't be changed.
 	 **/
-	void writeSettings();
+//	void writeSettings();
 
 
     protected:
-
-	/**
-	 * Add the packages to the DirTree.
-	 **/
-	void addPkgToTree( const PkgInfoList & pkgList );
 
         /**
          * Create a read job for each package to read its file list from a file
@@ -96,12 +89,6 @@ namespace QDirStat
          * its file list and add it as a blocked job to the read job queue.
          **/
         void createAsyncPkgReadJobs( const PkgInfoList & pkgList );
-
-        /**
-         * Create a process for reading the file list for 'pkg' with the
-         * appropriate external command. The process is not started yet.
-         **/
-        QProcess * createReadFileListProcess( PkgInfo * pkg );
 
 
 	// Data members
@@ -121,12 +108,14 @@ namespace QDirStat
 
 
     /**
-     * Read job class for reading information about a package. This is the base
-     * class with a simplistic approach that just starts the external command
+     * Read job class for reading information about a package, based on
+     * DirReadJob so that the standard DirTree job queue can be used.
+     *
+     * This is the base class for the asynchronous process-based
+     * AsyncPkgReadJob and the file-cache-based CachePkgReadJob, with a
+     * simplistic approach that just starts the external command
      * used for getting the file list when needed and then waits for it to
      * return a result.
-     *
-     * See also AsyncPkgReadJob and CachePkgReadJob.
      **/
     class PkgReadJob: public QObject, public DirReadJob
     {
@@ -144,12 +133,17 @@ namespace QDirStat
 	 **/
 	PkgReadJob( DirTree   * tree,
                     PkgInfo   * pkg,
-		    bool        verboseMissingPkgFiles );
+		    bool        verboseMissingPkgFiles ):
+	    QObject (),
+	    DirReadJob ( tree, pkg ),
+	    _pkg { pkg },
+	    _verboseMissingPkgFiles { verboseMissingPkgFiles }
+	{}
 
 	/**
 	 * Destructor.
 	 **/
-	~PkgReadJob() override;
+	~PkgReadJob() override = default;
 
 	/**
 	 * Start reading the file list of the package.
@@ -176,58 +170,31 @@ namespace QDirStat
          **/
         virtual QStringList fileList();
 
+	/**
+	 * Obtain information about the file or directory specified in
+	 * 'pathComponents' and create a new FileInfo or a DirInfo (whatever is
+	 * appropriate) from that information. Use FileInfo::isDirInfo() to
+	 * find out which.
+	 *
+	 * If the underlying syscall fails, this returns 0.
+	 **/
+	FileInfo * createItem( const QString & path,
+			       const QString & name,
+			       DirInfo       * parent );
+
         /**
          * Add all files belonging to 'path' to this package.
          * Create all directories as needed.
          **/
-        void addFile( const QString & path );
-
-	/**
-	 * Obtain information about the file or directory specified in
-         * 'pathComponents' and create a new FileInfo or a DirInfo (whatever is
-         * appropriate) from that information. Use FileInfo::isDirInfo() to
-         * find out which.
-         *
-         * If the underlying syscall fails, this returns 0.
-	 **/
-	FileInfo * createItem( const QStringList & pathComponents,
-                               DirTree	         * tree,
-                               DirInfo	         * parent );
-
-        /**
-         * Do an lstat() syscall for 'path' or fetch the result from a cache.
-         * Return false if lstat() fails.
-         **/
-        static bool lstat( struct stat & statInfo, const QString & path );
-
-        /**
-         * Recursively finalize all directories in the subtree.
-         **/
-        void finalizeAll( DirInfo * subtree );
-
-        /**
-         * Clear the stat cache and statistics
-         **/
-        static void clearStatCache();
-
-        /**
-         * Write statistics about the stat cache to the log.
-         **/
-        static void reportCacheStats();
+        void addFiles( const QStringList & fileIst );
 
 
     private:
 
         // Data members
 
-        static QHash<QString, struct stat> _statCache;
-
-	PkgInfo    * _pkg;
-	bool         _verboseMissingPkgFiles;
-
-        static int   _activeJobs;
-        static int   _cacheHits;
-        static int   _lstatCalls;
+	PkgInfo * _pkg;
+	bool      _verboseMissingPkgFiles;
 
     };	// class PkgReadJob
 
@@ -286,7 +253,7 @@ namespace QDirStat
          *
          * Reimplemented from PkgReadJob.
          **/
-        QStringList fileList() override;
+        QStringList fileList() override { return _fileList; }
 
 
     private:

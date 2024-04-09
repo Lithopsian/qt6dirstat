@@ -147,7 +147,11 @@ void DirInfo::clear()
 {
 //    _deletingAll = true;
 
-    // Recursively (through the destructors)  delete all children.
+    // If there are no children of any kind, no need to even mark as dirty
+    if ( !_firstChild && !_dotEntry && !_attic )
+	return;
+
+    // Recursively (through the destructors) delete all children
     while ( _firstChild )
     {
 	FileInfo * childToDelete = _firstChild;
@@ -159,25 +163,20 @@ void DirInfo::clear()
 	delete childToDelete;
     }
 
-    markAsDirty();
-
     delete _dotEntry;
     _dotEntry = nullptr;
 
     delete _attic;
     _attic = nullptr;
 
-//    _summaryDirty = true;
+    markAsDirty();
 //    _deletingAll  = false;
-
-//    dropSortCache();
 }
 
 
 void DirInfo::reset()
 {
-    if ( _firstChild || _dotEntry || _attic )
-	clear();
+    clear();
 
     _readState       = DirQueued;
     _pendingReadJobs = 0;
@@ -250,7 +249,7 @@ bool DirInfo::hasAtticChildren() const
 
 void DirInfo::recalc()
 {
-    // logDebug() << this << Qt::endl;
+    //logDebug() << this << " " << pkgInfoParent() << " " << isPkgInfo() << Qt::endl;
 
     initCounts();
 
@@ -1136,21 +1135,4 @@ void DirInfo::finishReading( DirReadState readState )
     setReadState( readState );
     finalizeLocal();
     _tree->sendReadJobFinished( this );
-}
-
-
-FileInfo * DirInfo::locateChild( const QString & pathComponent ) const
-{
-    if ( pathComponent.isEmpty() )
-        return nullptr;
-
-    for ( FileInfoIterator it( this ); *it; ++it )
-    {
-        //logDebug() << "Checking " << (*it)->name() << " in " << subtree << " for " << pathComponent << Qt::endl;
-
-        if ( (*it)->name() == pathComponent )
-            return *it;
-    }
-
-    return nullptr;
 }
