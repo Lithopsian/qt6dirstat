@@ -34,7 +34,7 @@
 using namespace QDirStat;
 
 
-FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent,
+FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
 					  SelectionModel * selectionModel ):
     QDialog ( parent ),
     _ui { new Ui::FileTypeStatsWindow }
@@ -93,7 +93,7 @@ FileTypeStatsWindow::~FileTypeStatsWindow()
 }
 
 
-FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent,
+FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget        * parent,
 							   SelectionModel * selectionModel)
 {
     static QPointer<FileTypeStatsWindow> _sharedInstance = nullptr;
@@ -134,8 +134,8 @@ void FileTypeStatsWindow::refresh()
 }
 
 
-void FileTypeStatsWindow::populateSharedInstance( QWidget * mainWindow,
-						  FileInfo * subtree,
+void FileTypeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
+						  FileInfo       * subtree,
 						  SelectionModel * selectionModel )
 {
     if ( !subtree || !selectionModel )
@@ -287,7 +287,7 @@ SuffixFileTypeItem * FileTypeStatsWindow::addNonSuffixRuleItem( const MimeCatego
 
 SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString & suffix,
                                                                  int             count,
-                                                                 FileSize        sum     )
+                                                                 FileSize        sum )
 {
     const double percentage = _stats->percentage( sum );
 
@@ -298,8 +298,8 @@ SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString &
 }
 
 
-void FileTypeStatsWindow::addTopXOtherItems( FileTypeItem  * otherCategoryItem,
-                                             QList<FileTypeItem *> & otherItems        )
+void FileTypeStatsWindow::addTopXOtherItems( FileTypeItem          * otherCategoryItem,
+                                             QList<FileTypeItem *> & otherItems )
 {
     FileTypeItemCompare cmp;
     std::sort( otherItems.begin(), otherItems.end(), cmp );
@@ -373,13 +373,13 @@ QString FileTypeStatsWindow::currentSuffix() const
 }
 
 
-void FileTypeStatsWindow::enableActions( QTreeWidgetItem * currentItem )
+void FileTypeStatsWindow::enableActions( const QTreeWidgetItem * currentItem )
 {
     bool enabled = false;
 
     if ( currentItem )
     {
-	const SuffixFileTypeItem * suffixItem = dynamic_cast<SuffixFileTypeItem *>( currentItem );
+	const SuffixFileTypeItem * suffixItem = dynamic_cast<const SuffixFileTypeItem *>( currentItem );
 
 	enabled = suffixItem && suffixItem->suffix() != NO_SUFFIX && suffixItem->suffix() != NON_SUFFIX_RULE;
     }
@@ -432,18 +432,14 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 
 
 
-SuffixFileTypeItem::SuffixFileTypeItem( const QString & suffix,
-					int		count,
-					FileSize	totalSize,
-					float		percentage ):
-    FileTypeItem ( "*." + suffix, count, totalSize, percentage ),
-    _suffix { suffix }
+
+QString SuffixFileTypeItem::itemName( const QString & suffix )
 {
-    if ( suffix == NO_SUFFIX )
-	setText( FT_NameCol,  QObject::tr( "<No Extension>" ) );
-    else if ( suffix == NON_SUFFIX_RULE )
-	setText( FT_NameCol,  QObject::tr( "<Other>" ) );
+    if ( suffix == NO_SUFFIX )       return QObject::tr( "<no extension>"    );
+    if ( suffix == NON_SUFFIX_RULE ) return QObject::tr( "<non-suffix rule>" );
+    return "*." + suffix;
 }
+
 
 
 FileTypeItem::FileTypeItem( const QString & name,
@@ -461,9 +457,9 @@ FileTypeItem::FileTypeItem( const QString & name,
     setText( FT_TotalSizeCol,  formatSize( totalSize ) );
     setText( FT_PercentageCol, QString::number( percentage, 'f', 2 ) + "%" );
 
-    setTextAlignment( FT_NameCol,	Qt::AlignVCenter | Qt::AlignLeft  );
-    setTextAlignment( FT_CountCol,	Qt::AlignVCenter | Qt::AlignRight );
-    setTextAlignment( FT_TotalSizeCol,	Qt::AlignVCenter | Qt::AlignRight );
+    setTextAlignment( FT_NameCol,       Qt::AlignVCenter | Qt::AlignLeft  );
+    setTextAlignment( FT_CountCol,      Qt::AlignVCenter | Qt::AlignRight );
+    setTextAlignment( FT_TotalSizeCol,  Qt::AlignVCenter | Qt::AlignRight );
     setTextAlignment( FT_PercentageCol, Qt::AlignVCenter | Qt::AlignRight );
 }
 

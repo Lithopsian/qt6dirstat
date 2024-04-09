@@ -45,7 +45,7 @@ namespace QDirStat
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
-	FileTypeStatsWindow( QWidget * parent,
+	FileTypeStatsWindow( QWidget        * parent,
 			     SelectionModel * selectionModel );
 
 	/**
@@ -58,7 +58,7 @@ namespace QDirStat
          * multiple parts of the application. This will create a new instance
          * if there is none yet (or anymore).
          **/
-        static FileTypeStatsWindow * sharedInstance( QWidget * parent,
+        static FileTypeStatsWindow * sharedInstance( QWidget        * parent,
 						     SelectionModel * selectionModel );
 
 
@@ -73,8 +73,8 @@ namespace QDirStat
          * Convenience function for creating, populating and showing the shared
          * instance.
          **/
-        static void populateSharedInstance( QWidget * mainWindow,
-					    FileInfo * subtree,
+        static void populateSharedInstance( QWidget        * mainWindow,
+					    FileInfo       * subtree,
 					    SelectionModel * selectionModel );
 
 
@@ -114,7 +114,7 @@ namespace QDirStat
 	/**
 	 * Enable or disable the actions depending on the current item.
 	 **/
-	void enableActions( QTreeWidgetItem * currentItem );
+	void enableActions( const QTreeWidgetItem * currentItem );
 
 
     protected:
@@ -139,7 +139,7 @@ namespace QDirStat
          **/
         FileTypeItem * addCategoryItem( const QString & name,
                                         int             count,
-                                        FileSize        sum    );
+                                        FileSize        sum );
 
         /**
          * Create a file type item for files matching a non-suffix rule of a
@@ -157,14 +157,14 @@ namespace QDirStat
          **/
         SuffixFileTypeItem * addSuffixFileTypeItem( const QString & suffix,
                                                     int             count,
-                                                    FileSize        sum    );
+                                                    FileSize        sum );
 
         /**
          * Add the top X of 'otherItems' to 'otherCategory' and delete the
          * rest.
          **/
         void addTopXOtherItems( FileTypeItem          * otherCategoryItem,
-                                QList<FileTypeItem *> & otherItems        );
+                                QList<FileTypeItem *> & otherItems );
 
 	/**
          * Return the suffix of the currently selected file type or an empty
@@ -225,22 +225,23 @@ namespace QDirStat
 	 * category for suffixes.
 	 **/
 	FileTypeItem( const QString & name,
-		      int	      count,
-		      FileSize	      totalSize,
-		      float	      percentage );
+		      int             count,
+		      FileSize        totalSize,
+		      float           percentage );
+
 	//
 	// Getters
 	//
 
-	QString	 name()	      const { return _name; }
-	int	 count()      const { return _count; }
+	QString  name()	      const { return _name; }
+	int      count()      const { return _count; }
 	FileSize totalSize()  const { return _totalSize; }
-	float	 percentage() const { return _percentage; }
+	float    percentage() const { return _percentage; }
 
 	/**
 	 * Set the font to bold face for all columns.
 	 **/
-	void setBold();
+//	void setBold();
 
 	/**
 	 * Less-than operator for sorting.
@@ -250,15 +251,18 @@ namespace QDirStat
 
     private:
 
-	QString		_name;
-	int		_count;
-	FileSize	_totalSize;
-	float		_percentage;
+	QString  _name;
+	int      _count;
+	FileSize _totalSize;
+	float    _percentage;
     };
 
 #if 0
     /**
      * Specialized item class for MIME categories.
+     *
+     * So specialized that it doesn't do anything differently
+     * to the base class.
      **/
     class CategoryFileTypeItem: public FileTypeItem
     {
@@ -268,19 +272,15 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	CategoryFileTypeItem( const QString & name,
-			      int	      count,
-			      FileSize	      totalSize,
-			      float	      percentage ):
+			      int             count,
+			      FileSize        totalSize,
+			      float            percentage ):
 	    FileTypeItem ( name,
 			   count,
 			   totalSize,
 			   percentage )
 	{}
 
-
-    private:
-
-//	const MimeCategory * _category;
     };
 #endif
 
@@ -295,14 +295,26 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	SuffixFileTypeItem( const QString & suffix,
-			    int		    count,
-			    FileSize	    totalSize,
-			    float	    percentage );
+			    int	            count,
+			    FileSize        totalSize,
+			    float           percentage ):
+	    FileTypeItem ( itemName( suffix ), count, totalSize, percentage ),
+	    _suffix { suffix }
+	{}
 
 	/**
 	 * Return this file type's suffix.
 	 **/
 	QString suffix() const { return _suffix; }
+
+
+    protected:
+
+	/**
+	 * Returns a string to be used as the name for this item.
+	 **/
+	QString itemName( const QString & suffix );
+
 
     private:
 

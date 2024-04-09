@@ -21,12 +21,10 @@ using namespace QDirStat;
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
-    _otherCategory { new MimeCategory( QObject::tr( "Other" ) ) },
-    _mimeCategorizer { MimeCategorizer::instance() }
+    _otherCategory { new MimeCategory( QObject::tr( "Other" ) ) }
 {
     CHECK_NEW( _otherCategory );
-    CHECK_PTR( _mimeCategorizer );
-logDebug() << Qt::endl;
+
     if ( subtree && subtree->checkMagicNumber() )
     {
         collect( subtree );
@@ -34,7 +32,7 @@ logDebug() << Qt::endl;
         removeCruft();
         removeEmpty();
         sanityCheck();
-    }logDebug() << Qt::endl;
+    }
 }
 
 
@@ -48,6 +46,8 @@ void FileTypeStats::collect( const FileInfo * dir )
 {
     if ( !dir )
 	return;
+
+    MimeCategorizer * mimeCategorizer = MimeCategorizer::instance();
 
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
@@ -75,7 +75,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 	    // hand-crafted, so if it knows anything about a suffix, it's the
 	    // best choice.
 
-	    const MimeCategory * category = _mimeCategorizer->category( item, &suffix );
+	    const MimeCategory * category = mimeCategorizer->category( item, &suffix );
 	    if ( category )
             {
                 addCategorySum( category, item );
@@ -146,10 +146,9 @@ void FileTypeStats::removeCruft()
 {
     // Make sure those two already exist to avoid confusing the iterator
     // (QMap::operator[] auto-inserts with default ctor if not already there)
-
     const MapCategory cruftMapCategory = { NO_SUFFIX, _otherCategory };
-    _suffixSum	[ cruftMapCategory ] += 0LL;
-    _suffixCount[ cruftMapCategory ] += 0;
+    _suffixSum  [ cruftMapCategory ] = 0LL;
+    _suffixCount[ cruftMapCategory ] = 0;
 
     FileSize totalMergedSum   = 0LL;
     int	     totalMergedCount = 0;
@@ -184,10 +183,10 @@ void FileTypeStats::removeCruft()
     }
 
 #if 0
-    logDebug() << "Merged " << (int)cruft.size() << " suffixes to <NO SUFFIX>: "
+    logDebug() << "Merged " << (int)cruft.size() << " suffixes to <no extension>: "
 	       << cruft.join( ", " ) << Qt::endl;
 #endif
-    logDebug() << "Merged: " << totalMergedCount << " files "
+    logDebug() << "Merged to NO_SUFFIX " << totalMergedCount << " files "
 	       << "(" << formatSize( totalMergedSum ) << ")"
 	       << Qt::endl;
 }
@@ -234,6 +233,7 @@ bool FileTypeStats::isCruft( const QString & suffix, const MimeCategory * catego
     if ( len == 3 && letters == 3 )
 	return false;
 
+    // Arbitrary exclusion of long uncommon suffixes
     const int count = _suffixCount[ { suffix, category } ];
     if ( len > 6 && count < len )
 	return true;
