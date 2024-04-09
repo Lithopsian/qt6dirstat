@@ -84,8 +84,9 @@ static void moveGroups( const QString & groupPrefix,
  **/
 static void fixFileOwner( const QString & filename )
 {
-    const QString sudoUid = QProcessEnvironment::systemEnvironment().value( "SUDO_UID", QString() );
-    const QString sudoGid = QProcessEnvironment::systemEnvironment().value( "SUDO_GID", QString() );
+    const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    const QString sudoUid = env.value( "SUDO_UID", QString() );
+    const QString sudoGid = env.value( "SUDO_GID", QString() );
 
     if ( !sudoUid.isEmpty() && !sudoGid.isEmpty() )
     {
