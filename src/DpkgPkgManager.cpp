@@ -138,8 +138,7 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 	    if ( fields2.size() != 2 )
 		continue;
 
-	    const QString path2Resolved = resolvePath( fields1.last() );
-
+	    const QString path2Resolved = resolvePath( fields2.last() );
 	    if ( path2Resolved == path )
 		// the renamed file is our file, have to do another query to get the package:
 		// dpkg -S against the pathname from the diversion by ... from line
@@ -159,30 +158,29 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 
 	    const QString & packages = fields3.first();
 
-	    // the from/to pair for the renamed file is followed by an unrelated entry
+	    // if the from/to pair for the renamed file is followed by an unrelated entry ...
 	    const QString path1Resolved = resolvePath ( path1 );
 	    const QString path3Resolved = resolvePath( fields3.last() );
 	    if ( path1Resolved != path3Resolved )
 	    {
-		// ... so start parsing again normally from the third line
+		// ... then start parsing again normally from the third line
 		--line;
 		continue;
 	    }
 
-	    // if the package from the diversion by ... from line is also in the third line
+	    // if the package from the diversion by ... from line is also in the third line ...
 	    if ( !divertPkg.isEmpty() && packages.split( ", " ).contains( divertPkg ) )
 	    {
-		// ... and the resolved path matches the original file
+		// ... and the resolved path matches the original file ...
 		if ( path == path1Resolved )
 		    // ... then return the diverting package from the first line
 		    return divertPkg;
 	    }
-	    else
+	    // ... or the resolved path matches the renamed file
+	    else if ( path == path2Resolved )
 	    {
-		// ... and the resolved path matches the renamed file
-		if ( path == path2Resolved )
-		    // ... then return the package that owned this file pre-divert
-		    return packages.split( ": " ).first();
+		// ... then return the package that owned this file pre-divert
+		return packages.split( ": " ).first();
 	    }
 
 	    // wrong diversion triplet, carry on, skipping the third line
