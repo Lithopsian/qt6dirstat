@@ -20,29 +20,27 @@ using namespace QDirStat;
 
 ConfigDialog::ConfigDialog( QWidget * parent ):
     QDialog ( parent ),
-    _ui { new Ui::ConfigDialog }
+    _ui { new Ui::ConfigDialog },
+    _generalConfigPage { new GeneralConfigPage( this ) },
+    _mimeCategoryConfigPage { new MimeCategoryConfigPage( this ) },
+    _cleanupConfigPage { new CleanupConfigPage( this ) },
+    _excludeRulesConfigPage { new ExcludeRulesConfigPage( this ) }
 {
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    _generalConfigPage = new GeneralConfigPage( this );
     CHECK_NEW( _generalConfigPage );
-    _ui->pagesTabWidget->addTab( _generalConfigPage, tr( "General" ) );
-
-    _mimeCategoryConfigPage = new MimeCategoryConfigPage( this );
     CHECK_NEW( _mimeCategoryConfigPage );
-    _ui->pagesTabWidget->addTab( _mimeCategoryConfigPage, tr( "MIME Categories" ) );
-
-    _cleanupConfigPage = new CleanupConfigPage( this );
     CHECK_NEW( _cleanupConfigPage );
-    _ui->pagesTabWidget->addTab( _cleanupConfigPage, tr( "Cleanup Actions" ) );
-
-    _excludeRulesConfigPage = new ExcludeRulesConfigPage( this );
     CHECK_NEW( _excludeRulesConfigPage );
+
+    _ui->pagesTabWidget->addTab( _generalConfigPage, tr( "General" ) );
+    _ui->pagesTabWidget->addTab( _mimeCategoryConfigPage, tr( "MIME Categories" ) );
+    _ui->pagesTabWidget->addTab( _cleanupConfigPage, tr( "Cleanup Actions" ) );
     _ui->pagesTabWidget->addTab( _excludeRulesConfigPage, tr( "Exclude Rules" ) );
 
-    connect( _ui->applyButton,	 &QPushButton::clicked,
-	     this,		 &ConfigDialog::applyChanges );
+    connect( _ui->applyButton, &QPushButton::clicked,
+	     this,             &ConfigDialog::applyChanges );
 }
 
 
@@ -50,6 +48,30 @@ ConfigDialog::~ConfigDialog()
 {
     // logDebug() << "ConfigDialog destructor" << Qt::endl;
     delete _ui;
+}
+
+
+ConfigDialog * ConfigDialog::sharedInstance( QWidget * parent )
+{
+    static QPointer<ConfigDialog> _sharedInstance = nullptr;
+
+    if ( !_sharedInstance )
+    {
+	_sharedInstance = new ConfigDialog( parent );
+	CHECK_NEW( _sharedInstance );
+    }
+
+    return _sharedInstance;
+}
+
+
+void ConfigDialog::showSharedInstance( QWidget * parent )
+{
+    // Get the shared instance, creating it if necessary
+    ConfigDialog * instance = sharedInstance( parent );
+
+    instance->show();
+    instance->raise();
 }
 
 

@@ -453,41 +453,46 @@ void MainWindow::startingReading()
 }
 
 
-inline static QStringList modelTreeAncestors( const QModelIndex & index )
+namespace
 {
-    QStringList parents;
-
-    for ( QModelIndex parent = index; parent.isValid(); parent = index.model()->parent( parent ) )
+    // Verbose logging functions, all callers might be commented out
+    [[gnu::unused]] QStringList modelTreeAncestors( const QModelIndex & index )
     {
-	const QVariant data = index.model()->data( parent, 0 );
-	if ( data.isValid() )
-	    parents.prepend( data.toString() );
+	QStringList parents;
+
+	for ( QModelIndex parent = index; parent.isValid(); parent = index.model()->parent( parent ) )
+	{
+	    const QVariant data = index.model()->data( parent, 0 );
+	    if ( data.isValid() )
+		parents.prepend( data.toString() );
+	}
+
+	return parents;
     }
 
-    return parents;
-}
 
-
-inline static void dumpModelTree( const QAbstractItemModel * model,
-			   const QModelIndex        & index,
-			   const QString            & indent )
-{
-    const int rowCount = model->rowCount( index );
-    const QVariant data = model->data( index, Qt::DisplayRole );
-
-    if ( !data.isValid() )
-	logDebug() << "<No data> " << rowCount << " rows" << Qt::endl;
-    else if ( rowCount > 0 )
-	logDebug() << indent << data.toString() << ": " << rowCount << " rows" << Qt::endl;
-    else
-	logDebug() << indent << data.toString() << Qt::endl;
-
-    for ( int row=0; row < rowCount; row++ )
+    [[gnu::unused]] void dumpModelTree( const QAbstractItemModel * model,
+			       const QModelIndex        & index,
+			       const QString            & indent )
     {
-	const QModelIndex childIndex = model->index( row, 0, index );
-	dumpModelTree( model, childIndex, indent + QString( 4, ' ' ) );
+	const int rowCount = model->rowCount( index );
+	const QVariant data = model->data( index, Qt::DisplayRole );
+
+	if ( !data.isValid() )
+	    logDebug() << "<No data> " << rowCount << " rows" << Qt::endl;
+	else if ( rowCount > 0 )
+	    logDebug() << indent << data.toString() << ": " << rowCount << " rows" << Qt::endl;
+	else
+	    logDebug() << indent << data.toString() << Qt::endl;
+
+	for ( int row=0; row < rowCount; row++ )
+	{
+	    const QModelIndex childIndex = model->index( row, 0, index );
+	    dumpModelTree( model, childIndex, indent + QString( 4, ' ' ) );
+	}
     }
-}
+
+} // namespace
 
 
 void MainWindow::readingFinished()
@@ -981,19 +986,7 @@ void MainWindow::moveToTrash()
 
 void MainWindow::openConfigDialog()
 {
-    static QPointer<ConfigDialog> configDialog;
-
-    if ( configDialog && configDialog->isVisible() )
-    {
-	configDialog->raise();
-	return;
-    }
-
-    // Destroy the dialog when it is closed, and always recreate a new one
-    configDialog = new ConfigDialog( this );
-    CHECK_PTR( configDialog );
-    configDialog->setAttribute(Qt::WA_DeleteOnClose);
-    configDialog->show();
+    ConfigDialog::showSharedInstance( this );
 }
 
 

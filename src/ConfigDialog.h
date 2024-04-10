@@ -35,7 +35,6 @@ namespace QDirStat
     {
 	Q_OBJECT
 
-    public:
 	/**
 	 * Constructor. Create the dialog and all pages.
 	 **/
@@ -45,6 +44,22 @@ namespace QDirStat
 	 * Destructor.
 	 **/
 	~ConfigDialog() override;
+
+	/**
+	 * Static method for using one shared instance of this class between
+	 * multiple parts of the application. This will create a new instance
+	 * if there is none yet (or any more).
+	 **/
+	static ConfigDialog * sharedInstance( QWidget * parent );
+
+
+    public:
+
+	/**
+	 * Convenience function for creating, if necessary, and showing the
+	 * settings dialog window.
+	 **/
+	static void showSharedInstance( QWidget * parent );
 
 
     protected slots:
