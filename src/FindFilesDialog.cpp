@@ -7,13 +7,13 @@
  */
 
 
-//#include "Qt4Compat.h"       // qEnableClearButton()
+#include <QResizeEvent>
 
 #include "FindFilesDialog.h"
-#include "QDirStatApp.h"
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "FileSearchFilter.h"
+#include "QDirStatApp.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Subtree.h"
@@ -23,10 +23,9 @@
 
 using namespace QDirStat;
 
-// Values that should be persistent for one program run,
-// but not written to the settings / config file
-static QString lastPattern;
-static QString lastPath;
+
+QString FindFilesDialog::_lastPattern;
+QString FindFilesDialog::_lastPath;
 
 
 FindFilesDialog::FindFilesDialog( QWidget * parent ):
@@ -38,14 +37,14 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    if ( lastPath.isEmpty() && app()->root() )
-        lastPath = app()->root()->url();
+    if ( _lastPath.isEmpty() && app()->root() )
+        _lastPath = app()->root()->url();
 
     _ui->patternField->setClearButtonEnabled( true );
     _ui->patternField->setFocus();
 
-    connect( this, &FindFilesDialog::accepted,
-	     this, &FindFilesDialog::saveValues);
+    connect( this, &FindFilesDialog::finished,
+	     this, &FindFilesDialog::finish);
 
     loadValues();
 }
@@ -60,29 +59,17 @@ FindFilesDialog::~FindFilesDialog()
 
 FileSearchFilter FindFilesDialog::fileSearchFilter()
 {
-    FileInfo * subtree = nullptr;
-
-    if ( _ui->wholeTreeRadioButton->isChecked() )
-        subtree = app()->root();
-    else if ( _ui->currentSubtreeRadioButton->isChecked() )
-        subtree = currentSubtree();
-
+    FileInfo * subtree = _ui->wholeTreeRadioButton->isChecked() ? app()->root() : currentSubtree();
     FileSearchFilter filter( subtree ? subtree->toDirInfo() : nullptr,
                              _ui->patternField->text(),
-                             ( SearchFilter::FilterMode )_ui->filterModeComboBox->currentIndex(),
+                             static_cast<SearchFilter::FilterMode>( _ui->filterModeComboBox->currentIndex() ),
                              _ui->caseSensitiveCheckBox->isChecked() );
-
-    filter.setFindFiles( _ui->findFilesRadioButton->isChecked() ||
-                         _ui->findBothRadioButton->isChecked()    );
-
-    filter.setFindDirs( _ui->findDirectoriesRadioButton->isChecked() ||
-                        _ui->findBothRadioButton->isChecked()          );
-
-    filter.setFindSymLinks( _ui->findSymLinksCheckBox->isChecked() );
-
-    filter.setFindPkg( filter.findDirs() );
-
     //logDebug() << filter << Qt::endl;
+
+    filter.setFindFiles( _ui->findFilesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked() );
+    filter.setFindDirs( _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked() );
+    filter.setFindSymLinks( _ui->findSymLinksCheckBox->isChecked() );
+    filter.setFindPkg( filter.findDirs() );
 
     return filter;
 }
@@ -93,22 +80,22 @@ DirInfo * FindFilesDialog::currentSubtree()
     FileInfo * subtree = app()->selectedDirInfo();
     if ( subtree )
     {
-        lastPath = subtree->url();
+        _lastPath = subtree->url();
     }
     else
     {
-        subtree = app()->dirTree()->locate( lastPath,
+        subtree = app()->dirTree()->locate( _lastPath,
                                             true     ); // findPseudoDirs
-        if ( ! subtree ) // lastPath outside of this tree?
+        if ( !subtree ) // _lastPath outside of this tree?
         {
             if ( app()->root() )
             {
                 subtree  = app()->root();
-                lastPath = subtree->url();
+                _lastPath = subtree->url();
             }
             else
             {
-                lastPath.clear();
+                _lastPath.clear();
             }
         }
     }
@@ -138,32 +125,35 @@ void FindFilesDialog::loadValues()
 {
     readSettings();
 
-    // Restore those values from static variables
-    _ui->patternField->setText( lastPattern );
+    _ui->patternField->setText( _lastPattern );
 
-    const FileInfo * sel  = currentSubtree();
-    const QString  & path = sel ? sel->url() : lastPath;
+    const FileInfo * sel = currentSubtree();
     if ( sel )
-        lastPath = path;
+        _lastPath = sel->url();
 
-    _ui->currentSubtreePathLabel->setText( path );
-    _ui->currentSubtreeRadioButton->setEnabled( ! path.isEmpty() );
+    _ui->currentSubtreeRadioButton->setEnabled( !_lastPath.isEmpty() );
+
+    // The subtree label will be filled in by the resizeEvent handler
 }
 
 
-void FindFilesDialog::saveValues()
+void FindFilesDialog::finish( int result )
 {
-    writeSettings();
+    // Always save the window geometry
+    writeWindowSettings( this, "FindFilesDialog" );;
 
-    //
-    // Values that should not be written to the settings / the config file:
-    // Save to static variables just for the duration of this program run as
-    // the dialog is created, destroyed and created every time the user starts
-    // the "Find Files" action (Ctrl-F).
-    //
+    // Only save the other settings if the dialog wasn't cancelled
+    if ( result == QDialog::Accepted )
+    {
+	writeSettings();
 
-    lastPattern = _ui->patternField->text();
-    lastPath    = _ui->currentSubtreePathLabel->text();
+	// Values that should not be written to the settings / the config file:
+	// Save to static variables just for the duration of this program run as
+	// the dialog is created, destroyed and created every time the user starts
+	// the "Find Files" action (Ctrl-F).
+	_lastPattern = _ui->patternField->text();
+	_lastPath    = _ui->currentSubtreePathLabel->text();
+    }
 }
 
 
@@ -187,11 +177,6 @@ void FindFilesDialog::readSettings()
     _ui->currentSubtreeRadioButton->setChecked  ( settings.value( "currentSubtree", false  ).toBool() );
 
     settings.endGroup();
-
-    // Intentionally NOT reading from the settings / the config file:
-    //
-    // _ui->patternField->setText(...);
-    // _ui->currentSubtreePathLabel->setText(...);
 
     readWindowSettings( this, "FindFilesDialog" );
 }
@@ -217,11 +202,13 @@ void FindFilesDialog::writeSettings()
     settings.setValue( "currentSubtree", _ui->currentSubtreeRadioButton->isChecked()  );
 
     settings.endGroup();
+}
 
-    // Intentionally NOT writing to the settings / the config file:
-    //
-    // _ui->patternField->text();
-    // _ui->currentSubtreePathLabel->text();
 
-    writeWindowSettings( this, "FindFilesDialog" );
+void FindFilesDialog::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    const int maxSize = event->size().width() - 100;
+    const QFontMetrics metrics( _ui->currentSubtreePathLabel->font() );
+    _ui->currentSubtreePathLabel->setText( metrics.elidedText( _lastPath, Qt::ElideMiddle, maxSize ) );
 }

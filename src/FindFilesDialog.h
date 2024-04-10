@@ -54,19 +54,19 @@ namespace QDirStat
     protected slots:
 
         /**
+         * Save the values of the widgets to the settings / the config file or
+         * to internal static variables.
+         **/
+        void finish( int result );
+
+
+    protected:
+
+        /**
          * Load values for all widgets from the settings / the config file or
          * from internal static variables
          **/
         void loadValues();
-
-        /**
-         * Save the values of the widgets to the settings / the config file or
-         * to internal static variables.
-         **/
-        void saveValues();
-
-
-    protected:
 
 	/**
 	 * The package filter the user entered.
@@ -89,6 +89,17 @@ namespace QDirStat
          **/
         DirInfo * currentSubtree();
 
+        /**
+         * Resize event, reimplemented from QWidget.
+	 *
+	 * Elide the label to fit inside the current dialog width, so that
+	 * they fill the available width but very long subtree paths don't
+	 * stretch the dialog.  A little extra room is left for the user to
+	 * shrink the dialog, which would then force the label to be elided
+	 * further.
+         **/
+        void resizeEvent( QResizeEvent * event ) override;
+
 
     private:
 
@@ -97,6 +108,9 @@ namespace QDirStat
         //
 
 	Ui::FindFilesDialog * _ui;
+
+	static QString _lastPattern;
+	static QString _lastPath;
 
     };	// class FindFilesDialog
 
