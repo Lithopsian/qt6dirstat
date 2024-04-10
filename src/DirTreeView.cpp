@@ -105,7 +105,7 @@ void DirTreeView::contextMenu( const QPoint & pos )
     // submenu of the context menu. Submenus in context menus are generally
     // also discouraged, but here discoverability of these features is more
     // important.
-
+/*
     const FileInfo * item = static_cast< const FileInfo *>( index.internalPointer() );
     CHECK_MAGIC( item );
     if ( item->isDirInfo() )    // Not for files, symlinks etc.
@@ -118,7 +118,7 @@ void DirTreeView::contextMenu( const QPoint & pos )
                               };
         ActionManager::addActions( subMenu, actions );
     }
-
+*/
     menu.exec( mapToGlobal( pos ) );
 }
 
