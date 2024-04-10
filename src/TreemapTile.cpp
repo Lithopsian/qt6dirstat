@@ -28,130 +28,135 @@
 using namespace QDirStat;
 
 
-/**
- * Just a helper for an unwieldy common term
- **/
-static FileSize itemTotalSize( FileInfo *it )
+namespace
 {
-    return it->totalAllocatedSize() ? it->totalAllocatedSize() : it->totalSize();
-}
-
-
-/**
- * Try to include members referred to by 'it' into 'rect' so that they achieve
- * the most "square" appearance.  Items are added until the aspect ratio of the
- * first and last items doesn't get better any more.  Returns the total size of
- * the items for the row.
- **/
-static FileSize squarify( const QRectF & rect,
-                          FileInfoSortedBySizeIterator & it,
-                          FileSize remainingTotal )
-{
-    //logDebug() << "squarify() " << this << " " << rect << Qt::endl;
-
-    // We only care about ratios, so scale everything for speed of calculation
-    // rowHeightScale = rowHeight / remainingTotal, scale this to 1
-    // rowWidthScale = rowWidth, scaled to rowWidth / rowHeight * remainingTotal
-    const double rowRatio = rect.width() < rect.height() ? rect.width() / rect.height() : rect.height() / rect.width();
-    const double rowWidthScale = rowRatio * remainingTotal; // really rectWidth
-
-    const FileSize firstSize = itemTotalSize( *it );
-    FileSize sum = 0;
-    double bestAspectRatio = 0;
-    while ( *it )
+    /**
+     * Just a helper for an unwieldy common term
+     **/
+    FileSize itemTotalSize( FileInfo *it )
     {
-        FileSize size = itemTotalSize( *it );
-        if ( size > 0 )
-        {
-            sum += size;
+        return it->totalAllocatedSize() ? it->totalAllocatedSize() : it->totalSize();
+    }
 
-            // Again, only ratios matter, so avoid the size / sum division by multiplying both by sum
-            const double rowHeight = ( double )sum * sum; // * really sum * rowHeight / remainingTotal
-            const double rowScale = rowWidthScale; // really rowWidth * size / sum
-            const double aspectRatio = qMin( rowHeight / (rowScale * firstSize), rowScale * size / rowHeight );
-            if ( aspectRatio < bestAspectRatio )
+
+    /**
+     * Try to include members referred to by 'it' into 'rect' so that they achieve
+     * the most "square" appearance.  Items are added until the aspect ratio of the
+     * first and last items doesn't get better any more.  Returns the total size of
+     * the items for the row.
+     **/
+    FileSize squarify( const QRectF & rect,
+                              FileInfoSortedBySizeIterator & it,
+                              FileSize remainingTotal )
+    {
+        //logDebug() << "squarify() " << this << " " << rect << Qt::endl;
+
+        // We only care about ratios, so scale everything for speed of calculation
+        // rowHeightScale = rowHeight / remainingTotal, scale this to 1
+        // rowWidthScale = rowWidth, scaled to rowWidth / rowHeight * remainingTotal
+        const double rowRatio = rect.width() < rect.height() ? rect.width() / rect.height() : rect.height() / rect.width();
+        const double rowWidthScale = rowRatio * remainingTotal; // really rectWidth
+
+        const FileSize firstSize = itemTotalSize( *it );
+        FileSize sum = 0;
+        double bestAspectRatio = 0;
+        while ( *it )
+        {
+            FileSize size = itemTotalSize( *it );
+            if ( size > 0 )
             {
-                // "Forget" the offending tile that made things worse
-                // Leave the iterator pointing to the first item after this row
-                sum -= size;
-                break;
+                sum += size;
+
+                // Again, only ratios matter, so avoid the size / sum division by multiplying both by sum
+                const double rowHeight = ( double )sum * sum; // * really sum * rowHeight / remainingTotal
+                const double rowScale = rowWidthScale; // really rowWidth * size / sum
+                const double aspectRatio = qMin( rowHeight / (rowScale * firstSize), rowScale * size / rowHeight );
+                if ( aspectRatio < bestAspectRatio )
+                {
+                    // "Forget" the offending tile that made things worse
+                    // Leave the iterator pointing to the first item after this row
+                    sum -= size;
+                    break;
+                }
+
+                // Aspect ratio of the two (or perhaps only one so far) end tiles still approaching one
+                bestAspectRatio = aspectRatio;
             }
 
-            // Aspect ratio of the two (or perhaps only one so far) end tiles still approaching one
-            bestAspectRatio = aspectRatio;
+            ++it;
         }
 
-        ++it;
+        return sum;
     }
 
-    return sum;
-}
-
-/*
-static QRgb contrastingColor( QRgb col )
-{
-    if ( qGray( col ) < 128 )
-        return qRgb( qRed( col ) * 2, qGreen( col ) * 2, qBlue( col ) * 2 );
-    else
-        return qRgb( qRed( col ) / 2, qGreen( col ) / 2, qBlue( col ) / 2 );
-}
-
-
-static void enforceContrast( QImage & image )
-{
-    if ( image.width() > 5 )
+    /*
+    QRgb contrastingColor( QRgb col )
     {
-        // Check contrast along the right image boundary:
-        //
-        // Compare samples from the outmost boundary to samples a few pixels to
-        // the inside and count identical pixel values. A number of identical
-        // pixels are tolerated, but not too many.
-        int x1 = image.width() - 6;
-        int x2 = image.width() - 1;
-        int interval = qMax( image.height() / 10, 5 );
-        int sameColorCount = 0;
-
-        // Take samples
-        for ( int y = interval; y < image.height(); y+= interval )
-        {
-            if ( image.pixel( x1, y ) == image.pixel( x2, y ) )
-            sameColorCount++;
-        }
-
-        if ( sameColorCount * 10 > image.height() )
-        {
-            // Add a line at the right boundary
-            QRgb val = contrastingColor( image.pixel( x2, image.height() / 2 ) );
-            for ( int y = 0; y < image.height(); y++ )
-                image.setPixel( x2, y, val );
-        }
+        if ( qGray( col ) < 128 )
+            return qRgb( qRed( col ) * 2, qGreen( col ) * 2, qBlue( col ) * 2 );
+        else
+            return qRgb( qRed( col ) / 2, qGreen( col ) / 2, qBlue( col ) / 2 );
     }
 
-    if ( image.height() > 5 )
+
+    void enforceContrast( QImage & image )
     {
-        // Check contrast along the bottom boundary
-
-        int y1 = image.height() - 6;
-        int y2 = image.height() - 1;
-        int interval = qMax( image.width() / 10, 5 );
-        int sameColorCount = 0;
-
-        for ( int x = interval; x < image.width(); x += interval )
+        if ( image.width() > 5 )
         {
-            if ( image.pixel( x, y1 ) == image.pixel( x, y2 ) )
-            sameColorCount++;
+            // Check contrast along the right image boundary:
+            //
+            // Compare samples from the outmost boundary to samples a few pixels to
+            // the inside and count identical pixel values. A number of identical
+            // pixels are tolerated, but not too many.
+            int x1 = image.width() - 6;
+            int x2 = image.width() - 1;
+            int interval = qMax( image.height() / 10, 5 );
+            int sameColorCount = 0;
+
+            // Take samples
+            for ( int y = interval; y < image.height(); y+= interval )
+            {
+                if ( image.pixel( x1, y ) == image.pixel( x2, y ) )
+                sameColorCount++;
+            }
+
+            if ( sameColorCount * 10 > image.height() )
+            {
+                // Add a line at the right boundary
+                QRgb val = contrastingColor( image.pixel( x2, image.height() / 2 ) );
+                for ( int y = 0; y < image.height(); y++ )
+                    image.setPixel( x2, y, val );
+            }
         }
 
-        if ( sameColorCount * 10 > image.height() )
+        if ( image.height() > 5 )
         {
-            // Add a grey line at the bottom boundary
-            QRgb val = contrastingColor( image.pixel( image.width() / 2, y2 ) );
-            for ( int x = 0; x < image.width(); x++ )
-                image.setPixel( x, y2, val );
+            // Check contrast along the bottom boundary
+
+            int y1 = image.height() - 6;
+            int y2 = image.height() - 1;
+            int interval = qMax( image.width() / 10, 5 );
+            int sameColorCount = 0;
+
+            for ( int x = interval; x < image.width(); x += interval )
+            {
+                if ( image.pixel( x, y1 ) == image.pixel( x, y2 ) )
+                sameColorCount++;
+            }
+
+            if ( sameColorCount * 10 > image.height() )
+            {
+                // Add a grey line at the bottom boundary
+                QRgb val = contrastingColor( image.pixel( image.width() / 2, y2 ) );
+                for ( int x = 0; x < image.width(); x++ )
+                    image.setPixel( x, y2, val );
+            }
         }
     }
-}
 */
+
+} // namespace
+
 
 // constructor with no parent tile, only used for the root tile
 TreemapTile::TreemapTile( TreemapView * parentView,
@@ -160,9 +165,9 @@ TreemapTile::TreemapTile( TreemapView * parentView,
     QGraphicsRectItem ( rect ),
     _parentView { parentView },
     _orig { orig },
-    _cushionSurface { _parentView->cushionHeights() }, // initial cushion surface
-    _firstTile { true },
-    _lastTile { false }
+    _cushionSurface { _parentView->cushionHeights() } // initial cushion surface
+//    _firstTile { true },
+//    _lastTile { false }
 {
     //logDebug() << "Creating root tile " << orig << "    " << rect << Qt::endl;
     init();
@@ -177,7 +182,7 @@ TreemapTile::TreemapTile( TreemapView * parentView,
     else
         createChildrenVertical( rect );
 
-    _stopwatch.start();
+//    _stopwatch.start();
 
     int threads = 0;
     for ( auto future = _parentView->tileFuturesBegin() ; future != _parentView->tileFuturesEnd(); ++future, ++threads )
@@ -192,11 +197,10 @@ TreemapTile::TreemapTile( TreemapTile * parentTile,
                           const QRectF & rect ):
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
-//    _parentTile { parentTile },
     _orig { orig },
-    _cushionSurface { parentTile->_cushionSurface, _parentView->cushionHeights() }, // copy the parent cushion and scale the height
-    _firstTile { false },
-    _lastTile { false }
+    _cushionSurface { parentTile->_cushionSurface, _parentView->cushionHeights() } // copy the parent cushion and scale the height
+//    _firstTile { false },
+//    _lastTile { false }
 {
 //    logDebug() << "Creating non-squarified child for " << orig << " (in " << parentTile->_orig << ")" << Qt::endl;
 
@@ -228,11 +232,10 @@ TreemapTile::TreemapTile( TreemapTile  * parentTile,
                           const CushionSurface & cushionSurface ):
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
-//    _parentTile { parentTile },
     _orig { orig },
-    _cushionSurface { cushionSurface }, // uses the default copy constructor on a row cushion
-    _firstTile ( false ),
-    _lastTile { false }
+    _cushionSurface { cushionSurface } // uses the default copy constructor on a row cushion
+//    _firstTile ( false ),
+//    _lastTile { false }
 {
     //logDebug() << "Creating squarified tile for " << orig << "  " << rect << Qt::endl;
 
@@ -468,7 +471,6 @@ void TreemapTile::layoutRow( Orientation dir,
 void TreemapTile::addRenderThread( TreemapTile *tile, int minThreadTileSize )
 {
     // If the tile's parent is smaller than the threshold and not the root tile, then no thread
-//    if ( _parentTile && _orig->totalUnignoredItems() < _parentView->threadThreshold() )
     if ( parentItem() && rect().width() < _parentView->maxTileThreshold() &&
          rect().height() < _parentView->maxTileThreshold() )
         return;
@@ -478,7 +480,6 @@ void TreemapTile::addRenderThread( TreemapTile *tile, int minThreadTileSize )
         return;
 
     // If the tile itself is larger than the threshold and its children are sub-directories, no thread
-//    if ( tile->_orig->totalUnignoredItems() >= _parentView->threadThreshold() &&
     if ( ( tile->rect().width() >= _parentView->maxTileThreshold() ||
            tile->rect().height() >= _parentView->maxTileThreshold() ) &&
          ( !tile->_orig->firstChild() || tile->_orig->firstChild()->isDirInfo() ) )

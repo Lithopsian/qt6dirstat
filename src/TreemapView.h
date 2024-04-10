@@ -20,10 +20,10 @@
 #include <QtConcurrent/QtConcurrent>
 
 
-#define DefaultAmbientLight	  40
+#define DefaultAmbientLight       40
 #define DefaultHeightScaleFactor   0.8
-#define DefaultCushionHeight	   0.5
-#define DefaultMinTileSize	   3
+#define DefaultCushionHeight       0.5
+#define DefaultMinTileSize         3
 
 
 namespace QDirStat
@@ -424,7 +424,7 @@ namespace QDirStat
 	 * built, and hence the last to be painted.  This is used for logging
 	 * purposes as it is difficult to identify the end of the paint any other way.
          **/
-	 void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
+//	 void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
 
 
     public slots:
@@ -679,7 +679,7 @@ namespace QDirStat
 
 	// just for logging
 	QElapsedTimer _stopwatch;
-	TreemapTile * _lastTile;
+//	TreemapTile * _lastTile;
 
     }; // class TreemapView
 

@@ -252,7 +252,7 @@ namespace QDirStat
 	 * Sets a flag on the last tile that was constructed, for logging purposes.
 	 * The flag will be set by the view after the map has finished building.
 	 **/
-	void setLastTile() { _lastTile = true; }
+//	void setLastTile() { _lastTile = true; }
 
 
     protected:
@@ -466,9 +466,9 @@ namespace QDirStat
 
 	SelectedTileHighlighter * _highlighter { nullptr };
 
-	bool _firstTile;
-	bool _lastTile;
-	QElapsedTimer	_stopwatch;
+//	bool _firstTile;
+//	bool _lastTile;
+//	QElapsedTimer	_stopwatch;
 
     }; // class TreemapTile
 
