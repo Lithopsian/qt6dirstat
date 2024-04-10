@@ -518,7 +518,7 @@ void OutputWindow::writeSettings()
     writeColorEntry( settings, "StdoutTextColor"   , _stdoutColor         );
     writeColorEntry( settings, "StdErrTextColor"   , _stderrColor         );
     writeFontEntry ( settings, "TerminalFont"      , _terminalDefaultFont );
-    settings.setValue( "DefaultShowTimeoutMillisec", defaultShowTimeout() );
+//    settings.setValue( "DefaultShowTimeoutMillisec", defaultShowTimeout() );
 
     settings.endGroup();
 }
@@ -526,18 +526,11 @@ void OutputWindow::writeSettings()
 
 int OutputWindow::defaultShowTimeout()
 {
-    // Keep this in a static variable so it can be accessed from outside the class
-    // in a static function call.  This is used from CleanupConfigPage and from
-    // CleanupCollection.
-    int _defaultShowTimeout = -1;
+    QDirStat::Settings settings;
 
-    if ( _defaultShowTimeout == -1 )
-    {
-	QDirStat::Settings settings;
-	settings.beginGroup( "OutputWindow" );
-	_defaultShowTimeout = settings.value( "DefaultShowTimeoutMillisec", 500 ).toInt();
-	settings.endGroup();
-    }
+    settings.beginGroup( "OutputWindow" );
+    int defaultShowTimeout = settings.value( "DefaultShowTimeoutMillisec", 500 ).toInt();
+    settings.endGroup();
 
-    return _defaultShowTimeout;
+    return defaultShowTimeout;
 }

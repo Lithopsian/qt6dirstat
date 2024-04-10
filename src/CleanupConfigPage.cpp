@@ -26,7 +26,8 @@ using namespace QDirStat;
 
 CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     ListEditor ( parent ),
-    _ui { new Ui::CleanupConfigPage }
+    _ui { new Ui::CleanupConfigPage },
+    _outputWindowDefaultTimeout { OutputWindow::defaultShowTimeout() }
 {
     CHECK_NEW( _ui );
     _ui->setupUi( this );
@@ -122,7 +123,7 @@ void CleanupConfigPage::fillListWidget()
 
 void CleanupConfigPage::enableWidgets()
 {
-    const int policyIndex       = _ui->outputWindowPolicyComboBox->currentIndex();
+    const int  policyIndex      = _ui->outputWindowPolicyComboBox->currentIndex();
     const bool show             = policyIndex != Cleanup::ShowNever;
     const bool showAfterTimeout = policyIndex == Cleanup::ShowAfterTimeout;
     const bool showIfNoError    = show && policyIndex != Cleanup::ShowIfErrorOutput;
@@ -134,7 +135,7 @@ void CleanupConfigPage::enableWidgets()
     _ui->outputWindowTimeoutCaption->setEnabled( showAfterTimeout && !useDefault );
     _ui->outputWindowTimeoutSpinBox->setEnabled( showAfterTimeout && !useDefault );
     if ( useDefault )
-	_ui->outputWindowTimeoutSpinBox->setValue( OutputWindow::defaultShowTimeout() / 1000.0 );
+	_ui->outputWindowTimeoutSpinBox->setValue( _outputWindowDefaultTimeout / 1000.0 );
 
     _ui->outputWindowAutoClose->setEnabled( showIfNoError );
 }
@@ -241,9 +242,11 @@ void CleanupConfigPage::load( void * value )
     _ui->outputWindowPolicyComboBox->setCurrentIndex( cleanup->outputWindowPolicy() );
 
     const int cleanupTimeout = cleanup->outputWindowTimeout();
-    const int timeout = cleanupTimeout == 0 ? OutputWindow::defaultShowTimeout() : cleanupTimeout;
-    _ui->outputWindowTimeoutSpinBox->setValue( timeout / 1000.0 );
-    _ui->outputWindowAutoClose->setChecked( cleanup->outputWindowAutoClose() );
+    const bool defaultTimeout = cleanupTimeout == 0;
+    const int timeout = defaultTimeout ? _outputWindowDefaultTimeout : cleanupTimeout;
+    _ui->outputWindowTimeoutSpinBox->setValue  ( timeout / 1000.0                 );
+    _ui->outputWindowDefaultTimeout->setChecked( defaultTimeout                   );
+    _ui->outputWindowAutoClose->setChecked     ( cleanup->outputWindowAutoClose() );
 }
 
 

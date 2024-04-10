@@ -195,33 +195,6 @@ namespace QDirStat
 	const QString & shell() const { return _shell; }
 
 	/**
-	 * Return the full path name to the user's login shell.
-	 * The $SHELL environment variable is used to obtain this value.
-	 * If this is empty, this defaults to defaultShells().first().
-	 **/
-//	static const QString & loginShell();
-
-	/**
-	 * Return the full paths to the available (and executable) shells:
-	 *     loginShell()	($SHELL)
-	 *     /bin/bash
-	 *     /bin/sh
-	 **/
-	static const QStringList & defaultShells();
-
-	/**
-	 * Return the first default shell or an empty string if there is no
-	 * usable shell at all.
-	 **/
-	static QString defaultShell()
-	    { return defaultShells().isEmpty() ? QString() : defaultShells().first(); }
-
-	/**
-	 * Return 'true' if programName is non-empty and executable.
-	 **/
-//	static bool isExecutable( const QString & programName );
-
-	/**
 	 * Return the refresh policy of this cleanup action - i.e. the action
 	 * to perform after each call to Cleanup::execute(). This is supposed
 	 * to bring the corresponding DirTree back into sync after the cleanup
@@ -323,37 +296,6 @@ namespace QDirStat
 	 **/
 	FileInfoSet deDuplicateParents( const FileInfoSet & sel );
 
-	/**
-	 * Return a mapping from macros to applications that may be specific
-	 * for different desktops (KDE, GNOME, Xfce, Unity, LXDE).
-	 * Incomplete list:
-	 *
-	 *   %terminal
-	 *	KDE:	"konsole --workdir %d"
-	 *	GNOME:	"gnome-terminal"
-	 *	Unity:	"gnome-terminal"
-	 *	Xfce:	"xfce4-terminal"
-	 *	LXDE:	"lxterminal"
-	 *
-	 *   %filemanager
-	 *	KDE:	"konqueror --profile filemanagement" // not that dumbed-down Dolphin
-	 *	GNOME:	"nautilus"
-	 *	Unity:	"nautilus"
-	 *	Xfce:	"thunar"
-	 *	LXDE:	"pcmanfm"
-	 *
-	 * What desktop is currently used is guessed from $XDG_CURRENT_DESKTOP.
-	 **/
-//	static QString desktopSpecificTerminal();
-//	static QString desktopSpecificFileManager();
-//	static QStringList terminalApps();
-//	static QStringList fileManagerApps();
-//	static QString envDesktop();
-//	static const QString & terminalApp();
-//	static const QString & fileManagerApp();
-//	static QString fallbackTerminalApp() { return terminalApps().first(); }
-//	static QString fallbackFileManagerApp() { return fileManagerApps().first(); }
-//	static bool haveApp( const QString & app );
 
 	/**
 	 * Setters (see the corresponding getter for documentation), mainly
@@ -390,9 +332,19 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Recursively perform the cleanup.
+	 * Return the full paths to the available (and executable) shells:
+	 *     loginShell()	($SHELL)
+	 *     /bin/bash
+	 *     /bin/sh
 	 **/
-//	void executeRecursive( FileInfo *item, OutputWindow * outputWindow );
+	static const QStringList & defaultShells();
+
+	/**
+	 * Return the first default shell or an empty string if there is no
+	 * usable shell at all.
+	 **/
+	static QString defaultShell()
+	    { return defaultShells().isEmpty() ? QString() : defaultShells().first(); }
 
 	/**
 	 * Retrieve the directory part of a FileInfo's path.
@@ -404,64 +356,6 @@ namespace QDirStat
 	 * defaultShell(). Return an empty string if no usable shell is found.
 	 **/
 	QString chooseShell( OutputWindow * outputWindow ) const;
-
-	/**
-	 * Return a mapping from macros to fallback applications in case the
-	 * current desktop cannot be determined:
-	 *
-	 *   %terminal	   "xterm"
-	 *   %filemanager  "xdg-open"
-	 **/
-//	static QMap<QString, QString> fallbackApps();
-
-	/**
-	 * Expand some variables in string 'unexpanded' to information from
-	 * within 'item'. Multiple expansion is performed as needed, i.e. the
-	 * string may contain more than one variable to expand. The resulting
-	 * string is returned.
-	 *
-	 *   %p expands to item->path() (in single quotes), i.e. the item's
-	 *   full path name.
-	 *
-	 *     '/usr/local/bin'	      for that directory
-	 *     '/usr/local/bin/doit'  for a file within it
-	 *
-	 *   %n expands to item->name() (in single quotes), i.e. the last
-	 *   component of the pathname. The examples above would expand to:
-	 *
-	 *     'bin'
-	 *     'doit'
-	 *
-	 *   %d expands to the directory name with full path. For directories,
-	 *   this is the same as %p. For files or dot entries, this is the same
-	 *   as their parent's %p:
-	 *
-	 *    '/usr/local/bin'	for a file /usr/local/bin/doit
-	 *    '/usr/local/bin'	for directory /usr/local/bin.
-	 *
-	 *
-	 *   %terminal	  "konsole" or "gnome-terminal" or "xfce4-terminal" ...
-	 *
-	 *   %filemanager "konqueror" or "nautilus" or "thunar" ...
-	 *
-	 *
-	 * For commands that are to be executed from within the 'Clean up'
-	 * menu, you might specify something like:
-	 *
-	 *     "xdg-open %p"
-	 *     "tar cjvf %n.tar.bz2 && rm -rf %n"
-	 **/
-//	QString expandVariables ( const FileInfo * item,
-//				  const QString	 & unexpanded ) const;
-
-	/**
-	 * Expand some variables in string 'unexpanded' to application that are
-	 * typically different from one desktop (KDE, Gnome, Xfce) to the next:
-	 *
-	 *   %terminal	  "konsole" or "gnome-terminal" or "xfce4-terminal" ...
-	 *   %filemanager "konqueror" or "nautilus" or "thunar" ...
-	 **/
-//	QString expandDesktopSpecificApps( const QString & unexpanded ) const;
 
 	/**
 	 * Run a command with 'item' as base to expand variables.

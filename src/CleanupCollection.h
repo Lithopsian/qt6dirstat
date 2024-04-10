@@ -192,20 +192,6 @@ namespace QDirStat
 //	void remove( Cleanup * cleanup );
 
 	/**
-	 * Ask user for confirmation to execute a cleanup action for
-	 * 'items'. Returns 'true' if user accepts, 'false' otherwise.
-	 **/
-	static bool confirmation( Cleanup * cleanup, const FileInfoSet & items );
-
-	/**
-	 * Return the URLs for the selected item types in 'items':
-	 * directories (including dot entries) or files.
-	 **/
-	static QStringList filteredUrls( const FileInfoSet & items,
-					 bool                dirs,
-					 bool                files );
-
-	/**
 	 * Update all menus that have the 'keepUpdated' flag set.
 	 **/
 	void updateMenus();
@@ -232,11 +218,11 @@ namespace QDirStat
 	// Data members
 	//
 
-	SelectionModel		  * _selectionModel;
-	CleanupList		    _cleanupList;
-	Trash			  * _trash;
-	QList<QPointer<QMenu>>	    _menus;
-	QList<QPointer<QToolBar>>   _toolBars;
+	SelectionModel		* _selectionModel;
+	CleanupList		  _cleanupList;
+	Trash			* _trash;
+	QList<QPointer<QMenu>>	  _menus;
+	QList<QPointer<QToolBar>> _toolBars;
 
     };
 }	// namespace QDirStat

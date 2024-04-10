@@ -120,7 +120,9 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::CleanupConfigPage	* _ui;
+	Ui::CleanupConfigPage * _ui;
+
+	int _outputWindowDefaultTimeout;
 
     };	// class CleanupConfigPage
 

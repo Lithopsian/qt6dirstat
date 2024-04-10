@@ -27,22 +27,129 @@
 
 #define MAX_URLS_IN_CONFIRMATION_POPUP 9
 
+
 using namespace QDirStat;
 
 
-static void removeAllFromWidget( QWidget * widget )
+namespace
 {
-    if ( !widget )
-	return;
-
-    for ( QAction * action : widget->actions() )
+    /**
+     * Remove all actions from the given widget, which would normally
+     * be a menu or toolbar.
+     **/
+    void removeAllFromWidget( QWidget * widget )
     {
-	Cleanup * cleanup = dynamic_cast<Cleanup *>( action );
+	if ( !widget )
+	    return;
 
-	if ( cleanup )
-	    widget->removeAction( cleanup );
+	for ( QAction * action : widget->actions() )
+	{
+	    Cleanup * cleanup = dynamic_cast<Cleanup *>( action );
+	    if ( cleanup )
+		widget->removeAction( cleanup );
+	}
     }
-}
+
+
+    /**
+     * Return the URLs for the selected item types in 'items':
+     * directories (including dot entries) or files.
+     **/
+    QStringList filteredUrls( const FileInfoSet & items,
+			      bool                dirs,
+			      bool                files )
+    {
+	QStringList urls;
+
+	for ( const auto item : items )
+	{
+	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
+
+	    if ( ( item->isDirInfo() && dirs ) || ( !item->isDirInfo() && files ) )
+	    {
+		if ( urls.size() >= MAX_URLS_IN_CONFIRMATION_POPUP )
+		{
+		    urls << "...";
+		    return urls;
+		}
+
+		urls << name;
+	    }
+	}
+
+	return urls;
+    }
+
+
+    /**
+     * Ask user for confirmation to execute a cleanup action for
+     * 'items'. Returns 'true' if user accepts, 'false' otherwise.
+     **/
+    bool confirmation( Cleanup * cleanup, const FileInfoSet & items )
+    {
+	// QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
+	// "white-space: pre", but only up to about 100 characters
+	// So elide ridiculously long names and add enough spaces to the title to avoid wrapping
+	const QFont font = QGuiApplication::font();
+	const int spaceWidth = textWidth( font, " " );
+
+	const QString msg = [ cleanup, &items, &font, spaceWidth ]()
+	{
+	    if ( items.size() == 1 )
+	    {
+		const FileInfo * item = items.first();
+		const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
+
+		// Pad the title to avoid tiny dialog boxes
+		const int spaces = qMax( textWidth( font, name ) / spaceWidth, 40 );
+		const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+		const QString itemType = item->isDirInfo() ?
+					 QObject::tr( "for directory" ) :
+					 QObject::tr( "for file" );
+
+		return QString( "<h3>%1</h3>%2: %3<br/>" ).arg( title ).arg( itemType ).arg( name );
+	    }
+
+	    const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
+	    const QStringList files = filteredUrls( items, false, true ); // then files
+
+	    QStringList urls;
+	    if ( !dirs.isEmpty() )
+	    {
+		urls << QObject::tr( "<u>for directories:</u>" );
+		urls << dirs;
+	    }
+	    if ( !files.isEmpty() )
+	    {
+		urls << QObject::tr( "<u>for files:</u>" );
+		urls << files;
+	    }
+
+	    if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
+		urls << QObject::tr( "<i>(%1 items total)</i>" ).arg( items.size() );
+
+	    // Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
+	    int spaces = 40;
+	    for ( const QString & line : urls )
+	    {
+		const int lineSpaces = textWidth( font, line ) / spaceWidth;
+		if ( lineSpaces > spaces )
+		    spaces = lineSpaces;
+	    }
+	    const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+
+	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>" ) );
+	}();
+
+	const int ret = QMessageBox::question( qApp->activeWindow(),
+					       QObject::tr( "Please Confirm" ),
+					       whitespacePre( msg ),
+					       QMessageBox::Yes | QMessageBox::No );
+
+	return ret == QMessageBox::Yes;
+    }
+
+} // namespace
 
 
 
@@ -303,95 +410,6 @@ void CleanupCollection::execute()
     }
 
     outputWindow->noMoreProcesses();
-}
-
-
-bool CleanupCollection::confirmation( Cleanup * cleanup, const FileInfoSet & items )
-{
-    // QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
-    // "white-space: pre", but only up to about 100 characters
-    // So elide ridiculously long names and add enough spaces to the title to avoid wrapping
-    const QFont font = QGuiApplication::font();
-    const int spaceWidth = textWidth( font, " " );
-
-    const QString msg = [ cleanup, &items, &font, spaceWidth ]()
-    {
-	if ( items.size() == 1 )
-	{
-	    const FileInfo * item = items.first();
-	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
-
-	    // Pad the title to avoid tiny dialog boxes
-	    const int spaces = qMax( textWidth( font, name ) / spaceWidth, 40 );
-	    const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
-	    const QString itemType = item->isDirInfo() ? tr( "for directory" ) : tr( "for file" );
-
-	    return QString( "<h3>%1</h3>%2: %3<br/>" ).arg( title ).arg( itemType ).arg( name );
-	}
-
-	const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
-	const QStringList files = filteredUrls( items, false, true ); // then files
-
-	QStringList urls;
-	if ( !dirs.isEmpty() )
-	{
-	    urls << tr( "<u>for directories:</u>" );
-	    urls << dirs;
-	}
-	if ( !files.isEmpty() )
-	{
-	    urls << tr( "<u>for files:</u>" );
-	    urls << files;
-	}
-
-	if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
-	    urls << tr( "<i>(%1 items total)</i>" ).arg( items.size() );
-
-	// Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
-	int spaces = 40;
-	for ( const QString & line : urls )
-	{
-	    const int lineSpaces = textWidth( font, line ) / spaceWidth;
-	    if ( lineSpaces > spaces )
-		spaces = lineSpaces;
-	}
-	const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
-
-	return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>" ) );
-    }();
-
-    const int ret = QMessageBox::question( qApp->activeWindow(),
-					   tr( "Please Confirm" ),
-					   whitespacePre( msg ),
-					   QMessageBox::Yes | QMessageBox::No );
-
-    return ret == QMessageBox::Yes;
-}
-
-
-QStringList CleanupCollection::filteredUrls( const FileInfoSet & items,
-					     bool                dirs,
-					     bool                files )
-{
-    QStringList urls;
-
-    for ( const auto item : items )
-    {
-	const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
-
-	if ( ( item->isDirInfo() && dirs ) || ( !item->isDirInfo() && files ) )
-	{
-	    if ( urls.size() >= MAX_URLS_IN_CONFIRMATION_POPUP )
-	    {
-		urls << "...";
-		return urls;
-	    }
-
-	    urls << name;
-	}
-    }
-
-    return urls;
 }
 
 
