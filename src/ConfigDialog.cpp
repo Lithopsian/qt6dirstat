@@ -26,6 +26,8 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
     _cleanupConfigPage { new CleanupConfigPage( this ) },
     _excludeRulesConfigPage { new ExcludeRulesConfigPage( this ) }
 {
+    setAttribute(Qt::WA_DeleteOnClose);
+
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
@@ -46,7 +48,7 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
 
 ConfigDialog::~ConfigDialog()
 {
-    // logDebug() << "ConfigDialog destructor" << Qt::endl;
+    logDebug() << "ConfigDialog destructor" << Qt::endl;
     delete _ui;
 }
 
