@@ -27,6 +27,159 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Create a suitable display name for a package: packages that are
+     * only installed in one version or for one architecture will simply
+     * keep their base name; others will have the version and/or the
+     * architecture appended so the user can tell them apart.
+     **/
+    void createDisplayName( const QString & pkgName, const PkgInfoList & pkgList )
+    {
+	if ( pkgList.size() < 2 )
+	    return;
+
+	const QString & version  = pkgList.first()->version();
+	const QString & arch     = pkgList.first()->arch();
+
+	bool sameVersion = true;
+	bool sameArch    = true;
+
+	for ( const PkgInfo * pkg : pkgList )
+	{
+	    if ( pkg->version() != version )
+		sameVersion = false;
+
+	    if ( pkg->arch() != arch )
+		sameArch = false;
+	}
+
+	//logDebug() << "Found multi version pkg " << pkgName << " same arch: " << sameArch << Qt::endl;
+
+	for ( PkgInfo * pkg : pkgList )
+	{
+	    QString name = pkgName;
+
+	    if ( !sameVersion )
+	    {
+		name += "-" + pkg->version();
+		pkg->setMultiVersion( true );
+	    }
+
+	    if ( !sameArch )
+	    {
+		name += ":" + pkg->arch();
+		pkg->setMultiArch( true );
+	    }
+
+	    pkg->setName( name );
+	}
+    }
+
+
+    /**
+     * Handle packages that are installed in multiple versions or for
+     * multiple architectures: assign a different display name to each of
+     * them.
+     **/
+    void handleMultiPkg( const PkgInfoList & pkgList )
+    {
+	// QMultiHash is slightly faster, but uniqueKeys() isn't available before 5.13
+	QMultiMap<QString, PkgInfo *> multiPkg;
+
+	for ( PkgInfo * pkg : pkgList )
+	    multiPkg.insert( pkg->baseName(), pkg );
+
+	for ( const QString & pkgName : multiPkg.uniqueKeys() )
+	    createDisplayName( pkgName, multiPkg.values( pkgName ) );
+    }
+
+
+    /**
+     * Return a list of packages filtered using the given filter pattern.
+     **/
+    PkgInfoList filteredPkgList( const PkgFilter & filter )
+    {
+	const PkgInfoList pkgList = PkgQuery::installedPkg();
+
+	if ( filter.filterMode() == PkgFilter::SelectAll )
+	    return pkgList;
+
+	PkgInfoList filteredList;
+
+	for ( PkgInfo * pkg : pkgList )
+	{
+	    if ( filter.matches( pkg->baseName() ) )
+		filteredList << pkg;
+	}
+
+	return filteredList;
+    }
+
+
+    /**
+     * Add all the packages to the DirTree, including the 'package
+     * summary' root.
+     **/
+    void addToTree( DirTree * tree, const PkgInfoList & pkgList )
+    {
+	CHECK_PTR( tree );
+	CHECK_PTR( tree->root() );
+
+	PkgInfo * top = new PkgInfo( tree, tree->root() );
+	CHECK_NEW( top );
+
+	tree->root()->insertChild( top );
+
+	for ( PkgInfo * pkg : pkgList )
+	{
+	    pkg->setTree( tree );
+	    top->insertChild( pkg );
+	}
+
+	top->setReadState( DirFinished );
+	top->finalizeLocal();
+    }
+
+
+    /**
+     * Create a process for reading the file list for 'pkg' with the
+     * appropriate external command. The process is not started yet.
+     **/
+    QProcess * createReadFileListProcess( PkgInfo * pkg )
+    {
+	CHECK_PTR( pkg );
+	CHECK_PTR( pkg->pkgManager() );
+
+	const QString command = pkg->pkgManager()->fileListCommand( pkg );
+
+	if ( command.isEmpty() )
+	{
+	    logError() << "Empty file list command for " << pkg << Qt::endl;
+	    return nullptr;
+	}
+
+	QStringList args	  = command.split( QRegularExpression( "\\s+" ) );
+	const QString program = args.takeFirst();
+
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	env.insert( "LANG", "C" ); // Prevent output in translated languages
+
+	QProcess * process = new QProcess();
+	process->setProgram( program );
+	process->setArguments( args );
+	process->setProcessEnvironment( env );
+	process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
+
+	// Intentionally NOT starting the process yet
+
+	return process;
+    }
+
+} // namespace
+
+
 PkgReader::PkgReader( DirTree * tree ):
     _tree { tree }
 {
@@ -39,120 +192,6 @@ PkgReader::~PkgReader()
     writeSettings();
 }
 */
-
-/**
- * Create a suitable display name for a package: packages that are
- * only installed in one version or for one architecture will simply
- * keep their base name; others will have the version and/or the
- * architecture appended so the user can tell them apart.
- **/
-static void createDisplayName( const QString & pkgName, const PkgInfoList & pkgList )
-{
-    if ( pkgList.size() < 2 )
-	return;
-
-    const QString & version  = pkgList.first()->version();
-    const QString & arch     = pkgList.first()->arch();
-
-    bool sameVersion = true;
-    bool sameArch    = true;
-
-    for ( const PkgInfo * pkg : pkgList )
-    {
-	if ( pkg->version() != version )
-	    sameVersion = false;
-
-	if ( pkg->arch() != arch )
-	    sameArch = false;
-    }
-
-    //logDebug() << "Found multi version pkg " << pkgName << " same arch: " << sameArch << Qt::endl;
-
-    for ( PkgInfo * pkg : pkgList )
-    {
-	QString name = pkgName;
-
-	if ( !sameVersion )
-	{
-	    name += "-" + pkg->version();
-	    pkg->setMultiVersion( true );
-	}
-
-	if ( !sameArch )
-	{
-	    name += ":" + pkg->arch();
-	    pkg->setMultiArch( true );
-	}
-
-	pkg->setName( name );
-    }
-}
-
-
-/**
- * Handle packages that are installed in multiple versions or for
- * multiple architectures: assign a different display name to each of
- * them.
- **/
-static void handleMultiPkg( const PkgInfoList & pkgList )
-{
-    // QMultiHash is slightly faster, but uniqueKeys() isn't available before 5.13
-    QMultiMap<QString, PkgInfo *> multiPkg;
-
-    for ( PkgInfo * pkg : pkgList )
-	multiPkg.insert( pkg->baseName(), pkg );
-
-    for ( const QString & pkgName : multiPkg.uniqueKeys() )
-	createDisplayName( pkgName, multiPkg.values( pkgName ) );
-}
-
-
-/**
- * Return a list of packages filtered using the given filter pattern.
- **/
-PkgInfoList filteredPkgList( const PkgFilter & filter )
-{
-    const PkgInfoList pkgList = PkgQuery::installedPkg();
-
-    if ( filter.filterMode() == PkgFilter::SelectAll )
-	return pkgList;
-
-    PkgInfoList filteredList;
-
-    for ( PkgInfo * pkg : pkgList )
-    {
-	if ( filter.matches( pkg->baseName() ) )
-	    filteredList << pkg;
-    }
-
-    return filteredList;
-}
-
-
-/**
- * Add all the packages to the DirTree, including the 'package
- * summary' root.
- **/
-static void addToTree( DirTree * tree, const PkgInfoList & pkgList )
-{
-    CHECK_PTR( tree );
-    CHECK_PTR( tree->root() );
-
-    PkgInfo * top = new PkgInfo( tree, tree->root() );
-    CHECK_NEW( top );
-
-    tree->root()->insertChild( top );
-
-    for ( PkgInfo * pkg : pkgList )
-    {
-	pkg->setTree( tree );
-	top->insertChild( pkg );
-    }
-
-    top->setReadState( DirFinished );
-    top->finalizeLocal();
-}
-
 
 void PkgReader::read( const PkgFilter & filter )
 {
@@ -197,41 +236,6 @@ void PkgReader::createCachePkgReadJobs( const PkgInfoList & pkgList )
 	CHECK_NEW( job );
 	_tree->addJob( job );
     }
-}
-
-
-/**
- * Create a process for reading the file list for 'pkg' with the
- * appropriate external command. The process is not started yet.
- **/
-static QProcess * createReadFileListProcess( PkgInfo * pkg )
-{
-    CHECK_PTR( pkg );
-    CHECK_PTR( pkg->pkgManager() );
-
-    const QString command = pkg->pkgManager()->fileListCommand( pkg );
-
-    if ( command.isEmpty() )
-    {
-	logError() << "Empty file list command for " << pkg << Qt::endl;
-	return nullptr;
-    }
-
-    QStringList args	  = command.split( QRegularExpression( "\\s+" ) );
-    const QString program = args.takeFirst();
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert( "LANG", "C" ); // Prevent output in translated languages
-
-    QProcess * process = new QProcess();
-    process->setProgram( program );
-    process->setArguments( args );
-    process->setProcessEnvironment( env );
-    process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
-
-    // Intentionally NOT starting the process yet
-
-    return process;
 }
 
 
@@ -289,23 +293,109 @@ void PkgReader::writeSettings()
 
 
 
-
-/**
- * Recursively finalize all directories in a subtree.
- **/
-static void finalizeAll( DirInfo * subtree )
+namespace
 {
-    for ( FileInfo * child = subtree->firstChild(); child; child = child->next() )
+    /**
+     * Recursively finalize all directories in a subtree.
+     **/
+    void finalizeAll( DirInfo * subtree )
     {
-	if ( child->isDirInfo() )
-	    finalizeAll( child->toDirInfo() );
+	for ( FileInfo * child = subtree->firstChild(); child; child = child->next() )
+	{
+	    if ( child->isDirInfo() )
+		finalizeAll( child->toDirInfo() );
+	}
+
+	if ( !subtree->readError() )
+	    subtree->setReadState( DirFinished );
+
+	subtree->finalizeLocal();
     }
 
-    if ( !subtree->readError() )
-	subtree->setReadState( DirFinished );
 
-    subtree->finalizeLocal();
-}
+    /**
+     * Do an lstat() syscall for 'path' or fetch the result from a cache.
+     * Return false if lstat() fails.
+     **/
+    bool lstat( struct stat & statInfo, const QString & path )
+    {
+	const int result = ::lstat( path.toUtf8(), &statInfo );
+
+	if ( result != 0 )
+	    return false;	// lstat() failed
+
+	if ( S_ISDIR( statInfo.st_mode ) )	// directory
+	{
+	    // Zero the directory's own size fields to prevent them from
+	    // distorting the total sums.  Otherwise the directory would be
+	    // counted in each package that uses the directory, and a directory
+	    // with a large own size and only a tiny file that belongs to that
+	    // package would completely dwarf the package file in the treemap.
+	    statInfo.st_size   = 0;
+	    statInfo.st_blocks = 0;
+	    statInfo.st_mtime  = 0;
+	}
+
+	return true;
+    }
+
+
+    /**
+     * Create a DirInfo or FileInfo node from a path and lstat call.
+     **/
+    FileInfo * createItem( const QString & path,
+			   const QString & name,
+			   DirTree       * tree,
+			   DirInfo       * parent )
+    {
+	// logDebug() << "path: \"" << path << "\"" << Qt::endl;
+
+	struct stat statInfo;
+	if ( !lstat( statInfo, path ) ) // lstat() failed
+	{
+	    if ( errno == EACCES )
+	    {
+		// No child will be added, but still needs a recalc
+		parent->markAsDirty();
+		parent->setReadState( DirPermissionDenied );
+	    }
+
+	    return nullptr;
+	}
+
+	if ( S_ISDIR( statInfo.st_mode ) )		// directory?
+	{
+	    FileInfo * newDir = new DirInfo( parent, tree, name, statInfo );
+	    CHECK_NEW( newDir );
+	    return newDir;
+	}
+	else					// no directory
+	{
+	    FileInfo * newFile = new FileInfo( parent, tree, name, statInfo );
+	    CHECK_NEW( newFile );
+	    return newFile;
+	}
+    }
+
+
+    /**
+     * Locate a direct child of a DirInfo by name.
+     **/
+    FileInfo * locateChild( DirInfo * parent, const QString & pathComponent )
+    {
+	if ( pathComponent.isEmpty() )
+	    return nullptr;
+
+	for ( FileInfoIterator it( parent ); *it; ++it )
+	{
+	    if ( (*it)->name() == pathComponent )
+		return *it;
+	}
+
+	return nullptr;
+    }
+
+} // namespace
 
 
 void PkgReadJob::startReading()
@@ -332,80 +422,6 @@ QStringList PkgReadJob::fileList()
 }
 
 
-/**
- * Do an lstat() syscall for 'path' or fetch the result from a cache.
- * Return false if lstat() fails.
- **/
-static bool lstat( struct stat & statInfo, const QString & path )
-{
-    const int result = ::lstat( path.toUtf8(), &statInfo );
-
-    if ( result != 0 )
-	return false;	// lstat() failed
-
-    if ( S_ISDIR( statInfo.st_mode ) )	// directory
-    {
-	// Zero the directory's own size fields to prevent them from
-	// distorting the total sums.  Otherwise the directory would be
-	// counted in each package that uses the directory, and a directory
-	// with a large own size and only a tiny file that belongs to that
-	// package would completely dwarf the package file in the treemap.
-	statInfo.st_size   = 0;
-	statInfo.st_blocks = 0;
-	statInfo.st_mtime  = 0;
-    }
-
-    return true;
-}
-
-
-/**
- * Create a DirInfo or FileInfo node from a path and lstat call.
- **/
-static FileInfo * createItem( const QString & path,
-			      const QString & name,
-			      DirTree       * tree,
-			      DirInfo       * parent )
-{
-    // logDebug() << "path: \"" << path << "\"" << Qt::endl;
-
-    struct stat statInfo;
-    if ( !lstat( statInfo, path ) ) // lstat() failed
-	return nullptr;
-
-    if ( S_ISDIR( statInfo.st_mode ) )		// directory?
-    {
-	FileInfo * newDir = new DirInfo( parent, tree, name, statInfo );
-	CHECK_NEW( newDir );
-	return newDir;
-    }
-    else					// no directory
-    {
-	FileInfo * newFile = new FileInfo( parent, tree, name, statInfo );
-	CHECK_NEW( newFile );
-	return newFile;
-    }
-}
-
-
-/**
- * Locate a direct child of a DirInfo by name.
- **/
-static FileInfo * locateChild( DirInfo * parent, const QString & pathComponent )
-{
-    if ( pathComponent.isEmpty() )
-        return nullptr;
-
-    for ( FileInfoIterator it( parent ); *it; ++it )
-    {
-        if ( (*it)->name() == pathComponent )
-            return *it;
-    }
-
-    return nullptr;
-}
-
-
 FileInfo * PkgReadJob::createItem( const QString & path,
 				   const QString & name,
 				   DirInfo       * parent )
@@ -417,8 +433,9 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     }
     else if ( _verboseMissingPkgFiles )
     {
-	//Packaged file probably not on disk, just log it
-	logWarning() << _pkg << ": missing: " << path << Qt::endl;
+	//Packaged file can't be read.  Permissions problems have
+	// already been flagged on parent, but could just be a missing file
+	logWarning() << _pkg << ": can't stat " << path << Qt::endl;
     }
 
     return newItem;
@@ -471,7 +488,7 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 	    }
 	    else if ( currentComponent != components.constLast() )
 	    {
-		// Failure that used to occur (for dpkg) when symlinks weren't resolved
+		// Failure that used to occur a lot (for dpkg) when symlinks weren't resolved
 		logWarning() << newParent << " should be a directory, but is not" << Qt::endl;
 		continue;
 	    }
