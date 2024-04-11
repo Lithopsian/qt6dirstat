@@ -32,27 +32,30 @@ using SysUtil::tryRunCommand;
 using SysUtil::haveCommand;
 
 
+namespace
+{
+    /**
+     * Determine the path to the rpm command for this system - may not
+     * actually exist.
+     **/
+    QString rpmCommand()
+    {
+	// Note that it is not enough to rely on a symlink /bin/rpm ->
+	// /usr/bin/rpm: While recent SUSE distros have that symlink (and maybe Red
+	// Hat and Fedora as well?), rpm as a secondary package manager on Ubuntu
+	// does not have such a link; they only have /usr/bin/rpm.
+	if ( haveCommand( "/usr/bin/rpm" ) )
+	    return "/usr/bin/rpm";
+
+	// Return something to try although it may not exist
+	return "/bin/rpm"; // for old SUSE / Red Hat distros
+    }
+} // namespace
+
+
 RpmPkgManager::RpmPkgManager()
 {
     readSettings();
-}
-
-
-/**
- * Determine the path to the rpm command for this system - may not
- * actually exist.
- **/
-static QString rpmCommand()
-{
-    // Note that it is not enough to rely on a symlink /bin/rpm ->
-    // /usr/bin/rpm: While recent SUSE distros have that symlink (and maybe Red
-    // Hat and Fedora as well?), rpm as a secondary package manager on Ubuntu
-    // does not have such a link; they only have /usr/bin/rpm.
-    if ( haveCommand( "/usr/bin/rpm" ) )
-	return "/usr/bin/rpm";
-
-    // Return something to try although it may not exist
-    return "/bin/rpm"; // for old SUSE / Red Hat distros
 }
 
 
@@ -248,17 +251,9 @@ void RpmPkgManager::rebuildRpmDbWarning() const
     }
 
     // Add a panel message so the user is sure to see this message.
-    //
-    // Need a guarded pointer because the [x] close button in the PanelMessage
-    // deletes the instance.
-    static QPointer<PanelMessage> panelMessage;
-
-    if ( !panelMessage )
-    {
-	MainWindow * mainWindow = (MainWindow *)app()->findMainWindow();
-	if ( mainWindow )
-	    panelMessage = PanelMessage::showRpmMsg( mainWindow, mainWindow->messagePanelContainer() );
-    }
+    MainWindow * mainWindow = (MainWindow *)app()->findMainWindow();
+    if ( mainWindow )
+	PanelMessage::showRpmMsg( mainWindow, mainWindow->messagePanelContainer() );
 
     issuedWarning = true;
 }

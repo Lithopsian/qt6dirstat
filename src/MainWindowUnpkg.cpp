@@ -49,8 +49,6 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 {
     unpkgSettings.dump();
 
-    _enableDirPermissionsWarning = true;
-
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     if ( ! pkgManager )
     {

@@ -11,7 +11,6 @@
 #include "Attic.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
-#include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "QDirStatApp.h"        // dirTreeModel
 #include "SelectionModel.h"
@@ -19,10 +18,8 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 using namespace QDirStat;
-
-
-QPointer<UnreadableDirsWindow> UnreadableDirsWindow::_sharedInstance = nullptr;
 
 
 UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
@@ -39,8 +36,8 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
     initWidgets();
     readWindowSettings( this, "UnreadableDirsWindow" );
 
-    connect( _ui->treeWidget,	 &QTreeWidget::currentItemChanged,
-	     this,		 &UnreadableDirsWindow::selectResult );
+    connect( _ui->treeWidget, &QTreeWidget::currentItemChanged,
+             this,            &UnreadableDirsWindow::selectResult );
 }
 
 
@@ -54,6 +51,8 @@ UnreadableDirsWindow::~UnreadableDirsWindow()
 
 UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 {
+    static QPointer<UnreadableDirsWindow> _sharedInstance = nullptr;
+
     if ( !_sharedInstance )
     {
 	_sharedInstance = new UnreadableDirsWindow( app()->findMainWindow() );
@@ -103,14 +102,6 @@ void UnreadableDirsWindow::populateSharedInstance( FileInfo * subtree )
 }
 
 
-void UnreadableDirsWindow::closeSharedInstance()
-{
-    // Just close, it will delete itself automatically and the QPointer will also reset
-    if ( _sharedInstance )
-        _sharedInstance->close();
-}
-
-
 void UnreadableDirsWindow::populate( FileInfo * newSubtree )
 {
     clear();
@@ -132,18 +123,6 @@ void UnreadableDirsWindow::populate( FileInfo * newSubtree )
     // automatically uses the topmost item as the current item, and in the
     // default selection mode, this item is also selected. When the window is
     // not active, this does not happen yet - until the window is activated.
-    //
-    // In the context of QDirStat, this means that this is also signaled to the
-    // SelectionModel, the corresponding branch in the main window's dir tree
-    // is opened, and the matching files are selected in the dir tree and in
-    // the treemap.
-    //
-    // It is very irritating if this only happens sometimes - when the "locate
-    // files" window is created, but not when it is just populated with new
-    // content from the outside (from the file type stats window).
-    //
-    // So let's make sure the topmost item is always selected.
-
     _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
 }
 
@@ -162,9 +141,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
 	_ui->treeWidget->addTopLevelItem( searchResultItem );
     }
 
-
     // Recurse through any subdirectories
-
     for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
     {
 	if ( child->isDir() )
@@ -181,14 +158,9 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
 
 void UnreadableDirsWindow::selectResult( QTreeWidgetItem * widgetItem )
 {
-    if ( !widgetItem )
-	return;
-
     const UnreadableDirListItem * item = dynamic_cast<UnreadableDirListItem *>( widgetItem );
-    CHECK_DYNAMIC_CAST( item, "UnreadableDirListItem" );
-
-    app()->selectionModel()->setCurrentItem( item->dir(),
-                                             true ); // select
+    if ( item )
+	app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
 }
 
 

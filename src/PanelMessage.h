@@ -36,6 +36,11 @@ namespace QDirStat
 	 **/
 	PanelMessage( QWidget * parent );
 
+	/**
+	 * Destructor.
+	 **/
+	~PanelMessage() override;
+
     public:
 	/**
 	 * Constructor.
@@ -43,11 +48,6 @@ namespace QDirStat
 //	PanelMessage( QWidget		* parent,
 //		      const QString	& heading,
 //		      const QString	& msg );
-
-	/**
-	 * Destructor.
-	 **/
-	~PanelMessage() override;
 
 	/**
 	 * Set the "Details..." link text.
@@ -74,7 +74,7 @@ namespace QDirStat
 	/**
 	 * Return the URL set with setDetailsUrl().
 	 **/
-	const QLabel * detailsLinkLabel() const { return _ui->detailsLinkLabel; }
+//	const QLabel * detailsLinkLabel() const { return _ui->detailsLinkLabel; }
 
 	/**
 	 * Set the icon. If not set, a generic light bulb icon is used.
@@ -82,13 +82,27 @@ namespace QDirStat
 //	void setIcon( const QPixmap & pixmap );
 
 	/**
+	 * Delete any panel message child of 'parent' that is currently
+	 * displaying a permissions message.
+	 **/
+	static void deletePermissionsMsg( const QWidget * parent );
+
+	/**
+	 * Show the particular type of panel message in the given container.  These wrappers
+	 * maintain an internal static smart pointer to the panel so that only one panel
+	 * of each type is created.
+	 **/
+	static void showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox );
+	static void showFilesystemsMsg( QWidget * parent, QVBoxLayout * vBox );
+	static void showRpmMsg( QWidget * parent, QVBoxLayout * vBox );
+
+
+    protected:
+
+	/**
 	 * Show a panel message in the given container.
 	 **/
 	static PanelMessage * createMsg( QWidget * parent, QVBoxLayout * vBox );
-	static QPointer<PanelMessage> showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox );
-	static QPointer<PanelMessage> showFilesystemsMsg( QWidget * parent, QVBoxLayout * vBox );
-	static QPointer<PanelMessage> showRpmMsg( QWidget * parent, QVBoxLayout * vBox );
-
 
 
     private:

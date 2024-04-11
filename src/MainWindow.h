@@ -20,18 +20,15 @@
 #include "Subtree.h"
 
 
-class QCloseEvent;
+class QMenu;
 class QMouseEvent;
 class QSignalMapper;
-//class TreeLayout;
 class SysCallFailedException;
-class QMenu;
 
 
 namespace QDirStat
 {
     class HistoryButtons;
-    class PanelMessage;
     class PkgFilter;
     class PkgManager;
     class TreemapView;
@@ -41,7 +38,6 @@ namespace QDirStat
 using QDirStat::DirTreeView;
 using QDirStat::FileInfo;
 using QDirStat::HistoryButtons;
-using QDirStat::PanelMessage;
 using QDirStat::PkgFilter;
 using QDirStat::PkgManager;
 using QDirStat::Subtree;
@@ -86,6 +82,12 @@ public slots:
      * Read a filesystem, as requested from the fiflesystems window.
      **/
     void readFilesystem( const QString & path );
+
+    /**
+     * Show the directories that could not be read in a separate non-modal
+     * window.
+     **/
+    void showUnreadableDirs();
 
 
 protected:
@@ -167,11 +169,6 @@ public: // for the config dialog
     bool urlInWindowTitle() const { return _urlInWindowTitle; }
 
     /**
-     * Return the setting for UseTreemapHover
-     **/
-//    bool useTreemapHover() const { return _useTreemapHover; }
-
-    /**
      * Return the setting for sStatusBarTimeoutMillisec
      **/
     int statusBarTimeout() const { return _statusBarTimeout; }
@@ -228,7 +225,7 @@ protected slots:
      * Show the directories that could not be read in a separate non-modal
      * window.
      **/
-    void showUnreadableDirs();
+    void closeChildren();
 
     /**
      * Navigate one directory level up.
@@ -382,12 +379,6 @@ protected slots:
      * The hotkey for this is Shift-F7.
      **/
     void toggleVerboseSelection( bool verboseSelection );
-
-    /**
-     * Handle the config dialog closing.  It is configured to delete on close,
-     * so this resets the dangling pointer.
-     **/
-//    void configDialogFinished( int result );
 
     /**
      * Show or hide the breadcrumbs.
@@ -619,33 +610,32 @@ protected:
      **/
     void mousePressEvent( QMouseEvent * event ) override;
 
-	/**
-	 * Context menu event.
-	 *
-	 * Reimplemented from QMainWindow.
-	 **/
-	void contextMenuEvent( QContextMenuEvent * event ) override;
+    /**
+     * Context menu event.
+     *
+     * Reimplemented from QMainWindow.
+     **/
+    void contextMenuEvent( QContextMenuEvent * event ) override;
 
 
 private:
 
-    Ui::MainWindow	 * _ui;
-    HistoryButtons	 * _historyButtons	{ nullptr };
-    QActionGroup	 * _layoutActionGroup	{ nullptr };
-    Subtree		   _futureSelection;
+    Ui::MainWindow  * _ui;
+    HistoryButtons  * _historyButtons		{ nullptr };
+    QActionGroup    * _layoutActionGroup	{ nullptr };
+    Subtree           _futureSelection;
 
-    QPointer<PanelMessage> _dirPermissionsWarning;
-    bool		   _enableDirPermissionsWarning	{ false };
-    bool		   _verboseSelection		{ false };
-    bool		   _urlInWindowTitle		{ false };
+    bool              _enableDirPermissionsMsg	{ false };
+    bool              _verboseSelection		{ false };
+    bool              _urlInWindowTitle		{ false };
 
-    QTimer		   _updateTimer;
-    int			   _statusBarTimeout		{ 3000 };
-    int			   _longStatusBarTimeout	{ 30000 };
-    QElapsedTimer	   _stopWatch;
+    QTimer            _updateTimer;
+    int	              _statusBarTimeout		{ 3000 };
+    int	              _longStatusBarTimeout	{ 30000 };
+    QElapsedTimer     _stopWatch;
 
-    int			   _sortCol;
-    Qt::SortOrder	   _sortOrder;
+    int	              _sortCol;
+    Qt::SortOrder     _sortOrder;
 
 }; // class MainWindow
 

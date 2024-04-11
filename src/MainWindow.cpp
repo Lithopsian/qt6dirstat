@@ -9,7 +9,6 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QCloseEvent>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -355,6 +354,7 @@ void MainWindow::busyDisplay()
 {
     //logInfo() << Qt::endl;
 
+    _stopWatch.start();
     _ui->treemapView->disable();
     updateActions();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
@@ -362,10 +362,8 @@ void MainWindow::busyDisplay()
     // If it is open, close the window that lists unreadable directories:
     // With the next directory read, things might have changed; the user may
     // have fixed permissions or ownership of those directories.
-    UnreadableDirsWindow::closeSharedInstance();
-
-    if ( _dirPermissionsWarning )
-        _dirPermissionsWarning->deleteLater();
+//    UnreadableDirsWindow::closeSharedInstance();
+    closeChildren();
 
     _updateTimer.start();
 
@@ -442,7 +440,6 @@ void MainWindow::setDetailsPanelVisible( bool detailsPanelVisible )
 
 void MainWindow::startingReading()
 {
-    _stopWatch.start();
     busyDisplay();
 
     // Open this here, so it doesn't get done for refresh selected
@@ -546,7 +543,8 @@ void MainWindow::openUrl( const QString & url )
 
 void MainWindow::openDir( const QString & url )
 {
-    _enableDirPermissionsWarning = true;
+    _enableDirPermissionsMsg = true;
+
     try
     {
 	app()->dirTreeModel()->openUrl( url );
@@ -562,7 +560,6 @@ void MainWindow::openDir( const QString & url )
     }
 
     updateActions();
-//    expandTreeToLevel( 1 );
 }
 
 
@@ -628,11 +625,12 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 
 void MainWindow::pkgQuerySetup()
 {
-    delete _dirPermissionsWarning;
+    closeChildren();
     _ui->breadcrumbNavigator->clear();
     _ui->fileDetailsView->clear();
     app()->dirTreeModel()->clear();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
+    _enableDirPermissionsMsg = true;
 }
 
 
@@ -655,7 +653,7 @@ void MainWindow::setFutureSelection()
 
 void MainWindow::refreshAll()
 {
-    _enableDirPermissionsWarning = true;
+    _enableDirPermissionsMsg = true;
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
 
@@ -663,31 +661,31 @@ void MainWindow::refreshAll()
     if ( url.isEmpty() )
     {
 	askOpenDir();
+	return;
     }
+
+    //logDebug() << "Refreshing " << url << Qt::endl;
+
+    if ( PkgInfo::isPkgUrl( url ) )
+	readPkg( url );
     else
-    {
-	//logDebug() << "Refreshing " << url << Qt::endl;
+	app()->dirTreeModel()->openUrl( url );
 
-	if ( PkgInfo::isPkgUrl( url ) )
-	    readPkg( url );
-	else
-	    app()->dirTreeModel()->openUrl( url );
+    // No need to check if the URL is an unpkg:/ URL:
+    //
+    // In that case, the previous filters are still set, and just reading
+    // the dir tree again from disk with openUrl() will filter out the
+    // unwanted packaged files, ignored extensions and excluded directories
+    // again.
 
-        // No need to check if the URL is an unpkg:/ URL:
-        //
-        // In that case, the previous filters are still set, and just reading
-        // the dir tree again from disk with openUrl() will filter out the
-        // unwanted packaged files, ignored extensions and excluded directories
-        // again.
-
-	updateActions();
-    }
+    updateActions();
 }
 
 
 void MainWindow::refreshSelected()
 {
     // logDebug() << "Setting future selection: " << _futureSelection.subtree() << Qt::endl;
+    _enableDirPermissionsMsg = true;
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
     busyDisplay();
@@ -726,7 +724,7 @@ void MainWindow::applyFutureSelection()
     {
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
 
-	// The previous branch was actually the same, but it is gone now, so force it to have changed
+	// The previous branch was the same, but it is gone now, so force it to have changed
 //        app()->selectionModel()->setCurrentBranch( nullptr, sel );
 /*
         if ( branch )
@@ -873,7 +871,7 @@ void MainWindow::showSummary()
 
 void MainWindow::startingCleanup( const QString & cleanupName )
 {
-    // Notice that this is not called for actions that are not owned by the
+    // Note that this is not called for actions that are not owned by the
     // CleanupCollection such as _ui->actionMoveToTrash().
 
     setFutureSelection();
@@ -884,7 +882,7 @@ void MainWindow::startingCleanup( const QString & cleanupName )
 
 void MainWindow::cleanupFinished( int errorCount )
 {
-    // Notice that this is not called for actions that are not owned by the
+    // Note that this is not called for actions that are not owned by the
     // CleanupCollection such as _ui->actionMoveToTrash().
 
     //logDebug() << "Error count: " << errorCount << Qt::endl;
@@ -975,7 +973,7 @@ void MainWindow::navigateToUrl( const QString & url )
 
 void MainWindow::moveToTrash()
 {
-    // Note that _ui->actionMoveToTrash() is not actually a subclass of Cleanup
+    // Note that moveToTrash() is not a subclass of Cleanup
 
     // Save the selection - at least the first selected item
     setFutureSelection();
@@ -1023,21 +1021,29 @@ void MainWindow::readFilesystem( const QString & path )
 
 void MainWindow::showDirPermissionsWarning()
 {
-//    if ( _dirPermissionsWarning || !_enableDirPermissionsWarning )
+    if ( !_enableDirPermissionsMsg )
 	return; // never display, I know already
 
-    _dirPermissionsWarning = PanelMessage::showPermissionsMsg( this, _ui->vBox );
+    PanelMessage::showPermissionsMsg( this, _ui->vBox );
 
-    connect( _dirPermissionsWarning->detailsLinkLabel(), &QLabel::linkActivated,
-	     this,                                       &MainWindow::showUnreadableDirs );
-
-    _enableDirPermissionsWarning = false;
+    // Don't display again until there is a manual refresh or new read
+    _enableDirPermissionsMsg = false;
 }
 
 
 void MainWindow::showUnreadableDirs()
 {
     UnreadableDirsWindow::populateSharedInstance( app()->root() );
+}
+
+
+void MainWindow::closeChildren()
+{
+    UnreadableDirsWindow * unreadableDirsWindow = findChild<UnreadableDirsWindow *>();
+    if ( unreadableDirsWindow )
+	unreadableDirsWindow->close();
+
+    PanelMessage::deletePermissionsMsg( this );
 }
 
 #if 0

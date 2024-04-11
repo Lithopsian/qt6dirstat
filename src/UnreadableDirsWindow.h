@@ -85,12 +85,6 @@ namespace QDirStat
          **/
         static void populateSharedInstance( FileInfo * newSubtree );
 
-        /**
-         * Convenience function for closing and deleting the shared instance
-         * if it is open.
-         **/
-        static void closeSharedInstance();
-
 	/**
 	 * Obtain the subtree from the last used URL or 0 if none was found.
 	 **/
@@ -143,7 +137,6 @@ namespace QDirStat
 	Ui::UnreadableDirsWindow * _ui;
 	Subtree			   _subtree;
 
-        static QPointer<UnreadableDirsWindow> _sharedInstance;
     };
 
 

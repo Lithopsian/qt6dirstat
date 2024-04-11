@@ -9,6 +9,7 @@
 #include <QPointer>
 
 #include "PanelMessage.h"
+#include "MainWindow.h"
 #include "SysUtil.h"
 #include "Logger.h"
 #include "Exception.h"
@@ -23,9 +24,6 @@ PanelMessage::PanelMessage( QWidget * parent ):
 {
     CHECK_NEW( _ui );
     _ui->setupUi( this );
-
-//    connect( _ui->detailsLinkLabel,	&QLabel::linkActivated,
-//	     this,			&PanelMessage::openDetailsUrl );
 }
 
 
@@ -34,8 +32,8 @@ PanelMessage::~PanelMessage()
 {
     delete _ui;
 }
-/*
 
+/*
 void PanelMessage::setDetails( const QString & urlText )
 {
     _ui->detailsLinkLabel->setText( "<a href=\"details\">" + urlText + "</a>" );
@@ -92,20 +90,21 @@ PanelMessage * PanelMessage::createMsg( QWidget * parent, QVBoxLayout * vBox )
 }
 
 
-QPointer<PanelMessage> PanelMessage::showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox )
+void PanelMessage::showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox )
 {
     static QPointer<PanelMessage> permissionsMsg;
     if ( !permissionsMsg )
     {
 	permissionsMsg = createMsg( parent, vBox );
 	permissionsMsg->_ui->stackedWidget->setCurrentWidget( permissionsMsg->_ui->permissionsPage );
-    }
 
-    return permissionsMsg;
+	connect( permissionsMsg->_ui->detailsLinkLabel, &QLabel::linkActivated,
+		 static_cast<MainWindow * >( parent ),  &MainWindow::showUnreadableDirs );
+    }
 }
 
 
-QPointer<PanelMessage> PanelMessage::showFilesystemsMsg( QWidget * parent, QVBoxLayout * vBox )
+void PanelMessage::showFilesystemsMsg( QWidget * parent, QVBoxLayout * vBox )
 {
     static QPointer<PanelMessage> filesystemsMsg;
     if ( !filesystemsMsg )
@@ -113,12 +112,10 @@ QPointer<PanelMessage> PanelMessage::showFilesystemsMsg( QWidget * parent, QVBox
 	filesystemsMsg = createMsg( parent, vBox );
 	filesystemsMsg->_ui->stackedWidget->setCurrentWidget( filesystemsMsg->_ui->filesystemsPage );
     }
-
-    return filesystemsMsg;
 }
 
 
-QPointer<PanelMessage> PanelMessage::showRpmMsg( QWidget * parent, QVBoxLayout * vBox )
+void PanelMessage::showRpmMsg( QWidget * parent, QVBoxLayout * vBox )
 {
     static QPointer<PanelMessage> rpmMsg;
     if ( !rpmMsg )
@@ -126,8 +123,14 @@ QPointer<PanelMessage> PanelMessage::showRpmMsg( QWidget * parent, QVBoxLayout *
 	rpmMsg = createMsg( parent, vBox );
 	rpmMsg->_ui->stackedWidget->setCurrentWidget( rpmMsg->_ui->rpmPage );
     }
-
-    return rpmMsg;
 }
 
 
+void PanelMessage::deletePermissionsMsg( const QWidget * parent )
+{
+    for ( PanelMessage * msg : parent->findChildren<PanelMessage *>() )
+    {
+	if ( msg->_ui->stackedWidget->currentWidget() == msg->_ui->permissionsPage )
+	    delete msg;
+    }
+}
