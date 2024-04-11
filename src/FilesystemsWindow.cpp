@@ -88,7 +88,7 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 
     static QPointer<FilesystemsWindow> _sharedInstance = nullptr;
 
-    if ( ! _sharedInstance )
+    if ( !_sharedInstance )
     {
 	_sharedInstance = new FilesystemsWindow( parent );
 	CHECK_NEW( _sharedInstance );
@@ -195,7 +195,7 @@ void FilesystemsWindow::enableActions()
 void FilesystemsWindow::readSelectedFilesystem()
 {
     const QString path = selectedPath();
-    if ( ! path.isEmpty() )
+    if ( !path.isEmpty() )
     {
 	//logDebug() << "Read " << path << Qt::endl;
 	emit readFilesystem( path );
@@ -208,7 +208,7 @@ QString FilesystemsWindow::selectedPath() const
     QString result;
 
     const QList<QTreeWidgetItem *> sel = _ui->fsTree->selectedItems();
-    if ( ! sel.isEmpty() )
+    if ( !sel.isEmpty() )
     {
 	const FilesystemItem * item = dynamic_cast<FilesystemItem *>( sel.first() );
 	if ( item )

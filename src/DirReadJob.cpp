@@ -25,72 +25,105 @@
 #define DONT_TRUST_NTFS_HARD_LINKS      1
 #define VERBOSE_NTFS_HARD_LINKS         0
 
+
 using namespace QDirStat;
 
 
-/**
- * Return the device name where 'dir' is on if it's a mount point.
- * This uses MountPoints which reads /proc/mounts.
- **/
-static QString device( const DirInfo * dir )
+namespace
 {
-    return MountPoints::device( dir->url() );
-}
-
-
-/**
- * Check if going from 'parent' to 'child' would cross a filesystem
- * boundary. This take Btrfs subvolumes into account.
- **/
-static bool crossingFilesystems( DirTree * tree, DirInfo * parent, DirInfo * child )
-{
-    if ( parent->device() == child->device() )
-	return false;
-
-    const QString childDevice	= device( child );
-    QString parentDevice	= device( parent->findNearestMountPoint() );
-    if ( parentDevice.isEmpty() )
-	parentDevice = tree->device();
-
-    // Not safe to assume that empty devices indicate filesystem crossing.
-    // Calling something a mountpoint when it isn't causes findNearestMountPoint()
-    // to return null and things then crash.
-    const bool crossing = !parentDevice.isEmpty() && !childDevice.isEmpty() && parentDevice != childDevice;
-    if ( crossing )
-	logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
-    else
-	logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
-
-    return crossing;
-}
-
-
-/**
- * Check if we really should cross into a mounted filesystem; don't do
- * it if this is a system mount, a bind mount, a filesystem mounted
- * multiple times, or a network mount (NFS / Samba).
- **/
-static bool shouldCrossIntoFilesystem( const DirInfo * dir )
-{
-    const MountPoint * mountPoint = MountPoints::findByPath( dir->url() );
-
-    if ( !mountPoint )
+    /**
+     * Return the device name where 'dir' is on if it's a mount point.
+     * This uses MountPoints which reads /proc/mounts.
+     **/
+    QString device( const DirInfo * dir )
     {
-        logError() << "Can't find mount point for " << dir->url() << Qt::endl;
-
-        return false;
+	return MountPoints::device( dir->url() );
     }
 
-    const bool doCross = !mountPoint->isSystemMount()  &&	//  /dev, /proc, /sys, ...
-			 !mountPoint->isDuplicate()    &&	//  bind mount or multiple mounted
-			 !mountPoint->isNetworkMount();		//  NFS or CIFS (Samba)
 
-//    logDebug() << ( doCross ? "Reading" : "Not reading" )
-//	       << " mounted filesystem " << mountPoint->path() << Qt::endl;
+    /**
+     * Check if going from 'parent' to 'child' would cross a filesystem
+     * boundary. This take Btrfs subvolumes into account.
+     **/
+    bool crossingFilesystems( DirTree * tree, DirInfo * parent, DirInfo * child )
+    {
+	if ( parent->device() == child->device() )
+	    return false;
 
-    return doCross;
-}
+	const QString childDevice	= device( child );
+	QString parentDevice	= device( parent->findNearestMountPoint() );
+	if ( parentDevice.isEmpty() )
+	    parentDevice = tree->device();
 
+	// Not safe to assume that empty devices indicate filesystem crossing.
+	// Calling something a mountpoint when it isn't causes findNearestMountPoint()
+	// to return null and things then crash.
+	const bool crossing = !parentDevice.isEmpty() && !childDevice.isEmpty() && parentDevice != childDevice;
+	if ( crossing )
+	    logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
+	else
+	    logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
+
+	return crossing;
+    }
+
+
+    /**
+     * Check if we really should cross into a mounted filesystem; don't do
+     * it if this is a system mount, a bind mount, a filesystem mounted
+     * multiple times, or a network mount (NFS / Samba).
+     **/
+    bool shouldCrossIntoFilesystem( const DirInfo * dir )
+    {
+	const MountPoint * mountPoint = MountPoints::findByPath( dir->url() );
+
+	if ( !mountPoint )
+	{
+	    logError() << "Can't find mount point for " << dir->url() << Qt::endl;
+
+	    return false;
+	}
+
+	const bool doCross = !mountPoint->isSystemMount()  &&	//  /dev, /proc, /sys, ...
+			     !mountPoint->isDuplicate()    &&	//  bind mount or multiple mounted
+			     !mountPoint->isNetworkMount();		//  NFS or CIFS (Samba)
+
+//        logDebug() << ( doCross ? "Reading" : "Not reading" )
+//	             << " mounted filesystem " << mountPoint->path() << Qt::endl;
+
+	return doCross;
+    }
+
+
+    /**
+     * Delete all jobs from the given queue, except 'exceptJob'.
+     **/
+    int killQueue( DirInfo * subtree, QList<DirReadJob *> &queue, const DirReadJob * exceptJob )
+    {
+	int count = 0;
+
+	QMutableListIterator<DirReadJob *> it( queue );
+	while ( it.hasNext() )
+	{
+	    DirReadJob * job = it.next();
+
+	    if ( exceptJob && job == exceptJob )
+	    {
+		//logDebug() << "NOT killing " << job << Qt::endl;
+	    }
+	    else if ( job->dir() && job->dir()->isInSubtree( subtree ) )
+	    {
+		//logDebug() << "Killing " << job << Qt::endl;
+		it.remove();
+		delete job;
+		++count;
+	    }
+	}
+
+	return count;
+    }
+
+} // namespace
 
 
 DirReadJob::DirReadJob( DirTree * tree,
@@ -228,6 +261,15 @@ void LocalDirReadJob::startReading()
 	const int flags = AT_SYMLINK_NOFOLLOW;
 #endif
 
+	// QMultiMap (just like QMap) guarantees sort order by keys, so we are
+	// now iterating over the directory entries by i-number order. Most
+	// filesystems will benefit from that since they store i-nodes sorted
+	// by i-number on disk, so (at least with rotational disks) seek times
+	// are minimized by this strategy.
+	//
+	// We need a QMultiMap, not just a map: If a file has multiple hard links
+	// in the same directory, a QMap would store only one of them, all others
+	// would go missing in the DirTree.
 	QMultiMap<ino_t, QString> entryMap;
 
 	while ( ( entry = readdir( diskDir ) ) )
@@ -237,16 +279,6 @@ void LocalDirReadJob::startReading()
 	    if ( entryName != "."  && entryName != ".."   )
 		entryMap.insert( entry->d_ino, entryName );
 	}
-
-	// QMultiMap (just like QMap) guarantees sort order by keys, so we are
-	// now iterating over the directory entries by i-number order. Most
-	// filesystems will benefit from that since they store i-nodes sorted
-	// by i-number on disk, so (at least with rotational disks) seek times
-	// are minimized by this strategy.
-	//
-	// Notice that we need a QMultiMap, not just a map: If a file has
-	// multiple hard links in the same directory, a QMap would store only
-	// one of them, all others would go missing in the DirTree.
 
 	for ( const QString & entryName : entryMap )
 	{
@@ -503,9 +535,8 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
 QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
     const QString dirName = _dirName == "/" ? "" : _dirName;  // Avoid leading // when in root dir
-    const QString result = dirName + "/" + entryName;
 
-    return result;
+    return dirName + "/" + entryName;
 }
 
 
@@ -530,28 +561,11 @@ bool LocalDirReadJob::isNtfs()
 
 
 
-/*
-CacheReadJob::CacheReadJob( bool	  automatic,
-			    DirTree	* tree,
-			    DirInfo	* parent,
-			    CacheReader * reader )
-    : ObjDirReadJob { tree, parent }
-    , _reader { reader }
-    , _automatic { automatic }
-{
-    if ( _reader )
-    {
-	_reader->rewind();
-	init();
-    }
-}
-*/
-
 CacheReadJob::CacheReadJob( DirTree	  * tree,
 			    DirInfo	  * dir,
 			    DirInfo	  * parent,
 			    const QString & cacheFileName )
-    : DirReadJob { tree, parent },
+    : DirReadJob ( tree, parent ),
       _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
 {
     CHECK_NEW( _reader );
@@ -562,7 +576,7 @@ CacheReadJob::CacheReadJob( DirTree	  * tree,
 
 CacheReadJob::CacheReadJob( DirTree	  * tree,
 			    const QString & cacheFileName )
-    : DirReadJob { tree, nullptr },
+    : DirReadJob ( tree, nullptr ),
       _reader { new CacheReader( cacheFileName, tree ) }
 {
     CHECK_NEW( _reader );
@@ -615,7 +629,7 @@ void CacheReadJob::read()
 
 
 DirReadJobQueue::DirReadJobQueue()
-    : QObject()
+    : QObject ()
 {
     connect( &_timer, &QTimer::timeout,
 	     this,    &DirReadJobQueue::timeSlicedRead );
@@ -683,44 +697,6 @@ void DirReadJobQueue::abort()
 }
 
 
-int DirReadJobQueue::killQueue( DirInfo * subtree, QList<DirReadJob *> &queue, const DirReadJob * exceptJob )
-{
-    int count = 0;
-
-    QMutableListIterator<DirReadJob *> it( queue );
-    while ( it.hasNext() )
-    {
-	DirReadJob * job = it.next();
-
-	if ( exceptJob && job == exceptJob )
-	{
-	    //logDebug() << "NOT killing " << job << Qt::endl;
-	}
-	else if ( job->dir() && job->dir()->isInSubtree( subtree ) )
-	{
-	    //logDebug() << "Killing " << job << Qt::endl;
-	    it.remove();
-	    delete job;
-	    ++count;
-	}
-    }
-
-    return count;
-}
-
-
-void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJob )
-{
-    if ( !subtree )
-	return;
-
-    const int count = killQueue( subtree, _queue, exceptJob ) + killQueue( subtree, _blocked, exceptJob );
-    Q_UNUSED( count );
-
-    //logDebug() << "Killed " << count << " read jobs for " << subtree << Qt::endl;
-}
-
-
 void DirReadJobQueue::timeSlicedRead()
 {
     if ( _queue.isEmpty() )
@@ -761,6 +737,19 @@ void DirReadJobQueue::deletingChildNotify( FileInfo * child )
 void DirReadJobQueue::addBlocked( DirReadJob * job )
 {
     _blocked.append( job );
+}
+
+
+void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJob )
+{
+    if ( !subtree )
+	return;
+
+    killQueue( subtree, _queue,   exceptJob );
+    killQueue( subtree, _blocked, exceptJob );
+
+    //const int count = killQueue( subtree, _queue, exceptJob ) + killQueue( subtree, _blocked, exceptJob );
+    //logDebug() << "Killed " << count << " read jobs for " << subtree << Qt::endl;
 }
 
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>371</width>
-    <height>402</height>
+    <height>438</height>
    </rect>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
@@ -148,6 +148,9 @@
         <string>Status bar</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
         <item row="0" column="0" colspan="2">
          <widget class="QCheckBox" name="useTreemapHoverCheckBox">
           <property name="toolTip">
@@ -235,6 +238,18 @@
          </widget>
         </item>
        </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="explainerLabel">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

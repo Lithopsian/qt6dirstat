@@ -23,7 +23,7 @@
 #include "Exception.h"
 
 
-// The ExistingDirCompleter is useful if there is are no other navigation tools
+// The ExistingDirCompleter is useful if there are no other navigation tools
 // that compete for widget focus and user attention, but here it's only
 // confusing: The dirTreeView, the pathCompleter and the pathComboBox fire off
 // a cascade of signals for every tiny change, and that makes the completer

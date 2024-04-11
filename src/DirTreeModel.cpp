@@ -21,136 +21,150 @@
 #include "FormatUtil.h"
 #include "Exception.h"
 
+
 // Number of clusters up to which a file will be considered small and will also
 // display the allocated size like (4k).
 #define SMALL_FILE_CLUSTERS     2
 
+
 using namespace QDirStat;
 
 
-// Debug helpers: static so they should disappear if they aren't being used.
-[[gnu::unused]] static void dumpDirectChildren( const FileInfo * dir )
+namespace
 {
-    if ( ! dir )
-	return;
-
-    FileInfoIterator it( dir );
-
-    if ( dir->hasChildren() )
+    // Debug helpers: static so they should disappear if they aren't being used.
+    [[gnu::unused]] void dumpDirectChildren( const FileInfo * dir )
     {
-	logDebug() << "Children of " << dir
-		   << "  (" << (void *) dir << ")"
-		   << Qt::endl;
-	int count = 0;
+	if ( ! dir )
+	    return;
 
-	while ( *it )
+	FileInfoIterator it( dir );
+
+	if ( dir->hasChildren() )
 	{
-	    logDebug() << "	   #" << count++ << ": "
-		       << (void *) *it
-		       << "	 " << *it
+	    logDebug() << "Children of " << dir
+		       << "  (" << (void *) dir << ")"
 		       << Qt::endl;
-	    ++it;
+	    int count = 0;
+
+	    while ( *it )
+	    {
+		logDebug() << "	   #" << count++ << ": "
+			   << (void *) *it
+			   << "	 " << *it
+			   << Qt::endl;
+		++it;
+	    }
+	}
+	else
+	{
+	    logDebug() << "    No children in " << dir << Qt::endl;
 	}
     }
-    else
+
+
+    [[gnu::unused]] void dumpPersistentIndexList( QModelIndexList persistentList )
     {
-	logDebug() << "    No children in " << dir << Qt::endl;
+	logDebug() << persistentList.size() << " persistent indexes" << Qt::endl;
+
+	for ( int i=0; i < persistentList.size(); ++i )
+	{
+	    const QModelIndex index = persistentList.at(i);
+
+	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+	    CHECK_MAGIC( item );
+
+	    logDebug() << "#" << i
+		       << " Persistent index "
+		       << index
+		       << Qt::endl;
+	}
     }
-}
 
 
-[[gnu::unused]] static void dumpPersistentIndexList( QModelIndexList persistentList )
-{
-    logDebug() << persistentList.size() << " persistent indexes" << Qt::endl;
-
-    for ( int i=0; i < persistentList.size(); ++i )
+    /**
+     * Format a percentage value as string if it is non-negative.
+     **/
+    QVariant formatPercentQVariant( float percent )
     {
-	const QModelIndex index = persistentList.at(i);
+	const QString text = QDirStat::formatPercent( percent );
 
-	FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
-	CHECK_MAGIC( item );
-
-	logDebug() << "#" << i
-		   << " Persistent index "
-		   << index
-		   << Qt::endl;
+	return text.isEmpty() ? QVariant() : text;
     }
-}
 
 
-/**
- * For sparse files, return a list of three strings for the delegate:
- * text describing the size, eg. "1.0MB "; text describing the allocated
- * size, eg. "(1.0kB)"; and text descriving the number of hard links, eg.
- * " / 3 links", which will be empty if there are not at least 2
- * hard links.
- **/
-static QStringList sparseSizeText( FileInfo * item )
-{
-    const QString sizeText = formatSize( item->rawByteSize() );
-    const QString allocText = " (" % formatSize( item->rawAllocatedSize() ) % ")";
-    const QString linksText = formatLinksInline( item->links() );
-    return { sizeText, allocText, linksText };
-}
+    /**
+     * For sparse files, return a list of three strings for the delegate:
+     * text describing the size, eg. "1.0MB "; text describing the allocated
+     * size, eg. "(1.0kB)"; and text descriving the number of hard links, eg.
+     * " / 3 links", which will be empty if there are not at least 2
+     * hard links.
+     **/
+    QStringList sparseSizeText( FileInfo * item )
+    {
+	const QString sizeText = formatSize( item->rawByteSize() );
+	const QString allocText = " (" % formatSize( item->rawAllocatedSize() ) % ")";
+	const QString linksText = formatLinksInline( item->links() );
+	return { sizeText, allocText, linksText };
+    }
 
 
-/**
- * Return text formatted as "42.0kB / 4 links".  This would normally only
- * ve called if the number of hard links is more than one.
- **/
-static QString linksSizeText( FileInfo * item )
-{
-    return QString( formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) );
-}
+    /**
+     * Return text formatted as "42.0kB / 4 links".  This would normally only
+     * ve called if the number of hard links is more than one.
+     **/
+    QString linksSizeText( FileInfo * item )
+    {
+	return QString( formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) );
+    }
 
 
-/**
- * Return a list containing two strings for the delegate: the size formatted
- * with special for individual bytes, eg "137 B "; and the allocated size in
- * whole kilobytes, eg. "(8k)". This is only intended to be called if
- * useSmallFilSizeText() returns true.
- **/
-static QStringList smallSizeText( FileInfo * item )
-{
-    const FileSize size = item->size();
-    const QString sizeText = size < 1000 ? formatShortByteSize( size ) : formatSize( size );
-    const QString allocText = QString( " (%1k)" ).arg( item->allocatedSize() / 1024 );
-    return { sizeText, allocText };
-}
+    /**
+     * Return a list containing two strings for the delegate: the size formatted
+     * with special for individual bytes, eg "137 B "; and the allocated size in
+     * whole kilobytes, eg. "(8k)". This is only intended to be called if
+     * useSmallFilSizeText() returns true.
+     **/
+    QStringList smallSizeText( FileInfo * item )
+    {
+	const FileSize size = item->size();
+	const QString sizeText = size < 1000 ? formatShortByteSize( size ) : formatSize( size );
+	const QString allocText = QString( " (%1k)" ).arg( item->allocatedSize() / 1024 );
+	return { sizeText, allocText };
+    }
 
 
-/**
- * Return 'true' if this is considered a small file or symlink,
- * i.e. non-null, but 2 clusters allocated or less.
- **/
-static bool useSmallFileSizeText( FileInfo * item )
-{
-    if ( !item || !item->tree() || item->blocks() == 0 || !( item->isFile() || item->isSymLink() ) )
-	return false;
+    /**
+     * Return 'true' if this is considered a small file or symlink,
+     * i.e. non-null, but 2 clusters allocated or less.
+     **/
+    bool useSmallFileSizeText( FileInfo * item )
+    {
+	if ( !item || !item->tree() || item->blocks() == 0 || !( item->isFile() || item->isSymLink() ) )
+	    return false;
 
-    const FileSize clusterSize = item->tree()->clusterSize();
-    if ( clusterSize == 0 )
-	return false;
+	const FileSize clusterSize = item->tree()->clusterSize();
+	if ( clusterSize == 0 )
+	    return false;
 
-    // More than 3 allocated clusters isn't "small"
-    const FileSize allocated = item->allocatedSize();
-    const int numClusters = allocated / clusterSize;
-    if ( numClusters > SMALL_FILE_CLUSTERS + 1 )
-	return false;
+	// More than 3 allocated clusters isn't "small"
+	const FileSize allocated = item->allocatedSize();
+	const int numClusters = allocated / clusterSize;
+	if ( numClusters > SMALL_FILE_CLUSTERS + 1 )
+	    return false;
 
-    // 3 allocated clusters, but less than 2.5 actually used is "small"
-    // 'unused' might be negative for sparse files, but the check will still be valid
-    const FileSize unused = allocated - item->rawByteSize();
-    if ( numClusters > SMALL_FILE_CLUSTERS && unused <= clusterSize / 2 )
-	return false;
+	// 3 allocated clusters, but less than 2.5 actually used is "small"
+	// 'unused' might be negative for sparse files, but the check will still be valid
+	const FileSize unused = allocated - item->rawByteSize();
+	if ( numClusters > SMALL_FILE_CLUSTERS && unused <= clusterSize / 2 )
+	    return false;
 
-    return allocated < 1024 * 1024 &&     // below 1 MB
-	   allocated >= 1024 &&           // at least 1k so the (?k) makes sense
-	   allocated % 1024 == 0;         // exact number of kB
-}
+	return allocated < 1024 * 1024 &&     // below 1 MB
+	       allocated >= 1024 &&           // at least 1k so the (?k) makes sense
+	       allocated % 1024 == 0;         // exact number of kB
+    }
 
-
-
+} // namespace
 
 
 DirTreeModel::DirTreeModel( QObject * parent ):
@@ -163,7 +177,7 @@ DirTreeModel::DirTreeModel( QObject * parent ):
     _updateTimer.setInterval( _updateTimerMillisec );
 
     connect( &_updateTimer, &QTimer::timeout,
-	     this,	    &DirTreeModel::sendPendingUpdates );
+	     this,          &DirTreeModel::sendPendingUpdates );
 }
 
 
@@ -431,6 +445,7 @@ FileInfo * DirTreeModel::itemFromIndex( const QModelIndex & index )
 
     FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
     CHECK_MAGIC( item );
+
     return item;
 }
 
@@ -545,7 +560,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    switch ( col )
 	    {
 		case PercentBarCol:
-		    return formatPercent( item->subtreeAllocatedPercent() );
+		    return formatPercentQVariant( item->subtreeAllocatedPercent() );
 
 		case SizeCol:
 		    return sizeColTooltip( item );
@@ -789,7 +804,7 @@ QVariant DirTreeModel::columnText( FileInfo * item, int col ) const
 	    if ( item->isAttic() || item == _tree->firstToplevel() )
 		return QVariant();
 
-	    return formatPercent( item->subtreeAllocatedPercent() );
+	    return formatPercentQVariant( item->subtreeAllocatedPercent() );
 	}
 
 	case NameCol:		  return item->name();
@@ -1239,14 +1254,6 @@ void DirTreeModel::invalidatePersistent( FileInfo * subtree,
 	}
     }
 
-}
-
-
-QVariant DirTreeModel::formatPercent( float percent )
-{
-    const QString text = ::formatPercent( percent );
-
-    return text.isEmpty() ? QVariant() : text;
 }
 
 

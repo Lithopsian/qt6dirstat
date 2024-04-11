@@ -30,7 +30,7 @@ GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
     setup();
 
     connect( parent, &ConfigDialog::applyChanges,
-	     this,   &GeneralConfigPage::applyChanges );
+             this,   &GeneralConfigPage::applyChanges );
 }
 
 
@@ -45,7 +45,7 @@ void GeneralConfigPage::setup()
     // All the values on this page are held in variables in MainWindow and
     // DirTreeModel (or DirTree).
     const MainWindow *mainWindow = (MainWindow *)app()->findMainWindow();
-    if ( !mainWindow )
+    if ( !mainWindow ) // yikes!
         return;
 
     const DirTreeModel *dirTreeModel = app()->dirTreeModel();
@@ -61,6 +61,9 @@ void GeneralConfigPage::setup()
     _ui->useTreemapHoverCheckBox->setChecked ( mainWindow->treemapView()->useTreemapHover() );
     _ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
     _ui->statusBarLongTimeoutSpinBox->setValue( mainWindow->longStatusBarTimeout() / 1000.0 );
+
+    _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) +
+                                  Settings::primaryFileName().replace( '/', "/⁠" ) ); // add word-joiner character
 }
 
 
@@ -79,8 +82,6 @@ void GeneralConfigPage::applyChanges()
                                       _ui->useBoldForDominantCheckBox->isChecked(),
                                       ( DirTreeItemSize )_ui->treeIconThemeComboBox->currentIndex(),
                                       _ui->treeUpdateIntervalSpinBox->value() );
-
-//        mainWindow->dirTreeView()->setStyles( _ui->treeIconThemeComboBox->currentIndex() );
     }
 
     mainWindow->updateSettings( _ui->urlInWindowTitleCheckBox->isChecked(),

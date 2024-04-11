@@ -129,15 +129,6 @@ qreal HistogramView::bestBucketCount( int n )
     return result;
 }
 
-/*
-qreal HistogramView::bucketWidth( qreal min, qreal max, int bucketCount )
-{
-    if ( bucketCount < 1 )
-	return 0;
-
-    return ( max - min ) / bucketCount;
-}
-*/
 
 qreal HistogramView::bucketStart( int index ) const
 {

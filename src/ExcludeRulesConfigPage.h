@@ -107,11 +107,6 @@ namespace QDirStat
 
 	QString valueText( void * value ) override;
 
-	/**
-	 * Comparison operator for two exclude rules.
-	 **/
-	static bool equal ( const ExcludeRule * rule1, const ExcludeRule * rule2 );
-
 
     private:
 

@@ -23,83 +23,88 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 using namespace QDirStat;
 
 
-/**
- * Set the font to bold for all items in a table row.
- **/
-static void setRowBold( QTableWidget * table, int row )
+namespace
 {
-    for ( int col=0; col < table->columnCount(); ++col )
+    /**
+     * Set the font to bold for all items in a table row.
+     **/
+    void setRowBold( QTableWidget * table, int row )
     {
-	QTableWidgetItem * item = table->item( row, col );
-	if ( item )
+	for ( int col=0; col < table->columnCount(); ++col )
 	{
-	    QFont font = item->font();
-	    font.setBold( true );
-	    item->setFont( font );
+	    QTableWidgetItem * item = table->item( row, col );
+	    if ( item )
+	    {
+		QFont font = item->font();
+		font.setBold( true );
+		item->setFont( font );
+	    }
 	}
     }
-}
 
-#if 0
-/**
- * Set the foreground (the text color) for all items in a table row.
- **/
-static void setRowForeground( QTableWidget * table, int row, const QBrush & brush )
-{
-    for ( int col=0; col < table->columnCount(); ++col )
+    #if 0
+    /**
+     * Set the foreground (the text color) for all items in a table row.
+     **/
+    void setRowForeground( QTableWidget * table, int row, const QBrush & brush )
     {
-	QTableWidgetItem * item = table->item( row, col );
-	if ( item )
-	    item->setForeground( brush );
+	for ( int col=0; col < table->columnCount(); ++col )
+	{
+	    QTableWidgetItem * item = table->item( row, col );
+	    if ( item )
+		item->setForeground( brush );
+	}
     }
-}
-#endif
+    #endif
 
-/**
- * Set the background for all items in a table row.
- **/
-static void setRowBackground( QTableWidget * table, int row, const QBrush & brush )
-{
-    for ( int col=0; col < table->columnCount(); ++col )
+    /**
+     * Set the background for all items in a table row.
+     **/
+    void setRowBackground( QTableWidget * table, int row, const QBrush & brush )
     {
-	QTableWidgetItem * item = table->item( row, col );
-	if ( item )
-	    item->setBackground( brush );
+	for ( int col=0; col < table->columnCount(); ++col )
+	{
+	    QTableWidgetItem * item = table->item( row, col );
+	    if ( item )
+		item->setBackground( brush );
+	}
     }
-}
 
 
-/**
- * Set the text alignment for all items in a table column.
- **/
-static void setColAlignment( QTableWidget * table, int col, Qt::Alignment alignment )
-{
-    for ( int row=0; row < table->rowCount(); ++row )
+    /**
+     * Set the text alignment for all items in a table column.
+     **/
+    void setColAlignment( QTableWidget * table, int col, Qt::Alignment alignment )
     {
-	QTableWidgetItem * item = table->item( row, col );
-	if ( item )
-	    item->setTextAlignment( alignment | Qt::AlignVCenter );
+	for ( int row=0; row < table->rowCount(); ++row )
+	{
+	    QTableWidgetItem * item = table->item( row, col );
+	    if ( item )
+		item->setTextAlignment( alignment | Qt::AlignVCenter );
+	}
     }
-}
 
 
-/**
- * Add an item to a table.
- **/
-static QTableWidgetItem * addItem( QTableWidget	 * table,
-				   int		   row,
-				   int		   col,
-				   const QString & text )
-{
-    QTableWidgetItem * item = new QTableWidgetItem( text );
-    CHECK_NEW( item );
-    table->setItem( row, col, item );
+    /**
+     * Add an item to a table.
+     **/
+    QTableWidgetItem * addItem( QTableWidget	 * table,
+				       int		   row,
+				       int		   col,
+				       const QString & text )
+    {
+	QTableWidgetItem * item = new QTableWidgetItem( text );
+	CHECK_NEW( item );
+	table->setItem( row, col, item );
 
-    return item;
-}
+	return item;
+    }
+
+} // namespace
 
 
 

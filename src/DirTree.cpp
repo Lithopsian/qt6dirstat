@@ -30,7 +30,180 @@
 
 #define VERBOSE_EXCLUDE_RULES 0
 
+
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Obtain information about the URL specified and create a new FileInfo
+     * or a DirInfo (whatever is appropriate) from that information. Use
+     * FileInfo::isDirInfo() to find out which.
+     *
+     * If the underlying syscall fails, this throws a SysCallException if
+     * 'doThrow' is 'true', and it just returns 0 if it is 'false'.
+     **/
+    FileInfo * stat( const QString & url,
+		     DirTree       * tree,
+		     DirInfo       * parent,
+		     bool            doThrow = true )
+    {
+	struct stat statInfo;
+	// logDebug() << "url: \"" << url << "\"" << Qt::endl;
+
+	if ( lstat( url.toUtf8(), &statInfo ) == 0 ) // lstat() OK
+	{
+	    QString name = url;
+
+	    if ( parent && parent != tree->root() )
+		name = SysUtil::baseName( url );
+
+	    if ( S_ISDIR( statInfo.st_mode ) )	// directory?
+	    {
+		DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
+		CHECK_NEW( dir );
+
+		if ( parent )
+		{
+		    parent->insertChild( dir );
+
+		    if ( !tree->isTopLevel( dir ) && !parent->isPkgInfo() && dir->device() != parent->device() )
+		    {
+			logDebug() << dir << " is a mount point" << Qt::endl;
+			dir->setMountPoint();
+		    }
+		}
+
+		return dir;
+	    }
+	    else					// no directory
+	    {
+		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
+		CHECK_NEW( file );
+
+		if ( parent )
+		    parent->insertChild( file );
+
+		return file;
+	    }
+	}
+	else // lstat() failed
+	{
+	    if ( doThrow )
+		THROW( SysCallFailedException( "lstat", url ) );
+
+	    return nullptr;
+	}
+    }
+
+
+    /**
+     * Move all items from the attic to the normal children list.
+     **/
+    void unatticAll( DirInfo * dir )
+    {
+	CHECK_PTR( dir );
+
+	if ( dir->attic() )
+	{
+	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
+	    dir->takeAllChildren( dir->attic() );
+	    dir->deleteEmptyAttic();
+	    dir->recalc();
+	}
+
+	for ( FileInfoIterator it( dir ); *it; ++it )
+	{
+	    if ( (*it)->isDirInfo() )
+		unatticAll( (*it)->toDirInfo() );
+	}
+    }
+
+
+    /**
+     * Recurse through the tree from 'dir' on and move any ignored items to
+     * the attic on the same level.
+     **/
+    void moveIgnoredToAttic( DirInfo * dir )
+    {
+	if ( !dir )
+	    return;
+
+	if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
+	    return;
+
+	// Not using FileInfoIterator because we don't want to iterate over the dot
+	// entry as well, just the normal children.
+
+	FileInfo * child = dir->firstChild();
+	FileInfoList ignoredChildren;
+
+	while ( child )
+	{
+	    if ( child->isIgnored() )
+		// Don't move the child right here, otherwise the iteration breaks
+		ignoredChildren << child;
+	    else
+		moveIgnoredToAttic( child->toDirInfo() );
+
+	    child = child->next();
+	}
+
+
+	for ( FileInfo * child : ignoredChildren )
+	{
+	    // logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
+	    dir->moveToAttic( child );
+
+	    if ( child->isDirInfo() )
+		unatticAll( child->toDirInfo() );
+	}
+
+	if ( !ignoredChildren.isEmpty() )
+	{
+	    dir->recalc();
+
+	    if ( dir->attic() )
+		dir->attic()->recalc();
+	}
+    }
+
+
+    /**
+     * Recurse through the tree from 'dir' on and ignore any empty dirs
+     * (i.e. dirs without any unignored non-directory child) that are not
+     * ignored yet.
+     **/
+    void ignoreEmptyDirs( DirInfo * dir )
+    {
+	CHECK_PTR( dir );
+
+	FileInfo * child = dir->firstChild();
+	FileInfoList ignoredChildren;
+
+	while ( child )
+	{
+	    if ( !child->isIgnored() && child->isDirInfo() )
+	    {
+		DirInfo * subDir = child->toDirInfo();
+
+		if ( subDir->totalUnignoredItems() == 0 )
+		{
+		    //logDebug() << "Ignoring empty subdir " << subDir << Qt::endl;
+		    subDir->setIgnored( true );
+		}
+		else
+		{
+		    ignoreEmptyDirs( subDir );
+		}
+	    }
+
+	    child = child->next();
+	}
+    }
+
+} // namespace
 
 
 DirTree::DirTree():
@@ -262,12 +435,6 @@ void DirTree::finalizeTree()
     }
 }
 
-/*
-void DirTree::slotFinished()
-{
-    sendFinished();
-}
-*/
 
 void DirTree::childAddedNotify( FileInfo * newChild )
 {
@@ -291,12 +458,6 @@ void DirTree::deletingChildNotify( FileInfo * deletedChild )
 	_root = nullptr;
 }
 
-/*
-void DirTree::childDeletedNotify()
-{
-    emit childDeleted();
-}
-*/
 
 void DirTree::deleteSubtree( FileInfo *subtree )
 {
@@ -454,13 +615,6 @@ bool DirTree::readCache( const QString & cacheFileName )
     return true;
 }
 
-/*
-void DirTree::clearAndReadCache( const QString & cacheFileName )
-{
-    clear();
-    readCache( cacheFileName, true );
-}
-*/
 
 void DirTree::readPkg( const PkgFilter & pkgFilter )
 {
@@ -524,100 +678,6 @@ bool DirTree::checkIgnoreFilters( const QString & path )
 }
 
 
-void DirTree::moveIgnoredToAttic( DirInfo * dir )
-{
-    if ( !dir )
-	return;
-
-    if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
-	return;
-
-    // Not using FileInfoIterator because we don't want to iterate over the dot
-    // entry as well, just the normal children.
-
-    FileInfo * child = dir->firstChild();
-    FileInfoList ignoredChildren;
-
-    while ( child )
-    {
-	if ( child->isIgnored() )
-	    // Don't move the child right here, otherwise the iteration breaks
-	    ignoredChildren << child;
-	else
-	    moveIgnoredToAttic( child->toDirInfo() );
-
-	child = child->next();
-    }
-
-
-    for ( FileInfo * child : ignoredChildren )
-    {
-	// logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
-	dir->moveToAttic( child );
-
-	if ( child->isDirInfo() )
-	    unatticAll( child->toDirInfo() );
-    }
-
-    if ( !ignoredChildren.isEmpty() )
-    {
-	dir->recalc();
-
-	if ( dir->attic() )
-	    dir->attic()->recalc();
-    }
-}
-
-
-void DirTree::ignoreEmptyDirs( DirInfo * dir )
-{
-    CHECK_PTR( dir );
-
-    FileInfo * child = dir->firstChild();
-    FileInfoList ignoredChildren;
-
-    while ( child )
-    {
-	if ( !child->isIgnored() && child->isDirInfo() )
-	{
-	    DirInfo * subDir = child->toDirInfo();
-
-	    if ( subDir->totalUnignoredItems() == 0 )
-	    {
-		//logDebug() << "Ignoring empty subdir " << subDir << Qt::endl;
-		subDir->setIgnored( true );
-	    }
-	    else
-	    {
-		ignoreEmptyDirs( subDir );
-	    }
-	}
-
-	child = child->next();
-    }
-}
-
-
-void DirTree::unatticAll( DirInfo * dir )
-{
-    CHECK_PTR( dir );
-
-    if ( dir->attic() )
-    {
-	//logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
-	dir->takeAllChildren( dir->attic() );
-	dir->deleteEmptyAttic();
-	dir->recalc();
-    }
-
-    for ( FileInfoIterator it( dir ); *it; ++it )
-    {
-	if ( (*it)->isDirInfo() )
-	    unatticAll( (*it)->toDirInfo() );
-    }
-}
-
-
 void DirTree::recalc( DirInfo * dir )
 {
     CHECK_PTR( dir );
@@ -657,64 +717,6 @@ void DirTree::detectClusterSize( FileInfo * item )
 //        logDebug() << "Derived from " << item << " " << formatSize( item->rawByteSize() )
 //                   << " (allocated: " << formatSize( item->rawAllocatedSize() ) << ")"
 //                   << Qt::endl;
-    }
-}
-
-
-FileInfo * DirTree::stat( const QString & url,
-				  DirTree	* tree,
-				  DirInfo	* parent,
-				  bool		  doThrow )
-{
-    struct stat statInfo;
-    // logDebug() << "url: \"" << url << "\"" << Qt::endl;
-
-    if ( lstat( url.toUtf8(), &statInfo ) == 0 ) // lstat() OK
-    {
-	QString name = url;
-
-	if ( parent && parent != tree->root() )
-	    name = SysUtil::baseName( url );
-//	{
-//	    const QStringList components = url.split( "/", Qt::SkipEmptyParts );
-//	    name = components.last();
-//	}
-
-	if ( S_ISDIR( statInfo.st_mode ) )	// directory?
-	{
-	    DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
-	    CHECK_NEW( dir );
-
-	    if ( parent )
-	    {
-		parent->insertChild( dir );
-
-		if ( !tree->isTopLevel( dir ) && !parent->isPkgInfo() && dir->device() != parent->device() )
-		{
-		    logDebug() << dir << " is a mount point" << Qt::endl;
-		    dir->setMountPoint();
-		}
-	    }
-
-	    return dir;
-	}
-	else					// no directory
-	{
-	    FileInfo * file = new FileInfo( parent, tree, name, statInfo );
-	    CHECK_NEW( file );
-
-	    if ( parent )
-		parent->insertChild( file );
-
-	    return file;
-	}
-    }
-    else // lstat() failed
-    {
-	if ( doThrow )
-	    THROW( SysCallFailedException( "lstat", url ) );
-
-	return nullptr;
     }
 }
 

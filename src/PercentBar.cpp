@@ -23,6 +23,27 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Return a color that contrasts with 'contrastColor'.
+     **/
+    QColor contrastingColor( const QColor &desiredColor,
+			     const QColor &contrastColor )
+    {
+	if ( desiredColor != contrastColor )
+	    return desiredColor;
+
+	if ( contrastColor != contrastColor.lighter() )
+	    // try a little lighter
+	    return contrastColor.lighter();
+	else
+	    // try a little darker
+	    return contrastColor.darker();
+    }
+} // namespace
+
+
 PercentBarDelegate::PercentBarDelegate( QTreeView * treeView,
                                         int         percentBarCol,
 					int         startColorIndex,
@@ -160,14 +181,12 @@ void PercentBarDelegate::paintPercentBar( QPainter		     * painter,
 	painter->fillRect( x + penWidth, y + penWidth,
 			   w - 2 * penWidth + 1, h - 2 * penWidth + 1,
 			   _barBackground );
-	/*
-	 * Notice: The Xlib XDrawRectangle() function always fills one
-	 * pixel less than specified. Although this is very likely just a
-	 * plain old bug, it is documented that way. Obviously, Qt just
-	 * maps the fillRect() call directly to XDrawRectangle() so they
-	 * inherited that bug (although the Qt doc stays silent about
-	 * it). So it is really necessary to compensate for that missing
-	 * pixel in each dimension.
+
+	/**
+	 * The Xlib XDrawRectangle() function always fills one pixel less
+	 * than specified. Although this is very likely just a plain old bug,
+	 * it is documented that way. Qt maps the fillRect() call directly
+	 * to XDrawRectangle() so they inherited that feature.
 	 **/
 
 	// Fill the percentage
@@ -196,19 +215,4 @@ void PercentBarDelegate::paintPercentBar( QPainter		     * painter,
 	painter->drawLine( x+2, y+h-1, x+w-1, y+h-1 );
 	painter->drawLine( x+w-1, y+1, x+w-1, y+h-1 );
     }
-}
-
-
-QColor PercentBarDelegate::contrastingColor( const QColor &desiredColor,
-					     const QColor &contrastColor )
-{
-    if ( desiredColor != contrastColor )
-	return desiredColor;
-
-    if ( contrastColor != contrastColor.lighter() )
-	// try a little lighter
-	return contrastColor.lighter();
-    else
-	// try a little darker
-	return contrastColor.darker();
 }

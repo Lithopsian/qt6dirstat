@@ -21,50 +21,60 @@
 using namespace QDirStat;
 
 
-qreal TreeWalker::upperPercentileThreshold( PercentileStats & stats )
+namespace
 {
-    const int percentile = [&stats]()
+    /**
+     * Calculate a data value threshold from a set of PercentileStats from
+     * an upper percentile up to the maximum value (P100).
+     **/
+    qreal upperPercentileThreshold( PercentileStats & stats )
     {
-        if ( stats.size() <= 100 )                return 80;
-        if ( stats.size() * 0.10 <= MAX_RESULTS ) return 90;
-        if ( stats.size() * 0.05 <= MAX_RESULTS ) return 95;
-        if ( stats.size() * 0.01 <= MAX_RESULTS ) return 99;
-        return 0;
-    }();
+        const int percentile = [&stats]()
+        {
+            if ( stats.size() <= 100 )                return 80;
+            if ( stats.size() * 0.10 <= MAX_RESULTS ) return 90;
+            if ( stats.size() * 0.05 <= MAX_RESULTS ) return 95;
+            if ( stats.size() * 0.01 <= MAX_RESULTS ) return 99;
+            return 0;
+        }();
 
-    if ( percentile > 0 )
-    {
-        //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
-        return stats.percentile( percentile );
+        if ( percentile > 0 )
+        {
+            //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
+            return stats.percentile( percentile );
+        }
+
+        //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
+        return stats.at( stats.size() - MAX_RESULTS );
     }
 
-    //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
-    return stats.at( stats.size() - MAX_RESULTS );
-}
 
-
-qreal TreeWalker::lowerPercentileThreshold( PercentileStats & stats )
-{
-    const int percentile = [&stats]()
+    /**
+     * Calculate a data value threshold from a set of PercentileStats from
+     * an the minimum value (P0) to a lower percentile.
+     **/
+    qreal lowerPercentileThreshold( PercentileStats & stats )
     {
-        if ( stats.size() <= 100 )                return 20;
-        if ( stats.size() * 0.10 <= MAX_RESULTS ) return 10;
-        if ( stats.size() * 0.05 <= MAX_RESULTS ) return 5;
-        if ( stats.size() * 0.01 <= MAX_RESULTS ) return 1;
-        return 0;
-    }();
+        const int percentile = [&stats]()
+        {
+            if ( stats.size() <= 100 )                return 20;
+            if ( stats.size() * 0.10 <= MAX_RESULTS ) return 10;
+            if ( stats.size() * 0.05 <= MAX_RESULTS ) return 5;
+            if ( stats.size() * 0.01 <= MAX_RESULTS ) return 1;
+            return 0;
+        }();
 
-    if ( percentile > 0 )
-    {
-        //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
-        return stats.percentile( percentile );
+        if ( percentile > 0 )
+        {
+            //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
+            return stats.percentile( percentile );
+        }
+
+        //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
+        return stats.at( MAX_RESULTS );
     }
 
-    //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
-    return stats.at( MAX_RESULTS );
-}
-
-
+} // namespace
 
 
 void LargestFilesTreeWalker::prepare( FileInfo * subtree )

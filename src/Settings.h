@@ -39,11 +39,6 @@ namespace QDirStat
 	Settings( const QString & name = QString() );
 
 	/**
-	 * Destructor.
-	 **/
-	~Settings() override;
-
-	/**
 	 * Name of this settings object. This returns an empty string for the
 	 * generic settings, i.e. the main config file.
 	 **/
@@ -103,6 +98,11 @@ namespace QDirStat
 	 * Go to the settings top level
 	 **/
 	void ensureToplevel();
+
+	/**
+	 * Return the filename of the main settings file
+	 **/
+	static QString primaryFileName();
 
 	/**
 	 * Set the owner of all used config files to the correct one if this

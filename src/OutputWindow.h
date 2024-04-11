@@ -96,7 +96,8 @@ public:
     void showAfterTimeout( int timeoutMillisec = 0 );
 
     /**
-     * Return the default window show timeout in milliseconds.
+     * Return the default window show timeout in milliseconds.  This is used
+     * by CleanupConfigPage as well as within this class.
      **/
     static int defaultShowTimeout();
 

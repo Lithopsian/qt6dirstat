@@ -18,77 +18,82 @@ using namespace QDirStat;
 
 
 
-static bool isSystemUid( uid_t uid )
+namespace
 {
-    return uid < (uid_t) MIN_NON_SYSTEM_UID;
-}
-
-
-static bool isSystemPath( const QString & path )
-{
-    if ( path.startsWith( "/boot/"  ) ||
-         path.startsWith( "/bin/"   ) ||
-         path.startsWith( "/dev/"   ) ||
-         path.startsWith( "/etc/"   ) ||
-         path.startsWith( "/lib/"   ) ||
-         path.startsWith( "/lib32/" ) ||
-         path.startsWith( "/lib64/" ) ||
-         path.startsWith( "/opt/"   ) ||
-         path.startsWith( "/proc/"  ) ||
-         path.startsWith( "/sbin/"  ) ||
-         path.startsWith( "/sys/"   )   )
+    bool isSystemUid( uid_t uid )
     {
-        return true;
+        return uid < (uid_t) MIN_NON_SYSTEM_UID;
     }
 
-    if ( path.startsWith( "/usr/" ) &&
-         ! path.startsWith( "/usr/local/" ) )
+
+    bool isSystemPath( const QString & path )
     {
-        return true;
+        if ( path.startsWith( "/boot/"  ) ||
+             path.startsWith( "/bin/"   ) ||
+             path.startsWith( "/dev/"   ) ||
+             path.startsWith( "/etc/"   ) ||
+             path.startsWith( "/lib/"   ) ||
+             path.startsWith( "/lib32/" ) ||
+             path.startsWith( "/lib64/" ) ||
+             path.startsWith( "/opt/"   ) ||
+             path.startsWith( "/proc/"  ) ||
+             path.startsWith( "/sbin/"  ) ||
+             path.startsWith( "/sys/"   )   )
+        {
+            return true;
+        }
+
+        if ( path.startsWith( "/usr/" ) &&
+             ! path.startsWith( "/usr/local/" ) )
+        {
+            return true;
+        }
+
+        /**
+         * Intentionally NOT considered true system paths:
+         *
+         *   /cdrom
+         *   /home
+         *   /lost+found
+         *   /media
+         *   /mnt
+         *   /root
+         *   /run
+         *   /srv
+         *   /tmp
+         *   /var
+         *
+         * Some of those might be debatable: While it is true that no mere user
+         * should mess with anything outside his home directory, some might work on
+         * web projects below /srv, some might write or use software that does
+         * things below /run, some might be in the process of cleaning up a mess
+         * left behind by fsck below /lost+found, some may wish to clean up
+         * accumulated logs and spool files and whatnot below /var.
+         *
+         * Of course many users might legitimately use classic removable media
+         * mount points like /cdrom, /media, /mnt, and all users are free to use
+         * /tmp and /var/tmp.
+         **/
+
+        return false;
     }
 
-    /**
-     * Intentionally NOT considered true system paths:
-     *
-     *   /cdrom
-     *   /home
-     *   /lost+found
-     *   /media
-     *   /mnt
-     *   /root
-     *   /run
-     *   /srv
-     *   /tmp
-     *   /var
-     *
-     * Some of those might be debatable: While it is true that no mere user
-     * should mess with anything outside his home directory, some might work on
-     * web projects below /srv, some might write or use software that does
-     * things below /run, some might be in the process of cleaning up a mess
-     * left behind by fsck below /lost+found, some may wish to clean up
-     * accumulated logs and spool files and whatnot below /var.
-     *
-     * Of course many users might legitimately use classic removable media
-     * mount points like /cdrom, /media, /mnt, and all users are free to use
-     * /tmp and /var/tmp.
-     **/
 
-    return false;
-}
-
-
-static bool mightBeSystemPath( const QString & path )
-{
-    if ( path.contains  ( "/lost+found/" ) ||   // Also on other mounted filesystems!
-         path.startsWith( "/run/"        ) ||
-         path.startsWith( "/srv/"        ) ||
-         path.startsWith( "/var/"        )   )
+    bool mightBeSystemPath( const QString & path )
     {
-        return true;
+        if ( path.contains  ( "/lost+found/" ) ||   // Also on other mounted filesystems!
+             path.startsWith( "/run/"        ) ||
+             path.startsWith( "/srv/"        ) ||
+             path.startsWith( "/var/"        )   )
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    return false;
-}
+} // namespace
+
 
 
 bool SystemFileChecker::isSystemFile( const FileInfo * file )

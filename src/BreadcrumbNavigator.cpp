@@ -21,15 +21,48 @@
 #define MAX_TOTAL_LEN         120
 #define SHORTENED_LEN          10
 
+
 using namespace QDirStat;
 
+
+namespace
+{
+    /**
+     * Split a path up into its base path (everything up to the last path
+     * component) and its base name (the last path component).
+     *
+     * Both 'basePath_ret' and 'name_ret' are return parameters and will be
+     * modified by this function. If nonempty, a trailing path separator
+     * ("/") is added to 'basePath_ret'.
+     **/
+    void splitBasePath( const QString & path,
+                        QString       & basePath_ret, // return parameter
+                        QString       & name_ret )    // return parameter
+    {
+        basePath_ret = "";
+        name_ret = path;
+
+        if ( path != "/" && path.contains( "/" ) )
+        {
+            QStringList components = path.split( "/", Qt::SkipEmptyParts );
+
+            if ( !components.empty() )
+                name_ret = components.takeLast();
+
+            if ( !components.empty() )
+                basePath_ret = components.join( "/" ) + "/";
+
+            if ( path.startsWith( "/" ) )
+                basePath_ret.prepend( "/" );
+        }
+    }
+} // namespace
 
 
 BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
     QLabel ( parent )
 {
     clear();
-//    setTextFormat( Qt::RichText );
 
 #if VERBOSE_BREADCRUMBS
     connect( this, &BreadcrumbNavigator::linkActivated,
@@ -137,7 +170,7 @@ void BreadcrumbNavigator::shortenBreadcrumbs()
             return;
 
         longestCrumb->displayName = elideMiddle( longestCrumb->pathComponent, SHORTENED_LEN );
-#if 1
+#if VERBOSE_BREADCRUMBS
         logDebug() << "Shortened from " << longestCrumb->pathComponent.length()
                    << " to " << longestCrumb->displayName.length()
                    << ": " << longestCrumb->pathComponent << Qt::endl;
@@ -181,28 +214,6 @@ int BreadcrumbNavigator::breadcrumbsLen() const
     return len;
 }
 
-
-void BreadcrumbNavigator::splitBasePath( const QString & path,
-                                         QString       & basePath_ret, // return parameter
-                                         QString       & name_ret )    // return parameter
-{
-    basePath_ret = "";
-    name_ret = path;
-
-    if ( path != "/" && path.contains( "/" ) )
-    {
-        QStringList components = path.split( "/", Qt::SkipEmptyParts );
-
-        if ( !components.empty() )
-            name_ret = components.takeLast();
-
-        if ( !components.empty() )
-            basePath_ret = components.join( "/" ) + "/";
-
-        if ( path.startsWith( "/" ) )
-            basePath_ret.prepend( "/" );
-    }
-}
 
 void BreadcrumbNavigator::logPathClicked( const QString & path )
 {

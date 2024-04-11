@@ -54,10 +54,10 @@ namespace QDirStat
     protected slots:
 
         /**
-         * Save the values of the widgets to the settings / the config file or
+         * Save the values of the widgets to the settings file or
          * to internal static variables.
          **/
-        void finish( int result );
+        void accept();
 
 
     protected:

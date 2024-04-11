@@ -16,17 +16,22 @@
 using namespace QDirStat;
 
 
-static QString defaultStartingDir()
-    { return "/"; }
+namespace
+{
+    // Default value getters
+    QString defaultStartingDir()
+        { return "/"; }
 
-static QStringList defaultExcludeDirs()
-    { return { "/home", "/root", "/tmp", "/var", "/snap", "/usr/lib/sysimage/rpm", "/usr/local" }; }
+    QStringList defaultExcludeDirs()
+        { return { "/home", "/root", "/tmp", "/var", "/snap", "/usr/lib/sysimage/rpm", "/usr/local" }; }
 
-static QStringList defaultIgnorePatterns()
-    { return { "*.pyc" }; }
+    QStringList defaultIgnorePatterns()
+        { return { "*.pyc" }; }
 
-static bool defaultCrossFilesystems()
-    { return false; }
+    bool defaultCrossFilesystems()
+        { return false; }
+
+} // namespace
 
 
 UnpkgSettings::UnpkgSettings()
@@ -64,8 +69,8 @@ void UnpkgSettings::write()
 
     settings.beginGroup( "UnpkgSettings" );
 
-    settings.setValue( "StartingDir",	   _startingDir      );
-    settings.setValue( "ExcludeDirs",	   _excludeDirs      );
+    settings.setValue( "StartingDir",      _startingDir      );
+    settings.setValue( "ExcludeDirs",      _excludeDirs      );
     settings.setValue( "IgnorePatterns",   _ignorePatterns   );
     settings.setValue( "CrossFilesystems", _crossFilesystems );
 
@@ -85,9 +90,9 @@ UnpkgSettings UnpkgSettings::defaultSettings()
 void UnpkgSettings::dump() const
 {
 #if 0
-    logDebug() << "startingDir:      " << _startingDir << Qt::endl;
-    logDebug() << "excludeDirs:      " << _excludeDirs << Qt::endl;
-    logDebug() << "ignorePatterns:   " << _ignorePatterns << Qt::endl;
+    logDebug() << "startingDir:      " << _startingDir      << Qt::endl;
+    logDebug() << "excludeDirs:      " << _excludeDirs      << Qt::endl;
+    logDebug() << "ignorePatterns:   " << _ignorePatterns   << Qt::endl;
     logDebug() << "crossFilesystems: " << _crossFilesystems << Qt::endl;
 #endif
 }

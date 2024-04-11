@@ -51,7 +51,7 @@ void MainWindow::initLayouts( const QString & currentLayoutName )
     _layoutActionGroup = new QActionGroup( this );
     CHECK_NEW( _layoutActionGroup );
 
-    // Notice that the column layouts are handled in the HeaderTweaker and its
+    // Note that the column layouts are handled in the HeaderTweaker and its
     // ColumnLayout helper class; see also HeaderTweaker.h and .cpp.
     //
     // The layout names "L1", "L2", "L3" here are important: They need to match

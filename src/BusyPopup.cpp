@@ -15,7 +15,21 @@
 
 #define PROCESS_EVENTS_MILLISEC 500
 
+
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Process events (except user input events) for the specified time.
+     **/
+    void processEvents( int millisec )
+    {
+	QEventLoop eventLoop;
+	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents, millisec );
+    }
+} // namespace
 
 
 BusyPopup::BusyPopup( const QString & text,
@@ -39,13 +53,6 @@ void BusyPopup::post()
     show();
     processEvents( PROCESS_EVENTS_MILLISEC );
     _posted = true;
-}
-
-
-void BusyPopup::processEvents( int millisec )
-{
-    QEventLoop eventLoop;
-    eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents, millisec );
 }
 
 

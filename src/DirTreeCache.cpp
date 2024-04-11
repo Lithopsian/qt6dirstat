@@ -31,126 +31,131 @@
 #define VERBOSE_CACHE_FILE_INFOS	0
 #define DEBUG_LOCATE_PARENT		0
 
+
 using namespace QDirStat;
 
 
-/**
- * Format a file size as string - with trailing "G", "M", "K" for
- * "Gigabytes", "Megabytes, "Kilobytes", respectively (provided there
- * is no fractional part - 27M is OK, 27.2M is not).
- **/
-static QString formatSize( FileSize size )
+namespace
 {
-    // Multiples of 1024 are common, any larger multiple freakishly rare
-    return size >= KB && size % KB == 0 ? QString( "%1K" ).arg( size / KB ) : QString::number( size );
-}
+    /**
+     * Format a file size as string - with trailing "G", "M", "K" for
+     * "Gigabytes", "Megabytes, "Kilobytes", respectively (provided there
+     * is no fractional part - 27M is OK, 27.2M is not).
+     **/
+    QString formatSize( FileSize size )
+    {
+	// Multiples of 1024 are common, any larger multiple freakishly rare
+	return size >= KB && size % KB == 0 ? QString( "%1K" ).arg( size / KB ) : QString::number( size );
+    }
 
 
-/**
- * Return a string representing the type of file.
- **/
-static const char * fileType( const FileInfo * item )
-{
-    if ( item->isFile()		) return "F";
-    if ( item->isDir()		) return "D";
-    if ( item->isSymLink()	) return "L";
-    if ( item->isBlockDevice()	) return "BlockDev";
-    if ( item->isCharDevice()	) return "CharDev";
-    if ( item->isFifo()		) return "FIFO";
-    if ( item->isSocket()	) return "Socket";
-    return "";
-}
+    /**
+     * Return a string representing the type of file.
+     **/
+    const char * fileType( const FileInfo * item )
+    {
+	if ( item->isFile()		) return "F";
+	if ( item->isDir()		) return "D";
+	if ( item->isSymLink()	) return "L";
+	if ( item->isBlockDevice()	) return "BlockDev";
+	if ( item->isCharDevice()	) return "CharDev";
+	if ( item->isFifo()		) return "FIFO";
+	if ( item->isSocket()	) return "Socket";
+	return "";
+    }
 
 
-/**
- * Return the 'path' in an URL-encoded form, i.e. with some special
- * characters escaped in percent notation (" " -> "%20").
- **/
-static QByteArray urlEncoded( const QString & path )
-{
-    // Using a protocol ("scheme") part to avoid directory names with a colon
-    // ":" being cut off because it looks like a URL protocol.
-    QUrl url;
-    url.setScheme( "foo" );
-    url.setPath( path );
+    /**
+     * Return the 'path' in an URL-encoded form, i.e. with some special
+     * characters escaped in percent notation (" " -> "%20").
+     **/
+    QByteArray urlEncoded( const QString & path )
+    {
+	// Using a protocol ("scheme") part to avoid directory names with a colon
+	// ":" being cut off because it looks like a URL protocol.
+	QUrl url;
+	url.setScheme( "foo" );
+	url.setPath( path );
 
-    const QByteArray encoded = url.toEncoded( QUrl::RemoveScheme );
-    if ( encoded.isEmpty() )
-        logError() << "Invalid file/dir name: " << path << Qt::endl;
+	const QByteArray encoded = url.toEncoded( QUrl::RemoveScheme );
+	if ( encoded.isEmpty() )
+	    logError() << "Invalid file/dir name: " << path << Qt::endl;
 
-    return encoded;
+	return encoded;
 
-}
+    }
 
 
     /**
      * Write 'item' to cache file 'cache' without recursion.
      * Uses zlib to write gzip-compressed files.
      **/
-static void writeItem( gzFile cache, const FileInfo * item )
-{
-    if ( !item )
-	return;
+    void writeItem( gzFile cache, const FileInfo * item )
+    {
+	if ( !item )
+	    return;
 
-    // Write file type
-    gzprintf( cache, fileType( item ) );
+	// Write file type
+	gzprintf( cache, fileType( item ) );
 
-    // Write name
-    if ( item->isDirInfo() && !item->isDotEntry() )
-	gzprintf( cache, " %-40s", urlEncoded( item->url() ).data() ); // absolute path
-    else
-	gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).data() ); // relative path
+	// Write name
+	if ( item->isDirInfo() && !item->isDotEntry() )
+	    gzprintf( cache, " %-40s", urlEncoded( item->url() ).data() ); // absolute path
+	else
+	    gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).data() ); // relative path
 
-    // Write size
-    gzprintf( cache, "\t%s", formatSize( item->rawByteSize() ).toUtf8().data() );
+	// Write size
+	gzprintf( cache, "\t%s", formatSize( item->rawByteSize() ).toUtf8().data() );
 
-    // For uid, gid, and permissions (mode also identifies the object type)
-    gzprintf( cache, "\t%4d\t%4d\t%06o", item->uid(), item->gid(), item->mode() );
+	// For uid, gid, and permissions (mode also identifies the object type)
+	gzprintf( cache, "\t%4d\t%4d\t%06o", item->uid(), item->gid(), item->mode() );
 
-    // Write mtime
-    gzprintf( cache, "\t0x%lx", (unsigned long)item->mtime() );
+	// Write mtime
+	gzprintf( cache, "\t0x%lx", (unsigned long)item->mtime() );
 
-    // Write allocated size (and dummy to maintain compatibility with earlier formats)
-    gzprintf( cache, "\t%s\t|", formatSize( item->rawAllocatedSize() ).toUtf8().data() );
+	// Write allocated size (and dummy to maintain compatibility with earlier formats)
+	gzprintf( cache, "\t%s\t|", formatSize( item->rawAllocatedSize() ).toUtf8().data() );
 
-    // Optional fields
-    if ( item->isExcluded() )
-	gzprintf( cache, "\tunread: %s", "excluded" );
-    if ( item->readState() == DirPermissionDenied )
-	gzprintf( cache, "\tunread: %s", "permissions" );
-    if ( item->isMountPoint() && item->readState() == DirOnRequestOnly )
-	gzprintf( cache, "\tunread: %s", "mountpoint" );
-    if ( item->isSparseFile() )
-	gzprintf( cache, "\tblocks: %lld", item->blocks() );
-    if ( item->isFile() && item->links() > 1 )
-	gzprintf( cache, "\tlinks: %u", (unsigned) item->links() );
+	// Optional fields
+	if ( item->isExcluded() )
+	    gzprintf( cache, "\tunread: %s", "excluded" );
+	if ( item->readState() == DirPermissionDenied )
+	    gzprintf( cache, "\tunread: %s", "permissions" );
+	if ( item->isMountPoint() && item->readState() == DirOnRequestOnly )
+	    gzprintf( cache, "\tunread: %s", "mountpoint" );
+	if ( item->isSparseFile() )
+	    gzprintf( cache, "\tblocks: %lld", item->blocks() );
+	if ( item->isFile() && item->links() > 1 )
+	    gzprintf( cache, "\tlinks: %u", (unsigned) item->links() );
 
-    // One item per line
-    gzputc( cache, '\n' );
-}
+	// One item per line
+	gzputc( cache, '\n' );
+    }
 
 
-/**
- * Write 'item' recursively to cache file 'cache'.
- * Uses zlib to write gzip-compressed files.
- **/
-static void writeTree( gzFile cache, const FileInfo * item )
-{
-    if ( !item )
-	return;
+    /**
+     * Write 'item' recursively to cache file 'cache'.
+     * Uses zlib to write gzip-compressed files.
+     **/
+    void writeTree( gzFile cache, const FileInfo * item )
+    {
+	if ( !item )
+	    return;
 
-    // Write entry for this item
-    if ( !item->isDotEntry() )
-	writeItem( cache, item );
+	// Write entry for this item
+	if ( !item->isDotEntry() )
+	    writeItem( cache, item );
 
-    // Write file children
-    if ( item->dotEntry() )
-	writeTree( cache, item->dotEntry() );
+	// Write file children
+	if ( item->dotEntry() )
+	    writeTree( cache, item->dotEntry() );
 
-    // Recurse through subdirectories
-    for ( FileInfo * child = item->firstChild(); child; child = child->next() )
-	writeTree( cache, child );
-}
+	// Recurse through subdirectories
+	for ( FileInfo * child = item->firstChild(); child; child = child->next() )
+	    writeTree( cache, child );
+    }
+
+} // namespace
 
 
 
@@ -182,108 +187,110 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree *tree )
 
 
 
-
-
-/**
- * Skip leading whitespace from a string.
- * Returns a pointer to the first character that is non-whitespace.
- **/
-static char * skipWhiteSpace( char * cptr )
+namespace
 {
-    if ( cptr == nullptr )
-	return nullptr;
-
-    while ( *cptr != '\0' && isspace( *cptr ) )
-	cptr++;
-
-    return cptr;
-}
-
-
-/**
- * Find the next whitespace in a string.
- *
- * Returns a pointer to the next whitespace character
- * or a null pointer if there is no more whitespace in the string.
- **/
-static char * findNextWhiteSpace( char * cptr )
-{
-    if ( cptr == nullptr )
-	return nullptr;
-
-    while ( *cptr != '\0' && !isspace( *cptr ) )
-	cptr++;
-
-    return *cptr == '\0' ? nullptr : cptr;
-}
-
-
-/**
- * Remove all trailing whitespace from a string - overwrite it with 0
- * bytes.
- *
- * Returns the new string length.
- **/
-static void killTrailingWhiteSpace( char * cptr )
-{
-    if ( cptr == nullptr )
-	return;
-
-    const char * start = cptr;
-    cptr += strlen( start ) - 1;
-
-    while ( cptr >= start && isspace( *cptr ) )
-	*cptr-- = '\0';
-}
-
-
-/**
- * Split up a file name with path into its path and its name component
- * and return them in path_ret and name_ret, respectively.
- *
- * Example:
- *     "/some/dir/somewhere/myfile.obj"
- * ->  "/some/dir/somewhere", "myfile.obj"
- **/
-static void splitPath( const QString & fileNameWithPath,
-			     QString	   & path_ret,
-			     QString	   & name_ret )
-{
-    const bool absolutePath = fileNameWithPath.startsWith( "/" );
-    QStringList components = fileNameWithPath.split( "/", Qt::SkipEmptyParts );
-
-    if ( components.isEmpty() )
+    /**
+     * Skip leading whitespace from a string.
+     * Returns a pointer to the first character that is non-whitespace.
+     **/
+    char * skipWhiteSpace( char * cptr )
     {
-	path_ret = "";
-	name_ret = absolutePath ? "/" : "";
+	if ( cptr == nullptr )
+	    return nullptr;
+
+	while ( *cptr != '\0' && isspace( *cptr ) )
+	    cptr++;
+
+	return cptr;
     }
-    else
+
+
+    /**
+     * Find the next whitespace in a string.
+     *
+     * Returns a pointer to the next whitespace character
+     * or a null pointer if there is no more whitespace in the string.
+     **/
+    char * findNextWhiteSpace( char * cptr )
     {
-	name_ret = components.takeLast();
-	path_ret = components.join( "/" );
+	if ( cptr == nullptr )
+	    return nullptr;
 
-	if ( absolutePath )
-	    path_ret.prepend( "/" );
+	while ( *cptr != '\0' && !isspace( *cptr ) )
+	    cptr++;
+
+	return *cptr == '\0' ? nullptr : cptr;
     }
-}
 
 
-/**
- * Build a full path from path + file name (without path).
- **/
-static QString buildPath( const QString & path, const QString & name )
-{
-    if ( path.isEmpty() )
-	return name;
+    /**
+     * Remove all trailing whitespace from a string - overwrite it with 0
+     * bytes.
+     *
+     * Returns the new string length.
+     **/
+    void killTrailingWhiteSpace( char * cptr )
+    {
+	if ( cptr == nullptr )
+	    return;
 
-    if ( name.isEmpty() )
-	return path;
+	const char * start = cptr;
+	cptr += strlen( start ) - 1;
 
-    if ( path == "/" )
-	return path + name;
+	while ( cptr >= start && isspace( *cptr ) )
+	    *cptr-- = '\0';
+    }
 
-    return path + "/" + name;
-}
+
+    /**
+     * Split up a file name with path into its path and its name component
+     * and return them in path_ret and name_ret, respectively.
+     *
+     * Example:
+     *     "/some/dir/somewhere/myfile.obj"
+     * ->  "/some/dir/somewhere", "myfile.obj"
+     **/
+    void splitPath( const QString & fileNameWithPath,
+				 QString	   & path_ret,
+				 QString	   & name_ret )
+    {
+	const bool absolutePath = fileNameWithPath.startsWith( "/" );
+	QStringList components = fileNameWithPath.split( "/", Qt::SkipEmptyParts );
+
+	if ( components.isEmpty() )
+	{
+	    path_ret = "";
+	    name_ret = absolutePath ? "/" : "";
+	}
+	else
+	{
+	    name_ret = components.takeLast();
+	    path_ret = components.join( "/" );
+
+	    if ( absolutePath )
+		path_ret.prepend( "/" );
+	}
+    }
+
+
+    /**
+     * Build a full path from path + file name (without path).
+     **/
+    QString buildPath( const QString & path, const QString & name )
+    {
+	if ( path.isEmpty() )
+	    return name;
+
+	if ( name.isEmpty() )
+	    return path;
+
+	if ( path == "/" )
+	    return path + name;
+
+	return path + "/" + name;
+    }
+
+} // namespace
 
 
 

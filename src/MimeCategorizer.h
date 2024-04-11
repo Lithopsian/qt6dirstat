@@ -151,11 +151,6 @@ namespace QDirStat
 	    void readSettings();
 
 	    /**
-	     * Write the MimeCategory parameter to the settings.
-	     **/
-	    void writeSettings( const MimeCategoryList & categoryList );
-
-	    /**
 	     * Return the MimeCategory for a FileInfo item or an empty dummy category
 	     * if it doesn't fit into any of the available categories.
 	     **/
@@ -188,14 +183,6 @@ namespace QDirStat
 	    void addExactKeys( const MimeCategory * category );
 
 	    /**
-	     * Add one filename/category combination to a map.
-	     **/
-	    void addExactKey( ExactMatches       & keys,
-			      QBitArray          & lengths,
-			      const QString      & key,
-			      const MimeCategory * category );
-
-	    /**
 	     * Add all suffixes from both suffix lists in the category as keys with a value
 	     * that is a pair containing an empty regular expression and a category.  One entry
 	     * is created in the case-sensitive map for each case-sensitive suffix, one for an
@@ -208,13 +195,6 @@ namespace QDirStat
 	     * This provides a really fast lookup for each suffix.
 	     **/
 	    void addSuffixKeys( const MimeCategory * category );
-
-	    /**
-	     * Adds one simple suffix to one suffix map.
-	     **/
-	    void addSuffixKey( SuffixMatches       & suffixes,
-			       const QString       & suffix,
-			       const MimeCategory  * category );
 
 	    /**
 	     * Add regular expressions which include a suffix to the suffix maps.

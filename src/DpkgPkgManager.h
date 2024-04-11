@@ -237,12 +237,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Resolves symlinks in the directory path of a file string.  If the file itself
-	 * is a symlink, this is kept unresolved.
-	*/
-//	QString resolvePath( const QString & pathname ) const;
-
-	/**
 	 * Return whether a given dpkg query line represents a diversion
 	 *
 	 * For dpkg -S, lines may begin "diversion by ... " or "local diversion ..."
@@ -251,17 +245,17 @@ namespace QDirStat
 	 * or "diverted by".
 	*/
 	bool isDiversion( const QString & line ) const
-		{ return line.startsWith( "diversion by" ) || line.startsWith( "local diversion" ); }
+	    { return line.startsWith( "diversion by" ) || line.startsWith( "local diversion" ); }
 	bool isLocalDiversion( const QString & line ) const
-		{ return line.startsWith( "local diversion" ); }
+	    { return line.startsWith( "local diversion" ); }
 	bool isDiversionFrom( const QString & line ) const
-		{ return isDiversion( line ) && line.contains( "from: " ); }
+	    { return isDiversion( line ) && line.contains( "from: " ); }
 	bool isDiversionTo( const QString & line ) const
-		{ return isDiversion( line ) && line.contains( "to: " ); }
+	    { return isDiversion( line ) && line.contains( "to: " ); }
 	bool isDivertedBy( const QString & line ) const
-		{ return line.startsWith( "diverted by" ) || line.startsWith( "locally diverted" ); }
+	    { return line.startsWith( "diverted by" ) || line.startsWith( "locally diverted" ); }
 	bool isPackageDivert( const QString & line ) const
-		{ return line.startsWith( "package diverts" ); }
+	    { return line.startsWith( "package diverts" ); }
 
 	/**
 	 * This searches the lines produced by a dpkg -S query.

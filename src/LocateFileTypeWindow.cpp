@@ -160,7 +160,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 	    populateRecursive( child );
     }
 
-    // Notice that unlike in FileTypeStats, there is no need to recurse through
+    // Unlike in FileTypeStats, there is no need to recurse through
     // any dot entries: They are handled in matchingFiles() already.
 }
 

@@ -27,25 +27,33 @@ using SysUtil::tryRunCommand;
 using SysUtil::haveCommand;
 
 
-static QString resolvePath( const QString & pathname )
+namespace
 {
-    const QFileInfo fileInfo( pathname );
-
-    // a directory that is a symlink in root (eg. /lib) is resolved
-    if ( fileInfo.dir().isRoot() && fileInfo.isDir() ) // first test doesn't access the filesystem
+    /**
+     * Resolves symlinks in the directory path of a file string.  If the file itself
+     * is a symlink, this is kept unresolved.
+    */
+    QString resolvePath( const QString & pathname )
     {
-	const QString realpath = fileInfo.canonicalFilePath();
-	//logDebug() << pathname << " " << realpath << Qt::endl;
-	return realpath.isEmpty() ? pathname : realpath;
+	const QFileInfo fileInfo( pathname );
+
+	// a directory that is a symlink in root (eg. /lib) is resolved
+	if ( fileInfo.dir().isRoot() && fileInfo.isDir() ) // first test doesn't access the filesystem
+	{
+	    const QString realpath = fileInfo.canonicalFilePath();
+	    //logDebug() << pathname << " " << realpath << Qt::endl;
+	    return realpath.isEmpty() ? pathname : realpath;
+	}
+
+	// in all other cases, only symlinks in the parent path are resolved
+	const QString filename = fileInfo.fileName();
+	const QString pathInfo = fileInfo.path();
+	const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
+	//logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
+	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + "/" + filename : pathname;
     }
 
-    // in all other cases, only symlinks in the parent path are resolved
-    const QString filename = fileInfo.fileName();
-    const QString pathInfo = fileInfo.path();
-    const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
-    //logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
-    return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + "/" + filename : pathname;
-}
+} // namespace
 
 
 bool DpkgPkgManager::isPrimaryPkgManager() const

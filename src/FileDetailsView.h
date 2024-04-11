@@ -126,30 +126,10 @@ namespace QDirStat
 	void setCurrentPage( QWidget *page );
 
 	/**
-	 * Return the MIME category of a file.
-	 **/
-	static const QString & mimeCategory( const FileInfo * fileInfo );
-
-	/**
 	 * Sets the label to the category for this file, and enables
 	 * the caption if a category is found.
 	 **/
 	void setMimeCategory( const FileInfo * fileInfo );
-
-	/**
-	 * Return the path of a fileInfo's parent directory.
-	 **/
-//	static QString parentPath( const FileInfo * fileInfo );
-
-	/**
-	 * Set a label with a number and an optional prefix.
-	 **/
-	static void setLabel( QLabel * label, int number, const QString & prefix = "" );
-
-	/**
-	 * Set a file size label with a file size and an optional prefix.
-	 **/
-	static void setLabel( FileSizeLabel * label, FileSize size, const QString & prefix = "" );
 
 	/**
 	 * Set a label with a text of limited size.
@@ -168,7 +148,6 @@ namespace QDirStat
 	QString dirColorStyle( const DirInfo * dir ) const;
 
 	// Boilerplate widget setting methods
-	static QString subtreeMsg( const DirInfo * dir );
 
 	void showFileInfo( FileInfo * file );
 	void showFilePkgInfo( const FileInfo * file );

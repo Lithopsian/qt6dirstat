@@ -143,25 +143,6 @@ namespace QDirStat
 	 **/
 	void finished();
 
-	/**
-	 * Check if going from 'parent' to 'child' would cross a filesystem
-	 * boundary. This take Btrfs subvolumes into account.
-	 **/
-//	static bool crossingFilesystems( DirTree * tree, DirInfo * parent, DirInfo * child );
-
-	/**
-	 * Return the device name where 'dir' is on if it's a mount point.
-	 * This uses MountPoints which reads /proc/mounts.
-	 **/
-//	static QString device( const DirInfo * dir );
-
-	/**
-	 * Check if we really should cross into a mounted filesystem; don't do
-	 * it if this is a system mount, a bind mount, a filesystem mounted
-	 * multiple times, or a network mount (NFS / Samba).
-	 **/
-//	static bool shouldCrossIntoFilesystem( const DirInfo * dir ) const;
-
 
     protected:
 
@@ -444,11 +425,6 @@ namespace QDirStat
 	 * Abort all jobs in the queue.
 	 **/
 	void abort();
-
-	/**
-	 * Delete all jobs from the given queue, except 'exceptJob'.
-	 **/
-	int killQueue( DirInfo * subtree, QList<DirReadJob *> & queue, const DirReadJob * exceptJob );
 
 	/**
 	 * Delete all jobs for a subtree, except 'exceptJob'.

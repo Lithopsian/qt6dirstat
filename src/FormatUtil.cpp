@@ -37,6 +37,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 	                         QObject::tr( " ZB" ),
 	                         QObject::tr( " YB" )
                                };
+
     if ( lSize < 1000 )
     {
 	// Exact number of bytes, no decimals

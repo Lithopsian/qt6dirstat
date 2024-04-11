@@ -10,7 +10,8 @@
 #ifndef Logger_h
 #define Logger_h
 
-#include <QString>
+#include <QRectF>
+#include <QSizeF>
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>
@@ -113,7 +114,7 @@ public:
      * logWarning() etc. macros instead.
      */
     QTextStream & log( const QString & srcFile,
-		       int	       srcLine,
+		       int             srcLine,
 		       const QString & srcFunction,
 		       LogSeverity     severity );
 
@@ -123,9 +124,9 @@ public:
      *
      * If 'logger' is 0, the default logger is used.
      */
-    static QTextStream & log( Logger	    * logger,
+    static QTextStream & log( Logger        * logger,
 			      const QString & srcFile,
-			      int	      srcLine,
+			      int             srcLine,
 			      const QString & srcFunction,
 			      LogSeverity     severity );
 
@@ -135,24 +136,6 @@ public:
      */
     void newline() { _logStream << Qt::endl; }
     static void newline( Logger * logger );
-
-    /**
-     * Return a timestamp string in the format used in the log file:
-     * "yyyy-MM-dd hh:mm:ss.zzz"
-     */
-    static QString timeStamp();
-
-    /**
-     * Prefix each line of a multi-line text with 'prefix'.
-     */
-    static QString prefixLines( const QString & prefix,
-                                const QString & multiLineText );
-
-    /**
-     * Indent each line of a multi-line text with 'indentWith' blanks.
-     */
-    static QString indentLines( int indentWidth,
-                                const QString & multiLineText );
 
     /**
      * Set this as the default logger. That one will be used whenever log() is
@@ -213,20 +196,7 @@ public:
      */
     static void setLogLevel( Logger *logger, LogSeverity newLevel );
 
-    /**
-     * Return the user name (the login name) of the user owning this process.
-     * If that information cannot be obtained, this returns the UID as a string.
-     **/
-    static QString userName();
 
-    /**
-     * Rotate the logs in directory 'logDir' based on future log file
-     * 'filename' (without path). Keep at most 'logRotateCount' old logs and
-     * delete all other old logs.
-     **/
-    static void logRotate( const QString & logDir,
-                           const QString & filename,
-                           int             logRotateCount );
 
 protected:
 
@@ -246,49 +216,18 @@ protected:
      **/
     void openLogFile( const QString & filename );
 
-    /**
-     * Create log directory 'logDir' and return the name of the directory
-     * actually used. That might be different from the requested name if the
-     * directory already exists and is not owned by the current user.
-     **/
-    QString createLogDir( const QString & logDir );
-
-    /**
-     * Expand variables in 'unexpanded' and return the expanded string:
-     *
-     *   $USER  the login user name of the current user
-     *   $UID   the numeric user ID of the current user
-     **/
-    static QString expandVariables( const QString & unexpanded );
-
-    /**
-     * Return the name for an old log file based on 'filename' for old log
-     * no. 'no'.
-     **/
-    static QString oldName( const QString & filename, int no );
-
-    /**
-     * Return the glob pattern for old log files based on 'filename'.
-     * This pattern can be used for QDir matches.
-     **/
-    static QString oldNamePattern( const QString & filename );
-
 
 private:
 
     static Logger * _defaultLogger;
-    QFile	    _logFile;
-    QTextStream	    _logStream;
-    QFile	    _nullDevice;
-    QTextStream	    _nullStream;
-    LogSeverity	    _logLevel;
+    QFile           _logFile;
+    QTextStream     _logStream;
+    QFile           _nullDevice;
+    QTextStream     _nullStream;
+    LogSeverity     _logLevel;
+
 };
 
-
-class QSizeF;
-class QRectF;
-class QPointF;
-class QSize;
 
 
 inline QTextStream & operator<<( QTextStream & str, bool val )
@@ -297,10 +236,18 @@ inline QTextStream & operator<<( QTextStream & str, bool val )
 inline QTextStream & operator<<( QTextStream & str, const QStringList &stringList )
     { return str << stringList.join( ", " ); }
 
-QTextStream & operator<<( QTextStream & str, const QSizeF  & size );
-QTextStream & operator<<( QTextStream & str, const QRectF  & rect );
-QTextStream & operator<<( QTextStream & str, const QPointF & point );
-QTextStream & operator<<( QTextStream & str, const QSize   & size );
+inline QTextStream & operator<<( QTextStream & str, const QRectF & rect )
+    { return str << "QRectF( x: " << rect.x() << " y: " << rect.y()
+                 << " width: " << rect.width() << " height: " << rect.height() << " )"; }
+
+inline QTextStream & operator<<( QTextStream & str, const QPointF & point )
+    { return str << "QPointF( x: " << point.x() << " y: " << point.y() << " )"; }
+
+inline QTextStream & operator<<( QTextStream & str, const QSizeF & size )
+    { return str << "QSizeF( width: " << size.width() << " height: " << size.height() << " )"; }
+
+inline QTextStream & operator<<( QTextStream & str, const QSize & size )
+    { return str << "QSize( width: " << size.width() << " height: " << size.height() << " )"; }
 
 
 /**

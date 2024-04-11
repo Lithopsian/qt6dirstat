@@ -98,18 +98,6 @@ namespace QDirStat
     protected:
 
         /**
-         * Split a path up into its base path (everything up to the last path
-         * component) and its base name (the last path component).
-         *
-         * Both 'basePath_ret' and 'name_ret' are return parameters and will be
-         * modified by this function. If nonempty, a trailing path separator
-         * ("/") is added to 'basePath_ret'.
-         **/
-        void splitBasePath( const QString & path,
-                            QString       & basePath_ret, // return parameter
-                            QString       & name_ret );   // return parameter
-
-        /**
          * Return the total display length of all breadcrumbs plus delimiters.
          **/
         int breadcrumbsLen() const;

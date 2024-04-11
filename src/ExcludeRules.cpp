@@ -18,7 +18,7 @@
 #include "Exception.h"
 
 
-#define VERBOSE_EXCLUDE_MATCHES	0
+#define VERBOSE_EXCLUDE_MATCHES 0
 
 using namespace QDirStat;
 
@@ -29,8 +29,8 @@ void ExcludeRule::setCaseSensitive( bool caseSensitive )
 }
 
 
-QString ExcludeRule::formatPattern( PatternSyntax patternSyntax,
-				    const QString &    pattern )
+QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
+				    const QString & pattern )
 {
     // Anchor and escape all special characters so a regexp match behaves like a simple comparison
     if ( patternSyntax == FixedString )
@@ -91,26 +91,50 @@ bool ExcludeRule::matchDirectChildren( DirInfo * dir ) const
 }
 
 
+bool ExcludeRule::operator!=( const ExcludeRule * other )
+{
+    if ( !other )
+        return true;
+
+    if ( other == this )
+        return false;
+
+    if ( other->patternSyntax()     != patternSyntax() ||
+	 other->pattern()           != pattern()       ||
+	 other->caseSensitive()     != caseSensitive() ||
+	 other->useFullPath()       != useFullPath()   ||
+         other->checkAnyFileChild() != checkAnyFileChild() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 //
 //---------------------------------------------------------------------------
 //
 
-inline static void dumpExcludeRules( const ExcludeRules * excludeRules )
+namespace
 {
-    if ( excludeRules->isEmpty() )
-	logDebug() << "No exclude rules defined" << Qt::endl;
+    [[gnu::unused]] void dumpExcludeRules( const ExcludeRules * excludeRules )
+    {
+	if ( excludeRules->isEmpty() )
+	    logDebug() << "No exclude rules defined" << Qt::endl;
 
-    for ( ExcludeRuleListIterator it = excludeRules->cbegin(); it != excludeRules->cend(); ++it )
-	logDebug() << *it << Qt::endl;
-}
+	for ( ExcludeRuleListIterator it = excludeRules->cbegin(); it != excludeRules->cend(); ++it )
+	    logDebug() << *it << Qt::endl;
+    }
+
+} // namespace
 
 
 ExcludeRules::ExcludeRules()
 {
     readSettings();
 #if VERBOSE_EXCLUDE_MATCHES
-    dumpExcludeRules();
+    dumpExcludeRules( this );
 #endif
 }
 
@@ -207,16 +231,20 @@ void ExcludeRules::addDefaultRules()
 }
 
 
-/**
- * Return the enum mapping for the pattern syntax enum PatternSyntax
- **/
-static SettingsEnumMapping patternSyntaxMapping()
+namespace
 {
-    return { { ExcludeRule::RegExp,      "RegExp"      },
-	     { ExcludeRule::Wildcard,    "Wildcard"    },
-	     { ExcludeRule::FixedString, "FixedString" },
-	   };
-}
+    /**
+     * Return the enum mapping for the pattern syntax enum PatternSyntax
+     **/
+    SettingsEnumMapping patternSyntaxMapping()
+    {
+	return { { ExcludeRule::RegExp,      "RegExp"      },
+		 { ExcludeRule::Wildcard,    "Wildcard"    },
+		 { ExcludeRule::FixedString, "FixedString" },
+	       };
+    }
+
+} // namespace
 
 
 void ExcludeRules::readSettings()

@@ -43,8 +43,8 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     _ui->patternField->setClearButtonEnabled( true );
     _ui->patternField->setFocus();
 
-    connect( this, &FindFilesDialog::finished,
-	     this, &FindFilesDialog::finish);
+    connect( this, &FindFilesDialog::accepted,
+             this, &FindFilesDialog::accept);
 
     loadValues();
 }
@@ -53,6 +53,10 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
 FindFilesDialog::~FindFilesDialog()
 {
     //logDebug() << " destructor called" << Qt::endl;
+
+    // Always save the window geometry
+    writeWindowSettings( this, "FindFilesDialog" );;
+
     delete _ui;
 }
 
@@ -137,23 +141,16 @@ void FindFilesDialog::loadValues()
 }
 
 
-void FindFilesDialog::finish( int result )
+void FindFilesDialog::accept()
 {
-    // Always save the window geometry
-    writeWindowSettings( this, "FindFilesDialog" );;
+    writeSettings();
 
-    // Only save the other settings if the dialog wasn't cancelled
-    if ( result == QDialog::Accepted )
-    {
-	writeSettings();
-
-	// Values that should not be written to the settings / the config file:
-	// Save to static variables just for the duration of this program run as
-	// the dialog is created, destroyed and created every time the user starts
-	// the "Find Files" action (Ctrl-F).
-	_lastPattern = _ui->patternField->text();
-	_lastPath    = _ui->currentSubtreePathLabel->text();
-    }
+    // Values that should not be written to the settings / the config file:
+    // Save to static variables just for the duration of this program run as
+    // the dialog is created, destroyed and created every time the user starts
+    // the "Find Files" action (Ctrl-F).
+    _lastPattern = _ui->patternField->text();
+    _lastPath    = _ui->currentSubtreePathLabel->text();
 }
 
 

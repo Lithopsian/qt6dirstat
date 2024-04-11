@@ -148,7 +148,8 @@ namespace QDirStat
 	 * Calculate the bucket width from min to max for 'bucketCount'
 	 * buckets.
 	 **/
-//	static qreal bucketWidth( qreal min, qreal max, int bucketCount );
+//	static qreal bucketWidth( qreal min, qreal max, int bucketCount )
+//	    { return bucketCount < 1 ? 0 : ( max - min ) / bucketCount; }
 
 	/**
 	 * Return the current number of data buckets (eg. number of

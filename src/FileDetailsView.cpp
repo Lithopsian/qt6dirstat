@@ -27,6 +27,50 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Set a label with a number and an optional prefix.
+     **/
+    void setLabel( QLabel        * label,
+		  int             number,
+		  const QString & prefix = "" )
+    {
+	CHECK_PTR( label );
+	label->setText( prefix + QString( "%L1" ).arg( number ) );
+    }
+
+
+    /**
+     * Set a file size label with a file size and an optional prefix.
+     **/
+    void setLabel( FileSizeLabel * label,
+		   FileSize        size,
+		   const QString & prefix = "" )
+    {
+	CHECK_PTR( label );
+	label->setValue( size, prefix );
+    }
+
+    /**
+     * Return the MIME category of a file.
+     **/
+    const QString & mimeCategory( const FileInfo * fileInfo )
+    {
+	return MimeCategorizer::instance()->name( fileInfo );
+    }
+
+    /**
+     * Return a message string describing the status of a DirInfo node.
+     **/
+    QString subtreeMsg( const DirInfo * dir )
+    {
+	return FileDetailsView::readStateMsg( dir->isBusy() ? DirReading : dir->readState() );
+    }
+
+} // namespace
+
+
 // The delay stages are constructed to rapidly move to stage 1, which is a short
 // delay of half the time taken for the previous query to complete.  In practice,
 // this delay will probably not be noticeable.  After that the delay increases only
@@ -314,12 +358,6 @@ void FileDetailsView::showDetails( DirInfo * dir )
 }
 
 
-QString FileDetailsView::subtreeMsg( const DirInfo * dir )
-{
-    return readStateMsg( dir->isBusy() ? DirReading : dir->readState() );
-}
-
-
 QString FileDetailsView::readStateMsg( int readState )
 {
     switch ( readState )
@@ -561,35 +599,11 @@ void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
 }
 
 
-void FileDetailsView::setLabel( QLabel		* label,
-				int		  number,
-				const QString	& prefix )
-{
-    CHECK_PTR( label );
-    label->setText( prefix + QString( "%L1" ).arg( number ) );
-}
-
-
-void FileDetailsView::setLabel( FileSizeLabel	* label,
-				FileSize	  size,
-				const QString	& prefix )
-{
-    CHECK_PTR( label );
-    label->setValue( size, prefix );
-}
-
-
 void FileDetailsView::setLabelLimited( QLabel * label, const QString & text )
 {
     CHECK_PTR( label );
     const QString limitedText = elideMiddle( text, _labelLimit );
     label->setText( limitedText );
-}
-
-
-const QString & FileDetailsView::mimeCategory( const FileInfo * fileInfo )
-{
-    return MimeCategorizer::instance()->name( fileInfo );
 }
 
 

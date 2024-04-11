@@ -31,8 +31,22 @@
 #define VERBOSE_DOMINANCE_CHECK                  0
 #define DIRECT_CHILDREN_COUNT_SANITY_CHECK       0
 
+
 using namespace QDirStat;
 
+
+namespace
+{
+    [[gnu::unused]] void dumpChildrenList( const FileInfo     * dir,
+					   const FileInfoList & children )
+    {
+	logDebug() << "Children of " << dir << Qt::endl;
+
+	for ( int i=0; i < children.size(); ++i )
+	    logDebug() << "    #" << i << ": " << children.at(i) << Qt::endl;
+    }
+
+} // namespace
 
 
 DirInfo::DirInfo( DirInfo       * parent,
@@ -111,16 +125,6 @@ DirInfo::DirInfo( DirInfo       * parent,
 DirInfo::~DirInfo()
 {
     clear();
-}
-
-
-[[gnu::unused]] static void dumpChildrenList( const FileInfo     * dir,
-			      const FileInfoList & children )
-{
-    logDebug() << "Children of " << dir << Qt::endl;
-
-    for ( int i=0; i < children.size(); ++i )
-	logDebug() << "    #" << i << ": " << children.at(i) << Qt::endl;
 }
 
 
@@ -404,12 +408,10 @@ time_t DirInfo::oldestFileMtime()
 
 int DirInfo::totalUsedPercent()
 {
-    int percent = 100;
+    if ( totalAllocatedSize() <= 0 || totalSize() <= 0 )
+	return 100;
 
-    if ( totalAllocatedSize() > 0 && totalSize() > 0 )
-        percent = qRound( ( 100.0 * totalSize() ) / totalAllocatedSize() );
-
-    return percent;
+    return qRound( ( 100.0 * totalSize() ) / totalAllocatedSize() );
 }
 
 
@@ -826,7 +828,7 @@ void DirInfo::cleanupDotEntries()
     // This also affects dot entries that were just disowned because they had
     // no siblings (i.e., there are no subdirectories on this level).
     //
-    // Notice that this also checks if the dot entry's attic (if it has one) is
+    // Note that this also checks if the dot entry's attic (if it has one) is
     // empty, and that its attic is deleted along with the dot entry.
     deleteEmptyDotEntry();
 }
@@ -883,49 +885,8 @@ void DirInfo::ignoreEmptySubDirs()
 	(*it)->setIgnored( true );
 	_summaryDirty = true;
     }
-/*
-    FileInfoIterator it( this );
-
-    while ( *it )
-    {
-	if ( !(*it)->isIgnored() && (*it)->isDirInfo() )
-	{
-	    if ( (*it)->totalUnignoredItems() == 0 )
-	    {
-		// logDebug() << "Ignoring empty subdir " << (*it) << Qt::endl;
-		(*it)->setIgnored( true );
-		_summaryDirty = true;
-	    }
-	}
-
-	++it;
-    } */
 }
 
-/* nobody needs recursive, so this is inline in the header
-void DirInfo::clearTouched( bool recursive )
-{
-    _touched = false;
-
-    if ( recursive )
-    {
-	if ( !isDotEntry() )
-	{
-	    for ( FileInfo * child = _firstChild; child; child = child->next() )
-	    {
-		if ( child->isDirInfo() )
-		    child->toDirInfo()->clearTouched();
-	    }
-
-	    if ( _dotEntry )
-		_dotEntry->clearTouched();
-	}
-
-	if ( _attic )
-	    _attic->clearTouched();
-    }
-}
-*/
 
 const FileInfoList & DirInfo::sortedChildren( DataColumn    sortCol,
 					      Qt::SortOrder sortOrder,

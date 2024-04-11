@@ -19,32 +19,36 @@
 //#include "Logger.h"
 //#include "Exception.h"
 
+
 using namespace QDirStat;
 
 
-/**
- * Common function to derive a subtree and call the common LocateFilesWindow.
- **/
-static void discoverFiles( TreeWalker    * treeWalker,
-                           int             sortCol,
-                           Qt::SortOrder   sortOrder,
-                           const QString & headingText,
-                           FileInfo      * subtree = nullptr )
+namespace
 {
-    if ( !subtree )
-        subtree = app()->selectedDirInfoOrRoot();
-
-    if ( subtree )
+    /**
+     * Common function to derive a subtree and call the common LocateFilesWindow.
+     **/
+    void discoverFiles( TreeWalker    * treeWalker,
+                        int             sortCol,
+                        Qt::SortOrder   sortOrder,
+                        const QString & headingText,
+                        FileInfo      * subtree = nullptr )
     {
-	// Should always be a subtree, but if not then do nothing
-	LocateFilesWindow::populateSharedInstance( treeWalker,
-						   subtree,
-						   headingText.arg( subtree->url() ),
-						   sortCol,
-						   sortOrder );
-    }
-}
+        if ( !subtree )
+            subtree = app()->selectedDirInfoOrRoot();
 
+        if ( subtree )
+        {
+            // Should always be a subtree, but if not then do nothing
+            LocateFilesWindow::populateSharedInstance( treeWalker,
+						       subtree,
+						       headingText.arg( subtree->url() ),
+						       sortCol,
+						       sortOrder );
+        }
+    }
+
+} // namespace
 
 
 void DiscoverActions::discoverLargestFiles()

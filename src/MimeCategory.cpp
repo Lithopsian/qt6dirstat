@@ -9,56 +9,60 @@
 
 #include "MimeCategory.h"
 #include "Logger.h"
-//#include "Exception.h"
+
 
 using namespace QDirStat;
 
 
-/**
- * Return 'true' if 'pattern' contains no wildcard characters.
- **/
-static bool isWildcard( const QString & pattern )
+namespace
 {
-    return pattern.contains( '*' ) || pattern.contains( '?' ) || pattern.contains( '[' );
-}
+    /**
+     * Return 'true' if 'pattern' contains no wildcard characters.
+     **/
+    bool isWildcard( const QString & pattern )
+    {
+	return pattern.contains( '*' ) || pattern.contains( '?' ) || pattern.contains( '[' );
+    }
 
 
-/**
- * Return 'true' if 'pattern' is a simple suffix pattern, i.e. it
- * starts with "*." and does not contain any more wildcard characters.
- **/
-static bool isSuffixPattern( const QString & pattern )
-{
-    if ( ! pattern.startsWith( "*." ) )
-	return false;
+    /**
+     * Return 'true' if 'pattern' is a simple suffix pattern, i.e. it
+     * starts with "*." and does not contain any more wildcard characters.
+     **/
+    bool isSuffixPattern( const QString & pattern )
+    {
+	if ( ! pattern.startsWith( "*." ) )
+	    return false;
 
-    const QString rest = pattern.mid( 2, -1 ); // Without leading "*."
+	const QString rest = pattern.mid( 2, -1 ); // Without leading "*."
 
-    return ( !isWildcard( rest ) );
-}
-
-
-/**
- * Return 'true' if 'pattern' includes a suffix plus other wildcards,
- * e.g. "lib*.a"
- **/
-static bool isWildcardWithSuffix( const QString & pattern )
-{
-    const QStringList list = pattern.split( "*.", Qt::SkipEmptyParts );
-
-    return list.size() > 1 && !isWildcard( list.last() );
-}
+	return ( !isWildcard( rest ) );
+    }
 
 
-static QStringList humanReadableSuffixList( const QStringList & suffixList )
-{
-    QStringList result;
+    /**
+     * Return 'true' if 'pattern' includes a suffix plus other wildcards,
+     * e.g. "lib*.a"
+     **/
+    bool isWildcardWithSuffix( const QString & pattern )
+    {
+	const QStringList list = pattern.split( "*.", Qt::SkipEmptyParts );
 
-    for ( const QString & suffix : suffixList )
-	result << ( "*." + suffix );
+	return list.size() > 1 && !isWildcard( list.last() );
+    }
 
-    return result;
-}
+
+    QStringList humanReadableSuffixList( const QStringList & suffixList )
+    {
+	QStringList result;
+
+	for ( const QString & suffix : suffixList )
+	    result << ( "*." + suffix );
+
+	return result;
+    }
+
+} // namespace
 
 
 

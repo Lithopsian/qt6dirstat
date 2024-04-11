@@ -325,21 +325,6 @@ namespace QDirStat
 	QVariant sizeColTooltip( FileInfo * item ) const;
 
 	/**
-	 * For sparse files, return a list of three strings for the delegate:
-	 * text describing the size, eg. "1.0MB "; text describing the allocated
-	 * size, eg. "(1.0kB)"; and text descriving the number of hard links, eg.
-	 * " / 3 links", which will be empty if there are not at least 2
-	 * hard links.
-	 **/
-//	static QStringList sparseSizeText( FileInfo * item );
-
-	/**
-	 * Return text formatted as "42.0kB / 4 links".  This would normally only
-	 * ve called if the number of hard links is more than one.
-	 **/
-//	static QString linksSizeText( FileInfo * item );
-
-	/**
 	 * Return data to be displayed for the specified model index and role.
 	 **/
 	QVariant data( const QModelIndex & index, int role ) const override;
@@ -535,12 +520,6 @@ namespace QDirStat
 	 * Return the text for the size for 'item'
 	 **/
 	QVariant sizeColText( FileInfo * item ) const;
-
-	/**
-	 * Format a percentage value as string if it is non-negative.
-	 * Return QVariant() if it is negative.
-	 **/
-	static QVariant formatPercent( float percent );
 
 	/**
 	 * Find the child number 'childNo' among the children of 'parent'.

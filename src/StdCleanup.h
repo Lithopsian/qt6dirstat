@@ -10,9 +10,6 @@
 #ifndef StdCleanup_h
 #define StdCleanup_h
 
-#include <QObject>
-#include <QList>
-
 
 namespace QDirStat
 {
@@ -22,9 +19,6 @@ namespace QDirStat
      * Create any of the predefined standard Cleanup actions to be
      * performed on DirTree items. Ownership of the objects is passed to the
      * caller.
-     *
-     * This class is not meant to be ever instantiated - use the static methods
-     * only.
      **/
 
     namespace StdCleanup

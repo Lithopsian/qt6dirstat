@@ -141,6 +141,11 @@ namespace QDirStat
          **/
         bool caseSensitive() const { return !( patternOptions() & CaseInsensitiveOption ); }
 
+	/**
+	 * Comparison operator for two exclude rules.
+	 **/
+	bool operator!=( const ExcludeRule * other );
+
 
     private:
 

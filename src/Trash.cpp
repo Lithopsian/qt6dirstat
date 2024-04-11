@@ -22,55 +22,58 @@
 #include "Exception.h"
 
 
-/**
- * Return the device of file or directory 'path'.
- **/
-static dev_t device( const QString & path )
+namespace
 {
-    dev_t dev = 0;
-    struct stat statBuf;
-    const int result = stat( path.toUtf8(), &statBuf );
-    dev = statBuf.st_dev;
-
-    if ( result < 0 )
+    /**
+     * Return the device of file or directory 'path'.
+     **/
+    dev_t device( const QString & path )
     {
-	logError() << "stat( " << path << " ) failed: "
-		   << formatErrno() << Qt::endl;
+	dev_t dev = 0;
+	struct stat statBuf;
+	const int result = stat( path.toUtf8(), &statBuf );
+	dev = statBuf.st_dev;
 
-	dev = dev_t( -1 );
+	if ( result < 0 )
+	{
+	    logError() << "stat( " << path << " ) failed: "
+		       << formatErrno() << Qt::endl;
+
+	    dev = dev_t( -1 );
+	}
+
+	return dev;
     }
 
-    return dev;
-}
 
-
-/**
- * Find the toplevel directory (the mount point) for the device that 'path'
- * is on.
- **/
-static QString toplevel( const QString & rawPath )
-{
-    const dev_t dev = device( rawPath );
-    const QFileInfo fileInfo( rawPath );
-    QString path = fileInfo.canonicalPath();
-    QStringList components = path.split( "/", Qt::SkipEmptyParts );
-    QString lastPath;
-
-    // Go one directory level up as long as we are on the same device
-
-    while ( ! components.isEmpty() && device( path ) == dev )
+    /**
+     * Find the toplevel directory (the mount point) for the device that 'path'
+     * is on.
+     **/
+    QString toplevel( const QString & rawPath )
     {
-	lastPath = path;
-	components.removeLast();
-	path = "/" + components.join( "/" );
+	const dev_t dev = device( rawPath );
+	const QFileInfo fileInfo( rawPath );
+	QString path = fileInfo.canonicalPath();
+	QStringList components = path.split( "/", Qt::SkipEmptyParts );
+	QString lastPath;
+
+	// Go one directory level up as long as we are on the same device
+
+	while ( ! components.isEmpty() && device( path ) == dev )
+	{
+	    lastPath = path;
+	    components.removeLast();
+	    path = "/" + components.join( "/" );
+	}
+
+	if ( components.isEmpty() && device( "/" ) == dev )
+	    lastPath = "/";
+
+	return lastPath;
     }
 
-    if ( components.isEmpty() && device( "/" ) == dev )
-	lastPath = "/";
-
-    return lastPath;
-}
-
+} // namespace
 
 using namespace QDirStat;
 
@@ -204,35 +207,35 @@ void Trash::empty()
 */
 
 
-
-/**
- * Create a directory if it doesn't exist. This throws an exception if
- * 'doThrow' is 'true'.
- *
- * Return 'true' if success, 'false' if error (and doThrow is 'false').
- **/
-static bool ensureDirExists( const QString & path,
-				mode_t		mode,
-				bool		doThrow )
+namespace
 {
-    const QDir dir( path );
-
-    if ( dir.exists() )
-	return true;
-
-    logInfo() << "mkdir " << path << Qt::endl;
-    const int result = mkdir( path.toUtf8(), mode );
-
-    if ( result < 0 && doThrow )
+    /**
+     * Create a directory if it doesn't exist. This throws an exception if
+     * 'doThrow' is 'true'.
+     *
+     * Return 'true' if success, 'false' if error (and doThrow is 'false').
+     **/
+    bool ensureDirExists( const QString & path, mode_t mode, bool doThrow )
     {
-	THROW( FileException( path,
-			      QString( "Could not create directory %1: %2" )
-			      .arg( path ).arg( formatErrno() ) ) );
+	const QDir dir( path );
+
+	if ( dir.exists() )
+	    return true;
+
+	logInfo() << "mkdir " << path << Qt::endl;
+	const int result = mkdir( path.toUtf8(), mode );
+
+	if ( result < 0 && doThrow )
+	{
+	    THROW( FileException( path,
+				  QString( "Could not create directory %1: %2" )
+				  .arg( path ).arg( formatErrno() ) ) );
+	}
+
+	return result >= 0;
     }
 
-    return result >= 0;
-}
-
+} // namespace
 
 
 TrashDir::TrashDir( const QString & path, dev_t device ):

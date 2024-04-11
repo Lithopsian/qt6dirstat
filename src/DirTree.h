@@ -467,24 +467,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Recurse through the tree from 'dir' on and move any ignored items to
-	 * the attic on the same level.
-	 **/
-	void moveIgnoredToAttic( DirInfo * dir );
-
-	/**
-	 * Recurse through the tree from 'dir' on and ignore any empty dirs
-	 * (i.e. dirs without any unignored non-directory child) that are not
-	 * ignored yet.
-	 **/
-	void ignoreEmptyDirs( DirInfo * dir );
-
-	/**
-	 * Move all items from the attic to the normal children list.
-	 **/
-	void unatticAll( DirInfo * dir );
-
-	/**
 	 * Recursively force a complete recalculation of all sums.
 	 **/
 	void recalc( DirInfo * dir );
@@ -493,19 +475,6 @@ namespace QDirStat
 	 * Try to derive the cluster size from 'item'.
 	 **/
 	void detectClusterSize( FileInfo * item );
-
-	/**
-	 * Obtain information about the URL specified and create a new FileInfo
-	 * or a DirInfo (whatever is appropriate) from that information. Use
-	 * FileInfo::isDirInfo() to find out which.
-	 *
-	 * If the underlying syscall fails, this throws a SysCallException if
-	 * 'doThrow' is 'true', and it just returns 0 if it is 'false'.
-	 **/
-	static FileInfo * stat( const QString & url,
-				DirTree	      * tree,
-				DirInfo	      * parent	= nullptr,
-				bool		doThrow = true );
 
 	/**
 	 * Clear all temporary exclude rules.

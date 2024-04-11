@@ -403,7 +403,7 @@ namespace QDirStat
 	 * could not be read or if reading was aborted, an empty string
 	 * otherwise.
 	 *
-	 * Notice that this implementation also returns an empty string as long
+	 * Note that this implementation also returns an empty string as long
 	 * as this subtree is busy, i.e. reading is not finished: The ">"
 	 * prefix should be something special to catch the user's attention,
 	 * not something omnipresent that is commonly ignored.
@@ -498,10 +498,8 @@ namespace QDirStat
 	 *
 	 * Don't confuse this with isDir() which tells whether or not this is a
 	 * disk directory! Both should return the same, but you'll never know -
-	 * better be safe than sorry!
-	 *
-	 * Notice that DotEntry inherits DirInfo, so a DotEntry is also
-	 * implicitly a DirInfo.
+	 * better be safe than sorry!  Derived classes such as PkgInfo and DotEntry
+	 * are implicitly isDirInfo(), but not isDir().
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
@@ -534,6 +532,12 @@ namespace QDirStat
 	 * signals and finalize the directory (clean up dot entries etc.).
 	 **/
 	void finishReading( DirReadState readState );
+
+	/**
+	 * Mark this object and all its ancestors as dirty and drop their sort
+	 * caches.
+	 **/
+	void markAsDirty();
 
 
     protected:
@@ -580,12 +584,6 @@ namespace QDirStat
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	void unlinkChild( FileInfo * deletedChild ) override;
-
-	/**
-	 * Mark this object and all its ancestors as dirty and drop their sort
-	 * caches.
-	 **/
-	void markAsDirty();
 
 	/**
 	 * Drop all cached information about children sorting for this object and

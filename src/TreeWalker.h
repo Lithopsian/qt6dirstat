@@ -81,21 +81,6 @@ namespace QDirStat
         void setOverflow() { _overflow = true; }
 
 
-    protected:
-
-        /**
-         * Calculate a data value threshold from a set of PercentileStats from
-         * an upper percentile up to the maximum value (P100).
-         **/
-        qreal upperPercentileThreshold( PercentileStats & stats );
-
-        /**
-         * Calculate a data value threshold from a set of PercentileStats from
-         * an the minimum value (P0) to a lower percentile.
-         **/
-        qreal lowerPercentileThreshold( PercentileStats & stats );
-
-
     private:
 
         //

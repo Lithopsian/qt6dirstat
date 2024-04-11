@@ -39,7 +39,7 @@ namespace QDirStat
 	 *
 	 * Check CacheWriter::ok() to see if writing the cache file went OK.
 	 **/
-	CacheWriter( const QString & fileName, DirTree *tree ):
+	CacheWriter( const QString & fileName, DirTree * tree ):
 	    _ok { writeCache( fileName, tree ) }
 	{}
 
@@ -55,7 +55,7 @@ namespace QDirStat
 	 * Write cache file in gzip format.
 	 * Returns 'true' if OK, 'false' upon error.
 	 **/
-	static bool writeCache( const QString & fileName, const DirTree *tree );
+	static bool writeCache( const QString & fileName, const DirTree * tree );
 
 
     private:
@@ -167,16 +167,6 @@ namespace QDirStat
 	 * Use _fields to add one item to _tree.
 	 **/
 	void addItem();
-
-	/**
-	 * Map a character string to a mode.
-	 **/
-//	static mode_t modeFromType( const char * type );
-
-	/**
-	 * Return the multiplier for a given suffix.
-	 **/
-//	static FileSize multiplier( const char * suffix );
 
 	/**
 	 * Read the next line that is not empty or a comment and store it in

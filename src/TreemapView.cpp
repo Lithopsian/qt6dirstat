@@ -910,9 +910,8 @@ QPainterPath HighlightRect::shape() const
     // 1 or 2 pixels to make it humanly possible to position the mouse cursor
     // close enough.
     //
-    // Notice that it's still only on the inside of the line to avoid bad side
+    // Note that it's still only on the inside of the line to avoid bad side
     // effects with QGraphicsView's internal mechanisms.
-
     const int thickness = 10;
 
     QPainterPath path;

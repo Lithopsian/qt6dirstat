@@ -18,17 +18,9 @@
 
 #define VERBOSE_SORT_THRESHOLD	50000
 
+
 using namespace QDirStat;
 
-/*
-void PercentileStats::clear()
-{
-    // Just _data.clear() does not free any memory; we need to assign an empty
-    // list to _data.
-
-    _data = QRealList();
-}
-*/
 
 void PercentileStats::sort()
 {

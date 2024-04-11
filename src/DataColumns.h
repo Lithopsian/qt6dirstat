@@ -56,8 +56,7 @@ namespace QDirStat
 	/**
 	 * Map a view column to the corresponding model column
 	 **/
-	inline DataColumn fromViewCol( int viewCol )
-	    { return static_cast<DataColumn>( viewCol ); }
+	inline DataColumn fromViewCol( int viewCol ) { return static_cast<DataColumn>( viewCol ); }
 
 	/**
 	 * Map a model column to the corresponding view column

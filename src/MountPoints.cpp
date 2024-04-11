@@ -22,18 +22,23 @@
 using namespace QDirStat;
 
 
-[[gnu::unused]] static void dumpNormalMountPoints()
+namespace
 {
-    for ( const MountPoint * mountPoint : MountPoints::normalMountPoints() )
-	logDebug() << mountPoint->path() << Qt::endl;
-}
+    // Verbose logging, all callers might be commented out
+    [[gnu::unused]] void dumpNormalMountPoints()
+    {
+	for ( const MountPoint * mountPoint : MountPoints::normalMountPoints() )
+	    logDebug() << mountPoint->path() << Qt::endl;
+    }
 
-
+} // namespace
 
 
 MountPoint::~MountPoint()
 {
+#if HAVE_Q_STORAGE_INFO
     delete _storageInfo;
+#endif
 }
 
 
@@ -280,9 +285,9 @@ bool MountPoints::read( const QString & filename )
 	//   /dev/sda7 /work ext4 rw,relatime,data=ordered 0 0
 	//   nas:/share/work /nas/work nfs rw,local_lock=none 0 0
 
-	const QString & device	 = fields[0];
-	QString path		 = fields[1];
-	QString fsType		 = fields[2];
+	const QString & device   = fields[0];
+	QString path             = fields[1];
+	QString fsType           = fields[2];
 	const QString &mountOpts = fields[3];
 	// ignoring fsck and dump order (0 0)
 

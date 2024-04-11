@@ -49,21 +49,11 @@ namespace QDirStat
 		   bool		   autoPost = true );
 
 	/**
-	 * Destructor.
-	 **/
-//	virtual ~BusyPopup() {}
-
-	/**
 	 * Show the BusyPopup and process events for some milliseconds to make
 	 * sure it is rendered. This is done automatically if 'autoPost' is
 	 * 'true' in the constructor.
 	 **/
 	void post();
-
-	/**
-	 * Process events (except user input events) for the specified time.
-	 **/
-	void processEvents( int millisec );
 
 	/**
 	 * Process a show event.

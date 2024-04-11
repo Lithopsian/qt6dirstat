@@ -80,7 +80,7 @@ void ExcludeRulesConfigPage::applyChanges()
     for ( int i = 0; i < rules.size() || it != excludeRules->cend(); ++i, ++it )
     {
 	// If we ran past the end of either list, or the rules don't match ...
-	if ( it == excludeRules->cend() || i == rules.size() || !equal( *it, rules.at( i ) ) )
+	if ( it == excludeRules->cend() || i == rules.size() || *it != rules.at( i ) )
 	{
 	    excludeRules->writeSettings( rules );
 	    app()->dirTree()->setExcludeRules();
@@ -232,25 +232,3 @@ void ExcludeRulesConfigPage::add()
     ListEditor::add();
     _ui->patternLineEdit->setFocus();
 }
-
-
-bool ExcludeRulesConfigPage::equal ( const ExcludeRule * rule1, const ExcludeRule * rule2 )
-{
-    if ( !rule1 || !rule2 )
-        return false;
-
-    if ( rule1 == rule2 )
-        return true;
-
-    if ( rule1->patternSyntax()     != rule2->patternSyntax() ||
-	 rule1->pattern()           != rule2->pattern()       ||
-	 rule1->caseSensitive()     != rule2->caseSensitive() ||
-	 rule1->useFullPath()       != rule2->useFullPath()   ||
-         rule1->checkAnyFileChild() != rule2->checkAnyFileChild() )
-    {
-        return false;
-    }
-
-    return true;
-}
-

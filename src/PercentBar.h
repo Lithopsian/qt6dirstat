@@ -157,12 +157,6 @@ namespace QDirStat
 			      const QModelIndex		 & index,
 			      float			   percent ) const;
 
-	/**
-	 * Return a color that contrasts with 'contrastColor'.
-	 **/
-	static QColor contrastingColor( const QColor &desiredColor,
-					const QColor &contrastColor );
-
 
     private:
 
