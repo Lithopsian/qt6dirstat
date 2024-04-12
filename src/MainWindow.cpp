@@ -598,10 +598,10 @@ void MainWindow::askOpenDir()
 
 void MainWindow::askOpenPkg()
 {
-    bool canceled;
-    PkgFilter pkgFilter = OpenPkgDialog::askPkgFilter( &canceled );
+    bool cancelled;
+    PkgFilter pkgFilter = OpenPkgDialog::askPkgFilter( &cancelled );
 
-    if ( !canceled )
+    if ( !cancelled )
     {
 	app()->dirTree()->reset();
 	readPkg( pkgFilter );
@@ -636,10 +636,10 @@ void MainWindow::pkgQuerySetup()
 
 void MainWindow::askFindFiles()
 {
-    bool canceled;
-    const FileSearchFilter filter = FindFilesDialog::askFindFiles( &canceled );
+    bool cancelled;
+    const FileSearchFilter filter = FindFilesDialog::askFindFiles( &cancelled );
 
-    if ( !canceled )
+    if ( !cancelled )
 	DiscoverActions::findFiles( filter );
 }
 

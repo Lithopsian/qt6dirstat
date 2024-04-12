@@ -79,7 +79,6 @@ bool MountPoint::isSnapPackage() const
 
 
 #if HAVE_Q_STORAGE_INFO
-
 QStorageInfo * MountPoint::storageInfo()
 {
     if ( !_storageInfo )
@@ -93,48 +92,6 @@ QStorageInfo * MountPoint::storageInfo()
 
     return _storageInfo;
 }
-
-
-FileSize MountPoint::totalSize()
-{
-    return storageInfo()->bytesTotal();
-}
-
-
-FileSize MountPoint::usedSize()
-{
-    return storageInfo()->bytesTotal() - storageInfo()->bytesFree();
-}
-
-
-FileSize MountPoint::reservedSize()
-{
-    return storageInfo()->bytesFree() - storageInfo()->bytesAvailable();
-}
-
-
-FileSize MountPoint::freeSizeForUser()
-{
-    return storageInfo()->bytesAvailable();
-}
-
-
-FileSize MountPoint::freeSizeForRoot()
-{
-    return storageInfo()->bytesFree();
-}
-
-#else  // !HAVE_Q_STORAGE_INFO
-
-// Qt before 5.4 does not have QStorageInfo,
-// and statfs() is Linux-specific (not POSIX).
-
-FileSize MountPoint::totalSize()	 { return -1; }
-FileSize MountPoint::usedSize()		 { return -1; }
-FileSize MountPoint::reservedSize()	 { return -1; }
-FileSize MountPoint::freeSizeForUser()	 { return -1; }
-FileSize MountPoint::freeSizeForRoot()   { return -1; }
-
 #endif // !HAVE_Q_STORAGE_INFO
 
 
@@ -474,12 +431,6 @@ void MountPoints::dump()
 {
     for ( const MountPoint * mountPoint : instance()->_mountPointList )
 	logDebug() << mountPoint->path() << Qt::endl;
-}
-
-
-void MountPoints::reload()
-{
-    instance()->ensurePopulated();
 }
 
 

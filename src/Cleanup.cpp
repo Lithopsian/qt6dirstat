@@ -24,8 +24,6 @@
 using namespace QDirStat;
 
 
-
-
 namespace
 {
     /**

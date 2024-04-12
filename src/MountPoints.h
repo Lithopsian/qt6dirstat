@@ -154,36 +154,53 @@ namespace QDirStat
 	bool hasSizeInfo() const { return false; }
 #endif
 
+#if HAVE_Q_STORAGE_INFO
 	/**
 	 * Total size of the filesystem of this mount point.
 	 * This returns -1 if no size information is available.
 	 **/
-	FileSize totalSize();
+	FileSize totalSize()
+	    { return storageInfo()->bytesTotal(); }
 
 	/**
 	 * Total used size of the filesystem of this mount point.
 	 * This returns -1 if no size information is available.
 	 **/
-	FileSize usedSize();
+	FileSize usedSize()
+	    { return storageInfo()->bytesTotal() - storageInfo()->bytesFree(); }
 
 	/**
 	 * Reserved size for root for the filesystem of this mount point.
 	 * This returns -1 if no size information is available.
 	 **/
-	FileSize reservedSize();
+	FileSize reservedSize()
+	    { return storageInfo()->bytesFree() - storageInfo()->bytesAvailable(); }
 
 	/**
 	 * Available free size of this filesystem for non-privileged users.
 	 * This returns -1 if no size information is available.
 	 **/
-	FileSize freeSizeForUser();
+	FileSize freeSizeForUser()
+	    { return storageInfo()->bytesAvailable(); }
 
 	/**
 	 * Available free size of this filesystem for privileged users.
 	 * This returns -1 if no size information is available.
 	 **/
-	FileSize freeSizeForRoot();
+	FileSize freeSizeForRoot()
+	    { return storageInfo()->bytesFree(); }
 
+#else
+	/**
+	 *  Qt before 5.4 does not have QStorageInfo, and statfs()
+	 * is Linux-specific (not POSIX).
+	 **/
+	FileSize MountPoint::totalSize()	 { return -1; }
+	FileSize MountPoint::usedSize()		 { return -1; }
+	FileSize MountPoint::reservedSize()	 { return -1; }
+	FileSize MountPoint::freeSizeForUser()	 { return -1; }
+	FileSize MountPoint::freeSizeForRoot()   { return -1; }
+#endif
 
     private:
 
@@ -301,7 +318,7 @@ namespace QDirStat
          * Clear all information and reload it from disk.
          * NOTICE: This invalidates ALL MountPoint pointers!
          **/
-        static void reload();
+        static void reload() { instance()->ensurePopulated(); }
 
 
     protected:

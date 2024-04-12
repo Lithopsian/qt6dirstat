@@ -63,12 +63,6 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 }
 
 
-void UnreadableDirsWindow::clear()
-{
-    _ui->treeWidget->clear();
-}
-
-
 void UnreadableDirsWindow::initWidgets()
 {
     app()->setWidgetFontSize( _ui->treeWidget );
@@ -104,7 +98,7 @@ void UnreadableDirsWindow::populateSharedInstance( FileInfo * subtree )
 
 void UnreadableDirsWindow::populate( FileInfo * newSubtree )
 {
-    clear();
+    _ui->treeWidget->clear();
     _subtree = newSubtree;
 
     //logDebug() << "Locating all unreadable dirs below " << _subtree.url() << Qt::endl;

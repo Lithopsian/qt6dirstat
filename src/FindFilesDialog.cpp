@@ -115,9 +115,9 @@ FileSearchFilter FindFilesDialog::askFindFiles( bool    * cancelled_ret,
     const int result = dialog.exec();
 
     const bool cancelled = ( result == QDialog::Rejected );
-logDebug() << cancelled << Qt::endl;
+
     const FileSearchFilter filter = cancelled ? FileSearchFilter() : dialog.fileSearchFilter();
-logDebug() << filter << Qt::endl;
+
     if ( cancelled_ret )
 	*cancelled_ret = filter.pattern().isEmpty() ? true : cancelled;
 

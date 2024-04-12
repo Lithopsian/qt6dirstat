@@ -45,10 +45,10 @@ namespace QDirStat
 	 * Open an "open package" dialog and wait for the user to enter
 	 * values.
          *
-         * 'canceled_ret' is a return parameter that (if non-null) is set to
-	 * 'true' if the user canceled the dialog.
+         * 'cancelled_ret' is a return parameter that (if non-null) is set to
+	 * 'true' if the user cancelled the dialog.
 	 **/
-	static FileSearchFilter askFindFiles( bool    * canceled_ret,
+	static FileSearchFilter askFindFiles( bool    * cancelled_ret,
                                               QWidget * parent = nullptr   );
 
     protected slots:

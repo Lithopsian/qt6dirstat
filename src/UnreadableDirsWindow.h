@@ -103,11 +103,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Clear all data and widget contents.
-	 **/
-	void clear();
-
-	/**
 	 * One-time initialization of the widgets in this window.
 	 **/
 	void initWidgets();

@@ -310,12 +310,6 @@ void DirInfo::recalc()
 }
 
 
-void DirInfo::setMountPoint( bool isMountPoint )
-{
-    _isMountPoint = isMountPoint;
-}
-
-
 FileSize DirInfo::totalSize()
 {
     if ( _summaryDirty )
@@ -446,12 +440,6 @@ int DirInfo::errSubDirCount()
 	recalc();
 
     return _errSubDirCount;
-}
-
-
-bool DirInfo::isFinished() const
-{
-    return !isBusy();
 }
 
 

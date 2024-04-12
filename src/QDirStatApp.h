@@ -19,15 +19,6 @@ namespace QDirStat
     class DirTree;
     class FileInfo;
     class SelectionModel;
-    class QDirStatApp;
-
-    /**
-     * Access the singleton instance of the QDirStatApp class. If no instance
-     * exists yet, this will create it and also the key objects that it manages
-     * (see below).
-     **/
-    QDirStatApp * app();
-
 
     /**
      * This is the application object for the QDirStat application with a
@@ -172,6 +163,13 @@ namespace QDirStat
         SelectionModel          * _selectionModel;
 
     };  // class QDirStatApp
+
+    /**
+     * Access the singleton instance of the QDirStatApp class. If no instance
+     * exists yet, this will create it and also the key objects that it manages
+     * (see below).
+     **/
+    inline QDirStatApp * app() { return QDirStatApp::instance(); }
 
 }       // namespace QDirStat
 

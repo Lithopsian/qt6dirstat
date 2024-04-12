@@ -236,7 +236,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	void setMountPoint( bool isMountPoint = true ) override;
+	void setMountPoint( bool isMountPoint = true ) override { _isMountPoint = isMountPoint; }
 
 	/**
 	 * Find the nearest parent that is a mount point or 0 if there is
@@ -249,7 +249,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	bool isFinished() const override;
+	bool isFinished() const override { return !isBusy(); }
 
 	/**
 	 * Returns true if this subtree is busy, i.e. it is not finished

@@ -121,10 +121,3 @@ void QDirStatApp::setWidgetFontSize( QWidget * widget )
 	//setStyleSheet( QString( "QTreeView { font-size: %1pt; }" ).arg( pointSize ) );
     }
 }
-
-
-
-QDirStatApp * QDirStat::app()
-{
-    return QDirStatApp::instance();
-}
