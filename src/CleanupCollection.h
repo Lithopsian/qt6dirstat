@@ -218,10 +218,10 @@ namespace QDirStat
 	// Data members
 	//
 
-	SelectionModel		* _selectionModel;
-	CleanupList		  _cleanupList;
-	Trash			* _trash;
-	QList<QPointer<QMenu>>	  _menus;
+	SelectionModel          * _selectionModel;
+	CleanupList               _cleanupList;
+	Trash                   * _trash;
+	QList<QPointer<QMenu>>    _menus;
 	QList<QPointer<QToolBar>> _toolBars;
 
     };

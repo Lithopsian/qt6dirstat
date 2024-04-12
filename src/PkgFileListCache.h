@@ -15,10 +15,7 @@
 
 namespace QDirStat
 {
-    // Forward declarations
-
     class PkgManager;
-
 
     /**
      * Cache class for a package file lists.
@@ -37,9 +34,9 @@ namespace QDirStat
 
 	enum LookupType
 	{
-	    LookupByPkg	  = 1,		// Will use only containsPkg()
-	    LookupGlobal  = 2,		// Will use only containsFile()
-	    LookupAll	  = 0xFFFF	// Will use all
+	    LookupByPkg  = 1,		// Will use only containsPkg()
+	    LookupGlobal = 2,		// Will use only containsFile()
+	    LookupAll    = 0xFFFF	// Will use all
 	};
 
 	/**
@@ -48,8 +45,8 @@ namespace QDirStat
 	 **/
 	PkgFileListCache( const PkgManager * pkgManager,
 			  LookupType         lookupType = LookupByPkg ):
-	    _pkgManager( pkgManager ),
-	    _lookupType( lookupType )
+	    _pkgManager { pkgManager },
+	    _lookupType { lookupType }
 	{}
 
 	/**
@@ -104,9 +101,9 @@ namespace QDirStat
     private:
 
 	const PkgManager           * _pkgManager;
-	LookupType		     _lookupType;
+	LookupType                   _lookupType;
 	QMultiHash<QString, QString> _pkgFileNames;
-	QSet<QString>		     _fileNames;
+	QSet<QString>                _fileNames;
 
     };
 }	// namespace QDirStat

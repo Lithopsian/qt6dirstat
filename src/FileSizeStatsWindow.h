@@ -21,10 +21,8 @@ class QTableWidget;
 namespace QDirStat
 {
     class BucketsTableModel;
-    class DirTree;
     class FileInfo;
     class FileSizeStats;
-    class PercentileSums;
 
     /**
      * Modeless dialog to display file size statistics:

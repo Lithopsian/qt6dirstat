@@ -16,8 +16,6 @@
 
 namespace QDirStat
 {
-    class PanelMessage;
-
     /**
      * Message in a small panel with an icon, a bold face heading,
      * a message text, an optional "Details..." hyperlink

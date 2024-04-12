@@ -11,16 +11,16 @@
 #define HistoryButtons_h
 
 #include <QObject>
+
 #include "History.h"
 
-class QMenu;
+
 class QAction;
 
 
 namespace QDirStat
 {
     class FileInfo;
-
 
     class HistoryButtons: public QObject
     {

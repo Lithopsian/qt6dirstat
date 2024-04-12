@@ -10,10 +10,10 @@
 #define MimeCategory_h
 
 
-#include <QString>
-#include <QList>
-#include <QStringList>
 #include <QColor>
+#include <QList>
+#include <QString>
+#include <QStringList>
 #include <QTextStream>
 
 
@@ -193,8 +193,8 @@ namespace QDirStat
 	// Data members
 	//
 
-	QString		_name;
-	QColor		_color { Qt::white };
+	QString _name;
+	QColor  _color { Qt::white };
 
 	/**
 	 * The raw patterns are categorised into different lists for the convenience of the
@@ -202,14 +202,14 @@ namespace QDirStat
 	 * when needed as a single (per case-sensitivity) sorted comma-delimited string by the
 	 * humanReadablePatternList() method.
 	 **/
-	QStringList	_caseInsensitiveExactList;
-	QStringList	_caseSensitiveExactList;
-	QStringList	_caseInsensitiveSuffixList;
-	QStringList	_caseSensitiveSuffixList;
-	QStringList	_caseInsensitiveWildcardSuffixList;
-	QStringList	_caseSensitiveWildcardSuffixList;
-	QStringList	_caseInsensitiveWildcardList;
-	QStringList	_caseSensitiveWildcardList;
+	QStringList _caseInsensitiveExactList;
+	QStringList _caseSensitiveExactList;
+	QStringList _caseInsensitiveSuffixList;
+	QStringList _caseSensitiveSuffixList;
+	QStringList _caseInsensitiveWildcardSuffixList;
+	QStringList _caseSensitiveWildcardSuffixList;
+	QStringList _caseInsensitiveWildcardList;
+	QStringList _caseSensitiveWildcardList;
 
     };	// class MimeCategory
 

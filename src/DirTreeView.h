@@ -13,8 +13,6 @@
 #include <QTreeView>
 #include <QTreeWidget>
 
-class QAction;
-
 
 namespace QDirStat
 {

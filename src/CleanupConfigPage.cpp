@@ -92,7 +92,7 @@ void CleanupConfigPage::applyChanges()
 	// If we ran past the end of either list, or the cleanups don't match ...
 	if ( iNew == cleanups.size() ||
 	     iOld == collection->size() ||
-	     !equal( cleanups.at( iNew ), collection->at( iOld ) ) )
+	     cleanups.at( iNew ) != collection->at( iOld ) )
 	{
 	    collection->writeSettings( cleanups );
 	    return;
@@ -274,35 +274,4 @@ QString CleanupConfigPage::valueText( void * value )
     CHECK_PTR( cleanup );
 
     return cleanup->cleanTitle();
-}
-
-
-bool CleanupConfigPage::equal( const Cleanup * cleanup1, const Cleanup * cleanup2 ) const
-{
-    if ( !cleanup1 || !cleanup2 )
-        return false;
-
-    if ( cleanup1 == cleanup2 )
-        return true;
-
-    if ( cleanup1->isActive()              != cleanup2->isActive()              ||
-         cleanup1->title()                 != cleanup2->title()                 ||
-         cleanup1->command()               != cleanup2->command()               ||
-//         cleanup1->iconName()              != cleanup2->iconName()              || // not currently in the
-//         cleanup1->shortcut()              != cleanup2->shortcut()              || // config dialog
-         cleanup1->recurse()               != cleanup2->recurse()               ||
-         cleanup1->askForConfirmation()    != cleanup2->askForConfirmation()    ||
-         cleanup1->refreshPolicy()         != cleanup2->refreshPolicy()         ||
-         cleanup1->worksForDir()           != cleanup2->worksForDir()           ||
-         cleanup1->worksForFile()          != cleanup2->worksForFile()          ||
-         cleanup1->worksForDotEntry()      != cleanup2->worksForDotEntry()      ||
-         cleanup1->outputWindowPolicy()    != cleanup2->outputWindowPolicy()    ||
-         cleanup1->outputWindowTimeout()   != cleanup2->outputWindowTimeout()   ||
-         cleanup1->outputWindowAutoClose() != cleanup2->outputWindowAutoClose() ||
-         cleanup1->shell()                 != cleanup2->shell() )
-    {
-        return false;
-    }
-
-    return true;
 }

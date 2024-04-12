@@ -161,12 +161,12 @@ namespace QDirStat
 	// Set the various buttons and connect them to the appropriate slot.
 	//
 
-	void setMoveUpButton	  ( QAbstractButton * button );
-	void setMoveDownButton	  ( QAbstractButton * button );
-	void setMoveToTopButton	  ( QAbstractButton * button );
+	void setMoveUpButton      ( QAbstractButton * button );
+	void setMoveDownButton    ( QAbstractButton * button );
+	void setMoveToTopButton   ( QAbstractButton * button );
 	void setMoveToBottomButton( QAbstractButton * button );
-	void setAddButton	  ( QAbstractButton * button );
-	void setRemoveButton	  ( QAbstractButton * button );
+	void setAddButton         ( QAbstractButton * button );
+	void setRemoveButton      ( QAbstractButton * button );
 
 
     protected slots:
@@ -232,9 +232,9 @@ namespace QDirStat
 	// Data members
 	//
 
-	QListWidget	* _listWidget		{ nullptr };
-	int		  _firstRow		{ 0 };
-	bool		  _updatesLocked	{ false };
+	QListWidget     * _listWidget		{ nullptr };
+	int               _firstRow		{ 0 };
+	bool              _updatesLocked	{ false };
 	QAbstractButton * _moveUpButton		{ nullptr };
 	QAbstractButton * _moveDownButton	{ nullptr };
 	QAbstractButton * _moveToTopButton	{ nullptr };

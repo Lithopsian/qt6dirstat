@@ -20,7 +20,7 @@ namespace QDirStat
 {
 // For use in loops
 #define DataColumnBegin NameCol
-#define DataColumnEnd	UndefinedCol
+#define DataColumnEnd   UndefinedCol
 
     /**
      * Data columns for data model, view, and sorting.  Most of the work
@@ -30,7 +30,7 @@ namespace QDirStat
      **/
     enum DataColumn
     {
-	NameCol	       = 0,	// File / directory name
+	NameCol = 0,		// File / directory name
 	PercentBarCol,		// Graphical percentage bar
 	PercentNumCol,		// Numeric percentage Value
 	SizeCol,		// size (subtree or own size for files)
@@ -47,9 +47,7 @@ namespace QDirStat
 	ReadJobsCol,		// Dummy column only for sorting by pending read jobs
     };
 
-
     typedef QList<DataColumn> DataColumnList;
-
 
     namespace DataColumns
     {

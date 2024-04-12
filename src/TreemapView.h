@@ -56,7 +56,6 @@ namespace QDirStat
     constexpr double CurrentHighlightLayer = 1e8;
     constexpr double SceneHighlightLayer   = 1e10;
 
-
     /**
      * View widget that displays a DirTree as a treemap.
      **/

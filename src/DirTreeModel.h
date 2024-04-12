@@ -41,7 +41,6 @@ namespace QDirStat
 	RawDataRole = Qt::UserRole
     };
 
-
     class DirTreeModel: public QAbstractItemModel
     {
 	Q_OBJECT
@@ -259,25 +258,10 @@ namespace QDirStat
 	void writeSettings();
 
 	/**
-	 * Return this data model's selection model.
-	 *
-	 * The data model doesn't strictly need a selection model, but certain
-	 * operations it provides (like refreshSelected()) do.
-	 **/
-//	SelectionModel * selectionModel() const { return _selectionModel; }
-
-	/**
 	 * Refresh the selected items: Re-read their contents from disk.
 	 * This requires a selection model to be set.
 	 **/
 	void refreshSelected();
-
-	/**
-	 * Set the selection model. This is required for all methods with
-	 * '..Selected()' in their name.
-	 **/
-//	void setSelectionModel( SelectionModel * selModel )
-//	    { _selectionModel = selModel; }
 
 	/**
 	 * Set the update speed to slow (default 3 sec instead of 250 millisec).
@@ -295,7 +279,6 @@ namespace QDirStat
 	// handling of the "dot entry". In this case, it is handled as a
 	// separate subdirectory. But this might change in the future, or it
 	// might even become configurable.
-
 
 	/**
 	 * Get the FileInfo for a model index. This may return 0 if the index
@@ -396,6 +379,7 @@ namespace QDirStat
 	 **/
 	void busyDisplay();
 
+
     protected slots:
 
 	/**
@@ -441,6 +425,7 @@ namespace QDirStat
 	 * Notification that clearing a subtree is done.
 	 **/
 	void subtreeCleared( DirInfo * subtree );
+
 
     protected:
 
@@ -492,17 +477,16 @@ namespace QDirStat
 	 * indicates if 'subtree' itself will become invalid.
 	 **/
 	void invalidatePersistent( FileInfo * subtree,
-				   bool	      includeParent );
+				   bool       includeParent );
 
 
 	/**
 	 * Data for different roles for each item (row) and column
 	 **/
-	QVariant columnText	       ( FileInfo * item, int col ) const;
-	QVariant columnIcon	       ( FileInfo * item, int col ) const;
-	QVariant columnAlignment       ( FileInfo * item, int col ) const;
-	QVariant columnFont	       ( FileInfo * item, int col ) const;
-//	QVariant dominantItemColumnFont( FileInfo * item, int col ) const;
+	QVariant columnText     ( FileInfo * item, int col ) const;
+	QVariant columnIcon     ( FileInfo * item, int col ) const;
+	QVariant columnAlignment( FileInfo * item, int col ) const;
+	QVariant columnFont     ( FileInfo * item, int col ) const;
 
 	/**
 	 * Raw data for direct communication with our item delegates
@@ -572,21 +556,19 @@ namespace QDirStat
 	//
 	// Data members
 	//
-	DirTree * _tree			{ nullptr };
+	DirTree       * _tree			{ nullptr };
 
-	bool		 _crossFilesystems;
-//	QString		 _treeIconDir;
-	DirTreeItemSize	 _treeItemSize;
-//	int		 _readJobsCol		{ PercentBarCol };
-	QSet<DirInfo *>	 _pendingUpdates;
-	QTimer		 _updateTimer;
-	int		 _updateTimerMillisec;
-	int		 _slowUpdateMillisec;
-	bool		 _slowUpdate		{ false };
-	DataColumn	 _sortCol		{ ReadJobsCol };
-	Qt::SortOrder	 _sortOrder		{ Qt::DescendingOrder };
-	bool		 _removingRows		{ false };
-	bool		 _useBoldForDominantItems;
+	bool            _crossFilesystems;
+	DirTreeItemSize _treeItemSize;
+	QSet<DirInfo *> _pendingUpdates;
+	QTimer          _updateTimer;
+	int             _updateTimerMillisec;
+	int             _slowUpdateMillisec;
+	bool            _slowUpdate		{ false };
+	DataColumn      _sortCol		{ ReadJobsCol };
+	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
+	bool            _removingRows		{ false };
+	bool            _useBoldForDominantItems;
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;
@@ -598,20 +580,20 @@ namespace QDirStat
 	QFont  _themeFont;
 
 	// The various tree icons
-	QIcon _dirIcon;
-	QIcon _dotEntryIcon;
-	QIcon _atticIcon;
-	QIcon _fileIcon;
-	QIcon _symlinkIcon;
-	QIcon _unreadableDirIcon;
-	QIcon _mountPointIcon;
-	QIcon _networkIcon;
-	QIcon _stopIcon;
-	QIcon _excludedIcon;
-	QIcon _blockDeviceIcon;
-	QIcon _charDeviceIcon;
-	QIcon _specialIcon;
-	QIcon _pkgIcon;
+	QIcon  _dirIcon;
+	QIcon  _dotEntryIcon;
+	QIcon  _atticIcon;
+	QIcon  _fileIcon;
+	QIcon  _symlinkIcon;
+	QIcon  _unreadableDirIcon;
+	QIcon  _mountPointIcon;
+	QIcon  _networkIcon;
+	QIcon  _stopIcon;
+	QIcon  _excludedIcon;
+	QIcon  _blockDeviceIcon;
+	QIcon  _charDeviceIcon;
+	QIcon  _specialIcon;
+	QIcon  _pkgIcon;
 
     };	// class DirTreeModel
 

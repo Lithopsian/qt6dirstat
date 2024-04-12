@@ -16,7 +16,6 @@
 
 namespace QDirStat
 {
-    // Forward declarations
     class DirTree;
 
     /**

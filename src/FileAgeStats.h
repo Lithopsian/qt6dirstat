@@ -24,7 +24,6 @@ namespace QDirStat
     typedef QHash<short, YearStats>     YearStatsHash;
     typedef QList<short>                YearsList;
 
-
     /**
      * File modification year / month statistics for one year or one month.
      **/
@@ -32,20 +31,16 @@ namespace QDirStat
     {
     public:
 
-	short		year;           // 1970-2037 (time_t range)
-        short           month;          // 1-12 or 0 for the  complete year
-	int		filesCount;
-	float		filesPercent;	// 0.0 .. 100.0
-	FileSize	size;
-	float		sizePercent;	// 0.0 .. 100.0
+	short    year;                     // 1970-2037 (time_t range)
+        short    month;                    // 1-12 or 0 for the  complete year
+	int      filesCount     { 0 };
+	float    filesPercent   { 0.0 };   // 0.0 .. 100.0
+	FileSize size           { 0 };
+	float    sizePercent    { 0.0 };   // 0.0 .. 100.0
 
 	YearStats( short yr = 0, short mn = 0 ):
             year { yr },
-            month { mn },
-            filesCount { 0 },
-            filesPercent { 0.0 },
-            size { 0 },
-            sizePercent { 0.0 }
+            month { mn }
         {}
 
     };  // class YearStats

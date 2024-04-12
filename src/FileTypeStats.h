@@ -22,9 +22,7 @@
 
 namespace QDirStat
 {
-    class DirTree;
     class FileInfo;
-    class MimeCategorizer;
     class MimeCategory;
 
     typedef QPair<QString, const MimeCategory *>	MapCategory;
@@ -36,7 +34,6 @@ namespace QDirStat
 
     typedef StringFileSizeMap::const_iterator		StringFileSizeMapIterator;
     typedef CategoryFileSizeMap::const_iterator 	CategoryFileSizeMapIterator;
-
 
     /**
      * Class to calculate file type statistics for a subtree, such as how much

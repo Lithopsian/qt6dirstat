@@ -144,7 +144,7 @@ namespace QDirStat
 	/**
 	 * Comparison operator for two exclude rules.
 	 **/
-	bool operator!=( const ExcludeRule * other );
+	bool operator!=( const ExcludeRule * other ) const;
 
 
     private:

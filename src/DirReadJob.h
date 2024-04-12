@@ -19,14 +19,11 @@
 
 namespace QDirStat
 {
-    // Forward declarations
     class DirInfo;
     class DirTree;
     class CacheReader;
     class DirReadJobQueue;
     class FileInfo;
-    class MountPoint;
-
 
     /**
      * A directory read job that can be queued. This is mainly to prevent
@@ -57,7 +54,7 @@ namespace QDirStat
 	 *
 	 * This does not read anything yet. Call read() for that.
 	 **/
-	DirReadJob( DirTree *tree, DirInfo *dir );
+	DirReadJob( DirTree * tree, DirInfo * dir );
 
 	/**
 	 * Destructor
@@ -146,10 +143,10 @@ namespace QDirStat
 
     protected:
 
-	DirTree *	   _tree;
-	DirInfo *	   _dir;
-	DirReadJobQueue *  _queue;
-	bool		   _started;
+	DirTree         *  _tree;
+	DirInfo         * _dir;
+	DirReadJobQueue * _queue;
+	bool              _started;
 
     };	// class DirReadJob
 
@@ -288,9 +285,9 @@ namespace QDirStat
 	//
 
 	QString _dirName;
-	bool	_applyFileChildExcludeRules;
-	bool	_checkedForNtfs	{ false };
-	bool	_isNtfs		{ false };
+	bool    _applyFileChildExcludeRules;
+	bool    _checkedForNtfs	{ false };
+	bool    _isNtfs		{ false };
 
 	static bool _warnedAboutNtfsHardLinks;
 
@@ -481,9 +478,9 @@ namespace QDirStat
 
     protected:
 
-	QList<DirReadJob *>  _queue;
-	QList<DirReadJob *>  _blocked;
-	QTimer		     _timer;
+	QList<DirReadJob *> _queue;
+	QList<DirReadJob *> _blocked;
+	QTimer              _timer;
     };
 
 

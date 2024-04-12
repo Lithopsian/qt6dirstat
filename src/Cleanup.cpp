@@ -613,3 +613,34 @@ void Cleanup::runCommand( const FileInfo * item,
     // The CleanupCollection will take care about refreshing if this is
     // configured for this cleanup.
 }
+
+
+bool Cleanup::operator!=( const Cleanup * other ) const
+{
+    if ( !other )
+        return true;
+
+    if ( other == this )
+        return false;
+
+    if ( other->isActive()              != isActive()              ||
+         other->title()                 != title()                 ||
+         other->command()               != command()               ||
+//         other->iconName()              != iconName()              || // not currently in the
+//         other->shortcut()              != shortcut()              || // config dialog
+         other->recurse()               != recurse()               ||
+         other->askForConfirmation()    != askForConfirmation()    ||
+         other->refreshPolicy()         != refreshPolicy()         ||
+         other->worksForDir()           != worksForDir()           ||
+         other->worksForFile()          != worksForFile()          ||
+         other->worksForDotEntry()      != worksForDotEntry()      ||
+         other->outputWindowPolicy()    != outputWindowPolicy()    ||
+         other->outputWindowTimeout()   != outputWindowTimeout()   ||
+         other->outputWindowAutoClose() != outputWindowAutoClose() ||
+         other->shell()                 != shell() )
+    {
+        return true;
+    }
+
+    return false;
+}

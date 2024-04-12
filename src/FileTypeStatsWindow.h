@@ -23,7 +23,6 @@ namespace QDirStat
     class FileInfo;
     class FileTypeStats;
     class MimeCategory;
-    class LocateFileTypeWindow;
     class FileTypeItem;
     class SelectionModel;
     class SuffixFileTypeItem;

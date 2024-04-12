@@ -11,18 +11,15 @@
 #define MainWindow_h
 
 #include <QMainWindow>
-#include <QString>
 #include <QElapsedTimer>
+#include <QString>
 #include <QTimer>
-#include <QPointer>
 
 #include "ui_main-window.h"
 #include "Subtree.h"
 
 
-class QMenu;
 class QMouseEvent;
-class QSignalMapper;
 class SysCallFailedException;
 
 

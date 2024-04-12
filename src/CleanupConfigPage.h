@@ -107,12 +107,6 @@ namespace QDirStat
 	 **/
 	void enableEditWidgets( bool enable );
 
-	/**
-	 * Test whether two Cleanup objects are eqial for the purposes of
-	 * the configuration dialog.
-	 **/
-	bool equal( const Cleanup * cleanup1, const Cleanup * cleanup2 ) const;
-
 
     private:
 

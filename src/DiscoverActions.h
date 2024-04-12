@@ -10,7 +10,6 @@
 #ifndef DiscoverActions_h
 #define DiscoverActions_h
 
-#include <QObject>
 #include <QString>
 
 

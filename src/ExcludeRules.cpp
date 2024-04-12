@@ -91,7 +91,7 @@ bool ExcludeRule::matchDirectChildren( DirInfo * dir ) const
 }
 
 
-bool ExcludeRule::operator!=( const ExcludeRule * other )
+bool ExcludeRule::operator!=( const ExcludeRule * other ) const
 {
     if ( !other )
         return true;

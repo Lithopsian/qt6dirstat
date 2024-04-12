@@ -20,7 +20,6 @@ namespace QDirStat
 {
     class PkgManager;
 
-
     /**
      * Singleton class for simple queries to the system's package manager.
      * Only normally accessed by the public static functions.

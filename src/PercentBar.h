@@ -22,8 +22,6 @@ typedef QList<QColor> ColorList;
 
 namespace QDirStat
 {
-    class DirTreeView;
-
     /**
      * Item delegate class to paint the percent bar in the PercentBarCol.
      *
@@ -132,21 +130,6 @@ namespace QDirStat
 	 * parent, parent's parent etc. to the top.
 	 **/
 	int treeLevel( const QModelIndex & index ) const;
-
-        /**
-         * Return percentage data for the specified model index.
-         * For valid data, this should return a float value from 0.0 to 100.0.
-         *
-         * This default implementation uses the default Qt::DisplayRole for
-         * that model index, i.e. the value that would normally be displayed.
-         * It any '%' percent sign and tries to convert the remainder to
-         * 'float'.
-         *
-         * If that does not result in a valid floating point number, it calls
-         * the parent class, i.e. the value in that cell is displayed normally,
-         * not a percent bar.
-         **/
-//        QVariant percentData( const QModelIndex & index ) const;
 
 	/**
 	 * Paint a percent bar into a widget.

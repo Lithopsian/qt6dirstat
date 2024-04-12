@@ -13,7 +13,6 @@
 #define LOG_COMMANDS	true
 #define LOG_OUTPUT	false
 
-#include <QString>
 
 #include "PkgInfo.h"
 #include "PkgFileListCache.h"
@@ -21,7 +20,6 @@
 
 namespace QDirStat
 {
-
     /**
      * Abstract base class for all package managers.
      *

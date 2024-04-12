@@ -17,10 +17,9 @@ namespace QDirStat
 {
     class DirTreeModel;
     class DirTree;
+    class FileInfo;
     class SelectionModel;
     class QDirStatApp;
-    class FileInfo;
-
 
     /**
      * Access the singleton instance of the QDirStatApp class. If no instance

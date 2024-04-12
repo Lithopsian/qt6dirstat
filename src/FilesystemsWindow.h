@@ -19,7 +19,6 @@
 
 namespace QDirStat
 {
-    class FileInfo;
     class MountPoint;
 
     /**

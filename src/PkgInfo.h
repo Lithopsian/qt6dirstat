@@ -156,7 +156,7 @@ namespace QDirStat
          * just return 'path'.
          **/
         QString pkgUrl( const QString & path ) const
-	    { return isPkgUrl( path ) ? path : url() + path; }
+            { return isPkgUrl( path ) ? path : url() + path; }
 
         /**
          * Locate a path that is already split up into its components within a
@@ -186,7 +186,7 @@ namespace QDirStat
          * found.
          **/
 //        FileInfo * locate( const QStringList & pathComponents )
-//	    { return locate( this, pathComponents ); }
+//            { return locate( this, pathComponents ); }
 
         /**
          * Returns the package scheme prefix.

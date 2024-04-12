@@ -433,43 +433,43 @@ namespace QDirStat
 	bool                  _useLogHeightScale;
 
 	// Flags and settings
-	const bool	_showMedian		{ true };
-	const bool	_showQuartiles		{ true };
-	int		_percentileStep		{ 0 };
-	const int	_leftMarginPercentiles	{ 0 };
-	const int	_rightMarginPercentiles	{ 5 };
+	const bool _showMedian			{ true };
+	const bool _showQuartiles		{ true };
+	int        _percentileStep		{ 0 };
+	const int  _leftMarginPercentiles	{ 0 };
+	const int  _rightMarginPercentiles	{ 5 };
 
 	// Brushes and Pens
-	QBrush	_panelBackground;
-	QBrush	_barBrush;
-	QPen	_barPen;
-	QPen	_medianPen;
-	QPen	_quartilePen;
-	QPen	_percentilePen;
-	QPen	_decilePen;
-	QPen	_piePen;
-	QBrush	_overflowSliceBrush;
+	QBrush _panelBackground;
+	QBrush _barBrush;
+	QPen   _barPen;
+	QPen   _medianPen;
+	QPen   _quartilePen;
+	QPen   _percentilePen;
+	QPen   _decilePen;
+	QPen   _piePen;
+	QBrush _overflowSliceBrush;
 
 	// Geometry
-	qreal	_histogramWidth;
-	qreal	_histogramHeight;
-        bool	_geometryDirty;
+	qreal  _histogramWidth;
+	qreal  _histogramHeight;
+	bool   _geometryDirty;
 
 	// Not static since there will only ever be one HistogramView and most of the time none
-	const qreal	_leftBorder	{ 40.0 };
-	const qreal	_rightBorder	{ 10.0 };
-	const qreal	_topBorder	{ 30.0 };
-	const qreal	_bottomBorder	{ 50.0 };
-	const qreal	_viewMargin	{ 10.0 };
+	const qreal _leftBorder		{ 40.0 };
+	const qreal _rightBorder	{ 10.0 };
+	const qreal _topBorder		{ 30.0 };
+	const qreal _bottomBorder	{ 50.0 };
+	const qreal _viewMargin		{ 10.0 };
 
-	const qreal	_axisExtraLength	{   5.0 };
-	const qreal	_markerExtraHeight	{  15.0 };
-	const qreal	_overflowWidth		{ 140.0 };
-	const qreal	_overflowLeftBorder	{  10.0 };
-	const qreal	_overflowRightBorder	{  10.0 };
-	const qreal	_overflowSpacing	{  15.0 }; // between histogram and overflow area
-	const qreal	_pieDiameter		{  60.0 };
-	const qreal	_pieSliceOffset		{  10.0 };
+	const qreal _axisExtraLength	{   5.0 };
+	const qreal _markerExtraHeight	{  15.0 };
+	const qreal _overflowWidth	{ 140.0 };
+	const qreal _overflowLeftBorder	{  10.0 };
+	const qreal _overflowRightBorder{  10.0 };
+	const qreal _overflowSpacing	{  15.0 }; // between histogram and overflow area
+	const qreal _pieDiameter	{  60.0 };
+	const qreal _pieSliceOffset	{  10.0 };
 
     };
 

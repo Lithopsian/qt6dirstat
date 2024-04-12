@@ -17,7 +17,6 @@
 namespace QDirStat
 {
     class ConfigDialog;
-    class ExcludeRule;
 
     /**
      * Configuration page (tab) for exclude rules:

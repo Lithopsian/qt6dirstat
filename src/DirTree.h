@@ -23,7 +23,6 @@ namespace QDirStat
     class DirTreeFilter;
     class PkgFilter;
 
-
     /**
      * This class provides some infrastructure as well as global data for a
      * directory tree. It acts as the glue that holds things together: The root
@@ -486,22 +485,23 @@ namespace QDirStat
 
 	// Data members
 
-	DirInfo *		_root;
-	DirReadJobQueue		_jobQueue;
+	DirInfo       * _root;
+	DirReadJobQueue _jobQueue;
 
-	QString			_device;
-	QString			_url;
+	QString         _device;
+	QString         _url;
 
-	ExcludeRules *		_excludeRules		{ nullptr };
-	ExcludeRules *		_tmpExcludeRules	{ nullptr };
+	ExcludeRules  * _excludeRules		{ nullptr };
+	ExcludeRules  * _tmpExcludeRules	{ nullptr };
+
 	QList<const DirTreeFilter *> _filters;
 
-	bool			_crossFilesystems	{ false };
-	bool			_isBusy			{ false };
-	bool			_beingDestroyed		{ false };
-        bool                    _haveClusterSize	{ false };
-        int                     _blocksPerCluster	{ 0 };
-	bool			_ignoreHardLinks	{ false };
+	bool _crossFilesystems	{ false };
+	bool _isBusy		{ false };
+	bool _beingDestroyed	{ false };
+        bool _haveClusterSize	{ false };
+        int  _blocksPerCluster	{ 0 };
+	bool _ignoreHardLinks	{ false };
 
     };	// class DirTree
 

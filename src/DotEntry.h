@@ -16,11 +16,10 @@
 
 namespace QDirStat
 {
-    // Forward declarations
     class DirTree;
 
     /**
-     * This is a very special kind if DirInfo: The <Files> pseudo container
+     * This is a very special kind if DirInfo: the <Files> pseudo container
      * that groups the non-directory children of a directory together. The
      * basic idea is keep the direct file children of a directory in one
      * container so their total size can easily be compared to any of the

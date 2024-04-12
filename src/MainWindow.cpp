@@ -1021,7 +1021,7 @@ void MainWindow::readFilesystem( const QString & path )
 
 void MainWindow::showDirPermissionsWarning()
 {
-    if ( !_enableDirPermissionsMsg )
+//    if ( !_enableDirPermissionsMsg )
 	return; // never display, I know already
 
     PanelMessage::showPermissionsMsg( this, _ui->vBox );

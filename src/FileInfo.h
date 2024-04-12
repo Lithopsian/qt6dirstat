@@ -22,11 +22,11 @@
 #include "FileSize.h"
 
 
-namespace QDirStat
-{
 #define FileInfoMagic 4242
 
-    // Forward declarations
+
+namespace QDirStat
+{
     class Attic;
     class DirInfo;
     class DirTree;
@@ -47,7 +47,6 @@ namespace QDirStat
 	DirPermissionDenied,	// Insufficient permissions for reading
 	DirError		// Error while reading
     };
-
 
     /**
      * The most basic building block of a DirTree:

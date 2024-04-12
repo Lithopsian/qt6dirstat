@@ -22,7 +22,6 @@ namespace QDirStat
 {
     class TreeWalker;
 
-
     /**
      * Modeless dialog to display search results for "discover" actions.
      *

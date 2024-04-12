@@ -17,7 +17,6 @@
 
 namespace QDirStat
 {
-    // Forward declarations
     class DirTree;
     class DotEntry;
 
@@ -74,7 +73,7 @@ namespace QDirStat
 	 * used for pseudo-directories.
 	 **/
 	DirInfo( DirInfo       * parent,
-	         DirTree       * tree,
+		 DirTree       * tree,
 		 const QString & name );
 
 	/**
@@ -645,43 +644,43 @@ namespace QDirStat
 	// Data members
 	//
 
-	FileInfoList *	_sortedChildren		{ nullptr };
-	FileInfoList *	_dominantChildren	{ nullptr };
-	DataColumn	_lastSortCol		{ UndefinedCol };
-	Qt::SortOrder	_lastSortOrder		{ Qt::AscendingOrder };
-	int		_pendingReadJobs	{ 0 };
-	bool		_lastIncludeAttic:1;
+	FileInfoList * _sortedChildren		{ nullptr };
+	FileInfoList * _dominantChildren	{ nullptr };
+	DataColumn     _lastSortCol		{ UndefinedCol };
+	Qt::SortOrder  _lastSortOrder		{ Qt::AscendingOrder };
+	int            _pendingReadJobs		{ 0 };
+	bool           _lastIncludeAttic:1;
 
-	bool		_isMountPoint:1;	// flag: is this a mount point?
-	bool		_isExcluded:1;		// flag: was this directory excluded?
-	bool		_summaryDirty:1;	// dirty flag for the cached values
-//	bool		_deletingAll:1;		// deleting complete children tree?
-	bool		_locked:1;		// app lock
-	bool		_touched:1;		// app 'touch' flag
-	bool		_fromCache:1;		// is this the root of a cache file read
+	bool           _isMountPoint:1;		// flag: is this a mount point?
+	bool           _isExcluded:1;		// flag: was this directory excluded?
+	bool           _summaryDirty:1;		// dirty flag for the cached values
+//	bool           _deletingAll:1;		// deleting complete children tree?
+	bool           _locked:1;		// app lock
+	bool           _touched:1;		// app 'touch' flag
+	bool           _fromCache:1;		// is this the root of a cache file read
 
 	// Children management
 
-	FileInfo *	_firstChild	{ nullptr };	// pointer to the first child
-	DotEntry *	_dotEntry	{ nullptr };	// pseudo entry to hold non-dir children
-	Attic	 *	_attic		{ nullptr };	// pseudo entry to hold ignored children
+	FileInfo *     _firstChild	{ nullptr };	// pointer to the first child
+	DotEntry *     _dotEntry	{ nullptr };	// pseudo entry to hold non-dir children
+	Attic    *     _attic		{ nullptr };	// pseudo entry to hold ignored children
 
 	// Some cached values
 
-	FileSize	_totalSize;
-	FileSize	_totalAllocatedSize;
-	FileSize	_totalBlocks;
-	int		_totalItems;
-	int		_totalSubDirs;
-	int		_totalFiles;
-	int		_totalIgnoredItems;
-	int		_totalUnignoredItems;
-	int		_directChildrenCount;
-	int		_errSubDirCount;
-	time_t		_latestMtime;
-	time_t		_oldestFileMtime;
+	FileSize       _totalSize;
+	FileSize       _totalAllocatedSize;
+	FileSize       _totalBlocks;
+	int            _totalItems;
+	int            _totalSubDirs;
+	int            _totalFiles;
+	int            _totalIgnoredItems;
+	int            _totalUnignoredItems;
+	int            _directChildrenCount;
+	int            _errSubDirCount;
+	time_t         _latestMtime;
+	time_t         _oldestFileMtime;
 
-	DirReadState	_readState;
+	DirReadState   _readState;
 
 
     };	// class DirInfo

@@ -25,7 +25,6 @@ namespace QDirStat
     };
     Q_DECLARE_FLAGS( WildcardConversionOptions, WildcardConversionOption )
 
-
     /**
      * Class for the wildcard-type of string matching used by the categorizer
      * and other filtering.  This is implemented by converting the wildcard pattern

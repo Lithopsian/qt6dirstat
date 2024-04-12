@@ -94,7 +94,7 @@ namespace QDirStat
          **/
         void setUseRootFallback( bool val ) { _useRootFallback = val; }
 
-	/**
+        /**
          * Return 'true if the item's parent should be used as a fallback if no
          * item with that URL can be located. The default is 'false'.
          **/
@@ -121,7 +121,7 @@ namespace QDirStat
          **/
         FileInfo * subtree();
 
-	/**
+        /**
          * Get the corresponding DirInfo from the DirTree via the URL.
          * This is very much like 'subtree()', but if the result is not a
          * DirInfo, it traverses up the tree to get the parent.
@@ -129,8 +129,8 @@ namespace QDirStat
          * Remember that this may also return a DotEntry, a PkgInfo or an Attic
          * because they are all subclasses of DirInfo.
          **/
-
         DirInfo * dir();
+
         /**
          * Dereference operator. This is an alias for subtree(): Get the
          * subtree via the URL.
@@ -172,6 +172,7 @@ namespace QDirStat
          * This is typically not necessary; it is implicitly done in set().
          **/
         void setUrl( const QString & newUrl );
+
 
     protected:
 
