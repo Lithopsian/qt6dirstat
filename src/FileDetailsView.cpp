@@ -387,10 +387,10 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	// No special msg -> show summary fields
 
 	const QString prefix = dir->sizePrefix();
-	setLabel( _ui->dirTotalSizeLabel,   dir->totalSize(),	       prefix );
+	setLabel( _ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
 	setLabel( _ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
-	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),	       prefix );
-	setLabel( _ui->dirFileCountLabel,   dir->totalFiles(),	       prefix );
+	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
+	setLabel( _ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
 	setLabel( _ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
 	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMtime() ) );
 
@@ -489,11 +489,12 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
     if ( msg.isEmpty() )
     {
 	// No special msg -> show summary fields
-	setLabel( _ui->pkgTotalSizeLabel,   pkg->totalSize()	      );
-	setLabel( _ui->pkgAllocatedLabel,   pkg->totalAllocatedSize() );
-	setLabel( _ui->pkgItemCountLabel,   pkg->totalItems()	      );
-	setLabel( _ui->pkgFileCountLabel,   pkg->totalFiles()	      );
-	setLabel( _ui->pkgSubDirCountLabel, pkg->totalSubDirs()	      );
+	const QString prefix = pkg->sizePrefix();
+	setLabel( _ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
+	setLabel( _ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
+	setLabel( _ui->pkgItemCountLabel,   pkg->totalItems(),         prefix );
+	setLabel( _ui->pkgFileCountLabel,   pkg->totalFiles(),         prefix );
+	setLabel( _ui->pkgSubDirCountLabel, pkg->totalSubDirs(),       prefix );
 
 //	_ui->pkgTotalSizeLabel->suppressIfSameContent( _ui->pkgAllocatedLabel, _ui->pkgAllocatedCaption );
     }
@@ -528,11 +529,12 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
     const QString msg = subtreeMsg( pkg );
     if ( msg.isEmpty() )
     {
-	setLabel( _ui->pkgSummaryTotalSizeLabel,   pkg->totalSize()	     );
-	setLabel( _ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize() );
-	setLabel( _ui->pkgSummaryItemCountLabel,   pkg->totalItems()	     );
-	setLabel( _ui->pkgSummaryFileCountLabel,   pkg->totalFiles()	     );
-	setLabel( _ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs()	     );
+	const QString prefix = pkg->sizePrefix();
+	setLabel( _ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
+	setLabel( _ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
+	setLabel( _ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );
+	setLabel( _ui->pkgSummaryFileCountLabel,   pkg->totalFiles(),         prefix );
+	setLabel( _ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs(),       prefix );
 
 //	_ui->pkgSummaryTotalSizeLabel->suppressIfSameContent( _ui->pkgSummaryAllocatedLabel,
 //							      _ui->pkgSummaryAllocatedCaption );

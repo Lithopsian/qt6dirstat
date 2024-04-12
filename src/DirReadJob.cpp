@@ -213,12 +213,6 @@ LocalDirReadJob::LocalDirReadJob( DirTree * tree,
 }
 
 
-LocalDirReadJob::~LocalDirReadJob()
-{
-    // NOP
-}
-
-
 void LocalDirReadJob::startReading()
 {
     struct dirent * entry;
@@ -731,12 +725,6 @@ void DirReadJobQueue::deletingChildNotify( FileInfo * child )
 	logDebug() << "Killing all pending read jobs for " << child << Qt::endl;
 	killSubtree( child->toDirInfo() );
     }
-}
-
-
-void DirReadJobQueue::addBlocked( DirReadJob * job )
-{
-    _blocked.append( job );
 }
 
 

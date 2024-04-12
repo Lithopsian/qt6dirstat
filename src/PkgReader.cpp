@@ -227,6 +227,7 @@ void PkgReader::createCachePkgReadJobs( const PkgInfoList & pkgList )
     if ( !fileListCache )
     {
 	logError() << "Creating the file list cache failed" << Qt::endl;
+	_tree->sendFinished();
 	return;
     }
 
@@ -352,16 +353,7 @@ namespace
 
 	struct stat statInfo;
 	if ( !lstat( statInfo, path ) ) // lstat() failed
-	{
-	    if ( errno == EACCES )
-	    {
-		// No child will be added, but still needs a recalc
-		parent->markAsDirty();
-		parent->setReadState( DirPermissionDenied );
-	    }
-
 	    return nullptr;
-	}
 
 	if ( S_ISDIR( statInfo.st_mode ) )		// directory?
 	{
@@ -431,11 +423,23 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     {
 	parent->insertChild( newItem );
     }
+    else if ( errno == EACCES )
+    {
+	// No permissions, expected error
+	parent->markAsDirty();
+	parent->setReadState( DirPermissionDenied );
+    }
+    else if ( errno != ENOENT )
+    {
+	// Unexpected error, probably serious
+	logError() << _pkg << ": can't stat " << path << Qt::endl;
+	parent->markAsDirty();
+	parent->setReadState( DirError );
+    }
     else if ( _verboseMissingPkgFiles )
     {
-	//Packaged file can't be read.  Permissions problems have
-	// already been flagged on parent, but could just be a missing file
-	logWarning() << _pkg << ": can't stat " << path << Qt::endl;
+	// Packaged file not present, just log it
+	logWarning() << _pkg << ": missing: " << path << Qt::endl;
     }
 
     return newItem;
@@ -517,6 +521,10 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
 					    QProcess::ExitStatus exitStatus )
 {
+    // Always get this job out of the blocked queue and clean up the file list process
+    _tree->unblock( this );
+    _readFileListProcess->deleteLater();
+
     if ( exitStatus != QProcess::NormalExit )
     {
 	logError() << "Get file list command crashed for " << pkg() << Qt::endl;
@@ -529,8 +537,6 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
     {
 	const QString output = QString::fromUtf8( _readFileListProcess->readAll() );
 	_fileList = pkg()->pkgManager()->parseFileList( output );
-	_tree->unblock( this ); // schedule this job
-	_readFileListProcess->deleteLater();
 
 	return;
     }
@@ -538,9 +544,6 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
     // There was an error of some sort, logged above
     pkg()->setReadState( DirError );
     _tree->sendReadJobFinished( pkg() );
-
-    delete _readFileListProcess;
-    _readFileListProcess = nullptr;
 
     finished();
     // Don't add anything after finished() since this deletes this job!

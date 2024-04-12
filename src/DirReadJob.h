@@ -196,11 +196,6 @@ namespace QDirStat
 	LocalDirReadJob( DirTree * tree, DirInfo * dir, bool applyFileChildExcludeRules );
 
 	/**
-	 * Destructor.
-	 **/
-	~LocalDirReadJob() override;
-
-	/**
 	 * Return 'true' if any exclude rules matching against any direct file
 	 * child should be applied. This is generally useful only for
 	 * second-level read jobs, not for the starting point of a directory
@@ -403,7 +398,7 @@ namespace QDirStat
 	 * yet, e.g. because they are waiting for results from an external
 	 * process.
 	 **/
-	void addBlocked( DirReadJob * job );
+	void addBlocked( DirReadJob * job ) { _blocked.append( job ); }
 
 	/**
 	 * Notification that a job that was blocked is now ready to be
