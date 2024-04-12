@@ -16,12 +16,6 @@
 
 namespace QDirStat
 {
-    class CleanupConfigPage;
-    class MimeCategoryConfigPage;
-    class ExcludeRulesConfigPage;
-    class GeneralConfigPage;
-
-
     /**
      * Configuration dialog for QDirStat.
      *
@@ -105,11 +99,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::ConfigDialog	* _ui;
-	GeneralConfigPage	* _generalConfigPage;
-	MimeCategoryConfigPage	* _mimeCategoryConfigPage;
-	CleanupConfigPage	* _cleanupConfigPage;
-	ExcludeRulesConfigPage  * _excludeRulesConfigPage;
+	Ui::ConfigDialog       * _ui;
 
     };	// class ConfigDialog
 

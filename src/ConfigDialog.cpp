@@ -27,22 +27,21 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    // Make sure setupUi() is called first, or the notebook tabs won't have fopcus
-    _generalConfigPage = new GeneralConfigPage( this );
-    CHECK_NEW( _generalConfigPage );
-    _ui->pagesTabWidget->addTab( _generalConfigPage, tr( "General" ) );
+    GeneralConfigPage * generalConfigPage = new GeneralConfigPage( this );
+    CHECK_NEW( generalConfigPage );
+    _ui->pagesTabWidget->addTab( generalConfigPage, tr( "General" ) );
 
-    _mimeCategoryConfigPage = new MimeCategoryConfigPage( this );
-    CHECK_NEW( _mimeCategoryConfigPage );
-    _ui->pagesTabWidget->addTab( _mimeCategoryConfigPage, tr( "MIME Categories" ) );
+    MimeCategoryConfigPage * mimeCategoryConfigPage = new MimeCategoryConfigPage( this );
+    CHECK_NEW( mimeCategoryConfigPage );
+    _ui->pagesTabWidget->addTab( mimeCategoryConfigPage, tr( "MIME Categories" ) );
 
-    _cleanupConfigPage = new CleanupConfigPage( this );
-    CHECK_NEW( _cleanupConfigPage );
-    _ui->pagesTabWidget->addTab( _cleanupConfigPage, tr( "Cleanup Actions" ) );
+    CleanupConfigPage * cleanupConfigPage = new CleanupConfigPage( this );
+    CHECK_NEW( cleanupConfigPage );
+    _ui->pagesTabWidget->addTab( cleanupConfigPage, tr( "Cleanup Actions" ) );
 
-    _excludeRulesConfigPage = new ExcludeRulesConfigPage( this );
-    CHECK_NEW( _excludeRulesConfigPage );
-    _ui->pagesTabWidget->addTab( _excludeRulesConfigPage, tr( "Exclude Rules" ) );
+    ExcludeRulesConfigPage * excludeRulesConfigPage = new ExcludeRulesConfigPage( this );
+    CHECK_NEW( excludeRulesConfigPage );
+    _ui->pagesTabWidget->addTab( excludeRulesConfigPage, tr( "Exclude Rules" ) );
 
     connect( _ui->applyButton, &QPushButton::clicked,
 	     this,             &ConfigDialog::applyChanges );
