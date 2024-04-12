@@ -44,7 +44,7 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     _ui->patternField->setFocus();
 
     connect( this, &FindFilesDialog::accepted,
-             this, &FindFilesDialog::accept);
+             this, &FindFilesDialog::saveValues );
 
     loadValues();
 }
@@ -108,18 +108,18 @@ DirInfo * FindFilesDialog::currentSubtree()
 }
 
 
-FileSearchFilter FindFilesDialog::askFindFiles( bool    * canceled_ret,
+FileSearchFilter FindFilesDialog::askFindFiles( bool    * cancelled_ret,
                                                 QWidget * parent )
 {
     FindFilesDialog dialog( parent );
     const int result = dialog.exec();
 
-    const bool canceled = ( result == QDialog::Rejected );
-
-    const FileSearchFilter filter = canceled ? FileSearchFilter() : dialog.fileSearchFilter();
-
-    if ( canceled_ret )
-	*canceled_ret = filter.pattern().isEmpty() ? true : canceled;
+    const bool cancelled = ( result == QDialog::Rejected );
+logDebug() << cancelled << Qt::endl;
+    const FileSearchFilter filter = cancelled ? FileSearchFilter() : dialog.fileSearchFilter();
+logDebug() << filter << Qt::endl;
+    if ( cancelled_ret )
+	*cancelled_ret = filter.pattern().isEmpty() ? true : cancelled;
 
     return filter;
 }
@@ -141,7 +141,7 @@ void FindFilesDialog::loadValues()
 }
 
 
-void FindFilesDialog::accept()
+void FindFilesDialog::saveValues()
 {
     writeSettings();
 

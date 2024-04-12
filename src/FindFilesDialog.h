@@ -57,7 +57,7 @@ namespace QDirStat
          * Save the values of the widgets to the settings file or
          * to internal static variables.
          **/
-        void accept();
+        void saveValues();
 
 
     protected:
