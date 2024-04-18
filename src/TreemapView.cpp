@@ -1,11 +1,11 @@
 /*
  *   File name: TreemapView.cpp
- *   Summary:        View widget for treemap rendering for QDirStat
- *   License:        GPL V2 - See file LICENSE for details.
+ *   Summary:   View widget for treemap rendering for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:        Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QResizeEvent>
 
@@ -21,6 +21,7 @@
 #include "Exception.h"
 #include "Logger.h"
 
+
 using namespace QDirStat;
 
 
@@ -31,7 +32,8 @@ TreemapView::TreemapView( QWidget * parent ):
 
     readSettings();
 
-    QThreadPool::globalInstance()->setMaxThreadCount(100);
+    // We only ever need one thread at a time, and having more just chews up memory
+    QThreadPool::globalInstance()->setMaxThreadCount( 1 );
 
     connect( &_watcher,  &QFutureWatcher<TreemapTile *>::finished,
              this,       &TreemapView::treemapFinished );
@@ -40,8 +42,7 @@ TreemapView::TreemapView( QWidget * parent ):
 
 TreemapView::~TreemapView()
 {
-    // Write settings back to file so the user can change them in that file:
-    // only if we are the real treemapView
+    // Write settings back to file, but only if we are the real treemapView
     if ( _selectionModel )
         writeSettings();
 }
@@ -50,7 +51,7 @@ TreemapView::~TreemapView()
 void TreemapView::cancelTreemap()
 {
     _treemapCancel = TreemapCancelCancel;
-    _future.waitForFinished();
+    _watcher.waitForFinished();
 }
 
 
@@ -58,13 +59,26 @@ void TreemapView::clear()
 {
     cancelTreemap();
 
-    if ( scene() )
-        qDeleteAll( scene()->items() );
+    if ( _rootTile )
+    {
+        if ( scene() )
+        {
+            // Take out the tiles so we can delete them in the background
+            scene()->removeItem( _rootTile );
 
-//    _currentTile     = nullptr;
+            // Clear everything else, any highlighters and mask
+            scene()->clear();
+        }
+
+        // Deleting these can take a while, so delegate to a thread
+        TreemapTile * rootTile = _rootTile;
+        QtConcurrent::run( [ rootTile ]() { delete rootTile; } );
+        _rootTile = nullptr;
+    }
+
     _currentTileHighlighter = nullptr;
-    _rootTile        = nullptr;
-    _sceneMask       = nullptr;
+    _sceneMask              = nullptr;
+
     _parentHighlightList.clear();
 }
 
@@ -76,20 +90,15 @@ void TreemapView::setDirTree( const DirTree * newTree )
 
     _tree = newTree;
 
-//    if ( !_rootTile && _tree->firstToplevel() ) // we won't be enabled here. so can't build treemap
-//        rebuildTreemap( _tree->firstToplevel() );
-
     // This signal indicates that a subtree is going to be removed.  This occurs
     // for cleanups with refresh policy AssumeDeleted and when a cache file is
     // automatically read during a tree read.  It is always followed by
     // childDeleted, but the tree may still be being read at that point.  The
-    // assumedDeleted signal from the cleanup indicates that it has finished.  An
-    // ongoing tree read will send a normal finished() signal when it completes.
+    // assumedDeleted signal from the cleanup (connected in MainWindow) indicates
+    // that it has finished.  An ongoing tree read will send a normal finished() signal
+    // when it completes.
     connect( _tree, &DirTree::deletingChild,
              this,  &TreemapView::deleteNotify );
-//    connect( _tree, &DirTree::childDeleted,
-//             this,  &TreemapView::enable );
-//             this,  &TreemapView::rebuildTreemapSlot );
 
     // Clear the treemap before the DirTree disappears
     // Also disable, although nobody should trigger us to rebuild until it is safe.
@@ -107,18 +116,10 @@ void TreemapView::setSelectionModel( SelectionModel * selectionModel )
 
     _selectionModel = selectionModel;
 
-    // ancient, but apparently never used
-//    connect( this,            &TreemapView::selectionChanged,
-//             _selectionModel, &SelectionModel::selectItem );
-
-    // These two slots must be called in this order, or they overwrite eachother
     connect( this,            &TreemapView::currentItemChanged,
              _selectionModel, &SelectionModel::updateCurrentBranch );
 
-//    connect( this,            &TreemapView::currentItemChanged,
-//             _selectionModel, qOverload<FileInfo *, bool>( &SelectionModel::setCurrentItem ) );
-
-    // Use the proxy for all receiving signals
+    // Use the proxy for all selection model receiving signals
     delete _selectionModelProxy;
     _selectionModelProxy = new SelectionModelProxy( selectionModel, this );
     CHECK_NEW( _selectionModelProxy );
@@ -235,8 +236,7 @@ void TreemapView::zoomIn()
 
     // Work up the FileInfo tree because there might not be a tile for the current item
     FileInfo *newNode = _selectionModel->currentItem();
-    const FileInfo *rootNode = _rootTile->orig();
-    while ( newNode && newNode->parent() != rootNode )
+    while ( newNode && newNode->parent() != _rootTile->orig() )
         newNode = newNode->parent();
 
     rebuildTreemap( newNode );
@@ -318,7 +318,7 @@ void TreemapView::rebuildTreemapSlot()
     rebuildTreemap( root );
 
     _savedRootUrl = "";
-    logDebug() << _savedRootUrl << Qt::endl;
+    //logDebug() << _savedRootUrl << Qt::endl;
 }
 
 
@@ -340,38 +340,43 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
     }
 
     logDebug() << rect << Qt::endl;
+
     _treemapCancel = TreemapCancelNone;
     _treemapRunning = true;
 
     _stopwatch.start();
 
-    _future = QtConcurrent::run( [ this, newRoot, rect ]() {
+    _watcher.setFuture( QtConcurrent::run( [ this, newRoot, rect ]() {
+        _threadPool = new QThreadPool();
+        CHECK_NEW( _threadPool );
+        _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
+
         TreemapTile *tile = new TreemapTile( this,           // parentView
                                              newRoot,        // orig
                                              rect );
+
+        delete _threadPool;
+
         if ( treemapCancelled() )
         {
-            // Logging is not thread-sage, use only for debugging
+            // Logging is not thread-safe, use only for debugging
 //            logDebug() << "treemap cancelled, delete tiles" << Qt::endl;
             delete tile;
             tile = nullptr;
         }
 
         return tile;
-    } );
-
-    _watcher.setFuture( _future );
+    } ) );
 }
 
 
 void TreemapView::treemapFinished()
 {
-    TreemapTile *futureResult = _future.result();
+    TreemapTile *futureResult = _watcher.result();
 
     logDebug() << _stopwatch.restart() << "ms " << Qt::endl;
 
     _treemapRunning = false;
-    _tileFutures.clear();
 
     if ( treemapCancelled() )
     {
@@ -413,7 +418,7 @@ void TreemapView::treemapFinished()
 
     emit treemapChanged();
 
-    // << _stopwatch.restart() << "ms" << Qt::endl;
+    //logDebug() << _stopwatch.restart() << "ms" << Qt::endl;
 //    _lastTile->setLastTile();
 }
 
@@ -426,10 +431,10 @@ void TreemapView::configChanged( const QColor & fixedColor,
                                  int minTileSize )
 {
     //logDebug() << fixedColor.name() << Qt::endl;
-    const bool treemapChanged = squarified != _squarify ||
-                                cushionHeight != _cushionHeight ||
+    const bool treemapChanged = squarified        != _squarify ||
+                                cushionHeight     != _cushionHeight ||
                                 heightScaleFactor != _heightScaleFactor ||
-                                minTileSize != _minTileSize;
+                                minTileSize       != _minTileSize;
     const bool colorsChanged = cushionShading != _doCushionShading || fixedColor != _tileFixedColor;
     if ( !treemapChanged && !colorsChanged )
         return;
@@ -437,12 +442,12 @@ void TreemapView::configChanged( const QColor & fixedColor,
     // We're about to change data used by the treemap build thread
     cancelTreemap();
 
-    _tileFixedColor = fixedColor;
-    _squarify = squarified;
-    _doCushionShading = cushionShading;
-    _cushionHeight = cushionHeight;
+    _tileFixedColor    = fixedColor;
+    _squarify          = squarified;
+    _doCushionShading  = cushionShading;
+    _cushionHeight     = cushionHeight;
     _heightScaleFactor = heightScaleFactor;
-    _minTileSize = minTileSize;
+    _minTileSize       = minTileSize;
 
     calculateSettings();
 
@@ -667,7 +672,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
     SignalBlocker sigBlocker( this );
     scene()->clearSelection();
 
-    QMap<const FileInfo *, TreemapTile *> map;
+    QHash<const FileInfo *, TreemapTile *> map;
     if ( newSelection.size() > 10 )
     {
         // Build a mapping of all fileInfo objects to tiles for scaling to very large selections
@@ -770,7 +775,7 @@ void TreemapView::setFixedColor( const QColor & color )
 {
     //logDebug() << color.name() << Qt::endl;
 
-    // We're about to change data (and a function pointer) used in the treemap build thread
+    // We're about to change data used in the treemap build thread
     cancelTreemap();
 
     _tileFixedColor = color;
@@ -786,7 +791,6 @@ void TreemapView::highlightParents( const TreemapTile * tile )
         return;
     }
 
-//    _highlightedTile = tile;
     const TreemapTile * parent = tile->parentTile();
     const TreemapTile * currentHighlight = highlightedParent();
 
@@ -800,7 +804,6 @@ void TreemapView::highlightParents( const TreemapTile * tile )
         ParentTileHighlighter * highlight = new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
         CHECK_NEW( highlight );
         _parentHighlightList << highlight;
-//        highlight->setToolTip( parent->orig()->debugUrl() );
 
         topParent = parent;
         parent = parent->parentTile();
@@ -818,14 +821,12 @@ void TreemapView::clearParentsHighlight()
 {
     qDeleteAll( _parentHighlightList );
     _parentHighlightList.clear();
-//    _highlightedTile = nullptr;
     clearSceneMask();
 }
 
 
 void TreemapView::toggleParentsHighlight( const TreemapTile * tile )
 {
-//    if ( tile == _highlightedTile )
     if ( !_parentHighlightList.isEmpty() && tile->orig() == _selectionModel->currentItem() )
         clearParentsHighlight();
     else
@@ -884,22 +885,6 @@ HighlightRect::HighlightRect( QGraphicsScene * scene,
 }
 
 
-HighlightRect::HighlightRect( QGraphicsScene * scene,
-                              const QColor & color,
-                              int lineWidth,
-                              float zValue ):
-    HighlightRect( scene, nullptr, color, lineWidth, zValue )
-{}
-
-
-HighlightRect::HighlightRect( const TreemapTile * tile,
-                              const QColor & color,
-                              int lineWidth,
-                              float zValue ):
-    HighlightRect( tile->scene(), tile, color, lineWidth, zValue )
-{}
-
-
 QPainterPath HighlightRect::shape() const
 {
     if ( !_tile )
@@ -949,10 +934,7 @@ void CurrentTileHighlighter::highlight( const TreemapTile * tile )
     _tile = tile;
 
     QPen highlightPen = pen();
-    if ( _tile && _tile->isSelected() )
-        highlightPen.setStyle( Qt::SolidLine );
-    else
-        highlightPen.setStyle( Qt::DotLine );
+    highlightPen.setStyle( _tile && _tile->isSelected() ? Qt::SolidLine : Qt::DotLine );
     setPen( highlightPen );
 
     HighlightRect::highlight();
@@ -976,9 +958,7 @@ SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
     path.addRect( tile->rect() );
     setPath( path );
 
-    const int grey = 0x30;
-    QColor color( grey, grey, grey, opacity * 255 );
-    setBrush( color );
+    setBrush( QColor( 0x30, 0x30, 0x30, opacity * 255 ) );
 
     setZValue( SceneMaskLayer );
     tile->scene()->addItem( this );

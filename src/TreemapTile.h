@@ -1,15 +1,14 @@
 /*
  *   File name: TreemapTile.h
- *   Summary:	Treemap rendering for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Treemap rendering for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef TreemapTile_h
 #define TreemapTile_h
-
 
 #include <QGraphicsRectItem>
 #include <QTextStream>
@@ -134,7 +133,7 @@ namespace QDirStat
 	double yy1() const { return _yy1; }
 
 
-    private:
+    protected:
 
 	/**
 	 * Helper function for calculating the polynomial coefficients.
@@ -225,7 +224,7 @@ namespace QDirStat
 	/**
 	 * Returns a pointer to the parent TreemapTile or 0 if there is none.
 	 **/
-	const TreemapTile * parentTile() const { return static_cast<TreemapTile *>( parentItem() ); }
+	TreemapTile * parentTile() const { return static_cast<TreemapTile *>( parentItem() ); }
 
 	/**
 	 * Pre-calculates a map of cushion heights based on the configured
@@ -342,14 +341,6 @@ namespace QDirStat
 	void paint( QPainter			   * painter,
 		    const QStyleOptionGraphicsItem * option,
 		    QWidget			   * widget = nullptr ) override;
-
-	/**
-	 * Draws a thin outline.  Only draw on the top and left sides to keep the outline as
-	 * thin as possible.  Lines on small tiles will be drawn barrower than 1 pixel.  Using
-	 * painter->drawLine() is relatively slow, but the quality of these sub-pixel lines is
-	 * high.
-	 **/
-	void drawOutline( QPainter * painter, const QRectF & rect, const QColor & color, int penScale );
 
 	/**
 	 * Notification that item attributes (such as the 'selected' state)
@@ -473,8 +464,8 @@ namespace QDirStat
     }; // class TreemapTile
 
     /**
-     * Derived class for for tiles in the simple layout being laid out in the
-     * howizontal direction.  The constructor delegates to the similar TreemapTile
+     * Derived class for tiles in the simple layout being laid out in the
+     * horizontal direction.  The constructor delegates to the similar TreemapTile
      * constructor, the only difference being the createChildrenHorizontal() member
      * function that ends up getting called to layout the children.
      **/
@@ -492,9 +483,9 @@ namespace QDirStat
     };
 
     /**
-     * Derived class for for tiles in the simple layout being laid out in the
+     * Derived class for tiles in the simple layout being laid out in the
      * vertical direction.  The constructor delegates to the similar TreemapTile
-     * constructor, the only difference being the createChildrenVerticak() member
+     * constructor, the only difference being the createChildrenVertical() member
      * function that ends up getting called to layout the children.
      **/
     class VerticalTreemapTile: private TreemapTile

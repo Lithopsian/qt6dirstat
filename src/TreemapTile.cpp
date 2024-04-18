@@ -1,16 +1,17 @@
 /*
  *   File name: TreemapTile.cpp
- *   Summary:    Treemap rendering for QDirStat
- *   License:    GPL V2 - See file LICENSE for details.
+ *   Summary:   Treemap rendering for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:    Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <math.h>
 
 #include <QElapsedTimer>
-#include <QImage>
 #include <QGraphicsSceneMouseEvent>
+#include <QImage>
 #include <QMenu>
 #include <QPainter>
 
@@ -33,7 +34,7 @@ namespace
     /**
      * Just a helper for an unwieldy common term
      **/
-    FileSize itemTotalSize( FileInfo *it )
+    FileSize itemTotalSize( FileInfo * it )
     {
         return it->totalAllocatedSize() ? it->totalAllocatedSize() : it->totalSize();
     }
@@ -45,9 +46,9 @@ namespace
      * first and last items doesn't get better any more.  Returns the total size of
      * the items for the row.
      **/
-    FileSize squarify( const QRectF & rect,
-                              FileInfoSortedBySizeIterator & it,
-                              FileSize remainingTotal )
+    FileSize squarify( const QRectF                 & rect,
+                       FileInfoSortedBySizeIterator & it,
+                       FileSize                       remainingTotal )
     {
         //logDebug() << "squarify() " << this << " " << rect << Qt::endl;
 
@@ -155,12 +156,32 @@ namespace
     }
 */
 
+    /**
+     * Draws a thin outline.  Only draw on the top and left sides to keep the outline as
+     * thin as possible.  Lines on small tiles will be drawn barrower than 1 pixel.  Using
+     * painter->drawLine() is relatively slow, but the quality of these sub-pixel lines is
+     * high.
+     **/
+    void drawOutline( QPainter * painter, const QRectF & rect, const QColor & color, int penScale )
+    {
+        // Draw the outline as thin as practical
+        const float sizeForPen = qMin( rect.width(), rect.height() );
+        const float penSize = sizeForPen < penScale ? sizeForPen / penScale : 1.0;
+        painter->setPen( QPen( color, penSize ) );
+
+        // Draw along only the top and left edges to avoid doubling the line thickness
+        if ( rect.x() > 0 )
+            painter->drawLine( rect.topLeft(), rect.bottomLeft() );
+        if ( rect.y() > 0 )
+            painter->drawLine( rect.topLeft(), rect.topRight() );
+    }
+
 } // namespace
 
 
 // constructor with no parent tile, only used for the root tile
-TreemapTile::TreemapTile( TreemapView * parentView,
-                          FileInfo * orig,
+TreemapTile::TreemapTile( TreemapView  * parentView,
+                          FileInfo     * orig,
                           const QRectF & rect ):
     QGraphicsRectItem ( rect ),
     _parentView { parentView },
@@ -184,16 +205,14 @@ TreemapTile::TreemapTile( TreemapView * parentView,
 
 //    _stopwatch.start();
 
-    int threads = 0;
-    for ( auto future = _parentView->tileFuturesBegin() ; future != _parentView->tileFuturesEnd(); ++future, ++threads )
-        ( *future ).waitForFinished();
+    _parentView->threadPool()->waitForDone();
 
 //    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : "") << Qt::endl;
 }
 
 // constructor for simple (non-squarified) children
-TreemapTile::TreemapTile( TreemapTile * parentTile,
-                          FileInfo * orig,
+TreemapTile::TreemapTile( TreemapTile  * parentTile,
+                          FileInfo     * orig,
                           const QRectF & rect ):
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
@@ -283,7 +302,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left() + offset, rect.top(), newOffset - offset, rect.height() );
-            TreemapTile *tile = new VerticalTreemapTile( this, *it, childRect );
+            TreemapTile * tile = new VerticalTreemapTile( this, *it, childRect );
             CHECK_NEW( tile );
             tile->cushionSurface().addHorizontalRidge( childRect.left(), childRect.right() );
 
@@ -324,7 +343,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left(), rect.top() + offset, rect.width(), newOffset - offset );
-            TreemapTile *tile = new HorizontalTreemapTile( this, *it, childRect );
+            TreemapTile * tile = new HorizontalTreemapTile( this, *it, childRect );
             CHECK_NEW( tile );
             tile->cushionSurface().addVerticalRidge( childRect.top(), childRect.bottom() );
 
@@ -351,7 +370,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         return;
 
     QRectF childrenRect = rect;
-    FileInfo *rowEnd = *it;
+    FileInfo * rowEnd = *it;
     while ( rowEnd && childrenRect.height() >= 0 && childrenRect.width() >= 0 )
     {
         // Square treemaps always layout the next row of tiles along the shortest dimension
@@ -390,13 +409,13 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
     }
 }
 
-void TreemapTile::layoutRow( Orientation dir,
-                             QRectF & rect,
+void TreemapTile::layoutRow( Orientation                    dir,
+                             QRectF                       & rect,
                              FileInfoSortedBySizeIterator & it,
-                             const FileInfo *rowEnd,
-                             FileSize rowTotal,
-                             double primary,
-                             double height )
+                             const FileInfo               * rowEnd,
+                             FileSize                       rowTotal,
+                             double                         primary,
+                             double                         height )
 {
 
     //logDebug() << this << " - " << rect << " - height= " << height << Qt::endl;
@@ -468,7 +487,7 @@ void TreemapTile::layoutRow( Orientation dir,
     //logDebug() << "Left over:" << " " << newRect << " " << this << Qt::endl;
 }
 
-void TreemapTile::addRenderThread( TreemapTile *tile, int minThreadTileSize )
+void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 {
     // If the tile's parent is smaller than the threshold and not the root tile, then no thread
     if ( parentItem() && rect().width() < _parentView->maxTileThreshold() &&
@@ -486,23 +505,25 @@ void TreemapTile::addRenderThread( TreemapTile *tile, int minThreadTileSize )
          return;
 
     //logDebug() << QThreadPool::globalInstance()->activeThreadCount() << " threads active" << Qt::endl;
+    // The API changed in Qt6!
 #if (QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 ))
-    _parentView->appendTileFuture( QtConcurrent::run( tile, &TreemapTile::renderChildCushions ) );
+    QtConcurrent::run( _parentView->threadPool(), tile, &TreemapTile::renderChildCushions );
 #else
-    _parentView->appendTileFuture( QtConcurrent::run( &TreemapTile::renderChildCushions, tile ) );
+    QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile );
 #endif
 }
 
 void TreemapTile::renderChildCushions()
 {
+    return;
     if ( _parentView->treemapCancelled() )
         return;
 
     const auto items = childItems();
-    for ( QGraphicsItem *graphicsItem : items )
+    for ( QGraphicsItem * graphicsItem : items )
     {
         // nothing other than tiles in the tree at this point
-        TreemapTile *tile = ( TreemapTile * )( graphicsItem );
+        TreemapTile * tile = static_cast<TreemapTile * >( graphicsItem );
 
         if ( tile->_orig->isDirInfo() )
             tile->renderChildCushions();
@@ -514,18 +535,18 @@ void TreemapTile::renderChildCushions()
     }
 }
 
-void TreemapTile::paint( QPainter            * painter,
+void TreemapTile::paint( QPainter                       * painter,
                          const QStyleOptionGraphicsItem * option,
-                         QWidget            * widget )
+                         QWidget                        * widget )
 {
     CHECK_MAGIC( _orig );
-
-//    if ( _firstTile )
+/*
+    if ( _firstTile )
     {
-//        logDebug() << Qt::endl;
-//        _parentView->rootTile()->_stopwatch.start();
+        logDebug() << Qt::endl;
+        _parentView->rootTile()->_stopwatch.start();
     }
-
+*/
     // Don't paint tiles with children, the children will cover the parent, but double-check
     // it actually has child tiles (no tile will be created for zero-sized children)
     if ( _orig->hasChildren() && childItems().size() > 0 )
@@ -566,10 +587,6 @@ void TreemapTile::paint( QPainter            * painter,
     }
     else
     {
-        // No cushion shading, use flat coloured tiles, may have already been set in the render thread
-//        if ( _pixmap.isNull() )
-//            _pixmap = renderPlainTile(rect);
-
         if ( brush().style() == Qt::NoBrush )
             setBrush( tileColor( _orig ) );
         QGraphicsRectItem::paint( painter, option, widget );
@@ -577,9 +594,6 @@ void TreemapTile::paint( QPainter            * painter,
         // Always try to draw an outline since there is no other indication of the tiles
         if ( _parentView->outlineColor().isValid() )
             drawOutline( painter, rect, _parentView->outlineColor(), 5 );
-
-//        if ( !_pixmap.isNull() )
-//            painter->drawPixmap( rect.topLeft(), _pixmap );
     }
 
     if ( isSelected() )
@@ -593,7 +607,6 @@ void TreemapTile::paint( QPainter            * painter,
         // HighlightRect to be created. But we can save some memory if
         // we don't do that for every tile, so we draw that highlight
         // frame manually if this is a leaf tile.
-
         painter->setBrush( Qt::NoBrush );
         QRectF selectionRect = rect;
         selectionRect.setSize( rect.size() - QSize( 1.0, 1.0 ) );
@@ -603,20 +616,6 @@ void TreemapTile::paint( QPainter            * painter,
 
 //    if (_lastTile)
 //        logDebug() << _parentView->rootTile()->_stopwatch.restart() << "ms" << Qt::endl;
-}
-
-void TreemapTile::drawOutline( QPainter * painter, const QRectF & rect, const QColor & color, int penScale )
-{
-    // Draw the outline as thin as practical
-    const float sizeForPen = qMin( rect.width(), rect.height() );
-    const float penSize = sizeForPen < penScale ? sizeForPen / penScale : 1.0;
-    painter->setPen( QPen( color, penSize ) );
-
-    // Draw along the top and left edges only to avoid doubling the line thickness
-    if ( rect.x() > 0 )
-        painter->drawLine( rect.topLeft(), rect.bottomLeft() );
-    if ( rect.y() > 0 )
-        painter->drawLine( rect.topLeft(), rect.topRight() );
 }
 
 QPixmap TreemapTile::renderCushion( const QRectF & rect )
@@ -632,7 +631,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
     const QColor & color = tileColor( _orig );
 
     QImage image( rect.width(), rect.height(), QImage::Format_RGB32 );
-    QRgb *data = reinterpret_cast<QRgb*>( image.bits() );
+    QRgb * data = reinterpret_cast<QRgb *>( image.bits() );
 
     const double xx22 = 2.0 * _cushionSurface.xx2();
     const double yy22 = 2.0 * _cushionSurface.yy2();
@@ -654,9 +653,6 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
             *data = qRgb( red, green, blue );
         }
     }
-
-//    if (_parentView->forceCushionGrid())
-//        renderOutline(image, width, height, _parentView->cushionGridColor(), color);
 
 //    if ( _parentView->enforceContrast() )
 //        enforceContrast( image );
@@ -746,6 +742,8 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
     switch ( event->button() )
     {
     case Qt::LeftButton:
+        //logDebug() << this << " mouse pressed (" << event->modifiers() << ")" << Qt::endl;
+
         // isSelected() is unreliable here since in QGraphicsItem some
         // stuff is done in the mousePressEvent, while some other stuff is
         // done in the mouseReleaseEvent. Just setting the current item
@@ -754,9 +752,7 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
         // item ends up selected or not, the mouse press makes it the
         // current item, so let's update the red highlighter rectangle
         // here.
-
         QGraphicsRectItem::mousePressEvent( event );
-        //logDebug() << this << " mouse pressed (" << event->modifiers() << ")" << Qt::endl;
         _parentView->setCurrentTile( this );
         break;
 
@@ -766,7 +762,6 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
         // Handle item selection (with or without Ctrl) ourselves here;
         // unlike for a left click, the QGraphicsItem base class does
         // not do this for us already.
-
         if ( ( event->modifiers() & Qt::ControlModifier ) == 0 )
             scene()->clearSelection();
 
@@ -860,7 +855,7 @@ void TreemapTile::wheelEvent( QGraphicsSceneWheelEvent * event )
     else
     {
         // If no current item, or it is the root already, pick a new current item so we can zoom
-        FileInfo *currentItem = _parentView->selectionModel()->currentItem();
+        FileInfo * currentItem = _parentView->selectionModel()->currentItem();
         if ( !currentItem || currentItem == _parentView->rootTile()->_orig )
             if ( this->parentItem() != _parentView->rootTile() ) // ... unless we just can't zoom any further
             _parentView->setCurrentTile( this );

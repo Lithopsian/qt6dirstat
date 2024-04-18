@@ -1,15 +1,14 @@
 /*
  *   File name: TreemapView.h
- *   Summary:	View widget for treemap rendering for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   View widget for treemap rendering for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef TreemapView_h
 #define TreemapView_h
-
 
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
@@ -49,12 +48,14 @@ namespace QDirStat
 
     typedef QList<HighlightRect *> HighlightRectList;
 
-    // Treemap layers (Z values)
-    constexpr double TileLayer             = 0.0;
-    constexpr double SceneMaskLayer        = 1e5;
-    constexpr double TileHighlightLayer    = 1e6;
-    constexpr double CurrentHighlightLayer = 1e8;
-    constexpr double SceneHighlightLayer   = 1e10;
+    enum TreemapLayers
+    {
+	TileLayer,
+	SceneMaskLayer,
+	TileHighlightLayer,
+	CurrentHighlightLayer,
+	SceneHighlightLayer,
+    };
 
     /**
      * View widget that displays a DirTree as a treemap.
@@ -194,17 +195,24 @@ namespace QDirStat
 	bool treemapCancelled() const { return _treemapCancel != TreemapCancelNone; }
 
 	/**
+	 * Return the thread pool for rendering threads.  A dedicated pool is used for
+	 * this so that the memory used in threads can be reclaimed; otherwise a
+	 * moderately large number of threads will permanently hog many MB each.
+	 **/
+	QThreadPool * threadPool() { return _threadPool; }
+
+	/**
 	 * Adds the future for a tile-rendering thread to a list.  The treemap build will
 	 * wait for all the rendering threads to finish before returning.  The rendering
 	 * threads have no return value.
 	 **/
-	void appendTileFuture( QFuture<void> future ) { _tileFutures.append( future ); }
+//	void appendTileFuture( QFuture<void> future ) { _tileFutures.append( future ); }
 
 	/**
 	 * Iterators for the tile future list.
 	 **/
-	const auto tileFuturesBegin() { return _tileFutures.begin(); }
-	const auto tileFuturesEnd() const { return _tileFutures.cend(); }
+//	const auto tileFuturesBegin() { return _tileFutures.begin(); }
+//	const auto tileFuturesEnd() const { return _tileFutures.cend(); }
 
 	/**
 	 * Returns true if it is possible to zoom in with the currently
@@ -466,7 +474,7 @@ namespace QDirStat
 	 **/
 	void deleteNotify( FileInfo * );
 
-    private:
+    protected:
 
 	/**
 	 * Read parameters from the settings file.
@@ -625,16 +633,16 @@ namespace QDirStat
     private:
 
 	// Data members
-	const DirTree		* _tree			{ nullptr };
-	SelectionModel		* _selectionModel	{ nullptr };
-	SelectionModelProxy	* _selectionModelProxy	{ nullptr };
+	const DirTree       * _tree			{ nullptr };
+	SelectionModel      * _selectionModel		{ nullptr };
+	SelectionModelProxy * _selectionModelProxy	{ nullptr };
 
-	TreemapTile	* _rootTile			{ nullptr };
-	HighlightRect	* _currentTileHighlighter	{ nullptr };
+	TreemapTile     * _rootTile			{ nullptr };
+	HighlightRect   * _currentTileHighlighter	{ nullptr };
         SceneMask       * _sceneMask			{ nullptr };
-	FileInfo	* _newRoot			{ nullptr };
+	FileInfo        * _newRoot			{ nullptr };
         HighlightRectList _parentHighlightList;
-	QString		  _savedRootUrl;
+	QString	          _savedRootUrl;
 
 	bool   _colourPreviews;
 	bool   _squarify;
@@ -669,12 +677,12 @@ namespace QDirStat
 	int    _maxTileThreshold; // largest sub-tree size at which to spawn a rendering thread
 	const CushionHeightSequence * _cushionHeights;
 
-	bool _disabled		{ false }; // flag to disable all treemap builds even though the view may still be visible
+	bool _disabled		{ false }; // flag to disable all treemap builds
 	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
-	std::atomic<TreemapCancel>	_treemapCancel { TreemapCancelNone }; // flag to the treemap build thread
-	QFuture<TreemapTile *>		_future;
-	QFutureWatcher<TreemapTile *>	_watcher;
-	QVector<QFuture<void>>		_tileFutures;
+
+	std::atomic<TreemapCancel>      _treemapCancel { TreemapCancelNone }; // flag to the treemap build thread
+	QFutureWatcher<TreemapTile *>   _watcher;
+	QThreadPool                   * _threadPool { nullptr }; // dedicated thread pool for rendering
 
 	// just for logging
 	QElapsedTimer _stopwatch;
@@ -698,28 +706,27 @@ namespace QDirStat
      **/
     class HighlightRect: public QGraphicsRectItem
     {
-    private:
-
-	/**
-	 * Private constructor that the others will delegate to.
-	 **/
-	HighlightRect( QGraphicsScene * scene, const TreemapTile * tile, const QColor & color, int lineWidth, float zValue );
-
     public:
 
 	/**
-	 * Create a highlight rectangle for the entire scene. This is most
-	 * useful for the current item.
+	 * Constructor.
 	 **/
-	HighlightRect( QGraphicsScene * scene, const QColor & color, int lineWidth, float zValue );
+	HighlightRect( QGraphicsScene    * scene,
+	               const TreemapTile * tile,
+		       const QColor      & color,
+		       int                 lineWidth,
+		       float               zValue );
 
 	/**
-	 * Create a highlight rectangle for one specific tile and highlight it
-	 * right away. This is most useful for selected items if more than one
-	 * item is selected. The z-height of this is lower than for the
-	 * scene-wide highlight rectangle.
+	 * Create a highlight rectangle without a specific tile.
+	 * This is most useful for the current item.
 	 **/
-	HighlightRect( const TreemapTile * tile, const QColor & color, int lineWidth, float zValue );
+	HighlightRect( QGraphicsScene * scene,
+	               const QColor   & color,
+		       int              lineWidth,
+		       float            zValue ):
+	        HighlightRect ( scene, nullptr, color, lineWidth, zValue )
+	{}
 
 	/**
 	 * Highlight the current treemap tile: resize this selection
@@ -767,7 +774,10 @@ namespace QDirStat
     {
     public:
 	CurrentTileHighlighter( TreemapView * treemapView ):
-	    HighlightRect ( treemapView->scene(), treemapView->currentItemColor(), 2, CurrentHighlightLayer )
+	    HighlightRect ( treemapView->scene(),
+	                    treemapView->currentItemColor(),
+			    2,
+			    CurrentHighlightLayer )
 	{}
 
 	void highlight( const TreemapTile * tile ) override;
@@ -786,7 +796,11 @@ namespace QDirStat
     {
     public:
 	SelectedTileHighlighter( TreemapView * treemapView, const TreemapTile * tile ):
-	    HighlightRect ( tile, treemapView->selectedItemsColor(), 2, TileHighlightLayer )
+	    HighlightRect ( treemapView->scene(),
+	                    tile,
+			    treemapView->selectedItemsColor(),
+			    2,
+			    TileHighlightLayer )
 	{}
     };
 
@@ -802,12 +816,16 @@ namespace QDirStat
     {
     public:
 	ParentTileHighlighter( TreemapView * treemapView, const TreemapTile * tile, const QString & tooltip ):
-	    HighlightRect ( tile, treemapView->highlightColor(), outlineWidth( treemapView ), SceneHighlightLayer )
+	    HighlightRect ( treemapView->scene(),
+	                    tile,
+			    treemapView->highlightColor(),
+			    outlineWidth( treemapView ),
+			    SceneHighlightLayer )
 	{
 	    setToolTip( tooltip );
 	}
 
-    private:
+    protected:
 	static int outlineWidth( TreemapView * treemapView )
 	    { return treemapView->highlightedParent() ? 1 : 2; }
     };
