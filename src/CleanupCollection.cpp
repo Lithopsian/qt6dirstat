@@ -1,11 +1,11 @@
 /*
  *   File name: CleanupCollection.cpp
- *   Summary:	QDirStat classes to reclaim disk space
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat classes to reclaim disk space
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QMenu>
 #include <QToolBar>
@@ -24,6 +24,7 @@
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Trash.h"
+
 
 #define MAX_URLS_IN_CONFIRMATION_POPUP 9
 
@@ -182,6 +183,7 @@ CleanupCollection::~CleanupCollection()
 {
 //    writeSettings( _cleanupList );
     clear();
+    delete _trash;
 }
 
 
