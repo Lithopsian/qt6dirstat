@@ -1,11 +1,11 @@
 /*
  *   File name: TreeWalker.cpp
- *   Summary:	QDirStat helper class to walk a FileInfo tree
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat helper class to walk a FileInfo tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "TreeWalker.h"
 #include "FileSizeStats.h"
@@ -13,6 +13,7 @@
 #include "SysUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 #define MAX_RESULTS              200
 #define MAX_FIND_FILES_RESULTS  1000
@@ -132,7 +133,7 @@ bool FindFilesTreeWalker::check( FileInfo * item )
     if ( ( !_filter.findDirs()     || !item->isDir()     ) &&
          ( !_filter.findFiles()    || !item->isFile()    ) &&
          ( !_filter.findSymLinks() || !item->isSymLink() ) &&
-         ( !_filter.findPkg()      || !item->isPkgInfo() ) )
+         ( !_filter.findPkgs()     || !item->isPkgInfo() ) )
     {
         return false;
     }

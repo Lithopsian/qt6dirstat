@@ -1,13 +1,14 @@
 /*
  *   File name: SysUtil.cpp
- *   Summary:	System utility functions for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   System utility functions for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
+#define DONT_DEPRECATE_STRERROR // for Logger.h
 
-#define DONT_DEPRECATE_STRERROR
 #include <unistd.h>	// access(), getuid(), geteduid(), readlink()
 #include <errno.h>
 #include <pwd.h>	// getpwuid()

@@ -1,11 +1,11 @@
 /*
  *   File name: FilesystemsWindow.cpp
- *   Summary:	QDirStat "Mounted Filesystems" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "Mounted Filesystems" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QClipboard>
 #include <QContextMenuEvent>
@@ -24,7 +24,9 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 #define WARN_PERCENT	10.0
+
 
 using namespace QDirStat;
 
@@ -45,33 +47,33 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     MainWindow * mainWindow = dynamic_cast<MainWindow *>( app()->findMainWindow() );
     if ( mainWindow )
     {
-	connect( this,		  &FilesystemsWindow::readFilesystem,
-		 mainWindow,	  &MainWindow::readFilesystem );
+	connect( this,       &FilesystemsWindow::readFilesystem,
+		 mainWindow, &MainWindow::readFilesystem );
     }
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
-	     this,		  &FilesystemsWindow::normalStateChanged );
+	     this,                &FilesystemsWindow::normalStateChanged );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
-	     this,		  &FilesystemsWindow::refresh );
+	     this,                &FilesystemsWindow::refresh );
 
-    connect( _ui->fsTree,	  &QTreeWidget::customContextMenuRequested,
-	      this,		  &FilesystemsWindow::contextMenu);
+    connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
+	      this,               &FilesystemsWindow::contextMenu);
 
-    connect( _ui->fsTree,	  &QTreeWidget::itemDoubleClicked,
-	     _ui->actionRead,	  &QAction::triggered );
+    connect( _ui->fsTree,         &QTreeWidget::itemDoubleClicked,
+	     _ui->actionRead,     &QAction::triggered );
 
-    connect( _ui->readButton,	  &QAbstractButton::clicked,
-	     _ui->actionRead,	  &QAction::triggered );
+    connect( _ui->readButton,     &QAbstractButton::clicked,
+	     _ui->actionRead,     &QAction::triggered );
 
-    connect( _ui->actionRead,	  &QAction::triggered,
-	     this,		  &FilesystemsWindow::readSelectedFilesystem );
+    connect( _ui->actionRead,     &QAction::triggered,
+	     this,                &FilesystemsWindow::readSelectedFilesystem );
 
-    connect( _ui->actionCopy,	  &QAction::triggered,
-	     this,		  &FilesystemsWindow::copyDeviceToClipboard );
+    connect( _ui->actionCopy,     &QAction::triggered,
+	     this,                &FilesystemsWindow::copyDeviceToClipboard );
 
-    connect( _ui->fsTree,	  &QTreeWidget::itemSelectionChanged,
-	     this,		  &FilesystemsWindow::enableActions );
+    connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
+	     this,                &FilesystemsWindow::enableActions );
 }
 
 
@@ -132,20 +134,21 @@ void FilesystemsWindow::initWidgets()
     QStringList headers = { tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
 
     if ( MountPoints::hasSizeInfo() )
-	headers += { tr( "Size" ), tr( "Used" ), tr( "Reserved" ), tr( "Free" ), tr( "Free %" ) };
+	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
 
     _ui->fsTree->setHeaderLabels( headers );
     _ui->fsTree->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
     app()->setWidgetFontSize( _ui->fsTree );
 
-    // Center the column headers except the furst two
+    // Center the column headers except the first two
     _ui->fsTree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );
+
     QTreeWidgetItem * hItem = _ui->fsTree->headerItem();
-    hItem->setTextAlignment( FS_DeviceCol, Qt::AlignVCenter | Qt::AlignLeft );
+    hItem->setTextAlignment( FS_DeviceCol,    Qt::AlignVCenter | Qt::AlignLeft );
     hItem->setTextAlignment( FS_MountPathCol, Qt::AlignVCenter | Qt::AlignLeft );
 
     hItem->setToolTip( FS_ReservedSizeCol, tr( "Reserved for root" ) );
-    hItem->setToolTip( FS_FreeSizeCol,	   tr( "Free for unprivileged users" ) );
+    hItem->setToolTip( FS_FreeSizeCol,     tr( "Free for unprivileged users" ) );
 
     HeaderTweaker::resizeToContents( _ui->fsTree->header() );
     _ui->fsTree->sortItems( FS_DeviceCol, Qt::AscendingOrder );
@@ -205,17 +208,15 @@ void FilesystemsWindow::readSelectedFilesystem()
 
 QString FilesystemsWindow::selectedPath() const
 {
-    QString result;
-
     const QList<QTreeWidgetItem *> sel = _ui->fsTree->selectedItems();
     if ( !sel.isEmpty() )
     {
 	const FilesystemItem * item = dynamic_cast<FilesystemItem *>( sel.first() );
 	if ( item )
-	    result = item->mountPath();
+	    return item->mountPath();
     }
 
-    return result;
+    return QString();
 }
 
 
@@ -245,7 +246,6 @@ void FilesystemsWindow::contextMenu( const QPoint & pos )
     QMenu menu;
     menu.addAction( _ui->actionRead );
     menu.addAction( _ui->actionCopy );
-
     menu.exec( _ui->fsTree->mapToGlobal( pos ) );
 }
 
@@ -263,17 +263,17 @@ void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
 				QTreeWidget * parent ):
     QTreeWidgetItem ( parent ),
-    _device	    { mountPoint->device()	    },
-    _mountPath	    { mountPoint->path()	    },
-    _fsType	    { mountPoint->filesystemType()  },
-    _totalSize	    { mountPoint->totalSize()	    },
-    _usedSize	    { mountPoint->usedSize()	    },
+    _device         { mountPoint->device()          },
+    _mountPath      { mountPoint->path()            },
+    _fsType         { mountPoint->filesystemType()  },
+    _totalSize      { mountPoint->totalSize()       },
+    _usedSize       { mountPoint->usedSize()        },
     _reservedSize   { mountPoint->reservedSize()    },
-    _freeSize	    { mountPoint->freeSizeForUser() },
+    _freeSize       { mountPoint->freeSizeForUser() },
     _isNetworkMount { mountPoint->isNetworkMount()  },
-    _isReadOnly	    { mountPoint->isReadOnly()	    }
+    _isReadOnly     { mountPoint->isReadOnly()      }
 {
-    QString dev    = _device;
+    QString dev = _device;
 
     if ( dev.startsWith( "/dev/mapper/luks-" ) )
     {
@@ -281,7 +281,7 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
         const int limit = sizeof( "/dev/mapper/luks-010203" ) - 1;
         if ( dev.size() > limit )
         {
-            dev = dev.left( limit ) + "…";
+            dev = dev.left( limit ) + "…"; // ellipsis
             setToolTip( FS_DeviceCol, _device );
         }
     }
@@ -331,10 +331,12 @@ void FilesystemItem::set( int col, Qt::Alignment alignment, const QString & text
 
 bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
+    if ( !treeWidget() )
+	return QTreeWidgetItem::operator<( rawOther );
+
     const FilesystemItem & other = dynamic_cast<const FilesystemItem &>( rawOther );
 
-    const FilesystemColumns col = treeWidget() ? (FilesystemColumns)treeWidget()->sortColumn() : FS_DeviceCol;
-    switch ( col )
+    switch ( (FilesystemColumns)treeWidget()->sortColumn() )
     {
 	case FS_DeviceCol:
 	    if ( isNetworkMount() == other.isNetworkMount() )

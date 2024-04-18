@@ -1,11 +1,11 @@
 /*
  *   File name: FileInfoIterator.cpp
- *   Summary:	Support classes for QDirStat - DirTree iterator classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat - DirTree iterator classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <algorithm>
 
@@ -14,6 +14,7 @@
 #include "FileInfoSorter.h"
 #include "DotEntry.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -32,25 +33,21 @@ void FileInfoIterator::next()
     {
 	// Process direct children
 	_current = _current ? _current->next() : _parent->firstChild();
-
 	if ( !_current )
 	{
 	    _directChildrenProcessed = true;
 	    next();
 	}
     }
-    else // _directChildrenProcessed
+    else if ( !_dotEntryProcessed )
     {
-	if ( !_dotEntryProcessed )
-	{
-	    // Process dot entry
-	    _current = _parent->dotEntry();
-	    _dotEntryProcessed = true;
-	}
-	else	// Dot entry already processed
-	{
-	    _current = nullptr;
-	}
+	// Process dot entry
+	_current = _parent->dotEntry();
+	_dotEntryProcessed = true;
+    }
+    else // Direct children and dot entry processed
+    {
+	_current = nullptr;
     }
 }
 

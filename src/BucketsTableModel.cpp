@@ -1,17 +1,18 @@
 /*
  *   File name: BucketsTableModel.h
- *   Summary:	Data model for buckets table
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Data model for buckets table
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "BucketsTableModel.h"
 #include "HistogramView.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -60,9 +61,9 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
 }
 
 
-QVariant BucketsTableModel::headerData( int	        section,
+QVariant BucketsTableModel::headerData( int             section,
                                         Qt::Orientation orientation,
-                                        int	        role ) const
+                                        int             role ) const
 {
     switch ( role )
     {
@@ -71,10 +72,10 @@ QVariant BucketsTableModel::headerData( int	        section,
             {
                 switch ( section )
                 {
-                    case StartCol:	return tr( "Start size" );
-                    case EndCol:	return tr( "End size"   );
-                    case ValueCol:	return tr( "Files"      );
-                    default: return QVariant();
+                    case StartCol: return tr( "Start size" );
+                    case EndCol:   return tr( "End size"   );
+                    case ValueCol: return tr( "Files"      );
+                    default:       return QVariant();
                 }
             }
             else
@@ -88,9 +89,9 @@ QVariant BucketsTableModel::headerData( int	        section,
 	case Qt::TextAlignmentRole:
             {
                 if ( orientation == Qt::Horizontal )
-                    return (int)Qt::AlignVCenter | Qt::AlignHCenter;
+                    return (QVariant)( Qt::AlignVCenter | Qt::AlignHCenter );
                 else
-                    return (int)Qt::AlignVCenter | Qt::AlignRight;
+                    return (QVariant)( Qt::AlignVCenter | Qt::AlignRight );
             }
 
 	default:

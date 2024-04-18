@@ -1,11 +1,11 @@
 /*
  *   File name: PkgReader.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "PkgReader.h"
 #include "DirTree.h"
@@ -439,7 +439,7 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     else if ( _verboseMissingPkgFiles )
     {
 	// Packaged file not present, just log it
-	logWarning() << _pkg << ": missing: " << path << Qt::endl;
+	logWarning() << _pkg << " missing " << path << Qt::endl;
     }
 
     return newItem;

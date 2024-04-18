@@ -1,11 +1,14 @@
 /*
  *   File name: RpmPkgManager.cpp
- *   Summary:	RPM package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   RPM package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
+#define LONG_CMD_TIMEOUT_SEC    30	// for SysUtil.h
+#define DEFAULT_WARNING_SEC      7	// for SysUtil.h
 
 #include <iostream>	// cerr/endl;
 
@@ -22,8 +25,6 @@
 #include "Logger.h"
 #include "Exception.h"
 
-#define LONG_CMD_TIMEOUT_SEC	30
-#define DEFAULT_WARNING_SEC	7
 
 using namespace QDirStat;
 
@@ -50,6 +51,7 @@ namespace
 	// Return something to try although it may not exist
 	return "/bin/rpm"; // for old SUSE / Red Hat distros
     }
+
 } // namespace
 
 
@@ -82,8 +84,6 @@ QString RpmPkgManager::owningPkg( const QString & path ) const
     if ( exitCode != 0 || output.contains( "not owned by any package" ) )
 	return "";
 
-//    QString pkg = output;
-
     return output;
 }
 
@@ -94,10 +94,10 @@ PkgInfoList RpmPkgManager::installedPkg() const
     QElapsedTimer timer;
     timer.start();
 
-    const QString output = runCommand(	rpmCommand(),
-					{ "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
-					&exitCode,
-					LONG_CMD_TIMEOUT_SEC );
+    const QString output = runCommand( rpmCommand(),
+				       { "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
+				       &exitCode,
+				       LONG_CMD_TIMEOUT_SEC );
 
     if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
 	rebuildRpmDbWarning();
@@ -121,10 +121,10 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 		logError() << "Invalid rpm -qa output: " << line << "\n" << Qt::endl;
 	    else
 	    {
-		const QString name	= fields.takeFirst();
-		const QString version	= fields.takeFirst(); // includes release
+		const QString name    = fields.takeFirst();
+		const QString version = fields.takeFirst(); // includes release
 
-		QString arch	= fields.takeFirst();
+		QString arch = fields.takeFirst();
 		if ( arch == "(none)" )
 		    arch = "";
 
@@ -142,17 +142,13 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 
 QString RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
 {
-    return QString( "%1 -ql %2" )
-	.arg( rpmCommand() )
-	.arg( queryName( pkg ) );
+    return QString( "%1 -ql %2" ).arg( rpmCommand() ).arg( queryName( pkg ) );
 }
 
 
 QStringList RpmPkgManager::parseFileList( const QString & output ) const
 {
-    QStringList fileList;
-
-    fileList = output.split( "\n" );
+    QStringList fileList = output.split( "\n" );
     fileList.removeAll( "(contains no files)" );
 
     return fileList;
@@ -233,7 +229,7 @@ void RpmPkgManager::readSettings()
     _getPkgListWarningSec = settings.value( "GetRpmPkgListWarningSec", DEFAULT_WARNING_SEC ).toInt();
 
     // Write the value right back to the settings if it isn't there already:
-    // Since package manager objects are never really destroyed, this can't
+    // Since package manager objects are never destroyed, this can't
     // reliably be done in the destructor.
     settings.setDefaultValue( "GetRpmPkgListWarningSec", _getPkgListWarningSec );
     settings.endGroup();

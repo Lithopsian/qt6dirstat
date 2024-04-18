@@ -1,9 +1,10 @@
 /*
  *   File name: SystemFileChecker.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <sys/types.h> // uid_t
@@ -14,8 +15,8 @@
 
 #define MIN_NON_SYSTEM_UID      500
 
-using namespace QDirStat;
 
+using namespace QDirStat;
 
 
 namespace
@@ -43,11 +44,8 @@ namespace
             return true;
         }
 
-        if ( path.startsWith( "/usr/" ) &&
-             ! path.startsWith( "/usr/local/" ) )
-        {
+        if ( path.startsWith( "/usr/" ) && !path.startsWith( "/usr/local/" ) )
             return true;
-        }
 
         /**
          * Intentionally NOT considered true system paths:
@@ -98,7 +96,7 @@ namespace
 
 bool SystemFileChecker::isSystemFile( const FileInfo * file )
 {
-    if ( ! file )
+    if ( !file )
         return false;
 
     if ( file->isPseudoDir() && file->parent() )

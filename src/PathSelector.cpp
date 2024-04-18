@@ -1,11 +1,11 @@
 /*
  *   File name: PathSelector.cpp
- *   Summary:	Path selection list widget for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Path selection list widget for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QDir>
 
@@ -15,10 +15,11 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 #define SHOW_SIZES_IN_TOOLTIP 0
 
-using namespace QDirStat;
 
+using namespace QDirStat;
 
 
 PathSelector::PathSelector( QWidget * parent ):
@@ -52,10 +53,9 @@ PathSelectorItem * PathSelector::addPath( const QString & path,
 
 PathSelectorItem * PathSelector::addHomeDir()
 {
-//    const QIcon icon = _iconProvider.icon( QFileIconProvider::Folder );
     const QIcon icon( ":/icons/48x48/home-dir.png" );
     PathSelectorItem * item = addPath( QDir::homePath(), icon );
-    item->setToolTip( tr( "Your home directory" ) );
+//    item->setToolTip( tr( "Your home directory" ) );
 
     return item;
 }
@@ -74,21 +74,6 @@ PathSelectorItem * PathSelector::addMountPoint( MountPoint * mountPoint )
     return item;
 }
 
-/*
-PathSelectorItem * PathSelector::addMountPoint( MountPoint *  mountPoint,
-                                                const QIcon & icon )
-{
-    CHECK_PTR( mountPoint );
-
-    PathSelectorItem * item = new PathSelectorItem( mountPoint, this );
-    CHECK_NEW( item );
-
-    if ( !icon.isNull() )
-	item->setIcon( icon );
-
-    return item;
-}
-*/
 
 void PathSelector::addMountPoints( const QList<MountPoint *> & mountPoints )
 {
@@ -147,16 +132,6 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
 
 
 
-PathSelectorItem::PathSelectorItem( const QString & path,
-				    PathSelector  * parent ):
-    QListWidgetItem ( path, parent ),
-    _path { path },
-    _mountPoint { nullptr }
-{
-
-}
-
-
 PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 				    PathSelector * parent ):
     QListWidgetItem ( parent ),
@@ -177,9 +152,9 @@ PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 
     if ( _mountPoint->hasSizeInfo() )
     {
-        tooltip += "\n\n" + QObject::tr( "Used: " ) + formatSize( _mountPoint->usedSize() );
-        tooltip += "\n" + QObject::tr( "Free for users: " ) + formatSize( _mountPoint->freeSizeForUser() );
-        tooltip += "\n" + QObject::tr( "Free for root: " ) +  formatSize( _mountPoint->freeSizeForRoot() );
+        tooltip += QObject::tr( "\n\nUsed: " )         + formatSize( _mountPoint->usedSize() );
+        tooltip += QObject::tr( "\nFree for users: " ) + formatSize( _mountPoint->freeSizeForUser() );
+        tooltip += QObject::tr( "\nFree for root: " )  + formatSize( _mountPoint->freeSizeForRoot() );
     }
 #endif
 

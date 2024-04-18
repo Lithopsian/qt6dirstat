@@ -1,17 +1,18 @@
 /*
  *   File name: ListEditor.h
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QPushButton>
 
 #include "ListEditor.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -21,7 +22,7 @@ void ListEditor::setListWidget( QListWidget * listWidget )
     _listWidget = listWidget;
 
     connect( _listWidget, &QListWidget::currentItemChanged,
-	     this,	  &ListEditor::currentItemChanged );
+	     this,        &ListEditor::currentItemChanged );
 }
 
 
@@ -70,11 +71,10 @@ void ListEditor::setRemoveButton( QAbstractButton * button )
 void ListEditor::moveUp()
 {
     QListWidgetItem * currentItem = _listWidget->currentItem();
-    const int currentRow	  = _listWidget->currentRow();
-
-    if ( ! currentItem )
+    if ( !currentItem )
 	return;
 
+    const int currentRow = _listWidget->currentRow();
     if ( currentRow > 0 )
     {
 	_updatesLocked = true;
@@ -88,12 +88,12 @@ void ListEditor::moveUp()
 
 void ListEditor::moveDown()
 {
-    QListWidgetItem * currentItem = _listWidget->currentItem();
-    const int currentRow	  = _listWidget->currentRow();
 
-    if ( ! currentItem )
+    QListWidgetItem * currentItem = _listWidget->currentItem();
+    if ( !currentItem )
 	return;
 
+    const int currentRow = _listWidget->currentRow();
     if ( currentRow < _listWidget->count() - 1 )
     {
 	_updatesLocked = true;
@@ -108,11 +108,10 @@ void ListEditor::moveDown()
 void ListEditor::moveToTop()
 {
     QListWidgetItem * currentItem = _listWidget->currentItem();
-    int currentRow		  = _listWidget->currentRow();
-
-    if ( ! currentItem )
+    if ( !currentItem )
 	return;
 
+    int currentRow = _listWidget->currentRow();
     if ( currentRow > 0 )
     {
 	_updatesLocked = true;
@@ -127,11 +126,10 @@ void ListEditor::moveToTop()
 void ListEditor::moveToBottom()
 {
     QListWidgetItem * currentItem = _listWidget->currentItem();
-    const int currentRow	  = _listWidget->currentRow();
-
-    if ( ! currentItem )
+    if ( !currentItem )
 	return;
 
+    const int currentRow = _listWidget->currentRow();
     if ( currentRow < _listWidget->count() - 1 )
     {
 	_updatesLocked = true;
@@ -159,18 +157,14 @@ void ListEditor::add()
 void ListEditor::remove()
 {
     QListWidgetItem * currentItem = _listWidget->currentItem();
-    const int currentRow	  = _listWidget->currentRow();
-
-    if ( ! currentItem )
+    if ( !currentItem )
 	return;
-
-    void * value = this->value( currentItem );
 
     // Delete current item
     _updatesLocked = true;
-    _listWidget->takeItem( currentRow );
+    removeValue( this->value( currentItem ) );
+    _listWidget->takeItem( _listWidget->currentRow() );
     delete currentItem;
-    removeValue( value );
     updateActions();
     _updatesLocked = false;
 
@@ -180,25 +174,14 @@ void ListEditor::remove()
 
 void ListEditor::updateActions()
 {
-    if ( _listWidget->count() == 0 )
-    {
-        enableButton( _removeButton,       false );
-        enableButton( _moveToTopButton,    false );
-        enableButton( _moveUpButton,       false );
-        enableButton( _moveDownButton,     false );
-        enableButton( _moveToBottomButton, false );
-    }
-    else
-    {
-        int currentRow = _listWidget->currentRow();
-        int lastRow    = _listWidget->count() - 1;
+    const int currentRow = _listWidget->currentRow();
+    const int lastRow    = _listWidget->count() - 1;
 
-        enableButton( _removeButton,       true );
-        enableButton( _moveToTopButton,    currentRow > _firstRow );
-        enableButton( _moveUpButton,       currentRow > _firstRow );
-        enableButton( _moveDownButton,     currentRow < lastRow   );
-        enableButton( _moveToBottomButton, currentRow < lastRow   );
-    }
+    enableButton( _removeButton,       lastRow    > -1        );
+    enableButton( _moveToTopButton,    currentRow > _firstRow );
+    enableButton( _moveUpButton,       currentRow > _firstRow );
+    enableButton( _moveDownButton,     currentRow < lastRow   );
+    enableButton( _moveToBottomButton, currentRow < lastRow   );
 }
 
 
@@ -213,7 +196,7 @@ void ListEditor::currentItemChanged( QListWidgetItem * current,
 
 void * ListEditor::value( QListWidgetItem * item )
 {
-    if ( ! item )
+    if ( !item )
 	return nullptr;
 
     ListEditorItem * editorItem = dynamic_cast<ListEditorItem *>( item );

@@ -1,11 +1,11 @@
 /*
  *   File name: FileSizeLabel.cpp
- *   Summary:	Specialized QLabel for a file size for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Specialized QLabel for a file size for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QMenu>
 #include <QObject>
@@ -14,6 +14,7 @@
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
+
 
 using namespace QDirStat;
 

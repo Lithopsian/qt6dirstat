@@ -1,11 +1,11 @@
 /*
  *   File name: UnpkgSettings.cpp
- *   Summary:	Parameters for "unpackaged files" view
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Parameters for "unpackaged files" view
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "UnpkgSettings.h"
 #include "Settings.h"

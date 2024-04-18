@@ -1,9 +1,10 @@
 /*
  *   File name: DpkgPkgManager.cpp
- *   Summary:	Dpkg package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Dpkg package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QFileInfo>
@@ -15,6 +16,7 @@
 #include "SysUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 #define LOG_COMMANDS	true
 #define LOG_OUTPUT	false
@@ -49,6 +51,7 @@ namespace
 	const QString filename = fileInfo.fileName();
 	const QString pathInfo = fileInfo.path();
 	const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
+
 	//logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
 	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + "/" + filename : pathname;
     }

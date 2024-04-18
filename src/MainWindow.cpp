@@ -1,11 +1,11 @@
 /*
  *   File name: MainWindow.cpp
- *   Summary:	QDirStat main window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat main window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QApplication>
 #include <QClipboard>
@@ -47,9 +47,11 @@
 #include "UnreadableDirsWindow.h"
 #include "Version.h"
 
-#define UPDATE_MILLISEC		200
+
+#define UPDATE_MILLISEC 200
 
 #define USE_CUSTOM_OPEN_DIR_DIALOG 1
+
 
 using namespace QDirStat;
 
@@ -73,7 +75,6 @@ MainWindow::MainWindow( bool slowUpdate ):
     // - the DirTreeModel
     // - the DirTree (owned and managed by the DirTreeModel)
     // - the SelectionModel
-
     if ( slowUpdate )
         app()->dirTreeModel()->setSlowUpdate();
 
@@ -116,9 +117,8 @@ MainWindow::~MainWindow()
     writeSettings();
 
     // Relying on the QObject hierarchy to properly clean this up resulted in a
-    //	segfault; there was probably a problem in the deletion order.
-
-    delete _ui->dirTreeView;
+    // segfault; there was probably a problem in the deletion order.
+//    delete _ui->dirTreeView;
     delete _ui;
     delete _historyButtons;
 
@@ -128,8 +128,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::checkPkgManagerSupport()
 {
-    if ( !PkgQuery::haveGetInstalledPkgSupport() ||
-	 !PkgQuery::haveFileListSupport()	    )
+    if ( !PkgQuery::haveGetInstalledPkgSupport() || !PkgQuery::haveFileListSupport() )
     {
 	logInfo() << "No package manager support "
 		  << "for getting installed packages or file lists"
@@ -157,78 +156,78 @@ void MainWindow::connectSignals()
     const SelectionModel    * selectionModel    = app()->selectionModel();
     const CleanupCollection * cleanupCollection = ActionManager::cleanupCollection();
 
-    connect( dirTree,		       &DirTree::startingReading,
-	     this,		       &MainWindow::startingReading );
+    connect( dirTree,                  &DirTree::startingReading,
+	     this,                     &MainWindow::startingReading );
 
-    connect( dirTree,		       &DirTree::startingRefresh,
-	     this,		       &MainWindow::busyDisplay );
+    connect( dirTree,                  &DirTree::startingRefresh,
+	     this,                     &MainWindow::busyDisplay );
 
-    connect( dirTree,		       &DirTree::finished,
-	     this,		       &MainWindow::readingFinished );
+    connect( dirTree,                  &DirTree::finished,
+	     this,                     &MainWindow::readingFinished );
 
-    connect( dirTree,		       &DirTree::aborted,
-	     this,		       &MainWindow::readingAborted );
+    connect( dirTree,                  &DirTree::aborted,
+	     this,                     &MainWindow::readingAborted );
 
     connect( dirTreeModel,             &DirTreeModel::layoutChanged,
-	     this,		       &MainWindow::layoutChanged );
+	     this,                     &MainWindow::layoutChanged );
 
-    connect( selectionModel,	       &SelectionModel::currentItemChanged,
-	     _historyButtons,	       &HistoryButtons::addToHistory );
+    connect( selectionModel,           &SelectionModel::currentItemChanged,
+	     _historyButtons,          &HistoryButtons::addToHistory );
 
-    connect( _historyButtons,	       &HistoryButtons::navigateToUrl,
-	     this,		       &MainWindow::navigateToUrl );
+    connect( _historyButtons,          &HistoryButtons::navigateToUrl,
+	     this,                     &MainWindow::navigateToUrl );
 
-    connect( selectionModel,	       &SelectionModel::currentItemChanged,
+    connect( selectionModel,           &SelectionModel::currentItemChanged,
 	     _ui->breadcrumbNavigator, &BreadcrumbNavigator::setPath );
 
     connect( _ui->breadcrumbNavigator, &BreadcrumbNavigator::pathClicked,
-	     selectionModel,	       qOverload<const QString &>( &SelectionModel::setCurrentItem ) );
+	     selectionModel,           qOverload<const QString &>( &SelectionModel::setCurrentItem ) );
 
-    connect( selectionModel,	       qOverload<>( &SelectionModel::selectionChanged ),
-	     this,		       &MainWindow::selectionChanged );
+    connect( selectionModel,           qOverload<>( &SelectionModel::selectionChanged ),
+	     this,                     &MainWindow::selectionChanged );
 
-    connect( selectionModel,	       &SelectionModel::currentItemChanged,
-	     this,		       &MainWindow::currentItemChanged );
+    connect( selectionModel,           &SelectionModel::currentItemChanged,
+	     this,                     &MainWindow::currentItemChanged );
 
     connect( cleanupCollection,        &CleanupCollection::startingCleanup,
-	     this,		       &MainWindow::startingCleanup );
+	     this,                     &MainWindow::startingCleanup );
 
     connect( cleanupCollection,        &CleanupCollection::cleanupFinished,
-	     this,		       &MainWindow::cleanupFinished );
+	     this,                     &MainWindow::cleanupFinished );
 
-    connect( cleanupCollection,	       &CleanupCollection::assumedDeleted,
-             _ui->treemapView,	       &TreemapView::enable );
+    connect( cleanupCollection,        &CleanupCollection::assumedDeleted,
+             _ui->treemapView,         &TreemapView::enable );
 
-    connect( _ui->treemapView,	       &TreemapView::treemapChanged,
-	     this,		       &MainWindow::updateActions );
+    connect( _ui->treemapView,         &TreemapView::treemapChanged,
+	     this,                     &MainWindow::updateActions );
 
-    connect( _ui->treemapView,	       &TreemapView::hoverEnter,
-	     this,		       &MainWindow::showCurrent );
+    connect( _ui->treemapView,         &TreemapView::hoverEnter,
+	     this,                     &MainWindow::showCurrent );
 
-    connect( _ui->treemapView,	       &TreemapView::hoverLeave,
-	     this,		       &MainWindow::showSummary );
+    connect( _ui->treemapView,         &TreemapView::hoverLeave,
+	     this,                     &MainWindow::showSummary );
 
-    connect( &_updateTimer,	       &QTimer::timeout,
-	     this,		       &MainWindow::showElapsedTime );
+    connect( &_updateTimer,            &QTimer::timeout,
+	     this,                     &MainWindow::showElapsedTime );
 
     // Here because DirTreeView doesn't have a selectionModel when it is first constructed
-    connect( selectionModel,	       &SelectionModel::currentBranchChanged,
-	     _ui->dirTreeView,	       &DirTreeView::closeAllExcept );
+    connect( selectionModel,           &SelectionModel::currentBranchChanged,
+	     _ui->dirTreeView,         &DirTreeView::closeAllExcept );
 
 }
 
 
 void MainWindow::updateSettings( bool urlInWindowTitle,
                                  bool useTreemapHover,
-                                 int statusBarTimeout,
-                                 int longStatusBarTimeout )
+                                 int  statusBarTimeout,
+                                 int  longStatusBarTimeout )
 {
     _urlInWindowTitle = urlInWindowTitle;
     updateWindowTitle( app()->dirTree()->url() );
 
     _ui->treemapView->setUseTreemapHover( useTreemapHover );
 
-    _statusBarTimeout = statusBarTimeout;
+    _statusBarTimeout     = statusBarTimeout;
     _longStatusBarTimeout = longStatusBarTimeout;
 }
 
@@ -240,19 +239,20 @@ void MainWindow::readSettings()
 
     restoreState(settings.value("State").toByteArray());
 
-    _statusBarTimeout		= settings.value( "StatusBarTimeoutMillisec",  3000 ).toInt();
-    _longStatusBarTimeout	= settings.value( "LongStatusBarTimeout",     30000 ).toInt();
+    _statusBarTimeout           = settings.value( "StatusBarTimeoutMillisec",  3000 ).toInt();
+    _longStatusBarTimeout       = settings.value( "LongStatusBarTimeout",     30000 ).toInt();
 
-    const bool showTreemap	= settings.value( "ShowTreemap",	      true  ).toBool();
-    const bool treemapOnSide	= settings.value( "TreemapOnSide",	      false ).toBool();
+    const bool showTreemap      = settings.value( "ShowTreemap",              true  ).toBool();
+    const bool treemapOnSide    = settings.value( "TreemapOnSide",            false ).toBool();
 
-    _verboseSelection		= settings.value( "VerboseSelection",	      false ).toBool();
-    _urlInWindowTitle		= settings.value( "UrlInWindowTitle",	      false ).toBool();
-    const bool useTreemapHover  = settings.value( "UseTreemapHover",	      false ).toBool();
+    _verboseSelection           = settings.value( "VerboseSelection",         false ).toBool();
+    _urlInWindowTitle           = settings.value( "UrlInWindowTitle",         false ).toBool();
+    const bool useTreemapHover  = settings.value( "UseTreemapHover",          false ).toBool();
 
-    const QString layoutName	= settings.value( "Layout",		      "L2"  ).toString();
-    const bool showMenuBar	= settings.value( "ShowMenuBar",	      true  ).toBool();
-    const bool showStatusBar	= settings.value( "ShowStatusBar",	      true  ).toBool();
+    const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
+    const bool showMenuBar      = settings.value( "ShowMenuBar",              true  ).toBool();
+    const bool showStatusBar    = settings.value( "ShowStatusBar",            true  ).toBool();
+    _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
 
     _ui->fileDetailsView->setLabelLimit( settings.value( "FileDetailsLabelLimit", 0 ).toInt() );
 
@@ -260,17 +260,12 @@ void MainWindow::readSettings()
 
     settings.beginGroup( "MainWindow-Subwindows" );
     const QByteArray mainSplitterState = settings.value( "MainSplitter" , QByteArray() ).toByteArray();
-    const QByteArray topSplitterState	 = settings.value( "TopSplitter"  , QByteArray() ).toByteArray();
+    const QByteArray topSplitterState  = settings.value( "TopSplitter"  , QByteArray() ).toByteArray();
     settings.endGroup();
 
     _ui->actionShowMenuBar->setChecked  ( showMenuBar   );
     _ui->actionShowStatusBar->setChecked( showStatusBar );
     showBars();
-
-    _ui->treemapView->setUseTreemapHover( useTreemapHover );
-    _ui->actionShowTreemap->setChecked( showTreemap );
-    _ui->actionTreemapAsSidePanel->setChecked( treemapOnSide );
-    treemapAsSidePanel( treemapOnSide );
 
     _ui->actionVerboseSelection->setChecked( _verboseSelection );
     toggleVerboseSelection( _verboseSelection );
@@ -286,12 +281,16 @@ void MainWindow::readSettings()
 	// The window geometry isn't set yet, so just put in something vaguely workable
 	_ui->topViewsSplitter->setStretchFactor( 0, 1 );
 	_ui->topViewsSplitter->setStretchFactor( 1, 4 );
-//	_ui->fileDetailsPanel->resize( QSize( 300, 300 ) );
     }
     else
     {
 	_ui->topViewsSplitter->restoreState( topSplitterState );
     }
+
+    _ui->treemapView->setUseTreemapHover( useTreemapHover );
+    _ui->actionShowTreemap->setChecked( showTreemap );
+    _ui->actionTreemapAsSidePanel->setChecked( treemapOnSide );
+    treemapAsSidePanel( treemapOnSide );
 
     initLayouts( layoutName );
 }
@@ -302,17 +301,18 @@ void MainWindow::writeSettings()
     QDirStat::Settings settings;
     settings.beginGroup( "MainWindow" );
 
-    settings.setValue( "ShowTreemap",      _ui->actionShowTreemap->isChecked() );
-    settings.setValue( "TreemapOnSide",    _ui->actionTreemapAsSidePanel->isChecked() );
-    settings.setValue( "VerboseSelection", _verboseSelection );
+    settings.setValue( "ShowTreemap",              _ui->actionShowTreemap->isChecked()        );
+    settings.setValue( "TreemapOnSide",            _ui->actionTreemapAsSidePanel->isChecked() );
+    settings.setValue( "VerboseSelection",         _verboseSelection                          );
 
-    settings.setValue( "Layout",           currentLayoutName()                   );
-    settings.setValue( "ShowMenuBar",      _ui->actionShowMenuBar->isChecked()   );
-    settings.setValue( "ShowStatusBar",    _ui->actionShowStatusBar->isChecked() );
+    settings.setValue( "Layout",                   currentLayoutName()                   );
+    settings.setValue( "ShowMenuBar",              _ui->actionShowMenuBar->isChecked()   );
+    settings.setValue( "ShowStatusBar",            _ui->actionShowStatusBar->isChecked() );
+    settings.setValue( "ShowDirPermissionsMsg",    _showDirPermissionsMsg );
 
-    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout );
-    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout );
-    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle );
+    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout                   );
+    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout               );
+    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                   );
     settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover() );
 
     settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit() );
@@ -362,7 +362,6 @@ void MainWindow::busyDisplay()
     // If it is open, close the window that lists unreadable directories:
     // With the next directory read, things might have changed; the user may
     // have fixed permissions or ownership of those directories.
-//    UnreadableDirsWindow::closeSharedInstance();
     closeChildren();
 
     _updateTimer.start();
@@ -517,7 +516,8 @@ void MainWindow::readingAborted()
 }
 
 
-void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &, QAbstractItemModel::LayoutChangeHint changeHint )
+void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
+                                QAbstractItemModel::LayoutChangeHint changeHint )
 {
     if ( changeHint == QAbstractItemModel::VerticalSortHint )
     {
@@ -543,7 +543,7 @@ void MainWindow::openUrl( const QString & url )
 
 void MainWindow::openDir( const QString & url )
 {
-    _enableDirPermissionsMsg = true;
+    enableDirPermissionsMsg();
 
     try
     {
@@ -630,7 +630,7 @@ void MainWindow::pkgQuerySetup()
     _ui->fileDetailsView->clear();
     app()->dirTreeModel()->clear();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
-    _enableDirPermissionsMsg = true;
+    enableDirPermissionsMsg();
 }
 
 
@@ -653,7 +653,7 @@ void MainWindow::setFutureSelection()
 
 void MainWindow::refreshAll()
 {
-    _enableDirPermissionsMsg = true;
+    enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
 
@@ -685,7 +685,7 @@ void MainWindow::refreshAll()
 void MainWindow::refreshSelected()
 {
     // logDebug() << "Setting future selection: " << _futureSelection.subtree() << Qt::endl;
-    _enableDirPermissionsMsg = true;
+    enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
     busyDisplay();
@@ -1021,13 +1021,13 @@ void MainWindow::readFilesystem( const QString & path )
 
 void MainWindow::showDirPermissionsWarning()
 {
-//    if ( !_enableDirPermissionsMsg )
+    if ( !_enableDirPermissionsMsg )
 	return; // never display, I know already
 
     PanelMessage::showPermissionsMsg( this, _ui->vBox );
 
     // Don't display again until there is a manual refresh or new read
-    _enableDirPermissionsMsg = false;
+    disableDirPermissionsMsg();
 }
 
 

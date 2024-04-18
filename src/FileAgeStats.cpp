@@ -1,9 +1,10 @@
 /*
  *   File name: FileAgeStats.cpp
- *   Summary:	Statistics classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Statistics classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <algorithm>    // std::sort()
@@ -14,6 +15,7 @@
 #include "FileInfoIterator.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -53,11 +55,11 @@ void FileAgeStats::collect( const FileInfo * subtree )
 void FileAgeStats::collectRecursive( const FileInfo * dir )
 {
     if ( ! dir )
-	return;
+        return;
 
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
-	const FileInfo * item = *it;
+        const FileInfo * item = *it;
 
         if ( item && item->isFile() )
         {
@@ -79,8 +81,8 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
             }
         }
 
-	if ( item->hasChildren() )
-	    collectRecursive( item );
+        if ( item->hasChildren() )
+            collectRecursive( item );
     }
 }
 

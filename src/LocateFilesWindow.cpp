@@ -1,11 +1,11 @@
 /*
  *   File name: LocateFilesWindow.cpp
- *   Summary:	QDirStat "locate files" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "locate files" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QMenu>
 
@@ -22,6 +22,7 @@
 #include "TreeWalker.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -45,10 +46,10 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
     readWindowSettings( this, "LocateFilesWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
-	     this,		 &LocateFilesWindow::refresh );
+	     this,               &LocateFilesWindow::refresh );
 
-    connect( _ui->treeWidget,	 &QTreeWidget::currentItemChanged,
-	     this,		 &LocateFilesWindow::locateInMainWindow );
+    connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
+	     this,               &LocateFilesWindow::locateInMainWindow );
 
     connect( _ui->treeWidget,    &QTreeWidget::customContextMenuRequested,
              this,               &LocateFilesWindow::itemContextMenu );
@@ -272,15 +273,15 @@ void LocateListItem::set( int col, const QString & text, Qt::Alignment alignment
 
 bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
+    if ( !treeWidget() )
+	return QTreeWidgetItem::operator<( rawOther );
+
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const LocateListItem & other = dynamic_cast<const LocateListItem &>( rawOther );
 
-    const LocateListColumns col = treeWidget() ?
-				  (LocateListColumns)treeWidget()->sortColumn() :
-				  LocateListPathCol;
-    switch ( col )
+    switch ( (LocateListColumns)treeWidget()->sortColumn() )
     {
 	case LocateListSizeCol:  return _size  < other._size;
 	case LocateListMTimeCol: return _mtime < other._mtime;

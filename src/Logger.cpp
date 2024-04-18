@@ -1,11 +1,11 @@
 /*
  *   File name: Logger.cpp
- *   Summary:	Logger class for QDirstat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Logger class for QDirstat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #define DONT_DEPRECATE_STRERROR
 #include "Logger.h"

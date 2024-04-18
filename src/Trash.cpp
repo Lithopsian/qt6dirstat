@@ -1,11 +1,11 @@
 /*
  *   File name: Trash.h
- *   Summary:	Implementation of the XDG Trash spec for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Implementation of the XDG Trash spec for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -244,7 +244,7 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
 {
     // logDebug() << "Created TrashDir " << path << Qt::endl;
 
-    ensureDirExists( path,	  0700, true );
+    ensureDirExists( path,        0700, true );
     ensureDirExists( filesPath(), 0700, true );
     ensureDirExists( infoPath(),  0700, true );
 }
@@ -253,12 +253,12 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
 QString TrashDir::uniqueName( const QString & path )
 {
     const QFileInfo file( path );
-    const QDir filesDir( filesPath() );
+    const QDir      filesDir( filesPath() );
 
     const QString baseName  = file.baseName();
     const QString extension = file.completeSuffix();
-    int	    count     = 0;
-    QString name      = baseName;
+    int           count     = 0;
+    QString       name      = baseName;
 
     if ( ! extension.isEmpty() )
 	name += "." + extension;

@@ -1,9 +1,10 @@
 /*
  *   File name: MainWindowLayout.cpp
- *   Summary:	Unpackaged files view functions in the QDirStat main window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Unpackaged files view functions in the QDirStat main window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include "MainWindow.h"
@@ -18,6 +19,7 @@
 #include "BusyPopup.h"
 #include "Exception.h"
 #include "Logger.h"
+
 
 using namespace QDirStat;
 

@@ -1,11 +1,11 @@
 /*
  *   File name: ProcessStarter.h
- *   Summary:	Utilities for external processes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Utilities for external processes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "ProcessStarter.h"
 #include "Logger.h"
@@ -30,7 +30,7 @@ void ProcessStarter::add( QProcess * process )
     _waiting.append( process );
 
     connect( process, qOverload<int, QProcess::ExitStatus>( &QProcess::finished ),
-	     this,    &ProcessStarter::processFinished );
+             this,    &ProcessStarter::processFinished );
 
     if ( _started )
         startProcesses();
@@ -58,7 +58,7 @@ void ProcessStarter::processFinished( int,
                                       QProcess::ExitStatus )
 {
     QProcess * process = qobject_cast<QProcess *>( sender() );
-    if ( ! process )
+    if ( !process )
     {
         logError() << "Ignoring non-process QObject " << (void *) sender() << Qt::endl;
         return;

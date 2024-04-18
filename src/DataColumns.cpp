@@ -1,12 +1,11 @@
 /*
  *   File name: DataColumns.cpp
- *   Summary:	Data column mapping
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Data column mapping
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
-
 
 #include "DataColumns.h"
 #include "Logger.h"

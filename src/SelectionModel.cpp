@@ -1,11 +1,11 @@
 /*
  *   File name: SelectionModel.cpp
- *   Summary:	Handling of selected items
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Handling of selected items
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "SelectionModel.h"
 #include "DirTreeModel.h"
@@ -15,7 +15,9 @@
 #include "Exception.h"
 #include "Logger.h"
 
+
 #define VERBOSE_SELECTION 0
+
 
 using namespace QDirStat;
 
@@ -31,10 +33,10 @@ SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
 	     this, &SelectionModel::propagateSelectionChanged );
 
     connect( dirTreeModel->tree(), &DirTree::deletingChild,
-	     this,		   &SelectionModel::deletingChildNotify );
+	     this,                 &SelectionModel::deletingChildNotify );
 
     connect( dirTreeModel->tree(), &DirTree::clearing,
-	     this,		   &SelectionModel::clear );
+	     this,                 &SelectionModel::clear );
 }
 
 

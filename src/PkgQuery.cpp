@@ -1,11 +1,14 @@
 /*
  *   File name: PkgManager.cpp
- *   Summary:	Simple package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Simple package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
+#define LOG_COMMANDS	true	// for SysUtil.h
+#define LOG_OUTPUT	false	// for SysUtil.h
 
 #include "PkgQuery.h"
 #include "PkgManager.h"
@@ -15,8 +18,6 @@
 #include "Logger.h"
 #include "Exception.h"
 
-#define LOG_COMMANDS	true
-#define LOG_OUTPUT	false
 #include "SysUtil.h"
 
 
@@ -36,6 +37,7 @@ using SysUtil::haveCommand;
 PkgQuery * PkgQuery::instance()
 {
     static PkgQuery _instance;
+
     return &_instance;
 }
 

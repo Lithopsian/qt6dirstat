@@ -1,9 +1,10 @@
 /*
  *   File name: FormatUtil.cpp
- *   Summary:	String formatting utilities for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   String formatting utilities for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QObject>
@@ -60,18 +61,9 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 }
 
 
-QString QDirStat::formatPercent( float percent )
-{
-    if ( percent < 0.0 )	// Invalid percentage?
-	return "";
-
-    return QString::number( percent, 'f', 1 ) + '%';
-}
-
-
 QString QDirStat::formatTime( time_t rawTime )
 {
-    if ( rawTime == (time_t) 0 )
+    if ( rawTime == (time_t)0 )
 	return "";
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 8, 0)
@@ -80,7 +72,6 @@ QString QDirStat::formatTime( time_t rawTime )
     const QDateTime time = QDateTime::fromSecsSinceEpoch( rawTime );
 #endif
     return QLocale().toString( time, QLocale::ShortFormat );
-//    return time.toString( Qt::DefaultLocaleShortDate );
 }
 
 
@@ -143,16 +134,16 @@ QString QDirStat::formatMillisec( qint64 millisec )
     {
 	// .arg doesn't offer enough control over decimal places and significant figures
 	// so do it manually, 3 decimal places up to 1 sec, then 1 up to 10 secs, then none
-	const int precision = millisec > 9999 ? 0 : millisec < 1000 ? 3 : 1;
-	const float sec = (float)millisec / 1000.0;
+	const int   precision = millisec > 9999 ? 0 : millisec < 1000 ? 3 : 1;
+	const float sec       = (float)millisec / 1000.0;
 	return QObject::tr( "%1 sec" ).arg( sec, 0, 'f', precision );
     }
     else
     {
 	const int sec = millisec / 1000L;
 	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QChar( '0' ) )
-	    .arg( min,	 2, 10, QChar( '0' ) )
-	    .arg( sec,	 2, 10, QChar( '0' ) );
+				    .arg( min,   2, 10, QChar( '0' ) )
+				    .arg( sec,   2, 10, QChar( '0' ) );
     }
 }
 

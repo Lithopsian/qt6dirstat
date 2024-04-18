@@ -1,11 +1,11 @@
 /*
  *   File name: CleanupConfigPage.h
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "CleanupConfigPage.h"
 #include "ActionManager.h"
@@ -20,6 +20,7 @@
 // This is a mess that became necessary because Qt's moc cannot handle template
 // classes. Yes, this is ugly.
 #define CLEANUP_CAST(VOID_PTR) (static_cast<Cleanup *>(VOID_PTR))
+
 
 using namespace QDirStat;
 

@@ -1,9 +1,10 @@
 /*
  *   File name: MainWindowActions.cpp
- *   Summary:	Connecting menu actions in the QDirStat main window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Connecting menu actions in the QDirStat main window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QMouseEvent>
@@ -169,15 +170,15 @@ void MainWindow::updateActions()
     _ui->actionAskReadCache->setEnabled ( !reading );
     _ui->actionAskWriteCache->setEnabled( isTree && !pkgView );
 
+    const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
+    const bool        selSizeOne     = !reading && selectedItems.size() == 1;
     _ui->actionFindFiles->setEnabled   ( firstToplevel );
-    _ui->actionCopyPath->setEnabled    ( currentItem );
+    _ui->actionCopyPath->setEnabled    ( selSizeOne );
     _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
     _ui->actionGoToToplevel->setEnabled( firstToplevel );
 
-    const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
-    const bool        selSizeOne     = !reading && selectedItems.size() == 1;
-    const FileInfo  * sel            = selectedItems.first();
-    const bool        oneDirSelected = selSizeOne && sel && sel->isDir() && !pkgView;
+    const FileInfo * sel            = selectedItems.first();
+    const bool       oneDirSelected = selSizeOne && sel && sel->isDir() && !pkgView;
     _ui->actionRefreshSelected->setEnabled( selSizeOne && !pkgView && !sel->isMountPoint() && !sel->isExcluded() );
     _ui->actionContinueReading->setEnabled( oneDirSelected && sel->isMountPoint() );
     _ui->actionReadExcluded->setEnabled   ( oneDirSelected && sel->isExcluded()   );

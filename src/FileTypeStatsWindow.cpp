@@ -1,13 +1,13 @@
 /*
  *   File name: FileTypeStatsWindow.cpp
- *   Summary:	QDirStat file type statistics window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat file type statistics window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
-
-#include <algorithm>
+#include <algorithm>	// std::sort
 
 #include <QKeyEvent>
 #include <QMenu>
@@ -31,6 +31,7 @@
 // Number of suffixes in the "other" category
 #define TOP_X 20
 
+
 using namespace QDirStat;
 
 
@@ -53,29 +54,29 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
     addAction( _ui->actionLocate );
     addAction( _ui->actionSizeStats );
 
-    connect( _ui->treeWidget,	   &QTreeWidget::currentItemChanged,
-	     this,		   &FileTypeStatsWindow::enableActions );
+    connect( _ui->treeWidget,      &QTreeWidget::currentItemChanged,
+	     this,                 &FileTypeStatsWindow::enableActions );
 
-    connect( _ui->treeWidget,	   &QTreeWidget::customContextMenuRequested,
-	      this,		   &FileTypeStatsWindow::contextMenu);
+    connect( _ui->treeWidget,      &QTreeWidget::customContextMenuRequested,
+	     this,                 &FileTypeStatsWindow::contextMenu);
 
-    connect( _ui->treeWidget,	   &QTreeWidget::itemDoubleClicked,
-	     this,		   &FileTypeStatsWindow::locateCurrentFileType );
+    connect( _ui->treeWidget,      &QTreeWidget::itemDoubleClicked,
+	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
     connect( _ui->refreshButton,   &QAbstractButton::clicked,
-	     this,		   &FileTypeStatsWindow::refresh );
+	     this,                 &FileTypeStatsWindow::refresh );
 
-    connect( _ui->locateButton,	   &QAbstractButton::clicked,
-	     this,		   &FileTypeStatsWindow::locateCurrentFileType );
+    connect( _ui->locateButton,    &QAbstractButton::clicked,
+	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
-    connect( _ui->actionLocate,	   &QAction::triggered,
-	     this,		   &FileTypeStatsWindow::locateCurrentFileType );
+    connect( _ui->actionLocate,    &QAction::triggered,
+	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
     connect( _ui->sizeStatsButton, &QAbstractButton::clicked,
-	     this,		   &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
     connect( _ui->actionSizeStats, &QAction::triggered,
-	     this,		   &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
     connect( selectionModel, qOverload<FileInfo *, const FileInfo *>( &SelectionModel::currentItemChanged ),
 	     this,           &FileTypeStatsWindow::syncedPopulate );
@@ -174,7 +175,8 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _ui->treeWidget->setSortingEnabled( false );
 
     // Create toplevel items for the categories
-    QMap<const MimeCategory *, FileTypeItem *> categoryItem;
+    logDebug() << Qt::endl;
+    QHash<const MimeCategory *, FileTypeItem *> categoryItem;
     FileTypeItem * otherCategoryItem = nullptr;
 
     for ( CategoryFileSizeMapIterator it = _stats->categorySumBegin(); it != _stats->categorySumEnd(); ++it )
@@ -183,9 +185,9 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 	if ( category )
 	{
             // Add a category item
-	    FileSize sum = it.value();
-            int count = _stats->categoryCount( category );
-	    FileTypeItem * catItem = addCategoryItem( category->name(), count, sum );
+	    const FileSize sum       = it.value();
+            const int      count     = _stats->categoryCount( category );
+	    FileTypeItem * catItem   = addCategoryItem( category->name(), count, sum );
 	    categoryItem[ category ] = catItem;
 
 	    if ( category == _stats->otherCategory() )
@@ -204,17 +206,17 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
     // Prepare to collect items for a category "other"
     QList<FileTypeItem *> otherItems;
-    int	     otherCount = 0;
-    FileSize otherSum	= 0LL;
+    int      otherCount = 0;
+    FileSize otherSum   = 0LL;
 
     // Create items for each individual suffix (below a category)
     for ( StringFileSizeMapIterator it = _stats->suffixSumBegin(); it != _stats->suffixSumEnd(); ++it )
     {
-	const QString & suffix = it.key().first;
+	const QString      & suffix   = it.key().first;
 	const MimeCategory * category = it.key().second;
-	const FileSize sum = it.value();
-	const int count = _stats->suffixCount( suffix, category );
-	SuffixFileTypeItem * item = addSuffixFileTypeItem( suffix, count, sum );
+	const FileSize       sum      = it.value();
+	const int            count    = _stats->suffixCount( suffix, category );
+	SuffixFileTypeItem * item     = addSuffixFileTypeItem( suffix, count, sum );
 
 	if ( category )
 	{
@@ -248,7 +250,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
                                              otherCount,
                                              otherSum );
 
-	const QString name = otherItems.size() > TOP_X ? tr( "Other (Top %1)" ).arg( TOP_X ) : tr( "Other" );
+	const QString name = otherItems.size() > TOP_X ? tr( "Other (top %1)" ).arg( TOP_X ) : tr( "Other" );
         otherCategoryItem->setText( 0, name );
 
 	addTopXOtherItems( otherCategoryItem, otherItems );
@@ -261,13 +263,10 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
 FileTypeItem * FileTypeStatsWindow::addCategoryItem( const QString & name, int count, FileSize sum )
 {
-    const double percentage = _stats->percentage( sum );
-
-    FileTypeItem * item = new FileTypeItem( name, count, sum, percentage );
+    FileTypeItem * item = new FileTypeItem( name, count, sum, _stats->percentage( sum ) );
     CHECK_NEW( item );
 
     _ui->treeWidget->addTopLevelItem( item );
-//    item->setBold();
 
     return item;
 }
@@ -279,9 +278,7 @@ SuffixFileTypeItem * FileTypeStatsWindow::addNonSuffixRuleItem( const MimeCatego
     const FileSize sum    = _stats->categoryNonSuffixRuleSum  ( category );
     const int      count  = _stats->categoryNonSuffixRuleCount( category );
 
-    SuffixFileTypeItem * item = addSuffixFileTypeItem( suffix, count, sum );
-
-    return item;
+    return addSuffixFileTypeItem( suffix, count, sum );
 }
 
 
@@ -289,9 +286,7 @@ SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString &
                                                                  int             count,
                                                                  FileSize        sum )
 {
-    const double percentage = _stats->percentage( sum );
-
-    SuffixFileTypeItem * item = new SuffixFileTypeItem( suffix, count, sum, percentage );
+    SuffixFileTypeItem * item = new SuffixFileTypeItem( suffix, count, sum, _stats->percentage( sum ) );
     CHECK_NEW( item );
 
     return item;
@@ -301,23 +296,20 @@ SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString &
 void FileTypeStatsWindow::addTopXOtherItems( FileTypeItem          * otherCategoryItem,
                                              QList<FileTypeItem *> & otherItems )
 {
-    FileTypeItemCompare cmp;
-    std::sort( otherItems.begin(), otherItems.end(), cmp );
+    std::sort( otherItems.begin(), otherItems.end(), FileTypeItemCompare() );
 
-    const int top_x = qMin( TOP_X, otherItems.size() );
-
-    for ( int i=0; i < top_x; ++i )
+    const int topX = qMin( TOP_X, otherItems.size() );
+    for ( int i=0; i < topX; ++i )
     {
         // Take the X first items out of the otherItems list
         // and add them as children of the "Other" category
-
         FileTypeItem * item = otherItems.takeFirst();
         otherCategoryItem->addChild( item );
     }
 
     if ( !otherItems.empty() )
     {
-#if 1
+#if 0
         QStringList suffixes;
 
         for ( FileTypeItem * item : otherItems )
@@ -380,7 +372,6 @@ void FileTypeStatsWindow::enableActions( const QTreeWidgetItem * currentItem )
     if ( currentItem )
     {
 	const SuffixFileTypeItem * suffixItem = dynamic_cast<const SuffixFileTypeItem *>( currentItem );
-
 	enabled = suffixItem && suffixItem->suffix() != NO_SUFFIX && suffixItem->suffix() != NON_SUFFIX_RULE;
     }
 
@@ -407,7 +398,6 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
     QMenu menu;
     menu.addAction( _ui->actionLocate );
     menu.addAction( _ui->actionSizeStats );
-
     menu.exec( _ui->treeWidget->mapToGlobal( pos ) );
 }
 
@@ -466,13 +456,15 @@ FileTypeItem::FileTypeItem( const QString & name,
 
 bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
 {
+    if ( !treeWidget() )
+	return QTreeWidgetItem::operator<( rawOther );
+
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const FileTypeItem & other = dynamic_cast<const FileTypeItem &>( rawOther );
 
-    const FileTypeColumns col = treeWidget() ? (FileTypeColumns)treeWidget()->sortColumn() : FT_TotalSizeCol;
-    switch ( col )
+    switch ( (FileTypeColumns)treeWidget()->sortColumn() )
     {
 	case FT_CountCol:      return count()      < other.count();
 	case FT_TotalSizeCol:  return totalSize()  < other.totalSize();
@@ -483,14 +475,3 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
 
     return QTreeWidgetItem::operator<( rawOther );
 }
-
-/*
-void FileTypeItem::setBold()
-{
-    QFont boldFont = font( 0 );
-    boldFont.setBold( true );
-
-    for ( int col=0; col < FT_ColumnCount; ++col )
-	setFont( col, boldFont );
-}
-*/

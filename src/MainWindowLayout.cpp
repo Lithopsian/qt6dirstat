@@ -1,9 +1,10 @@
 /*
  *   File name: MainWindowLayout.cpp
- *   Summary:	QDirStat main window layout-related functions
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat main window layout-related functions
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QActionGroup>
@@ -16,6 +17,7 @@
 #include "Settings.h"
 #include "Exception.h"
 #include "Logger.h"
+
 
 using namespace QDirStat;
 
@@ -169,7 +171,7 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
     QWidget * widget = QApplication::widgetAt( event->globalPos() );
     while ( widget->parentWidget() )
     {
-        if (widget == _ui->centralWidget )
+        if ( widget == _ui->centralWidget )
         {
             QMenu menu;
             const QStringList actions1 = { "actionShowBreadcrumbs",

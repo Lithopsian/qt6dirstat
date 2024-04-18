@@ -1,13 +1,11 @@
 /*
  *   File name: BreadcrumbNavigator.cpp
- *   Summary:	Breadcrumb widget for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Breadcrumb widget for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
-
-//#include "Qt4Compat.h" // qHtmlEscape()
 
 #include "BreadcrumbNavigator.h"
 #include "DirInfo.h"
@@ -15,6 +13,7 @@
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
+
 
 #define VERBOSE_BREADCRUMBS     0
 
@@ -126,7 +125,7 @@ void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
         --depth;
     }
 
-    if ( _breadcrumbs[ 0 ].pathComponent.isEmpty() )
+    if ( _breadcrumbs.first().pathComponent.isEmpty() )
         _breadcrumbs.removeFirst();
 
 #if VERBOSE_BREADCRUMBS

@@ -1,9 +1,10 @@
 /*
  *   File name: MimeCategorizer.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QElapsedTimer>
@@ -25,9 +26,9 @@ namespace
      * Add one filename/category combination to a map.
      **/
     void addExactKey( ExactMatches        & keys,
-				       QBitArray           & lengths,
-				       const QString       & key,
-				       const MimeCategory  * category )
+		      QBitArray           & lengths,
+		      const QString       & key,
+		      const MimeCategory  * category )
     {
 	//logDebug() << "adding " << keyList << " to " << category << Qt::endl;
 	if ( keys.contains( key ) )
@@ -54,8 +55,8 @@ namespace
      * Adds one simple suffix to one suffix map.
      **/
     void addSuffixKey( SuffixMatches      & suffixes,
-					const QString      & suffix,
-					const MimeCategory * category )
+		       const QString      & suffix,
+		       const MimeCategory * category )
     {
 	if ( suffixes.contains( suffix ) )
 	{

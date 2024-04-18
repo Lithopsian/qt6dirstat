@@ -1,11 +1,11 @@
 /*
  *   File name: FileSizeStatsWindow.cpp
- *   Summary:	QDirStat size type statistics window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat size type statistics window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QDesktopServices>
 #include <QTableWidget>
@@ -92,10 +92,10 @@ namespace
     /**
      * Add an item to a table.
      **/
-    QTableWidgetItem * addItem( QTableWidget	 * table,
-				       int		   row,
-				       int		   col,
-				       const QString & text )
+    QTableWidgetItem * addItem( QTableWidget  * table,
+				int             row,
+				int             col,
+				const QString & text )
     {
 	QTableWidgetItem * item = new QTableWidgetItem( text );
 	CHECK_NEW( item );
@@ -160,37 +160,37 @@ void FileSizeStatsWindow::initWidgets()
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
 	connect( helpButton, &QAbstractButton::clicked,
-		 this,	     &FileSizeStatsWindow::showHelp );
+		 this,       &FileSizeStatsWindow::showHelp );
     }
 
     _ui->optionsPanel->hide();
 
-    connect( _ui->closeOptionsButton,	    &QPushButton::clicked,
-	     this,			    &FileSizeStatsWindow::closeOptions );
+    connect( _ui->closeOptionsButton,       &QPushButton::clicked,
+	     this,                          &FileSizeStatsWindow::closeOptions );
 
-    connect( _ui->openOptionsButton,	    &QPushButton::clicked,
-	     this,			    &FileSizeStatsWindow::openOptions );
+    connect( _ui->openOptionsButton,        &QPushButton::clicked,
+	     this,                          &FileSizeStatsWindow::openOptions );
 
-    connect( _ui->autoButton,		    &QPushButton::clicked,
-	     this,			    &FileSizeStatsWindow::autoPercentiles );
+    connect( _ui->autoButton,               &QPushButton::clicked,
+	     this,                          &FileSizeStatsWindow::autoPercentiles );
 
     // The spin boxes are linked to the sliders inside the UI
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
-	     this,			    &FileSizeStatsWindow::startValueChanged );
+	     this,                          &FileSizeStatsWindow::startValueChanged );
 
-    connect( _ui->endPercentileSlider,	    &QSlider::valueChanged,
-	     this,			    &FileSizeStatsWindow::endValueChanged );
+    connect( _ui->endPercentileSlider,      &QSlider::valueChanged,
+	     this,                          &FileSizeStatsWindow::endValueChanged );
 
-    connect( _ui->markersComboBox,	    qOverload<int>( &QComboBox::currentIndexChanged ),
-	     this,			    &FileSizeStatsWindow::markersChanged );
+    connect( _ui->markersComboBox,          qOverload<int>( &QComboBox::currentIndexChanged ),
+	     this,                          &FileSizeStatsWindow::markersChanged );
 
     connect( _ui->percentileFilterCheckBox, &QCheckBox::stateChanged,
-	     this,			    &FileSizeStatsWindow::fillPercentileTable );
+	     this,                          &FileSizeStatsWindow::fillPercentileTable );
 }
 
 
-void FileSizeStatsWindow::populateSharedInstance( QWidget	* mainWindow,
-						  FileInfo	* subtree,
+void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
+						  FileInfo      * subtree,
 						  const QString & suffix  )
 {
     if ( !subtree )
@@ -229,11 +229,11 @@ void FileSizeStatsWindow::fillPercentileTable()
 }
 
 
-void FileSizeStatsWindow::fillQuantileTable( QTableWidget *	    table,
-					     int		    order,
-					     const QString &	    namePrefix,
-					     int		    step,
-					     int		    extremesMargin )
+void FileSizeStatsWindow::fillQuantileTable( QTableWidget  * table,
+					     int             order,
+					     const QString & namePrefix,
+					     int             step,
+					     int             extremesMargin )
 {
     enum TableColumns
     {
@@ -247,23 +247,21 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget *	    table,
     table->clear();
     table->setRowCount( order + 1 );
 
-    QStringList headers;
-
-    switch ( order )
+    QStringList headers( [ order ]()
     {
-	case 100:	headers << tr( "Percentile"  ); break;
-	case  10:	headers << tr( "Decile"      ); break;
-	case   4:	headers << tr( "Quartile"    ); break;
-	default:	headers << tr( "%1-Quantile" ).arg( order ); break;
-    }
+	switch ( order )
+	{
+	    case 100: return tr( "Percentile"  );
+	    case  10: return tr( "Decile"      );
+	    case   4: return tr( "Quartile"    );
+	    default : return tr( "%1-Quantile" ).arg( order );
+	}
+    }() );
 
     headers << tr( "Size cutoff" ) << tr( "Name" );
 
     if ( !_stats->percentileSums().isEmpty() )
-    {
-	headers << tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix ).arg( namePrefix );
-	headers << tr( "Cumulative sum" );
-    }
+	headers << tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix ).arg( namePrefix ) << tr( "Cumulative sum" );
 
     table->setColumnCount( headers.size() );
     table->setHorizontalHeaderLabels( headers );
@@ -285,15 +283,15 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget *	    table,
 	addItem( table, row, CumulativeSumCol, i > 0 ? formatSize( _stats->cumulativeSums().at( i ) ) : "" );
 
 	const QString text = [=]()
-	    {
-		if ( i == 0 )		return tr( "Min" );
-		if ( i == order  )	return tr( "Max" );
-		if ( i == median )	return tr( "Median" );
-		if ( i == quartile1 )	return tr( "1. Quartile" );
-		if ( i == quartile3 )	return tr( "3. Quartile" );
+	{
+	    if ( i == 0 )		return tr( "Min" );
+	    if ( i == order  )	return tr( "Max" );
+	    if ( i == median )	return tr( "Median" );
+	    if ( i == quartile1 )	return tr( "1. Quartile" );
+	    if ( i == quartile3 )	return tr( "3. Quartile" );
 
-		return QString();
-	    }();
+	    return QString();
+	}();
 
 	if ( !text.isEmpty() )
 	{
@@ -397,7 +395,7 @@ void FileSizeStatsWindow::endValueChanged( int newEnd )
 
 void FileSizeStatsWindow::markersChanged( int markersIndex )
 {
-    const int step = [markersIndex]()
+    const int step = [ markersIndex ]()
     {
 	switch ( markersIndex )
 	{
@@ -433,15 +431,10 @@ void FileSizeStatsWindow::updateOptions()
 
 void FileSizeStatsWindow::showHelp()
 {
-//    const QString topic = "Statistics.md";
     const QWidget * button = qobject_cast<QWidget *>( sender() );
     if ( !button )
 	return;
 
     const QString helpUrl = "https://github.com/shundhammer/qdirstat/blob/master/doc/stats/" + button->statusTip();
     QDesktopServices::openUrl( helpUrl );
-//    QString program = "/usr/bin/xdg-open";
-
-    // logInfo() << "Starting  " << program << " " << helpUrl << Qt::endl;
-//    QProcess::startDetached( program, QStringList() << helpUrl );
 }

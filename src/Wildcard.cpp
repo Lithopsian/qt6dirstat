@@ -1,13 +1,13 @@
 /*
  *   File name: Wildcard.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Ian Nartowicz
+ *   Author:    Ian Nartowicz (backported from Qt)
  */
 
 #include "Wildcard.h"
-#include "Logger.h"
+
 
 using namespace QDirStat;
 

@@ -1,11 +1,11 @@
 /*
  *   File name: HeaderTweaker.cpp
- *   Summary:	Helper class for DirTreeView
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Helper class for DirTreeView
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QMenu>
 #include <QAction>

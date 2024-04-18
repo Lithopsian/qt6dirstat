@@ -1,11 +1,11 @@
 /*
  *   File name: PercentileStats.cpp
- *   Summary:	Statistics classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Statistics classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <math.h>	// ceil()
 #include <algorithm>    // std::sort()
@@ -108,16 +108,10 @@ qreal PercentileStats::quantile( int order, int number )
 	return 0.0;
 
     if ( number > order )
-    {
-	QString msg = QString( "Cannot determine quantile #%1 for %2-quantile" ).arg( number ).arg( order );
-	THROW( Exception( msg ) );
-    }
+	THROW( Exception( QString( "Cannot determine quantile #%1 for %2-quantile" ).arg( number ).arg( order ) ) );
 
     if ( order < 2 )
-    {
-	QString msg = QString( "Invalid quantile order %1" ).arg( order );
-	THROW( Exception( msg ) );
-    }
+	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
 
     if ( !_sorted )
 	sort();
@@ -171,14 +165,14 @@ void PercentileStats::calculatePercentiles()
 
     for ( int i=0; i < _percentileSums.size(); i++ )
     {
-	runningTotal	 += _percentileSums.at(i);
+	runningTotal += _percentileSums.at(i);
 	_cumulativeSums.append( runningTotal );
     }
 
 #if 0
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "sum[ "	  << i << " ] : " << formatSize( _percentileSums[i] ) << Qt::endl;
+	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[i] ) << Qt::endl;
 	logDebug() << "cum_sum[ " << i << " ] : " << formatSize( _cumulativeSums[i] ) << Qt::endl;
     }
 #endif

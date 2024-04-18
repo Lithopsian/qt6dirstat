@@ -1,11 +1,11 @@
 /*
- *   File name:	ExcludeRules.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   File name: ExcludeRules.cpp
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "ExcludeRules.h"
 #include "DirInfo.h"
@@ -19,6 +19,7 @@
 
 
 #define VERBOSE_EXCLUDE_MATCHES 0
+
 
 using namespace QDirStat;
 
@@ -84,7 +85,7 @@ bool ExcludeRule::matchDirectChildren( DirInfo * dir ) const
     for ( FileInfoIterator it( dir->dotEntry() ? dir->dotEntry() : dir ); *it; ++it)
     {
         if ( !(*it)->isDir() && isMatch( (*it)->name() ) )
-                return true;
+	    return true;
     }
 
     return false;
@@ -261,9 +262,9 @@ void ExcludeRules::readSettings()
 	settings.beginGroup( groupName );
 
 	// Read one exclude rule
-	const QString pattern        = settings.value( "Pattern"	              ).toString();
+	const QString pattern        = settings.value( "Pattern"                  ).toString();
 	const bool caseSensitive     = settings.value( "CaseSensitive",     true  ).toBool();
-	const bool useFullPath       = settings.value( "UseFullPath",	false ).toBool();
+	const bool useFullPath       = settings.value( "UseFullPath",       false ).toBool();
 	const bool checkAnyFileChild = settings.value( "CheckAnyFileChild", false ).toBool();
 
 	const int syntax = readEnumEntry( settings, "Syntax", ExcludeRule::RegExp, mapping );
@@ -311,9 +312,9 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
 	{
 	    settings.beginGroup( "ExcludeRule", i+1 );
 
-	    settings.setValue( "Pattern",	    rule->pattern()           );
-	    settings.setValue( "CaseSensitive",	    rule->caseSensitive()     );
-	    settings.setValue( "UseFullPath",	    rule->useFullPath()       );
+	    settings.setValue( "Pattern",           rule->pattern()           );
+	    settings.setValue( "CaseSensitive",     rule->caseSensitive()     );
+	    settings.setValue( "UseFullPath",       rule->useFullPath()       );
 	    settings.setValue( "CheckAnyFileChild", rule->checkAnyFileChild() );
 
 	    writeEnumEntry( settings, "Syntax", rule->patternSyntax(), mapping );

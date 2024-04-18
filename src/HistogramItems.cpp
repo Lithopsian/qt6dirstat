@@ -1,9 +1,10 @@
 /*
  *   File name: HistogramViewItems.cpp
- *   Summary:	QGraphicsItems for file size histogram for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QGraphicsItems for file size histogram for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QGraphicsRectItem>
@@ -15,6 +16,7 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 

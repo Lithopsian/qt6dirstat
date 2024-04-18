@@ -1,9 +1,10 @@
 /*
  *   File name: FileDetailsView.h
- *   Summary:	Details view for the currently selected file or directory
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Details view for the currently selected file or directory
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include "FileDetailsView.h"
@@ -22,7 +23,9 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 #define MAX_SYMLINK_TARGET_LEN 25
+
 
 using namespace QDirStat;
 
@@ -66,6 +69,17 @@ namespace
     QString subtreeMsg( const DirInfo * dir )
     {
 	return FileDetailsView::readStateMsg( dir->isBusy() ? DirReading : dir->readState() );
+    }
+
+    /**
+     * The ratio of totalSize() / totalAllocatedSize() in percent for a directory.
+     **/
+    int totalUsedPercent( DirInfo * dir )
+    {
+	if ( dir->totalAllocatedSize() <= 0 || dir->totalSize() <= 0 )
+	    return 100;
+
+	return qRound( ( 100.0 * dir->totalSize() ) / dir->totalAllocatedSize() );
     }
 
 } // namespace
@@ -125,17 +139,6 @@ void FileDetailsView::setCurrentPage( QWidget *page )
     setCurrentWidget( page );
 }
 
-/*
-void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
-{
-    const FileInfoSet sel = selectedItems.normalized();
-
-    if ( sel.isEmpty() )
-	clear();
-    else
-	showSelectionSummary( sel );
-}
-*/
 
 void FileDetailsView::showDetails( FileInfo * file )
 {
@@ -242,12 +245,12 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 
 QString FileDetailsView::formatFilesystemObjectType( const FileInfo * file )
 {
-    if      ( file->isFile() )		return tr( "file"             );
-    else if ( file->isSymLink() )	return tr( "symbolic link"    );
-    else if ( file->isBlockDevice() )	return tr( "block device"     );
-    else if ( file->isCharDevice() )	return tr( "character device" );
-    else if ( file->isFifo() )		return tr( "named pipe"       );
-    else if ( file->isSocket() )	return tr( "socket"           );
+    if      ( file->isFile()        ) return tr( "file"             );
+    else if ( file->isSymLink()     ) return tr( "symbolic link"    );
+    else if ( file->isBlockDevice() ) return tr( "block device"     );
+    else if ( file->isCharDevice()  ) return tr( "character device" );
+    else if ( file->isFifo()        ) return tr( "named pipe"       );
+    else if ( file->isSocket()      ) return tr( "socket"           );
 
     logWarning() << " unexpected mode: " << file->mode() << Qt::endl;
     return QString();
@@ -363,11 +366,11 @@ QString FileDetailsView::readStateMsg( int readState )
     switch ( readState )
     {
 	case DirQueued:
-	case DirReading:		return tr( "[reading]" );
-	case DirPermissionDenied:	return tr( "[permission denied]" );
-	case DirError:			return tr( "[read error]" );
-	case DirOnRequestOnly:		return tr( "[not read]" );
-	case DirAborted:		return tr( "[aborted]" );
+	case DirReading:          return tr( "[reading]" );
+	case DirPermissionDenied: return tr( "[permission denied]" );
+	case DirError:            return tr( "[read error]" );
+	case DirOnRequestOnly:    return tr( "[not read]" );
+	case DirAborted:          return tr( "[aborted]" );
 //	case DirFinished:
 //	case DirCached:
 //	default:
@@ -395,7 +398,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMtime() ) );
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
-	_ui->dirAllocatedLabel->setBold( dir->totalUsedPercent() < ALLOCATED_FAT_PERCENT );
+	_ui->dirAllocatedLabel->setBold( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
     }
     else  // Special msg -> show it and clear all summary fields
     {
@@ -558,8 +561,8 @@ void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
 {
     // logDebug() << "Showing selection summary" << Qt::endl;
 
-    int fileCount	 = 0;
-    int dirCount	 = 0;
+    int fileCount        = 0;
+    int dirCount         = 0;
     int subtreeFileCount = 0;
 
     const FileInfoSet sel = selectedItems.normalized();
@@ -589,11 +592,11 @@ void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
 	sel.count() == 1 ? tr( "1 Selected Item" ) : tr( "%1 Selected Items" ).arg( sel.count() );
     _ui->selHeading->setText( itemCount );
 
-    setLabel( _ui->selTotalSizeLabel,	     sel.totalSize()	      );
-    setLabel( _ui->selAllocatedLabel,	     sel.totalAllocatedSize() );
-    setLabel( _ui->selFileCountLabel,	     fileCount		      );
-    setLabel( _ui->selDirCountLabel,	     dirCount		      );
-    setLabel( _ui->selSubtreeFileCountLabel, subtreeFileCount	      );
+    setLabel( _ui->selTotalSizeLabel,        sel.totalSize()          );
+    setLabel( _ui->selAllocatedLabel,        sel.totalAllocatedSize() );
+    setLabel( _ui->selFileCountLabel,        fileCount                );
+    setLabel( _ui->selDirCountLabel,         dirCount                 );
+    setLabel( _ui->selSubtreeFileCountLabel, subtreeFileCount         );
 
 //    _ui->selTotalSizeLabel->suppressIfSameContent( _ui->selAllocatedLabel, _ui->selAllocatedCaption );
 

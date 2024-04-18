@@ -1,11 +1,11 @@
 /*
  *   File name: StdCleanup.cpp
- *   Summary:	QDirStat classes to reclaim disk space
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat classes to reclaim disk space
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "CleanupCollection.h"
 #include "StdCleanup.h"
@@ -13,10 +13,12 @@
 #include "Exception.h"
 #include "Logger.h"
 
+
 #define USE_DEBUG_ACTIONS 0
 
 
 using namespace QDirStat;
+
 
 namespace
 {

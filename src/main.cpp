@@ -1,11 +1,11 @@
 /*
  *   File name: main.cpp
- *   Summary:	QDirStat main program
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat main program
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <iostream>	// cerr
 
@@ -20,6 +20,7 @@
 
 
 using std::cerr;
+
 static const char * progName = "qt6dirstat";
 
 

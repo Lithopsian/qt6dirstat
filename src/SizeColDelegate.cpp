@@ -1,9 +1,10 @@
 /*
  *   File name: SizeColDelegate.cpp
- *   Summary:	DirTreeView delegate for the size column
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   DirTreeView delegate for the size column
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QPainter>
@@ -18,6 +19,7 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 
+
 #define SPARSE_COLOR_NORMAL "#FF22AA"
 #define SPARSE_COLOR_DARK   "#FF8888"
 #define ALLOC_COLOR_NORMAL  "#2222FF"
@@ -28,6 +30,7 @@
 #define BOTTOM_MARGIN 0
 #define RIGHT_MARGIN  4
 #define LEFT_MARGIN   6
+
 
 using namespace QDirStat;
 

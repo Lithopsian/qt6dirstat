@@ -1,11 +1,11 @@
 /*
  *   File name: OpenDirDialog.cpp
- *   Summary:	QDirStat "open directory" dialog
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "open directory" dialog
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QPushButton>
 #include <QLineEdit>

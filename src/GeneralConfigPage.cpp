@@ -1,11 +1,11 @@
 /*
  *   File name: GeneralConfigPage.cpp
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "GeneralConfigPage.h"
 #include "ConfigDialog.h"

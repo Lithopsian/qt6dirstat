@@ -1,9 +1,10 @@
 /*
  *   File name: LocateFileTypeWindow.cpp
- *   Summary:	QDirStat "locate files by type" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "locate files by type" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QPointer>
@@ -19,6 +20,7 @@
 #include "SettingsHelpers.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -237,16 +239,15 @@ void SuffixSearchResultItem::set( int col, const QString & text, Qt::Alignment a
 
 bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
+    if ( !treeWidget() )
+	return QTreeWidgetItem::operator<( rawOther );
+
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const SuffixSearchResultItem & other = dynamic_cast<const SuffixSearchResultItem &>( rawOther );
 
-    const SuffixSearchResultColumns col = treeWidget() ?
-					  (SuffixSearchResultColumns)treeWidget()->sortColumn() :
-					  SSR_PathCol;
-
-    switch ( col )
+    switch ( (SuffixSearchResultColumns)treeWidget()->sortColumn() )
     {
 	case SSR_CountCol:     return _count     < other.count();
 	case SSR_TotalSizeCol: return _totalSize < other.totalSize();

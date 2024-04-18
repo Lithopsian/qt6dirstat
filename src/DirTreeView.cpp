@@ -1,11 +1,11 @@
 /*
  *   File name: DirTreeView.cpp
- *   Summary:	Tree view widget for directory tree
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Tree view widget for directory tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QMenu>
 #include <QKeyEvent>
@@ -21,6 +21,7 @@
 #include "SizeColDelegate.h"
 #include "Exception.h"
 #include "Logger.h"
+
 
 using namespace QDirStat;
 

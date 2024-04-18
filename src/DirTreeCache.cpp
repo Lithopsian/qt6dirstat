@@ -1,11 +1,11 @@
 /*
  *   File name: DirTreeCache.cpp
- *   Summary:	QDirStat cache reader / writer
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat cache reader / writer
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <ctype.h>
 
@@ -18,6 +18,7 @@
 #include "MountPoints.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 #define KB 1024LL
 #define MB (1024LL*1024)

@@ -1,14 +1,13 @@
 /*
  *   File name: Settings.cpp
- *   Summary:	Specialized settings classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Specialized settings classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
-
-// Refusing to use any of those hare-brained incompatible strerror() replacements.
-#define DONT_DEPRECATE_STRERROR
+#define DONT_DEPRECATE_STRERROR // for Logger,h
 
 #include <unistd.h> // chown()
 #include <errno.h>
@@ -21,6 +20,7 @@
 #include "SysUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -35,8 +35,8 @@ namespace
      * object 'from' to settings object 'to'.
      **/
     void moveGroups( const QString & groupPrefix,
-			    Settings      * from,
-			    Settings      * to )
+		     Settings      * from,
+		     Settings      * to )
     {
 	CHECK_PTR( from );
 	CHECK_PTR( to   );
@@ -153,10 +153,7 @@ void Settings::beginGroup( const QString & prefix, int no )
 
     const QString groupName = QString( "%1_%2" )
 	.arg( prefix )
-	.arg( no,
-	      2,		// fieldWidth
-	      10,		// base
-	      QChar( '0' ) );	// fillChar
+	.arg( no, 2, 10, QChar( '0' ) );
 
     QSettings::beginGroup( groupName );
 }
@@ -172,30 +169,9 @@ void Settings::fixFileOwners()
 }
 
 
-void Settings::setDefaultValue( const QString & key, bool newValue )
-{
-    if ( !contains( key ) )
-        setValue( key, newValue );
-}
-
-
-void Settings::setDefaultValue( const QString & key, int newValue )
-{
-    if ( !contains( key ) )
-        setValue( key, newValue );
-}
-
-
-void Settings::setDefaultValue( const QString & key, const QString & newValue )
-{
-    if ( !contains( key ) )
-        setValue( key, newValue );
-}
-
-
 void Settings::ensureToplevel()
 {
-    while ( !group().isEmpty() )	// ensure using toplevel settings
+    while ( !group().isEmpty() )
 	endGroup();
 }
 

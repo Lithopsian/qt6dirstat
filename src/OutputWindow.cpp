@@ -1,11 +1,11 @@
 /*
  *   File name: OutputWindow.cpp
- *   Summary:	Terminal-like window to watch output of an external process
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Terminal-like window to watch output of an external process
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QApplication>
 #include <QCloseEvent>
@@ -16,6 +16,7 @@
 #include "SettingsHelpers.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using QDirStat::readColorEntry;
 using QDirStat::writeColorEntry;

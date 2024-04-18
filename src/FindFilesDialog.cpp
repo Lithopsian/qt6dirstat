@@ -1,11 +1,11 @@
 /*
  *   File name: FindFilesDialog.cpp
- *   Summary:	QDirStat "Find Files" dialog
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "Find Files" dialog
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QResizeEvent>
 
@@ -37,11 +37,8 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    if ( _lastPath.isEmpty() && app()->root() )
+    if ( app()->root() )
         _lastPath = app()->root()->url();
-
-    _ui->patternField->setClearButtonEnabled( true );
-    _ui->patternField->setFocus();
 
     connect( this, &FindFilesDialog::accepted,
              this, &FindFilesDialog::saveValues );
@@ -64,16 +61,16 @@ FindFilesDialog::~FindFilesDialog()
 FileSearchFilter FindFilesDialog::fileSearchFilter()
 {
     FileInfo * subtree = _ui->wholeTreeRadioButton->isChecked() ? app()->root() : currentSubtree();
+    const bool findDirs = _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked();
+
     FileSearchFilter filter( subtree ? subtree->toDirInfo() : nullptr,
                              _ui->patternField->text(),
                              static_cast<SearchFilter::FilterMode>( _ui->filterModeComboBox->currentIndex() ),
-                             _ui->caseSensitiveCheckBox->isChecked() );
-    //logDebug() << filter << Qt::endl;
-
-    filter.setFindFiles( _ui->findFilesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked() );
-    filter.setFindDirs( _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked() );
-    filter.setFindSymLinks( _ui->findSymLinksCheckBox->isChecked() );
-    filter.setFindPkg( filter.findDirs() );
+                             _ui->caseSensitiveCheckBox->isChecked(),
+                             _ui->findFilesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked(),
+                             findDirs,
+                             _ui->findSymLinksCheckBox->isChecked(),
+                             findDirs );
 
     return filter;
 }
@@ -119,7 +116,7 @@ FileSearchFilter FindFilesDialog::askFindFiles( bool    * cancelled_ret,
     const FileSearchFilter filter = cancelled ? FileSearchFilter() : dialog.fileSearchFilter();
 
     if ( cancelled_ret )
-	*cancelled_ret = filter.pattern().isEmpty() ? true : cancelled;
+        *cancelled_ret = filter.pattern().isEmpty() ? true : cancelled;
 
     return filter;
 }

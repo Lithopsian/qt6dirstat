@@ -1,16 +1,14 @@
 /*
  *   File name: PkgManager.cpp
- *   Summary:	Package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "PkgManager.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;
@@ -19,8 +17,7 @@ using namespace QDirStat;
 QStringList PkgManager::fileList( const PkgInfo * pkg ) const
 {
     const QString command = fileListCommand( pkg );
-
-    if ( ! command.isEmpty() )
+    if ( !command.isEmpty() )
     {
         int exitCode = -1;
         const QString output = SysUtil::runCommand( command,

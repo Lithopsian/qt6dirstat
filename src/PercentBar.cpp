@@ -1,11 +1,11 @@
 /*
  *   File name: PercentBar.cpp
- *   Summary:	Functions and item delegate for percent bar
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Functions and item delegate for percent bar
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QPainter>
 #include <QTreeView>
@@ -41,6 +41,42 @@ namespace
 	    // try a little darker
 	    return contrastColor.darker();
     }
+
+
+    /**
+     * Return the default fill colors.
+     **/
+    ColorList defaultFillColors()
+    {
+	return ColorList( { QColor(   0,   0, 255 ),
+			    QColor( 128,   0, 128 ),
+			    QColor( 231, 147,  43 ),
+			    QColor(   4, 113,   0 ),
+			    QColor( 176,   0,   0 ),
+			    QColor( 204, 187,   0 ),
+			    QColor( 162,  98,  30 ),
+			    QColor(   0, 148, 146 ),
+			    QColor( 217,  94,   0 ),
+			    QColor(   0, 194,  65 ),
+			    QColor( 194, 108, 187 ),
+			    QColor(   0, 179, 255 ),
+			  } );
+    }
+
+
+    /**
+     * Find out the tree depth level of item 'index' by following its
+     * parent, parent's parent etc. to the top.
+     **/
+    int treeLevel( const QModelIndex & index )
+    {
+	int level = 0;
+	for ( QModelIndex item = index; item.isValid(); item = item.parent() )
+	    ++level;
+
+	return level;
+    }
+
 } // namespace
 
 
@@ -55,24 +91,6 @@ PercentBarDelegate::PercentBarDelegate( QTreeView * treeView,
     _invisibleLevels { invisibleLevels }
 {
     readSettings();
-}
-
-
-ColorList PercentBarDelegate::defaultFillColors() const
-{
-    return ColorList( { QColor(   0,   0, 255 ),
-			QColor( 128,   0, 128 ),
-			QColor( 231, 147,  43 ),
-			QColor(   4, 113,   0 ),
-			QColor( 176,   0,   0 ),
-			QColor( 204, 187,   0 ),
-			QColor( 162,  98,  30 ),
-			QColor(   0, 148, 146 ),
-			QColor( 217,  94,   0 ),
-			QColor(   0, 194,  65 ),
-			QColor( 194, 108, 187 ),
-			QColor(   0, 179, 255 ),
-		      } );
 }
 
 
@@ -127,16 +145,6 @@ void PercentBarDelegate::paint( QPainter		   * painter,
 	    PercentBarDelegate::paintPercentBar( painter, option, index, percent );
 	}
     }
-}
-
-
-int PercentBarDelegate::treeLevel( const QModelIndex & index ) const
-{
-    int level = 0;
-    for ( QModelIndex item = index; item.isValid(); item = item.parent() )
-	++level;
-
-    return level;
 }
 
 

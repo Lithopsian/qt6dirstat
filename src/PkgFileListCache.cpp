@@ -1,17 +1,15 @@
 /*
  *   File name: PkgFileListCache.cpp
- *   Summary:	Package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include "PkgFileListCache.h"
 #include "Exception.h"
 #include "Logger.h"
-
-
-using namespace QDirStat;
 
 
 #define CHECK_LOOKUP_TYPE(wanted)					  \
@@ -20,6 +18,8 @@ do {									  \
 	THROW( Exception( "Cache not set up for this type of lookup" ) ); \
 } while ( false )
 
+
+using namespace QDirStat;
 
 
 

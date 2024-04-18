@@ -1,11 +1,11 @@
 /*
  *   File name: FileTypeStats.cpp
- *   Summary:	Statistics classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Statistics classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "FileTypeStats.h"
 #include "DirTree.h"
@@ -16,6 +16,7 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
@@ -145,7 +146,7 @@ void FileTypeStats::addSuffixSum( const QString & suffix, const MimeCategory * c
 void FileTypeStats::removeCruft()
 {
     // Make sure those two already exist to avoid confusing the iterator
-    // (QMap::operator[] auto-inserts with default ctor if not already there)
+    // (QHash::operator[] auto-inserts with default ctor if not already there)
     const MapCategory cruftMapCategory = { NO_SUFFIX, _otherCategory };
     _suffixSum  [ cruftMapCategory ] = 0LL;
     _suffixCount[ cruftMapCategory ] = 0;

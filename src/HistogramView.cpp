@@ -1,11 +1,11 @@
 /*
  *   File name: HistogramView.cpp
- *   Summary:	View widget for histogram rendering for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   View widget for histogram rendering for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <math.h>
 #include <algorithm>
@@ -48,47 +48,11 @@ void HistogramView::init()
 {
     _stats = nullptr;
 
-//    _histogramPanel = nullptr;
     _geometryDirty  = true;
 
-//    _bucketMaxValue	    = 0;
     _startPercentile	    = 0;    // data min
     _endPercentile	    = 100;  // data max
     _useLogHeightScale	    = false;
-/*
-    _showMedian		    = true;
-    _showQuartiles	    = true;
-    _percentileStep	    = 0;
-    _leftMarginPercentiles  = 0;
-    _rightMarginPercentiles = 5;
-
-    _leftBorder		  = 40.0;
-    _rightBorder	  = 10.0;
-    _topBorder		  = 30.0;
-    _bottomBorder	  = 50.0;
-    _viewMargin		  = 10.0;
-
-    _markerExtraHeight	  = 15.0;
-
-    _overflowWidth	  = 150.0;
-    _overflowLeftBorder	  = 10.0;
-    _overflowRightBorder  = 10.0;
-    _overflowSpacing	  = 15.0;
-    _pieDiameter	  = 60.0;
-    _pieSliceOffset	  = 10.0;
-
-    _panelBackground	  = scene()->palette().base();
-    _barBrush		  = QBrush( QColor( 0xB0, 0xB0, 0xD0 ) );
-    _barPen		  = QPen( QColor( 0x40, 0x40, 0x50 ), 1 );
-
-    _medianPen		  = QPen( Qt::magenta, 2 );
-    _quartilePen	  = QPen( Qt::blue, 2 );
-    _percentilePen	  = QPen( QColor( 0xA0, 0xA0, 0xA0 ), 1 );
-    _decilePen		  = QPen( QColor( 0x30, 0x80, 0x30 ), 1 );
-
-    _piePen		  = QPen( Qt::black, 2 );
-    _overflowSliceBrush	  = QBrush( QColor( 0xD0, 0x40, 0x20 ) );
-*/
 }
 
 
@@ -537,10 +501,10 @@ void HistogramView::addXAxisLabel()
 
 void HistogramView::addXStartEndLabels()
 {
-    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : QString( "P%1" ).arg( _startPercentile );
+    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : "P" + _startPercentile;
     startLabel += "\n" + formatSize( percentile( _startPercentile ) );
 
-    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : QString( "P%1" ).arg( _endPercentile );
+    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : "P" + _endPercentile;
     endLabel += "\n" + formatSize( percentile( _endPercentile ) );
 
     QGraphicsTextItem * startItem = scene()->addText( startLabel );
@@ -570,17 +534,17 @@ void HistogramView::addQuartileText()
     {
 	const qreal textSpacing = 30.0;
 
-	const QString q1Text = tr( "Q1: %1" ).arg( formatSize( percentile( 25 ) ) );
-	const QString q3Text = tr( "Q3: %1" ).arg( formatSize( percentile( 75 ) ) );
-	const QString medianText = tr( "Median: %1" ).arg( formatSize( percentile( 50 ) ) );
+	const QString q1Text     = tr( "Q1: "     ) + formatSize( percentile( 25 ) );
+	const QString medianText = tr( "Median: " ) + formatSize( percentile( 50 ) );
+	const QString q3Text     = tr( "Q3: "     ) + formatSize( percentile( 75 ) );
 
 	QGraphicsTextItem * q1Item     = scene()->addText( q1Text );
-	QGraphicsTextItem * q3Item     = scene()->addText( q3Text );
 	QGraphicsTextItem * medianItem = scene()->addText( medianText );
+	QGraphicsTextItem * q3Item     = scene()->addText( q3Text );
 
 	q1Item->setDefaultTextColor( _quartilePen.color() );
-	q3Item->setDefaultTextColor( _quartilePen.color() );
 	medianItem->setDefaultTextColor( _medianPen.color() );
+	q3Item->setDefaultTextColor( _quartilePen.color() );
 
 	setBold( medianItem);
 	setBold( q1Item);
@@ -589,8 +553,8 @@ void HistogramView::addQuartileText()
 	y -= medianItem->boundingRect().height();
 
 	const qreal q1Width     = q1Item->boundingRect().width();
-	const qreal q3Width     = q3Item->boundingRect().width();
 	const qreal medianWidth = medianItem->boundingRect().width();
+	const qreal q3Width     = q3Item->boundingRect().width();
 
 	q1Item->setPos( x, y );
 	x += q1Width + textSpacing;
@@ -600,8 +564,8 @@ void HistogramView::addQuartileText()
 	x += q3Width + textSpacing;
 
 	q1Item->setZValue( TextLayer );
-	q3Item->setZValue( TextLayer );
 	medianItem->setZValue( TextLayer );
+	q3Item->setZValue( TextLayer );
     }
 
     // Add text for the total number of files
@@ -637,9 +601,9 @@ void HistogramView::addHistogramBars()
 
 	const QRectF rect( i * barWidth, 0, barWidth, -( _histogramHeight + _axisExtraLength ) );
 	const qreal fillHeight = maxVal == 0 ? 0.0 : val / maxVal * _histogramHeight;
-//	addBar( barWidth, i, fillHeight );
 	HistogramBar * bar = new HistogramBar( this, i, rect, fillHeight );
 	CHECK_NEW( bar );
+
 	scene()->addItem( bar );
     }
 }

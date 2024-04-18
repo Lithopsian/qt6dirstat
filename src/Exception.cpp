@@ -1,9 +1,10 @@
 /*
  *   File name: Exception.cpp
- *   Summary:	Exception classes for QDirstat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Exception classes for QDirstat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <errno.h>

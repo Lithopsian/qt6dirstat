@@ -1,9 +1,10 @@
 /*
  *   File name: DirReadJob.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <dirent.h>
@@ -21,6 +22,7 @@
 #include "MountPoints.h"
 #include "Exception.h"
 #include "Logger.h"
+
 
 #define DONT_TRUST_NTFS_HARD_LINKS      1
 #define VERBOSE_NTFS_HARD_LINKS         0

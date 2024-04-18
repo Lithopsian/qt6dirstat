@@ -1,9 +1,10 @@
 /*
  *   File name: FileAgeStatsWindow.h
- *   Summary:	QDirStat "File Age Statistics" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "File Age Statistics" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <QFont>
@@ -32,8 +33,8 @@
 using namespace QDirStat;
 
 
-FileAgeStatsWindow::FileAgeStatsWindow( QWidget         * parent,
-					SelectionModel  * selectionModel ):
+FileAgeStatsWindow::FileAgeStatsWindow( QWidget        * parent,
+					SelectionModel * selectionModel ):
     QDialog ( parent ),
     _ui { new Ui::FileAgeStatsWindow }
 {
@@ -137,9 +138,9 @@ void FileAgeStatsWindow::initWidgets()
 }
 
 
-void FileAgeStatsWindow::populateSharedInstance( QWidget         * mainWindow,
-                                                 FileInfo        * subtree,
-						 SelectionModel  * selectionModel )
+void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
+						 FileInfo       * subtree,
+						 SelectionModel * selectionModel )
 {
     if ( !subtree || !selectionModel )
         return;
@@ -302,8 +303,8 @@ void FileAgeStatsWindow::readSettings()
     Settings settings;
 
     settings.beginGroup( "FileAgeStatsWindow" );
-    _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow", true ).toBool() );
-    _startGapsWithCurrentYear = settings.value( "StartGapsWithCurrentYear", true ).toBool();
+    _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow",       true ).toBool() );
+    _startGapsWithCurrentYear    = settings.value( "StartGapsWithCurrentYear", true ).toBool();
     settings.endGroup();
 
     readWindowSettings( this, "FileAgeStatsWindow" );
@@ -369,30 +370,17 @@ void YearListItem::set( YearListColumns col, Qt::Alignment alignment, const QStr
 }
 
 
-/*
-QVariant YearListItem::data( int column, int role ) const
-{
-    if ( role == Qt::TextAlignmentRole )
-    {
-        if ( column == YearListYearCol )
-            return QVariant( Qt::AlignVCenter | Qt::AlignLeft );
-        else
-            return QVariant( Qt::AlignVCenter | Qt::AlignRight );
-    }
-
-    return QTreeWidgetItem::data( column, role );
-}
-*/
-
 bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
+    if ( !treeWidget() )
+	QTreeWidgetItem::operator<( rawOther );
+
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const YearListItem & other = dynamic_cast<const YearListItem &>( rawOther );
 
-    const YearListColumns col = treeWidget() ? (YearListColumns)treeWidget()->sortColumn() : YearListYearCol;
-    switch ( col )
+    switch ( (YearListColumns)treeWidget()->sortColumn() )
     {
 	case YearListYearCol:
             {

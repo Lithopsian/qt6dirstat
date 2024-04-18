@@ -1,11 +1,11 @@
 /*
  *   File name: DiscoverActions.cpp
- *   Summary:	Actions for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Actions for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "DiscoverActions.h"
 #include "BusyPopup.h"
@@ -16,8 +16,6 @@
 #include "LocateFilesWindow.h"
 #include "QDirStatApp.h"
 #include "TreeWalker.h"
-//#include "Logger.h"
-//#include "Exception.h"
 
 
 using namespace QDirStat;

@@ -1,11 +1,11 @@
 /*
  *   File name: ConfigDialog.cpp
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "ConfigDialog.h"
 #include "CleanupConfigPage.h"
@@ -14,6 +14,7 @@
 #include "MimeCategoryConfigPage.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 using namespace QDirStat;
 
