@@ -1,11 +1,11 @@
 /*
  *   File name: UnreadableDirsWindow.cpp
- *   Summary:	QDirStat file type statistics window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat file type statistics window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
@@ -138,7 +138,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
     // Recurse through any subdirectories
     for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
     {
-	if ( child->isDir() )
+	if ( child->isDirInfo() )
 	    populateRecursive( child );
     }
 
@@ -185,13 +185,15 @@ void UnreadableDirListItem::set( UnreadableDirectories col, const QString & text
 
 bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
+    if ( !treeWidget() )
+	return QTreeWidgetItem::operator<( rawOther );
+
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const UnreadableDirListItem & other = dynamic_cast<const UnreadableDirListItem &>( rawOther );
 
-    const UnreadableDirectories col = treeWidget() ? (UnreadableDirectories)treeWidget()->sortColumn() : UD_Path;
-    switch ( col )
+    switch ( (UnreadableDirectories)treeWidget()->sortColumn() )
     {
 	case UD_Path: break;
 	case UD_User:        return _dir->userName()            < other._dir->userName();

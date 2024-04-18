@@ -1,11 +1,11 @@
 /*
  *   File name: UnreadableDirsWindow.h
- *   Summary:	QDirStat "locate files" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "locate files" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef UnreadableDirsWindow_h
 #define UnreadableDirsWindow_h
