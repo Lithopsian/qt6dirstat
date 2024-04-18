@@ -1,14 +1,14 @@
 /*
  *   File name: OpenUnpkgDialog.h
- *   Summary:	QDirStat "show unpackaged files" dialog
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "show unpackaged files" dialog
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef OpenUnpkgDialog_h
 #define OpenUnpkgDialog_h
-
 
 #include <QDialog>
 #include <QString>

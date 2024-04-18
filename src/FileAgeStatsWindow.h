@@ -1,11 +1,11 @@
 /*
  *   File name: FileAgeStatsWindow.h
- *   Summary:	QDirStat "File Age Statistics" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "File Age Statistics" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FileAgeStatsWindow_h
 #define FileAgeStatsWindow_h
@@ -229,14 +229,6 @@ namespace QDirStat
          * Reimplemented from QTreeWidgetItem.
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;
-
-        /**
-         * Generic data method for different roles. Here used for more exotic
-         * settings like the vertical alignment where there is no simpler way.
-         *
-         * Reimplemented from QTreeWidgetItem.
-         **/
-//        QVariant data( int column, int role ) const override;
 
 	void set( YearListColumns col, Qt::Alignment alignment, const QString & text );
 

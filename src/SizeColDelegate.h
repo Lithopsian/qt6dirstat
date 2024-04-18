@@ -1,14 +1,14 @@
 /*
  *   File name: SizeColDelegate.h
- *   Summary:	DirTreeView delegate for the size column
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   DirTreeView delegate for the size column
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef SizeColDelegate_h
 #define SizeColDelegate_h
-
 
 #include <QStyledItemDelegate>
 #include <QTreeView>

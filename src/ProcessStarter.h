@@ -1,11 +1,11 @@
 /*
  *   File name: ProcessStarter.h
- *   Summary:	Utilities for external processes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Utilities for external processes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef ProcessStarter_h
 #define ProcessStarter_h

@@ -1,11 +1,11 @@
 /*
  *   File name: FindFilesDialog.h
- *   Summary:	QDirStat "Find Files" dialog
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "Find Files" dialog
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FindFilesDialog_h
 #define FindFilesDialog_h

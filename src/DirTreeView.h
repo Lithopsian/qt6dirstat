@@ -1,14 +1,14 @@
 /*
  *   File name: DirTreeView.h
- *   Summary:	Tree view widget for directory tree
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Tree view widget for directory tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef DirTreeView_h
 #define DirTreeView_h
-
 
 #include <QTreeView>
 #include <QTreeWidget>

@@ -1,17 +1,18 @@
 /*
  *   File name: ListEditor.h
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef ListEditor_h
 #define ListEditor_h
 
 #include <QWidget>
 #include <QListWidgetItem>
+
 
 class QAbstractButton;
 
@@ -154,7 +155,7 @@ namespace QDirStat
 	/**
 	 * Set the first row for moveUp() and moveToTop().
 	 **/
-	void setFirstRow( int newFirstRow ) { _firstRow = newFirstRow; }
+//	void setFirstRow( int newFirstRow ) { _firstRow = newFirstRow; }
 
 
 	//
@@ -233,7 +234,7 @@ namespace QDirStat
 	//
 
 	QListWidget     * _listWidget		{ nullptr };
-	int               _firstRow		{ 0 };
+	const int         _firstRow		{ 0 };
 	bool              _updatesLocked	{ false };
 	QAbstractButton * _moveUpButton		{ nullptr };
 	QAbstractButton * _moveDownButton	{ nullptr };

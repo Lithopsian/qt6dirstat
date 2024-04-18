@@ -1,11 +1,11 @@
 /*
  *   File name: TreeWalker.h
- *   Summary:        QDirStat helper class to walk a FileInfo tree
- *   License:        GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat helper class to walk a FileInfo tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:        Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef TreeWalker_h
 #define TreeWalker_h

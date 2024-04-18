@@ -1,11 +1,11 @@
 /*
  *   File name: SysUtil.h
- *   Summary:	System utility functions for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   System utility functions for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef SysUtil_h
 #define SysUtil_h
@@ -74,9 +74,9 @@ namespace QDirStat
 	 **/
 	QString runCommand( const QString & commandLine,
 			    int *	    exitCode_ret  = 0,
-			    int		    timeout_sec	  = COMMAND_TIMEOUT_SEC,
-			    bool	    logCommand	  = LOG_COMMANDS,
-			    bool	    logOutput	  = LOG_OUTPUT,
+			    int		    timeout_sec   = COMMAND_TIMEOUT_SEC,
+			    bool	    logCommand    = LOG_COMMANDS,
+			    bool	    logOutput     = LOG_OUTPUT,
 			    bool	    ignoreErrCode = false );
 
 	/**

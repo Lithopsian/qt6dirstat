@@ -1,15 +1,14 @@
 /*
  *   File name: AdaptiveTimer.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef AdaptiveTimer_h
 #define AdaptiveTimer_h
-
 
 #include <QObject>
 #include <QTimer>

@@ -1,11 +1,11 @@
 /*
  *   File name: FileSizeStatsWindow.h
- *   Summary:	QDirStat file size statistics window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat file size statistics window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FileSizeStatsWindow_h
 #define FileSizeStatsWindow_h
@@ -61,8 +61,8 @@ namespace QDirStat
 	 *
 	 * Any suffix should start with '.', but not '*.".
 	 **/
-	static void populateSharedInstance( QWidget	  * mainWindow,
-					    FileInfo	  * subtree,
+	static void populateSharedInstance( QWidget       * mainWindow,
+					    FileInfo      * subtree,
 					    const QString & suffix = "" );
 
 
@@ -126,11 +126,11 @@ namespace QDirStat
 	 * 'step' is the step width; 'extremesMargin' specifies how far from
 	 * the extremes (min, max) the step width should be 1 instead.
 	 **/
-	void fillQuantileTable( QTableWidget	* table,
-				int		  order,
-				const QString	& namePrefix,
-				int		  step,
-				int		  extremesMargin );
+	void fillQuantileTable( QTableWidget  * table,
+				int             order,
+				const QString & namePrefix,
+				int             step,
+				int             extremesMargin );
 
 	/**
 	 * Fill the buckets and histogram, and build the tables.

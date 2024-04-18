@@ -1,11 +1,11 @@
 /*
  *   File name: HistoryButtons.h
- *   Summary:	History buttons handling for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   History buttons handling for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef HistoryButtons_h
 #define HistoryButtons_h

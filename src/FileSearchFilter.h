@@ -1,9 +1,10 @@
 /*
  *   File name: FileSearchFilter.h
- *   Summary:	Package manager Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Package manager Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef FileSearchFilter_h
@@ -30,7 +31,7 @@ namespace QDirStat
          * empty search pattern.
          **/
         FileSearchFilter():
-	    FileSearchFilter { 0, "", Auto, true }
+	    FileSearchFilter { nullptr, "", Auto, true, true, true, true, true }
 	{}
 
         /**
@@ -48,15 +49,23 @@ namespace QDirStat
          * - If it starts with "=", it uses "ExactMatch".
          * - If it's empty, it uses "SelectAll".
          **/
-        FileSearchFilter( DirInfo *       subtree,
+        FileSearchFilter( DirInfo       * subtree,
                           const QString & pattern,
                           FilterMode      filterMode,
-                          bool            caseSensitive ):
+                          bool            caseSensitive,
+			  bool            findFiles,
+			  bool            findDirs,
+			  bool            findSymLinks,
+			  bool            findPkgs ):
 	    SearchFilter( pattern,
 			  filterMode,
 			  Contains,         // defaultFilterMode
 			  caseSensitive ),  // case-insensitive
-	    _subtree { subtree }
+	    _subtree { subtree },
+	    _findFiles { findFiles },
+	    _findDirs { findDirs },
+	    _findSymLinks { findSymLinks },
+	    _findPkgs { findPkgs }
 	{}
 
         /**
@@ -65,13 +74,13 @@ namespace QDirStat
         bool findFiles()    const { return _findFiles;    }
         bool findDirs()     const { return _findDirs;     }
         bool findSymLinks() const { return _findSymLinks; }
-        bool findPkg()      const { return _findPkg;      }
-
+        bool findPkgs()     const { return _findPkgs;     }
+/*
         void setFindFiles   ( bool value ) { _findFiles    = value; }
         void setFindDirs    ( bool value ) { _findDirs     = value; }
         void setFindSymLinks( bool value ) { _findSymLinks = value; }
-        void setFindPkg     ( bool value ) { _findPkg      = value; }
-
+        void setFindPkgs    ( bool value ) { _findPkgs     = value; }
+*/
         /**
          * Subtree to start the search from
          **/
@@ -85,7 +94,7 @@ namespace QDirStat
         bool      _findFiles	{ true };
         bool      _findDirs	{ true };
         bool      _findSymLinks	{ true };
-        bool      _findPkg	{ true };
+        bool      _findPkgs	{ true };
 
     };  // class FileSearchFilter
 

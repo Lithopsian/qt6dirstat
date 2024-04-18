@@ -1,9 +1,10 @@
 /*
  *   File name: SettingsHelpers.h
- *   Summary:	Helper functions for QSettings for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Helper functions for QSettings for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef SettingsHelpers_h
@@ -12,6 +13,7 @@
 #include <QColor>
 #include <QFont>
 #include <QList>
+
 
 class QSettings;
 

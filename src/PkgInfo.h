@@ -1,11 +1,11 @@
 /*
  *   File name: PkgInfo.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef PkgInfo_h
 #define PkgInfo_h
@@ -200,12 +200,12 @@ namespace QDirStat
 
         const PkgManager * _pkgManager;
 
-        QString      _baseName;
-        QString      _version;
-        QString      _arch;
+        QString _baseName;
+        QString _version;
+        QString _arch;
 
-        bool         _multiVersion :1;
-        bool         _multiArch    :1;
+        bool    _multiVersion :1;
+        bool    _multiArch    :1;
 
     };  // class PkgInfo
 

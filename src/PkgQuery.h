@@ -1,11 +1,11 @@
 /*
  *   File name: PkgQuery.h
- *   Summary:	Package manager query support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Package manager query support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef PkgQuery_h
 #define PkgQuery_h

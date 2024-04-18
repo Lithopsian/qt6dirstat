@@ -1,19 +1,20 @@
 /*
  *   File name: MountPoints.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef MountPoints_h
 #define MountPoints_h
 
-
 #include <QString>
 #include <QStringList>
 #include <QList>
 #include <QTextStream>
+
 
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 ))
 #  define HAVE_Q_STORAGE_INFO 0

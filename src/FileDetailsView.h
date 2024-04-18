@@ -1,9 +1,10 @@
 /*
  *   File name: FileDetailsView.h
- *   Summary:	Details view for the currently selected file or directory
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Details view for the currently selected file or directory
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef FileDetailsView_h

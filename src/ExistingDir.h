@@ -1,14 +1,14 @@
 /*
  *   File name: ExistingDir.h
- *   Summary:	QDirStat widget support classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat widget support classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef ExistingDir_h
 #define ExistingDir_h
-
 
 #include <QValidator>
 #include <QCompleter>

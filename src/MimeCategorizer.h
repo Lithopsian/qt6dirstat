@@ -1,9 +1,10 @@
 /*
  *   File name: MimeCategorizer.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef MimeCategorizer_h
@@ -15,6 +16,7 @@
 
 #include "MimeCategory.h"
 #include "Wildcard.h"
+
 
 #define CATEGORY_EXECUTABLE "executable"
 #define CATEGORY_SYMLINK "symlink"
@@ -278,7 +280,7 @@ namespace QDirStat
 	    QBitArray           _caseInsensitiveLengths;
 	    QBitArray           _caseSensitiveLengths;
 
-	    QReadWriteLock _lock;
+	    QReadWriteLock      _lock;
 
     };	// class MimeCategorizer
 

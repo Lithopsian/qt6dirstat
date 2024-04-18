@@ -1,11 +1,11 @@
 /*
  *   File name: PercentileStats.h
- *   Summary:	Statistics classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Statistics classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef PercentileStats_h
 #define PercentileStats_h

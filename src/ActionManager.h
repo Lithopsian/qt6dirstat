@@ -1,15 +1,14 @@
 /*
  *   File name: ActionManager.h
- *   Summary:	Common access to QActions defined in a .ui file
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Common access to QActions defined in a .ui file
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef ActionManager_h
 #define ActionManager_h
-
 
 #include <QAction>
 #include <QList>

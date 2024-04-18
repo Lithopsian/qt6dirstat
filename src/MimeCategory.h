@@ -1,14 +1,14 @@
 /*
  *   File name: MimeCategory.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef MimeCategory_h
 #define MimeCategory_h
-
 
 #include <QColor>
 #include <QList>
@@ -37,14 +37,16 @@ namespace QDirStat
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
 	MimeCategory():
-		_name { "" }
+		_name { "" },
+		_color { Qt::white }
 	{}
 
 	/**
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
 	MimeCategory( const QString & name ):
-	    _name { name }
+	    _name { name },
+	    _color { Qt::white }
 	{}
 
 	/**
@@ -194,7 +196,7 @@ namespace QDirStat
 	//
 
 	QString _name;
-	QColor  _color { Qt::white };
+	QColor  _color;
 
 	/**
 	 * The raw patterns are categorised into different lists for the convenience of the

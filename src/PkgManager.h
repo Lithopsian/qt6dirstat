@@ -1,17 +1,17 @@
 /*
  *   File name: PkgManager.h
- *   Summary:	Package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef PkgManager_h
 #define PkgManager_h
 
-#define LOG_COMMANDS	true
-#define LOG_OUTPUT	false
+#define LOG_COMMANDS true
+#define LOG_OUTPUT   false
 
 
 #include "PkgInfo.h"

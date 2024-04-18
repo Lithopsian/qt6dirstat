@@ -1,9 +1,10 @@
 /*
  *   File name: PanelMessage.h
- *   Summary:	Message in a panel with icon and close button
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Message in a panel with icon and close button
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef PanelMessage_h

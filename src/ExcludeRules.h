@@ -1,11 +1,11 @@
 /*
  *   File name: ExcludeRules.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef ExcludeRules_h
 #define ExcludeRules_h
@@ -147,7 +147,7 @@ namespace QDirStat
 	bool operator!=( const ExcludeRule * other ) const;
 
 
-    private:
+    protected:
 
 	/**
 	* Returns whether the given string matches this regular expression.

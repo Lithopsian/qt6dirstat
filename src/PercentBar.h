@@ -1,9 +1,10 @@
 /*
  *   File name: PercentBar.h
- *   Summary:	Functions and item delegate for percent bar
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Functions and item delegate for percent bar
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef PercentBar_h
@@ -119,17 +120,6 @@ namespace QDirStat
 
 
     protected:
-
-	/**
-	 * Return the default fill colors.
-	 **/
-	ColorList defaultFillColors() const;
-
-	/**
-	 * Find out the tree depth level of item 'index' by following its
-	 * parent, parent's parent etc. to the top.
-	 **/
-	int treeLevel( const QModelIndex & index ) const;
 
 	/**
 	 * Paint a percent bar into a widget.

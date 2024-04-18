@@ -1,9 +1,10 @@
 /*
  *   File name: Version.h
- *   Summary:	Version number header for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Version number header for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef Version_h

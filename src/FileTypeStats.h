@@ -1,11 +1,11 @@
 /*
  *   File name: FileTypeStats.h
- *   Summary:	Statistics classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Statistics classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FileTypeStats_h
 #define FileTypeStats_h
@@ -25,15 +25,15 @@ namespace QDirStat
     class FileInfo;
     class MimeCategory;
 
-    typedef QPair<QString, const MimeCategory *>	MapCategory;
+    typedef QPair<QString, const MimeCategory *>  MapCategory;
 
-    typedef QHash<MapCategory, FileSize>		StringFileSizeMap;
-    typedef QHash<MapCategory, int>			StringIntMap;
-    typedef QHash<const MimeCategory *, FileSize>	CategoryFileSizeMap;
-    typedef QHash<const MimeCategory *, int>		CategoryIntMap;
+    typedef QHash<MapCategory, FileSize>          StringFileSizeMap;
+    typedef QHash<MapCategory, int>               StringIntMap;
+    typedef QHash<const MimeCategory *, FileSize> CategoryFileSizeMap;
+    typedef QHash<const MimeCategory *, int>      CategoryIntMap;
 
-    typedef StringFileSizeMap::const_iterator		StringFileSizeMapIterator;
-    typedef CategoryFileSizeMap::const_iterator 	CategoryFileSizeMapIterator;
+    typedef StringFileSizeMap::const_iterator     StringFileSizeMapIterator;
+    typedef CategoryFileSizeMap::const_iterator   CategoryFileSizeMapIterator;
 
     /**
      * Class to calculate file type statistics for a subtree, such as how much
@@ -196,7 +196,8 @@ namespace QDirStat
 	CategoryFileSizeMap	_categoryNonSuffixRuleSum;
 	CategoryIntMap		_categoryNonSuffixRuleCount;
 
-        FileSize                _totalSize { 0LL };
+	FileSize                _totalSize { 0LL };
+
     };
 }
 

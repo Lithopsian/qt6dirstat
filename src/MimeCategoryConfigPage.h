@@ -1,11 +1,11 @@
 /*
  *   File name: MimeCategoryConfigPage.h
- *   Summary:	QDirStat configuration dialog classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat configuration dialog classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef MimeCategoryConfigPage_h
 #define MimeCategoryConfigPage_h
@@ -233,7 +233,7 @@ namespace QDirStat
 	// Data
 
 	Ui::MimeCategoryConfigPage * _ui;
-	DirTree			   * _dirTree { nullptr };
+	DirTree			   * _dirTree;
 
 	bool _dirty { false };
 

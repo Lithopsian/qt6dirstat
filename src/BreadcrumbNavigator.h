@@ -1,14 +1,14 @@
 /*
  *   File name: BreadcrumbNavigator.h
- *   Summary:	Breadcrumb widget for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Breadcrumb widget for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef BreadcrumbNavigator_h
 #define BreadcrumbNavigator_h
-
 
 #include <QLabel>
 #include <QVector>
@@ -58,11 +58,6 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	BreadcrumbNavigator( QWidget * parent = nullptr );
-
-	/**
-	 * Destructor.
-	 **/
-	~BreadcrumbNavigator() override =default;
 
 	/**
 	 * Explicitly clear the path.

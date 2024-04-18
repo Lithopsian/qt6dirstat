@@ -1,11 +1,11 @@
 /*
  *   File name: MainWindow.h
- *   Summary:	QDirStat main window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat main window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef MainWindow_h
 #define MainWindow_h
@@ -279,7 +279,8 @@ protected slots:
     /**
      * Refresh after the tree has been sorted.
      **/
-    void layoutChanged( const QList<QPersistentModelIndex> &, QAbstractItemModel::LayoutChangeHint );
+    void layoutChanged( const QList<QPersistentModelIndex> &,
+                        QAbstractItemModel::LayoutChangeHint );
 
     /**
      * Change display mode to "busy" (while reading a directory tree):
@@ -507,6 +508,17 @@ protected:
     void showBars();
 
     /**
+     * Enable or disable the directory permissions panel message.  This is
+     * only shown once when a directory is read, then not again after limited
+     * refreshes such as Refresh Selected or Cleanups.  If the Refresh All or
+     * different directory (or Package) read is done, the message will be
+     * displayed again.  The ShowDirPermissionsMsg setting can be used to
+     * prevent the message being shown at all.
+     **/
+    void enableDirPermissionsMsg() { _enableDirPermissionsMsg = _showDirPermissionsMsg; }
+    void disableDirPermissionsMsg() { _enableDirPermissionsMsg = false; }
+
+    /**
      * Create the different top layouts.
      **/
     void initLayouts( const QString & currentLayoutName );
@@ -617,22 +629,23 @@ protected:
 
 private:
 
-    Ui::MainWindow  * _ui;
-    HistoryButtons  * _historyButtons		{ nullptr };
-    QActionGroup    * _layoutActionGroup	{ nullptr };
-    Subtree           _futureSelection;
+    Ui::MainWindow * _ui;
+    HistoryButtons * _historyButtons;
+    QActionGroup   * _layoutActionGroup;
+    Subtree          _futureSelection;
 
-    bool              _enableDirPermissionsMsg	{ false };
-    bool              _verboseSelection		{ false };
-    bool              _urlInWindowTitle		{ false };
+    bool             _showDirPermissionsMsg;
+    bool             _enableDirPermissionsMsg { false };
+    bool             _verboseSelection;
+    bool             _urlInWindowTitle;
 
-    QTimer            _updateTimer;
-    int	              _statusBarTimeout		{ 3000 };
-    int	              _longStatusBarTimeout	{ 30000 };
-    QElapsedTimer     _stopWatch;
+    QTimer           _updateTimer;
+    int	             _statusBarTimeout;
+    int	             _longStatusBarTimeout;
+    QElapsedTimer    _stopWatch;
 
-    int	              _sortCol;
-    Qt::SortOrder     _sortOrder;
+    int	             _sortCol;
+    Qt::SortOrder    _sortOrder;
 
 }; // class MainWindow
 

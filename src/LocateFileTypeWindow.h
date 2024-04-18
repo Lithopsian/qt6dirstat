@@ -1,11 +1,11 @@
 /*
  *   File name: LocateFileTypeWindow.h
- *   Summary:	QDirStat "locate files by type" window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat "locate files by type" window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef LocateFileTypeWindow_h
 #define LocateFileTypeWindow_h

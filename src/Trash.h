@@ -1,11 +1,11 @@
 /*
  *   File name: Trash.h
- *   Summary:	Implementation of the XDG Trash spec for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Implementation of the XDG Trash spec for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef Trash_h
 #define Trash_h
@@ -78,7 +78,7 @@ namespace QDirStat
         // Data members
         //
 
-        TrashDir  * _homeTrashDir { nullptr };
+        TrashDir  * _homeTrashDir;
         TrashDirMap _trashDirs;
 
     };	// class Trash

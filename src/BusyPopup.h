@@ -1,11 +1,11 @@
 /*
  *   File name: BusyPopup.h
- *   Summary:	QDirStat generic widget classes
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat generic widget classes
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef BusyPopup_h
 #define BusyPopup_h
@@ -45,8 +45,8 @@ namespace QDirStat
 	 * process events for some milliseconds to makes sure it is rendered.
 	 **/
 	BusyPopup( const QString & text,
-		   QWidget *	   parent   = nullptr,
-		   bool		   autoPost = true );
+		   QWidget       * parent   = nullptr,
+		   bool            autoPost = true );
 
 	/**
 	 * Show the BusyPopup and process events for some milliseconds to make

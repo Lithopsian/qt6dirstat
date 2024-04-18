@@ -1,14 +1,14 @@
 /*
  *   File name: PathSelector.h
- *   Summary:	Path selection list widget for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Path selection list widget for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef PathSelector_h
 #define PathSelector_h
-
 
 #include <QListWidget>
 #include <QFileIconProvider>
@@ -133,7 +133,11 @@ namespace QDirStat
 	 * Use QListWidgetItem::setIcon() to set an icon.
 	 **/
 	PathSelectorItem( const QString & path,
-			  PathSelector  * parent = nullptr );
+			  PathSelector  * parent = nullptr ):
+	    QListWidgetItem ( path, parent ),
+	    _path { path },
+	    _mountPoint { nullptr }
+	{}
 
 	/**
 	 * Constructor for a mount point.

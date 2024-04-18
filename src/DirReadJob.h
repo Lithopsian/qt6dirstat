@@ -1,15 +1,14 @@
 /*
  *   File name: DirReadJob.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DirReadJob_h
 #define DirReadJob_h
-
 
 #include <QTimer>
 #include <QTextStream>
@@ -151,29 +150,6 @@ namespace QDirStat
     };	// class DirReadJob
 
 
-#if 0
-    /**
-     * Wrapper class between DirReadJob and QObject
-     **/
-    class ObjDirReadJob: public QObject, public DirReadJob
-    {
-	Q_OBJECT
-
-    public:
-
-	ObjDirReadJob( DirTree *tree, DirInfo *dir = nullptr )
-	    : QObject(), DirReadJob( tree, dir ) {};
-
-    protected slots:
-
-	void slotChildAdded   ( FileInfo *child ) { childAdded( child ); }
-	void slotDeletingChild( FileInfo *child ) { deletingChild( child ); }
-	void slotFinished()			  { finished(); }
-
-    };	// ObjDirReadJob
-#endif
-
-
     /**
      * Implementation of the abstract DirReadJob class that reads a local
      * directory.
@@ -182,7 +158,7 @@ namespace QDirStat
      * directory services since lstat() unlike the KDE services can obtain
      * information about the device (i.e. filesystem) a file or directory
      * resides on. This is important if you wish to limit directory scans to
-     * one filesystem - which is most desirable when that one filesystem runs
+     * one filesystem - which is desirable when that one filesystem runs
      * out of space.
      *
      * @short Directory reader that reads one local directory.

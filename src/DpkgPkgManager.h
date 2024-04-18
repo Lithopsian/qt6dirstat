@@ -1,11 +1,11 @@
 /*
  *   File name: DPkgPkgManager.cpp
- *   Summary:	Dpkg package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Dpkg package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DpkgPkgManager_h
 #define DpkgPkgManager_h

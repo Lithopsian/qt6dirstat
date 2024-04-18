@@ -1,9 +1,10 @@
 /*
  *   File name: History.h
- *   Summary:	Directory navigation history for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Directory navigation history for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef History_h

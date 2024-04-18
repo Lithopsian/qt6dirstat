@@ -1,15 +1,14 @@
 /*
  *   File name: Cleanup.h
- *   Summary:	QDirStat classes to reclaim disk space
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat classes to reclaim disk space
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef Cleanup_h
 #define Cleanup_h
-
 
 #define DESKTOP_APP_TERMINAL		"%terminal"
 #define DESKTOP_APP_FILE_MANAGER	"%filemanager"
@@ -376,20 +375,20 @@ namespace QDirStat
 	// Data members
 	//
 
-	bool		   _active;
-	QString		   _title;
-	QString		   _command;
-	QString		   _iconName;
-	bool		   _recurse;
-	bool		   _askForConfirmation;
-	RefreshPolicy	   _refreshPolicy;
-	bool		   _worksForDir;
-	bool		   _worksForFile;
-	bool		   _worksForDotEntry;
+	bool               _active;
+	QString            _title;
+	QString            _command;
+	QString            _iconName;
+	bool               _recurse;
+	bool               _askForConfirmation;
+	RefreshPolicy      _refreshPolicy;
+	bool               _worksForDir;
+	bool               _worksForFile;
+	bool               _worksForDotEntry;
 	OutputWindowPolicy _outputWindowPolicy;
-	int		   _outputWindowTimeout;
-	bool		   _outputWindowAutoClose;
-	QString		   _shell;
+	int                _outputWindowTimeout;
+	bool               _outputWindowAutoClose;
+	QString            _shell;
 
     }; // Cleanup
 

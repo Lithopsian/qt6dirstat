@@ -1,11 +1,11 @@
 /*
  *   File name: RpmPkgManager.h
- *   Summary:	RPM package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   RPM package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef RpmPkgManager_h
 #define RpmPkgManager_h

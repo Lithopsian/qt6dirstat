@@ -1,14 +1,14 @@
 /*
  *   File name: SelectionModel.h
- *   Summary:	Handling of selected items
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Handling of selected items
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef SelectionModel_h
 #define SelectionModel_h
-
 
 #include <QItemSelectionModel>
 

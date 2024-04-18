@@ -1,11 +1,11 @@
 /*
  *   File name: FileTypeStatsWindow.h
- *   Summary:	QDirStat file type statistics window
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat file type statistics window
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FileTypeStatsWindow_h
 #define FileTypeStatsWindow_h

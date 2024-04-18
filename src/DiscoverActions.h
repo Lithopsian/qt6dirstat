@@ -1,11 +1,11 @@
 /*
  *   File name: DiscoverActions.h
- *   Summary:	Actions for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Actions for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DiscoverActions_h
 #define DiscoverActions_h

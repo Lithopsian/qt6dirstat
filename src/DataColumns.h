@@ -1,11 +1,11 @@
-    /*
+/*
  *   File name: DataColumns.h
- *   Summary:	Data column mapping
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Data column mapping
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DataColumns_h
 #define DataColumns_h
@@ -16,12 +16,13 @@
 #include <QTextStream>
 
 
-namespace QDirStat
-{
 // For use in loops
 #define DataColumnBegin NameCol
 #define DataColumnEnd   UndefinedCol
 
+
+namespace QDirStat
+{
     /**
      * Data columns for data model, view, and sorting.  Most of the work
      * is now done in HeaderTweaker.  There are just a few convenience functions

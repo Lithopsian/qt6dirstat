@@ -1,15 +1,14 @@
 /*
  *   File name: DirTreeCache.h
- *   Summary:	QDirStat cache reader / writer
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   QDirStat cache reader / writer
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DirTreeCache_h
 #define DirTreeCache_h
-
 
 #include <zlib.h>
 
@@ -77,9 +76,9 @@ namespace QDirStat
 	 * a valid cache file.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree	   * tree,
-		     DirInfo	   * parent,
-		     bool	     markFromCache );
+		     DirTree       * tree,
+		     DirInfo       * parent,
+		     bool            markFromCache );
 
     public:
 
@@ -88,7 +87,7 @@ namespace QDirStat
 	 * the cache file will be placed at the new root of the tree.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree	   * tree ):
+		     DirTree       * tree ):
 	    CacheReader ( fileName, tree, nullptr, false )
 	{}
 
@@ -100,9 +99,9 @@ namespace QDirStat
 	 * can be made aware of what has happened.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree	   * tree,
-		     DirInfo 	   * dir,
-		     DirInfo	   * parent );
+		     DirTree       * tree,
+		     DirInfo       * dir,
+		     DirInfo       * parent );
 
 	/**
 	 * Destructor
@@ -216,15 +215,15 @@ namespace QDirStat
 	// Data members
 	//
 
-	gzFile	  _cache;
-	char	  _buffer[ MAX_CACHE_LINE_LEN + 1 ];
-	char	* _line		{ _buffer };
-	int	  _lineNo	{ 0 };
-	char	* _fields[ MAX_FIELDS_PER_LINE ];
-	int	  _fieldsCount;
-	bool	  _markFromCache;
-	bool	  _ok		{ true };
-        int	  _errorCount	{ 0 };
+	gzFile    _cache;
+	char      _buffer[ MAX_CACHE_LINE_LEN + 1 ];
+	char    * _line		{ _buffer };
+	int       _lineNo	{ 0 };
+	char    * _fields[ MAX_FIELDS_PER_LINE ];
+	int       _fieldsCount;
+	bool      _markFromCache;
+	bool      _ok		{ true };
+        int       _errorCount	{ 0 };
 
 	DirTree	* _tree;
 	DirInfo * _parent; // parent directory if there is one

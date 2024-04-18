@@ -1,9 +1,10 @@
 /*
  *   File name: OutputWindow.h
- *   Summary:	Terminal-like window to watch output of an external process
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Terminal-like window to watch output of an external process
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef OutputWindow_h
@@ -345,18 +346,18 @@ private:
     //
 
     Ui::OutputWindow  * _ui;
-    QList<QProcess *>	_processList;
-    bool		_showOnStderr		{ false };
-    bool		_noMoreProcesses	{ false };
-    bool		_closed			{ false };
-    bool		_killedAll		{ false };
-    int			_errorCount		{ 0 };
-    QString		_lastWorkingDir;
-    QColor		_terminalBackground;
-    QColor		_commandTextColor;
-    QColor		_stdoutColor;
-    QColor		_stderrColor;
-    QFont		_terminalDefaultFont;
+    QList<QProcess *>   _processList;
+    bool                _showOnStderr		{ false };
+    bool                _noMoreProcesses	{ false };
+    bool                _closed			{ false };
+    bool                _killedAll		{ false };
+    int	                _errorCount		{ 0 };
+    QString             _lastWorkingDir;
+    QColor              _terminalBackground;
+    QColor              _commandTextColor;
+    QColor              _stdoutColor;
+    QColor              _stderrColor;
+    QFont               _terminalDefaultFont;
 
 };	// class OutputWindow
 

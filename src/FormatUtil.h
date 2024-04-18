@@ -1,14 +1,14 @@
 /*
  *   File name: FormatUtil.h
- *   Summary:	String formatting utilities for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   String formatting utilities for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef FormatUtil_h
 #define FormatUtil_h
-
 
 #include <sys/types.h>
 #include <sys/stat.h>       // ALLPERMS
@@ -19,6 +19,7 @@
 #include <QTextStream>
 
 #include "FileSize.h"
+
 
 #ifndef ALLPERMS
 #  define ALLPERMS 07777
@@ -115,7 +116,8 @@ namespace QDirStat
     /**
      * Format a percentage.
      **/
-    QString formatPercent( float percent );
+    inline QString formatPercent( float percent )
+        { return percent < 0.0 ? "" : QString::number( percent, 'f', 1 ) + '%'; }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the

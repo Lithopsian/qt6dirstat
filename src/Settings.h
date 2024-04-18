@@ -1,9 +1,10 @@
 /*
  *   File name: Settings.h
- *   Summary:	Specialized settings classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Specialized settings classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef Settings_h
@@ -73,10 +74,15 @@ namespace QDirStat
 
 	/**
 	 * Set a value, but only if that key is not already in the settings.
+	 *
+	 * Currently only the int overload is used, by RpmPkgManager.
 	 **/
-	void setDefaultValue( const QString & key, bool            newValue );
-	void setDefaultValue( const QString & key, int             newValue );
-	void setDefaultValue( const QString & key, const QString & newValue );
+	void setDefaultValue( const QString & key, bool            newValue )
+	    { if ( !contains( key ) ) setValue( key, newValue ); }
+	void setDefaultValue( const QString & key, int             newValue )
+	    { if ( !contains( key ) ) setValue( key, newValue ); }
+	void setDefaultValue( const QString & key, const QString & newValue )
+	    { if ( !contains( key ) ) setValue( key, newValue ); }
 
 	/**
 	 * Find all settings groups that start with 'groupPrefix'.

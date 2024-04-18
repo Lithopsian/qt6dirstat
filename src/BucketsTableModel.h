@@ -1,11 +1,11 @@
 /*
  *   File name: BucketsTableModel.h
- *   Summary:	Data model for buckets table
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Data model for buckets table
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef BucketsTableModel_h
 #define BucketsTableModel_h
@@ -67,8 +67,7 @@ namespace QDirStat
 	/**
 	 * Return the number of columns for 'parent'.
 	 **/
-	int columnCount( const QModelIndex & ) const override
-	    { return ColCount; }
+	int columnCount( const QModelIndex & ) const override { return ColCount; }
 
 	/**
 	 * Return data to be displayed for the specified model index and role.
@@ -78,9 +77,9 @@ namespace QDirStat
 	/**
 	 * Return header data for the specified section.
 	 **/
-	QVariant headerData( int	     section,
+	QVariant headerData( int             section,
 			     Qt::Orientation orientation,
-			     int	     role ) const override;
+			     int             role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if

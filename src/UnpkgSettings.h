@@ -1,15 +1,14 @@
 /*
  *   File name: UnpkgSettings.h
- *   Summary:	Parameters for "unpackaged files" view
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Parameters for "unpackaged files" view
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef UnpkgSettings_h
 #define UnpkgSettings_h
-
 
 #include <QString>
 #include <QStringList>

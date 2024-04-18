@@ -1,9 +1,9 @@
 /*
  *   File name: Wildcard.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Ian Nartowicz
+ *   Author:    Ian Nartowicz
  */
 
 #ifndef Wildcard_h

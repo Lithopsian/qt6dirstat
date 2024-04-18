@@ -1,14 +1,14 @@
 /*
  *   File name: FileInfoSorter.h
- *   Summary:	Functor to handle sorting FileInfo objects
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Functor to handle sorting FileInfo objects
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef FileInfoSorter_h
 #define FileInfoSorter_h
-
 
 #include "DataColumns.h"
 

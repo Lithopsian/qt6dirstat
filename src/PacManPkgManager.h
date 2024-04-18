@@ -1,11 +1,11 @@
 /*
  *   File name: PacManPkgManager.h
- *   Summary:	PacMan package manager support for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   PacMan package manager support for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef PacManPkgManager_h
 #define PacManPkgManager_h
