@@ -1,15 +1,14 @@
 /*
  *   File name: FileInfo.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef FileInfo_h
 #define FileInfo_h
-
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -70,19 +69,19 @@ namespace QDirStat
 	 * Constructor from raw data values.  Used by the cache reader and as
 	 * a delegate by some other constructors.
 	 **/
-	FileInfo( DirInfo	* parent,
-		  DirTree	* tree,
-		  const QString	& filename,
-		  mode_t	  mode,
-		  FileSize	  size,
-		  FileSize	  allocatedSize,
-		  bool		  withUidGidPerm,
-		  uid_t		  uid,
-		  gid_t		  gid,
-		  time_t	  mtime,
-		  bool		  isSparseFile,
-		  FileSize	  blocks,
-		  nlink_t	  links ):
+	FileInfo( DirInfo       * parent,
+		  DirTree       * tree,
+		  const QString & filename,
+		  mode_t          mode,
+		  FileSize        size,
+		  FileSize        allocatedSize,
+		  bool            withUidGidPerm,
+		  uid_t           uid,
+		  gid_t           gid,
+		  time_t          mtime,
+		  bool            isSparseFile,
+		  FileSize        blocks,
+		  nlink_t         links ):
 	    _parent { parent },
 	    _tree { tree },
 	    _name { filename },
@@ -106,11 +105,11 @@ namespace QDirStat
 	 * Mime categorizer config page to create dummy entries in an example tree.
 	 *
 	 **/
-	FileInfo( DirInfo	* parent,
-		  DirTree	* tree,
-		  const QString	& filename,
-		  mode_t	  mode,
-		  FileSize	  size ):
+	FileInfo( DirInfo       * parent,
+		  DirTree       * tree,
+		  const QString & filename,
+		  mode_t          mode,
+		  FileSize        size ):
 	    FileInfo ( parent, tree, filename, mode, size, size, false, 0, 0, 0, false, blocksFromSize( size ), 1 )
 	{}
 
@@ -404,18 +403,21 @@ namespace QDirStat
 
 	/**
 	 * Returns the total size in bytes of this subtree.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileSize totalSize() { return size(); }
 
 	/**
 	 * Returns the total allocated size in bytes of this subtree.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileSize totalAllocatedSize() { return allocatedSize(); }
 
 	/**
 	 * Returns the total size in blocks of this subtree.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileSize totalBlocks() { return _blocks; }
@@ -423,6 +425,7 @@ namespace QDirStat
 	/**
 	 * Returns the total number of children in this subtree, excluding this
 	 * item.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual int totalItems() { return 0; }
@@ -430,6 +433,7 @@ namespace QDirStat
 	/**
 	 * Returns the total number of subdirectories in this subtree,
 	 * excluding this item. Dot entries and "." or ".." are not counted.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual int totalSubDirs() { return 0; }
@@ -437,6 +441,7 @@ namespace QDirStat
 	/**
 	 * Returns the total number of plain file children in this subtree,
 	 * excluding this item.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual int totalFiles() { return 0; }
@@ -444,6 +449,7 @@ namespace QDirStat
 	/**
 	 * Returns the total number of non-directory items in this subtree,
 	 * excluding this item.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 //	virtual int totalNonDirItems() { return 0; }
@@ -451,6 +457,7 @@ namespace QDirStat
 	/**
 	 * Returns the total number of ignored (non-directory!) items in this
 	 * subtree, excluding this item.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual int totalIgnoredItems() { return 0; }
@@ -483,6 +490,7 @@ namespace QDirStat
 
 	/**
 	 * Returns the latest modification time of this subtree.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual time_t latestMtime() { return _mtime; }
@@ -499,9 +507,6 @@ namespace QDirStat
 	 * Return the percentage of this subtree in regard to its parent
 	 * (0.0..100.0). Return a negative value if for any reason this cannot
 	 * be calculated or it would not make any sense.
-	 *
-	 * Derived classes are free to overwrite this, but this default
-	 * implementation should work well enough.
 	 **/
 	float subtreePercent();
 
@@ -510,14 +515,12 @@ namespace QDirStat
 	 * its parent's allocated size.  (0.0..100.0). Return a negative value
 	 * if for any reason this cannot be calculated or it would not make any
 	 * sense.
-	 *
-	 * Derived classes are free to overwrite this, but this default
-	 * implementation should work well enough.
 	 **/
 	float subtreeAllocatedPercent();
 
 	/**
 	 * Returns 'true' if this had been excluded while reading.
+	 *
 	 * Derived classes may want to overwrite this.
 	 **/
 	virtual bool isExcluded() const { return false; }
@@ -526,14 +529,17 @@ namespace QDirStat
 	 * Set the 'excluded' status.
 	 *
 	 * Only DirInfo objects are excluded, so the default implementation
-	 * silently ignores the value passed here and does nothing. Derived
-	 * classes may want to overwrite this.
+	 * silently ignores the value passed here and does nothing.
+	 *
+	 * Derived classes may want to overwrite this.
 	 **/
 	virtual void setExcluded( bool ) {}
 
 	/**
 	 * Returns whether or not this is a mount point.  Always false for a
-	 * file.  Derived classes may want to overwrite this.
+	 * file.
+	 *
+	 * Derived classes may want to overwrite this.
 	 **/
 	virtual bool isMountPoint() const  { return false; }
 
@@ -542,7 +548,9 @@ namespace QDirStat
 	 * point.
 	 *
 	 * This default implementation silently ignores the value passed and
-	 * does nothing. Derived classes may want to overwrite this.
+	 * does nothing.
+	 *
+	 * Derived classes may want to overwrite this.
 	 **/
 	virtual void setMountPoint( bool ) {}
 
@@ -566,6 +574,7 @@ namespace QDirStat
 	/**
 	 * Returns the number of pending read jobs in this subtree. When this
 	 * number reaches zero, the entire subtree is done.
+	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual int pendingReadJobs() const { return 0; }
@@ -632,7 +641,7 @@ namespace QDirStat
 	 * This default implementation does nothing.
 	 * Derived classes might want to overwrite this.
 	 **/
-	virtual void setFirstChild( FileInfo * ) {}
+//	virtual void setFirstChild( FileInfo * ) {}
 
 	/**
 	 * Returns true if this entry has any children.
@@ -667,7 +676,8 @@ namespace QDirStat
 	 * The order of children in this list is absolutely undefined;
 	 * don't rely on any implementation-specific order.
 	 *
-	 * This default implementation does nothing.
+	 * This default implementation does nothing and this should be
+	 * overridden by a derived class.
 	 **/
 	virtual void insertChild( FileInfo * ) {}
 
@@ -685,9 +695,12 @@ namespace QDirStat
 	/**
 	 * Set a "Dot Entry". This makes sense for directories only.
 	 *
-	 * This default implementation does nothing.
+	 * This default implementation does nothing and this should be
+	 * overridden by a derived class.
+	 *
+	 * Currently unused.
 	 **/
-	virtual void setDotEntry( FileInfo * ) {}
+//	virtual void setDotEntry( FileInfo * ) {}
 
 	/**
 	 * Return 'true' if this is a pseudo directory: A "dot entry" or an
@@ -745,7 +758,7 @@ namespace QDirStat
 	 *
 	 * This default implementation does nothing.
 	 **/
-	virtual void childAdded( FileInfo * ) {}
+//	virtual void childAdded( FileInfo * ) {}
 
 	/**
 	 * Remove a child from the children list.
@@ -758,7 +771,7 @@ namespace QDirStat
 	 * This default implementation does nothing.
 	 * Derived classes that can handle children should overwrite this.
 	 **/
-	virtual void unlinkChild( FileInfo * ) {}
+//	virtual void unlinkChild( FileInfo * ) {}
 
 	/**
 	 * Notification that a child is about to be deleted somewhere in the
@@ -767,7 +780,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that can handle children should overwrite this.
 	 **/
-	virtual void deletingChild( FileInfo * ) {}
+//	virtual void deletingChild( FileInfo * ) {}
 
 	/**
 	 * Get the current state of the directory reading process.
@@ -949,30 +962,32 @@ namespace QDirStat
 
     protected:
 
+	//
 	// Data members.
 	//
+
 	// Keep this short in order to use as little memory as possible -
 	// there will be a _lot_ of entries of this kind!
+	DirInfo  * _parent;		// pointer to the parent (DirInfo) item
+	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
+	DirTree  * _tree;		// pointer to the parent tree
 
-	DirInfo	 * _parent { nullptr };		// pointer to the parent entry
-	FileInfo * _next   { nullptr };		// pointer to the next entry
-	DirTree	 * _tree   { nullptr };		// pointer to the parent tree
+	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
-	short	 _magic { FileInfoMagic };	// magic number to detect if this object is valid
-	QString	 _name;			// the file name (without path!)
-	bool	 _isLocalFile   :1;	// flag: local or remote file?
-	bool	 _isSparseFile  :1;	// flag: sparse file (file with "holes")?
-	bool	 _isIgnored     :1;	// flag: ignored by rule?
-	bool	 _hasUidGidPerm :1;	// flag: was this constructed with uid/guid/ and permissions
-	dev_t	 _device;		// device this object resides on
-	mode_t	 _mode;			// file permissions + object type
-	nlink_t	 _links;		// number of links
-	uid_t	 _uid;			// User ID of owner
-	gid_t	 _gid;			// Group ID of owner
-	FileSize _size;			// size in bytes
-	FileSize _blocks;		// 512 bytes blocks
-	FileSize _allocatedSize;	// allocated size in bytes
-	time_t	 _mtime;		// modification time
+	QString    _name;		// the file name (without path!)
+	bool       _isLocalFile   :1;	// flag: local or remote file?
+	bool       _isSparseFile  :1;	// flag: sparse file (file with "holes")?
+	bool       _isIgnored     :1;	// flag: ignored by rule?
+	bool       _hasUidGidPerm :1;	// flag: was this constructed with uid/guid/ and permissions
+	dev_t      _device;		// device this object resides on
+	mode_t     _mode;		// file permissions + object type
+	nlink_t    _links;		// number of links
+	uid_t      _uid;		// User ID of owner
+	gid_t      _gid;		// Group ID of owner
+	FileSize   _size;		// size in bytes
+	FileSize   _blocks;		// 512 bytes blocks
+	FileSize   _allocatedSize;	// allocated size in bytes
+	time_t     _mtime;		// modification time
 
     };	// class FileInfo
 

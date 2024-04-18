@@ -1,9 +1,10 @@
 /*
  *   File name: DirTree.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #include <sys/stat.h>
@@ -27,6 +28,7 @@
 #include "SysUtil.h"
 #include "Logger.h"
 #include "Exception.h"
+
 
 #define VERBOSE_EXCLUDE_RULES 0
 
@@ -213,9 +215,9 @@ DirTree::DirTree():
     CHECK_NEW( _root );
 
     connect( & _jobQueue, &DirReadJobQueue::finished,
-	     this,	  &DirTree::sendFinished );
+	     this,        &DirTree::sendFinished );
 
-    connect( this,	  &DirTree::deletingChild,
+    connect( this,        &DirTree::deletingChild,
 	     & _jobQueue, &DirReadJobQueue::deletingChildNotify );
 }
 
@@ -265,7 +267,7 @@ FileInfo * DirTree::firstToplevel() const
 }
 
 
-bool DirTree::isTopLevel( FileInfo *item ) const
+bool DirTree::isTopLevel( FileInfo * item ) const
 {
     return item && item->parent() && !item->parent()->parent();
 }
@@ -502,7 +504,7 @@ void DirTree::deleteSubtree( FileInfo *subtree )
 	// Give the parent of the child to be deleted a chance to unlink the
 	// child from its children list and take care of internal summary
 	// fields
-	parent->deletingChild( subtree );
+	parent->unlinkChild( subtree );
     }
 
     delete subtree;

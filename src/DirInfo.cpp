@@ -1,11 +1,11 @@
 /*
  *   File name: DirInfo.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <algorithm>
 #include <sys/stat.h>
@@ -110,7 +110,6 @@ DirInfo::DirInfo( DirInfo       * parent,
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
-//    _deletingAll { false },
     _locked { false },
     _touched { false },
     _fromCache { false },
@@ -132,25 +131,23 @@ void DirInfo::initCounts()
 {
     // logDebug() << this << Qt::endl;
 
-    _totalSize		 = _size;
-    _totalAllocatedSize	 = _allocatedSize;
-    _totalBlocks	 = _blocks;
-    _totalItems		 = 0;
-    _totalSubDirs	 = 0;
-    _totalFiles		 = 0;
-    _totalIgnoredItems	 = 0;
+    _totalSize           = _size;
+    _totalAllocatedSize  = _allocatedSize;
+    _totalBlocks         = _blocks;
+    _totalItems          = 0;
+    _totalSubDirs        = 0;
+    _totalFiles          = 0;
+    _totalIgnoredItems   = 0;
     _totalUnignoredItems = 0;
     _directChildrenCount = 0;
-    _errSubDirCount	 = 0;
-    _latestMtime	 = _mtime;
-    _oldestFileMtime	 = 0;
+    _errSubDirCount      = 0;
+    _latestMtime         = _mtime;
+    _oldestFileMtime     = 0;
 }
 
 
 void DirInfo::clear()
 {
-//    _deletingAll = true;
-
     // If there are no children of any kind, no need to even mark as dirty
     if ( !_firstChild && !_dotEntry && !_attic )
 	return;
@@ -160,9 +157,6 @@ void DirInfo::clear()
     {
 	FileInfo * childToDelete = _firstChild;
 	_firstChild = _firstChild->next();
-
-//	if ( _parent )
-//	    _parent->deletingChild( childToDelete );
 
 	delete childToDelete;
     }
@@ -174,7 +168,6 @@ void DirInfo::clear()
     _attic = nullptr;
 
     markAsDirty();
-//    _deletingAll  = false;
 }
 
 
@@ -184,7 +177,6 @@ void DirInfo::reset()
 
     _readState       = DirQueued;
     _pendingReadJobs = 0;
-//    _summaryDirty    = true;
 
     ensureDotEntry();
     if ( _tree )
@@ -260,13 +252,13 @@ void DirInfo::recalc()
     for ( FileInfoIterator it( this ); *it; ++it )
     {
 	_directChildrenCount++;
-	_totalSize	     += (*it)->totalSize();
+	_totalSize           += (*it)->totalSize();
 	_totalAllocatedSize  += (*it)->totalAllocatedSize();
-	_totalBlocks	     += (*it)->totalBlocks();
-	_totalItems	     += (*it)->totalItems() + 1;
-	_totalSubDirs	     += (*it)->totalSubDirs();
-	_errSubDirCount	     += (*it)->errSubDirCount();
-	_totalFiles	     += (*it)->totalFiles();
+	_totalBlocks         += (*it)->totalBlocks();
+	_totalItems          += (*it)->totalItems() + 1;
+	_totalSubDirs        += (*it)->totalSubDirs();
+	_errSubDirCount      += (*it)->errSubDirCount();
+	_totalFiles          += (*it)->totalFiles();
 	_totalIgnoredItems   += (*it)->totalIgnoredItems();
 	_totalUnignoredItems += (*it)->totalUnignoredItems();
 
@@ -397,15 +389,6 @@ time_t DirInfo::oldestFileMtime()
 	recalc();
 
     return _oldestFileMtime;
-}
-
-
-int DirInfo::totalUsedPercent()
-{
-    if ( totalAllocatedSize() <= 0 || totalSize() <= 0 )
-	return 100;
-
-    return qRound( ( 100.0 * totalSize() ) / totalAllocatedSize() );
 }
 
 
@@ -546,6 +529,8 @@ void DirInfo::childAdded( FileInfo * newChild )
     // ignored or if this is the attic.
     if ( !newChild->isIgnored() || _isIgnored || isAttic() )
     {
+	// No point updating obsolete data
+	// - it will have to be calculated from scratch when it is needed
 	if ( !_summaryDirty )
 	{
 	    if ( newChild->mtime() > _latestMtime )
@@ -575,21 +560,9 @@ void DirInfo::childAdded( FileInfo * newChild )
 		}
 	    }
 	}
-	else
-	{
-	    // NOP
-
-	    /*
-	     * Don't bother updating the summary fields if the summary is dirty
-	     * (i.e. outdated) anyway: As soon as anybody wants to know some
-	     * exact value a complete recalculation of the entire subtree will
-	     * be triggered. On the other hand, if nobody wants to know (which
-	     * is very likely) we can save this effort.
-	     */
-	}
     }
 
-    if ( _lastSortCol != ReadJobsCol )
+    if ( _sortInfo && _sortInfo->_sortedCol != ReadJobsCol )
 	dropSortCache();
 
     if ( _parent )
@@ -607,43 +580,7 @@ void DirInfo::markAsDirty()
     dropSortCache();
 }
 
-#if 0
-void DirInfo::deletingChild( FileInfo * child )
-{
-    /**
-     * When children are deleted, things go downhill: Marking the summary
-     * fields as dirty (i.e. outdated) is the only thing that can be done here.
-     *
-     * The accumulated sizes could be updated (by subtracting this deleted
-     * child's values from them), but the latest mtime definitely has to be
-     * recalculated: The child now being deleted might just be the one with the
-     * latest mtime, and figuring out the second-latest cannot easily be
-     * done. So we merely mark the summary as dirty and wait until a recalc()
-     * will be triggered from outside - which might well never happen if
-     * nobody wants to know some summary field anyway.
-     **/
-
-
-    if ( child->parent() == this )
-    {
-	if ( !_deletingAll )
-	{
-	    /**
-	     * Unlink the child from the children's list - but only if this
-	     * doesn't happen recursively for all children of this object: No
-	     * use bothering about the validity of the children's list if this
-	     * will all be history anyway in a moment.
-	     **/
-	    unlinkChild( child );
-	}
-	else
-	{
-	    dropSortCache();
-	}
-    }
-}
-#endif
-
+/*
 void DirInfo::deletingChild( FileInfo * child )
 {
     if ( child->parent() == this )
@@ -652,7 +589,7 @@ void DirInfo::deletingChild( FileInfo * child )
     if ( _parent )
 	_parent->deletingChild( child );
 }
-
+*/
 
 void DirInfo::unlinkChild( FileInfo * deletedChild )
 {
@@ -698,7 +635,7 @@ void DirInfo::readJobAdded()
 {
     _pendingReadJobs++;
 
-    if ( _lastSortCol == ReadJobsCol )
+    if ( _sortInfo && _sortInfo->_sortedCol == ReadJobsCol )
 	dropSortCache();
 
     if ( _parent )
@@ -710,7 +647,7 @@ void DirInfo::readJobFinished( DirInfo * dir )
 {
     _pendingReadJobs--;
 
-    if ( _lastSortCol == ReadJobsCol )
+    if ( _sortInfo && _sortInfo->_sortedCol == ReadJobsCol )
 	dropSortCache();
 
     if ( dir && dir != this && dir->readError() )
@@ -836,8 +773,7 @@ void DirInfo::cleanupAttics()
 	    delete _attic;
 	    _attic = nullptr;
 
-	    if ( _lastIncludeAttic )
-		dropSortCache();
+	    dropSortCache();
 
 	    _summaryDirty = true;
 	}
@@ -876,83 +812,31 @@ void DirInfo::ignoreEmptySubDirs()
 }
 
 
-const FileInfoList & DirInfo::sortedChildren( DataColumn    sortCol,
-					      Qt::SortOrder sortOrder,
-					      bool          includeAttic )
+const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sortOrder )
 {
-    if ( _sortedChildren &&
-	 sortCol      == _lastSortCol &&
-	 sortOrder    == _lastSortOrder &&
-	 includeAttic == _lastIncludeAttic )
-    {
-	return *_sortedChildren;
-    }
+    // Clean old sorted children lists and create new ones
+    dropSortCaches(); // recursive to all ancestors
+    _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
+    CHECK_NEW( _sortInfo );
 
-    // Clean old sorted children list and create a new one
-    dropSortCaches(); // recursive
-    _sortedChildren = new FileInfoList();
-    CHECK_NEW( _sortedChildren );
-
-    // Populate with unsorted children list
-    for ( FileInfo * child = _firstChild; child; child = child->next() )
-	_sortedChildren->append( child );
-
-    if ( _dotEntry )
-	_sortedChildren->append( _dotEntry );
-
-    // logDebug() << "Sorting children of " << this << " by " << sortCol << Qt::endl;
-
-    // Do secondary sorting by NameCol (always in ascending order)
-    if ( sortCol != NameCol )
-    {
-	std::stable_sort( _sortedChildren->begin(),
-			  _sortedChildren->end(),
-			  FileInfoSorter( NameCol, Qt::AscendingOrder ) );
-    }
-
-    // Primary sorting as requested
-    std::stable_sort( _sortedChildren->begin(),
-		      _sortedChildren->end(),
-		      FileInfoSorter( sortCol, sortOrder ) );
-
-#if DIRECT_CHILDREN_COUNT_SANITY_CHECK
-    // Do the sanity check before adding the attic, because it isn't a direct child
-    if ( _sortedChildren->size() != _directChildrenCount )
-    {
-	dumpChildrenList( this, *_sortedChildren );
-
-	THROW( Exception( QString( "_directChildrenCount of %1 corrupted; is %2, should be %3" )
-			  .arg( debugUrl() )
-			  .arg( _directChildrenCount )
-			  .arg( _sortedChildren->size() ) ) );
-    }
-#endif
-
-    if ( includeAttic && _attic )
-	_sortedChildren->append( _attic );
-
-    _lastSortCol      = sortCol;
-    _lastSortOrder    = sortOrder;
-    _lastIncludeAttic = includeAttic;
-
-    return *_sortedChildren;
+    return _sortInfo;
 }
 
 
 void DirInfo::dropSortCache()
 {
-    delete _sortedChildren;
-    _sortedChildren = nullptr;
+    if ( !_sortInfo )
+	return;
 
-    delete _dominantChildren;
-    _dominantChildren = nullptr;
+    delete _sortInfo;
+    _sortInfo = nullptr;
 }
 
 
 void DirInfo::dropSortCaches()
 {
     // If this dir didn't have any sort cache, there won't be any in the subtree
-    if ( _sortedChildren )
+    if ( _sortInfo )
     {
 	// logDebug() << "Dropping sort cache for " << this << Qt::endl;
 
@@ -980,7 +864,7 @@ void DirInfo::dropSortCaches()
 const DirInfo * DirInfo::findNearestMountPoint() const
 {
     const DirInfo * dir = this;
-    while ( dir && dir->parent() && !dir->isMountPoint() )
+    while ( dir->parent() && !dir->isMountPoint() )
 	dir = dir->parent();
 
     return dir;
@@ -1016,72 +900,111 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
 }
 
 
-bool DirInfo::isDominantChild( FileInfo * child )
-{
-    if ( !_dominantChildren )
-        findDominantChildren();
-
-    return _dominantChildren && _dominantChildren->contains( child );
-}
-
-
-void DirInfo::findDominantChildren()
-{
-    if ( !_sortedChildren )
-        return;
-
-    // Only if sorting by size or percent, descending
-    switch ( _lastSortCol )
-    {
-        case PercentBarCol:
-        case PercentNumCol:
-        case SizeCol:
-            break;
-
-        default:
-            return;
-    }
-
-    if ( _lastSortOrder != Qt::DescendingOrder )
-	return;
-
-    delete _dominantChildren;
-    _dominantChildren = new FileInfoList();
-    CHECK_NEW( _dominantChildren );
-
-    const qreal count = qMin( _sortedChildren->size(), 30 );
-    if ( count < 2 )
-        return;
-
-    const qreal medianPercent      = _sortedChildren->at( count / 2 )->subtreeAllocatedPercent();
-    const qreal dominanceThreshold = qBound( DOMINANCE_MIN_PERCENT,
-                                             DOMINANCE_FACTOR * medianPercent,
-                                             DOMINANCE_MAX_PERCENT );
-
-#if VERBOSE_DOMINANCE_CHECK
-    logDebug() << this
-               << "  median: "    << formatPercent( medianPercent )
-               << "  threshold: " << formatPercent( FileSize( dominanceThreshold ) )
-               << Qt::endl;
-#endif
-
-    // Add the children that are larger to the dominant children
-    for ( int i = 0; i < _sortedChildren->size(); ++i )
-    {
-        FileInfo * child = _sortedChildren->at( i );
-        if ( child->subtreeAllocatedPercent() < dominanceThreshold )
-            break;
-
-	_dominantChildren->append( child );
-    // logDebug() << "Adding " << child->name() << ":\t\t" << formatPercent( childPercent ) << Qt::endl;
-    }
-}
-
-
 void DirInfo::finishReading( DirReadState readState )
 {
     // logDebug() << dir << Qt::endl;
     setReadState( readState );
     finalizeLocal();
     _tree->sendReadJobFinished( this );
+}
+
+
+
+
+DirSortInfo::DirSortInfo( DirInfo     * parent,
+                          DataColumn    sortCol,
+			  Qt::SortOrder sortOrder ):
+    _sortedCol { sortCol },
+    _sortedOrder { sortOrder }
+{
+    // Generate unsorted children list
+    _sortedChildren.reserve( parent->directChildrenCount() + 1 );
+    for ( FileInfo * child = parent->firstChild(); child; child = child->next() )
+	_sortedChildren.append( child );
+
+    if ( parent->dotEntry() )
+	_sortedChildren.append( parent->dotEntry() );
+
+    // logDebug() << "Sorting children of " << this << " by " << sortCol << Qt::endl;
+
+    // Do secondary sorting by NameCol (always in ascending order)
+    if ( sortCol != NameCol )
+    {
+	std::stable_sort( _sortedChildren.begin(),
+			  _sortedChildren.end(),
+			  FileInfoSorter( NameCol, Qt::AscendingOrder ) );
+    }
+
+    // Primary sorting as requested
+    std::stable_sort( _sortedChildren.begin(),
+		      _sortedChildren.end(),
+		      FileInfoSorter( sortCol, sortOrder ) );
+
+#if DIRECT_CHILDREN_COUNT_SANITY_CHECK
+    // Do the sanity check before adding the attic, because it isn't a direct child
+    if ( _sortedChildren.size() != parent->directChildrenCount() )
+    {
+	dumpChildrenList( parent, _sortedChildren );
+
+	THROW( Exception( QString( "_directChildrenCount of %1 corrupted; is %2, should be %3" )
+			  .arg( parent->debugUrl() )
+			  .arg( parent->directChildrenCount() )
+			  .arg( _sortedChildren->size() ) ) );
+    }
+#endif
+
+    if ( parent->attic() )
+	_sortedChildren.append( parent->attic() );
+
+    int childNumber = 0;
+    _childNumbers.reserve( _sortedChildren.size() );
+    for ( FileInfo * item : _sortedChildren )
+	_childNumbers.insert( item, childNumber++ );
+}
+
+
+void DirSortInfo::findDominantChildren()
+{
+    _firstNonDominantChild = [ this ]()
+    {
+	// Only if sorting by size or percent, descending
+	switch ( _sortedCol )
+	{
+	    case PercentBarCol:
+	    case PercentNumCol:
+	    case SizeCol:
+		break;
+
+	    default:
+		return 0;
+	}
+
+	if ( _sortedOrder != Qt::DescendingOrder )
+	    return 0;
+
+	const qreal count = qMin( _sortedChildren.size(), 30 );
+	if ( count < 2 )
+	    return 0;
+
+	const qreal medianPercent      = _sortedChildren.at( count / 2 )->subtreeAllocatedPercent();
+	const qreal dominancePercent   = DOMINANCE_FACTOR * medianPercent;
+	const qreal dominanceThreshold = qBound( DOMINANCE_MIN_PERCENT, dominancePercent, DOMINANCE_MAX_PERCENT );
+
+#if VERBOSE_DOMINANCE_CHECK
+	logDebug() << this
+		   << "  median: "    << formatPercent( medianPercent )
+		   << "  threshold: " << formatPercent( FileSize( dominanceThreshold ) )
+		   << Qt::endl;
+#endif
+
+	// Add the children that are larger than the threashold to the dominant children list
+	for ( FileInfo * child : _sortedChildren )
+	{
+	    if ( child->subtreeAllocatedPercent() < dominanceThreshold )
+		return _childNumbers.value( child, -1 );
+	}
+
+	// Should never reach here, children can't all be dominant
+	return _sortedChildren.size();
+    }();
 }

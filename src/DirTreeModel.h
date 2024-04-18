@@ -1,14 +1,14 @@
 /*
  *   File name: DirTreeModel.h
- *   Summary:	Qt data model for directory tree
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Qt data model for directory tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
 
 #ifndef DirTreeModel_h
 #define DirTreeModel_h
-
 
 #include <QAbstractItemModel>
 #include <QColor>
@@ -69,60 +69,12 @@ namespace QDirStat
 	 * model might choose to create a new tree shortly after returning
 	 * this, so don't store this pointer internally.
 	 **/
-	DirTree *tree()	{ return _tree; }
-
-	/**
-	 * Set the column order and what columns to display.
-	 *
-	 * Example:
-	 *
-	 *   DataColumnList col;
-	 *   col << QDirStat::NameCol,
-	 *	 << QDirStat::PercentBarCol,
-	 *	 << QDirStat::PercentNumCol,
-	 *	 << QDirStat::SizeCol;
-	 *   dirTreeModel->setColumns( col );
-	 */
-//	void setColumns( const DataColumnList & columns );
+	DirTree * tree() const { return _tree; }
 
 	/**
 	 * This is protected in the base class, but it's the only reasonable
-	 * way for the view to figure out what items are expanded: The
+	 * way for the view to figure out what items are expanded: the
 	 * QTreeViewPrivate knows, but IT DOESN'T TELL that secret.
-	 *
-	 * Trolltech, you fucked up big time here. Seriously, that QTreeView is
-	 * the most limiting tree widget you ever made. It's a far cry of the
-	 * Qt3 QListView: It can't do shit. No wonder all apps using it suffer
-	 * from poor usability! No way to set a separate icon for expanded
-	 * vs. collapsed items, no way to close all branches except the current
-	 * one.
-	 *
-	 * I am not going to reimplement all that stuff the private class
-	 * already does. Seriously, life is too short for that kind of
-	 * bullshit. I am not going to do my own bookkeeping based on
-	 * expanded() and collapsed() signals and always suffer from not
-	 * receiving the odd one and being out of sync with lists that are kept
-	 * in the private class. No fucking way.
-	 *
-	 * Trolls, if you ever actually used your own stuff like you did in the
-	 * old days before you abandoned the X11 widgets and spent all your
-	 * time and energy on that QML crap, you'd know that this QTreeView is
-	 * a sorry excuse for the old QListView.
-	 *
-	 * Didn't it ever occur to you that if you are constantly using
-	 * d->expandedIndexes in your QTreeView.cpp, derived classes might have
-	 * the same need to know about that? Why hide it in the private class
-	 * if it's that obvious that this is frequently needed information?
-	 *
-	 * It doesn't happen often in Qt - in all other aspects, it's a great,
-	 * well thought-out and very practical oriented framework. But
-	 * QTreeView is poorly designed in many aspects; hiding this
-	 * d->expandedIndexes is just one example.
-	 *
-	 * OK, I'm fed up with working around this poor design. Let's make our
-	 * own kludge to find out what items are expanded: Check the persistent
-	 * model indexes: The private class creates a persistent model index
-	 * for each item that is expanded.
 	 **/
 	QModelIndexList persistentIndexList() const
 	    { return QAbstractItemModel::persistentIndexList(); }
@@ -150,11 +102,11 @@ namespace QDirStat
 	 **/
 	void setBaseFont( const QFont & font );
 
-        /**
-         * Return the icon indicate an item's type (file, directory etc.)
-         * or a null icon if the type cannot be determined.
-         **/
-        QIcon itemTypeIcon( FileInfo * item ) const;
+	/**
+	 * Return the icon indicate an item's type (file, directory etc.)
+	 * or a null icon if the type cannot be determined.
+	 **/
+	QIcon itemTypeIcon( FileInfo * item ) const;
 
 	/**
 	 * Open a directory URL.
@@ -165,7 +117,7 @@ namespace QDirStat
 	 * Open a pkg URL: Read installed packages that match the specified
 	 * PkgFilter and their file lists from the system's package manager(s).
 	 *
-	 * Notice that PkgFilter has a constructor that takes a QString and
+	 * Note that PkgFilter has a constructor that takes a QString and
 	 * uses PkgFilter::Auto as the default filter mode to determine the
 	 * filter mode from any special characters present in the URL, e.g.
 	 *
@@ -281,12 +233,6 @@ namespace QDirStat
 	// might even become configurable.
 
 	/**
-	 * Get the FileInfo for a model index. This may return 0 if the index
-	 * is invalid.
-	 **/
-	FileInfo * itemFromIndex( const QModelIndex & index );
-
-	/**
 	 * Return a model index for 'item' and 'column'.
 	 **/
 	QModelIndex modelIndex( FileInfo * item, int column = 0 ) const;
@@ -301,11 +247,6 @@ namespace QDirStat
 	 * (Qt::AscendingOrder or Qt::DescendingOrder).
 	 **/
 	Qt::SortOrder sortOrder() const { return _sortOrder; }
-
-	/**
-	 * Return the formatted tooltip for the size column.
-	 **/
-	QVariant sizeColTooltip( FileInfo * item ) const;
 
 	/**
 	 * Return data to be displayed for the specified model index and role.
@@ -409,7 +350,7 @@ namespace QDirStat
 	/**
 	 * Notification that a subtree is about to be deleted.
 	 **/
-	void deletingChild( FileInfo * child );
+	void deletingChild( const FileInfo * child );
 
 	/**
 	 * Notification that deleting a subtree is done.
@@ -466,44 +407,15 @@ namespace QDirStat
 	void delayedUpdate( DirInfo * dir );
 
 	/**
-	 * Return 'true' if 'item' or any ancestor (parent or parent's parent
-	 * etc.) is still busy, i.e. the read job for the directory itself (not
-	 * any children!) is still queued or currently reading.
-	 **/
-	bool anyAncestorBusy( FileInfo * item ) const;
-
-	/**
 	 * Invalidate all persistent indexes in 'subtree'. 'includeParent'
 	 * indicates if 'subtree' itself will become invalid.
 	 **/
-	void invalidatePersistent( FileInfo * subtree,
-				   bool       includeParent );
-
+	void invalidatePersistent( const FileInfo * subtree, bool includeParent );
 
 	/**
-	 * Data for different roles for each item (row) and column
+	 * Return the icon to be displayed in the tree for this item.
 	 **/
-	QVariant columnText     ( FileInfo * item, int col ) const;
-	QVariant columnIcon     ( FileInfo * item, int col ) const;
-	QVariant columnAlignment( FileInfo * item, int col ) const;
-	QVariant columnFont     ( FileInfo * item, int col ) const;
-
-	/**
-	 * Raw data for direct communication with our item delegates
-	 * (PercentBarDelegate, SizeColDelegate)
-	 **/
-	QVariant columnRawData ( FileInfo * item, int col ) const;
-
-	/**
-	 * Return the number of direct children (plus the attic if there is
-	 * one) of a subtree.
-	 **/
-	int directChildrenCount( FileInfo * subtree ) const;
-
-	/**
-	 * Return the text for the size for 'item'
-	 **/
-	QVariant sizeColText( FileInfo * item ) const;
+	QVariant columnIcon ( FileInfo * item, int col ) const;
 
 	/**
 	 * Find the child number 'childNo' among the children of 'parent'.
@@ -515,7 +427,7 @@ namespace QDirStat
 	 * Find the row number (the index, starting with 0) of 'child' among
 	 * its parent's children.
 	 **/
-	int rowNumber( FileInfo * child ) const;
+	int rowNumber( const FileInfo * child ) const;
 
 	/**
 	 * Start removing rows.
@@ -556,7 +468,7 @@ namespace QDirStat
 	//
 	// Data members
 	//
-	DirTree       * _tree			{ nullptr };
+	DirTree       * _tree;
 
 	bool            _crossFilesystems;
 	DirTreeItemSize _treeItemSize;

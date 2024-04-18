@@ -1,11 +1,11 @@
 /*
  *   File name: DirTreeModel.cpp
- *   Summary:	Qt data model for directory tree
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Qt data model for directory tree
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <QStringBuilder>
 
@@ -15,15 +15,15 @@
 #include "ExcludeRules.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
+#include "FormatUtil.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Logger.h"
-#include "FormatUtil.h"
 #include "Exception.h"
 
 
 // Number of clusters up to which a file will be considered small and will also
-// display the allocated size like (4k).
+// display the allocated size like "(4k)".
 #define SMALL_FILE_CLUSTERS     2
 
 
@@ -32,6 +32,15 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Cast a QModelIndex internal pointer to a FileInfo pointer.
+     **/
+    FileInfo * internalPointerCast( const QModelIndex & index )
+    {
+	return static_cast<FileInfo *>( index.internalPointer() );
+    }
+
+
     // Debug helpers: static so they should disappear if they aren't being used.
     [[gnu::unused]] void dumpDirectChildren( const FileInfo * dir )
     {
@@ -71,7 +80,7 @@ namespace
 	{
 	    const QModelIndex index = persistentList.at(i);
 
-	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+	    const FileInfo * item = internalPointerCast( index );
 	    CHECK_MAGIC( item );
 
 	    logDebug() << "#" << i
@@ -164,6 +173,256 @@ namespace
 	       allocated % 1024 == 0;         // exact number of kB
     }
 
+    /**
+     * Return the text for the size for 'item'
+     **/
+    QVariant sizeColText( FileInfo * item )
+    {
+	if ( item->isSpecial() )
+	    return QVariant();
+
+	if ( item->isDirInfo() )
+	    return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
+
+	if ( item->isSparseFile() ) // delegate will use RawDataRole
+	    return QVariant();
+
+	if ( item->links() > 1 )
+	    return linksSizeText( item );
+
+	if ( useSmallFileSizeText( item ) ) // delegate will use RawDataRole
+	    return QVariant();
+
+	// ... and standard formatting for everything else
+	return formatSize( item->size() );
+    }
+
+    /**
+     * Return the column text for the data() override function.
+     **/
+    QVariant columnText( DirTree * tree, FileInfo * item, int col )
+    {
+	CHECK_PTR( item );
+
+	if ( item->isPkgInfo() && item->readState() == DirAborted )
+	{
+	    if ( col == PercentBarCol )
+		return QObject::tr( "[aborted]" );
+	    if ( !item->firstChild() && col != NameCol )
+		return "?";
+	}
+
+	switch ( col )
+	{
+	    case PercentBarCol:
+	    {
+		if ( item->isBusy() )     return QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
+		if ( item->isExcluded() ) return QObject::tr( "[excluded]" );
+		return QVariant();
+	    }
+
+	    case PercentNumCol:
+	    {
+		if ( item->isAttic() || item == tree->firstToplevel() )
+		    return QVariant();
+
+		return formatPercentQVariant( item->subtreeAllocatedPercent() );
+	    }
+
+	    case NameCol:		  return item->name();
+	    case SizeCol:		  return sizeColText( item );
+	    case LatestMTimeCol:	  return formatTime( item->latestMtime() );
+	    case UserCol:		  return item->userName();
+	    case GroupCol:		  return item->groupName();
+	    case PermissionsCol:	  return item->symbolicPermissions();
+	    case OctalPermissionsCol: return item->octalPermissions();
+	}
+
+	if ( item->isDirInfo() )
+	{
+	    if ( item->isDotEntry() && col == TotalSubDirsCol )
+		return QVariant();
+
+	    if ( item->readError() )
+	    {
+		switch ( col )
+		{
+		    case TotalItemsCol:
+		    case TotalFilesCol:
+		    case TotalSubDirsCol:
+			return "?";
+		}
+	    }
+
+	    switch ( col )
+	    {
+		case TotalItemsCol:      return QVariant( item->sizePrefix() % QString::number( item->totalItems() ) );
+		case TotalFilesCol:      return QVariant( item->sizePrefix() % QString::number( item->totalFiles() ) );
+		case TotalSubDirsCol:    return QVariant( item->sizePrefix() % QString::number( item->totalSubDirs() ) );
+		case OldestFileMTimeCol: return formatTime( item->oldestFileMtime() );
+	    }
+	}
+
+	return QVariant();
+    }
+
+
+    /**
+     * Return the column alignment for the data() override function.
+     **/
+    QVariant columnAlignment( FileInfo *, int col )
+    {
+	switch ( col )
+	{
+	    case NameCol:
+		return QVariant( Qt::AlignVCenter | Qt::AlignLeft );
+
+	    case PercentBarCol:         // just for the special text, the bar aligns itself
+	    case LatestMTimeCol:
+	    case OldestFileMTimeCol:
+		return QVariant( Qt::AlignVCenter | Qt::AlignHCenter );
+
+    //	case UserCol:
+    //	case GroupCol:
+    //	case PercentNumCol:
+    //	case SizeCol:
+    //	case TotalItemsCol:
+    //	case TotalFilesCol:
+    //	case TotalSubDirsCol:
+    //	case PermissionsCol:
+    //	case OctalPermissionsCol:
+    //	case LatestMTimeCol:
+    //	case OldestFileMTimeCol:
+    //	default:
+	}
+
+	return QVariant( Qt::AlignVCenter | Qt::AlignRight );
+    }
+
+
+    /**
+     * Return the column font for the data() override function.
+     **/
+    QVariant columnFont( const QFont & baseFont,
+			 FileInfo    * item,
+			 int           col,
+			 bool          useBoldForDominantItems )
+    {
+	switch ( col )
+	{
+	    case PermissionsCol:
+	    {
+		QFont font( baseFont );
+		font.setFamily( "monospace" );
+		return font;
+	    }
+
+	    case PercentNumCol:
+	    case SizeCol:
+	    {
+		if ( useBoldForDominantItems && item && item->isDominant() )
+		{
+		    QFont font( baseFont );
+		    font.setWeight( QFont::Bold );
+		    return font;
+		}
+	    }
+	}
+
+	return baseFont;
+    }
+
+
+    /**
+     * Return the number of direct children (plus the attic if there is
+     * one) of a subtree.
+     **/
+    int directChildrenCount( FileInfo * subtree )
+    {
+	if ( !subtree )
+	    return 0;
+
+	int count = subtree->directChildrenCount();
+
+	if ( subtree->attic() )
+	    ++count;
+
+	return count;
+    }
+
+
+    /**
+     * Return 'true' if 'item' or any ancestor (parent or parent's parent
+     * etc.) is still busy, i.e. the read job for the directory itself (not
+     * any children!) is still queued or currently reading.
+     **/
+    bool anyAncestorBusy( FileInfo * item )
+    {
+	while ( item )
+	{
+	    if ( item->readState() == DirQueued || item->readState() == DirReading )
+		return true;
+
+	    item = item->parent();
+	}
+
+	return false;
+    }
+
+
+    /**
+     * Return the formatted tooltip for the size column.
+     **/
+    QVariant sizeColTooltip( FileInfo * item )
+    {
+	if ( item->isDirInfo() )
+	    return item->sizePrefix() + formatByteSize( item->totalAllocatedSize() );
+
+	QString text = item->sizePrefix() + formatByteSize( item->rawByteSize() );
+
+	if ( item->allocatedSize() != item->rawByteSize() || item->isSparseFile() )
+	{
+	    text += QString( " %1<br/>%2 allocated" )
+		    .arg( item->isSparseFile() ? "sparse data" : "used" )
+		    .arg( formatByteSize( item->rawAllocatedSize() ) );
+	}
+
+	return whitespacePre( text + formatLinksRichText( item->links() ) );
+    }
+
+
+    /**
+     * Raw data for direct communication with our item delegates
+     * (PercentBarDelegate, SizeColDelegate)
+     **/
+    QVariant columnRawData( const DirTree * tree, FileInfo * item, int col )
+    {
+	if ( col == PercentBarCol )
+	{
+	    if ( ( item->parent() && item->parent()->isBusy() ) ||
+		 item == tree->firstToplevel() ||
+		 item->isAttic() )
+	    {
+		return QVariant();
+	    }
+
+	    return item->subtreeAllocatedPercent();
+	}
+
+	if ( col == SizeCol )
+	{
+	    // List of 3 strings, the third (links) may be empty
+	    if ( item->isSparseFile() )
+		return sparseSizeText( item );
+
+	    // List of 2 strings
+	    if ( useSmallFileSizeText( item ) && item->links() == 1 )
+		return smallSizeText( item );
+	}
+
+	return QVariant();
+    }
+
 } // namespace
 
 
@@ -190,37 +449,17 @@ DirTreeModel::~DirTreeModel()
 }
 
 
-void DirTreeModel::updateSettings( bool crossFilesystems,
-                                   bool useBoldForDominant,
-				   DirTreeItemSize dirTreeItemSize,
-				   int updateTimerMillisec )
-{
-    // Avoid overwriting the dialog setting unless there is an actual change
-    if ( _crossFilesystems != crossFilesystems )
-	_tree->setCrossFilesystems( _crossFilesystems );
-    _crossFilesystems = crossFilesystems;
-    _useBoldForDominantItems = useBoldForDominant;
-    _treeItemSize = dirTreeItemSize;
-    _updateTimerMillisec = updateTimerMillisec;
-    _updateTimer.setInterval( _slowUpdate ? _slowUpdateMillisec : updateTimerMillisec );
-
-    loadIcons();
-    setBaseFont( _themeFont );
-    emit layoutChanged();
-}
-
-
 void DirTreeModel::readSettings()
 {
     Settings settings;
 
     settings.beginGroup( "DirectoryTree" );
-    _crossFilesystems	      = settings.value( "CrossFilesystems",    false ).toBool();
+    _crossFilesystems         = settings.value( "CrossFilesystems",    false ).toBool();
     _useBoldForDominantItems  = settings.value( "UseBoldForDominant",  true  ).toBool();
     _tree->setIgnoreHardLinks(  settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool() );
     const QString treeIconDir = settings.value( "TreeIconDir",         DirTreeModel::treeIconDir( DTIS_Medium ) ).toString();
     _updateTimerMillisec      = settings.value( "UpdateTimerMillisec", 250  ).toInt();
-    _slowUpdateMillisec	      = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
+    _slowUpdateMillisec       = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
@@ -263,12 +502,32 @@ void DirTreeModel::writeSettings()
 }
 
 
+void DirTreeModel::updateSettings( bool crossFilesystems,
+                                   bool useBoldForDominant,
+				   DirTreeItemSize dirTreeItemSize,
+				   int updateTimerMillisec )
+{
+    // Avoid overwriting the dialog setting unless there is an actual change
+    if ( _crossFilesystems != crossFilesystems )
+	_tree->setCrossFilesystems( _crossFilesystems );
+    _crossFilesystems = crossFilesystems;
+
+    _useBoldForDominantItems = useBoldForDominant;
+    _treeItemSize = dirTreeItemSize;
+    _updateTimerMillisec = updateTimerMillisec;
+    _updateTimer.setInterval( _slowUpdate ? _slowUpdateMillisec : updateTimerMillisec );
+
+    loadIcons();
+    setBaseFont( _themeFont );
+    emit layoutChanged();
+}
+
+
 void DirTreeModel::setSlowUpdate()
 {
-    logInfo() << "Display update every " << _updateTimer.interval() << " millisec" << Qt::endl;
-
     _slowUpdate = true;
     _updateTimer.setInterval( _slowUpdateMillisec );
+    logInfo() << "Display update every " << _slowUpdateMillisec << " millisec" << Qt::endl;
 }
 
 
@@ -324,7 +583,7 @@ void DirTreeModel::clear()
 	// dumpPersistentIndexList( persistentIndexList() );
 
 	_updateTimer.stop();
-	_pendingUpdates.clear(); // these are dangerous if they arrive for a new tree
+	_pendingUpdates.clear(); // these are dangerous if they arrive from a dead tree
 	_tree->clear();
 
 	endResetModel();
@@ -338,12 +597,8 @@ void DirTreeModel::openUrl( const QString & url )
 {
     CHECK_PTR( _tree );
 
-    // Need to get rid of pending updates even if there are no tree children
-//    if ( _tree->root() && _tree->root()->hasChildren() )
-	clear();
-
+    clear();
     _updateTimer.start();
-
     _tree->startReading( url );
 }
 
@@ -353,103 +608,66 @@ void DirTreeModel::readPkg( const PkgFilter & pkgFilter )
     // logDebug() << "Reading " << pkgFilter << Qt::endl;
     CHECK_PTR( _tree );
 
-    // Need to get rid of pending updates even if there are no tree children
-//    if ( _tree->root() && _tree->root()->hasChildren() )
-	clear();
-
+    clear();
     _updateTimer.start();
-
     _tree->readPkg( pkgFilter );
 }
 
 
 void DirTreeModel::loadIcons()
 {
-    QString iconDir = treeIconDir();
+    const QString iconDir = treeIconDir();
 
-    _dirIcon	       = QIcon( iconDir + "dir.png"            );
+    _dirIcon           = QIcon( iconDir + "dir.png"            );
     _dotEntryIcon      = QIcon( iconDir + "dot-entry.png"      );
-    _fileIcon	       = QIcon( iconDir + "file.png"           );
+    _fileIcon          = QIcon( iconDir + "file.png"           );
     _symlinkIcon       = QIcon( iconDir + "symlink.png"        );
     _unreadableDirIcon = QIcon( iconDir + "unreadable-dir.png" );
     _mountPointIcon    = QIcon( iconDir + "mount-point.png"    );
-    _stopIcon	       = QIcon( iconDir + "stop.png"           );
+    _stopIcon          = QIcon( iconDir + "stop.png"           );
     _excludedIcon      = QIcon( iconDir + "excluded.png"       );
     _blockDeviceIcon   = QIcon( iconDir + "block-device.png"   );
     _charDeviceIcon    = QIcon( iconDir + "char-device.png"    );
     _specialIcon       = QIcon( iconDir + "special.png"        );
-    _pkgIcon	       = QIcon( iconDir + "folder-pkg.png"     );
+    _pkgIcon           = QIcon( iconDir + "folder-pkg.png"     );
 }
 
-/*
-void DirTreeModel::setColumns( const DataColumnList & columns )
-{
-    beginResetModel();
-    DataColumns::setColumns( columns );
-    endResetModel();
-}
-*/
 
 FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 {
     CHECK_PTR( parent );
 
-    const FileInfoList & childrenList = parent->sortedChildren( _sortCol,
-								_sortOrder,
-								true );	    // includeAttic
+    const FileInfoList & sortedChildren = parent->sortedChildren( _sortCol, _sortOrder );
+    if ( childNo >= 0 && childNo < sortedChildren.size() )
+	return sortedChildren.at( childNo );
 
-    if ( childNo < 0 || childNo >= childrenList.size() )
-    {
-	logError() << "Child #" << childNo << " is out of range: 0.."
-		   << childrenList.size()-1 << " children for "
-		   << parent << Qt::endl;
+    logError() << "Child #" << childNo << " is out of range (0..." << sortedChildren.size()-1
+	       << ") for " << parent << Qt::endl;
 
-	dumpDirectChildren( parent );
+    dumpDirectChildren( parent );
 
-	return nullptr;
-    }
-
-    return childrenList.at( childNo );
+    return nullptr;
 }
 
 
-int DirTreeModel::rowNumber( FileInfo * child ) const
+int DirTreeModel::rowNumber( const FileInfo * child ) const
 {
-    if ( !child->parent() )
+    DirInfo * parent = child->parent();
+    if ( !parent )
 	return 0;
 
-    const FileInfoList & childrenList = child->parent()->sortedChildren( _sortCol,
-									 _sortOrder,
-									 true ); // includeAttic
-
-    const int row = childrenList.indexOf( child );
+    const int row = parent->childNumber( _sortCol, _sortOrder, child );
     if ( row < 0 )
     {
-	// Not found
-	logError() << "Child " << child
-		   << " (" << (void *) child << ")"
-		   << " not found in \""
-		   << child->parent() << "\"" << Qt::endl;
+	// Not found, should never happen
+	logError() << "Child " << child << " (" << (void *)child << ")"
+		   << " not found in " << parent << Qt::endl;
 
-	dumpDirectChildren( child->parent() );
+	dumpDirectChildren( parent );
     }
 
     return row;
 }
-
-
-FileInfo * DirTreeModel::itemFromIndex( const QModelIndex & index )
-{
-    if ( !index.isValid() )
-	return nullptr;
-
-    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
-    CHECK_MAGIC( item );
-
-    return item;
-}
-
-
 
 //
 // Reimplemented from QAbstractItemModel
@@ -460,15 +678,8 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
     if ( !_tree )
 	return 0;
 
-    FileInfo * item = nullptr;
-
-    if ( parentIndex.isValid() )
-    {
-	item = static_cast<FileInfo *>( parentIndex.internalPointer() );
-	CHECK_MAGIC( item );
-    }
-    else
-	item = _tree->root();
+    FileInfo * item = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
+    CHECK_MAGIC( item );
 
     if ( !item->isDirInfo() || item->toDirInfo()->isLocked() )
 	return 0;
@@ -477,7 +688,6 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
     {
 	case DirQueued:
 	case DirReading:
-
 	    // Don't mess with directories that are currently being read: If we
 	    // tell our view about them, the view might begin fetching model
 	    // indexes for them, and when the tree later sends the
@@ -490,16 +700,13 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 	    //
 	    // Better keep it simple: Don't report any children until they
 	    // are complete.
-
 	    break;
 
 	case DirError:
 	case DirPermissionDenied:
-
 	    // This is a hybrid case: Depending on the dir reader, the dir may
 	    // or may not be finished at this time. For a local dir, it most
 	    // likely is; for a cache reader, there might be more to come.
-
 	    if ( !_tree->isBusy() )
 		return directChildrenCount( item );
 	    break;
@@ -524,7 +731,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	return QVariant();
 
     const DataColumn col  = DataColumns::fromViewCol( index.column() );
-    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+    FileInfo * item = internalPointerCast( index );
     CHECK_MAGIC( item );
 
     switch ( role )
@@ -533,7 +740,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    if ( item && item->isDirInfo() )
 		item->toDirInfo()->touch();
 
-	    return columnText( item, col );
+	    return columnText( _tree, item, col );
 
 	case Qt::ForegroundRole: // text colour
 	    if ( item->isIgnored() || item->isAttic() )
@@ -554,7 +761,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    return columnAlignment( item, col );
 
 	case RawDataRole: // Send raw data to item delegates PercentBarDelegate and SizeColDelegate
-	    return columnRawData( item, col );
+	    return columnRawData( _tree, item, col );
 
 	case Qt::ToolTipRole:
 	    switch ( col )
@@ -576,7 +783,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    }
 
 	case Qt::FontRole:
-	    return columnFont( item, col );
+	    return columnFont( _baseFont, item, col, _useBoldForDominantItems );
 
 	case Qt::BackgroundRole:
 	    if ( col == NameCol && item->isDirInfo() && item->toDirInfo()->isFromCache() )
@@ -584,25 +791,6 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
     }
 
     return QVariant();
-}
-
-
-
-QVariant DirTreeModel::sizeColTooltip( FileInfo * item ) const
-{
-    if ( item->isDirInfo() )
-	return item->sizePrefix() + formatByteSize( item->totalAllocatedSize() );
-
-    QString text = item->sizePrefix() + formatByteSize( item->rawByteSize() );
-
-    if ( item->allocatedSize() != item->rawByteSize() || item->isSparseFile() )
-    {
-	text += QString( " %1<br/>%2 allocated" )
-	    .arg( item->isSparseFile() ? "sparse data" : "used" )
-	    .arg( formatByteSize( item->rawAllocatedSize() ) );
-    }
-
-    return whitespacePre( text + formatLinksRichText( item->links() ) );
 }
 
 
@@ -655,7 +843,7 @@ Qt::ItemFlags DirTreeModel::flags( const QModelIndex & index ) const
     if ( !index.isValid() )
 	return Qt::NoItemFlags;
 
-    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+    const FileInfo * item = internalPointerCast( index );
     CHECK_MAGIC( item );
 
     if ( item->isDirInfo() )
@@ -670,23 +858,15 @@ QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parent
     if ( !_tree  || !_tree->root() || !hasIndex( row, column, parentIndex ) )
 	return QModelIndex();
 
-    FileInfo *parent;
-
-    if ( parentIndex.isValid() )
-    {
-	parent = static_cast<FileInfo *>( parentIndex.internalPointer() );
-	CHECK_MAGIC( parent );
-    }
-    else
-	parent = _tree->root();
+    FileInfo * parent = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
+    CHECK_MAGIC( parent );
 
     if ( parent->isDirInfo() )
     {
 	FileInfo * child = findChild( parent->toDirInfo(), row );
 	CHECK_PTR( child );
 
-	if ( child )
-	    return createIndex( row, column, child );
+	return createIndex( row, column, child );
     }
 
     return QModelIndex();
@@ -698,12 +878,11 @@ QModelIndex DirTreeModel::parent( const QModelIndex & index ) const
     if ( !index.isValid() )
 	return QModelIndex();
 
-    const FileInfo * child = static_cast<FileInfo*>( index.internalPointer() );
+    const FileInfo * child = internalPointerCast( index );
     if ( !checkMagicNumber( child ) )
 	return QModelIndex();
 
     FileInfo * parent = child->parent();
-
     if ( !parent || parent == _tree->root() )
 	return QModelIndex();
 
@@ -719,14 +898,14 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     if ( column == _sortCol && order == _sortOrder )
         return;
 
-    logDebug() << "Sorting by " << static_cast<DataColumn>( column )
+    logDebug() << "Sorting by " << DataColumns::fromViewCol( column )
 	       << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
 	       << Qt::endl;
 
     // logDebug() << "Before layoutAboutToBeChanged()" << Qt::endl;
     //dumpPersistentIndexList( persistentIndexList() );
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged( QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint );
     _sortCol = DataColumns::fromViewCol( column );
     _sortOrder = order;
     updatePersistentIndexes();
@@ -743,11 +922,6 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
 void DirTreeModel::busyDisplay()
 {
     emit layoutAboutToBeChanged();
-
-//    _sortCol = SizeCol;
-//    _sortOrder = Qt::DescendingOrder;
-//    logDebug() << "Sorting by " << _sortCol << " during reading" << Qt::endl;
-
     updatePersistentIndexes();
     emit layoutChanged();
 }
@@ -756,11 +930,6 @@ void DirTreeModel::busyDisplay()
 void DirTreeModel::idleDisplay()
 {
     emit layoutAboutToBeChanged();
-
-//    _sortCol = NameCol;
-//    _sortOrder = Qt::AscendingOrder;
-//    logDebug() << "Sorting by " << _sortCol << " after reading is finished" << Qt::endl;
-
     updatePersistentIndexes();
     emit layoutChanged();
 }
@@ -783,204 +952,6 @@ QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
 }
 
 
-QVariant DirTreeModel::columnText( FileInfo * item, int col ) const
-{
-    CHECK_PTR( item );
-
-    if ( item->isPkgInfo() && item->readState() == DirAborted && !item->firstChild() && col != NameCol )
-	return "?";
-
-    switch ( col )
-    {
-	case PercentBarCol:
-	{
-	    if ( item->isBusy() )     return tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
-	    if ( item->isExcluded() ) return tr( "[excluded]" );
-	    return QVariant();
-	}
-
-	case PercentNumCol:
-	{
-	    if ( item->isAttic() || item == _tree->firstToplevel() )
-		return QVariant();
-
-	    return formatPercentQVariant( item->subtreeAllocatedPercent() );
-	}
-
-	case NameCol:		  return item->name();
-	case SizeCol:		  return sizeColText( item );
-	case LatestMTimeCol:	  return formatTime( item->latestMtime() );
-	case UserCol:		  return item->userName();
-	case GroupCol:		  return item->groupName();
-	case PermissionsCol:	  return item->symbolicPermissions();
-	case OctalPermissionsCol: return item->octalPermissions();
-    }
-
-    if ( item->isDirInfo() )
-    {
-	if ( item->isDotEntry() && col == TotalSubDirsCol )
-	    return QVariant();
-
-	if ( item->readError() )
-	{
-	    switch ( col )
-	    {
-		case TotalItemsCol:
-		case TotalFilesCol:
-		case TotalSubDirsCol:
-		    return "?";
-	    }
-	}
-
-	switch ( col )
-	{
-	    case TotalItemsCol:      return QVariant( item->sizePrefix() % QString::number( item->totalItems() ) );
-	    case TotalFilesCol:      return QVariant( item->sizePrefix() % QString::number( item->totalFiles() ) );
-	    case TotalSubDirsCol:    return QVariant( item->sizePrefix() % QString::number( item->totalSubDirs() ) );
-	    case OldestFileMTimeCol: return formatTime( item->oldestFileMtime() );
-	}
-    }
-
-    return QVariant();
-}
-
-
-QVariant DirTreeModel::columnAlignment( FileInfo *, int col ) const
-{
-    switch ( col )
-    {
-	case NameCol:
-	    return QVariant( Qt::AlignVCenter | Qt::AlignLeft );
-
-	case PercentBarCol:         // just for the special text, the bar aligns itself
-	case LatestMTimeCol:
-	case OldestFileMTimeCol:
-	    return QVariant( Qt::AlignVCenter | Qt::AlignHCenter );
-
-//	case UserCol:
-//	case GroupCol:
-//	case PercentNumCol:
-//	case SizeCol:
-//	case TotalItemsCol:
-//	case TotalFilesCol:
-//	case TotalSubDirsCol:
-//	case PermissionsCol:
-//	case OctalPermissionsCol:
-//	case LatestMTimeCol:
-//	case OldestFileMTimeCol:
-//	default:
-    }
-
-    return QVariant( Qt::AlignVCenter | Qt::AlignRight );
-}
-
-
-QVariant DirTreeModel::columnFont( FileInfo * item, int col ) const
-{
-    switch ( col )
-    {
-	case PermissionsCol:
-	{
-	    QFont font( _baseFont );
-	    font.setFamily( "monospace" );
-	    return font;
-	}
-
-	case PercentNumCol:
-	case SizeCol:
-	{
-	    if ( _useBoldForDominantItems && item && item->isDominant() )
-	    {
-		QFont font( _baseFont );
-		font.setWeight( QFont::Bold );
-		return font;
-	    }
-	}
-    }
-
-    return _baseFont;
-}
-
-
-QVariant DirTreeModel::columnRawData( FileInfo * item, int col ) const
-{
-    // This is for the delegates, just for two columns
-
-    switch ( col )
-    {
-//	case NameCol:		  return item->name();
-	case PercentBarCol:
-	    {
-		if ( ( item->parent() && item->parent()->isBusy() ) ||
-		     item == _tree->firstToplevel() ||
-		     item->isAttic() )
-		{
-		    return -1.0;
-		}
-
-		return item->subtreeAllocatedPercent();
-	    }
-//	case PercentNumCol:	  return item->subtreeAllocatedPercent();
-	case SizeCol:
-	    {
-		if ( item->isSparseFile() )
-		    return sparseSizeText( item );
-
-		if ( useSmallFileSizeText( item ) && item->links() == 1 )
-		    return smallSizeText( item );
-	    }
-//	case TotalItemsCol:	  return item->totalItems();
-//	case TotalFilesCol:	  return item->totalFiles();
-//	case TotalSubDirsCol:	  return item->totalSubDirs();
-//	case LatestMTimeCol:	  return (qulonglong)item->latestMtime();
-//	case OldestFileMTimeCol:  return (qulonglong)item->oldestFileMtime();
-//	case UserCol:		  return item->uid();
-//	case GroupCol:		  return item->gid();
-//	case PermissionsCol:	  return item->mode();
-//	case OctalPermissionsCol: return item->mode();
-//	default:		  return QVariant();
-    }
-
-    return QVariant();
-}
-
-
-int DirTreeModel::directChildrenCount( FileInfo * subtree ) const
-{
-    if ( !subtree )
-	return 0;
-
-    int count = subtree->directChildrenCount();
-
-    if ( subtree->attic() )
-	++count;
-
-    return count;
-}
-
-
-QVariant DirTreeModel::sizeColText( FileInfo * item ) const
-{
-    if ( item->isSpecial() )
-	return QVariant();
-
-    if ( item->isDirInfo() )
-	return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
-
-    if ( item->isSparseFile() ) // delegate will use RawDataRole
-	return QVariant();
-
-    if ( item->links() > 1 )
-	return linksSizeText( item );
-
-    if ( useSmallFileSizeText( item ) ) // delegate will use RawDataRole
-	return QVariant();
-
-    // ... and standard formatting for everything else
-    return formatSize( item->size() );
-}
-
-
 QVariant DirTreeModel::columnIcon( FileInfo * item, int col ) const
 {
     if ( col != NameCol )
@@ -1000,7 +971,8 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
     if ( !item )
         return QIcon();
 
-    if ( item->readState() == DirAborted ) return _stopIcon;
+    if ( item->readState() == DirAborted )
+	return _stopIcon;
 
     if ( item->isDotEntry() ) return _dotEntryIcon;
     if ( item->isAttic()    ) return _atticIcon;
@@ -1009,7 +981,7 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
     if ( item->readError()  ) return _unreadableDirIcon;
     if ( item->isDir()      ) return item->isMountPoint() ? _mountPointIcon : _dirIcon;
     // else FileInfo
-    if ( item->isFile()	       ) return _fileIcon;
+    if ( item->isFile()        ) return _fileIcon;
     if ( item->isSymLink()     ) return _symlinkIcon;
     if ( item->isBlockDevice() ) return _blockDeviceIcon;
     if ( item->isCharDevice()  ) return _charDeviceIcon;
@@ -1028,20 +1000,6 @@ void DirTreeModel::readJobFinished( DirInfo * dir )
 	newChildrenNotify( dir );
 //    else if ( dir && !dir->isMountPoint() )
 //	logDebug() << "Ancestor busy - ignoring readJobFinished for " << dir << Qt::endl;
-}
-
-
-bool DirTreeModel::anyAncestorBusy( FileInfo * item ) const
-{
-    while ( item )
-    {
-	if ( item->readState() == DirQueued || item->readState() == DirReading )
-	    return true;
-
-	item = item->parent();
-    }
-
-    return false;
 }
 
 
@@ -1074,8 +1032,7 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
     }
 
     // If any readJobFinished signals were ignored because a parent was not
-    // finished yet, now is the time to notify the view about those children,
-    // too.
+    // finished yet, now is the time to notify the view about those children.
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
 	if ( (*it)->isDirInfo() && (*it)->readState() != DirReading && (*it)->readState() != DirQueued )
@@ -1144,7 +1101,7 @@ void DirTreeModel::updatePersistentIndexes()
     {
 	if ( oldIndex.isValid() )
 	{
-	    FileInfo * item = static_cast<FileInfo *>( oldIndex.internalPointer() );
+	    FileInfo * item = internalPointerCast( oldIndex );
 	    const QModelIndex newIndex = modelIndex( item, oldIndex.column() );
 #if 0
 	    logDebug() << "Updating " << item
@@ -1188,7 +1145,7 @@ void DirTreeModel::endRemoveRows()
 }
 
 
-void DirTreeModel::deletingChild( FileInfo * child )
+void DirTreeModel::deletingChild( const FileInfo * child )
 {
     // logDebug() << "Deleting child " << child << Qt::endl;
 
@@ -1235,13 +1192,13 @@ void DirTreeModel::subtreeCleared( DirInfo * )
 }
 
 
-void DirTreeModel::invalidatePersistent( FileInfo * subtree,
-					 bool	    includeParent )
+void DirTreeModel::invalidatePersistent( const FileInfo * subtree,
+					 bool             includeParent )
 {
     const auto indexList = persistentIndexList();
     for ( const QModelIndex & index : indexList )
     {
-	FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+	const FileInfo * item = internalPointerCast( index );
 	CHECK_PTR( item );
 
 	if ( !item->checkMagicNumber() || item->isInSubtree( subtree ) )

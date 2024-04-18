@@ -1,11 +1,11 @@
 /*
  *   File name: FileInfo.cpp
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -25,14 +25,45 @@
 #include "Logger.h"
 #include "Exception.h"
 
+
 // Some filesystems (NTFS seems to be among them) may handle block fragments
 // well. Don't report files as "sparse" files if the block size is only a few
 // bytes less than the byte size - it may be due to intelligent fragment
 // handling.
-
 #define FRAGMENT_SIZE 2048
 
+
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Helper functions for calculating percentages of item sizes relative
+     * to their parent.
+     **/
+    bool hasPercent( const FileInfo * item )
+    {
+	// not before subtree is finished reading
+	if ( !item->parent() || item->parent()->pendingReadJobs() > 0 )
+	    return false;
+
+	// no meaningful percent for aborted package reads
+	if ( item->isPkgInfo() && item->readState() == DirAborted )
+	    return false;
+
+	// not if this is an excluded object (dir)
+	if ( item->isExcluded() )
+	    return false;
+
+	return true;
+    }
+    float percent( FileSize size, FileSize parentSize)
+    {
+	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
+    }
+
+}
 
 
 FileInfo::FileInfo( DirInfo           * parent,
@@ -52,24 +83,24 @@ FileInfo::FileInfo( DirInfo           * parent,
 {
 //    CHECK_PTR( statInfo );
 
-    _device	   = statInfo.st_dev;
-    _mode	   = statInfo.st_mode;
-    _links	   = statInfo.st_nlink;
-    _uid	   = statInfo.st_uid;
-    _gid	   = statInfo.st_gid;
-    _mtime	   = statInfo.st_mtime;
+    _device = statInfo.st_dev;
+    _mode   = statInfo.st_mode;
+    _links  = statInfo.st_nlink;
+    _uid    = statInfo.st_uid;
+    _gid    = statInfo.st_gid;
+    _mtime  = statInfo.st_mtime;
 
     if ( isSpecial() )
     {
-	_size		= 0;
-	_allocatedSize	= 0;
-	_blocks		= 0;
-	_isSparseFile	= false;
+	_size          = 0;
+	_allocatedSize = 0;
+	_blocks        = 0;
+	_isSparseFile  = false;
     }
     else
     {
-	_size		= statInfo.st_size;
-	_blocks		= statInfo.st_blocks;
+	_size   = statInfo.st_size;
+	_blocks = statInfo.st_blocks;
 
 	if ( _blocks == 0 && _size > 0 )
 	{
@@ -110,11 +141,11 @@ FileInfo::~FileInfo()
     _magic = 0;
 
     /**
-     * The destructor should also take care about unlinking this object from
+     * The destructor should also take care of unlinking this object from
      * its parent's children list, but regrettably that just doesn't work: At
      * this point (within the destructor) parts of the object are already
      * destroyed, e.g., the virtual table - virtual methods don't work any
-     * more. Thus, somebody from outside must call deletingChild() just prior
+     * more. Thus, somebody from outside must call unlinkChild() just prior
      * to the actual "delete".
      *
      * This sucks, but it's the C++ standard.
@@ -124,23 +155,23 @@ FileInfo::~FileInfo()
 
 FileSize FileInfo::size() const
 {
-    const FileSize sz = _isSparseFile ? _allocatedSize : _size;
+    const FileSize size = _isSparseFile ? _allocatedSize : _size;
 
     if ( _links > 1 && !_tree->ignoreHardLinks() && isFile() )
-	return sz / _links;
+	return size / _links;
 
-    return sz;
+    return size;
 }
 
 
 FileSize FileInfo::allocatedSize() const
 {
-    const FileSize sz = _allocatedSize;
+    const FileSize size = _allocatedSize;
 
     if ( _links > 1 && !_tree->ignoreHardLinks() && isFile() )
-	return sz / _links;
+	return size / _links;
 
-    return sz;
+    return size;
 }
 
 
@@ -312,29 +343,19 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 
 float FileInfo::subtreePercent()
 {
-    if ( !parent()			 ||	// only if there is a parent as calculation base
-	 parent()->pendingReadJobs() > 0 ||	// not before subtree is finished reading
-	 parent()->totalSize() == 0	 ||	// avoid division by zero
-	 isExcluded() )				// not if this is an excluded object (dir)
-    {
-	return -1.0;
-    }
+    if ( hasPercent( this ) )
+	return percent( totalSize(), parent()->totalSize() );
 
-    return ( 100.0 * totalSize() ) / (float) parent()->totalSize();
+    return -1.0;
 }
 
 
 float FileInfo::subtreeAllocatedPercent()
 {
-    if ( !parent()			     ||	// only if there is a parent as calculation base
-	 parent()->pendingReadJobs() > 0     ||	// not before subtree is finished reading
-	 parent()->totalAllocatedSize() == 0 ||	// avoid division by zero
-	 isExcluded() )				// not if this is an excluded object (dir)
-    {
-	return -1.0;
-    }
+    if ( hasPercent( this ) )
+	return percent( totalAllocatedSize(), parent()->totalAllocatedSize() );
 
-    return ( 100.0 * totalAllocatedSize() ) / (float) parent()->totalAllocatedSize();
+    return -1.0;
 }
 
 
@@ -370,33 +391,25 @@ QString FileInfo::baseName() const
 
 DirInfo * FileInfo::toDirInfo()
 {
-    DirInfo * dirInfo = dynamic_cast<DirInfo *>( this );
-
-    return dirInfo;
+    return dynamic_cast<DirInfo *>( this );
 }
 
 
 DotEntry * FileInfo::toDotEntry()
 {
-    DotEntry * dotEntry = dynamic_cast<DotEntry *>( this );
-
-    return dotEntry;
+    return dynamic_cast<DotEntry *>( this );
 }
 
 
 Attic * FileInfo::toAttic()
 {
-    Attic * attic = dynamic_cast<Attic *>( this );
-
-    return attic;
+    return dynamic_cast<Attic *>( this );
 }
 
 
 PkgInfo * FileInfo::toPkgInfo()
 {
-    PkgInfo * pkgInfo = dynamic_cast<PkgInfo *>( this );
-
-    return pkgInfo;
+    return dynamic_cast<PkgInfo *>( this );
 }
 
 

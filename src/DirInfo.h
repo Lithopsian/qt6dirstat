@@ -1,15 +1,14 @@
 /*
  *   File name: DirInfo.h
- *   Summary:	Support classes for QDirStat
- *   License:	GPL V2 - See file LICENSE for details.
+ *   Summary:   Support classes for QDirStat
+ *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:	Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Authors:   Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *              Ian Nartowicz
  */
-
 
 #ifndef DirInfo_h
 #define DirInfo_h
-
 
 #include "FileInfo.h"
 #include "DataColumns.h"
@@ -17,11 +16,59 @@
 
 namespace QDirStat
 {
+    class DirSortInfo;
     class DirTree;
     class DotEntry;
 
+    typedef QHash<const FileInfo *, int> ChildNumbers;
+
     /**
-     * A more specialized version of FileInfo: This class can actually manage
+     * Small class to contain information about sorted children of a
+     * DirInfo object.  Relatively few DirInfo objects will generally
+     * have sorted children, they will only be generated when the model
+     * needs to display the children in the tree.
+     **/
+    class DirSortInfo
+    {
+	friend class DirInfo;
+
+	/**
+	 * Constructor, from a DirInfo parent item and sort order.  The
+	 * _sortedChildren list and _childNumbers lists are populated
+	 * with the direct children plus any Attic.  This information is
+	 * currently only used by DirTreeModel and is optimized for speed
+	 * due to the numerous lookups required.
+	 **/
+	DirSortInfo( DirInfo     * parent,
+	             DataColumn    sortCol,
+		     Qt::SortOrder sortOrder );
+
+	/**
+	 * Return a pointer to the dominant children list, creating it if
+	 * necessary.
+	 **/
+	int firstNonDominantChild()
+	    { if ( _firstNonDominantChild < 0 ) findDominantChildren(); return _firstNonDominantChild; }
+
+	/**
+	 * Create a dominant children list, and populate it as appropriate.  The created
+	 * list may be empty if no children are dominant.
+	 **/
+	void findDominantChildren();
+
+
+	DataColumn     _sortedCol;
+	Qt::SortOrder  _sortedOrder;
+	FileInfoList   _sortedChildren;
+	FileInfoList * _dominantChildren { nullptr };
+	ChildNumbers   _childNumbers;
+	int            _firstNonDominantChild { -1 };
+
+    };	// class DirSortInfo
+
+
+    /**
+     * A more specialized version of FileInfo: This class can manage
      * children. The base class (FileInfo) has only stubs for the respective
      * methods to integrate seamlessly with the abstraction of a file /
      * directory tree; this class fills those stubs with life.
@@ -110,11 +157,6 @@ namespace QDirStat
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	FileSize totalAllocatedSize() override;
-
-	/**
-	 * The ratio of totalSize() / totalAllocatedSize() in percent.
-	 **/
-	int totalUsedPercent();
 
 	/**
 	 * Returns the total size in blocks of this subtree.
@@ -290,6 +332,8 @@ namespace QDirStat
 	 *
 	 * The order of children in this list is absolutely undefined;
 	 * don't rely on any implementation-specific order.
+	 *
+	 * Reimplemented - inherited from FileInfo.
 	 **/
 	void insertChild( FileInfo * newChild ) override;
 
@@ -332,15 +376,26 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	void childAdded( FileInfo * newChild ) override;
+	void childAdded( FileInfo * newChild );
+
+	/**
+	 * Remove a child from the children list.
+	 *
+	 * IMPORTANT: This MUST be called just prior to deleting a FileInfo
+	 * object. Regrettably, this cannot simply be moved to the destructor:
+	 * important parts of the object might already be destroyed
+	 * (e.g., the virtual table - no more virtual methods).
+	 **/
+	void unlinkChild( FileInfo * deletedChild );
 
 	/**
 	 * Notification that a child is about to be deleted somewhere in the
 	 * subtree.
 	 *
-	 * Reimplemented - inherited from FileInfo.
+	 * It is currently only necessary to call unlinkChild() when deleting
+	 * a FileInfo object and this function is redundant.
 	 **/
-	void deletingChild( FileInfo * deletedChild ) override;
+//	void deletingChild( FileInfo * deletedChild );
 
 	/**
 	 * Notification of a new directory read job somewhere in the subtree.
@@ -418,18 +473,18 @@ namespace QDirStat
 	void setReadState( DirReadState newReadState );
 
 	/**
-	 * Return a list of (direct) children sorted by 'sortCol' and
-	 * 'sortOrder' (Qt::AscendingOrder or Qt::DescendingOrder).  If
-	 * 'includeAttic' is 'true', the attic (if there is one) is added to
-	 * the list.
-	 *
-	 * This might return cached information if all parameters are the same
-	 * as for the last call to this function, and there were no children
-	 * added or removed in the meantime.
+	 * Return the sorted list of children from the sort info structure.
 	 **/
-	const FileInfoList & sortedChildren( DataColumn	   sortCol,
-					     Qt::SortOrder sortOrder,
-					     bool	   includeAttic = false );
+	const FileInfoList & sortedChildren( DataColumn sortCol, Qt::SortOrder sortOrder )
+	    { return sortInfo( sortCol, sortOrder )->_sortedChildren; }
+
+	/**
+	 * Return the numeric position of the given child pointer in the
+	 * sorted children list.  This is retrieved from a map as indexOf()
+	 * becomes very slow on long lists and this is executed frequently.
+	 **/
+	int childNumber( DataColumn sortCol, Qt::SortOrder sortOrder, const FileInfo * child )
+	    { return sortInfo( sortCol, sortOrder )->_childNumbers.value( child, -1 ); }
 
 	/**
 	 * Check if this directory is locked. This is purely a user lock
@@ -520,11 +575,12 @@ namespace QDirStat
 	/**
 	 * Return 'true' if this child is a dominant one among its siblings,
 	 * i.e. if its total size is much larger than the other items on the
-	 * same level.
-	 *
-	 * This may trigger some calculations that may be cached.
+	 * same level.  This won't normally be called unless be called unless
+	 * the sort information has already been generated.
 	 **/
-	bool isDominantChild( FileInfo * child );
+	bool isDominantChild( FileInfo * child )
+	    { return _sortInfo ? _sortInfo->_childNumbers.value( child, -1 ) < _sortInfo->firstNonDominantChild() : false; }
+//	    { return _sortInfo ? _sortInfo->dominantChildren()->contains( child ) : false; }
 
 	/**
 	 * Finish reading the directory: Set the specified read state, send
@@ -549,10 +605,8 @@ namespace QDirStat
 	/**
 	 * Set this entry's first child.
 	 * Use this method only if you know exactly what you are doing.
-	 *
-	 * Reimplemented - inherited from FileInfo.
 	 **/
-	void setFirstChild( FileInfo * newfirstChild ) override
+	void setFirstChild( FileInfo * newfirstChild )
 	    { _firstChild = newfirstChild; }
 
 	/**
@@ -573,16 +627,33 @@ namespace QDirStat
 	bool hasAtticChildren() const;
 
 	/**
-	 * Remove a child from the children list.
+	 * Return a structure containing a list of children sorted by 'sortCol'
+	 * and in 'sortOrder' (Qt::AscendingOrder or Qt::DescendingOrder).  The
+	 * structure also includes a mapping of FileInfo pointers to the
+	 * numeric order in the list, for rapid lookup in DirTreeModel.
 	 *
-	 * IMPORTANT: This MUST be called just prior to deleting an object of
-	 * this class. Regrettably, this cannot simply be moved to the
-	 * destructor: Important parts of the object might already be destroyed
-	 * (e.g., the virtual table - no more virtual methods).
+	 * A list of dominant children by size can also be included, but is
+	 * generated in a separate function call.
 	 *
-	 * Reimplemented - inherited from FileInfo.
+	 * This might return cached information if all parameters are the same
+	 * as for the last call to this function, and there were no children
+	 * added or removed in the meantime.
 	 **/
-	void unlinkChild( FileInfo * deletedChild ) override;
+	const DirSortInfo * sortInfo( DataColumn sortCol, Qt::SortOrder sortOrder )
+	    { return sorted( sortCol, sortOrder ) ? _sortInfo : newSortInfo( sortCol, sortOrder ); }
+
+	/**
+	 * Replaces any existing sort information with new data for the given sort
+	 * column and order and returns a pointer to the DirSortInfo structure.
+	 **/
+	const DirSortInfo * newSortInfo( DataColumn sortCol, Qt::SortOrder sortOrder );
+
+	/**
+	 * Return whether the current sort data, if any, matches the given
+	 * sort column and order.
+	 **/
+	bool sorted( DataColumn sortCol, Qt::SortOrder sortOrder ) const
+	    { return _sortInfo && sortCol == _sortInfo->_sortedCol && sortOrder == _sortInfo->_sortedOrder; }
 
 	/**
 	 * Drop all cached information about children sorting for this object and
@@ -627,16 +698,6 @@ namespace QDirStat
 	 **/
 	void cleanupAttics();
 
-	/**
-	 * Populate the _dominantChildren list.
-	 **/
-	void findDominantChildren();
-
-	/**
-	 * Set the latest file modification times on the child and this DirInfo.
-	 **/
-//	void updateLatestMTime( FileInfo * child );
-
 
     private:
 
@@ -644,29 +705,22 @@ namespace QDirStat
 	// Data members
 	//
 
-	FileInfoList * _sortedChildren		{ nullptr };
-	FileInfoList * _dominantChildren	{ nullptr };
-	DataColumn     _lastSortCol		{ UndefinedCol };
-	Qt::SortOrder  _lastSortOrder		{ Qt::AscendingOrder };
-	int            _pendingReadJobs		{ 0 };
-	bool           _lastIncludeAttic:1;
+	int            _pendingReadJobs	{ 0 };
 
 	bool           _isMountPoint:1;		// flag: is this a mount point?
 	bool           _isExcluded:1;		// flag: was this directory excluded?
 	bool           _summaryDirty:1;		// dirty flag for the cached values
-//	bool           _deletingAll:1;		// deleting complete children tree?
 	bool           _locked:1;		// app lock
 	bool           _touched:1;		// app 'touch' flag
 	bool           _fromCache:1;		// is this the root of a cache file read
 
 	// Children management
+	FileInfo     * _firstChild	{ nullptr };	// pointer to the first child
+	DotEntry     * _dotEntry	{ nullptr };	// pseudo entry to hold non-dir children
+	Attic        * _attic		{ nullptr };	// pseudo entry to hold ignored children
+	DirSortInfo  * _sortInfo	{ nullptr };	// sorted children lists
 
-	FileInfo *     _firstChild	{ nullptr };	// pointer to the first child
-	DotEntry *     _dotEntry	{ nullptr };	// pseudo entry to hold non-dir children
-	Attic    *     _attic		{ nullptr };	// pseudo entry to hold ignored children
-
-	// Some cached values
-
+	// Summary data, not always current as indicated by the _summaryDirty flag
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
 	FileSize       _totalBlocks;
@@ -681,7 +735,6 @@ namespace QDirStat
 	time_t         _oldestFileMtime;
 
 	DirReadState   _readState;
-
 
     };	// class DirInfo
 
