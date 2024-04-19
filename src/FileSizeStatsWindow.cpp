@@ -8,6 +8,7 @@
  */
 
 #include <QDesktopServices>
+#include <QResizeEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 
@@ -207,7 +208,7 @@ void FileSizeStatsWindow::populate( FileInfo * subtree, const QString & suffix )
     if ( url == "<root>" )
 	url = subtree->tree()->url();
 
-    _ui->headingUrl->setText( suffix.isEmpty() ? url : tr( "%1 in %2" ).arg( suffix ).arg( url ) );
+    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "%1 in %2" ).arg( suffix ).arg( url ) );
 
     delete _stats;
     if ( suffix.isEmpty() )
@@ -437,4 +438,11 @@ void FileSizeStatsWindow::showHelp()
 
     const QString helpUrl = "https://github.com/shundhammer/qdirstat/blob/master/doc/stats/" + button->statusTip();
     QDesktopServices::openUrl( helpUrl );
+}
+
+
+void FileSizeStatsWindow::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
 }
