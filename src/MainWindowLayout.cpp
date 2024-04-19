@@ -96,8 +96,10 @@ void MainWindow::changeLayout( const QString & name )
     if ( action )
     {
 	// Just set the actions, toggled signals will actually change the widget visibility
-	_ui->actionShowBreadcrumbs->setChecked( layoutShowBreadcrumbs( action ) );
+	_ui->actionShowBreadcrumbs->setChecked ( layoutShowBreadcrumbs ( action ) );
 	_ui->actionShowDetailsPanel->setChecked( layoutShowDetailsPanel( action ) );
+	_ui->actionShowTreemap->setChecked     ( layoutShowTreemap     ( action ) );
+	_ui->actionTreemapOnSide->setChecked   ( layoutTreemapOnSide   ( action ) );
     }
     else
 	logError() << "No layout " << name << Qt::endl;
@@ -111,7 +113,7 @@ void MainWindow::updateLayoutBreadcrumbs( bool breadcrumbsVisible )
 
     QAction * action = _layoutActionGroup->checkedAction();
     auto layoutDetails = action->data().toList();
-    layoutDetails.first() = breadcrumbsVisible;
+    layoutDetails.replace( LayoutShowBreadcrumbs, breadcrumbsVisible );
     action->setData( layoutDetails );
 }
 
@@ -120,10 +122,35 @@ void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
 {
     //logDebug() << detailsPanelVisible << Qt::endl;
     _ui->fileDetailsPanel->setVisible( detailsPanelVisible );
+    updateFileDetailsView();
 
     QAction * action = _layoutActionGroup->checkedAction();
     auto layoutDetails = action->data().toList();
-    layoutDetails.last() = detailsPanelVisible;
+    layoutDetails.replace( LayoutShowDetails, detailsPanelVisible );
+    action->setData( layoutDetails );
+}
+
+
+void MainWindow::updateLayoutTreemap( bool treemapVisible )
+{
+    //logDebug() << treemapVisible << Qt::endl;
+    showTreemapView( treemapVisible );
+
+    QAction * action = _layoutActionGroup->checkedAction();
+    auto layoutDetails = action->data().toList();
+    layoutDetails.replace( LayoutShowTreemap, treemapVisible );
+    action->setData( layoutDetails );
+}
+
+
+void MainWindow::updateLayoutTreemapOnSide( bool treemapOnSide )
+{
+    //logDebug() << treemapVisible << Qt::endl;
+    treemapAsSidePanel( treemapOnSide );
+
+    QAction * action = _layoutActionGroup->checkedAction();
+    auto layoutDetails = action->data().toList();
+    layoutDetails.replace( LayoutTreemapOnSide, treemapOnSide );
     action->setData( layoutDetails );
 }
 
@@ -131,22 +158,28 @@ void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
 void MainWindow::readLayoutSetting( const QString & layoutName )
 {
     Settings settings;
+
     settings.beginGroup( "TreeViewLayout_" + layoutName );
     const bool showBreadcrumbs  = settings.value( "ShowCurrentPath",  true ).toBool();
     const bool showDetailsPanel = settings.value( "ShowDetailsPanel", true ).toBool();
+    const bool showTreemap      = settings.value( "ShowTreemap",      true ).toBool();
+    const bool treemapOnSide    = settings.value( "TreemapOnSide",   false ).toBool();
     settings.endGroup();
 
-    const auto layoutDetails = QList<QVariant>( { showBreadcrumbs, showDetailsPanel } );
-    layoutAction( layoutName )->setData( layoutDetails );
+    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showTreemap, treemapOnSide };
+    layoutAction( layoutName )->setData( data );
 }
 
 
 void MainWindow::writeLayoutSetting( const QAction * action )
 {
     Settings settings;
+
     settings.beginGroup( "TreeViewLayout_" + layoutName( action ) );
-    settings.setValue( "ShowCurrentPath", layoutShowBreadcrumbs( action ) );
+    settings.setValue( "ShowCurrentPath",  layoutShowBreadcrumbs ( action ) );
     settings.setValue( "ShowDetailsPanel", layoutShowDetailsPanel( action ) );
+    settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
+    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
     settings.endGroup();
 }
 
@@ -174,12 +207,14 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
         if ( widget == _ui->centralWidget )
         {
             QMenu menu;
-            const QStringList actions1 = { "actionShowBreadcrumbs",
-                                           "actionShowDetailsPanel",
-                                           "---",
-                                           "actionLayout1",
+            const QStringList actions1 = { "actionLayout1",
                                            "actionLayout2",
                                            "actionLayout3",
+                                           "---",
+                                           "actionShowBreadcrumbs",
+                                           "actionShowDetailsPanel",
+                                           "actionShowTreemap",
+                                           "actionTreemapOnSide",
                                          };
             ActionManager::addActions( &menu, actions1 );
 

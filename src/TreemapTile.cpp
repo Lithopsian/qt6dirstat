@@ -506,7 +506,7 @@ void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 
     //logDebug() << QThreadPool::globalInstance()->activeThreadCount() << " threads active" << Qt::endl;
     // The API changed in Qt6!
-#if (QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
     QtConcurrent::run( _parentView->threadPool(), tile, &TreemapTile::renderChildCushions );
 #else
     QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile );

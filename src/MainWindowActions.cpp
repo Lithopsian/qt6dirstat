@@ -86,11 +86,11 @@ void MainWindow::connectMenuActions()
     connectAction( _ui->actionDonate,             &MainWindow::showDonateDialog );
 
     // Toggle actions
-    connectToggleAction( _ui->actionShowBreadcrumbs,    &MainWindow::setBreadcrumbsVisible );
-    connectToggleAction( _ui->actionShowDetailsPanel,   &MainWindow::setDetailsPanelVisible );
-    connectToggleAction( _ui->actionShowTreemap,        &MainWindow::showTreemapView );
-    connectToggleAction( _ui->actionTreemapAsSidePanel, &MainWindow::treemapAsSidePanel );
-    connectToggleAction( _ui->actionVerboseSelection,   &MainWindow::toggleVerboseSelection );
+    connectToggleAction( _ui->actionShowBreadcrumbs,  &MainWindow::updateLayoutBreadcrumbs );
+    connectToggleAction( _ui->actionShowDetailsPanel, &MainWindow::updateLayoutDetailsPanel );
+    connectToggleAction( _ui->actionShowTreemap,      &MainWindow::updateLayoutTreemap );
+    connectToggleAction( _ui->actionTreemapOnSide,    &MainWindow::updateLayoutTreemapOnSide );
+    connectToggleAction( _ui->actionVerboseSelection, &MainWindow::toggleVerboseSelection );
 
     // Treemap actions
     connectTreemapAction( _ui->actionTreemapZoomTo,    &TreemapView::zoomTo );
@@ -195,7 +195,7 @@ void MainWindow::updateActions()
     _ui->menuExpandTreeToLevel->setEnabled   ( firstToplevel );
 
     const bool showingTreemap = _ui->treemapView->isVisible();
-    _ui->actionTreemapAsSidePanel->setEnabled( showingTreemap );
+//    _ui->actionTreemapAsSidePanel->setEnabled( showingTreemap );
     _ui->actionTreemapZoomTo->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
     _ui->actionTreemapZoomIn->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
     _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );

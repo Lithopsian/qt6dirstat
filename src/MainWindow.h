@@ -46,6 +46,14 @@ class MainWindow: public QMainWindow
 {
     Q_OBJECT
 
+    enum LayoutSettings
+    {
+        LayoutShowBreadcrumbs,
+        LayoutShowDetails,
+        LayoutShowTreemap,
+        LayoutTreemapOnSide,
+    };
+
 public:
 
     MainWindow( bool slowUpdate );
@@ -379,16 +387,6 @@ protected slots:
     void toggleVerboseSelection( bool verboseSelection );
 
     /**
-     * Show or hide the breadcrumbs.
-     **/
-    void setBreadcrumbsVisible( bool breadcrumbsVisible );
-
-    /**
-     * Show or hide the details view.
-     **/
-    void setDetailsPanelVisible( bool detailsPanelVisible );
-
-    /**
      * Copy the path of the current item (if there is one) to the system
      * clipboard for use in other applications.
      **/
@@ -448,6 +446,11 @@ protected slots:
 
 
 protected:
+
+    /**
+     * Return whether verbose selection is enabled.
+     **/
+    bool verboseSelection() const { return _ui->actionVerboseSelection->isChecked(); }
 
     /**
      * Set a subtree to either one of the selected items, or to the current item if
@@ -532,9 +535,13 @@ protected:
      * Get the layout details show values from an action.
      **/
      bool layoutShowBreadcrumbs( const QAction * action ) const
-        { return action->data().toList().first().toBool(); }
+        { return action->data().toList().at( LayoutShowBreadcrumbs ).toBool(); }
      bool layoutShowDetailsPanel( const QAction * action ) const
-        { return action->data().toList().last().toBool(); }
+        { return action->data().toList().at( LayoutShowDetails ).toBool(); }
+     bool layoutShowTreemap( const QAction * action ) const
+        { return action->data().toList().at( LayoutShowTreemap ).toBool(); }
+     bool layoutTreemapOnSide( const QAction * action ) const
+        { return action->data().toList().at( LayoutTreemapOnSide ).toBool(); }
 
     /**
      * Save whether the breadcrumbs are visible in the current layout.
@@ -545,6 +552,16 @@ protected:
      * Save whether the details panel is visible in the current layout.
      **/
     void updateLayoutDetailsPanel( bool detailsPanelVisible );
+
+    /**
+     * Save whether the treemap is visible in the current layout.
+     **/
+    void updateLayoutTreemap( bool treemapVisible );
+
+    /**
+     * Save whether the treemap is on the side in the current layout.
+     **/
+    void updateLayoutTreemapOnSide( bool treemapOnSide );
 
     /**
      * Apply a layout to the current settings.
@@ -636,15 +653,14 @@ private:
 
     bool             _showDirPermissionsMsg;
     bool             _enableDirPermissionsMsg { false };
-    bool             _verboseSelection;
     bool             _urlInWindowTitle;
 
     QTimer           _updateTimer;
-    int	             _statusBarTimeout;
-    int	             _longStatusBarTimeout;
+    int              _statusBarTimeout;
+    int              _longStatusBarTimeout;
     QElapsedTimer    _stopWatch;
 
-    int	             _sortCol;
+    int              _sortCol;
     Qt::SortOrder    _sortOrder;
 
 }; // class MainWindow

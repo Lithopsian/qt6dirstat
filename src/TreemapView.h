@@ -10,12 +10,12 @@
 #ifndef TreemapView_h
 #define TreemapView_h
 
-#include <QGraphicsView>
-#include <QGraphicsRectItem>
-#include <QGraphicsPathItem>
-#include <QList>
 #include <QElapsedTimer>
 #include <QFuture>
+#include <QGraphicsPathItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsView>
+#include <QList>
 #include <QtConcurrent/QtConcurrent>
 
 
@@ -100,11 +100,11 @@ namespace QDirStat
 	 **/
 	TreemapTile * rootTile() const { return _rootTile; }
 
-        /**
-         * Returns the currently highlighted treemap tile (that was highlighted
-         * with a middle click) or 0 if there is none.
-         **/
-//        TreemapTile * highlightedTile() const { return _highlightedTile; }
+	/**
+	 * Returns the currently highlighted treemap tile (that was highlighted
+	 * with a middle click) or 0 if there is none.
+	 **/
+//	TreemapTile * highlightedTile() const { return _highlightedTile; }
 
 	/**
 	 * Returns this treemap view's DirTree.
@@ -145,11 +145,11 @@ namespace QDirStat
 	 **/
 	void setFixedColor( const QColor & fixedColor );
 
-        /**
-         * Remember the current treemap zoom depth so it can be restored later (eg.
+	/**
+	 * Remember the current treemap zoom depth so it can be restored later (eg.
 	 * after a refresh).
-         **/
-        void saveTreemapRoot();
+	 **/
+	void saveTreemapRoot();
 
 	/**
 	 * Hide this treemap view: clear its contents, hide the viewport, and disable
@@ -237,31 +237,31 @@ namespace QDirStat
 	 **/
 	void sendSelection( const TreemapTile *tile );
 
-        /**
-         * Returns the value of the UseTreemapHover setting.
-         **/
-        bool useTreemapHover() const { return _useTreemapHover; }
+	/**
+	 * Returns the value of the UseTreemapHover setting.
+	 **/
+	bool useTreemapHover() const { return _useTreemapHover; }
 
-        /**
-         * Returns the value of the UseTreemapHover setting.
-         **/
-        void setUseTreemapHover( bool useTreemapHover ) { _useTreemapHover = useTreemapHover; }
+	/**
+	 * Returns the value of the UseTreemapHover setting.
+	 **/
+	void setUseTreemapHover( bool useTreemapHover ) { _useTreemapHover = useTreemapHover; }
 
-        /**
-         * Send a hoverEnter() signal for 'node'.
-         **/
-        void sendHoverEnter( FileInfo * node );
+	/**
+	 * Send a hoverEnter() signal for 'node'.
+	 **/
+	void sendHoverEnter( FileInfo * node );
 
-        /**
-         * Send a hoverLeave() signal for 'node'.
-         **/
-        void sendHoverLeave( FileInfo * node );
+	/**
+	 * Send a hoverLeave() signal for 'node'.
+	 **/
+	void sendHoverLeave( FileInfo * node );
 
-        /**
-         * Highlight the parent tiles of item 'tile' if that tile is not
-         * currently highlighted, or clear the highlight if it is.
-         **/
-        void toggleParentsHighlight( const TreemapTile * tile );
+	/**
+	 * Highlight the parent tiles of item 'tile' if that tile is not
+	 * currently highlighted, or clear the highlight if it is.
+	 **/
+	void toggleParentsHighlight( const TreemapTile * tile );
 
 	/**
 	 * Returns 'true' if the category colours should be shown next to each
@@ -292,10 +292,10 @@ namespace QDirStat
 	QBrush dirBrush() const { return _useDirGradient ? QBrush( _dirGradient ) : QBrush( _dirFillColor ); }
 
 	/**
-         * Returns 'true' if directories should be rendered with a gradient,
-         * 'false' if not.
-         **/
-//        bool useDirGradient() const { return _useDirGradient; }
+	 * Returns 'true' if directories should be rendered with a gradient,
+	 * 'false' if not.
+	 **/
+//	bool useDirGradient() const { return _useDirGradient; }
 
 	/**
 	 * Returns 'true' if treemap tiles are to be separated by a grid,
@@ -360,17 +360,17 @@ namespace QDirStat
 	 **/
 //	const QColor & dirFillColor() const { return _dirFillColor; }
 
-        /**
-         * Returns the start color for directory (or "dotentry") treemap tiles
-         * if a directory gradient should be used.
-         **/
-//        const QColor & dirGradientStart() const { return _dirGradientStart; }
+	/**
+	 * Returns the start color for directory (or "dotentry") treemap tiles
+	 * if a directory gradient should be used.
+	 **/
+//	const QColor & dirGradientStart() const { return _dirGradientStart; }
 
-        /**
-         * Returns the end color for directory (or "dotentry") treemap tiles
-         * if a directory gradient should be used.
-         **/
-//        const QColor & dirGradientEnd() const { return _dirGradientEnd; }
+	/**
+	 * Returns the end color for directory (or "dotentry") treemap tiles
+	 * if a directory gradient should be used.
+	 **/
+//	const QColor & dirGradientEnd() const { return _dirGradientEnd; }
 
 	/**
 	 * Returns the intensity of ambient light for cushion shading
@@ -418,20 +418,20 @@ namespace QDirStat
 			    double heightScaleFactor,
 			    int minTileSize );
 
-        /**
-         * Return the tile of the deepest-level highlighted parent or 0 if no
-         * parent is currently highlighted. Notice that this returns the real
-         * tile corresponding to a directory, not the HighlightRect.
-         **/
-        const TreemapTile * highlightedParent() const;
+	/**
+	 * Return the tile of the deepest-level highlighted parent or 0 if no
+	 * parent is currently highlighted. Notice that this returns the real
+	 * tile corresponding to a directory, not the HighlightRect.
+	 **/
+	const TreemapTile * highlightedParent() const;
 
-        /**
-         * Sets a pointer to a treemap tile.  Each tile updates this as it is
+	/**
+	 * Sets a pointer to a treemap tile.  Each tile updates this as it is
 	 * constructed, so that after the build it points to the last tile to be
 	 * built, and hence the last to be painted.  This is used for logging
 	 * purposes as it is difficult to identify the end of the paint any other way.
-         **/
-//	 void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
+	 **/
+//	void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
 
 
     public slots:
@@ -541,25 +541,25 @@ namespace QDirStat
 	 **/
 	TreemapTile * findTile( TreemapTile *rootTile, const FileInfo *node ) const;
 
-        /**
-         * Highlight the parent tiles of item 'tile'.
-         **/
-        void highlightParents( const TreemapTile * tile );
+	/**
+	 * Highlight the parent tiles of item 'tile'.
+	 **/
+	void highlightParents( const TreemapTile * tile );
 
-        /**
-         * Clear previous parent highlights.
-         **/
-        void clearParentsHighlight();
+	/**
+	 * Clear previous parent highlights.
+	 **/
+	void clearParentsHighlight();
 
-        /**
-         * Clear the old scene mask if there is one.
-         **/
-        void clearSceneMask();
+	/**
+	 * Clear the old scene mask if there is one.
+	 **/
+	void clearSceneMask();
 
-        /**
-         * Cancels any treemap builds.
-         **/
-        void cancelTreemap();
+	/**
+	 * Cancels any treemap builds.
+	 **/
+	void cancelTreemap();
 
 
     signals:
@@ -583,15 +583,15 @@ namespace QDirStat
 	 **/
 	void treemapChanged();
 
-        /**
-         * Emitted when the mouse cursor enters a hover over 'item'.
-         **/
-        void hoverEnter( FileInfo * item );
+	/**
+	 * Emitted when the mouse cursor enters a hover over 'item'.
+	 **/
+	void hoverEnter( FileInfo * item );
 
-        /**
-         * Emitted when the mouse cursor leaves the hover over 'item'.
-         **/
-        void hoverLeave( FileInfo * item );
+	/**
+	 * Emitted when the mouse cursor leaves the hover over 'item'.
+	 **/
+	void hoverLeave( FileInfo * item );
 
 
     protected slots:
@@ -743,25 +743,25 @@ namespace QDirStat
 	 **/
 	virtual void highlight( const TreemapTile * ) {}
 
-        /**
-         * Return the tile that this highlights or 0 if there is none.
-         **/
-        const TreemapTile * tile() const { return _tile; }
+	/**
+	 * Return the tile that this highlights or 0 if there is none.
+	 **/
+	const TreemapTile * tile() const { return _tile; }
 
-        /**
-         * Return the shape of this item; in this case only the outline,
-         * leaving the inside hollow to avoid displaying the tooltip there as
-         * well.
-         *
-         * Reimplemented from QGraphicsRectItem / QGraphicsItem.
-         **/
-        QPainterPath shape() const override;
+	/**
+	 * Return the shape of this item; in this case only the outline,
+	 * leaving the inside hollow to avoid displaying the tooltip there as
+	 * well.
+	 *
+	 * Reimplemented from QGraphicsRectItem / QGraphicsItem.
+	 **/
+	QPainterPath shape() const override;
 
 
     protected:
 
 	// Data members
-        const TreemapTile * _tile;
+	const TreemapTile * _tile;
 
     }; // class TreemapSelectionRect
 
@@ -839,14 +839,14 @@ namespace QDirStat
     {
     public:
 
-        /**
-         * Constructor: Create a semi-transparent mask that covers the complete
-         * scene (the complete treemap), but leaves 'tile' uncovered.
-         *
-         * 'opacity' (0.0 .. 1.0) indicates how transparent the mask is:
-         * 0.0 -> completely transparent; 1.0 -> solid.
-         **/
-        SceneMask( const TreemapTile * tile, float opacity );
+	/**
+	 * Constructor: Create a semi-transparent mask that covers the complete
+	 * scene (the complete treemap), but leaves 'tile' uncovered.
+	 *
+	 * 'opacity' (0.0 .. 1.0) indicates how transparent the mask is:
+	 * 0.0 -> completely transparent; 1.0 -> solid.
+	 **/
+	SceneMask( const TreemapTile * tile, float opacity );
     };
 
 }	// namespace QDirStat

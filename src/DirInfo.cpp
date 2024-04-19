@@ -983,6 +983,8 @@ void DirSortInfo::findDominantChildren()
 	    return 0;
 
 	const qreal count = qMin( _sortedChildren.size(), 30 );
+
+	// Declare that only one child (ie. 100%) doesn't count as dominant
 	if ( count < 2 )
 	    return 0;
 
@@ -1004,7 +1006,7 @@ void DirSortInfo::findDominantChildren()
 		return _childNumbers.value( child, -1 );
 	}
 
-	// Should never reach here, children can't all be dominant
-	return _sortedChildren.size();
+	// Should never get here, children can't all be dominant
+	return 0;
     }();
 }

@@ -96,7 +96,7 @@ MainWindow::MainWindow( bool slowUpdate ):
 
     app()->dirTreeModel()->setBaseFont( _ui->dirTreeView->font() );
 
-    _ui->treemapView->hideTreemap();
+//    _ui->treemapView->hideTreemap();
 
 #ifdef Q_OS_MACX
     // This makes the application to look more "native" on macOS
@@ -235,26 +235,24 @@ void MainWindow::updateSettings( bool urlInWindowTitle,
 void MainWindow::readSettings()
 {
     QDirStat::Settings settings;
+
     settings.beginGroup( "MainWindow" );
 
-    restoreState(settings.value("State").toByteArray());
+    restoreState( settings.value("State").toByteArray());
 
     _statusBarTimeout           = settings.value( "StatusBarTimeoutMillisec",  3000 ).toInt();
     _longStatusBarTimeout       = settings.value( "LongStatusBarTimeout",     30000 ).toInt();
-
-    const bool showTreemap      = settings.value( "ShowTreemap",              true  ).toBool();
-    const bool treemapOnSide    = settings.value( "TreemapOnSide",            false ).toBool();
-
-    _verboseSelection           = settings.value( "VerboseSelection",         false ).toBool();
     _urlInWindowTitle           = settings.value( "UrlInWindowTitle",         false ).toBool();
-    const bool useTreemapHover  = settings.value( "UseTreemapHover",          false ).toBool();
-
     const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
-    const bool showMenuBar      = settings.value( "ShowMenuBar",              true  ).toBool();
-    const bool showStatusBar    = settings.value( "ShowStatusBar",            true  ).toBool();
     _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
+//    const bool showTreemap      = settings.value( "ShowTreemap",              true  ).toBool();
+//    const bool treemapOnSide    = settings.value( "TreemapOnSide",            false ).toBool();
 
-    _ui->fileDetailsView->setLabelLimit( settings.value( "FileDetailsLabelLimit", 0 ).toInt() );
+    _ui->actionVerboseSelection->setChecked( settings.value( "VerboseSelection",      false ).toBool() );
+    _ui->treemapView->setUseTreemapHover   ( settings.value( "UseTreemapHover",       false ).toBool() );
+    _ui->actionShowMenuBar->setChecked     ( settings.value( "ShowMenuBar",           true  ).toBool() );
+    _ui->actionShowStatusBar->setChecked   ( settings.value( "ShowStatusBar",         true  ).toBool() );
+    _ui->fileDetailsView->setLabelLimit    ( settings.value( "FileDetailsLabelLimit", 0     ).toInt()  );
 
     settings.endGroup();
 
@@ -263,12 +261,7 @@ void MainWindow::readSettings()
     const QByteArray topSplitterState  = settings.value( "TopSplitter"  , QByteArray() ).toByteArray();
     settings.endGroup();
 
-    _ui->actionShowMenuBar->setChecked  ( showMenuBar   );
-    _ui->actionShowStatusBar->setChecked( showStatusBar );
     showBars();
-
-    _ui->actionVerboseSelection->setChecked( _verboseSelection );
-    toggleVerboseSelection( _verboseSelection );
 
     readWindowSettings( this, "MainWindow" );
 
@@ -287,10 +280,9 @@ void MainWindow::readSettings()
 	_ui->topViewsSplitter->restoreState( topSplitterState );
     }
 
-    _ui->treemapView->setUseTreemapHover( useTreemapHover );
-    _ui->actionShowTreemap->setChecked( showTreemap );
-    _ui->actionTreemapAsSidePanel->setChecked( treemapOnSide );
-    treemapAsSidePanel( treemapOnSide );
+//    _ui->treemapView->setUseTreemapHover( useTreemapHover );
+//    _ui->actionShowTreemap->setChecked( showTreemap );
+//    _ui->actionTreemapAsSidePanel->setChecked( _ui->mainWinSplitter->orientation() == Qt::Horizontal );
 
     initLayouts( layoutName );
 }
@@ -299,26 +291,21 @@ void MainWindow::readSettings()
 void MainWindow::writeSettings()
 {
     QDirStat::Settings settings;
+
     settings.beginGroup( "MainWindow" );
-
-    settings.setValue( "ShowTreemap",              _ui->actionShowTreemap->isChecked()        );
-    settings.setValue( "TreemapOnSide",            _ui->actionTreemapAsSidePanel->isChecked() );
-    settings.setValue( "VerboseSelection",         _verboseSelection                          );
-
+//    settings.setValue( "ShowTreemap",              _ui->actionShowTreemap->isChecked()        );
+//    settings.setValue( "TreemapOnSide",            _ui->actionTreemapAsSidePanel->isChecked() );
+    settings.setValue( "VerboseSelection",         verboseSelection()                    );
     settings.setValue( "Layout",                   currentLayoutName()                   );
     settings.setValue( "ShowMenuBar",              _ui->actionShowMenuBar->isChecked()   );
     settings.setValue( "ShowStatusBar",            _ui->actionShowStatusBar->isChecked() );
-    settings.setValue( "ShowDirPermissionsMsg",    _showDirPermissionsMsg );
-
-    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout                   );
-    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout               );
-    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                   );
-    settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover() );
-
-    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit() );
-
-    settings.setValue( "State", saveState() );
-
+    settings.setValue( "ShowDirPermissionsMsg",    _showDirPermissionsMsg                );
+    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout                     );
+    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout                 );
+    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                     );
+    settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover()   );
+    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit()    );
+    settings.setValue( "State",                    saveState()                           );
     settings.endGroup();
 
     writeWindowSettings( this, "MainWindow" );
@@ -336,17 +323,16 @@ void MainWindow::showTreemapView( bool show )
 {
     if ( !show )
 	_ui->treemapView->hideTreemap();
-    else if ( !_updateTimer.isActive() ) // don't show from F9 during a read
+    else if ( !_updateTimer.isActive() )
+	// don't show from F9 during a read, it will appear when the read is complete
 	_ui->treemapView->showTreemap();
 }
 
 
 void MainWindow::treemapAsSidePanel( bool asSidePanel )
 {
-    if ( asSidePanel )
-	_ui->mainWinSplitter->setOrientation( Qt::Horizontal );
-    else
-	_ui->mainWinSplitter->setOrientation( Qt::Vertical );
+    _ui->mainWinSplitter->setOrientation ( asSidePanel ? Qt::Horizontal : Qt::Vertical );
+    _ui->topViewsSplitter->setOrientation( asSidePanel ? Qt::Vertical : Qt::Horizontal );
 }
 
 
@@ -382,6 +368,7 @@ void MainWindow::idleDisplay()
     // Safe for the treemap to start work now
     _updateTimer.stop();
     showTreemapView( _ui->actionShowTreemap->isChecked() );
+//    _ui->treemapView->enable();
 
     updateActions();
     ActionManager::swapActions( _ui->toolBar, _ui->actionStopReading, _ui->actionRefreshAll );
@@ -420,20 +407,6 @@ void MainWindow::updateFileDetailsView()
 	_ui->fileDetailsView->showDetails( sel.first() );
     else
 	_ui->fileDetailsView->showDetails( sel );
-}
-
-
-void MainWindow::setBreadcrumbsVisible( bool breadcrumbsVisible )
-{
-    updateLayoutBreadcrumbs( breadcrumbsVisible );
-}
-
-
-void MainWindow::setDetailsPanelVisible( bool detailsPanelVisible )
-{
-    updateLayoutDetailsPanel( detailsPanelVisible );
-
-    updateFileDetailsView();
 }
 
 
@@ -1049,7 +1022,7 @@ void MainWindow::closeChildren()
 #if 0
 void MainWindow::itemClicked( const QModelIndex & index )
 {
-    if ( !_verboseSelection )
+    if ( !verboseSelection() )
 	return;
 
     if ( index.isValid() )
@@ -1078,7 +1051,7 @@ void MainWindow::selectionChanged()
     showSummary();
     updateFileDetailsView();
 
-    if ( _verboseSelection )
+    if ( verboseSelection() )
     {
 	logNewline();
 	app()->selectionModel()->dumpSelectedItems();
@@ -1095,7 +1068,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
     if ( !oldCurrent )
 	updateFileDetailsView();
 
-    if ( _verboseSelection )
+    if ( verboseSelection() )
     {
 	logDebug() << "new current: " << newCurrent << Qt::endl;
 	logDebug() << "old current: " << oldCurrent << Qt::endl;
@@ -1131,12 +1104,10 @@ void MainWindow::quit()
 void MainWindow::toggleVerboseSelection( bool verboseSelection)
 {
     // Verbose selection is toggled with Shift-F7
-    _verboseSelection = verboseSelection;
-
     if ( app()->selectionModel() )
-	app()->selectionModel()->setVerbose( _verboseSelection );
+	app()->selectionModel()->setVerbose( verboseSelection );
 
-    logInfo() << "Verbose selection is now " << ( _verboseSelection ? "on" : "off" )
+    logInfo() << "Verbose selection is now " << ( verboseSelection ? "on" : "off" )
 	      << ". Change this with Shift-F7." << Qt::endl;
 }
 

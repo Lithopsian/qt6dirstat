@@ -20,17 +20,11 @@
     <item>
      <widget class="QSplitter" name="mainWinSplitter">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="handleWidth">
-       <number>8</number>
+       <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QSplitter" name="topViewsSplitter">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="handleWidth">
-        <number>8</number>
        </property>
        <widget class="QWidget" name="treeViewContainer" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
@@ -124,7 +118,7 @@
            <x>0</x>
            <y>0</y>
            <width>79</width>
-           <height>302</height>
+           <height>587</height>
           </rect>
          </property>
         </widget>
@@ -201,6 +195,7 @@
     <addaction name="actionShowBreadcrumbs"/>
     <addaction name="actionShowDetailsPanel"/>
     <addaction name="actionShowTreemap"/>
+    <addaction name="actionTreemapOnSide"/>
     <addaction name="separator"/>
     <addaction name="actionFileSizeStats"/>
     <addaction name="actionFileTypeStats"/>
@@ -921,18 +916,12 @@
     <string>https://github.com/shundhammer/qdirstat/blob/master/doc/Troubleshooting.md#cant-move-a-directory-to-trash</string>
    </property>
   </action>
-  <action name="actionTreemapAsSidePanel">
+  <action name="actionTreemapOnSide">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
-    <string>&amp;Treemap as side panel</string>
-   </property>
-   <property name="toolTip">
-    <string>Show the Treeemap to the right of the directory tree, otherwise it will be shown below it</string>
+    <string>Treemap as side &amp;panel</string>
    </property>
   </action>
   <action name="actionFileAgeStats">
