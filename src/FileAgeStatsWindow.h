@@ -20,6 +20,7 @@
 
 namespace QDirStat
 {
+    class FileAgeStats;
     class PercentBarDelegate;
     class SelectionModel;
     class YearListItem;
@@ -171,6 +172,17 @@ namespace QDirStat
 	 **/
 	void keyPressEvent( QKeyEvent * event ) override;
 
+        /**
+         * Resize event, reimplemented from QWidget.
+	 *
+	 * Elide the title to fit inside the current dialog width, so that
+	 * they fill the available width but very long paths don't stretch
+	 * the dialog.  A little extra room is left for the user to
+	 * shrink the dialog, which would then force the label to be elided
+	 * further.
+         **/
+        void resizeEvent( QResizeEvent * event ) override;
+
 
 	//
 	// Data members
@@ -235,7 +247,7 @@ namespace QDirStat
 
     private:
 
-	const YearStats _stats;
+	const YearStats & _stats;
 
     };	// class YearListItem
 

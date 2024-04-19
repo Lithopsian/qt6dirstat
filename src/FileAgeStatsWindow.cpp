@@ -7,11 +7,11 @@
  *              Ian Nartowicz
  */
 
-#include <QFont>
 #include <QPointer>
 #include <QKeyEvent>
 
 #include "FileAgeStatsWindow.h"
+#include "FileAgeStats.h"
 #include "DiscoverActions.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
@@ -173,7 +173,7 @@ void FileAgeStatsWindow::populate( FileInfo * newSubtree )
     clear();
     _subtree = newSubtree;
 
-    _ui->headingUrl->setText( _subtree.url() );
+    _ui->headingUrl->setStatusTip( _subtree.url() );
 
     // For better Performance: disable sorting while inserting many (not many!) items
     _ui->treeWidget->setSortingEnabled( false );
@@ -338,6 +338,13 @@ void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 	item->setExpanded( !item->isExpanded() );
     else
 	locateFiles();
+}
+
+
+void FileAgeStatsWindow::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
 }
 
 

@@ -8,6 +8,7 @@
  */
 
 #include <QMenu>
+#include <QResizeEvent>
 
 #include "LocateFilesWindow.h"
 #include "ActionManager.h"
@@ -136,7 +137,7 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
     // Get the shared instance, creating it if necessary
     LocateFilesWindow * instance = sharedInstance( treeWalker );
 
-    instance->_ui->heading->setText( headingText );
+    instance->_ui->heading->setStatusTip( headingText );
     instance->populate( subtree );
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
     instance->show();
@@ -241,6 +242,13 @@ void LocateFilesWindow::addCleanupHotkeys()
     ActionManager::addActions( this, { "actionMoveToTrash", "actionFindFiles" } );
 
     ActionManager::addActiveCleanups( this );
+}
+
+
+void LocateFilesWindow::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    elideLabel( _ui->heading, _ui->heading->statusTip(), event->size().width() - 24 );
 }
 
 

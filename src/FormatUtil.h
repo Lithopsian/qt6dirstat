@@ -14,6 +14,7 @@
 #include <sys/stat.h>       // ALLPERMS
 
 #include <QFontMetrics>
+#include <QLabel>
 #include <QObject>
 #include <QString>
 #include <QTextStream>
@@ -170,13 +171,17 @@ namespace QDirStat
      * the given font.
      **/
     inline int textWidth( const QFont & font, const QString & text )
-	{
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 ))
-	    return QFontMetrics( font ).width( text );
+#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
+	{ return QFontMetrics( font ).width( text ); }
 #else
-	    return QFontMetrics( font ).horizontalAdvance( text );
+	{ return QFontMetrics( font ).horizontalAdvance( text ); }
 #endif
-	}
+
+    /**
+     * Elide the text to fit within 'maxSize' using the label widget font
+     * and place it in the label.
+     **/
+    void elideLabel( QLabel * label, const QString & text, int maxSize );
 
     /**
      * Human-readable output of a file size in a debug stream.

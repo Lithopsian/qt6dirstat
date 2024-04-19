@@ -93,7 +93,7 @@ namespace QDirStat
          * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the label to fit inside the current dialog width, so that
-	 * they fill the available width but very long subtree paths don't
+	 * it fills the available width but very long subtree paths don't
 	 * stretch the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.

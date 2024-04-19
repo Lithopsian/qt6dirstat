@@ -169,7 +169,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     delete _stats;
     _stats = new FileTypeStats( _subtree() );
 
-    _ui->headingUrl->setText( _subtree.url() );
+    _ui->headingUrl->setStatusTip( _subtree.url() );
 
     // Don't sort until all items are added
     _ui->treeWidget->setSortingEnabled( false );
@@ -418,6 +418,13 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
     else
 	// For category headings, toggle the expanded state
 	item->setExpanded( !item->isExpanded() );
+}
+
+
+void FileTypeStatsWindow::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
 }
 
 

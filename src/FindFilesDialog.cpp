@@ -13,6 +13,7 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "FileSearchFilter.h"
+#include "FormatUtil.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
@@ -202,7 +203,5 @@ void FindFilesDialog::writeSettings()
 void FindFilesDialog::resizeEvent( QResizeEvent * event )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    const int maxSize = event->size().width() - 100;
-    const QFontMetrics metrics( _ui->currentSubtreePathLabel->font() );
-    _ui->currentSubtreePathLabel->setText( metrics.elidedText( _lastPath, Qt::ElideMiddle, maxSize ) );
+    elideLabel( _ui->currentSubtreePathLabel, _lastPath, event->size().width() - 100 );
 }

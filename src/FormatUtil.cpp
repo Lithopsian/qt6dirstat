@@ -66,7 +66,7 @@ QString QDirStat::formatTime( time_t rawTime )
     if ( rawTime == (time_t)0 )
 	return "";
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 8, 0)
+#if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
     const QDateTime time = QDateTime::fromTime_t( rawTime );
 #else
     const QDateTime time = QDateTime::fromSecsSinceEpoch( rawTime );
@@ -166,4 +166,12 @@ QString QDirStat::monthAbbreviation( short month )
         case 12: return QObject::tr( "Dec" );
 	default: return "";
     }
+}
+
+
+void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    const QFontMetrics metrics( label->font() );
+    label->setText( metrics.elidedText( text, Qt::ElideMiddle, maxSize ) );
 }

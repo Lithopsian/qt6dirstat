@@ -8,6 +8,7 @@
  */
 
 #include <QPointer>
+#include <QResizeEvent>
 
 #include "LocateFileTypeWindow.h"
 #include "DirTree.h"
@@ -130,7 +131,9 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * newSubtr
 
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = ( count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count ) );
-    _ui->heading->setText( intro + tr( " with %2 files below %3" ).arg( displaySuffix() ).arg( _subtree.url() ) );
+    const QString heading = tr( " with %2 files below %3" ).arg( displaySuffix() ).arg( _subtree.url() );
+    _ui->heading->setStatusTip( intro + heading );
+
 //    logDebug() << count << " directories" << Qt::endl;
 }
 
@@ -207,6 +210,13 @@ void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item )
     app()->selectionModel()->setSelectedItems( matches );
 
     // logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
+}
+
+
+void LocateFileTypeWindow::resizeEvent( QResizeEvent * event )
+{
+    // Calculate a width from the dialog less margins, less a bit more
+    elideLabel( _ui->heading, _ui->heading->statusTip(), event->size().width() - 24 );
 }
 
 
