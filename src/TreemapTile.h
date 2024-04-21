@@ -98,7 +98,7 @@ namespace QDirStat
 
 	/**
 	 * Adds a ridge of the specified height in dimension 'dir' within
-	 * rectangle 'rect' to this surface. It's real voodo magic.
+	 * rectangle 'rect' to this surface. It's real voodoo magic.
 	 *
 	 * Just kidding - read the paper about "cushion treemaps" by Jarke
 	 * J. van Wiik and Huub van de Wetering from the TU Eindhoven, NL for
@@ -111,24 +111,24 @@ namespace QDirStat
 	void addVerticalRidge( double start, double end );
 
 	/**
-	 * Returns the polynomal coefficient of the second order for X
+	 * Returns the polynomial coefficient of the second order for X
 	 * direction.
 	 **/
 	double xx2() const { return _xx2; }
 
 	/**
-	 * Returns the polynomal coefficient of the first order for X direction.
+	 * Returns the polynomial coefficient of the first order for X direction.
 	 **/
 	double xx1() const { return _xx1; }
 
 	/**
-	 * Returns the polynomal coefficient of the second order for Y
+	 * Returns the polynomial coefficient of the second order for Y
 	 * direction.
 	 **/
 	double yy2() const { return _yy2; }
 
 	/**
-	 * Returns the polynomal coefficient of the first order for Y direction.
+	 * Returns the polynomial coefficient of the first order for Y direction.
 	 **/
 	double yy1() const { return _yy1; }
 
@@ -143,7 +143,7 @@ namespace QDirStat
 	    { return *_height / (end - start); }
 
 	/**
-	 * Calculate a new square polynomal coefficient.
+	 * Calculate a new square polynomial coefficient.
 	 * The full formula is -4h / (end - start)
 	 * Currently a no-op kept for clarity, should be inlined away.
 	 **/
@@ -151,7 +151,7 @@ namespace QDirStat
 	    { return reciprocal; }
 
 	/**
-	 * Calculate a new linear polynomal coefficient.
+	 * Calculate a new linear polynomial coefficient.
 	 * The full forumla is 4h * (start + end) / (end - start)
 	 **/
 	static double linearCoefficient( double start, double end, double reciprocal )
@@ -279,7 +279,7 @@ namespace QDirStat
 	 * quickly rendered in paint().
 	 *
 	 * The worst extremes are: small trees with only one child of the root, which
-	 * are rendered in a single thread spawned when the build is essntially complete;
+	 * are rendered in a single thread spawned when the build is essentially complete;
 	 * they will be very fast with or without threading; and very "flat" trees such as
 	 * the packages view, where essentially every packages gets a thread. Even in
 	 * this last case, performance is good and despite the large number of threads

@@ -383,7 +383,7 @@ namespace QDirStat
 	 * corresponding to over the left shoulder.  This avoids the steep top
 	 * and left sides of the largest tiles being in deep shadow, while the
 	 * smaller tiles to the bottom and right are still illuminated and the
-	 * highlight is reasonably centered.
+	 * highlight is reasonably centred.
 	 **/
 	double lightX() const { return _lightX; }
 	double lightY() const { return _lightY; }
@@ -466,7 +466,7 @@ namespace QDirStat
 	 * Completely rebuild the entire treemap from the internal tree's root
 	 * on.
 	 **/
-	void rebuildTreemapSlot();
+	void rebuildTreemap();
 
 	/**
 	 * Notification that a dir tree node is about to be deleted, with no
@@ -498,7 +498,7 @@ namespace QDirStat
 	 * ~/.config/QDirStat/QDirStat.conf ; this class writes the settings to
 	 * that file in its destructor so those experts can find and edit them.
 	 *
-	 * If you misconfigured things and want to go back to the defaults,
+	 * If you've misconfigured things and want to go back to the defaults,
 	 * simply delete that one setting or the section in the settings or the
 	 * complete settings file; missing settings are restored to the
 	 * defaults when the program exits the next time.
@@ -524,9 +524,8 @@ namespace QDirStat
 //	QSize visibleSize() const { return viewport()->size(); }
 
 	/**
-	 * Resize the treemap view. Suppress the treemap contents if the size
-	 * falls below a minimum size, redisplay it if it grows above that
-	 * minimum size.
+	 * Resize the treemap view. Scale it and create a thread to rebuild it
+	 * to the new size.
 	 *
 	 * Reimplemented from QFrame.
 	 **/

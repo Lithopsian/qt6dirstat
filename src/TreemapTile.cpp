@@ -741,54 +741,43 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
 
     switch ( event->button() )
     {
-    case Qt::LeftButton:
-        //logDebug() << this << " mouse pressed (" << event->modifiers() << ")" << Qt::endl;
+        case Qt::LeftButton:
+            //logDebug() << this << " mouse pressed (" << event->modifiers() << ")" << Qt::endl;
 
-        // isSelected() is unreliable here since in QGraphicsItem some
-        // stuff is done in the mousePressEvent, while some other stuff is
-        // done in the mouseReleaseEvent. Just setting the current item
-        // here to avoid having a yellow highlighter rectangle upon mouse
-        // press and then a red one upon mouse release. No matter if the
-        // item ends up selected or not, the mouse press makes it the
-        // current item, so let's update the red highlighter rectangle
-        // here.
-        QGraphicsRectItem::mousePressEvent( event );
-        _parentView->setCurrentTile( this );
-        break;
+            // isSelected() is unreliable here since in QGraphicsItem some
+            // stuff is done in the mousePressEvent, while some other stuff is
+            // done in the mouseReleaseEvent. Just setting the current item
+            // here to avoid having a yellow highlighter rectangle upon mouse
+            // press and then a red one upon mouse release. No matter if the
+            // item ends up selected or not, the mouse press makes it the
+            // current item, so let's update the red highlighter rectangle
+            // here.
+            QGraphicsRectItem::mousePressEvent( event );
+            _parentView->setCurrentTile( this );
+            break;
 
-    case Qt::MiddleButton:
-        // logDebug() << "Middle click on " << _orig << Qt::endl;
+        case Qt::MiddleButton:
+            // logDebug() << "Middle click on " << _orig << Qt::endl;
 
-        // Handle item selection (with or without Ctrl) ourselves here;
-        // unlike for a left click, the QGraphicsItem base class does
-        // not do this for us already.
-        if ( ( event->modifiers() & Qt::ControlModifier ) == 0 )
-            scene()->clearSelection();
+            // Handle item selection (with or without Ctrl) ourselves here;
+            // unlike for a left click, the QGraphicsItem base class does
+            // not do this for us already.
+            if ( ( event->modifiers() & Qt::ControlModifier ) == 0 )
+                scene()->clearSelection();
+            setSelected( !isSelected() );
+            _parentView->toggleParentsHighlight( this );
+            _parentView->setCurrentTile( this );
+            break;
 
-        setSelected( !isSelected() );
+        case Qt::RightButton:
+            // logDebug() << this << " right mouse pressed" << Qt::endl;
+            _parentView->setCurrentTile( this );
+            _parentView->sendSelection( this ); // won't get a mouse release for this
+            break;
 
-        _parentView->toggleParentsHighlight( this );
-        _parentView->setCurrentTile( this );
-        break;
-
-    case Qt::RightButton:
-        // logDebug() << this << " right mouse pressed" << Qt::endl;
-        _parentView->setCurrentTile( this );
-        break;
-/*
-    case Qt::ExtraButton1:
-        // logDebug() << this << " back mouse button pressed" << Qt::endl;
-        _parentView->resetZoom();
-        break;
-
-    case Qt::ExtraButton2:
-        // logDebug() << this << " forward mouse button pressed" << Qt::endl;
-        _parentView->zoomTo();
-        break;
-*/
-    default:
-        QGraphicsRectItem::mousePressEvent( event );
-        break;
+        default:
+            QGraphicsRectItem::mousePressEvent( event );
+            break;
     }
 }
 
@@ -801,16 +790,21 @@ void TreemapTile::mouseReleaseEvent( QGraphicsSceneMouseEvent * event )
 
     switch ( event->button() )
     {
-    case Qt::LeftButton:
-        // The current item was already set in the mouse press event,
-        // but it might have changed its 'selected' status right now,
-        // so let the view update it.
-        _parentView->setCurrentTile( this );
-        // logDebug() << this << " clicked; selected: " << isSelected() << Qt::endl;
-        break;
+        case Qt::LeftButton:
+            // The current item was already set in the mouse press event,
+            // but it might have changed its 'selected' status right now,
+            // so let the view update it.
+            _parentView->setCurrentTile( this );
+            // logDebug() << this << " clicked; selected: " << isSelected() << Qt::endl;
+            break;
 
-    default:
-        break;
+        case Qt::BackButton:
+        case Qt::ForwardButton:
+            // We get this after a double-click, but the used by the history buttons
+            return;
+
+        default:
+            break;
     }
 
     _parentView->sendSelection( this );
@@ -823,23 +817,23 @@ void TreemapTile::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
 
     switch ( event->button() )
     {
-    case Qt::LeftButton:
-        // logDebug() << "Zooming treemap in" << Qt::endl;
-        _parentView->zoomIn();
-        break;
+        case Qt::LeftButton:
+            // logDebug() << "Zooming treemap in" << Qt::endl;
+            _parentView->zoomIn();
+            break;
 
-    case Qt::MiddleButton:
-        // logDebug() << "Zooming treemap out" << Qt::endl;
-        _parentView->zoomOut();
-        break;
+        case Qt::MiddleButton:
+            // logDebug() << "Zooming treemap out" << Qt::endl;
+            _parentView->zoomOut();
+            break;
 
-    case Qt::RightButton:
-        // This doesn't work at all since the first click already opens the
-        // context menu which grabs the focus to that pop-up menu.
-        break;
+        case Qt::RightButton:
+            // This doesn't work at all since the first click already opens the
+            // context menu which grabs the focus to that pop-up menu.
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
