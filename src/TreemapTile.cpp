@@ -509,7 +509,7 @@ void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
     QtConcurrent::run( _parentView->threadPool(), tile, &TreemapTile::renderChildCushions );
 #else
-    QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile );
+    static_cast<void>( QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile ) );
 #endif
 }
 

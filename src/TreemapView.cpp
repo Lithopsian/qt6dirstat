@@ -72,7 +72,7 @@ void TreemapView::clear()
 
         // Deleting these can take a while, so delegate to a thread
         TreemapTile * rootTile = _rootTile;
-        QtConcurrent::run( [ rootTile ]() { delete rootTile; } );
+        static_cast<void>( QtConcurrent::run( [ rootTile ]() { delete rootTile; } ) );
         _rootTile = nullptr;
     }
 
@@ -175,16 +175,15 @@ void TreemapView::writeSettings()
     // logDebug() << Qt::endl;
 
     Settings settings;
+
     settings.beginGroup( "Treemaps" );
 
     settings.setValue( "ColourPreviews"   , _colourPreviews    );
-
     settings.setValue( "Squarify"         , _squarify          );
     settings.setValue( "CushionShading"   , _doCushionShading  );
 //    settings.setValue( "EnforceContrast"  , _enforceContrast   );
     settings.setValue( "ForceCushionGrid" , _forceCushionGrid  );
     settings.setValue( "UseDirGradient"   , _useDirGradient    );
-
     settings.setValue( "AmbientLight"     , _ambientLight      );
     settings.setValue( "HeightScaleFactor", _heightScaleFactor );
     settings.setValue( "CushionHeight"    , _cushionHeight     );
@@ -204,7 +203,7 @@ void TreemapView::writeSettings()
 }
 
 
-void TreemapView::writeOptionalColorEntry( Settings & settings, const char * setting, const QColor & color )
+void TreemapView::writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color )
 {
     if ( color.isValid() )
         writeColorEntry( settings, setting, color );
@@ -250,7 +249,6 @@ void TreemapView::zoomOut()
         return;
 
     FileInfo * newRoot = _rootTile->orig();
-
     if ( newRoot->parent() && newRoot->parent() != _tree->root() )
         newRoot = newRoot->parent();
 
@@ -300,7 +298,8 @@ bool TreemapView::canZoomOut() const
 
 void TreemapView::rebuildTreemap()
 {
-    logDebug() << _savedRootUrl << Qt::endl;
+    //logDebug() << _savedRootUrl << Qt::endl;
+
     FileInfo * root = nullptr;
 
     if ( !_savedRootUrl.isEmpty() )
@@ -346,14 +345,13 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
 
     _stopwatch.start();
 
-    _watcher.setFuture( QtConcurrent::run( [ this, newRoot, rect ]() {
+    _watcher.setFuture( QtConcurrent::run( [ this, newRoot, rect ]()
+    {
         _threadPool = new QThreadPool();
         CHECK_NEW( _threadPool );
         _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
 
-        TreemapTile *tile = new TreemapTile( this,           // parentView
-                                             newRoot,        // orig
-                                             rect );
+        TreemapTile * tile = new TreemapTile( this, newRoot, rect );
 
         delete _threadPool;
 
@@ -372,7 +370,7 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
 
 void TreemapView::treemapFinished()
 {
-    TreemapTile *futureResult = _watcher.result();
+    TreemapTile * futureResult = _watcher.result();
 
     logDebug() << _stopwatch.restart() << "ms " << Qt::endl;
 
@@ -435,7 +433,8 @@ void TreemapView::configChanged( const QColor & fixedColor,
                                 cushionHeight     != _cushionHeight ||
                                 heightScaleFactor != _heightScaleFactor ||
                                 minTileSize       != _minTileSize;
-    const bool colorsChanged = cushionShading != _doCushionShading || fixedColor != _tileFixedColor;
+    const bool colorsChanged = cushionShading != _doCushionShading ||
+                               fixedColor     != _tileFixedColor;
     if ( !treemapChanged && !colorsChanged )
         return;
 
@@ -482,13 +481,13 @@ void TreemapView::calculateSettings()
 
 void TreemapView::changeTreemapColors()
 {
-    //logDebug() << "change treemap colours to " << Qt::endl;
+    //logDebug() << Qt::endl;
 
-    if ( !_rootTile )
-        return;
-
-    _rootTile->invalidateCushions();
-    _rootTile->update( _rootTile->rect() );
+    if ( _rootTile )
+    {
+        _rootTile->invalidateCushions();
+        _rootTile->update( _rootTile->rect() );
+    }
 }
 
 void TreemapView::deleteNotify( FileInfo * )
@@ -503,14 +502,12 @@ void TreemapView::deleteNotify( FileInfo * )
             // Intentionally using debugUrl() here rather than just url() so
             // the correct zoom can be restored even when a dot entry is the
             // current treemap root.
-
             _savedRootUrl = _rootTile->orig()->debugUrl();
         }
         else
         {
             // A shortcut for the most common case: No zoom. Simply use the
             // tree's root for the next treemap rebuild.
-
             _savedRootUrl = "";
         }
     }
@@ -535,23 +532,20 @@ void TreemapView::resizeEvent( QResizeEvent * event )
     if ( !_tree )
         return;
 
-     if ( !_rootTile )
-    {
-        if ( _tree && _tree->firstToplevel() )
-        {
-            //logDebug() << "Redisplaying suppressed treemap" << Qt::endl;
-            rebuildTreemap( _tree->firstToplevel() );
-        }
-    }
-    else
+    if ( _rootTile )
     {
         //logDebug() << "Auto-resizing treemap" << Qt::endl;
         rebuildTreemap( _rootTile->orig() );
 
-        const QSize *newSize = &event->size();
-        const QSize *oldSize = &event->oldSize();
-        if ( !newSize->isEmpty() && !oldSize->isEmpty() )
-            scale( ( double )newSize->width() / oldSize->width(), ( double )newSize->height() / oldSize->height() );
+        const QSize & newSize = event->size();
+        const QSize & oldSize = event->oldSize();
+        if ( !newSize.isEmpty() && !oldSize.isEmpty() )
+            scale( ( qreal )newSize.width() / oldSize.width(), ( qreal )newSize.height() / oldSize.height() );
+    }
+    else if ( _tree && _tree->firstToplevel() )
+    {
+        //logDebug() << "Redisplaying suppressed treemap" << Qt::endl;
+        rebuildTreemap( _tree->firstToplevel() );
     }
 }
 
@@ -687,13 +681,13 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 
     for ( auto it = newSelection.constBegin(); it != newSelection.constEnd(); ++it )
     {
-        TreemapTile *tile = map.isEmpty() ? findTile( _rootTile, *it ) : map.value( *it, nullptr );
+        TreemapTile * tile = map.isEmpty() ? findTile( _rootTile, *it ) : map.value( *it, nullptr );
         if ( tile )
             tile->setSelected( true );
     }
 
     const FileInfo *currentItem = _selectionModel->currentItem();
-    const TreemapTile *tile = map.isEmpty() ? findTile( _rootTile, currentItem ) : map.value( currentItem, nullptr );
+    const TreemapTile * tile = map.isEmpty() ? findTile( _rootTile, currentItem ) : map.value( currentItem, nullptr );
     if ( tile )
         setCurrentTile( tile );
 
@@ -701,7 +695,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 }
 
 
-void TreemapView::sendSelection( const TreemapTile *tile)
+void TreemapView::sendSelection( const TreemapTile * tile)
 {
     if ( !scene() || !_selectionModel )
         return;
@@ -756,7 +750,7 @@ TreemapTile * TreemapView::findTile( TreemapTile *rootTile, const FileInfo *node
     // loop recursively through the children of each tile
     for ( QGraphicsItem *graphicsItem : rootTile->childItems() )
     {
-        TreemapTile *tile = dynamic_cast<TreemapTile *>(graphicsItem);
+        TreemapTile * tile = dynamic_cast<TreemapTile *>(graphicsItem);
         if ( tile )
         {
             tile = findTile( tile, node );
@@ -783,35 +777,33 @@ void TreemapView::setFixedColor( const QColor & color )
 
 void TreemapView::highlightParents( const TreemapTile * tile )
 {
+    clearParentsHighlight();
+
     if ( !tile )
-    {
-        clearParentsHighlight();
         return;
-    }
 
-    const TreemapTile * parent = tile->parentTile();
-    const TreemapTile * currentHighlight = highlightedParent();
 
-    if ( currentHighlight && currentHighlight != parent )
-        clearParentsHighlight();
+//    const TreemapTile * currentHighlight = highlightedParent();
+
+//    if ( currentHighlight && currentHighlight != parent )
+//        clearParentsHighlight();
 
     const TreemapTile * topParent = nullptr;
 
-    while ( parent && parent != _rootTile )
+    for ( const TreemapTile * parent = tile->parentTile();
+          parent && parent != _rootTile;
+          parent = parent->parentTile() )
     {
-        ParentTileHighlighter * highlight = new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
+        const ParentTileHighlighter * highlight =
+            new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
         CHECK_NEW( highlight );
         _parentHighlightList << highlight;
 
         topParent = parent;
-        parent = parent->parentTile();
     }
 
     if ( topParent )
-    {
-        clearSceneMask();
         _sceneMask = new SceneMask( topParent, 0.6 );
-    }
 }
 
 
@@ -852,21 +844,6 @@ void TreemapView::saveTreemapRoot()
 }
 
 
-void TreemapView::sendHoverEnter( FileInfo * node )
-{
-    if ( _useTreemapHover )
-        emit hoverEnter( node );
-}
-
-
-void TreemapView::sendHoverLeave( FileInfo * node )
-{
-    if ( _useTreemapHover )
-        emit hoverLeave( node );
-}
-
-
-
 HighlightRect::HighlightRect( QGraphicsScene * scene,
                               const TreemapTile * tile,
                               const QColor & color,
@@ -889,18 +866,16 @@ QPainterPath HighlightRect::shape() const
         return QGraphicsRectItem::shape();
 
     // Return just the outline as the shape so any tooltip is only displayed on
-    // the outline, not inside as well; but use more than the line thickness of
-    // 1 or 2 pixels to make it humanly possible to position the mouse cursor
-    // close enough.
+    // the outline, not inside the rectangle as well; but use more than the line
+    // thickness of 1 or 2 pixels to make it humanly possible to position the
+    // mouse cursor close enough.
     //
-    // Note that it's still only on the inside of the line to avoid bad side
-    // effects with QGraphicsView's internal mechanisms.
-    const int thickness = 10;
-
+    // Note that it's still only on the inside of the line to avoid side effects.
+    const int thickness = 5;
     QPainterPath path;
     path.addRect( _tile->rect() );
-    path.addRect( _tile->rect().adjusted( thickness,   thickness,
-                                          -thickness, -thickness ) );
+    path.addRect( _tile->rect().adjusted( thickness, thickness, -thickness, -thickness ) );
+
     return path;
 }
 
@@ -942,7 +917,7 @@ void CurrentTileHighlighter::highlight( const TreemapTile * tile )
 
 
 SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
-    QGraphicsPathItem()
+    QGraphicsPathItem ()
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
     CHECK_PTR( tile );
