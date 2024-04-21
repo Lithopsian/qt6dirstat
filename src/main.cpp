@@ -21,11 +21,12 @@
 
 using std::cerr;
 
-static const char * progName = "qt6dirstat";
 
 
 void usage()
 {
+    const char * progName = "qdirstat";
+
     cerr << "\n"
 	 << "Usage: \n"
 	 << "\n"

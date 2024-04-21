@@ -160,8 +160,7 @@ QProcess * OutputWindow::senderProcess( const char * function ) const
 	if ( sender() )
 	{
 	    logError() << "Expecting QProcess as sender() in " << function
-		       <<" , got "
-		       << sender()->metaObject()->className() << Qt::endl;
+		       <<" , got " << sender()->metaObject()->className() << Qt::endl;
 	}
 	else
 	{
@@ -175,7 +174,7 @@ QProcess * OutputWindow::senderProcess( const char * function ) const
 
 void OutputWindow::readStdout()
 {
-    QProcess * process = senderProcess( __FUNCTION__ );
+    QProcess * process = senderProcess( __func__ );
     if ( process )
 	addStdout( QString::fromUtf8( process->readAllStandardOutput() ) );
 }
@@ -183,7 +182,7 @@ void OutputWindow::readStdout()
 
 void OutputWindow::readStderr()
 {
-    QProcess * process = senderProcess( __FUNCTION__ );
+    QProcess * process = senderProcess( __func__ );
     if ( process )
 	addStderr( QString::fromUtf8( process->readAllStandardError() ) );
 }
@@ -199,7 +198,6 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 	    break;
 
 	case QProcess::CrashExit:
-
 	    if ( exitCode == 0 )
 	    {
 		// Don't report an exit code of 0: Since we are starting all
@@ -218,7 +216,7 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 	    break;
     }
 
-    QProcess * process = senderProcess( __FUNCTION__ );
+    QProcess * process = senderProcess( __func__ );
     if ( process )
     {
 	processFinished( process );
@@ -231,33 +229,19 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 
 void OutputWindow::processError( QProcess::ProcessError error )
 {
-    QString msg;
-
-    switch ( error )
+    const QString msg = [ error ]()
     {
-	case QProcess::FailedToStart:
-	    msg = tr( "Error: Process failed to start." );
-	    break;
-
-	case QProcess::Crashed: // Already reported via processFinished()
-	    break;
-
-	case QProcess::Timedout:
-	    msg = tr( "Error: Process timed out." );
-	    break;
-
-	case QProcess::ReadError:
-	    msg = tr( "Error reading output from the process." );
-	    break;
-
-	case QProcess::WriteError:
-	    msg = tr( "Error writing data to the process." );
-	    break;
-
-	case QProcess::UnknownError:
-	    msg = tr( "Unknown error." );
-	    break;
-    }
+	switch ( error )
+	{
+	    case QProcess::FailedToStart: return tr( "Error: Process failed to start." );
+	    case QProcess::Timedout:      return tr( "Error: Process timed out." );
+	    case QProcess::ReadError:     return tr( "Error reading output from the process." );
+	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
+	    case QProcess::UnknownError:  return tr( "Unknown error." );
+	    case QProcess::Crashed: // Already reported via processFinished()
+	    default:                      return QString();
+	}
+    }();
 
     if ( !msg.isEmpty() )
     {
@@ -265,7 +249,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
 	addStderr( msg );
     }
 
-    QProcess * process = senderProcess( __FUNCTION__ );
+    QProcess * process = senderProcess( __func__ );
     if ( process )
 	processFinished( process );
 
@@ -390,11 +374,8 @@ bool OutputWindow::hasActiveProcess() const
 {
     for ( const QProcess * process : _processList )
     {
-	if ( process->state() == QProcess::Starting ||
-	     process->state() == QProcess::Running )
-	{
+	if ( process->state() == QProcess::Starting || process->state() == QProcess::Running )
 	    return true;
-	}
     }
 
     return false;
@@ -416,11 +397,9 @@ QProcess * OutputWindow::pickQueuedProcess()
 QProcess * OutputWindow::startNextProcess()
 {
     QProcess * process = pickQueuedProcess();
-
     if ( process )
     {
 	const QString dir = process->workingDirectory();
-
 	if ( dir != _lastWorkingDir )
 	{
 	    addCommandLine( "cd " + dir );
@@ -476,10 +455,9 @@ void OutputWindow::updateActions()
 
 void OutputWindow::showAfterTimeout( int timeoutMillisec )
 {
-    if ( timeoutMillisec <= 0 )
-	timeoutMillisec = defaultShowTimeout();
-
-    QTimer::singleShot( timeoutMillisec, this, &OutputWindow::timeoutShow );
+    QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
+                        this,
+			&OutputWindow::timeoutShow );
 }
 
 

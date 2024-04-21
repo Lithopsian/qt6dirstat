@@ -406,7 +406,7 @@ void Logger::openLogFile( const QString & filename )
 	    fprintf( stderr, "Logging to %s\n", qPrintable( filename ) );
 	    _logStream.setDevice( &_logFile );
 	    _logStream << "\n\n";
-	    log( __FILE__, __LINE__, __FUNCTION__, LogSeverityInfo )
+	    log( __FILE__, __LINE__, __func__, LogSeverityInfo )
 		<< "-- Log Start --" << Qt::endl;
 	}
 	else

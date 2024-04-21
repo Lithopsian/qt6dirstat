@@ -257,7 +257,7 @@ private:
  * Use this as a substitute for normal 'throw( exception )'.
  */
 #define THROW( EXCEPTION ) \
-    _throw_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __FUNCTION__ )
+    _throw_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __func__ )
 
 /**
  * Write a log notification that an exception has been caught.
@@ -285,7 +285,7 @@ private:
  * or RETHROW calls.
  */
 #define CAUGHT( EXCEPTION ) \
-    _caught_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __FUNCTION__ )
+    _caught_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __func__ )
 
 /**
  * Write a log notification that an exception that has been caught is
@@ -294,7 +294,7 @@ private:
  * have an argument.
  */
 #define RETHROW( EXCEPTION ) \
-    _rethrow_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __FUNCTION__ )
+    _rethrow_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __func__ )
 
 /**
  * Check the result of 'new' and throw exception if it returned 0.

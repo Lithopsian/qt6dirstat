@@ -50,11 +50,11 @@ namespace Qt
 // These macros all use the default logger. Create similar macros to use your
 // own class-specific logger.
 
-#define logVerbose()	Logger::log( 0, __FILE__, __LINE__, __FUNCTION__, LogSeverityVerbose   )
-#define logDebug()	Logger::log( 0, __FILE__, __LINE__, __FUNCTION__, LogSeverityDebug     )
-#define logInfo()	Logger::log( 0, __FILE__, __LINE__, __FUNCTION__, LogSeverityInfo      )
-#define logWarning()	Logger::log( 0, __FILE__, __LINE__, __FUNCTION__, LogSeverityWarning   )
-#define logError()	Logger::log( 0, __FILE__, __LINE__, __FUNCTION__, LogSeverityError     )
+#define logVerbose()	Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityVerbose   )
+#define logDebug()	Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityDebug     )
+#define logInfo()	Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityInfo      )
+#define logWarning()	Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityWarning   )
+#define logError()	Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityError     )
 #define logNewline()	Logger::newline( 0 )
 
 
