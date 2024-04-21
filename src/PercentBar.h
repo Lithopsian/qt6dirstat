@@ -15,7 +15,7 @@
 #include <QStyledItemDelegate>
 #include <QTreeView>
 
-#include "DirTreeModel.h"      // RawDataRole
+#include "DirTreeModel.h" // RawDataRole
 
 
 typedef QList<QColor> ColorList;
@@ -33,24 +33,14 @@ namespace QDirStat
      * install multiple of them, one for each column that should get a percent
      * bar.
      *
-     * The default behaviour is to use a percent value that is displayed as
-     * text in that same column and render the percent bar instead. If there is
-     * no suitable text with a percent number, it calls its superclass,
-     * i.e. the text that is in that column (or nothing if there is no text at
-     * all) is displayed.
-     *
-     * So, simply add a column for this percent bar and display the numeric
-     * value (optionally followed by a '%' percent sign) in that column; the
-     * delegate will display a graphical percent bar instead of that numeric
-     * value.
+     * The default behaviour is to use a percent value from the RawDataRole
+     * and render the percent bar with that value.  No bar will be displayed
+     * if the QVariant() returned is invalid or the float derived from it is
+     * less than zero.
      *
      * Example:
      *
      *    60.0%    ->   [======    ]
-     *
-     * If the numeric value should be displayed as well, add another column for
-     * it, display the numeric value there as well, and don't install this
-     * delegate for that other column.
      *
      * For indented tree levels, the percent bar is indented as well, and a
      * different color is used for each indentation level.
@@ -66,57 +56,34 @@ namespace QDirStat
 	 * delegate to this one.
 	 **/
 	PercentBarDelegate( QTreeView * treeView,
-			    int percentBarCol,
-			    int startColorIndex,
-			    int invisibleLevels );
+			    int         percentBarCol,
+			    int         barWidth,
+			    QColor      barBackground,
+			    ColorList   fillColors,
+			    int         invisibleLevels ):
+	    QStyledItemDelegate { treeView },
+	    _percentBarCol { percentBarCol },
+	    _sizeHintWidth { barWidth },
+	    _barBackground { barBackground },
+	    _fillColors { fillColors },
+	    _invisibleLevels { invisibleLevels },
+	    _indentation { treeView->indentation() }
+	{}
 
 	/**
 	 * Paint one cell in the view.
 	 * Inherited from QStyledItemDelegate.
 	 **/
-	void paint( QPainter		       * painter,
+	void paint( QPainter                   * painter,
 		    const QStyleOptionViewItem & option,
-		    const QModelIndex	       & index ) const override;
+		    const QModelIndex          & index ) const override;
 
 	/**
 	 * Return a size hint for one cell in the view.
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	QSize sizeHint( const QStyleOptionViewItem & option,
-			const QModelIndex	   & index) const override;
-
-	/**
-	 * Return the percent bar fill colors for each tree level. If there
-	 * are more tree levels than colors, the colors will wrap around.
-	 *
-	 * This object reference can be used directly to add, remove or change
-	 * colors.
-	 **/
-//	ColorList & fillColors() { return _fillColors; }
-
-        /**
-         * Set the index of the starting color (default: 0).
-         **/
-//        void setStartColorIndex( int index ) { _startColorIndex = index; }
-
-        /**
-         * Return the index of the starting color.
-         **/
-//        int startColorIndex() const { return _startColorIndex; }
-
-
-    public slots:
-
-	/**
-	 * Read parameters from the settings file.
-	 **/
-	void readSettings();
-
-	/**
-	 * Write parameters to the settings file.  Unnecessary at the moment as nothing
-	 * can change while the program is running.
-	 **/
-//	void writeSettings();
+			const QModelIndex          & index) const override;
 
 
     protected:
@@ -125,10 +92,10 @@ namespace QDirStat
 	 * Paint a percent bar into a widget.
 	 * 'indentPixel' is the number of pixels to indent the bar.
 	 **/
-	void paintPercentBar( QPainter			 * painter,
+	void paintPercentBar( QPainter                   * painter,
 			      const QStyleOptionViewItem & option,
-			      const QModelIndex		 & index,
-			      float			   percent ) const;
+			      const QModelIndex          & index,
+			      float                        percent ) const;
 
 
     private:
@@ -137,13 +104,12 @@ namespace QDirStat
 	// Data Members
 	//
 
-	QTreeView * _treeView;
-        int         _percentBarCol;
-        int         _startColorIndex;
-        int         _invisibleLevels;
-	ColorList   _fillColors;
-	QColor      _barBackground;
-	int         _sizeHintWidth;
+        int               _percentBarCol;
+	int               _sizeHintWidth;
+	const QColor      _barBackground;
+	const ColorList   _fillColors;
+        int               _invisibleLevels;
+	int               _indentation;
 
     }; // class PercentBarDelegate
 

@@ -28,8 +28,7 @@ namespace
     /**
      * Return a color that contrasts with 'contrastColor'.
      **/
-    QColor contrastingColor( const QColor &desiredColor,
-			     const QColor &contrastColor )
+    QColor contrastingColor( const QColor &desiredColor, const QColor &contrastColor )
     {
 	if ( desiredColor != contrastColor )
 	    return desiredColor;
@@ -40,27 +39,6 @@ namespace
 	else
 	    // try a little darker
 	    return contrastColor.darker();
-    }
-
-
-    /**
-     * Return the default fill colors.
-     **/
-    ColorList defaultFillColors()
-    {
-	return ColorList( { QColor(   0,   0, 255 ),
-			    QColor( 128,   0, 128 ),
-			    QColor( 231, 147,  43 ),
-			    QColor(   4, 113,   0 ),
-			    QColor( 176,   0,   0 ),
-			    QColor( 204, 187,   0 ),
-			    QColor( 162,  98,  30 ),
-			    QColor(   0, 148, 146 ),
-			    QColor( 217,  94,   0 ),
-			    QColor(   0, 194,  65 ),
-			    QColor( 194, 108, 187 ),
-			    QColor(   0, 179, 255 ),
-			  } );
     }
 
 
@@ -80,67 +58,22 @@ namespace
 } // namespace
 
 
-PercentBarDelegate::PercentBarDelegate( QTreeView * treeView,
-                                        int         percentBarCol,
-					int         startColorIndex,
-					int         invisibleLevels ):
-    QStyledItemDelegate { treeView },
-    _treeView { treeView },
-    _percentBarCol { percentBarCol },
-    _startColorIndex { startColorIndex },
-    _invisibleLevels { invisibleLevels }
-{
-    readSettings();
-}
-
-
-void PercentBarDelegate::readSettings()
-{
-    Settings settings;
-
-    settings.beginGroup( "PercentBar" );
-    _fillColors	   = readColorListEntry( settings, "Colors"    , defaultFillColors() );
-    _barBackground = readColorEntry    ( settings, "Background", QColor( 160, 160, 160 ) );
-    _sizeHintWidth = settings.value( "PercentBarColumnWidth", 180 ).toInt();
-    settings.endGroup();
-}
-
-/*
-void PercentBarDelegate::writeSettings()
-{
-    Settings settings;
-    settings.beginGroup( "PercentBar" );
-
-    writeColorListEntry( settings, "Colors"    , _fillColors	);
-    writeColorEntry    ( settings, "Background", _barBackground );
-
-    settings.setValue( "PercentBarColumnWidth",  _sizeHintWidth	);
-
-    settings.endGroup();
-}
-*/
-
-void PercentBarDelegate::paint( QPainter		   * painter,
+void PercentBarDelegate::paint( QPainter                   * painter,
 				const QStyleOptionViewItem & option,
-				const QModelIndex	   & index ) const
+				const QModelIndex          & index ) const
 {
     // Let the default delegate draw what it can, which should be the appropriate background for us
     QStyledItemDelegate::paint( painter, option, index );
 
     if ( index.isValid() && index.column() == _percentBarCol )
     {
-	const QVariant data = index.data( RawDataRole );
 	bool ok = true;
-	float percent = data.toFloat( &ok );
+	float percent = index.data( RawDataRole ).toFloat( &ok );
 
 	if ( ok && percent >= 0.0f )
 	{
 	    if ( percent > 100.0f )
-	    {
-//		if ( percent > 103.0f )
-//		    logError() << "Percent maxed out: " << percent << Qt::endl;
 		percent = 100.0f;
-	    }
 
 	    PercentBarDelegate::paintPercentBar( painter, option, index, percent );
 	}
@@ -163,13 +96,13 @@ QSize PercentBarDelegate::sizeHint( const QStyleOptionViewItem & option,
 }
 
 
-void PercentBarDelegate::paintPercentBar( QPainter		     * painter,
+void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 					  const QStyleOptionViewItem & option,
-					  const QModelIndex	     & index,
-					  float			       percent ) const
+					  const QModelIndex          & index,
+					  float                        percent ) const
 {
     const int depth        = treeLevel( index ) - _invisibleLevels;
-    const int indentPixel  = ( depth * _treeView->indentation() ) / 2;
+    const int indentPixel  = depth * _indentation / 2;
 
     const int xMargin = 4;
     const int yMargin = option.rect.height() / 6;
@@ -199,10 +132,9 @@ void PercentBarDelegate::paintPercentBar( QPainter		     * painter,
 
 	// Fill the percentage
 	const int fillWidth = ( w - 2 * penWidth ) * percent / 100;
-	const int colorIndex = depth + _startColorIndex;
 	painter->fillRect( x + penWidth, y + penWidth,
 			   fillWidth + 1, h - 2 * penWidth + 1,
-			   _fillColors.at( colorIndex % _fillColors.size() ) );
+			   _fillColors.at( qMin( depth, _fillColors.size()-1 ) ) );
 
 	// Draw 3D shadows.
 	const QColor background = painter->background().color();

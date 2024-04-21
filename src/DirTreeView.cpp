@@ -18,6 +18,8 @@
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "PercentBar.h"
+#include "Settings.h"
+#include "SettingsHelpers.h"
 #include "SizeColDelegate.h"
 #include "Exception.h"
 #include "Logger.h"
@@ -28,16 +30,15 @@ using namespace QDirStat;
 
 DirTreeView::DirTreeView( QWidget * parent ):
     QTreeView ( parent ),
-    _percentBarDelegate { new PercentBarDelegate( this, PercentBarCol, 0, 2 ) },
     _sizeColDelegate { new SizeColDelegate( this ) },
     _headerTweaker { new HeaderTweaker( header(), this ) }
 {
     CHECK_NEW( _headerTweaker );
-    CHECK_NEW( _percentBarDelegate );
-    CHECK_NEW( _sizeColDelegate );
 
-    setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
-    setItemDelegateForColumn( SizeCol,       _sizeColDelegate );
+    CHECK_NEW( _sizeColDelegate );
+    setItemDelegateForColumn( SizeCol, _sizeColDelegate );
+
+    readSettings();
 
     connect( this, &DirTreeView::customContextMenuRequested,
 	     this, &DirTreeView::contextMenu );
@@ -51,15 +52,27 @@ DirTreeView::~DirTreeView()
     delete _sizeColDelegate;
 }
 
-/*
-void DirTreeView::currentChanged( const QModelIndex & current,
-				  const QModelIndex & oldCurrent )
+
+void DirTreeView::readSettings()
 {
-    //logDebug() << "New current " << current << ", old current" << oldCurrent << Qt::endl;
-    QTreeView::currentChanged( current, oldCurrent );
-    scrollTo( current ); // don't move if the item is visible, we might be halfway through a mouse click
+    Settings settings;
+
+    settings.beginGroup( "DirTreeView" );
+    const int barWidth = settings.value( "PercentBarWidth", 150 ).toInt();
+    settings.setDefaultValue( "PercentBarWidth", barWidth );
+    settings.setDefaultValue( "PercentBarWidth", barWidth );
+    const QColor barBackground = readColorEntry( settings, "PercentBarBackground", QColor( 160, 160, 160 ) );
+    setDefaultValue( settings, "PercentBarBackground", barBackground );
+    const ColorList barColors = readColorListEntry( settings, "PercentBarColors", percentBarDefaultColors() );
+    setDefaultValue( settings, "PercentBarColors", barColors );
+    settings.endGroup();
+
+    // Now we have all the settings for the percent bar delegate
+    _percentBarDelegate  = new PercentBarDelegate( this, PercentBarCol, barWidth, barBackground, barColors, 2 );
+    CHECK_NEW( _percentBarDelegate );
+    setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
 }
-*/
+
 
 void DirTreeView::contextMenu( const QPoint & pos )
 {
@@ -96,30 +109,6 @@ void DirTreeView::contextMenu( const QPoint & pos )
     // User-defined cleanups
     ActionManager::addEnabledCleanups( &menu );
 
-    // Submenu for the auxiliary views to keep the context menu short.
-    //
-    // Those actions are strictly speaking irrelevant in most cases, and so
-    // they should be omitted from a context menu. But here this serves for
-    // discoverability: Most users don't even know that it is an option to
-    // start any of those views from a subdirectory in the tree. As a
-    // compromise to keep the context menu short, those auxiliary views go to a
-    // submenu of the context menu. Submenus in context menus are generally
-    // also discouraged, but here discoverability of these features is more
-    // important.
-/*
-    const FileInfo * item = static_cast< const FileInfo *>( index.internalPointer() );
-    CHECK_MAGIC( item );
-    if ( item->isDirInfo() )    // Not for files, symlinks etc.
-    {
-        menu.addSeparator();
-        QMenu * subMenu = menu.addMenu( tr( "View in" ) );
-        QStringList actions = { "actionFileSizeStats",
-                                "actionFileTypeStats",
-                                "actionFileAgeStats",
-                              };
-        ActionManager::addActions( subMenu, actions );
-    }
-*/
     menu.exec( mapToGlobal( pos ) );
 }
 
@@ -170,12 +159,14 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
     // 100 is far too many, but they might all be within a small number of branches
     if ( branchesToClose.size() < 100 )
     {
-	for ( QModelIndex branch : branchesToClose )
+	// Avoid modifying the list as we iterate through it
+	const QModelIndexList branches = branchesToClose;
+	for ( const QModelIndex & branchToClose : branches )
 	{
 	    // Remove any branches that have ancestors that will be closed
-	    for ( QModelIndex ancestor = branch; ancestor.isValid(); ancestor = ancestor.parent() )
+	    for ( QModelIndex ancestor = branchToClose; ancestor.isValid(); ancestor = ancestor.parent() )
 	    {
-		if ( branchesToClose.contains( ancestor.parent() ) )
+		if ( branches.contains( ancestor.parent() ) )
 		    branchesToClose.removeAll( ancestor );
 	    }
 	}
@@ -204,28 +195,24 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
 void DirTreeView::setExpanded( FileInfo * item, bool expanded )
 {
     const DirTreeModel * model = dirTreeModel();
-    if ( !model )
-        return;
-
-    const QModelIndex index = model->modelIndex( item );
-    if ( index.isValid() )
-        QTreeView::setExpanded( index, expanded );
+    if ( model )
+    {
+	const QModelIndex index = model->modelIndex( item );
+	if ( index.isValid() )
+	    QTreeView::setExpanded( index, expanded );
+    }
 }
 
 
 void DirTreeView::mousePressEvent( QMouseEvent * event )
 {
-    // Leave the the back / forward buttons on the mouse to act like the
-    // history back / forward buttons in the tool bar.
+    // By default, the QTreeView parent class uses the back / forward buttons
+    // on the mouse to cursor up / cursor down in the tree.
     //
-    // By default, the QTreeView parent class uses them to act as
-    // cursor up / cursor down in the tree which defeats the idea of
-    // using them as history consistently throughout the application,
-    // making those mouse buttons pretty much unusable.
-    //
-    // So this makes sure those events are immediately propagated up to
-    // the parent widget.
-    if ( event && (event->button() == Qt::BackButton || event->button() == Qt::ForwardButton ) )
+    // This makes sure those events are immediately propagated up to the
+    // parent widget, where they can act like the history back / forward
+    // buttons in the tool bar.
+    if ( event && ( event->button() == Qt::BackButton || event->button() == Qt::ForwardButton ) )
     {
 	event->ignore();
 	return;
@@ -234,7 +221,7 @@ void DirTreeView::mousePressEvent( QMouseEvent * event )
     QTreeView::mousePressEvent( event );
 }
 
-/*
+
 void DirTreeView::keyPressEvent( QKeyEvent * event )
 {
     // By default, this opens all tree branches which completely
@@ -248,4 +235,4 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
 
     QTreeView::keyPressEvent( event );
 }
-*/
+

@@ -13,6 +13,8 @@
 #include <QTreeView>
 #include <QTreeWidget>
 
+#include "PercentBar.h" // ColorList
+
 
 namespace QDirStat
 {
@@ -55,16 +57,16 @@ namespace QDirStat
 	 **/
 	HeaderTweaker * headerTweaker() const { return _headerTweaker; }
 
-        /**
-         * Expand or collapse an item based on a FileInfo pointer.
-         **/
-        void setExpanded( FileInfo * item, bool expanded = true );
+	/**
+	 * Expand or collapse an item based on a FileInfo pointer.
+	 **/
+	void setExpanded( FileInfo * item, bool expanded = true );
 
-        /**
-         * Scroll to the current item (index).  This will open any necessary
+	/**
+	 * Scroll to the current item (index).  This will open any necessary
 	 * branches and attempt to center the item in the viewport.
-         **/
-        void scrollToCurrent() { scrollTo ( currentIndex(), QAbstractItemView::PositionAtCenter ); }
+	 **/
+	void scrollToCurrent() { scrollTo ( currentIndex(), QAbstractItemView::PositionAtCenter ); }
 
 
     public slots:
@@ -92,45 +94,59 @@ namespace QDirStat
 	const DirTreeModel * dirTreeModel() const;
 
 	/**
+	 * Read the settings.  Currently just for the percent bar delegate.
+	 **/
+	void readSettings();
+
+	/**
+	 * Return the default percent bar fill colors.
+	 **/
+	ColorList percentBarDefaultColors()
+	{
+	    return ColorList( { QColor(   0,   0, 255 ),
+				QColor(  34,  34, 255 ),
+				QColor(  68,  68, 255 ),
+				QColor(  85,  85, 255 ),
+				QColor( 102, 102, 255 ),
+				QColor( 119, 119, 255 ),
+				QColor( 136, 136, 255 ),
+				QColor( 153, 153, 255 ),
+				QColor( 170, 170, 255 ),
+				QColor( 187, 187, 255 ),
+				QColor( 204, 204, 255 ),
+			      } );
+	}
+
+	/**
 	 * Return the list of items that are currently expanded.
 	 **/
 	QModelIndexList expandedIndexes() const;
 
 	/**
-	 * Change the current item. Overwritten from QTreeView to make sure
-	 * the branch of the new current item is expanded and scrolled to
-	 * the visible area.
+	 * Keyboard event handler.
 	 *
-	 * Doesn't currently do anything different from the default implementation.
+	 * Reimplemented from QTreeView.
 	 **/
-//	void currentChanged( const QModelIndex & current,
-//			     const QModelIndex & oldCurrent ) override;
+        void keyPressEvent( QKeyEvent * event ) override;
 
-        /**
-         * Keyboard event handler.
-         *
-         * Reimplemented from QTreeView.
-         **/
-//        void keyPressEvent( QKeyEvent * event ) override;
-
-        /**
-         * Mouse button handler.
-         *
-         * Don't let QTreeView steal and misappropriate the mouse back /
-         * forward buttons; we want consistent history buttons throughout the
-         * application.
-         *
-         * Reimplemented from QTreeView.
-         **/
-        void mousePressEvent( QMouseEvent * event ) override;
+	/**
+	 * Mouse button handler.
+	 *
+	 * Don't let QTreeView steal and misappropriate the mouse back /
+	 * forward buttons; we want consistent history buttons throughout the
+	 * application.
+	 *
+	 * Reimplemented from QTreeView.
+	 **/
+	void mousePressEvent( QMouseEvent * event ) override;
 
 
     private:
 
 	// Data members
 
-	PercentBarDelegate * _percentBarDelegate;
-        SizeColDelegate    * _sizeColDelegate;
+	PercentBarDelegate * _percentBarDelegate	{ nullptr };
+	SizeColDelegate    * _sizeColDelegate;
 	HeaderTweaker      * _headerTweaker;
 
     };	// class DirTreeView

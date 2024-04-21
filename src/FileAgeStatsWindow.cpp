@@ -122,15 +122,6 @@ void FileAgeStatsWindow::initWidgets()
                                 };
     _ui->treeWidget->setHeaderLabels( headers );
 
-    // Delegates for the two percent bars
-    _filesPercentBarDelegate = new PercentBarDelegate( _ui->treeWidget, YearListFilesPercentBarCol, 4, 1 );
-    CHECK_NEW( _filesPercentBarDelegate );
-    _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
-
-    _sizePercentBarDelegate = new PercentBarDelegate( _ui->treeWidget, YearListSizePercentBarCol, 0, 1 );
-    CHECK_NEW( _sizePercentBarDelegate );
-    _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
-
     // Center the column headers
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignCenter );
 
@@ -303,11 +294,48 @@ void FileAgeStatsWindow::readSettings()
     Settings settings;
 
     settings.beginGroup( "FileAgeStatsWindow" );
+
     _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow",       true ).toBool() );
     _startGapsWithCurrentYear    = settings.value( "StartGapsWithCurrentYear", true ).toBool();
+    int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
+    const QColor percentBarBackground = readColorEntry( settings,
+							"PercentBarBackground",
+							QColor( 160, 160, 160 ) );
+    const ColorList filesPercentBarColors = readColorListEntry( settings,
+								"FilesPercentBarColors",
+								{ 0xbb0000, 0x00aa00 } );
+    const ColorList sizePercentBarColors  = readColorListEntry( settings,
+								"SizePercentBarColors",
+								{ 0xee0000, 0x00cc00 } );
+
+    settings.setDefaultValue( "StartGapsWithCurrentYear", _startGapsWithCurrentYear );
+    settings.setDefaultValue( "PercentBarWidth",          percentBarWidth           );
+    setDefaultValue( settings, "PercentBarBackground",  percentBarBackground  );
+    setDefaultValue( settings, "FilesPercentBarColors", filesPercentBarColors );
+    setDefaultValue( settings, "SizePercentBarColors",  sizePercentBarColors  );
+
     settings.endGroup();
 
     readWindowSettings( this, "FileAgeStatsWindow" );
+
+    // Delegates for the two percent bars
+    _filesPercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
+						       YearListFilesPercentBarCol,
+						       percentBarWidth,
+						       percentBarBackground,
+						       filesPercentBarColors,
+						       1 );
+    CHECK_NEW( _filesPercentBarDelegate );
+    _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
+
+    _sizePercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
+						      YearListSizePercentBarCol,
+						      percentBarWidth,
+						      percentBarBackground,
+						      sizePercentBarColors,
+						      1 );
+    CHECK_NEW( _sizePercentBarDelegate );
+    _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
 }
 
 
@@ -317,7 +345,6 @@ void FileAgeStatsWindow::writeSettings()
 
     settings.beginGroup( "FileAgeStatsWindow" );
     settings.setValue( "SyncWithMainWindow",       _ui->syncCheckBox->isChecked() );
-    settings.setValue( "StartGapsWithCurrentYear", _startGapsWithCurrentYear      );
     settings.endGroup();
 
     writeWindowSettings( this, "FileAgeStatsWindow" );
@@ -361,11 +388,11 @@ YearListItem::YearListItem( const YearStats & yearStats ) :
     {
 	set( YearListFilesCountCol,   Qt::AlignRight, QString::number( _stats.filesCount   ) );
 	set( YearListFilesPercentCol, Qt::AlignRight, formatPercent  ( _stats.filesPercent ) );
-	set( YearListSizeCol,         Qt::AlignRight, "    " + formatSize( _stats.size ) );
+	set( YearListSizeCol,         Qt::AlignRight, "    " + formatSize( _stats.size     ) );
 	set( YearListSizePercentCol,  Qt::AlignRight, formatPercent  ( _stats.sizePercent  ) );
 
-        setData( YearListFilesPercentBarCol, RawDataRole, _stats.sizePercent );
-        setData( YearListSizePercentBarCol,  RawDataRole, _stats.sizePercent );
+	setData( YearListFilesPercentBarCol, RawDataRole, _stats.filesPercent );
+	setData( YearListSizePercentBarCol,  RawDataRole, _stats.sizePercent  );
     }
 }
 

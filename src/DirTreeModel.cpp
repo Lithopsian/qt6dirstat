@@ -454,12 +454,12 @@ void DirTreeModel::readSettings()
     Settings settings;
 
     settings.beginGroup( "DirectoryTree" );
-    _crossFilesystems         = settings.value( "CrossFilesystems",    false ).toBool();
-    _useBoldForDominantItems  = settings.value( "UseBoldForDominant",  true  ).toBool();
-    _tree->setIgnoreHardLinks(  settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool() );
-    const QString treeIconDir = settings.value( "TreeIconDir",         DirTreeModel::treeIconDir( DTIS_Medium ) ).toString();
-    _updateTimerMillisec      = settings.value( "UpdateTimerMillisec", 250  ).toInt();
-    _slowUpdateMillisec       = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
+    _crossFilesystems        = settings.value( "CrossFilesystems",    false ).toBool();
+    _useBoldForDominantItems = settings.value( "UseBoldForDominant",  true  ).toBool();
+    _updateTimerMillisec     = settings.value( "UpdateTimerMillisec", 250  ).toInt();
+    _slowUpdateMillisec      = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
+    _tree->setIgnoreHardLinks( settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool() );
+    _treeItemSize = dirTreeItemSize( settings.value( "TreeIconDir",   DirTreeModel::treeIconDir( DTIS_Small ) ).toString() );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
@@ -473,7 +473,6 @@ void DirTreeModel::readSettings()
     settings.endGroup();
 
     _tree->setCrossFilesystems( _crossFilesystems );
-    _treeItemSize = dirTreeItemSize( treeIconDir );
 }
 
 
