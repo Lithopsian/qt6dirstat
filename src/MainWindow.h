@@ -51,7 +51,7 @@ class MainWindow: public QMainWindow
         LayoutShowBreadcrumbs,
         LayoutShowDetails,
         LayoutShowTreemap,
-        LayoutTreemapOnSide,
+//        LayoutTreemapOnSide,
     };
 
 public:
@@ -84,7 +84,7 @@ public slots:
     void askOpenDir();
 
     /**
-     * Read a filesystem, as requested from the fiflesystems window.
+     * Read a filesystem, as requested from the filesystems window.
      **/
     void readFilesystem( const QString & path );
 
@@ -174,7 +174,7 @@ public: // for the config dialog
     bool urlInWindowTitle() const { return _urlInWindowTitle; }
 
     /**
-     * Return the setting for sStatusBarTimeoutMillisec
+     * Return the setting for StatusBarTimeoutMillisec
      **/
     int statusBarTimeout() const { return _statusBarTimeout; }
 
@@ -185,7 +185,7 @@ public: // for the config dialog
 
     /**
      * Update internal settings from the general configuration page.
-     * Any changes will be saved to the conf file in the destructor.
+     * Any changes will be saved to the config file in the destructor.
      **/
     void updateSettings( bool urlInWindowTitle,
                          bool useTreemapHover,
@@ -475,7 +475,7 @@ protected:
     void writeSettings();
 
     /**
-     * Set up QObject connections (all except from QActions)
+     * Set up QObject connections (except from QActions)
      **/
     void connectSignals();
 
@@ -540,8 +540,9 @@ protected:
         { return action->data().toList().at( LayoutShowDetails ).toBool(); }
      bool layoutShowTreemap( const QAction * action ) const
         { return action->data().toList().at( LayoutShowTreemap ).toBool(); }
-     bool layoutTreemapOnSide( const QAction * action ) const
-        { return action->data().toList().at( LayoutTreemapOnSide ).toBool(); }
+//     bool layoutTreemapOnSide( const QAction * action ) const
+//        { return action->data().toList().at( LayoutTreemapOnSide ).toBool(); }
+    void setData( LayoutSettings setting, bool value );
 
     /**
      * Save whether the breadcrumbs are visible in the current layout.
@@ -561,7 +562,7 @@ protected:
     /**
      * Save whether the treemap is on the side in the current layout.
      **/
-    void updateLayoutTreemapOnSide( bool treemapOnSide );
+//    void updateLayoutTreemapOnSide( bool treemapOnSide );
 
     /**
      * Apply a layout to the current settings.
@@ -620,7 +621,7 @@ protected:
      * Show an error popup that a directory could not be opened and wait until
      * the user confirmed it.
      *
-     * The relevant informatoin is all in the exception.
+     * The relevant information is all in the exception.
      **/
     void showOpenDirErrorPopup( const SysCallFailedException & ex );
 
@@ -631,8 +632,8 @@ protected:
     void changeEvent( QEvent * event ) override;
 
     /**
-     * Handle mouse buttons: Activate history actions actionGoBack and
-     * actionGoForward with the "back" and "forward" mouse buttons as well.
+     * Handle mouse buttons: activate history actions actionGoBack and
+     * actionGoForward with the "back" and "forward" mouse buttons.
      **/
     void mousePressEvent( QMouseEvent * event ) override;
 

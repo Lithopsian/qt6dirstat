@@ -99,7 +99,7 @@ void MainWindow::changeLayout( const QString & name )
 	_ui->actionShowBreadcrumbs->setChecked ( layoutShowBreadcrumbs ( action ) );
 	_ui->actionShowDetailsPanel->setChecked( layoutShowDetailsPanel( action ) );
 	_ui->actionShowTreemap->setChecked     ( layoutShowTreemap     ( action ) );
-	_ui->actionTreemapOnSide->setChecked   ( layoutTreemapOnSide   ( action ) );
+//	_ui->actionTreemapOnSide->setChecked   ( layoutTreemapOnSide   ( action ) );
     }
     else
 	logError() << "No layout " << name << Qt::endl;
@@ -110,11 +110,7 @@ void MainWindow::updateLayoutBreadcrumbs( bool breadcrumbsVisible )
 {
     //logDebug() << breadcrumbsVisible << Qt::endl;
     _ui->breadcrumbNavigator->setVisible( breadcrumbsVisible );
-
-    QAction * action = _layoutActionGroup->checkedAction();
-    auto layoutDetails = action->data().toList();
-    layoutDetails.replace( LayoutShowBreadcrumbs, breadcrumbsVisible );
-    action->setData( layoutDetails );
+    setData( LayoutShowBreadcrumbs, breadcrumbsVisible );
 }
 
 
@@ -123,11 +119,7 @@ void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
     //logDebug() << detailsPanelVisible << Qt::endl;
     _ui->fileDetailsPanel->setVisible( detailsPanelVisible );
     updateFileDetailsView();
-
-    QAction * action = _layoutActionGroup->checkedAction();
-    auto layoutDetails = action->data().toList();
-    layoutDetails.replace( LayoutShowDetails, detailsPanelVisible );
-    action->setData( layoutDetails );
+    setData( LayoutShowDetails, detailsPanelVisible );
 }
 
 
@@ -135,22 +127,23 @@ void MainWindow::updateLayoutTreemap( bool treemapVisible )
 {
     //logDebug() << treemapVisible << Qt::endl;
     showTreemapView( treemapVisible );
-
-    QAction * action = _layoutActionGroup->checkedAction();
-    auto layoutDetails = action->data().toList();
-    layoutDetails.replace( LayoutShowTreemap, treemapVisible );
-    action->setData( layoutDetails );
+    setData( LayoutShowTreemap, treemapVisible );
 }
 
-
+/*
 void MainWindow::updateLayoutTreemapOnSide( bool treemapOnSide )
 {
     //logDebug() << treemapVisible << Qt::endl;
     treemapAsSidePanel( treemapOnSide );
+    setData( LayoutTreemapOnSide, treemapOnSide );
+}
+*/
 
+void MainWindow::setData( LayoutSettings setting, bool value )
+{
     QAction * action = _layoutActionGroup->checkedAction();
     auto layoutDetails = action->data().toList();
-    layoutDetails.replace( LayoutTreemapOnSide, treemapOnSide );
+    layoutDetails.replace( setting, value );
     action->setData( layoutDetails );
 }
 
@@ -179,7 +172,7 @@ void MainWindow::writeLayoutSetting( const QAction * action )
     settings.setValue( "ShowCurrentPath",  layoutShowBreadcrumbs ( action ) );
     settings.setValue( "ShowDetailsPanel", layoutShowDetailsPanel( action ) );
     settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
-    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
+//    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
     settings.endGroup();
 }
 
@@ -214,7 +207,7 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
                                            "actionShowBreadcrumbs",
                                            "actionShowDetailsPanel",
                                            "actionShowTreemap",
-                                           "actionTreemapOnSide",
+//                                           "actionTreemapOnSide",
                                          };
             ActionManager::addActions( &menu, actions1 );
 

@@ -31,6 +31,10 @@ void MainWindow::connectMenuActions()
     _ui->actionWhatsNew->setStatusTip( RELEASE_URL ); // defined in Version.h
 
     // Invisible, not on any menu or toolbar
+    addAction( _ui->actionExpandTreeLevel6 );    // Ctrl-6
+    addAction( _ui->actionExpandTreeLevel7 );    // Ctrl-7
+    addAction( _ui->actionExpandTreeLevel8 );    // Ctrl-8
+    addAction( _ui->actionExpandTreeLevel9 );    // Ctrl-9
     addAction( _ui->actionVerboseSelection );    // Shift-F7
     addAction( _ui->actionDumpSelection );       // F7
     connect( _ui->actionDumpSelection, &QAction::triggered,
@@ -89,7 +93,7 @@ void MainWindow::connectMenuActions()
     connectToggleAction( _ui->actionShowBreadcrumbs,  &MainWindow::updateLayoutBreadcrumbs );
     connectToggleAction( _ui->actionShowDetailsPanel, &MainWindow::updateLayoutDetailsPanel );
     connectToggleAction( _ui->actionShowTreemap,      &MainWindow::updateLayoutTreemap );
-    connectToggleAction( _ui->actionTreemapOnSide,    &MainWindow::updateLayoutTreemapOnSide );
+    connectToggleAction( _ui->actionTreemapOnSide,    &MainWindow::treemapAsSidePanel );
     connectToggleAction( _ui->actionVerboseSelection, &MainWindow::toggleVerboseSelection );
 
     // Treemap actions
@@ -97,11 +101,9 @@ void MainWindow::connectMenuActions()
     connectTreemapAction( _ui->actionTreemapZoomIn,    &TreemapView::zoomIn );
     connectTreemapAction( _ui->actionTreemapZoomOut,   &TreemapView::zoomOut );
     connectTreemapAction( _ui->actionResetTreemapZoom, &TreemapView::resetZoom );
-    connectTreemapAction( _ui->actionTreemapRebuild,   &TreemapView::rebuildTreemapSlot );
 
     // Expand tree to level actions
     mapTreeExpandAction( _ui->actionCloseAllTreeLevels, 0 );
-    mapTreeExpandAction( _ui->actionExpandTreeLevel0, 0 );
     mapTreeExpandAction( _ui->actionExpandTreeLevel1, 1 );
     mapTreeExpandAction( _ui->actionExpandTreeLevel2, 2 );
     mapTreeExpandAction( _ui->actionExpandTreeLevel3, 3 );
@@ -200,7 +202,6 @@ void MainWindow::updateActions()
     _ui->actionTreemapZoomIn->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
     _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );
     _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
-    _ui->actionTreemapRebuild->setEnabled    ( showingTreemap );
 
     for ( QAction * action : _ui->menuDiscover->actions() )
 	action->setEnabled( isTree );
@@ -213,19 +214,16 @@ void MainWindow::mousePressEvent( QMouseEvent * event )
 {
     if ( event )
     {
+	// Handle the back / forward buttons on the mouse to act like the
+	// history back / forward buttons in the tool bar
         switch ( event->button() )
         {
-            // Handle the back / forward buttons on the mouse to act like the
-            // history back / forward buttons in the tool bar
-
             case Qt::BackButton:
-                // logDebug() << "BackButton" << Qt::endl;
 		if ( _ui->actionGoBack->isEnabled() )
 		    _ui->actionGoBack->trigger();
                 break;
 
             case Qt::ForwardButton:
-                // logDebug() << "ForwardButton" << Qt::endl;
 		if ( _ui->actionGoForward->isEnabled() )
 		    _ui->actionGoForward->trigger();
                 break;

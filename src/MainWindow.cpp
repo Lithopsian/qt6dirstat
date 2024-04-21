@@ -96,8 +96,6 @@ MainWindow::MainWindow( bool slowUpdate ):
 
     app()->dirTreeModel()->setBaseFont( _ui->dirTreeView->font() );
 
-//    _ui->treemapView->hideTreemap();
-
 #ifdef Q_OS_MACX
     // This makes the application to look more "native" on macOS
     setUnifiedTitleAndToolBarOnMac( true );
@@ -116,9 +114,6 @@ MainWindow::~MainWindow()
 
     writeSettings();
 
-    // Relying on the QObject hierarchy to properly clean this up resulted in a
-    // segfault; there was probably a problem in the deletion order.
-//    delete _ui->dirTreeView;
     delete _ui;
     delete _historyButtons;
 
@@ -245,8 +240,6 @@ void MainWindow::readSettings()
     _urlInWindowTitle           = settings.value( "UrlInWindowTitle",         false ).toBool();
     const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
     _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
-//    const bool showTreemap      = settings.value( "ShowTreemap",              true  ).toBool();
-//    const bool treemapOnSide    = settings.value( "TreemapOnSide",            false ).toBool();
 
     _ui->actionVerboseSelection->setChecked( settings.value( "VerboseSelection",      false ).toBool() );
     _ui->treemapView->setUseTreemapHover   ( settings.value( "UseTreemapHover",       false ).toBool() );
@@ -270,7 +263,6 @@ void MainWindow::readSettings()
 
     if ( topSplitterState.isNull() )
     {
-	// No configuration settings for the details panel size
 	// The window geometry isn't set yet, so just put in something vaguely workable
 	_ui->topViewsSplitter->setStretchFactor( 0, 1 );
 	_ui->topViewsSplitter->setStretchFactor( 1, 4 );
@@ -279,10 +271,6 @@ void MainWindow::readSettings()
     {
 	_ui->topViewsSplitter->restoreState( topSplitterState );
     }
-
-//    _ui->treemapView->setUseTreemapHover( useTreemapHover );
-//    _ui->actionShowTreemap->setChecked( showTreemap );
-//    _ui->actionTreemapAsSidePanel->setChecked( _ui->mainWinSplitter->orientation() == Qt::Horizontal );
 
     initLayouts( layoutName );
 }
@@ -293,8 +281,6 @@ void MainWindow::writeSettings()
     QDirStat::Settings settings;
 
     settings.beginGroup( "MainWindow" );
-//    settings.setValue( "ShowTreemap",              _ui->actionShowTreemap->isChecked()        );
-//    settings.setValue( "TreemapOnSide",            _ui->actionTreemapAsSidePanel->isChecked() );
     settings.setValue( "VerboseSelection",         verboseSelection()                    );
     settings.setValue( "Layout",                   currentLayoutName()                   );
     settings.setValue( "ShowMenuBar",              _ui->actionShowMenuBar->isChecked()   );
@@ -368,7 +354,6 @@ void MainWindow::idleDisplay()
     // Safe for the treemap to start work now
     _updateTimer.stop();
     showTreemapView( _ui->actionShowTreemap->isChecked() );
-//    _ui->treemapView->enable();
 
     updateActions();
     ActionManager::swapActions( _ui->toolBar, _ui->actionStopReading, _ui->actionRefreshAll );

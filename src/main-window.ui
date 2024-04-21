@@ -195,6 +195,7 @@
     <addaction name="actionShowBreadcrumbs"/>
     <addaction name="actionShowDetailsPanel"/>
     <addaction name="actionShowTreemap"/>
+    <addaction name="separator"/>
     <addaction name="actionTreemapOnSide"/>
     <addaction name="separator"/>
     <addaction name="actionFileSizeStats"/>
@@ -347,14 +348,6 @@
   <action name="actionCloseAllTreeLevels">
    <property name="text">
     <string>&amp;Close All Tree Branches</string>
-   </property>
-  </action>
-  <action name="actionExpandTreeLevel0">
-   <property name="text">
-    <string>Level &amp;0</string>
-   </property>
-   <property name="toolTip">
-    <string>Expand (open) the directory tree to level 0</string>
    </property>
   </action>
   <action name="actionExpandTreeLevel1">
@@ -547,14 +540,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
-   </property>
-  </action>
-  <action name="actionTreemapRebuild">
-   <property name="text">
-    <string>Re&amp;build</string>
-   </property>
-   <property name="toolTip">
-    <string>Rebuild the treemap</string>
    </property>
   </action>
   <action name="actionShowTreemap">
@@ -933,11 +918,6 @@
    </property>
    <property name="shortcut">
     <string>F4</string>
-   </property>
-  </action>
-  <action name="actionDiscoverFilesFromYear">
-   <property name="text">
-    <string>Files from &amp;Year</string>
    </property>
   </action>
   <action name="actionGoBack">

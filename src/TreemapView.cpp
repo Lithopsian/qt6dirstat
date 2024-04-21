@@ -298,7 +298,7 @@ bool TreemapView::canZoomOut() const
 }
 
 
-void TreemapView::rebuildTreemapSlot()
+void TreemapView::rebuildTreemap()
 {
     logDebug() << _savedRootUrl << Qt::endl;
     FileInfo * root = nullptr;
@@ -324,7 +324,6 @@ void TreemapView::rebuildTreemapSlot()
 
 void TreemapView::rebuildTreemap( FileInfo * newRoot )
 {
-    logDebug() << newRoot << ( isVisible() ? " - visible" : " - not visible" ) << Qt::endl;
     if ( _disabled || !newRoot || !isVisible() )
         return;
 
@@ -334,6 +333,7 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
 
     if ( _treemapRunning )
     {
+        // Restart in the watched finished() slot so we don't stamp on the future
         _newRoot = newRoot;
         _treemapCancel = TreemapCancelRestart;
         return;
@@ -452,7 +452,7 @@ void TreemapView::configChanged( const QColor & fixedColor,
     calculateSettings();
 
     if ( treemapChanged )
-        rebuildTreemapSlot();
+        rebuildTreemap();
     else
         changeTreemapColors();
 }
@@ -498,9 +498,7 @@ void TreemapView::deleteNotify( FileInfo * )
         if ( _rootTile->orig() != _tree->firstToplevel() )
         {
             // If the user zoomed the treemap in, save the root's URL so the
-            // current state can be restored upon the next rebuildTreemapSlot()
-            // call (which is triggered by the childDeleted() signal that the
-            // tree emits after deleting is done).
+            // current state can be restored when the treemap is rebuilt.
             //
             // Intentionally using debugUrl() here rather than just url() so
             // the correct zoom can be restored even when a dot entry is the
@@ -596,7 +594,7 @@ void TreemapView::enable()
     _disabled = false;
 
     // Use the slow function to pick up any saved root on a refresh
-    rebuildTreemapSlot(); // will emit treemapChanged() when complete
+    rebuildTreemap(); // will emit treemapChanged() when complete
 }
 
 
