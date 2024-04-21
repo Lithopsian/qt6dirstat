@@ -37,17 +37,17 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     _ui->terminal->clear();
     setAutoClose( autoClose );
 
-    connect( _ui->actionZoomIn,       &QAction::triggered,
-             this,                    &OutputWindow::zoomIn );
+    connect( _ui->actionZoomIn,      &QAction::triggered,
+             this,                   &OutputWindow::zoomIn );
 
-    connect( _ui->actionZoomOut,      &QAction::triggered,
-             this,                    &OutputWindow::zoomOut );
+    connect( _ui->actionZoomOut,     &QAction::triggered,
+             this,                   &OutputWindow::zoomOut );
 
-    connect( _ui->actionResetZoom,    &QAction::triggered,
-             this,                    &OutputWindow::resetZoom );
+    connect( _ui->actionResetZoom,   &QAction::triggered,
+             this,                   &OutputWindow::resetZoom );
 
-    connect( _ui->actionKillProcess,  &QAction::triggered,
-             this,                    &OutputWindow::killAll );
+    connect( _ui->actionKillProcess, &QAction::triggered,
+             this,                   &OutputWindow::killAll );
 
     updateActions();
 }
@@ -93,13 +93,13 @@ void OutputWindow::addProcess( QProcess * process )
     connect( process, &QProcess::readyReadStandardError,
 	     this,    &OutputWindow::readStderr );
 
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 6, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 5, 6, 0 )
     connect( process, qOverload<QProcess::ProcessError >( &QProcess::error ),
-	     this,    &OutputWindow::processError );
 #else
     connect( process, &QProcess::errorOccurred,
-	     this,    &OutputWindow::processError );
 #endif
+	     this,    &OutputWindow::processError );
+
     connect( process, qOverload<int, QProcess::ExitStatus>( &QProcess::finished ),
 	     this,    &OutputWindow::processFinishedSlot );
 
@@ -460,11 +460,9 @@ void OutputWindow::closeEvent( QCloseEvent * event )
 {
     _closed = true;
 
+    // Wait until the last process is finished and then delete this window
     if ( _processList.isEmpty() && _noMoreProcesses )
 	this->deleteLater();
-
-    // If there are any more processes, wait until the last one is finished and
-    // then deleteLater().
 
     event->accept();
 }
@@ -495,13 +493,20 @@ void OutputWindow::timeoutShow()
 void OutputWindow::readSettings()
 {
     QDirStat::Settings settings;
+
     settings.beginGroup( "OutputWindow" );
 
     _terminalBackground  = readColorEntry( settings, "TerminalBackground", QColor( Qt::black        ) );
-    _commandTextColor    = readColorEntry( settings, "CommandTextColor"  , QColor( Qt::white        ) );
-    _stdoutColor         = readColorEntry( settings, "StdoutTextColor"   , QColor( 0xff, 0xaa, 0x00 ) );
-    _stderrColor         = readColorEntry( settings, "StdErrTextColor"   , QColor( Qt::red          ) );
-    _terminalDefaultFont = readFontEntry ( settings, "TerminalFont"      , _ui->terminal->font()      );
+    _commandTextColor    = readColorEntry( settings, "CommandTextColor",   QColor( Qt::white        ) );
+    _stdoutColor         = readColorEntry( settings, "StdoutTextColor",    QColor( 0xff, 0xaa, 0x00 ) );
+    _stderrColor         = readColorEntry( settings, "StdErrTextColor",    QColor( Qt::red          ) );
+    _terminalDefaultFont = readFontEntry ( settings, "TerminalFont",       _ui->terminal->font()      );
+
+    setDefaultValue( settings, "TerminalBackground", _terminalBackground  );
+    setDefaultValue( settings, "CommandTextColor",   _commandTextColor    );
+    setDefaultValue( settings, "StdoutTextColor",    _stdoutColor         );
+    setDefaultValue( settings, "StdErrTextColor",    _stderrColor         );
+    setDefaultValue( settings, "TerminalFont",       _terminalDefaultFont );
 
     settings.endGroup();
 
@@ -512,15 +517,13 @@ void OutputWindow::readSettings()
 void OutputWindow::writeSettings()
 {
     QDirStat::Settings settings;
-    settings.beginGroup( "OutputWindow" );
 
+    settings.beginGroup( "OutputWindow" );
     writeColorEntry( settings, "TerminalBackground", _terminalBackground  );
     writeColorEntry( settings, "CommandTextColor"  , _commandTextColor    );
     writeColorEntry( settings, "StdoutTextColor"   , _stdoutColor         );
     writeColorEntry( settings, "StdErrTextColor"   , _stderrColor         );
     writeFontEntry ( settings, "TerminalFont"      , _terminalDefaultFont );
-//    settings.setValue( "DefaultShowTimeoutMillisec", defaultShowTimeout() );
-
     settings.endGroup();
 }
 */

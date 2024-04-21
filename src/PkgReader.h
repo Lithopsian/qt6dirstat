@@ -34,47 +34,29 @@ namespace QDirStat
     {
     public:
 
-	/**
-	 * Constructor. Even though this object creates a PkgReadJob for each
-	 * package it finds, it is not necessary to keep this reader around
-	 * longer than after read() is finished: Once created and queued, the
-	 * PkgReadJobs are self-sufficient. They don't need this reader.
-	 **/
-	PkgReader( DirTree * tree );
+        /**
+         * Constructor. Even though this object creates a PkgReadJob for each
+         * package it finds, it is not necessary to keep this reader around
+         * longer than after read() is finished: Once created and queued, the
+         * PkgReadJobs are self-sufficient. They don't need this reader.
+         **/
+        PkgReader( DirTree * tree );
 
-	/**
-	 * Destructor.
-	 **/
-//	~PkgReader();
-
-	/**
-	 * Suppress copy and assignment constructors (not a QObject)
-	 **/
-//	PkgReader( const PkgReader & ) = delete;
-//	PkgReader & operator=( const PkgReader & ) = delete;
-
-	/**
-	 * Read installed packages from the system's package manager(s), select
-	 * those that match the specified filter and create a PkgReadJob for
-	 * each one to read its file list.
+        /**
+         * Read installed packages from the system's package manager(s), select
+         * those that match the specified filter and create a PkgReadJob for
+         * each one to read its file list.
          *
          * Like all read jobs, this is done with a zero duration timer in the
-	 * Qt event loop, so whenever there is no user or X11 event to process,
-	 * it will pick one read job and execute it.
-	 **/
-	void read( const PkgFilter & filter );
+         * Qt event loop, so whenever there is no user or X11 event to process,
+         * it will pick one read job and execute it.
+         **/
+        void read( const PkgFilter & filter );
 
-	/**
-	 * Read parameters from the settings file.
-	 **/
-	void readSettings();
-
-	/**
-	 * Write parameters to the settings file.
-	 *
-	 * Currently not done because the settings can't be changed.
-	 **/
-//	void writeSettings();
+        /**
+         * Read parameters from the settings file.
+         **/
+        void readSettings();
 
 
     protected:
@@ -92,18 +74,18 @@ namespace QDirStat
         void createAsyncPkgReadJobs( const PkgInfoList & pkgList );
 
 
-	// Data members
+        // Data members
 
-	DirTree * _tree;
+        DirTree * _tree;
 
-	/** These can be set manually in the [Pkg] section of the config file at
+        /** These can be set manually in the [Pkg] section of the config file at
          * ~/.config/QDirStat/QDirStat.config.
-	 **/
-        int       _maxParallelProcesses;
-        int       _minCachePkgListSize;
-	bool      _verboseMissingPkgFiles;
+         **/
+        int  _maxParallelProcesses;
+        int  _minCachePkgListSize;
+        bool _verboseMissingPkgFiles;
 
-    };	// class PkgReader
+    };        // class PkgReader
 
 
 
@@ -124,39 +106,39 @@ namespace QDirStat
 
     public:
 
-	/**
-	 * Constructor: Prepare to read the file list of existing PkgInfo node
-	 * 'pkg' and create a DirInfo or FileInfo node for each item in the
-	 * file list below 'pkg'.
+        /**
+         * Constructor: Prepare to read the file list of existing PkgInfo node
+         * 'pkg' and create a DirInfo or FileInfo node for each item in the
+         * file list below 'pkg'.
 
          * process.  Reading is then started from the outside with
          * startReading().
-	 **/
-	PkgReadJob( DirTree   * tree,
+         **/
+        PkgReadJob( DirTree   * tree,
                     PkgInfo   * pkg,
-		    bool        verboseMissingPkgFiles ):
-	    QObject (),
-	    DirReadJob ( tree, pkg ),
-	    _pkg { pkg },
-	    _verboseMissingPkgFiles { verboseMissingPkgFiles }
-	{}
+                    bool        verboseMissingPkgFiles ):
+            QObject (),
+            DirReadJob ( tree, pkg ),
+            _pkg { pkg },
+            _verboseMissingPkgFiles { verboseMissingPkgFiles }
+        {}
 
-	/**
-	 * Destructor.
-	 **/
-	~PkgReadJob() override = default;
+        /**
+         * Destructor.
+         **/
+        ~PkgReadJob() override = default;
 
-	/**
-	 * Start reading the file list of the package.
-	 *
-	 * Reimplemented from DirReadJob.
-	 **/
-	void startReading() override;
+        /**
+         * Start reading the file list of the package.
+         *
+         * Reimplemented from DirReadJob.
+         **/
+        void startReading() override;
 
-	/**
-	 * Return the parent PkgInfo node.
-	 **/
-	PkgInfo * pkg() const { return _pkg; }
+        /**
+         * Return the parent PkgInfo node.
+         **/
+        PkgInfo * pkg() const { return _pkg; }
 
 
     protected:
@@ -171,17 +153,17 @@ namespace QDirStat
          **/
         virtual QStringList fileList();
 
-	/**
-	 * Obtain information about the file or directory specified in
-	 * 'pathComponents' and create a new FileInfo or a DirInfo (whatever is
-	 * appropriate) from that information. Use FileInfo::isDirInfo() to
-	 * find out which.
-	 *
-	 * If the underlying syscall fails, this returns 0.
-	 **/
-	FileInfo * createItem( const QString & path,
-			       const QString & name,
-			       DirInfo       * parent );
+        /**
+         * Obtain information about the file or directory specified in
+         * 'pathComponents' and create a new FileInfo or a DirInfo (whatever is
+         * appropriate) from that information. Use FileInfo::isDirInfo() to
+         * find out which.
+         *
+         * If the underlying syscall fails, this returns 0.
+         **/
+        FileInfo * createItem( const QString & path,
+                               const QString & name,
+                               DirInfo       * parent );
 
         /**
          * Add all files belonging to 'path' to this package.
@@ -194,10 +176,10 @@ namespace QDirStat
 
         // Data members
 
-	PkgInfo * _pkg;
-	bool      _verboseMissingPkgFiles;
+        PkgInfo * _pkg;
+        bool      _verboseMissingPkgFiles;
 
-    };	// class PkgReadJob
+    };        // class PkgReadJob
 
 
 
@@ -216,12 +198,12 @@ namespace QDirStat
 
     public:
 
-	/**
-	 * Constructor: Prepare to read the file list of existing PkgInfo node
-	 * 'pkg' and create a DirInfo or FileInfo node for each item in the
-	 * file list below 'pkg'. Operation starts when the
-	 * 'readFileListProcess' has data to read, i.e. when it sends
-	 * the 'readFileListFinished' signal.
+        /**
+         * Constructor: Prepare to read the file list of existing PkgInfo node
+         * 'pkg' and create a DirInfo or FileInfo node for each item in the
+         * file list below 'pkg'. Operation starts when the
+         * 'readFileListProcess' has data to read, i.e. when it sends
+         * the 'readFileListFinished' signal.
          *
          * Create the readFileListProcess, then this read job, add the read job
          * to a DirReadJobQueue as a blocked job and then (!) start the
@@ -231,10 +213,10 @@ namespace QDirStat
          *
          * Reading is then started from the outside with startReading() when
          * the job is scheduled.
-	 **/
-	AsyncPkgReadJob( DirTree   * tree,
+         **/
+        AsyncPkgReadJob( DirTree   * tree,
                          PkgInfo   * pkg,
-			 bool        verboseMissingPkgFiles,
+                         bool        verboseMissingPkgFiles,
                          QProcess  * readFileListProcess );
 
 
@@ -261,8 +243,8 @@ namespace QDirStat
 
         // Data members
 
-        QProcess *  _readFileListProcess;
-        QStringList _fileList;
+        QProcess    * _readFileListProcess;
+        QStringList   _fileList;
 
     };  // class AsyncPkgReadJob
 
@@ -275,25 +257,25 @@ namespace QDirStat
 
     public:
 
-	/**
-	 * Constructor: Prepare to read the file list of existing PkgInfo node
-	 * 'pkg' and create a DirInfo or FileInfo node for each item in the
-	 * file list below 'pkg'. This uses 'fileListCache' to get the file
-	 * list.
-	 *
+        /**
+         * Constructor: Prepare to read the file list of existing PkgInfo node
+         * 'pkg' and create a DirInfo or FileInfo node for each item in the
+         * file list below 'pkg'. This uses 'fileListCache' to get the file
+         * list.
+         *
          * Create this type of job and add it as a normal job (not blocked,
          * unlike AsyncPkgReadJob) to the read queue.
          *
          * Reading is then started from the outside with startReading() when
          * the job queue picks this job.
-	 **/
-	CachePkgReadJob( DirTree   * tree,
+         **/
+        CachePkgReadJob( DirTree   * tree,
                          PkgInfo   * pkg,
-			 bool        verboseMissingPkgFiles,
+                         bool        verboseMissingPkgFiles,
                          QSharedPointer<PkgFileListCache> fileListCache ):
-	    PkgReadJob( tree, pkg, verboseMissingPkgFiles ),
-	    _fileListCache( fileListCache )
-	{}
+            PkgReadJob( tree, pkg, verboseMissingPkgFiles ),
+            _fileListCache( fileListCache )
+        {}
 
 
     protected:
@@ -314,6 +296,6 @@ namespace QDirStat
 
     };  // class CachePkgReadJob
 
-}	// namespace QDirStat
+}        // namespace QDirStat
 
 #endif // ifndef PkgReader_h

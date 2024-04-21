@@ -186,12 +186,6 @@ PkgReader::PkgReader( DirTree * tree ):
     readSettings();
 }
 
-/* nothing can change in the millisecond since the settings were read
-PkgReader::~PkgReader()
-{
-    writeSettings();
-}
-*/
 
 void PkgReader::read( const PkgFilter & filter )
 {
@@ -269,28 +263,20 @@ void PkgReader::createAsyncPkgReadJobs( const PkgInfoList & pkgList )
 void PkgReader::readSettings()
 {
     Settings settings;
+
     settings.beginGroup( "Pkg" );
 
-    _maxParallelProcesses   = settings.value( "MaxParallelProcesses"  , DEFAULT_PARALLEL_PROCESSES  ).toInt();
-    _minCachePkgListSize    = settings.value( "MinCachePkgListSize"   , DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
+    _maxParallelProcesses   = settings.value( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  ).toInt();
+    _minCachePkgListSize    = settings.value( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
     _verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
 
-    settings.endGroup();
-}
-
-/*
-void PkgReader::writeSettings()
-{
-    Settings settings;
-    settings.beginGroup( "Pkg" );
-
-    settings.setValue( "MaxParallelProcesses"  , _maxParallelProcesses   );
-    settings.setValue( "MinCachePkgListSize"   , _minCachePkgListSize    );
-    settings.setValue( "VerboseMissingPkgFiles", _verboseMissingPkgFiles );
+    settings.setDefaultValue( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  );
+    settings.setDefaultValue( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE );
+    settings.setDefaultValue( "VerboseMissingPkgFiles", false );
 
     settings.endGroup();
 }
-*/
+
 
 
 

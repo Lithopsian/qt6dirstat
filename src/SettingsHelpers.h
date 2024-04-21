@@ -13,6 +13,7 @@
 #include <QColor>
 #include <QFont>
 #include <QList>
+#include <QSettings>
 
 
 class QSettings;
@@ -26,22 +27,22 @@ namespace QDirStat
      * Read a color in RGB format (#RRGGBB) from the settings.
      **/
     QColor readColorEntry( const QSettings & settings,
-			   const char      * entryName,
+			   const QString   & entryName,
 			   const QColor    & fallback );
 
     /**
      * Write a color in RGB format (#RRGGBB) to the settings.
      **/
-    void writeColorEntry( QSettings    & settings,
-			  const char   * entryName,
-			  const QColor & color );
+    void writeColorEntry( QSettings     & settings,
+			  const QString & entryName,
+			  const QColor  & color );
 
     /**
      * Read a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) from the
      * settings.
      **/
     QList<QColor> readColorListEntry( const QSettings     & settings,
-				      const char          * entryName,
+				      const QString       & entryName,
 				      const QList<QColor> & fallback );
 
     /**
@@ -49,7 +50,7 @@ namespace QDirStat
      * settings.
      **/
     void writeColorListEntry( QSettings           & settings,
-			      const char          * entryName,
+			      const QString       & entryName,
 			      const QList<QColor> & colors );
 
     /**
@@ -57,16 +58,16 @@ namespace QDirStat
      * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
      **/
     QFont readFontEntry( const QSettings & settings,
-                         const char      * entryName,
+                         const QString   & entryName,
                          const QFont     & fallback );
 
     /**
      * Write a font in string format to the settings.
      * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
      **/
-    void writeFontEntry( QSettings   & settings,
-                         const char  * entryName,
-                         const QFont & font );
+    void writeFontEntry( QSettings     & settings,
+                         const QString & entryName,
+                         const QFont   & font );
 
 
     /**
@@ -74,7 +75,7 @@ namespace QDirStat
      * 'enumMapping' maps each valid enum value to the corresponding string.
      **/
     int readEnumEntry( const QSettings           & settings,
-		       const char                * entryName,
+		       const QString             & entryName,
 		       int                         fallback,
 		       const SettingsEnumMapping & enumMapping );
 
@@ -83,9 +84,19 @@ namespace QDirStat
      * 'enumMapping' maps each valid enum value to the corresponding string.
      **/
     void writeEnumEntry( QSettings                 & settings,
-			 const char                * entryName,
+			 const QString             & entryName,
 			 int                         enumValue,
 			 const SettingsEnumMapping & enumMapping );
+
+    /**
+     * Set a value, but only if that key is not already in the settings.
+     **/
+    inline void setDefaultValue( QSettings & settings, const QString & key, const QColor        & value )
+	{ if ( !settings.contains( key ) ) writeColorEntry( settings, key, value ); }
+    inline void setDefaultValue( QSettings & settings, const QString & key, const QFont         & value )
+	{ if ( !settings.contains( key ) ) writeFontEntry( settings, key, value ); }
+    inline void setDefaultValue( QSettings & settings, const QString & key, const QList<QColor> & value )
+	{ if ( !settings.contains( key ) ) writeColorListEntry( settings, key, value ); }
 
     /**
      * Read window settings (size and position) from the settings and apply

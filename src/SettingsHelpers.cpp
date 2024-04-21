@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QSettings>
 #include <QColor>
 #include <QWidget>
 
@@ -20,8 +19,8 @@
 namespace QDirStat
 {
     QColor readColorEntry( const QSettings & settings,
-			   const char	   * entryName,
-			   const QColor	   & fallback )
+			   const QString   & entryName,
+			   const QColor    & fallback )
     {
 	const QColor color( settings.value( entryName ).toString() );
 	if ( !color.isValid() )
@@ -36,16 +35,16 @@ namespace QDirStat
     }
 
 
-    void writeColorEntry( QSettings    & settings,
-			  const char   * entryName,
-			  const QColor & color )
+    void writeColorEntry( QSettings     & settings,
+			  const QString & entryName,
+			  const QColor  & color )
     {
 	settings.setValue( entryName, color.name() );
     }
 
 
-    QList<QColor> readColorListEntry( const QSettings	  & settings,
-				      const char	  * entryName,
+    QList<QColor> readColorListEntry( const QSettings     & settings,
+				      const QString       & entryName,
 				      const QList<QColor> & fallback )
     {
 	const QStringList strList = settings.value( entryName ).toStringList();
@@ -68,8 +67,8 @@ namespace QDirStat
     }
 
 
-    void writeColorListEntry( QSettings		  & settings,
-			      const char	  * entryName,
+    void writeColorListEntry( QSettings           & settings,
+			      const QString       & entryName,
 			      const QList<QColor> & colors )
     {
 	QStringList strList;
@@ -82,8 +81,8 @@ namespace QDirStat
 
 
     QFont readFontEntry( const QSettings & settings,
-			 const char	 * entryName,
-			 const QFont	 & fallback )
+			 const QString   & entryName,
+			 const QFont     & fallback )
     {
 	if ( settings.contains( entryName ) )
 	{
@@ -98,9 +97,9 @@ namespace QDirStat
     }
 
 
-    void writeFontEntry( QSettings    & settings,
-			 const char  * entryName,
-			 const QFont & font )
+    void writeFontEntry( QSettings     & settings,
+			 const QString & entryName,
+			 const QFont   & font )
     {
 	settings.setValue( entryName, font.toString() );
     }
@@ -108,8 +107,8 @@ namespace QDirStat
 
 
     int readEnumEntry( const QSettings & settings,
-		       const char      * entryName,
-		       int		 fallback,
+		       const QString   & entryName,
+		       int               fallback,
 		       const SettingsEnumMapping & enumMapping )
     {
 	if ( !settings.contains( entryName ) )
@@ -128,9 +127,9 @@ namespace QDirStat
     }
 
 
-    void writeEnumEntry( QSettings  & settings,
-			 const char * entryName,
-			 int	      enumValue,
+    void writeEnumEntry( QSettings     & settings,
+			 const QString & entryName,
+			 int             enumValue,
 			 const SettingsEnumMapping & enumMapping )
     {
 	if ( !enumMapping.contains( enumValue ) )

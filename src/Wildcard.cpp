@@ -12,7 +12,7 @@
 using namespace QDirStat;
 
 
-#if (QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 )
 QString Wildcard::wildcardToRegularExpression(const QString & pattern,
                                               QDirStat::WildcardConversionOptions options)
 {

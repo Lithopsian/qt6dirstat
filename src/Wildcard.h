@@ -90,7 +90,7 @@ namespace QDirStat
 	 * expression pattern string into an anchored string.  It doesn't check
 	 * whether the pattern is already anchored.
 	 **/
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
 	static QString anchoredPattern( const QString & expression )
 	    { return QString() + QLatin1String( "\\A(?:" ) + expression + QLatin1String( ")\\z" ); }
 #endif
@@ -101,7 +101,7 @@ namespace QDirStat
 	 * undesirable for matching paths and not the way that QRegExp behaved,
 	 * so the function is overloaded here.
 	 **/
-#if (QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 )
 	static QString wildcardToRegularExpression( const QString & pattern,
 						    QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
 #endif

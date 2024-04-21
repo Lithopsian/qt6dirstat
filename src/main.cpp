@@ -57,7 +57,7 @@ void logVersion()
               << " built with Qt " << QT_VERSION_STR
               << Qt::endl;
 
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
     logWarning() << "WARNING: You are using Qt " << QT_VERSION_STR
                  << ". This may or may not work." << Qt::endl;
     logWarning() << "The supported Qt version for Qt6DirStat is Qt 5.12 or newer." << Qt::endl;

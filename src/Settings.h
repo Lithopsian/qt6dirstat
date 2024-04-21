@@ -10,6 +10,8 @@
 #ifndef Settings_h
 #define Settings_h
 
+#include <QColor>
+#include <QFont>
 #include <QSettings>
 #include <QStringList>
 #include <QSet>
@@ -74,15 +76,13 @@ namespace QDirStat
 
 	/**
 	 * Set a value, but only if that key is not already in the settings.
-	 *
-	 * Currently only the int overload is used, by RpmPkgManager.
 	 **/
-	void setDefaultValue( const QString & key, bool            newValue )
-	    { if ( !contains( key ) ) setValue( key, newValue ); }
-	void setDefaultValue( const QString & key, int             newValue )
-	    { if ( !contains( key ) ) setValue( key, newValue ); }
-	void setDefaultValue( const QString & key, const QString & newValue )
-	    { if ( !contains( key ) ) setValue( key, newValue ); }
+	void setDefaultValue( const QString & key, bool value )
+	    { if ( !contains( key ) ) setValue( key, value ); }
+	void setDefaultValue( const QString & key, int value )
+	    { if ( !contains( key ) ) setValue( key, value ); }
+	void setDefaultValue( const QString & key, const QString & value )
+	    { if ( !contains( key ) ) setValue( key, value ); }
 
 	/**
 	 * Find all settings groups that start with 'groupPrefix'.

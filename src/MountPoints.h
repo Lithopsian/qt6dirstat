@@ -16,7 +16,7 @@
 #include <QTextStream>
 
 
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 ))
+#if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
 #  define HAVE_Q_STORAGE_INFO 0
 typedef void * QStorageInfo;
 #else
@@ -200,7 +200,7 @@ namespace QDirStat
 	FileSize MountPoint::usedSize()		 { return -1; }
 	FileSize MountPoint::reservedSize()	 { return -1; }
 	FileSize MountPoint::freeSizeForUser()	 { return -1; }
-	FileSize MountPoint::freeSizeForRoot()   { return -1; }
+	FileSize MountPoint::freeSizeForRoot()	 { return -1; }
 #endif
 
     private:
@@ -215,11 +215,11 @@ namespace QDirStat
 	QStorageInfo * _storageInfo { nullptr };
 #endif
 
-	QString	    _device;
-	QString	    _path;
-	QString	    _filesystemType;
+	QString     _device;
+	QString     _path;
+	QString     _filesystemType;
 	QStringList _mountOptions;
-	bool	    _isDuplicate { false };
+	bool        _isDuplicate { false };
 
     }; // class MountPoint
 
@@ -357,7 +357,6 @@ namespace QDirStat
          **/
         void add( MountPoint * mountPoint );
 
-
 	/**
 	 * Check if any of the mount points has filesystem type "btrfs".
 	 **/
@@ -387,12 +386,12 @@ namespace QDirStat
 	// Data members
 	//
 
-	QList<MountPoint *>	     _mountPointList;
+	QList<MountPoint *>          _mountPointList;
 	QHash<QString, MountPoint *> _mountPointMap;
         QStringList                  _ntfsDevices;
-	bool			     _isPopulated	{ false };
-	bool			     _hasBtrfs		{ false };
-	bool			     _checkedForBtrfs	{ false };
+	bool                         _isPopulated	{ false };
+	bool                         _hasBtrfs		{ false };
+	bool                         _checkedForBtrfs	{ false };
 
     }; // class MountPoints
 

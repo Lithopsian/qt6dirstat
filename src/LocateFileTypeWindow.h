@@ -127,24 +127,24 @@ namespace QDirStat
 	 **/
 	FileInfoSet matchingFiles( FileInfo * dir );
 
-        /**
-         * Select the first item in the list. This will also select it in the
-         * main window, open the branch where this item is in and scroll the
-         * main window's tree so that item is visible tere.
-         **/
-        void selectFirstItem()
+	/**
+	 * Select the first item in the list. This will also select it in the
+	 * main window, open the branch where this item is in and scroll the
+	 * main window's tree so that item is visible tere.
+	 **/
+	void selectFirstItem()
 	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
 
-        /**
-         * Resize event, reimplemented from QWidget.
+	/**
+	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
 	 * the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
-         **/
-        void resizeEvent( QResizeEvent * event ) override;
+	 **/
+	void resizeEvent( QResizeEvent * event ) override;
 
 
     private:
