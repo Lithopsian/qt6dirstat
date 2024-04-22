@@ -43,21 +43,27 @@ namespace QDirStat
     {
     public:
         /**
-         * Constructor.
+         * Default constructor, has no tree and no url.  Explicitly declared,
+         * otherwise it is suppressed because of the deleted copy constructors.
          **/
-        Subtree( DirTree * tree = nullptr ):
-	     _tree { tree }
-        {}
-
-        /**
-         * Destructor, just for rule of three.
-         **/
-        ~Subtree() = default;
+        Subtree() = default;
 
         /**
          * Copy constructor.
+         *
+         * clone() doesn't work properly, and probably isn't necessary given
+         * the existing data members.  Luckily, no-one is using the
+         * copy constructors.  Explicitly delete them to draw attention if
+         * any code accidentally or deliberately tries to use them.
          **/
-        Subtree( const Subtree & other ) { clone( other ); }
+        Subtree( const Subtree & other ) = delete;
+//            { clone( other ); }
+
+        /**
+         * Normal copy assignment operator.
+         **/
+        Subtree & operator=( const Subtree & other ) = delete;
+//            { clone( other ); return *this; }
 
         /**
          * Assignment Operator for a FileInfo pointer. This is an alias for
@@ -65,12 +71,6 @@ namespace QDirStat
          **/
         Subtree & operator=( FileInfo * subtree )
             { set( subtree ); return *this; }
-
-        /**
-         * Normal assignment operator.
-         **/
-        Subtree & operator=( const Subtree & other )
-            { clone( other ); return *this; }
 
         /**
          * Return the DirTree.
@@ -87,7 +87,7 @@ namespace QDirStat
          * if no URL is set or if no item with that URL can be located. The
          * default is 'true'.
          **/
-        bool useRootFallback() const { return _useRootFallback; }
+//        bool useRootFallback() const { return _useRootFallback; }
 
         /**
          * Enable or disable using the tree's root as a fallback.
@@ -98,7 +98,7 @@ namespace QDirStat
          * Return 'true if the item's parent should be used as a fallback if no
          * item with that URL can be located. The default is 'false'.
          **/
-        bool useParentFallback() const { return _useParentFallback; }
+//        bool useParentFallback() const { return _useParentFallback; }
 
         /**
          * Enable or disable using the item's parent URL as a fallback.
@@ -119,7 +119,7 @@ namespace QDirStat
          * the subtree) or if using the root as a fallback is disabled and the
          * URL could not be found in the DirTree.
          **/
-        FileInfo * subtree();
+        FileInfo * subtree() const;
 
         /**
          * Get the corresponding DirInfo from the DirTree via the URL.
@@ -129,13 +129,13 @@ namespace QDirStat
          * Remember that this may also return a DotEntry, a PkgInfo or an Attic
          * because they are all subclasses of DirInfo.
          **/
-        DirInfo * dir();
+        const DirInfo * dir() const;
 
         /**
          * Dereference operator. This is an alias for subtree(): Get the
          * subtree via the URL.
          **/
-        FileInfo * operator()() { return subtree(); }
+        FileInfo * operator()() const { return subtree(); }
 
         /**
          * Set the subtree. This also sets the tree and the URL which both can
@@ -157,21 +157,19 @@ namespace QDirStat
          * Return 'true' if this subtree is empty, i.e. if it was cleared or if
          * no FileInfo and no URL was ever set.
          **/
-        bool isEmpty() { return _url.isEmpty(); }
+        bool isEmpty() const { return _url.isEmpty(); }
 
         /**
-         * Set the DirTree.
-         *
-         * This is typically not necessary; it is implicitly done in set().
+         * Set the DirTree.  Used by, for example, MainWindow::_futureSelection,
+         * which sets the tree once and then sets the url as required.
          **/
         void setTree( DirTree * tree ) { _tree = tree; }
 
         /**
-         * Set the URL.
-         *
-         * This is typically not necessary; it is implicitly done in set().
+         * Set the URL.  Used when the url is known, but there is not (yet)
+         * a FileInfo object for it.
          **/
-        void setUrl( const QString & newUrl );
+        void setUrl( const QString & newUrl ) { _url = newUrl; }
 
 
     protected:
@@ -179,13 +177,18 @@ namespace QDirStat
         /**
          * Locate the FileInfo item with the stored URL in the stored tree.
          **/
-        FileInfo * locate();
+        FileInfo * locate() const;
 
         /**
          * Clone subtree 'other' to this one. This is what both the assignment
          * operator (for Subtrees) and the copy constructor do internally.
+         *
+         * All data members have their own copy constructors, so there isn't a
+         * need for a separate clone/copy function.  It has been fixed to
+         * reference all data members, but not tested as there are no uses of
+         * it in qdirstat.
          **/
-        void clone( const Subtree & other );
+//        void clone( const Subtree & other );
 
 
     private:

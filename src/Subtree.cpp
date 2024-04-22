@@ -10,13 +10,13 @@
 #include "Subtree.h"
 #include "DirInfo.h"
 #include "DirTree.h"
-#include "Logger.h"
+//#include "Logger.h"
 
 
 using namespace QDirStat;
 
 
-FileInfo * Subtree::subtree()
+FileInfo * Subtree::subtree() const
 {
     FileInfo * item = locate();
 
@@ -30,13 +30,13 @@ FileInfo * Subtree::subtree()
 }
 
 
-DirInfo * Subtree::dir()
+const DirInfo * Subtree::dir() const
 {
     FileInfo * item = subtree();
     if ( !item )
         return nullptr;
 
-    DirInfo * dir = item->toDirInfo();
+    const DirInfo * dir = item->toDirInfo();
 
     if ( !dir && item->parent() )
         dir = item->parent();
@@ -76,17 +76,7 @@ void Subtree::set( FileInfo * subtree )
 }
 
 
-void Subtree::setUrl( const QString & newUrl )
-{
-    //logDebug() << "URL: " << newUrl << Qt::endl;
-    _url = newUrl;
-
-    if ( !_tree )
-        logWarning() << "NULL tree!" << Qt::endl;
-}
-
-
-FileInfo * Subtree::locate()
+FileInfo * Subtree::locate() const
 {
     if ( !_tree || _url.isEmpty() )
 	return nullptr;
@@ -95,7 +85,7 @@ FileInfo * Subtree::locate()
 			  true ); // findPseudoDirs
 }
 
-
+/*
 void Subtree::clone( const Subtree & other )
 {
     if ( &other == this )
@@ -103,6 +93,9 @@ void Subtree::clone( const Subtree & other )
 
     _tree = other.tree();
     _url  = other.url();
+    _parentUrl  = other.parentUrl();
 
-    _useRootFallback = other.useRootFallback();
+    _useRootFallback   = other.useRootFallback();
+    _useParentFallback = other.useParentFallback();
 }
+*/
