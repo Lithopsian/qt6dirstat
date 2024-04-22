@@ -46,7 +46,7 @@ namespace QDirStat
 	TreemapCancelRestart,
     };
 
-    typedef QList<HighlightRect *> HighlightRectList;
+    typedef QList<const HighlightRect *> HighlightRectList;
 
     enum TreemapLayers
     {
@@ -129,11 +129,6 @@ namespace QDirStat
 	void setCleanupCollection( const CleanupCollection * collection );
 
 	/**
-	 * Return the cleanup collection or 0 if it is not set.
-	 **/
-//	const CleanupCollection * cleanupCollection() const { return _cleanupCollection; }
-
-	/**
 	 * Use a fixed color for all tiles. To undo this, set an invalid QColor
 	 * with the QColor default constructor.
 	 **/
@@ -202,19 +197,6 @@ namespace QDirStat
 	QThreadPool * threadPool() { return _threadPool; }
 
 	/**
-	 * Adds the future for a tile-rendering thread to a list.  The treemap build will
-	 * wait for all the rendering threads to finish before returning.  The rendering
-	 * threads have no return value.
-	 **/
-//	void appendTileFuture( QFuture<void> future ) { _tileFutures.append( future ); }
-
-	/**
-	 * Iterators for the tile future list.
-	 **/
-//	const auto tileFuturesBegin() { return _tileFutures.begin(); }
-//	const auto tileFuturesEnd() const { return _tileFutures.cend(); }
-
-	/**
 	 * Returns true if it is possible to zoom in with the currently
 	 * selected tile, false if not.
 	 **/
@@ -235,7 +217,7 @@ namespace QDirStat
 	/**
 	 * Sync the selected items and the current item to the selection model.
 	 **/
-	void sendSelection( const TreemapTile *tile );
+	void sendSelection( const TreemapTile * tile );
 
 	/**
 	 * Returns the value of the UseTreemapHover setting.
@@ -250,12 +232,14 @@ namespace QDirStat
 	/**
 	 * Send a hoverEnter() signal for 'node'.
 	 **/
-	void sendHoverEnter( FileInfo * node );
+	void sendHoverEnter( FileInfo * node )
+	    { if ( _useTreemapHover ) emit hoverEnter( node ); }
 
 	/**
 	 * Send a hoverLeave() signal for 'node'.
 	 **/
-	void sendHoverLeave( FileInfo * node );
+	void sendHoverLeave( FileInfo * node )
+	    { if ( _useTreemapHover ) emit hoverLeave( node ); }
 
 	/**
 	 * Highlight the parent tiles of item 'tile' if that tile is not
@@ -509,7 +493,7 @@ namespace QDirStat
 	 * Writes a colour to the settings file.  If the color is invalid, it
 	 * will write an entry with an empty string.
 	 **/
-	void writeOptionalColorEntry( Settings & settings, const char * setting, const QColor & color );
+	void writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color );
 
 	/**
 	 * Rebuild the treemap with 'newRoot' as the new root.
@@ -636,12 +620,12 @@ namespace QDirStat
 	SelectionModel      * _selectionModel		{ nullptr };
 	SelectionModelProxy * _selectionModelProxy	{ nullptr };
 
-	TreemapTile     * _rootTile			{ nullptr };
-	HighlightRect   * _currentTileHighlighter	{ nullptr };
-        SceneMask       * _sceneMask			{ nullptr };
-	FileInfo        * _newRoot			{ nullptr };
-        HighlightRectList _parentHighlightList;
-	QString	          _savedRootUrl;
+	TreemapTile         * _rootTile			{ nullptr };
+	HighlightRect       * _currentTileHighlighter	{ nullptr };
+        SceneMask           * _sceneMask		{ nullptr };
+	FileInfo            * _newRoot			{ nullptr };
+        HighlightRectList     _parentHighlightList;
+	QString	              _savedRootUrl;
 
 	bool   _colourPreviews;
 	bool   _squarify;
