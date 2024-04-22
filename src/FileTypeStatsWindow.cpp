@@ -78,8 +78,8 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
     connect( _ui->actionSizeStats, &QAction::triggered,
 	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
-    connect( selectionModel, qOverload<FileInfo *, const FileInfo *>( &SelectionModel::currentItemChanged ),
-	     this,           &FileTypeStatsWindow::syncedPopulate );
+    connect( selectionModel,       &SelectionModel::currentItemChanged,
+	     this,                 &FileTypeStatsWindow::syncedPopulate );
 }
 
 

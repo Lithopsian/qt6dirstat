@@ -29,24 +29,24 @@ QString DataColumns::toString( DataColumn col )
 {
     switch ( col )
     {
-	case NameCol:			return "NameCol";
-	case PercentBarCol:		return "PercentBarCol";
-	case PercentNumCol:		return "PercentNumCol";
-	case SizeCol:		        return "SizeCol";
-	case TotalItemsCol:		return "TotalItemsCol";
-	case TotalFilesCol:		return "TotalFilesCol";
-	case TotalSubDirsCol:		return "TotalSubDirsCol";
-	case LatestMTimeCol:		return "LatestMTimeCol";
-        case OldestFileMTimeCol:        return "OldestFileMTimeCol";
-	case UserCol:			return "UserCol";
-	case GroupCol:			return "GroupCol";
-	case PermissionsCol:		return "PermissionsCol";
-	case OctalPermissionsCol:	return "OctalPermissionsCol";
-	case UndefinedCol:		return "UndefinedCol";
-	case ReadJobsCol:		return "ReadJobsCol";
+	case NameCol:             return "NameCol";
+	case PercentBarCol:       return "PercentBarCol";
+	case PercentNumCol:       return "PercentNumCol";
+	case SizeCol:             return "SizeCol";
+	case TotalItemsCol:       return "TotalItemsCol";
+	case TotalFilesCol:       return "TotalFilesCol";
+	case TotalSubDirsCol:     return "TotalSubDirsCol";
+	case LatestMTimeCol:      return "LatestMTimeCol";
+        case OldestFileMTimeCol:  return "OldestFileMTimeCol";
+	case UserCol:             return "UserCol";
+	case GroupCol:            return "GroupCol";
+	case PermissionsCol:      return "PermissionsCol";
+	case OctalPermissionsCol: return "OctalPermissionsCol";
+	case UndefinedCol:        return "UndefinedCol";
+	case ReadJobsCol:         return "ReadJobsCol";
 
-	    // Intentionally omitting 'default' so the compiler
-	    // can catch unhandled enum values
+	// Intentionally omitting 'default' so the compiler
+	// can catch unhandled enum values
     }
 
     logError() << "Unknown DataColumn " << (int)col << Qt::endl;

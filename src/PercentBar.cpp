@@ -11,8 +11,6 @@
 #include <QTreeView>
 
 #include "PercentBar.h"
-#include "Settings.h"
-#include "SettingsHelpers.h"
 #include "Exception.h"
 #include "Logger.h"
 

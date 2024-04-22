@@ -547,7 +547,7 @@ void DirTreeModel::createTree()
 
     _tree->setExcludeRules();
 
-    connect( _tree, qOverload<>( &DirTree::startingReading ),
+    connect( _tree, &DirTree::startingReading,
 	     this,  &DirTreeModel::busyDisplay );
 
     connect( _tree, &DirTree::finished,

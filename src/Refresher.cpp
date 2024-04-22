@@ -10,7 +10,6 @@
 #include "Refresher.h"
 #include "DirTree.h"
 #include "DirInfo.h"
-#include "FileInfoSet.h"
 #include "Logger.h"
 
 
@@ -19,17 +18,17 @@ using namespace QDirStat;
 
 void Refresher::refresh()
 {
-    if ( !_items.isEmpty() )
+    if ( _items.isEmpty() )
+    {
+	logWarning() << "No items to refresh" << Qt::endl;
+    }
+    else
     {
 	//logDebug() << "Refreshing " << _items.size() << " items" << Qt::endl;
 
 	DirTree * tree = _items.first()->tree();
 	if ( tree )
 	    tree->refresh( _items );
-    }
-    else
-    {
-	logWarning() << "No items to refresh" << Qt::endl;
     }
 
     this->deleteLater();

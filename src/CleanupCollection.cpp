@@ -154,10 +154,10 @@ namespace
 
 
 
-CleanupCollection::CleanupCollection( QObject	     * parent,
+CleanupCollection::CleanupCollection( QObject        * parent,
 				      SelectionModel * selectionModel,
-				      QToolBar	     * toolBar,
-				      QMenu	     * menu ):
+				      QToolBar       * toolBar,
+				      QMenu          * menu ):
     QObject ( parent ),
     _selectionModel { selectionModel },
     _trash { new Trash() }
@@ -382,7 +382,7 @@ void CleanupCollection::execute()
     }
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
-	     this,	   &CleanupCollection::cleanupFinished );
+	     this,         &CleanupCollection::cleanupFinished );
 
     // Process the raw FileInfoSet to eliminate duplicates.  For Cleanups
     // not containing the %p or %n variables, create a de-duplicated list of
@@ -394,8 +394,8 @@ void CleanupCollection::execute()
 
     if ( cleanup->refreshPolicy() == Cleanup::AssumeDeleted )
     {
-	connect( outputWindow,	&OutputWindow::lastProcessFinished,
-		 this,		&CleanupCollection::assumedDeleted );
+	connect( outputWindow, &OutputWindow::lastProcessFinished,
+		 this,         &CleanupCollection::assumedDeleted );
 
         // It is important to use the normalized FileInfoSet here to avoid a
         // segfault because we are iterating over items whose ancestors we just
@@ -482,20 +482,20 @@ void CleanupCollection::readSettings()
 	// Read one cleanup
 	settings.beginGroup( groupName );
 
-	const QString title    = settings.value( "Title"	).toString();
-	const QString command  = settings.value( "Command"	).toString();
-	const QString iconName = settings.value( "Icon"		).toString();
-	const QString hotkey   = settings.value( "Hotkey"	).toString();
-	const QString shell    = settings.value( "Shell"	).toString();
+	const QString title    = settings.value( "Title"   ).toString();
+	const QString command  = settings.value( "Command" ).toString();
+	const QString iconName = settings.value( "Icon"    ).toString();
+	const QString hotkey   = settings.value( "Hotkey"  ).toString();
+	const QString shell    = settings.value( "Shell"   ).toString();
 
-	const bool active		 = settings.value( "Active"			, true	).toBool();
-	const bool worksForDir		 = settings.value( "WorksForDir"		, true	).toBool();
-	const bool worksForFile		 = settings.value( "WorksForFile"		, true	).toBool();
-	const bool worksForDotEntry      = settings.value( "WorksForDotEntry"		, true	).toBool();
-	const bool recurse		 = settings.value( "Recurse"			, false ).toBool();
-	const bool askForConfirmation    = settings.value( "AskForConfirmation"		, false ).toBool();
-	const bool outputWindowAutoClose = settings.value( "OutputWindowAutoClose"	, false ).toBool();
-	const int  outputWindowTimeout   = settings.value( "OutputWindowTimeout"	, 0	).toInt();
+	const bool active                = settings.value( "Active",                true  ).toBool();
+	const bool worksForDir           = settings.value( "WorksForDir",           true  ).toBool();
+	const bool worksForFile          = settings.value( "WorksForFile",          true  ).toBool();
+	const bool worksForDotEntry      = settings.value( "WorksForDotEntry",      true  ).toBool();
+	const bool recurse               = settings.value( "Recurse",               false ).toBool();
+	const bool askForConfirmation    = settings.value( "AskForConfirmation",    false ).toBool();
+	const bool outputWindowAutoClose = settings.value( "OutputWindowAutoClose", false ).toBool();
+	const int  outputWindowTimeout   = settings.value( "OutputWindowTimeout",   0     ).toInt();
 
 	const int refreshPolicy	 = readEnumEntry( settings, "RefreshPolicy",
 						  Cleanup::NoRefresh,
@@ -569,14 +569,14 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 	if ( !cleanup || cleanup->command().isEmpty() || cleanup->title().isEmpty() )
 	    continue;
 
-	settings.setValue( "Command"		  , cleanup->command()		     );
-	settings.setValue( "Title"		  , cleanup->title()		     );
-	settings.setValue( "Active"		  , cleanup->isActive()		     );
-	settings.setValue( "WorksForDir"	  , cleanup->worksForDir()	     );
-	settings.setValue( "WorksForFile"	  , cleanup->worksForFile()	     );
-	settings.setValue( "WorksForDotEntry"	  , cleanup->worksForDotEntry()	     );
-	settings.setValue( "Recurse"		  , cleanup->recurse()		     );
-	settings.setValue( "AskForConfirmation"	  , cleanup->askForConfirmation()    );
+	settings.setValue( "Command",               cleanup->command()               );
+	settings.setValue( "Title",                 cleanup->title()                 );
+	settings.setValue( "Active",                cleanup->isActive()              );
+	settings.setValue( "WorksForDir",           cleanup->worksForDir()           );
+	settings.setValue( "WorksForFile",          cleanup->worksForFile()          );
+	settings.setValue( "WorksForDotEntry",      cleanup->worksForDotEntry()      );
+	settings.setValue( "Recurse",               cleanup->recurse()               );
+	settings.setValue( "AskForConfirmation",    cleanup->askForConfirmation()    );
 	settings.setValue( "OutputWindowAutoClose", cleanup->outputWindowAutoClose() );
 
 	// Leave empty to use the OutputWindow default timeout
@@ -634,9 +634,9 @@ void CleanupCollection::moveToTrash()
 void CleanupCollection::createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet )
 {
     _selectionModel->prepareRefresh( refreshSet );
-    Refresher * refresher  = new Refresher( this, refreshSet );
+    Refresher * refresher = new Refresher( this, refreshSet );
     CHECK_NEW( refresher );
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
-	     refresher,	   &Refresher::refresh );
+	     refresher,    &Refresher::refresh );
 }

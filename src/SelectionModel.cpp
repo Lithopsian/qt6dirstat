@@ -240,7 +240,6 @@ void SelectionModel::prepareRefresh( const FileInfoSet & refreshSet )
     if ( _verbose )
 	logDebug() << "Selecting " << dir << Qt::endl;
 
-//    setCurrentItem( dir, true ); // called in updateCurrentBranch()
     updateCurrentBranch( dir );
 }
 

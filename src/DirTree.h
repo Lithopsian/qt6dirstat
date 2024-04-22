@@ -11,7 +11,7 @@
 #define DirTree_h
 
 #include "FileSize.h"
-#include "DirReadJob.h"
+#include "DirReadJob.h" // DirReadJobQueue
 
 
 namespace QDirStat
@@ -243,7 +243,7 @@ namespace QDirStat
 	/**
 	 * Returns 'true' if directory reading is in progress in this tree.
 	 **/
-	bool isBusy() { return _isBusy; }
+	bool isBusy() const { return _isBusy; }
 
 	/**
 	 * Write the complete tree to a cache file.
@@ -256,11 +256,6 @@ namespace QDirStat
 	 * Read a cache file.
 	 **/
 	bool readCache( const QString & cacheFileName );
-
-	/**
-	 * Clear the tree and read a cache file.
-	 **/
-//	void clearAndReadCache( const QString & cacheFileName );
 
 	/**
 	 * Read installed packages that match the specified PkgFilter and their
@@ -306,7 +301,8 @@ namespace QDirStat
 	 * The DirTree takes over ownership of the filter object and will
 	 * delete it when appropriate.
 	 **/
-	void addFilter( const DirTreeFilter * filter ) { if ( filter ) _filters << filter; }
+	void addFilter( const DirTreeFilter * filter )
+	    { if ( filter ) _filters << filter; }
 
 	/**
 	 * Clear all filters.
@@ -318,12 +314,12 @@ namespace QDirStat
 	 * filesystem object to be ignored during directory reading, 'false'
 	 * if not.
 	 **/
-	bool checkIgnoreFilters( const QString & path );
+	bool checkIgnoreFilters( const QString & path ) const;
 
 	/**
 	 * Return 'true' if there is any filter, 'false' if not.
 	 **/
-	bool hasFilters() const { return ! _filters.isEmpty(); }
+	bool hasFilters() const { return !_filters.isEmpty(); }
 
 	/**
 	 * Return 'true' if this DirTree is in the process of being destroyed,
@@ -445,13 +441,6 @@ namespace QDirStat
 	 * This is sent AFTER finalizeLocal( DirInfo * dir ).
 	 **/
 	void readJobFinished( DirInfo * dir );
-
-	/**
-	 * Single line progress information, emitted when the read status
-	 * changes - typically when a new directory is being read. Connect to a
-	 * status bar etc. to keep the user entertained.
-	 **/
-//	void progressInfo( const QString & infoLine );
 
 
     public slots:

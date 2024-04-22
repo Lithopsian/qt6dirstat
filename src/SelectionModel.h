@@ -201,11 +201,11 @@ namespace QDirStat
 
 	// Data members
 
-	DirTreeModel	* _dirTreeModel;
-	FileInfo	* _currentItem		{ nullptr };
-	FileInfoSet	  _selectedItems;
-	bool		  _selectedItemsDirty	{ false };
-	bool		  _verbose		{ false };
+	DirTreeModel * _dirTreeModel;
+	FileInfo     * _currentItem		{ nullptr };
+	FileInfoSet    _selectedItems;
+	bool           _selectedItemsDirty	{ false };
+	bool           _verbose			{ false };
 
     };	// class SelectionModel
 

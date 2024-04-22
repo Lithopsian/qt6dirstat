@@ -55,7 +55,6 @@ namespace
 		to->beginGroup( group );
 
 		const QStringList keys = from->allKeys();
-
 		for ( const QString & key : keys )
 		{
 		    // logVerbose() << "	Copying " << key << Qt::endl;
@@ -95,7 +94,6 @@ namespace
 	    const uid_t   uid     = sudoUid.toInt();
 	    const gid_t   gid     = sudoGid.toInt();
 	    const QString homeDir = SysUtil::homeDir( uid );
-
 	    if ( homeDir.isEmpty() )
 	    {
 		logWarning() << "Can't get home directory for UID " << uid << Qt::endl;
@@ -105,7 +103,6 @@ namespace
 	    if ( filename.startsWith( homeDir ) )
 	    {
 		const int result = ::chown( filename.toUtf8(), uid, gid );
-
 		if ( result != 0 )
 		{
 		    logError() << "Can't chown " << filename
@@ -151,11 +148,7 @@ void Settings::beginGroup( const QString & prefix, int no )
 {
     _groupPrefix = prefix;
 
-    const QString groupName = QString( "%1_%2" )
-	.arg( prefix )
-	.arg( no, 2, 10, QChar( '0' ) );
-
-    QSettings::beginGroup( groupName );
+    QSettings::beginGroup( QString( "%1_%2" ).arg( prefix ).arg( no, 2, 10, QChar( '0' ) ) );
 }
 
 
@@ -178,8 +171,9 @@ void Settings::ensureToplevel()
 
 QStringList Settings::findGroups( const QString & groupPrefix )
 {
-    QStringList result;
     ensureToplevel();
+
+    QStringList result;
 
     const auto groups = childGroups();
     for ( const QString & group : groups )
@@ -196,7 +190,8 @@ bool Settings::hasGroup( const QString & groupPrefix )
 {
     ensureToplevel();
 
-    for ( const QString & group : childGroups() )
+    const auto groups = childGroups();
+    for ( const QString & group : groups )
     {
 	if ( group.startsWith( groupPrefix ) )
 	    return true;
@@ -210,7 +205,8 @@ void Settings::removeGroups( const QString & groupPrefix )
 {
     ensureToplevel();
 
-    for ( const QString & group : childGroups() )
+    const auto groups = childGroups();
+    for ( const QString & group : groups )
     {
 	if ( group.startsWith( groupPrefix ) )
 	    remove( group );

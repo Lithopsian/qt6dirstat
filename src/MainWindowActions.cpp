@@ -10,15 +10,14 @@
 #include <QMouseEvent>
 
 #include "MainWindow.h"
-#include "CleanupCollection.h"
 #include "DirTree.h"
 #include "DiscoverActions.h"
 #include "FileInfo.h"
 #include "HistoryButtons.h"
+#include "Logger.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Version.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -26,7 +25,7 @@ using namespace QDirStat;
 
 void MainWindow::connectMenuActions()
 {
-    _ui->actionGoUp->setShortcutContext ( Qt::ApplicationShortcut );
+    _ui->actionGoUp->setShortcutContext( Qt::ApplicationShortcut );
     _ui->actionGoToToplevel->setShortcutContext( Qt::ApplicationShortcut );
     _ui->actionWhatsNew->setStatusTip( RELEASE_URL ); // defined in Version.h
 

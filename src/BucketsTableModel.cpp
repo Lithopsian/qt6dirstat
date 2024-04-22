@@ -33,12 +33,12 @@ int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
 {
     if ( ! index.isValid() )
-	return QVariant();
+        return QVariant();
 
     switch ( role )
     {
-	case Qt::DisplayRole:
-	    {
+        case Qt::DisplayRole:
+            {
                 const int row = index.row();
                 if ( row < 0 || row >= _histogram->bucketCount() )
                     return QVariant();
@@ -50,13 +50,13 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
                     case ValueCol:  return QString::number( _histogram->bucket( row ) );
                     default:        return QVariant();
                 }
-	    }
+            }
 
-	case Qt::TextAlignmentRole:
+        case Qt::TextAlignmentRole:
             return (int) Qt::AlignVCenter | Qt::AlignRight;
 
-	default:
-	    return QVariant();
+        default:
+            return QVariant();
     }
 }
 
@@ -67,7 +67,7 @@ QVariant BucketsTableModel::headerData( int             section,
 {
     switch ( role )
     {
-	case Qt::DisplayRole:
+        case Qt::DisplayRole:
             if ( orientation == Qt::Horizontal )
             {
                 switch ( section )
@@ -78,23 +78,19 @@ QVariant BucketsTableModel::headerData( int             section,
                     default:       return QVariant();
                 }
             }
+
+            if ( section < _histogram->bucketCount() )
+                return QString::number( section + 1 );
+
+            return QVariant();
+
+        case Qt::TextAlignmentRole:
+            if ( orientation == Qt::Horizontal )
+                return (QVariant)( Qt::AlignVCenter | Qt::AlignHCenter );
             else
-            {
-                if ( section < _histogram->bucketCount() )
-                    return QString::number( section + 1 );
-                else
-                    return QVariant();
-            }
+                return (QVariant)( Qt::AlignVCenter | Qt::AlignRight );
 
-	case Qt::TextAlignmentRole:
-            {
-                if ( orientation == Qt::Horizontal )
-                    return (QVariant)( Qt::AlignVCenter | Qt::AlignHCenter );
-                else
-                    return (QVariant)( Qt::AlignVCenter | Qt::AlignRight );
-            }
-
-	default:
-	    return QVariant();
+        default:
+            return QVariant();
     }
 }

@@ -338,9 +338,7 @@ void MainWindow::busyDisplay()
 
     _updateTimer.start();
 
-    // It would be nice to sort by read jobs during reading, but this confuses
-    // the hell out of the Qt side of the data model; so let's sort by name
-    // instead.  Seems OK in 5.15.
+    // Sort by ReadJobsCol (aka PercentBarCol) during the read
     SignalBlocker signalBlocker( app()->dirTreeModel() );
     const int sortCol = QDirStat::DataColumns::toViewCol( QDirStat::ReadJobsCol );
     _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
@@ -349,7 +347,7 @@ void MainWindow::busyDisplay()
 
 void MainWindow::idleDisplay()
 {
-    logInfo() << Qt::endl;
+    //logInfo() << Qt::endl;
 
     // Safe for the treemap to start work now
     _updateTimer.stop();
@@ -366,10 +364,6 @@ void MainWindow::idleDisplay()
 	//logDebug() << "Using future selection " << _futureSelection.subtree() << Qt::endl;
         applyFutureSelection();
     }
-//    else if ( app()->selectionModel()->currentBranch() )
-//    {
-//	logDebug() << "Keep current branch " << app()->selectionModel()->currentBranch() << Qt::endl;
-//    }
     else
     {
 	logDebug() << "No future selection - expanding tree to level 1" << Qt::endl;

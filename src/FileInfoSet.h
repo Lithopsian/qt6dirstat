@@ -27,6 +27,10 @@ namespace QDirStat
     class FileInfoSet: public QSet<FileInfo *>
     {
     public:
+
+	/**
+	 * Constructor, creates an empty QSet.
+	 **/
 	FileInfoSet():
 	    QSet<FileInfo *> ()
 	{}

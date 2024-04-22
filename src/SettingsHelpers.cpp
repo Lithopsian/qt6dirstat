@@ -47,9 +47,9 @@ namespace QDirStat
 				      const QString       & entryName,
 				      const QList<QColor> & fallback )
     {
-	const QStringList strList = settings.value( entryName ).toStringList();
 	QList<QColor> colorList;
 
+	const QStringList strList = settings.value( entryName ).toStringList();
 	for ( const QString & rgb : strList )
 	{
 	    const QColor color( rgb );
@@ -147,14 +147,16 @@ namespace QDirStat
         QDirStat::Settings settings;
         settings.beginGroup( settingsGroup );
 
-        const QPoint winPos	 = settings.value( "WindowPos" , QPoint( -99, -99 ) ).toPoint();
-        const QSize  winSize	 = settings.value( "WindowSize", QSize (   0,   0 ) ).toSize();
+        const QPoint winPos  = settings.value( "WindowPos" , QPoint( -99, -99 ) ).toPoint();
+        const QSize  winSize = settings.value( "WindowSize", QSize (   0,   0 ) ).toSize();
 
         if ( winSize.height() > 100 && winSize.width() > 100 )
             widget->resize( winSize );
 
         if ( winPos.x() != -99 && winPos.y() != -99 )
             widget->move( winPos );
+
+        settings.endGroup();
     }
 
 

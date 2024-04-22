@@ -48,7 +48,7 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget        * parent,
     initWidgets();
     readSettings();
 
-    connect( selectionModel,     qOverload<FileInfo *, const FileInfo *>( &SelectionModel::currentItemChanged ),
+    connect( selectionModel,     &SelectionModel::currentItemChanged,
              this,               &FileAgeStatsWindow::syncedPopulate );
 
     connect( _ui->refreshButton, &QPushButton::clicked,

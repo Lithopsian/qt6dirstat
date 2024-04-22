@@ -214,11 +214,11 @@ DirTree::DirTree():
 {
     CHECK_NEW( _root );
 
-    connect( & _jobQueue, &DirReadJobQueue::finished,
-	     this,        &DirTree::sendFinished );
+    connect( &_jobQueue, &DirReadJobQueue::finished,
+	     this,       &DirTree::sendFinished );
 
-    connect( this,        &DirTree::deletingChild,
-	     & _jobQueue, &DirReadJobQueue::deletingChildNotify );
+    connect( this,       &DirTree::deletingChild,
+	     &_jobQueue, &DirReadJobQueue::deletingChildNotify );
 }
 
 
@@ -668,7 +668,7 @@ void DirTree::clearFilters()
 }
 
 
-bool DirTree::checkIgnoreFilters( const QString & path )
+bool DirTree::checkIgnoreFilters( const QString & path ) const
 {
     for ( const DirTreeFilter * filter : _filters )
     {

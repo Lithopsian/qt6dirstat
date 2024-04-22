@@ -105,7 +105,6 @@ SOURCES	  = main.cpp			\
 	    PercentileStats.cpp		\
 	    PkgFileListCache.cpp	\
 	    PkgFilter.cpp		\
-#	    PkgInfo.cpp			\
 	    PkgManager.cpp		\
 	    PkgQuery.cpp		\
 	    PkgReader.cpp		\

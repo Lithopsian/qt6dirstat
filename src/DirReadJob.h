@@ -13,8 +13,6 @@
 #include <QTimer>
 #include <QTextStream>
 
-#include "FileSize.h"
-
 
 namespace QDirStat
 {
@@ -36,11 +34,11 @@ namespace QDirStat
      *
      * For each entry automatically a FileInfo or DirInfo will be created and
      * added to the parent DirInfo. For each directory a new DirReadJob will be
-     * created and added to the DirTree 's job queue.
+     * created and added to the DirTree's job queue.
      *
-     * Notice: This class contains pure virtuals - you cannot use it directly.
-     * Derive your own class from it or use one of LocalDirReadJob or
-     * CacheReadJob.
+     * This class is not intended to be used directly.  Derive your own class from
+     * it or use one of LocalDirReadJob or CacheReadJob.  Derived classes should
+     * implement at least one of read() or startReading().
      *
      * @short Abstract base class for directory reading.
      **/
@@ -78,24 +76,24 @@ namespace QDirStat
 
 	/**
 	 * Returns the corresponding DirInfo item.
-	 * Caution: This may be 0.
+	 * Caution: this may be 0.
 	 **/
-	virtual DirInfo * dir() { return _dir; }
+	DirInfo * dir() const { return _dir; }
 
 	/**
 	 * Set the corresponding DirInfo item.
 	 **/
-	virtual void setDir( DirInfo * dir ) { _dir = dir; }
+	void setDir( DirInfo * dir ) { _dir = dir; }
 
 	/**
 	 * Return the corresponding DirTree.
 	 **/
-//	DirTree * tree() const { return _tree; }
+	DirTree * tree() const { return _tree; }
 
 	/**
 	 * Return the job queue this job is in or 0 if it isn't queued.
 	 **/
-//	DirReadJobQueue * queue() const { return _queue; }
+	DirReadJobQueue * queue() const { return _queue; }
 
 	/**
 	 * Set the job queue this job is in.
@@ -140,12 +138,12 @@ namespace QDirStat
 	void finished();
 
 
-    protected:
+    private:
 
 	DirTree         *  _tree;
 	DirInfo         * _dir;
-	DirReadJobQueue * _queue;
-	bool              _started;
+	DirReadJobQueue * _queue	{ nullptr };
+	bool              _started	{ false };
 
     };	// class DirReadJob
 
@@ -182,6 +180,7 @@ namespace QDirStat
 	 **/
 	bool applyFileChildExcludeRules() const { return _applyFileChildExcludeRules; }
 
+
     protected:
 
 	/**
@@ -195,7 +194,7 @@ namespace QDirStat
 	 * Process one subdirectory entry.
 	 **/
 	void processSubDir( const QString & entryName,
-			    DirInfo	  * subDir    );
+			    DirInfo       * subDir );
 
 	/**
 	 * Return 'true' if 'entryName' matches an exclude rule of the
@@ -246,10 +245,19 @@ namespace QDirStat
 	QString fullName( const QString & entryName ) const;
 
 	/**
-	 * Return 'true' if the current filesystem is NTFS.
+	 * Return 'true' if the current filesystem is NTFS, only
+	 * checking once and then returning a cached value.
 	 **/
-	bool isNtfs();
+	bool isNtfs() { return _checkedForNtfs ? _isNtfs : checkForNtfs(); }
 
+	/**
+	 * Checks if the current filesystem is NTFS and returns the result.
+	 * The result is then cached for subsequent queries.
+	 **/
+	bool checkForNtfs();
+
+
+    private:
 
 	//
 	// Data members
@@ -259,8 +267,6 @@ namespace QDirStat
 	bool    _applyFileChildExcludeRules;
 	bool    _checkedForNtfs	{ false };
 	bool    _isNtfs		{ false };
-
-	static bool _warnedAboutNtfsHardLinks;
 
     };	// LocalDirReadJob
 
@@ -276,8 +282,8 @@ namespace QDirStat
 	 *
 	 * The cache file contents are loaded into the (empty) tree.
 	 **/
-	CacheReadJob( DirTree		* tree,
-		      const QString	& cacheFileName );
+	CacheReadJob( DirTree       * tree,
+		      const QString & cacheFileName );
 
 	/**
 	 * Constructor that uses a cache file that is not open yet.
@@ -285,10 +291,10 @@ namespace QDirStat
 	 * The cache reader first checks that the cache file contents
 	 * match the given toplevel
 	 **/
-	CacheReadJob( DirTree		* tree,
-		      DirInfo		* dir,
-		      DirInfo		* parent,
-		      const QString	& cacheFileName );
+	CacheReadJob( DirTree       * tree,
+		      DirInfo       * dir,
+		      DirInfo       * parent,
+		      const QString & cacheFileName );
 
 	/**
 	 * Destructor.
@@ -308,7 +314,7 @@ namespace QDirStat
 	CacheReader * reader() const { return _reader; }
 
 
-    protected:
+    private:
 
 	/**
 	 * Initializations common for all constructors.
@@ -447,12 +453,13 @@ namespace QDirStat
 	void timeSlicedRead();
 
 
-    protected:
+    private:
 
 	QList<DirReadJob *> _queue;
 	QList<DirReadJob *> _blocked;
 	QTimer              _timer;
-    };
+
+    };	// class DirReadJobQueue
 
 
     /**

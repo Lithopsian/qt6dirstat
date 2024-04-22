@@ -41,17 +41,6 @@ namespace QDirStat
 	ActionManager() {}
 
 	/**
-	 * Destructor. Protected because this is a singleton class.
-	 **/
-	~ActionManager();
-
-	/**
-	 * Suppress copy and assignment constructors (this is a singleton)
-	 **/
-	ActionManager( const ActionManager & ) = delete;
-	ActionManager & operator=( const ActionManager & ) = delete;
-
-	/**
 	 * Return the singleton instance of this class.  Orivate, use
 	 * the static methods for access.
 	 **/

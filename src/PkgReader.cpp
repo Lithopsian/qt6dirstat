@@ -385,7 +385,7 @@ void PkgReadJob::startReading()
     _pkg->setReadState( DirReading );
     addFiles( fileList() );
     finalizeAll( _pkg );
-    _tree->sendReadJobFinished( _pkg );
+    tree()->sendReadJobFinished( _pkg );
 
     finished();
     // Don't add anything after finished() since this deletes this job!
@@ -404,7 +404,7 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 				   const QString & name,
 				   DirInfo       * parent )
 {
-    FileInfo * newItem = ::createItem( path, name, _tree, parent );
+    FileInfo * newItem = ::createItem( path, name, tree(), parent );
     if ( newItem )
     {
 	parent->insertChild( newItem );
@@ -508,7 +508,7 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
 					    QProcess::ExitStatus exitStatus )
 {
     // Always get this job out of the blocked queue and clean up the file list process
-    _tree->unblock( this );
+    tree()->unblock( this );
     _readFileListProcess->deleteLater();
 
     if ( exitStatus != QProcess::NormalExit )
@@ -529,7 +529,7 @@ void AsyncPkgReadJob::readFileListFinished( int			 exitCode,
 
     // There was an error of some sort, logged above
     pkg()->setReadState( DirError );
-    _tree->sendReadJobFinished( pkg() );
+    tree()->sendReadJobFinished( pkg() );
 
     finished();
     // Don't add anything after finished() since this deletes this job!

@@ -18,13 +18,6 @@
 using namespace QDirStat;
 
 
-ActionManager::~ActionManager()
-{
-    // CleanupCollection is already destroyed by its QObject parent
-//    delete _cleanupCollection;
-}
-
-
 ActionManager * ActionManager::instance()
 {
     static ActionManager _instance;
