@@ -515,7 +515,6 @@ void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 
 void TreemapTile::renderChildCushions()
 {
-    return;
     if ( _parentView->treemapCancelled() )
         return;
 
@@ -703,7 +702,7 @@ QVariant TreemapTile::itemChange( GraphicsItemChange   change,
 
     if ( change == ItemSelectedChange && _orig->hasChildren() ) // tiles with no children are highlighted in paint()
     {
-        bool selected = value.toBool();
+        const bool selected = value.toBool();
         //logDebug() << this << ( selected ? " is selected" : " is deselected" ) << Qt::endl;
 
         if ( !selected )
@@ -775,39 +774,15 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
             _parentView->sendSelection( this ); // won't get a mouse release for this
             break;
 
+        case Qt::BackButton:
+        case Qt::ForwardButton:
+            event->ignore();
+            break;
+
         default:
             QGraphicsRectItem::mousePressEvent( event );
             break;
     }
-}
-
-void TreemapTile::mouseReleaseEvent( QGraphicsSceneMouseEvent * event )
-{
-    if ( !_parentView->selectionModel() )
-        return;
-
-    QGraphicsRectItem::mouseReleaseEvent( event );
-
-    switch ( event->button() )
-    {
-        case Qt::LeftButton:
-            // The current item was already set in the mouse press event,
-            // but it might have changed its 'selected' status right now,
-            // so let the view update it.
-            _parentView->setCurrentTile( this );
-            // logDebug() << this << " clicked; selected: " << isSelected() << Qt::endl;
-            break;
-
-        case Qt::BackButton:
-        case Qt::ForwardButton:
-            // We get this after a double-click, but the used by the history buttons
-            return;
-
-        default:
-            break;
-    }
-
-    _parentView->sendSelection( this );
 }
 
 void TreemapTile::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
@@ -830,11 +805,37 @@ void TreemapTile::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
         case Qt::RightButton:
             // This doesn't work at all since the first click already opens the
             // context menu which grabs the focus to that pop-up menu.
+        case Qt::BackButton:
+        case Qt::ForwardButton:
+            // Used for history navigation, so ignore here (in mousePressEvent)
+            // or the history button doesn't get the second click (and we also
+            // get an unnecessary release event here)
+        default:
+            QGraphicsRectItem::mousePressEvent( event );
+            break;
+    }
+}
+
+void TreemapTile::mouseReleaseEvent( QGraphicsSceneMouseEvent * event )
+{
+    if ( !_parentView->selectionModel() )
+        return;
+
+    switch ( event->button() )
+    {
+        case Qt::LeftButton:
+            // The current item was already set in the mouse press event,
+            // but the selected status might be changed on the release.
+            QGraphicsRectItem::mouseReleaseEvent( event );
+            _parentView->setCurrentTile( this );
+            // logDebug() << this << " clicked; selected: " << isSelected() << Qt::endl;
             break;
 
         default:
             break;
     }
+
+    _parentView->sendSelection( this );
 }
 
 void TreemapTile::wheelEvent( QGraphicsSceneWheelEvent * event )

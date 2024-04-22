@@ -25,6 +25,55 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Writes a colour to the settings file.  If the color is invalid, it
+     * will write an entry with an empty string.
+     **/
+    void writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color )
+    {
+        if ( color.isValid() )
+            writeColorEntry( settings, setting, color );
+        else
+            settings.setValue( setting, "" );
+    }
+
+
+    /**
+     * Search the treemap for a tile that corresponds to the specified
+     * FileInfo node. Returns 0 if there is none.
+     *
+     * Note that this is an expensive operation since all treemap tiles need
+     * to be searched.
+     **/
+    TreemapTile * findTile( TreemapTile * rootTile, const FileInfo * node )
+    {
+	if ( !node || !rootTile )
+	    return nullptr;
+
+	// common case that is easy
+	if ( rootTile->orig() == node )
+	    return rootTile;
+
+	// loop recursively through the children of each tile
+	for ( QGraphicsItem * graphicsItem : rootTile->childItems() )
+	{
+	    TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
+	    if ( tile )
+	    {
+		tile = findTile( tile, node );
+		if ( tile )
+		    return tile;
+	    }
+	}
+
+	return nullptr;
+    }
+
+} // namespace
+
+
 TreemapView::TreemapView( QWidget * parent ):
     QGraphicsView ( parent )
 {
@@ -141,28 +190,28 @@ void TreemapView::readSettings()
     Settings settings;
     settings.beginGroup( "Treemaps" );
 
-    _colourPreviews     = settings.value( "ColourPreviews"   , true ).toBool();
+    _colourPreviews     = settings.value( "ColourPreviews",    true ).toBool();
 
-    _squarify           = settings.value( "Squarify"         , true  ).toBool();
-    _doCushionShading   = settings.value( "CushionShading"   , true  ).toBool();
-//    _enforceContrast    = settings.value( "EnforceContrast"  , false ).toBool();
-    _forceCushionGrid   = settings.value( "ForceCushionGrid" , false ).toBool();
-    _useDirGradient     = settings.value( "UseDirGradient"   , true  ).toBool();
+    _squarify           = settings.value( "Squarify",          true  ).toBool();
+    _doCushionShading   = settings.value( "CushionShading",    true  ).toBool();
+//    _enforceContrast    = settings.value( "EnforceContrast",   false ).toBool();
+    _forceCushionGrid   = settings.value( "ForceCushionGrid",  false ).toBool();
+    _useDirGradient     = settings.value( "UseDirGradient",    true  ).toBool();
 
-    _ambientLight       = settings.value( "AmbientLight"     , DefaultAmbientLight ).toInt();
+    _ambientLight       = settings.value( "AmbientLight",      DefaultAmbientLight ).toInt();
     _heightScaleFactor  = settings.value( "HeightScaleFactor", DefaultHeightScaleFactor ).toDouble();
-    _cushionHeight      = settings.value( "CushionHeight"    , DefaultCushionHeight ).toDouble();
-    _minTileSize        = settings.value( "MinTileSize"      , DefaultMinTileSize ).toInt();
+    _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight ).toDouble();
+    _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize ).toInt();
 
-    _tileFixedColor     = readColorEntry( settings, "TileFixedColor"    , QColor()                   );
-    _currentItemColor   = readColorEntry( settings, "CurrentItemColor"  , Qt::red                    );
+    _tileFixedColor     = readColorEntry( settings, "TileFixedColor",     QColor()                   );
+    _currentItemColor   = readColorEntry( settings, "CurrentItemColor",   Qt::red                    );
     _selectedItemsColor = readColorEntry( settings, "SelectedItemsColor", Qt::yellow                 );
-    _highlightColor     = readColorEntry( settings, "HighlightColor"    , Qt::white                  );
-    _cushionGridColor   = readColorEntry( settings, "CushionGridColor"  , QColor( 0x80, 0x80, 0x80 ) );
-    _outlineColor       = readColorEntry( settings, "OutlineColor"      , QColor()                   );
-    _dirFillColor       = readColorEntry( settings, "DirFillColor"      , QColor( 0x60, 0x60, 0x60 ) );
-    _dirGradientStart   = readColorEntry( settings, "DirGradientStart"  , QColor( 0x60, 0x60, 0x70 ) );
-    _dirGradientEnd     = readColorEntry( settings, "DirGradientEnd"    , QColor( 0x70, 0x70, 0x80 ) );
+    _highlightColor     = readColorEntry( settings, "HighlightColor",     Qt::white                  );
+    _cushionGridColor   = readColorEntry( settings, "CushionGridColor",   QColor( 0x80, 0x80, 0x80 ) );
+    _outlineColor       = readColorEntry( settings, "OutlineColor",       QColor()                   );
+    _dirFillColor       = readColorEntry( settings, "DirFillColor",       QColor( 0x60, 0x60, 0x60 ) );
+    _dirGradientStart   = readColorEntry( settings, "DirGradientStart",   QColor( 0x60, 0x60, 0x70 ) );
+    _dirGradientEnd     = readColorEntry( settings, "DirGradientEnd",     QColor( 0x70, 0x70, 0x80 ) );
 
     settings.endGroup();
 
@@ -178,37 +227,29 @@ void TreemapView::writeSettings()
 
     settings.beginGroup( "Treemaps" );
 
-    settings.setValue( "ColourPreviews"   , _colourPreviews    );
-    settings.setValue( "Squarify"         , _squarify          );
-    settings.setValue( "CushionShading"   , _doCushionShading  );
-//    settings.setValue( "EnforceContrast"  , _enforceContrast   );
-    settings.setValue( "ForceCushionGrid" , _forceCushionGrid  );
-    settings.setValue( "UseDirGradient"   , _useDirGradient    );
-    settings.setValue( "AmbientLight"     , _ambientLight      );
+    settings.setValue( "ColourPreviews",    _colourPreviews    );
+    settings.setValue( "Squarify",          _squarify          );
+    settings.setValue( "CushionShading",    _doCushionShading  );
+//    settings.setValue( "EnforceContrast",   _enforceContrast   );
+    settings.setValue( "ForceCushionGrid",  _forceCushionGrid  );
+    settings.setValue( "UseDirGradient",    _useDirGradient    );
+    settings.setValue( "AmbientLight",      _ambientLight      );
     settings.setValue( "HeightScaleFactor", _heightScaleFactor );
-    settings.setValue( "CushionHeight"    , _cushionHeight     );
-    settings.setValue( "MinTileSize"      , _minTileSize       );
+    settings.setValue( "CushionHeight",     _cushionHeight     );
+    settings.setValue( "MinTileSize",       _minTileSize       );
 
     writeOptionalColorEntry( settings, "TileFixedColor", _tileFixedColor );
-    writeColorEntry( settings, "CurrentItemColor"      , _currentItemColor   );
-    writeColorEntry( settings, "SelectedItemsColor"    , _selectedItemsColor );
-    writeColorEntry( settings, "HighlightColor"        , _highlightColor     );
-    writeColorEntry( settings, "CushionGridColor"      , _cushionGridColor   );
     writeOptionalColorEntry( settings, "OutlineColor"  , _outlineColor       );
-    writeColorEntry( settings, "DirFillColor"          , _dirFillColor       );
-    writeColorEntry( settings, "DirGradientStart"      , _dirGradientStart   );
-    writeColorEntry( settings, "DirGradientEnd"        , _dirGradientEnd     );
+
+    writeColorEntry( settings, "CurrentItemColor",   _currentItemColor   );
+    writeColorEntry( settings, "SelectedItemsColor", _selectedItemsColor );
+    writeColorEntry( settings, "HighlightColor",     _highlightColor     );
+    writeColorEntry( settings, "CushionGridColor",   _cushionGridColor   );
+    writeColorEntry( settings, "DirFillColor",       _dirFillColor       );
+    writeColorEntry( settings, "DirGradientStart",   _dirGradientStart   );
+    writeColorEntry( settings, "DirGradientEnd",     _dirGradientEnd     );
 
     settings.endGroup();
-}
-
-
-void TreemapView::writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color )
-{
-    if ( color.isValid() )
-        writeColorEntry( settings, setting, color );
-    else
-        settings.setValue( setting, "" );
 }
 
 
@@ -365,6 +406,8 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
 
         return tile;
     } ) );
+    logDebug() << QThreadPool::globalInstance()->activeThreadCount() << " threads active" << Qt::endl;
+
 }
 
 
@@ -481,8 +524,6 @@ void TreemapView::calculateSettings()
 
 void TreemapView::changeTreemapColors()
 {
-    //logDebug() << Qt::endl;
-
     if ( _rootTile )
     {
         _rootTile->invalidateCushions();
@@ -526,7 +567,6 @@ void TreemapView::deleteNotify( FileInfo * )
 
 void TreemapView::resizeEvent( QResizeEvent * event )
 {
-    // logDebug() << Qt::endl;
     QGraphicsView::resizeEvent( event );
 
     if ( !_tree )
@@ -544,7 +584,6 @@ void TreemapView::resizeEvent( QResizeEvent * event )
     }
     else if ( _tree && _tree->firstToplevel() )
     {
-        //logDebug() << "Redisplaying suppressed treemap" << Qt::endl;
         rebuildTreemap( _tree->firstToplevel() );
     }
 }
@@ -738,31 +777,6 @@ void TreemapView::updateCurrentItem( FileInfo * currentItem )
 }
 
 
-TreemapTile * TreemapView::findTile( TreemapTile *rootTile, const FileInfo *node ) const
-{
-    if ( !node || !rootTile )
-        return nullptr;
-
-    // common case that is easy
-    if ( rootTile->orig() == node )
-        return rootTile;
-
-    // loop recursively through the children of each tile
-    for ( QGraphicsItem *graphicsItem : rootTile->childItems() )
-    {
-        TreemapTile * tile = dynamic_cast<TreemapTile *>(graphicsItem);
-        if ( tile )
-        {
-            tile = findTile( tile, node );
-            if ( tile )
-                return tile;
-        }
-    }
-
-    return nullptr;
-}
-
-
 void TreemapView::setFixedColor( const QColor & color )
 {
     //logDebug() << color.name() << Qt::endl;
@@ -777,33 +791,31 @@ void TreemapView::setFixedColor( const QColor & color )
 
 void TreemapView::highlightParents( const TreemapTile * tile )
 {
-    clearParentsHighlight();
-
     if ( !tile )
         return;
 
+    const TreemapTile * currentHighlight = highlightedParent();
+    const TreemapTile * parent = tile->parentTile();
 
-//    const TreemapTile * currentHighlight = highlightedParent();
+    // If the same parent, then keep the existing highlights and mask
+    if ( currentHighlight && currentHighlight == parent )
+        return;
 
-//    if ( currentHighlight && currentHighlight != parent )
-//        clearParentsHighlight();
+    // Simplest to start from scratch even if some of the ancestors are the same
+    clearParentsHighlight();
 
-    const TreemapTile * topParent = nullptr;
-
-    for ( const TreemapTile * parent = tile->parentTile();
-          parent && parent != _rootTile;
-          parent = parent->parentTile() )
+    while ( parent && parent != _rootTile )
     {
         const ParentTileHighlighter * highlight =
             new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
         CHECK_NEW( highlight );
         _parentHighlightList << highlight;
 
-        topParent = parent;
+        parent = parent->parentTile();
     }
 
-    if ( topParent )
-        _sceneMask = new SceneMask( topParent, 0.6 );
+    if ( !_parentHighlightList.isEmpty() )
+        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 );
 }
 
 

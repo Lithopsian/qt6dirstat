@@ -490,12 +490,6 @@ namespace QDirStat
 	void writeSettings();
 
 	/**
-	 * Writes a colour to the settings file.  If the color is invalid, it
-	 * will write an entry with an empty string.
-	 **/
-	void writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color );
-
-	/**
 	 * Rebuild the treemap with 'newRoot' as the new root.
 	 **/
 	void rebuildTreemap( FileInfo * newRoot );
@@ -514,15 +508,6 @@ namespace QDirStat
 	 * Reimplemented from QFrame.
 	 **/
 	void resizeEvent( QResizeEvent * event ) override;
-
-	/**
-	 * Search the treemap for a tile that corresponds to the specified
-	 * FileInfo node. Returns 0 if there is none.
-	 *
-	 * Notice: This is an expensive operation since all treemap tiles need
-	 * to be searched.
-	 **/
-	TreemapTile * findTile( TreemapTile *rootTile, const FileInfo *node ) const;
 
 	/**
 	 * Highlight the parent tiles of item 'tile'.

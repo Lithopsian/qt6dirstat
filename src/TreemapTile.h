@@ -353,32 +353,32 @@ namespace QDirStat
 
 	/**
 	 * Mouse press event: Handle setting the current item.
+	 *	left    button sets current item
+	 *	middle  button highlights tile parents
+	 *	right   brings up context menu and selects current item
 	 *
 	 * Reimplemented from QGraphicsItem.
 	 **/
 	void mousePressEvent( QGraphicsSceneMouseEvent * event ) override;
 
 	/**
-	 * Mouse release event: Handle marking item selection.
-	 *	left    button selects tile
-	 *	right   button brings up context menu
-	 *	middle  button highlights tile parents
-	 *	back    button zooms out to the top level
-	 *	forward button zooms in to the lowest level
-	 *
-	 * Reimplemented from QGraphicsItem.
-	 **/
-	void mouseReleaseEvent( QGraphicsSceneMouseEvent * event ) override;
-
-	/**
 	 * Mouse double click event:
 	 *	left    button double-click zooms in on the clicked tile,
-	 *	right   button click brings up context menu, so nothing here
 	 *	middle  button double-click zooms out one level
+	 *	right   button click brings up context menu, so nothing here
 	 *
 	 * Reimplemented from QGraphicsItem.
 	 **/
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event ) override;
+
+	/**
+	 * Mouse release event: Handle marking item selection.
+	 *	left    button selects tile (default for QGraphicsItem)
+	 *	right   button brings up context menu, so nothing here
+	 *
+	 * Reimplemented from QGraphicsItem.
+	 **/
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent * event ) override;
 
 	/**
 	 * Mouse wheel event: Zoom in or out
