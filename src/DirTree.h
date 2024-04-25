@@ -71,20 +71,10 @@ namespace QDirStat
 	void abortReading();
 
 	/**
-	 * Refresh a subtree, i.e. read its contents from disk again.
-	 *
-	 * All children of the old subtree will be deleted and rebuilt from
-	 * scratch, i.e. all pointers to elements within this subtree will
-	 * become invalid (a subtreeDeleted() signal will be emitted to notify
-	 * about that fact).
-	 *
-	 * When 0 is passed, the entire tree will be refreshed, i.e. from the
-	 * first toplevel element on.
-	 **/
-	void refresh( DirInfo * subtree = nullptr );
-
-	/**
-	 * Refresh a number of subtrees.
+	 * Refresh a number of subtrees.  If any of these are no longer accessible,
+	 * the item's parent will be used instead (and so on, recursively).  The
+	 * set of accessible subtrees will then be purged of invalid items and
+	 * normalised (items with ancestors in the set will be removed).
 	 **/
 	void refresh( const FileInfoSet & refreshSet );
 
@@ -136,7 +126,7 @@ namespace QDirStat
 	/**
 	 * Return the device of this tree's root item ("/dev/sda3" etc.).
 	 **/
-	const QString & device() const { return _device; }
+//	const QString & device() const { return _device; }
 
 	/**
 	 * Clear all items of this tree.
@@ -163,20 +153,23 @@ namespace QDirStat
 	/**
 	 * Add a new directory read job to the queue.
 	 **/
-	void addJob( DirReadJob * job );
+	void addJob( DirReadJob * job )
+	    { _jobQueue.enqueue( job ); }
 
 	/**
 	 * Add a new directory read job to the list of blocked jobs. A job may
 	 * be blocked because it may be waiting for an external process to
 	 * finish.
 	 **/
-	void addBlockedJob( DirReadJob * job );
+	void addBlockedJob( DirReadJob * job )
+	    { _jobQueue.addBlocked( job ); }
 
 	/**
 	 * Unblock a previously blocked read job so it is scheduled along with
 	 * the other pending jobs.
 	 **/
-	void unblock( DirReadJob * job );
+	void unblock( DirReadJob * job )
+	    { _jobQueue.unblock( job ); }
 
 	/**
 	 * Returns whether reads should cross filesystem boundaries.
@@ -368,7 +361,6 @@ namespace QDirStat
 
 	/**
 	 * Return the current hard links accounting policy.
-	 * See setIgnoreHardLinks() for details.
 	 **/
 	bool ignoreHardLinks() const { return _ignoreHardLinks; }
 
@@ -455,6 +447,19 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Refresh a subtree, i.e. read its contents from disk again.
+	 *
+	 * All children of the old subtree will be deleted and rebuilt from
+	 * scratch, i.e. all pointers to elements within this subtree will
+	 * become invalid (a subtreeDeleted() signal will be emitted to notify
+	 * about that fact).
+	 *
+	 * If the tree root (an item with no parent) is passed, then a full
+	 * re-read of the tree will be done.
+	 **/
+	void refresh( DirInfo * subtree = nullptr );
+
+	/**
 	 * Recursively force a complete recalculation of all sums.
 	 **/
 	void recalc( DirInfo * dir );
@@ -477,7 +482,7 @@ namespace QDirStat
 	DirInfo       * _root;
 	DirReadJobQueue _jobQueue;
 
-	QString         _device;
+//	QString         _device;
 	QString         _url;
 
 	ExcludeRules  * _excludeRules		{ nullptr };

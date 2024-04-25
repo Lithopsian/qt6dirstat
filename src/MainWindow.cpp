@@ -502,13 +502,13 @@ void MainWindow::openDir( const QString & url )
 	app()->dirTreeModel()->openUrl( url );
 	const QString & dirTreeUrl = app()->dirTree()->url();
 	updateWindowTitle( dirTreeUrl );
-        _futureSelection.setUrl( dirTreeUrl );
+	_futureSelection.setUrl( dirTreeUrl );
     }
     catch ( const SysCallFailedException & ex )
     {
 	CAUGHT( ex );
-        showOpenDirErrorPopup( ex );
-	askOpenDir();
+	showOpenDirErrorPopup( ex );
+//	askOpenDir();
     }
 
     updateActions();
@@ -517,6 +517,7 @@ void MainWindow::openDir( const QString & url )
 
 void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
 {
+    _ui->breadcrumbNavigator->clear();
     updateWindowTitle( "" );
     app()->dirTree()->sendFinished();
 
@@ -619,9 +620,23 @@ void MainWindow::refreshAll()
     //logDebug() << "Refreshing " << url << Qt::endl;
 
     if ( PkgInfo::isPkgUrl( url ) )
+    {
 	readPkg( url );
+    }
     else
-	app()->dirTreeModel()->openUrl( url );
+    {
+	// This will throw if the url no longer exists or is inaccessible
+	try
+	{
+	    app()->dirTreeModel()->openUrl( url );
+	}
+	catch ( const SysCallFailedException & ex )
+	{
+	    CAUGHT( ex );
+	    showOpenDirErrorPopup( ex );
+//	    askOpenDir();
+	}
+    }
 
     // No need to check if the URL is an unpkg:/ URL:
     //
@@ -655,7 +670,15 @@ void MainWindow::refreshSelected()
 	refreshSet << sel;
 	app()->selectionModel()->prepareRefresh( refreshSet );
 
-	app()->dirTree()->refresh( sel->toDirInfo() );
+	try
+	{
+	    app()->dirTree()->refresh( refreshSet );
+	}
+	catch ( const SysCallFailedException & ex )
+	{
+	    CAUGHT( ex );
+	    showOpenDirErrorPopup( ex );
+	}
     }
     else
     {

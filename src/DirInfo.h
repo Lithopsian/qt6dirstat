@@ -93,7 +93,7 @@ namespace QDirStat
 	DirInfo( DirInfo       * parent,
 		 DirTree       * tree,
 		 const QString & name,
-		 mode_t	         mode,
+		 mode_t          mode,
 		 FileSize        size,
 		 FileSize        allocatedSize,
 		 bool            withUidGidPerm,
@@ -109,7 +109,7 @@ namespace QDirStat
 	DirInfo( DirInfo       * parent,
 		 DirTree       * tree,
 		 const QString & name,
-		 mode_t	         mode,
+		 mode_t          mode,
 		 FileSize        size ):
 	    DirInfo ( parent, tree, name, mode, size, size, false, 0, 0, 0 )
 	{}

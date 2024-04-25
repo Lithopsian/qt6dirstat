@@ -7,10 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include <dirent.h>
+#include <dirent.h>     // opendir(), etc
 #include <fcntl.h>      // AT_ constants (fstatat() flags)
-#include <unistd.h>     // R_OK, X_OK
-#include <stdio.h>
+#include <unistd.h>     // access(), R_OK, X_OK
 
 #include <QMutableListIterator>
 
@@ -47,15 +46,15 @@ namespace
      * Check if going from 'parent' to 'child' would cross a filesystem
      * boundary. This take Btrfs subvolumes into account.
      **/
-    bool crossingFilesystems( DirTree * tree, DirInfo * parent, DirInfo * child )
+    bool crossingFilesystems( DirInfo * parent, DirInfo * child )
     {
 	if ( parent->device() == child->device() )
 	    return false;
 
-	const QString childDevice = device( child );
-	QString parentDevice      = device( parent->findNearestMountPoint() );
-	if ( parentDevice.isEmpty() )
-	    parentDevice = tree->device();
+	const QString childDevice  = device( child );
+	const QString parentDevice = device( parent->findNearestMountPoint() );
+//	if ( parentDevice.isEmpty() ) // redundant check now that findNearestMountPoint() works
+//	    parentDevice = tree->device();
 
 	// Not safe to assume that empty devices indicate filesystem crossing.
 	// Calling something a mountpoint when it isn't causes findNearestMountPoint()
@@ -156,11 +155,6 @@ DirReadJob::~DirReadJob()
 }
 
 
-/**
- * Default implementation - derived classes should overwrite this method or
- * startReading() (or both).
- **/
-
 void DirReadJob::read()
 {
     if ( !_started )
@@ -214,46 +208,41 @@ void LocalDirReadJob::startReading()
 {
     static bool _warnedAboutNtfsHardLinks = false;
 
-
-    struct dirent * entry;
-    struct stat     statInfo;
-    const QString   defaultCacheName = DEFAULT_CACHE_NAME;
-    DIR           * diskDir;
+    DIR * diskDir = nullptr;
 
     // logDebug() << dir() << Qt::endl;
 
-    bool ok = true;
-
     if ( access( _dirName.toUtf8(), X_OK | R_OK ) != 0 )
     {
-	ok = false;
-	//logWarning() << "No permission to read directory " << _dirName << Qt::endl;
-	dir()->finishReading( DirPermissionDenied );
-    }
+	switch ( errno )
+	{
+	    case EACCES:
+		logWarning() << "No permission to read directory " << _dirName << Qt::endl;
+		dir()->finishReading( DirPermissionDenied );
+		break;
 
-    if ( ok )
+	    default:
+		logWarning() << QString( "Unable to read directory %1 (errno=%2)" ).arg( _dirName ).arg( errno ) << Qt::endl;
+		dir()->finishReading( DirError );
+		break;
+	}
+    }
+    else
     {
 	diskDir = ::opendir( _dirName.toUtf8() );
 
 	if ( !diskDir )
 	{
 	    logWarning() << "opendir(" << _dirName << ") failed" << Qt::endl;
-	    ok = false;
-	    // opendir() doesn't set 'errno' according to POSIX	 :-(
 	    dir()->finishReading( DirError );
 	}
     }
 
-    if ( ok )
+    if ( diskDir )
     {
 	dir()->setReadState( DirReading );
-	int dirFd = dirfd( diskDir );
 
-#ifdef AT_NO_AUTOMOUNT
-	const int flags = AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT;
-#else
-	const int flags = AT_SYMLINK_NOFOLLOW;
-#endif
+	int dirFd = dirfd( diskDir );
 
 	// QMultiMap (just like QMap) guarantees sort order by keys, so we are
 	// now iterating over the directory entries by i-number order. Most
@@ -266,16 +255,23 @@ void LocalDirReadJob::startReading()
 	// would go missing in the DirTree.
 	QMultiMap<ino_t, QString> entryMap;
 
+	struct dirent * entry;
 	while ( ( entry = readdir( diskDir ) ) )
 	{
 	    const QString entryName = QString::fromUtf8( entry->d_name );
-
 	    if ( entryName != "."  && entryName != ".."   )
 		entryMap.insert( entry->d_ino, entryName );
 	}
 
+#ifdef AT_NO_AUTOMOUNT
+	const int flags = AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT;
+#else
+	const int flags = AT_SYMLINK_NOFOLLOW;
+#endif
+	const QString defaultCacheName = DEFAULT_CACHE_NAME;
 	for ( const QString & entryName : entryMap )
 	{
+	    struct stat statInfo;
 	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 )	// OK?
 	    {
 		if ( S_ISDIR( statInfo.st_mode ) )	// directory child?
@@ -385,7 +381,7 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
 	subDir->setExcluded();
 	subDir->finishReading( DirOnRequestOnly );
     }
-    else if ( !crossingFilesystems( tree(), dir(), subDir ) ) // normal case
+    else if ( !crossingFilesystems( dir(), subDir ) ) // normal case
     {
 	LocalDirReadJob * job = new LocalDirReadJob( tree(), subDir, true );
 	CHECK_NEW( job );
@@ -446,7 +442,7 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	logDebug() << "Using cache file " << cacheFullName << " for " << _dirName << Qt::endl;
 
 	DirTree * treeLocal = tree();	// Copy data members to local variables:
-	DirInfo * dirLocal  = dir();		// This object might be deleted soon by killSubtree()
+	DirInfo * dirLocal  = dir();	// this object might be deleted soon by killSubtree()
 
 	if ( isToplevel )
 	{
@@ -534,7 +530,7 @@ bool LocalDirReadJob::checkForNtfs()
 
     if ( !_dirName.isEmpty() )
     {
-	MountPoint * mountPoint = MountPoints::findNearestMountPoint( _dirName );
+	const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _dirName );
 	_isNtfs = mountPoint && mountPoint->isNtfs();
     }
 
@@ -595,7 +591,6 @@ void CacheReadJob::read()
 
     //logDebug() << "Reading 1000 cache lines" << Qt::endl;
     _reader->read( 1000 );
-
     if ( _reader->eof() || !_reader->ok() )
     {
 	//logDebug() << "Cache reading finished - ok: " << _reader->ok() << Qt::endl;
@@ -731,6 +726,6 @@ void DirReadJobQueue::unblock( DirReadJob * job )
     _blocked.removeAll( job );
     enqueue( job );
 
-    if ( _blocked.isEmpty() )
-	logDebug() << "No more jobs waiting for external processes" << Qt::endl;
+//    if ( _blocked.isEmpty() )
+//	logDebug() << "No more jobs waiting for external processes" << Qt::endl;
 }

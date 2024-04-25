@@ -98,15 +98,15 @@ DirInfo::DirInfo( DirInfo       * parent,
 		  gid_t           gid,
 		  time_t          mtime ):
     FileInfo ( parent,
-		 tree,
-		 name,
-		 mode,
-		 size,
-		 allocatedSize,
-		 withUidGidPerm,
-		 uid,
-		 gid,
-		 mtime ),
+	       tree,
+	       name,
+	       mode,
+	       size,
+	       allocatedSize,
+	       withUidGidPerm,
+	       uid,
+	       gid,
+	       mtime ),
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
@@ -864,7 +864,7 @@ void DirInfo::dropSortCaches()
 const DirInfo * DirInfo::findNearestMountPoint() const
 {
     const DirInfo * dir = this;
-    while ( dir->parent() && !dir->isMountPoint() )
+    while ( dir->parent() != dir->tree()->root() && !dir->isMountPoint() )
 	dir = dir->parent();
 
     return dir;

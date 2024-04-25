@@ -48,8 +48,7 @@ namespace
      **/
     FileInfo * stat( const QString & url,
 		     DirTree       * tree,
-		     DirInfo       * parent,
-		     bool            doThrow = true )
+		     DirInfo       * parent )
     {
 	struct stat statInfo;
 	// logDebug() << "url: \"" << url << "\"" << Qt::endl;
@@ -79,7 +78,7 @@ namespace
 
 		return dir;
 	    }
-	    else					// no directory
+	    else				// no directory
 	    {
 		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
 		CHECK_NEW( file );
@@ -92,11 +91,10 @@ namespace
 	}
 	else // lstat() failed
 	{
-	    if ( doThrow )
-		THROW( SysCallFailedException( "lstat", url ) );
-
-	    return nullptr;
+	    THROW( SysCallFailedException( "lstat", url ) );
 	}
+
+	return nullptr;
     }
 
 
@@ -132,30 +130,26 @@ namespace
 	if ( !dir )
 	    return;
 
-	if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
-	    return;
+//	if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
+//	    return;
 
 	// Not using FileInfoIterator because we don't want to iterate over the dot
 	// entry as well, just the normal children.
 
-	FileInfo * child = dir->firstChild();
 	FileInfoList ignoredChildren;
 
-	while ( child )
+	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
 	{
 	    if ( child->isIgnored() )
 		// Don't move the child right here, otherwise the iteration breaks
 		ignoredChildren << child;
 	    else
 		moveIgnoredToAttic( child->toDirInfo() );
-
-	    child = child->next();
 	}
-
 
 	for ( FileInfo * child : ignoredChildren )
 	{
-	    // logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
+	    //logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
 	    dir->moveToAttic( child );
 
 	    if ( child->isDirInfo() )
@@ -195,10 +189,8 @@ namespace
 		    //logDebug() << "Ignoring empty subdir " << subDir << Qt::endl;
 		    subDir->setIgnored( true );
 		}
-		else
-		{
-		    ignoreEmptyDirs( subDir );
-		}
+
+		ignoreEmptyDirs( subDir );
 	    }
 
 	    child = child->next();
@@ -286,7 +278,7 @@ void DirTree::clear()
     _isBusy           = false;
     _haveClusterSize  = false;
     _blocksPerCluster = 0;
-    _device.clear();
+//    _device.clear();
 }
 
 
@@ -300,24 +292,22 @@ void DirTree::reset()
 
 void DirTree::startReading( const QString & rawUrl )
 {
-    QFileInfo fileInfo( rawUrl );
-    const QString canonicalPath = fileInfo.canonicalFilePath(); // fix me, broken link handling
+    if ( _root->hasChildren() )
+	clear();
+
+    const QFileInfo fileInfo( rawUrl );
+    const QString canonicalPath = fileInfo.canonicalFilePath();
     _url = canonicalPath.isEmpty() ? fileInfo.absoluteFilePath() : canonicalPath;
     //logDebug() << "rawUrl: \"" << rawUrl << "\"" << Qt::endl;
     logInfo() << "   url: \"" << _url	 << "\"" << Qt::endl;
 
-    MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
-    _device = mountPoint ? mountPoint->device() : "";
-    logInfo() << "device: " << _device << Qt::endl;
-
-    if ( _root->hasChildren() )
-	clear();
+    const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
+//    _device = mountPoint ? mountPoint->device() : "";
+    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : "" ) << Qt::endl;
 
     sendStartingReading();
 
-    FileInfo * item = stat( _url, this, _root );
-    CHECK_PTR( item );
-
+    FileInfo * item = stat( _url, this, _root ); // will throw if it fails
     if ( item )
     {
 	childAddedNotify( item );
@@ -335,18 +325,39 @@ void DirTree::startReading( const QString & rawUrl )
 
 	emit readJobFinished( _root );
     }
-    else	// stat() failed
-    {
-	logWarning() << "stat(" << _url << ") failed" << Qt::endl;
-	_isBusy = false;
-	emit finished();
-    }
 }
 
 
 void DirTree::refresh( const FileInfoSet & refreshSet )
 {
-    for ( FileInfo * item : refreshSet.invalidRemoved().normalized() )
+    if ( !_root )
+	return;
+
+    // Make a list of items that are still accessible in the real world
+    FileInfoSet items;
+    for ( FileInfo * item : refreshSet.invalidRemoved() )
+    {
+	// Check the item is still accessible on disk
+	// Pseudo-dirs (shouldn't be here) will implicitly fail the check
+	struct stat statInfo;
+	while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
+	{
+	    if ( item->parent() == _root )
+	    {
+		// just try a full refresh, it will throw if even that isn't accessible any more
+		refresh( item->toDirInfo() );
+		return;
+	    }
+
+	    item = item->parent();
+	}
+
+	// Add an item that we have full access to
+	items << item;
+    }
+
+    // Refresh the subtrees that we have left
+    for ( FileInfo * item : items.normalized() )
     {
 	// Need to check the magic number here again because a previous
 	// iteration step might have made the item invalid already
@@ -363,51 +374,40 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 
 void DirTree::refresh( DirInfo * subtree )
 {
-    if ( !_root )
-	return;
-
-    if ( !subtree->checkMagicNumber() )
+    if ( subtree->parent() == _root )	// Refresh all (from first toplevel)
     {
-	// Not using CHECK_MAGIC() here which would throw an exception since
-	// this might easily happen after cleanup actions with multi selection
-	// if one selected item is in the subtree of another, and that parent
-	// was already refreshed.
-
-	logWarning() << "Item is no longer valid - not refreshing subtree" << Qt::endl;
-	return;
-    }
-
-    if ( subtree->isDotEntry() )
-	subtree = subtree->parent();
-
-    if ( !subtree || !subtree->parent() )	// Refresh all (from first toplevel)
-    {
-	try
-	{
-	    startReading( QDir::cleanPath( firstToplevel()->url() ) );
-	}
-	catch ( const SysCallFailedException & ex )
-	{
-	    CAUGHT( ex );
-	}
+	startReading( QDir::cleanPath( firstToplevel()->url() ) );
     }
     else	// Refresh subtree
     {
-	// logDebug() << "Refreshing subtree " << subtree << Qt::endl;
-
-	clearSubtree( subtree );
-
-	subtree->reset();
-	subtree->setExcluded( false );
-	subtree->setReadState( DirReading );
-
 	// A full startingReading signal would reset all the tree branches to level 1
 	emit startingRefresh();
 	_isBusy = true;
 
-	LocalDirReadJob * job = new LocalDirReadJob( this, subtree, false );
-	CHECK_NEW( job);
-	addJob( job );
+	//logDebug() << "Refreshing subtree " << subtree << Qt::endl;
+
+	const QString url = subtree->url();
+	DirInfo * parent = subtree->parent();
+
+	deleteSubtree( subtree );
+
+	FileInfo * item = stat( url, this, parent ); // will throw if it fails
+	if ( item )
+	{
+	    childAddedNotify( item );
+
+	    LocalDirReadJob * job = new LocalDirReadJob( this, item->toDirInfo(), false );
+	    CHECK_NEW( job );
+	    addJob( job );
+	}
+
+//	subtree->reset();
+//	subtree->setExcluded( false );
+//	subtree->setReadState( DirReading );
+
+//	LocalDirReadJob * job = new LocalDirReadJob( this, subtree, false );
+//	CHECK_NEW( job);
+//	addJob( job );
     }
 }
 
@@ -524,24 +524,6 @@ void DirTree::clearSubtree( DirInfo * subtree )
 	subtree->clear();
 	emit subtreeCleared( subtree );
     }
-}
-
-
-void DirTree::addJob( DirReadJob * job )
-{
-    _jobQueue.enqueue( job );
-}
-
-
-void DirTree::addBlockedJob( DirReadJob * job )
-{
-    _jobQueue.addBlocked( job );
-}
-
-
-void DirTree::unblock( DirReadJob * job )
-{
-    _jobQueue.unblock( job );
 }
 
 

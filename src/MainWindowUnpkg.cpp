@@ -66,17 +66,18 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     setUnpkgCrossFilesystems( unpkgSettings );
 
     // Start reading the directory
+    const QString url = parseUnpkgStartingDir( unpkgSettings );
+    _futureSelection.setUrl( url );
+
     try
     {
-        const QString dir = parseUnpkgStartingDir( unpkgSettings );
-        _futureSelection.setUrl( dir );
-	app()->dirTreeModel()->openUrl( dir );
+	app()->dirTreeModel()->openUrl( url );
 	updateWindowTitle( app()->dirTree()->url() );
     }
     catch ( const SysCallFailedException & ex )
     {
 	CAUGHT( ex );
-        showOpenDirErrorPopup( ex );
+	showOpenDirErrorPopup( ex );
     }
 
     updateActions();

@@ -64,19 +64,13 @@ bool MountPoint::isSystemMount() const
     // This check filters out system devices like "cgroup", "tmpfs", "sysfs"
     // and all those other kernel-table devices.
 
-    if ( !_device.contains( "/" ) )	return true;
+    if ( !_device.contains( "/" ) ) return true;
 
-    if ( _path.startsWith( "/dev"  ) )	return true;
-    if ( _path.startsWith( "/proc" ) )	return true;
-    if ( _path.startsWith( "/sys"  ) )	return true;
+    if ( _path.startsWith( "/dev"  ) ) return true;
+    if ( _path.startsWith( "/proc" ) ) return true;
+    if ( _path.startsWith( "/sys"  ) ) return true;
 
     return false;
-}
-
-
-bool MountPoint::isSnapPackage() const
-{
-    return _path.startsWith( "/snap" ) && _filesystemType.toLower() == "squashfs";
 }
 
 
@@ -107,7 +101,28 @@ MountPoints * MountPoints::instance()
 }
 
 
+MountPoints::MountPoints()
+{
+    init();
+}
+
+
 MountPoints::~MountPoints()
+{
+    clear();
+}
+
+
+void MountPoints::init()
+{
+    clear();
+    _isPopulated     = false;
+    _hasBtrfs        = false;
+    _checkedForBtrfs = false;
+}
+
+
+void MountPoints::clear()
 {
     qDeleteAll( _mountPointList );
     _mountPointList.clear();
@@ -115,7 +130,7 @@ MountPoints::~MountPoints()
 }
 
 
-MountPoint * MountPoints::findByPath( const QString & path )
+const MountPoint * MountPoints::findByPath( const QString & path )
 {
     instance()->ensurePopulated();
 
@@ -123,7 +138,7 @@ MountPoint * MountPoints::findByPath( const QString & path )
 }
 
 
-MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
+const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 {
     const QFileInfo fileInfo( startPath );
     QString path = fileInfo.canonicalFilePath(); // absolute path without symlinks or ..
@@ -131,7 +146,7 @@ MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 //    if ( path != startPath )
 //	logDebug() << startPath << " canonicalized is " << path << Qt::endl;
 
-    MountPoint * mountPoint = findByPath( path );
+    const MountPoint * mountPoint = findByPath( path );
 
     if ( !mountPoint )
     {
@@ -153,7 +168,7 @@ MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 }
 
 
-bool MountPoints::isDeviceMounted( const QString & device )
+bool MountPoints::isDeviceMounted( const QString & device ) const
 {
     // Do NOT call ensurePopulated() here: This would cause a recursion in the
     // populating process!
@@ -454,10 +469,3 @@ bool MountPoints::isDuplicate( const QString & url )
 
     return false;
 }
-
-
-#if HAVE_Q_STORAGE_INFO
-  bool MountPoints::hasSizeInfo() { return true; }
-#else
-  bool MountPoints::hasSizeInfo() { return false; }
-#endif
