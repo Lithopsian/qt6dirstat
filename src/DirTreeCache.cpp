@@ -55,13 +55,14 @@ namespace
      **/
     const char * fileType( const FileInfo * item )
     {
-	if ( item->isFile()		) return "F";
-	if ( item->isDir()		) return "D";
-	if ( item->isSymLink()	) return "L";
-	if ( item->isBlockDevice()	) return "BlockDev";
-	if ( item->isCharDevice()	) return "CharDev";
-	if ( item->isFifo()		) return "FIFO";
-	if ( item->isSocket()	) return "Socket";
+	if ( item->isFile()        ) return "F";
+	if ( item->isDir()         ) return "D";
+	if ( item->isSymLink()     ) return "L";
+	if ( item->isBlockDevice() ) return "BlockDev";
+	if ( item->isCharDevice()  ) return "CharDev";
+	if ( item->isFifo()        ) return "FIFO";
+	if ( item->isSocket()      ) return "Socket";
+
 	return "";
     }
 
@@ -252,11 +253,11 @@ namespace
      * ->  "/some/dir/somewhere", "myfile.obj"
      **/
     void splitPath( const QString & fileNameWithPath,
-				 QString	   & path_ret,
-				 QString	   & name_ret )
+		    QString       & path_ret,
+		    QString       & name_ret )
     {
-	const bool absolutePath = fileNameWithPath.startsWith( "/" );
-	QStringList components = fileNameWithPath.split( "/", Qt::SkipEmptyParts );
+	const bool  absolutePath = fileNameWithPath.startsWith( "/" );
+	QStringList components   = fileNameWithPath.split( "/", Qt::SkipEmptyParts );
 
 	if ( components.isEmpty() )
 	{
@@ -296,9 +297,9 @@ namespace
 
 
 CacheReader::CacheReader( const QString & fileName,
-			  DirTree	* tree,
-			  DirInfo	* parent,
-			  bool		  markFromCache ):
+			  DirTree       * tree,
+			  DirInfo       * parent,
+			  bool            markFromCache ):
     _cache { gzopen( fileName.toUtf8(), "r" ) },
     _markFromCache { markFromCache },
     _tree { tree },
@@ -317,9 +318,9 @@ CacheReader::CacheReader( const QString & fileName,
 
 
 CacheReader::CacheReader( const QString & fileName,
-			  DirTree	* tree,
-			  DirInfo	* dir,
-			  DirInfo	* parent ):
+			  DirTree       * tree,
+			  DirInfo       * dir,
+			  DirInfo       * parent ):
     CacheReader ( fileName, tree, parent, true )
 {
     if ( dir && !isDir( dir->url() ) ) // Does this cache file match this directory?
@@ -385,7 +386,7 @@ void CacheReader::addItem()
     }
 
     int n = 0;
-    const char * type	  = field( n++ );
+    const char * type     = field( n++ );
     const char * raw_path = field( n++ );
     const char * size_str = field( n++ );
 
@@ -436,24 +437,20 @@ void CacheReader::addItem()
     {
 	// No mode in old file formats,
 	// get the object type from the first field, but no permissions
-	switch ( toupper( *type ) )
+	mode = [ type, mode_str ]()
 	{
-	    case 'F':
+	    switch ( toupper( *type ) )
 	    {
 		// 'F' is ambiguous unfortunately
-		if ( *(mode_str+1) == 0 )
-		    mode = S_IFREG;
-		else
-		    mode = S_IFIFO;
-		break;
+		case 'F': return *(mode_str+1) == '\0' ? S_IFREG : S_IFIFO;
+		case 'D': return S_IFDIR;
+		case 'L': return S_IFLNK;
+		case 'B': return S_IFBLK;
+		case 'C': return S_IFCHR;
+		case 'S': return S_IFSOCK;
+		default:  return S_IFREG;
 	    }
-	    case 'D': mode = S_IFDIR; break;
-	    case 'L': mode = S_IFLNK; break;
-	    case 'B': mode = S_IFBLK; break;
-	    case 'C': mode = S_IFCHR; break;
-	    case 'S': mode = S_IFSOCK; break;
-	    default:  mode = S_IFREG; break;
-	}
+	}();
     }
 
     // Path
@@ -625,11 +622,10 @@ FileSize CacheReader::readSize( const char * size_str )
     {
  	switch ( toupper( *end ) )
 	{
-	    case 'K':	return size * KB;
-	    case 'M':	return size * MB;
-	    case 'G':	return size * GB;
-	    case 'T':	return size * TB;
-	    default: break; // shouldn't happen
+	    case 'K': return size * KB;
+	    case 'M': return size * MB;
+	    case 'G': return size * GB;
+	    case 'T': return size * TB;
 	}
     }
 
@@ -700,8 +696,7 @@ void CacheReader::checkHeader()
 
     if ( _ok )
     {
-	if ( ( strcmp( field( 0 ), "[qdirstat" ) != 0 &&
-	       strcmp( field( 0 ), "[kdirstat" ) != 0 ) ||
+	if ( ( strcmp( field( 0 ), "[qdirstat" ) != 0 && strcmp( field( 0 ), "[kdirstat" ) != 0 ) ||
 	       strcmp( field( 2 ), "cache"     ) != 0 ||
 	       strcmp( field( 3 ), "file]"     ) != 0 )
 	{

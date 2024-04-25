@@ -40,16 +40,16 @@ namespace QDirStat
 	 * Paint one cell in the view.
 	 * Inherited from QStyledItemDelegate.
 	 **/
-	void paint( QPainter		       * painter,
+	void paint( QPainter                   * painter,
 		    const QStyleOptionViewItem & option,
-		    const QModelIndex	       & index ) const override;
+		    const QModelIndex          & index ) const override;
 
 	/**
 	 * Return a size hint for one cell in the view.
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	QSize sizeHint( const QStyleOptionViewItem & option,
-			const QModelIndex	   & index) const override;
+			const QModelIndex          & index) const override;
 
     };  // class SizeColDelegate
 

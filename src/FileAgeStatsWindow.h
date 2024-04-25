@@ -57,10 +57,10 @@ namespace QDirStat
 
     public:
 
-        /**
-         * Convenience function for creating, populating and showing the shared
-         * instance.
-         **/
+	/**
+	 * Convenience function for creating, populating and showing the shared
+	 * instance.
+	 **/
 	static void populateSharedInstance( QWidget         * parent,
                                             FileInfo        * subtree,
 					    SelectionModel  * selectionModel );
@@ -68,30 +68,30 @@ namespace QDirStat
 
     signals:
 
-        /**
-         * Emitted when the user clicks the "Locate" button (which is only
-         * enabled when there are 1..10000 files for that year).
-         *
-         * 'path' is also sent because otherwise the main window will use the
-         * tree's root if a file and not a directory is currently
-         * selected. This is a common case after the user clicked on a file
-         * result in the "locate" window.
-         **/
-        void locateFilesFromYear( const QString & path, short year );
+	/**
+	 * Emitted when the user clicks the "Locate" button (which is only
+	 * enabled when there are 1..10000 files for that year).
+	 *
+	 * 'path' is also sent because otherwise the main window will use the
+	 * tree's root if a file and not a directory is currently
+	 * selected. This is a common case after the user clicked on a file
+	 * result in the "locate" window.
+	 **/
+	void locateFilesFromYear( const QString & path, short year );
 
-        /**
-         * Similar than 'locateFilesFromYear()', but with year and month (1-12).
-         **/
-        void locateFilesFromMonth( const QString & path, short year, short month );
+	/**
+	 * Similar than 'locateFilesFromYear()', but with year and month (1-12).
+	 **/
+	void locateFilesFromMonth( const QString & path, short year, short month );
 
 
     protected slots:
 
-        /**
-         * Automatically update with the current main window selection, if the
+	/**
+	 * Automatically update with the current main window selection, if the
 	 * checkbox is checked.
-         **/
-        void syncedPopulate( FileInfo * subtree );
+	 **/
+	void syncedPopulate( FileInfo * subtree );
 
 	/**
 	 * Refresh (reload) all data.
@@ -108,18 +108,18 @@ namespace QDirStat
 	 **/
 	void writeSettings();
 
-        /**
-         * Emit the locateFilesFromYear() signal for the currently selected
-         * item's year. Do nothing if nothing is selected.
-         **/
-        void locateFiles();
+	/**
+	 * Emit the locateFilesFromYear() signal for the currently selected
+	 * item's year. Do nothing if nothing is selected.
+	 **/
+	void locateFiles();
 
-        /**
-         * Enable or disable actions and buttons depending on the internal
-         * state, e.g. if any item is selected and the number of files for the
-         * selected year are in the specified range (1..10000).
-         **/
-        void enableActions();
+	/**
+	 * Enable or disable actions and buttons depending on the internal
+	 * state, e.g. if any item is selected and the number of files for the
+	 * selected year are in the specified range (1..10000).
+	 **/
+	void enableActions();
 
 
     protected:
@@ -144,26 +144,26 @@ namespace QDirStat
 	 **/
 	void populateListWidget();
 
-        /**
-         * Fill the gaps between years.
-         **/
-        void fillGaps();
+	/**
+	 * Fill the gaps between years.
+	 **/
+	void fillGaps();
 
-        /**
-         * Find the gaps between years.
-         **/
-        YearsList findGaps();
+	/**
+	 * Find the gaps between years.
+	 **/
+	YearsList findGaps() const;
 
-        /**
-         * Return the currently selected item in the tree widget or 0
-         * if there is none or if it is the wrong type.
-         **/
-        const YearListItem * selectedItem() const;
+	/**
+	 * Return the currently selected item in the tree widget or 0
+	 * if there is none or if it is the wrong type.
+	 **/
+	const YearListItem * selectedItem() const;
 
-        /**
-         * Returns whether a locate should be performed for the current selection.
-         **/
-        bool canLocate( const YearListItem * item ) const;
+	/**
+	 * Returns whether a locate should be performed for the current selection.
+	 **/
+	bool canLocate( const YearListItem * item ) const;
 
 	/**
 	 * Key press event for detecting evnter/return.
@@ -172,16 +172,16 @@ namespace QDirStat
 	 **/
 	void keyPressEvent( QKeyEvent * event ) override;
 
-        /**
-         * Resize event, reimplemented from QWidget.
+	/**
+	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
 	 * the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
-         **/
-        void resizeEvent( QResizeEvent * event ) override;
+	 **/
+	void resizeEvent( QResizeEvent * event ) override;
 
 
 	//
@@ -190,10 +190,10 @@ namespace QDirStat
 
 	Ui::FileAgeStatsWindow * _ui;
 	FileAgeStats           * _stats 			{ nullptr };
-        PercentBarDelegate     * _filesPercentBarDelegate	{ nullptr };
-        PercentBarDelegate     * _sizePercentBarDelegate	{ nullptr };
+	PercentBarDelegate     * _filesPercentBarDelegate	{ nullptr };
+	PercentBarDelegate     * _sizePercentBarDelegate	{ nullptr };
 	Subtree                  _subtree;
-        bool                     _startGapsWithCurrentYear	{ true };
+	bool                     _startGapsWithCurrentYear	{ true };
 
     };	// class FileAgeStatsWindow
 
@@ -237,8 +237,8 @@ namespace QDirStat
 
 	/**
 	 * Less-than operator for sorting.
-         *
-         * Reimplemented from QTreeWidgetItem.
+	 *
+	 * Reimplemented from QTreeWidgetItem.
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;
 

@@ -49,9 +49,6 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
     initPathComboBox();
     initDirTree();
 
-    _okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
-    CHECK_PTR( _okButton );
-
     initConnections();
     readSettings();
 
@@ -77,13 +74,11 @@ void OpenDirDialog::initPathComboBox()
 #if USE_COMPLETER
     QCompleter * completer = new ExistingDirCompleter( this );
     CHECK_NEW( completer );
-
     _ui->pathComboBox->setCompleter( completer );
 #endif
 
     _validator = new ExistingDirValidator( this );
     CHECK_NEW( _validator );
-
     _ui->pathComboBox->setValidator( _validator );
 }
 
@@ -108,6 +103,8 @@ void OpenDirDialog::initDirTree()
 void OpenDirDialog::initConnections()
 {
     const QItemSelectionModel * selectionModel = _ui->dirTreeView->selectionModel();
+    QPushButton * okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
+    CHECK_PTR( okButton );
 
     connect( selectionModel,    &QItemSelectionModel::currentChanged,
              this,              &OpenDirDialog::treeSelection );
@@ -116,7 +113,7 @@ void OpenDirDialog::initConnections()
              this,              &OpenDirDialog::goUp );
 
     connect( _validator,        &ExistingDirValidator::isOk,
-             _okButton,         &QPushButton::setEnabled );
+             okButton,          &QPushButton::setEnabled );
 
     connect( _validator,        &ExistingDirValidator::isOk,
              this,              &OpenDirDialog::pathEdited );
@@ -180,7 +177,7 @@ void OpenDirDialog::setPath( const QString & path )
 
     QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();
     if ( lineEdit )
-	lineEdit->setText( path );
+        lineEdit->setText( path );
 
 //    _ui->pathSelector->selectParentMountPoint( path );
     const QModelIndex index = _filesystemModel->index( path );
@@ -291,7 +288,7 @@ void OpenDirDialog::readSettings()
     settings.endGroup();
 
     if ( !mainSplitterState.isNull() )
-	_ui->mainSplitter->restoreState( mainSplitterState );
+        _ui->mainSplitter->restoreState( mainSplitterState );
 }
 
 
@@ -324,13 +321,13 @@ QString OpenDirDialog::askOpenDir( QWidget * parent, bool * crossFilesystems )
     if ( dialog.exec() == QDialog::Rejected )
     {
         //logInfo() << "[Cancel]" << Qt::endl;
-	return QString();
+        return QString();
     }
 
     // Remember the flag just for the next time the dialog is opened
     _crossFilesystems = dialog.crossFilesystems();
     if ( crossFilesystems )
-	*crossFilesystems = _crossFilesystems;
+        *crossFilesystems = _crossFilesystems;
 
     const QString path = dialog.selectedPath();
     //logInfo() << "User selected path " << path << Qt::endl;

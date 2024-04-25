@@ -18,15 +18,11 @@
 using namespace QDirStat;
 
 
-QValidator::State ExistingDirValidator::validate( QString & input, int &) const
+QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 {
     const bool ok = !input.isEmpty() && QDir( input ).exists();
 
-    // This is a complex way to do
-    //    emit isOk( ok );
-    // from this const method
-
-    const_cast<ExistingDirValidator *>( this )->isOk( ok );
+    emit const_cast<ExistingDirValidator *>( this )->isOk( ok );
 
 #if 0
     logDebug() << "Checking \"" << input << "\": "

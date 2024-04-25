@@ -56,10 +56,10 @@ namespace QDirStat
 	 **/
 	~OpenUnpkgDialog() override;
 
-        /**
-         * Get all values from the widgets at once.
-         **/
-        UnpkgSettings values() const;
+	/**
+	 * Get all values from the widgets at once.
+	 **/
+	UnpkgSettings values() const;
 
 
     protected slots:
@@ -104,10 +104,10 @@ namespace QDirStat
 	 **/
 	void readSettings();
 
-        /**
-         * Set all values at once.
-         **/
-        void setValues( const UnpkgSettings & settings );
+	/**
+	 * Set all values at once.
+	 **/
+	void setValues( const UnpkgSettings & settings );
 
 	/**
 	 * Get the content of a QPlainTextEdit widget as QStringList with
@@ -122,7 +122,6 @@ namespace QDirStat
 	// Data members
 
 	Ui::OpenUnpkgDialog * _ui;
-	QPushButton         * _okButton;
 
     };	// class OpenUnpkgDialog
 

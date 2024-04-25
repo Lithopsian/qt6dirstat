@@ -119,7 +119,7 @@ namespace QDirStat
          * empty string if there is no item with that index.
          **/
         QString item( int index ) const
-	    { return index >= 0 && index < _items.size() ? _items.at( index ) : ""; }
+            { return index >= 0 && index < _items.size() ? _items.at( index ) : ""; }
 
         /**
          * The size of the history stack, i.e. the number of items that are
@@ -155,8 +155,8 @@ namespace QDirStat
 
     private:
 
-        int             _current { -1 };
-        QStringList     _items;
+        int         _current { -1 };
+        QStringList _items;
 
     };  // class History
 }

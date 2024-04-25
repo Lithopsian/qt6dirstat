@@ -185,7 +185,7 @@ void FileAgeStatsWindow::populateListWidget()
 {
     for ( short year : _stats->years() )
     {
-        const YearStats * yearStats = _stats->yearStats( year );
+        YearStats * yearStats = _stats->yearStats( year );
         if ( yearStats )
         {
             // Add a year item
@@ -231,7 +231,7 @@ void FileAgeStatsWindow::fillGaps()
 }
 
 
-YearsList FileAgeStatsWindow::findGaps()
+YearsList FileAgeStatsWindow::findGaps() const
 {
     YearsList gaps;
 

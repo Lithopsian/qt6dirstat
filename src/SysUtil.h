@@ -45,10 +45,10 @@ namespace QDirStat
 	 * Log the command that is executed if 'logCommand' is 'true',
 	 * log the command's output if 'logOutput' is 'true'.
 	 **/
-	bool tryRunCommand( const QString		& commandLine,
-			    const QRegularExpression	& expectedResult,
-			    bool	    		logCommand	= LOG_COMMANDS,
-			    bool	    		logOutput	= LOG_OUTPUT   );
+	bool tryRunCommand( const QString            & commandLine,
+			    const QRegularExpression & expectedResult,
+			    bool                       logCommand = LOG_COMMANDS,
+			    bool                       logOutput  = LOG_OUTPUT );
 
 	/**
 	 * Run a command line and return its output. If exitCode_ret is
@@ -73,11 +73,11 @@ namespace QDirStat
 	 * the command into "/bin/sh -c".
 	 **/
 	QString runCommand( const QString & commandLine,
-			    int *	    exitCode_ret  = 0,
-			    int		    timeout_sec   = COMMAND_TIMEOUT_SEC,
-			    bool	    logCommand    = LOG_COMMANDS,
-			    bool	    logOutput     = LOG_OUTPUT,
-			    bool	    ignoreErrCode = false );
+			    int           * exitCode_ret  = 0,
+			    int             timeout_sec   = COMMAND_TIMEOUT_SEC,
+			    bool            logCommand    = LOG_COMMANDS,
+			    bool            logOutput     = LOG_OUTPUT,
+			    bool            ignoreErrCode = false );
 
 	/**
 	 * Run a command with arguments 'args' and return its output. If
@@ -99,13 +99,13 @@ namespace QDirStat
 	 * "/bin/sh" as the command, "-c" as the first argument and the command
 	 * line to be executed as the second. Beware of shell quoting quirks!
 	 **/
-	QString runCommand( const QString &	command,
+	QString runCommand( const QString     & command,
 			    const QStringList & args,
-			    int *		exitCode_ret  = 0,
-			    int			timeout_sec   = COMMAND_TIMEOUT_SEC,
-			    bool		logCommand    = LOG_COMMANDS,
-			    bool		logOutput     = LOG_OUTPUT,
-			    bool		ignoreErrCode = false );
+			    int               * exitCode_ret  = 0,
+			    int                 timeout_sec   = COMMAND_TIMEOUT_SEC,
+			    bool                logCommand    = LOG_COMMANDS,
+			    bool                logOutput     = LOG_OUTPUT,
+			    bool                ignoreErrCode = false );
 
 	/**
 	 * Return 'true' if the specified command is available and executable.

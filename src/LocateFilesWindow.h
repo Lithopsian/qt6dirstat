@@ -42,9 +42,9 @@ namespace QDirStat
 	 * to access this window.
 	 *
 	 * Note that this widget will destroy itself upon window close.
-         *
-         * This class takes over ownership of the TreeWalker and will delete it
-         * when appropriate.
+	 *
+	 * This class takes over ownership of the TreeWalker and will delete it
+	 * when appropriate.
 	 **/
 	LocateFilesWindow( TreeWalker * treeWalker,
                            QWidget    * parent = nullptr );
@@ -75,16 +75,6 @@ namespace QDirStat
 					    int             sortCol,
 					    Qt::SortOrder   sortOrder );
 
-        /**
-         * Obtain the subtree from the last used URL or 0 if none was found.
-         **/
-//        const Subtree & subtree() const { return _subtree; }
-
-        /**
-         * Return the TreeWalker of this window.
-         **/
-//        TreeWalker * treeWalker() const { return _treeWalker; }
-
 
     protected slots:
 
@@ -99,13 +89,23 @@ namespace QDirStat
 	 **/
 	void locateInMainWindow( QTreeWidgetItem * item );
 
-        /**
-         * Open a context menu for an item in the results list.
-         **/
-        void itemContextMenu( const QPoint & pos );
+	/**
+	 * Open a context menu for an item in the results list.
+	 **/
+	void itemContextMenu( const QPoint & pos );
 
 
     protected:
+
+	/**
+	 * Obtain the subtree from the last used URL or 0 if none was found.
+	 **/
+//	const Subtree & subtree() const { return _subtree; }
+
+	/**
+	 * Return the TreeWalker of this window.
+	 **/
+//	TreeWalker * treeWalker() const { return _treeWalker; }
 
 	/**
 	 * Clear all data and widget contents.
@@ -127,34 +127,34 @@ namespace QDirStat
 	 **/
 	void populate( FileInfo * subtree );
 
-        /**
-         * Set a new TreeWalker for this window. This deletes the old one.
-         **/
-        void setTreeWalker( TreeWalker * newTreeWalker );
+	/**
+	 * Set a new TreeWalker for this window. This deletes the old one.
+	 **/
+	void setTreeWalker( TreeWalker * newTreeWalker );
 
-        /**
-         * Set the sort column and sort order (Qt::AscendingOrder or
-         * Qt::DescendingOrder), sort the list and select the first item.
-         **/
-//        void sortByColumn( int col, Qt::SortOrder order );
+	/**
+	 * Set the sort column and sort order (Qt::AscendingOrder or
+	 * Qt::DescendingOrder), sort the list and select the first item.
+	 **/
+	//        void sortByColumn( int col, Qt::SortOrder order );
 
-        /**
-         * Count the number of items in the list and display the number.
-         **/
-        void showResultsCount();
+	/**
+	 * Count the number of items in the list and display the number.
+	 **/
+	void showResultsCount() const;
 
-        /**
-         * Select the first item in the list. This will also select it in the
-         * main window, open the branch where this item is in and scroll the
-         * main window's tree so that item is visible tere.
-         **/
-        void selectFirstItem()
+	/**
+	 * Select the first item in the list. This will also select it in the
+	 * main window, open the branch where this item is in and scroll the
+	 * main window's tree so that item is visible tere.
+	 **/
+	void selectFirstItem() const
 	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
 
-        /**
-         * Add the hotkeys (shortcuts) of the cleanup actions to this window.
-         **/
-        void addCleanupHotkeys();
+	/**
+	 * Add the hotkeys (shortcuts) of the cleanup actions to this window.
+	 **/
+	void addCleanupHotkeys();
 
 	/**
 	 * Recursively locate directories that contain files matching the
@@ -162,16 +162,16 @@ namespace QDirStat
 	 **/
 	void populateRecursive( FileInfo * dir );
 
-        /**
-         * Resize event, reimplemented from QWidget.
+	/**
+	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
 	 * the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
-         **/
-        void resizeEvent( QResizeEvent * event ) override;
+	 **/
+	void resizeEvent( QResizeEvent * event ) override;
 
 
     private:
@@ -181,8 +181,8 @@ namespace QDirStat
 	//
 
 	Ui::LocateFilesWindow * _ui;
-        TreeWalker            * _treeWalker;
-        Subtree                 _subtree;
+	TreeWalker            * _treeWalker;
+	Subtree                 _subtree;
     };
 
 
@@ -192,9 +192,9 @@ namespace QDirStat
     enum LocateListColumns
     {
 	LocateListSizeCol,
-        LocateListMTimeCol,
-        LocateListPathCol,
-        LocateListColumnCount
+	LocateListMTimeCol,
+	LocateListPathCol,
+	LocateListColumnCount
     };
 
 
@@ -228,9 +228,10 @@ namespace QDirStat
 	/**
 	 * Getters for the item properties.
 	 **/
-	QString	 path()         const { return _path;  }
-//	FileSize size()         const { return _size;  }
-//	time_t   mtime()        const { return _mtime; }
+	const QString & path()  const { return _path;  }
+//	FileSize        size()  const { return _size;  }
+//	time_t          mtime() const { return _mtime; }
+
 
     protected:
 
@@ -247,9 +248,9 @@ namespace QDirStat
 
     private:
 
-	QString		_path;
-	FileSize	_size;
-        time_t          _mtime;
+	QString  _path;
+	FileSize _size;
+	time_t   _mtime;
     };
 
 } // namespace QDirStat

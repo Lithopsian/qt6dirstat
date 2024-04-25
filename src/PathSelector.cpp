@@ -25,8 +25,6 @@ using namespace QDirStat;
 PathSelector::PathSelector( QWidget * parent ):
     QListWidget ( parent )
 {
-    setSpacing( 3 );
-
     connect( this, &PathSelector::currentItemChanged,
 	     this, &PathSelector::slotItemSelected );
 
@@ -39,7 +37,7 @@ PathSelector::PathSelector( QWidget * parent ):
 
 
 PathSelectorItem * PathSelector::addPath( const QString & path,
-                                          const QIcon &   icon )
+                                          const QIcon   & icon )
 {
     PathSelectorItem * item = new PathSelectorItem( path, this );
     CHECK_NEW( item );
@@ -51,17 +49,14 @@ PathSelectorItem * PathSelector::addPath( const QString & path,
 }
 
 
-PathSelectorItem * PathSelector::addHomeDir()
+void PathSelector::addHomeDir()
 {
-    const QIcon icon( ":/icons/48x48/home-dir.png" );
-    PathSelectorItem * item = addPath( QDir::homePath(), icon );
-//    item->setToolTip( tr( "Your home directory" ) );
-
-    return item;
+    PathSelectorItem * item = addPath( QDir::homePath(), QIcon( ":/icons/48x48/home-dir.png" ) );
+    item->setToolTip( tr( "Your home directory" ) );
 }
 
 
-PathSelectorItem * PathSelector::addMountPoint( MountPoint * mountPoint )
+void PathSelector::addMountPoint( MountPoint * mountPoint )
 {
     CHECK_PTR( mountPoint );
 
@@ -70,8 +65,6 @@ PathSelectorItem * PathSelector::addMountPoint( MountPoint * mountPoint )
 
     const auto type = mountPoint->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
     item->setIcon( _iconProvider.icon( type ) );
-
-    return item;
 }
 
 
@@ -82,10 +75,9 @@ void PathSelector::addMountPoints( const QList<MountPoint *> & mountPoints )
 }
 
 
-void PathSelector::slotItemSelected( QListWidgetItem * origItem )
+void PathSelector::slotItemSelected( const QListWidgetItem * origItem )
 {
-    PathSelectorItem * item = dynamic_cast<PathSelectorItem *>( origItem );
-
+    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( origItem );
     if ( item )
     {
 	// logVerbose() << "Selected path " << item->path() << Qt::endl;
@@ -94,10 +86,9 @@ void PathSelector::slotItemSelected( QListWidgetItem * origItem )
 }
 
 
-void PathSelector::slotItemDoubleClicked( QListWidgetItem * origItem )
+void PathSelector::slotItemDoubleClicked( const QListWidgetItem * origItem )
 {
-    PathSelectorItem * item = dynamic_cast<PathSelectorItem *>( origItem );
-
+    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( origItem );
     if ( item )
     {
 	// logVerbose() << "Double-clicked path " << item->path() << Qt::endl;
@@ -105,14 +96,14 @@ void PathSelector::slotItemDoubleClicked( QListWidgetItem * origItem )
     }
 }
 
-
+/*
 void PathSelector::selectParentMountPoint( const QString & wantedPath )
 {
-    PathSelectorItem * bestMatch = 0;
+    PathSelectorItem * bestMatch = nullptr;
 
     for ( int i=0; i < count(); ++i )
     {
-        PathSelectorItem * current = dynamic_cast<PathSelectorItem *>( this->item( i ) );
+        PathSelectorItem * current = dynamic_cast<PathSelectorItem *>( item( i ) );
 
         if ( current && wantedPath.startsWith( current->path() ) )
         {
@@ -127,7 +118,7 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
         setCurrentItem( bestMatch );
     }
 }
-
+*/
 
 
 
@@ -149,7 +140,6 @@ PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
     QString tooltip = _mountPoint->device();
 
 #if SHOW_SIZES_IN_TOOLTIP
-
     if ( _mountPoint->hasSizeInfo() )
     {
         tooltip += QObject::tr( "\n\nUsed: " )         + formatSize( _mountPoint->usedSize() );

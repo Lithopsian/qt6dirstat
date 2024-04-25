@@ -78,12 +78,12 @@ public:
 			 const QString & srcFunction ) const;
 
 
-protected:
+private:
 
     QString _what;
 
     mutable QString _srcFile;
-    mutable int	    _srcLine { 0 };
+    mutable int     _srcLine { 0 };
     mutable QString _srcFunction;
 };
 

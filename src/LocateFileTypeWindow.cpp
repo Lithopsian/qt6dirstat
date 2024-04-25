@@ -41,10 +41,10 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
     readWindowSettings( this, "LocateFileTypeWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
-	     this,		 &LocateFileTypeWindow::refresh );
+	     this,               &LocateFileTypeWindow::refresh );
 
-    connect( _ui->treeWidget,	 &QTreeWidget::currentItemChanged,
-	     this,		 &LocateFileTypeWindow::selectResult );
+    connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
+	     this,               &LocateFileTypeWindow::selectResult );
 }
 
 
@@ -170,7 +170,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 }
 
 
-FileInfoSet LocateFileTypeWindow::matchingFiles( FileInfo * item )
+FileInfoSet LocateFileTypeWindow::matchingFiles( FileInfo * item ) const
 {
     FileInfoSet result;
 
@@ -191,7 +191,7 @@ FileInfoSet LocateFileTypeWindow::matchingFiles( FileInfo * item )
 }
 
 
-void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item )
+void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
 {
     if ( !item )
 	return;
@@ -225,8 +225,8 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * event )
 
 
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
-						int		count,
-						FileSize	totalSize ):
+						int             count,
+						FileSize        totalSize ):
     QTreeWidgetItem ( QTreeWidgetItem::UserType ),
     _path { path },
     _count { count },

@@ -27,10 +27,10 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const QString		& commandLine,
-			     const QRegularExpression	& expectedResult,
-			     bool			logCommand,
-			     bool			logOutput )
+bool SysUtil::tryRunCommand( const QString            & commandLine,
+			     const QRegularExpression & expectedResult,
+			     bool                       logCommand,
+			     bool                       logOutput )
 {
     int exitCode = -1;
     QString output = runCommand( commandLine, &exitCode,
@@ -50,11 +50,11 @@ bool SysUtil::tryRunCommand( const QString		& commandLine,
 
 
 QString SysUtil::runCommand( const QString & commandLine,
-			     int *	     exitCode_ret,
-			     int	     timeout_sec,
-			     bool	     logCommand,
-			     bool	     logOutput,
-			     bool	     ignoreErrCode )
+			     int           * exitCode_ret,
+			     int             timeout_sec,
+			     bool            logCommand,
+			     bool            logOutput,
+			     bool            ignoreErrCode )
 {
     if ( exitCode_ret )
 	*exitCode_ret = -1;
@@ -74,13 +74,13 @@ QString SysUtil::runCommand( const QString & commandLine,
 }
 
 
-QString SysUtil::runCommand( const QString &	 command,
+QString SysUtil::runCommand( const QString     & command,
 			     const QStringList & args,
-			     int *		 exitCode_ret,
-			     int		 timeout_sec,
-			     bool		 logCommand,
-			     bool		 logOutput,
-			     bool		 ignoreErrCode )
+			     int               * exitCode_ret,
+			     int                 timeout_sec,
+			     bool                logCommand,
+			     bool                logOutput,
+			     bool                ignoreErrCode )
 {
     if ( exitCode_ret )
 	*exitCode_ret = -1;

@@ -28,9 +28,6 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    _okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
-    CHECK_PTR( _okButton );
-
     QCompleter * completer = new ExistingDirCompleter( this );
     CHECK_NEW( completer );
     _ui->startingDirComboBox->setCompleter( completer );
@@ -46,11 +43,14 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     QPushButton * resetButton = _ui->buttonBox->button( QDialogButtonBox::RestoreDefaults );
     CHECK_PTR( resetButton );
 
+    QPushButton * okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
+    CHECK_PTR( okButton );
+
     connect( resetButton, &QPushButton::clicked,
 	     this,        &OpenUnpkgDialog::restoreDefaults );
 
     connect( validator, &ExistingDirValidator::isOk,
-	     _okButton, &QPushButton::setEnabled );
+	     okButton, &QPushButton::setEnabled );
 
     connect( this, &OpenUnpkgDialog::accepted,
 	     this, &OpenUnpkgDialog::writeSettings );
@@ -73,10 +73,9 @@ QString OpenUnpkgDialog::startingDir() const
 
 QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit *widget ) const
 {
-    const QString text = widget->toPlainText();
-    const QStringList lines  = text.split( '\n', Qt::SkipEmptyParts );
     QStringList result;
 
+    const QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
     for ( QString line : lines )
     {
 	line = line.trimmed();

@@ -33,11 +33,11 @@ namespace QDirStat
     public:
 	/**
 	 * Open an "open directory" dialog, wait for the user to select one and
-         * return that path. If the user cancelled the dialog, this returns an
-         * empty string.
-         *
-         * 'crossFilesystems' (if non-null) returns the "cross filesystems"
-         * flag of the dialog.
+	 * return that path. If the user cancelled the dialog, this returns an
+	 * empty string.
+	 *
+	 * 'crossFilesystems' (if non-null) returns the "cross filesystems"
+	 * flag of the dialog.
 	 **/
 	static QString askOpenDir( QWidget * parent, bool * crossFilesystems );
 
@@ -60,44 +60,44 @@ namespace QDirStat
 	 **/
         QString selectedPath() const;
 
-        /**
-         * The "cross filesystems" flag of this dialog (overriding the global
-         * "cross filesystems" setting" from the config dialog).
-         **/
-        bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
+	/**
+	 * The "cross filesystems" flag of this dialog (overriding the global
+	 * "cross filesystems" setting" from the config dialog).
+	 **/
+	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
 
-        /**
-         * Return this dialog's path selector so it can be populated.
-         **/
-        PathSelector * pathSelector() const { return _ui->pathSelector; }
+	/**
+	 * Return this dialog's path selector so it can be populated.
+	 **/
+	PathSelector * pathSelector() const { return _ui->pathSelector; }
 
 	/**
 	 * Read settings from the config file
 	 **/
 	void readSettings();
 
-        /**
-         * Set a path in the dirTree.
-         **/
-        void setPath( const QString & path );
+	/**
+	 * Set a path in the dirTree.
+	 **/
+	void setPath( const QString & path );
 
 
     protected slots:
 
-        /**
-         * Set a path in the dirTree and expand (open) that branch.
-         **/
-        void setPathAndExpand( const QString & path );
+	/**
+	 * Set a path in the dirTree and expand (open) that branch.
+	 **/
+	void setPathAndExpand( const QString & path );
 
-        /**
-         * Set a path in the dirTree and accept the dialog.
-         **/
-        void setPathAndAccept( const QString & path );
+	/**
+	 * Set a path in the dirTree and accept the dialog.
+	 **/
+	void setPathAndAccept( const QString & path );
 
-        /**
-         * Go up one directory level.
-         **/
-        void goUp();
+	/**
+	 * Go up one directory level.
+	 **/
+	void goUp();
 
 	/**
 	 * Write settings to the config file
@@ -105,40 +105,39 @@ namespace QDirStat
 	void writeSettings();
 
        /**
-         * Notification that the user selected a directory in the tree
-         **/
-        void treeSelection( const QModelIndex & newCurrentItem,
-                            const QModelIndex & oldCurrentItem );
+	 * Notification that the user selected a directory in the tree
+	 **/
+	void treeSelection( const QModelIndex & newCurrentItem,
+			    const QModelIndex & oldCurrentItem );
 
-        /**
-         * Notification that the user edited a path in the combo box.
-         * 'ok' is the result of the validator's check.
-         **/
-        void pathEdited( bool ok );
+	/**
+	 * Notification that the user edited a path in the combo box.
+	 * 'ok' is the result of the validator's check.
+	 **/
+	void pathEdited( bool ok );
 
-        /**
-         * Select a directory once everything is initialized and the first
-         * signals are processed.
-         **/
-        void initialSelection();
+	/**
+	 * Select a directory once everything is initialized and the first
+	 * signals are processed.
+	 **/
+	void initialSelection();
 
 
     protected:
 
-        void initPathComboBox();
-        void initDirTree();
-        void initConnections();
-        void populatePathComboBox( const QString & path );
+	void initPathComboBox();
+	void initDirTree();
+	void initConnections();
+	void populatePathComboBox( const QString & path );
 
 
     private:
 
 	Ui::OpenDirDialog    * _ui;
-        QFileSystemModel     * _filesystemModel;
-	QPushButton          * _okButton;
-        ExistingDirValidator * _validator;
-        bool                   _settingPath { false };
-        QString                _lastPath;
+	QFileSystemModel     * _filesystemModel;
+	ExistingDirValidator * _validator;
+	bool                   _settingPath { false };
+	QString                _lastPath;
 
     };	// class OpenDirDialog
 

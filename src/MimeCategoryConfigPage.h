@@ -109,7 +109,7 @@ namespace QDirStat
 
 	/**
 	 * The pane splitter has moved, meaning the list has resized without
-	 * a resize event.  Adjust the sgading width.
+	 * a resize event.  Adjust the shading width.
 	 **/
 	void splitterMoved( int, int ) { adjustShadingWidth(); }
 
@@ -233,7 +233,7 @@ namespace QDirStat
 	// Data
 
 	Ui::MimeCategoryConfigPage * _ui;
-	DirTree			   * _dirTree;
+	DirTree                    * _dirTree;
 
 	bool _dirty { false };
 

@@ -24,7 +24,7 @@ HistoryButtons::HistoryButtons( QAction * actionGoBack,
                                 QAction * actionGoForward ):
     QObject (),
     _history { new History() },
-    _actionGoBack    { actionGoBack },
+    _actionGoBack { actionGoBack },
     _actionGoForward { actionGoForward }
 {
     CHECK_NEW( _history );
@@ -98,7 +98,7 @@ void HistoryButtons::initHistoryButtons()
     connect( forwardMenu, &QMenu::triggered,
              this,        &HistoryButtons::historyMenuAction );
 
-    _actionGoBack->setMenu   ( backMenu );
+    _actionGoBack->setMenu   ( backMenu    );
     _actionGoForward->setMenu( forwardMenu );
 }
 

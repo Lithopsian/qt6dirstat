@@ -33,22 +33,22 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
 
     setListWidget( _ui->listWidget );
 
-    setMoveUpButton	 ( _ui->moveUpButton	   );
-    setMoveDownButton	 ( _ui->moveDownButton	   );
-    setMoveToTopButton	 ( _ui->moveToTopButton	   );
+    setMoveUpButton      ( _ui->moveUpButton       );
+    setMoveDownButton    ( _ui->moveDownButton     );
+    setMoveToTopButton   ( _ui->moveToTopButton    );
     setMoveToBottomButton( _ui->moveToBottomButton );
-    setAddButton	 ( _ui->addButton	   );
-    setRemoveButton	 ( _ui->removeButton	   );
+    setAddButton         ( _ui->addButton          );
+    setRemoveButton      ( _ui->removeButton       );
 
     enableEditRuleWidgets( false );
     fillListWidget();
     updateActions();
 
-    connect( _ui->patternLineEdit,	&QLineEdit::textChanged,
-	     this,			&ExcludeRulesConfigPage::patternChanged );
+    connect( _ui->patternLineEdit, &QLineEdit::textChanged,
+	     this,                 &ExcludeRulesConfigPage::patternChanged );
 
-    connect( parent,             &ConfigDialog::applyChanges,
-	     this,		 &ExcludeRulesConfigPage::applyChanges );
+    connect( parent,               &ConfigDialog::applyChanges,
+	     this,                 &ExcludeRulesConfigPage::applyChanges );
 }
 
 

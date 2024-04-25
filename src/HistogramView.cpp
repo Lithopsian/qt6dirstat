@@ -37,6 +37,20 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Make the QGraphicsTextItem text bold.
+     **/
+    void setBold( QGraphicsTextItem * item )
+    {
+	QFont font( item->font() );
+	font.setBold( true );
+	item->setFont( font );
+    }
+}
+
+
 HistogramView::HistogramView( QWidget * parent ):
     QGraphicsView ( parent )
 {
@@ -412,27 +426,6 @@ void HistogramView::rebuild()
 	return;
     }
 
-    addHistogram();
-
-    fitToViewport();
-}
-
-
-qreal HistogramView::scaleValue( qreal value )
-{
-    const qreal startVal   = percentile( _startPercentile );
-    const qreal endVal     = percentile( _endPercentile   );
-    const qreal totalWidth = endVal - startVal;
-    const qreal result     = ( value - startVal ) / totalWidth * _histogramWidth;
-
-    // logDebug() << "Scaling " << formatSize( value ) << " to " << result << Qt::endl;
-
-    return result;
-}
-
-
-void HistogramView::addHistogram()
-{
     addHistogramBackground();
     addAxes();
     addYAxisLabel();
@@ -442,6 +435,21 @@ void HistogramView::addHistogram()
     addHistogramBars();
     addMarkers();
     addOverflowPanel();
+
+    fitToViewport();
+}
+
+
+qreal HistogramView::scaleValue( qreal value ) const
+{
+    const qreal startVal   = percentile( _startPercentile );
+    const qreal endVal     = percentile( _endPercentile   );
+    const qreal totalWidth = endVal - startVal;
+    const qreal result     = ( value - startVal ) / totalWidth * _histogramWidth;
+
+    // logDebug() << "Scaling " << formatSize( value ) << " to " << result << Qt::endl;
+
+    return result;
 }
 
 

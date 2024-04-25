@@ -470,7 +470,7 @@ void Cleanup::execute( FileInfo *item, OutputWindow * outputWindow )
 }
 
 
-const QString Cleanup::itemDir( const FileInfo *item ) const
+QString Cleanup::itemDir( const FileInfo *item ) const
 {
     QString dir = item->path();
 

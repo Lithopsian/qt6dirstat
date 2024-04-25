@@ -23,6 +23,7 @@ OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
 
     CHECK_NEW( _ui );
     _ui->setupUi( this );
+
     _ui->pkgPatternField->setClearButtonEnabled( true );
     _ui->pkgPatternField->setFocus();
 
@@ -46,9 +47,8 @@ PkgFilter OpenPkgDialog::pkgFilter()
         return PkgFilter();
     }
 
-    const auto mode       = PkgFilter::FilterMode( _ui->filterModeComboBox->currentIndex() );
-    const QString pattern = _ui->pkgPatternField->text();
-    PkgFilter filter( pattern, mode );
+    const auto mode = PkgFilter::FilterMode( _ui->filterModeComboBox->currentIndex() );
+    PkgFilter filter( _ui->pkgPatternField->text(), mode );
     // logDebug() << filter << Qt::endl;
 
     return filter;

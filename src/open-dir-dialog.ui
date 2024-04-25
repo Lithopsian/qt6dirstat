@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>OpenDirDialog</class>
  <widget class="QDialog" name="OpenDirDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>534</width>
+    <height>361</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Select Directory</string>
   </property>
@@ -55,7 +63,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QDirStat::PathSelector" name="pathSelector"/>
+          <widget class="QDirStat::PathSelector" name="pathSelector">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

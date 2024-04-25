@@ -36,14 +36,15 @@ namespace QDirStat
 	{}
 
 	/**
-	 * Validate the input string.
+	 * Validate the input string to see if it represents an
+	 * existing directory.
 	 **/
-	QValidator::State validate( QString & input, int &) const override;
+	QValidator::State validate( QString & input, int & ) const override;
 
 
     signals:
 
-	void isOk( bool ok );
+	void isOk( bool ok ) const;
 
     };	// class ExistingDirValidator
 

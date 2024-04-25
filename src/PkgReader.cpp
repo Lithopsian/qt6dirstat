@@ -315,12 +315,13 @@ namespace
 	{
 	    // Zero the directory's own size fields to prevent them from
 	    // distorting the total sums.  Otherwise the directory would be
-	    // counted in each package that uses the directory, and a directory
-	    // with a large own size and only a tiny file that belongs to that
-	    // package would completely dwarf the package file in the treemap.
+	    // counted in each package that uses the directory.
 	    statInfo.st_size   = 0;
 	    statInfo.st_blocks = 0;
-	    statInfo.st_mtime  = 0;
+
+	    // mtime is still valid although it may reflect the addition
+	    // or deletion of files that are not in this package
+//	    statInfo.st_mtime  = 0;
 	}
 
 	return true;

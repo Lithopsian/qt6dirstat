@@ -28,26 +28,26 @@ namespace QDirStat
 
     public:
 
-        /**
-         * Constructor.
-         **/
+	/**
+	 * Constructor.
+	 **/
 	HistoryButtons( QAction * actionGoBack,
 			QAction * actionGoForward );
 
-        /**
-         * Destructor.
-         **/
+	/**
+	 * Destructor.
+	 **/
 	~HistoryButtons() override;
 
-        /**
-         * Clear the complete history.
-         **/
-        void clearHistory() { _history->clear(); }
+	/**
+	 * Clear the complete history.
+	 **/
+	void clearHistory() { _history->clear(); }
 
-        /**
-         * Access to the history manager.
-         **/
-//	History * history() { return _history; }
+	/**
+	 * Access to the history manager.
+	 **/
+	//	History * history() { return _history; }
 
 	/**
 	 * Enable or disable the browser-like "Go Back" and "Go Forward"
@@ -88,10 +88,10 @@ namespace QDirStat
 
     protected slots:
 
-        /**
-         * Clear the old history menu and add all current history items to it.
-         **/
-        void updateHistoryMenu();
+	/**
+	 * Clear the old history menu and add all current history items to it.
+	 **/
+	void updateHistoryMenu();
 
 	/**
 	 * The user activated an action from the history menu; fetch the history
@@ -116,8 +116,8 @@ namespace QDirStat
 	//
 
 	History * _history;
-        QAction * _actionGoBack;
-        QAction * _actionGoForward;
+	QAction * _actionGoBack;
+	QAction * _actionGoForward;
 
     };
 }	// namespace QDirStat

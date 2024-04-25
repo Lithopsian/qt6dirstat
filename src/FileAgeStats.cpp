@@ -115,7 +115,7 @@ void FileAgeStats::calcPercentages()
 
 void FileAgeStats::calcMonthPercentages( short year )
 {
-    YearStats * thisYearStats = yearStats( year );
+    const YearStats * thisYearStats = yearStats( year );
     if ( !thisYearStats )
         return;
 

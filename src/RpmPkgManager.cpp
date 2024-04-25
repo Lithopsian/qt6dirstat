@@ -113,7 +113,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
     const QStringList splitOutput = output.split( "\n" );
     for ( const QString & line : splitOutput )
     {
-	if ( ! line.isEmpty() )
+	if ( !line.isEmpty() )
 	{
 	    QStringList fields = line.split( " | " );
 
@@ -161,10 +161,10 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
 
     QString name = pkg->baseName();
 
-    if ( ! pkg->version().isEmpty() )
+    if ( !pkg->version().isEmpty() )
 	name += "-" + pkg->version();
 
-    if ( ! pkg->arch().isEmpty() )
+    if ( !pkg->arch().isEmpty() )
 	name += "." + pkg->arch();
 
     return name;
@@ -211,7 +211,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 	    const QString pkgName = fields.takeFirst();
 	    const QString path    = fields.takeFirst();
 
-	    if ( ! pkgName.isEmpty() && ! path.isEmpty() )
+	    if ( !pkgName.isEmpty() && !path.isEmpty() )
 		cache->add( pkgName, path );
 	}
     }
@@ -240,7 +240,7 @@ void RpmPkgManager::rebuildRpmDbWarning() const
 {
     static bool issuedWarning = false;
 
-    if ( ! issuedWarning )
+    if ( !issuedWarning )
     {
 	std::cerr << "WARNING: rpm is very slow. Run	  sudo rpm --rebuilddb\n" << std::endl;
 	logWarning()  << "rpm is very slow. Run	  sudo rpm --rebuilddb"	  << Qt::endl;

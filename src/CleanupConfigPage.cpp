@@ -49,16 +49,16 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     updateActions();
 
     connect( _ui->outputWindowPolicyComboBox, qOverload<int>( &QComboBox::currentIndexChanged ),
-	     this,		              &CleanupConfigPage::enableWidgets );
+	     this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
-	     this,		              &CleanupConfigPage::enableWidgets );
+	     this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,
-	     this,		              &CleanupConfigPage::titleChanged );
+	     this,                            &CleanupConfigPage::titleChanged );
 
-    connect( parent,             &ConfigDialog::applyChanges,
-	     this,		 &CleanupConfigPage::applyChanges );
+    connect( parent,                          &ConfigDialog::applyChanges,
+	     this,                            &CleanupConfigPage::applyChanges );
 }
 
 

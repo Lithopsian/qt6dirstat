@@ -67,45 +67,41 @@ namespace
 } // namespace
 
 
-void SizeColDelegate::paint( QPainter			* painter,
-                             const QStyleOptionViewItem	& option,
-                             const QModelIndex		& index ) const
+void SizeColDelegate::paint( QPainter                   * painter,
+                             const QStyleOptionViewItem & option,
+                             const QModelIndex          & index ) const
 {
     // Let the default delegate draw what it can, which should be the appropriate background for us
     QStyledItemDelegate::paint( painter, option, index );
 
     const QBrush textBrush = index.data( Qt::ForegroundRole ).value<QBrush>();
 
-    QStringList data = index.data( RawDataRole ).toStringList();
+    const QStringList data = index.data( RawDataRole ).toStringList();
     const bool sparseFile = data.size() == 3;
-    const QString linksText = sparseFile ? data.takeLast() : "";
+    const QString & linksText = sparseFile ? data.at( 2 ) : "";
 
-    if ( data.size() == 2 )
+    if ( data.size() == 2 || data.size() == 3 )
     {
-	const int alignment = Qt::AlignRight | Qt::AlignVCenter;
-	const bool disabled = textBrush == option.palette.brush( QPalette::Disabled, QPalette::WindowText );
-
-	QRect rect               = option.rect;
-	const QPalette & palette = option.palette;
-
-	// We are responsible even for the highlight background of selected rows
-	const bool selected = option.state & QStyle::State_Selected;
-//	if ( selected )
-//	    painter->fillRect( rect, palette.highlight() );
-
-	const QString sizeText  = data.takeFirst(); // "137 B"
-	const QString allocText = data.takeFirst(); // " (4k)"
+	const QString & sizeText  = data.at( 0 ); // "137 B"
+	const QString & allocText = data.at( 1 ); // " (4k)"
 
 	// Use the model font since it may be bold (for dominant items)
 	painter->setFont( index.data( Qt::FontRole ).value<QFont>() );
+
+	QRect rect           = option.rect;
 	const int allocWidth = textWidth( painter->font(), allocText );
 	const int linksWidth = textWidth( painter->font(), linksText );
 	rect.setWidth( rect.width() - allocWidth - linksWidth - RIGHT_MARGIN );
+
+	const QPalette & palette = option.palette;
+	const bool disabled      = textBrush == palette.brush( QPalette::Disabled, QPalette::WindowText );
+	const bool selected      = option.state & QStyle::State_Selected;
 	painter->setPen( palette.color( disabled ? QPalette::Disabled : QPalette::Normal,
 					selected ? QPalette::HighlightedText : QPalette::WindowText ) );
 
 	// Since we align right, we need to move the rectangle to the left
 	// to reserve some space for the allocated size and any links text.
+	const int alignment = Qt::AlignRight | Qt::AlignVCenter;
 	painter->drawText( rect, alignment, sizeText );
 	rect.setWidth( option.rect.width() - RIGHT_MARGIN );
 	painter->drawText( rect, alignment, linksText );

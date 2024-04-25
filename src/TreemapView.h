@@ -651,6 +651,7 @@ namespace QDirStat
 	std::atomic<TreemapCancel>      _treemapCancel { TreemapCancelNone }; // flag to the treemap build thread
 	QFutureWatcher<TreemapTile *>   _watcher;
 	QThreadPool                   * _threadPool { nullptr }; // dedicated thread pool for rendering
+	QThreadPool                   * _mainThreadPool { nullptr }; // dedicated thread pool for treemap build
 
 	// just for logging
 	QElapsedTimer _stopwatch;

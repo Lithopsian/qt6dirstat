@@ -47,50 +47,50 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
 
     setup();
 
-    connect( _ui->nameLineEdit,	 	&QLineEdit::textChanged,
-	     this,			&MimeCategoryConfigPage::nameChanged );
+    connect( _ui->nameLineEdit,             &QLineEdit::textChanged,
+	     this,                          &MimeCategoryConfigPage::nameChanged );
 
-    connect( _ui->categoryColorEdit,	&QLineEdit::textChanged,
-	     this,			&MimeCategoryConfigPage::categoryColorChanged );
+    connect( _ui->categoryColorEdit,        &QLineEdit::textChanged,
+	     this,                          &MimeCategoryConfigPage::categoryColorChanged );
 
-    connect( _ui->categoryColorButton,	&QPushButton::clicked,
-	     this,			&MimeCategoryConfigPage::pickCategoryColor );
+    connect( _ui->categoryColorButton,      &QPushButton::clicked,
+	     this,                          &MimeCategoryConfigPage::pickCategoryColor );
 
-    connect( _ui->tileColorEdit,	&QLineEdit::textChanged,
-	     this,			&MimeCategoryConfigPage::tileColorChanged );
+    connect( _ui->tileColorEdit,            &QLineEdit::textChanged,
+	     this,                          &MimeCategoryConfigPage::tileColorChanged );
 
-    connect( _ui->tileColorButton,	&QPushButton::clicked,
-	     this,			&MimeCategoryConfigPage::pickTileColor );
+    connect( _ui->tileColorButton,          &QPushButton::clicked,
+	     this,                          &MimeCategoryConfigPage::pickTileColor );
 
-    connect( _ui->squarifiedCheckBox,		&QCheckBox::stateChanged,
-	     this,				&MimeCategoryConfigPage::configChanged );
+    connect( _ui->squarifiedCheckBox,       &QCheckBox::stateChanged,
+	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->cushionShadingCheckBox,	&QCheckBox::stateChanged,
-	     this,				&MimeCategoryConfigPage::cushionShadingChanged );
+    connect( _ui->cushionShadingCheckBox,   &QCheckBox::stateChanged,
+	     this,                          &MimeCategoryConfigPage::cushionShadingChanged );
 
-    connect( _ui->cushionHeightSpinBox,		qOverload<double>( &QDoubleSpinBox::valueChanged ),
-	     this,				&MimeCategoryConfigPage::configChanged );
+    connect( _ui->cushionHeightSpinBox,     qOverload<double>( &QDoubleSpinBox::valueChanged ),
+	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->heightScaleFactorSpinBox,	qOverload<double>( &QDoubleSpinBox::valueChanged ),
-	     this,				&MimeCategoryConfigPage::configChanged );
+    connect( _ui->heightScaleFactorSpinBox, qOverload<double>( &QDoubleSpinBox::valueChanged ),
+	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->minTileSizeSpinBox,		qOverload<int>( &QSpinBox::valueChanged ),
-	     this,				&MimeCategoryConfigPage::configChanged );
+    connect( _ui->minTileSizeSpinBox,       qOverload<int>( &QSpinBox::valueChanged ),
+	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->horizontalSplitter,		&QSplitter::splitterMoved,
-	     this,				&MimeCategoryConfigPage::splitterMoved );
+    connect( _ui->horizontalSplitter,       &QSplitter::splitterMoved,
+	     this,                          &MimeCategoryConfigPage::splitterMoved );
 
-    connect( _ui->actionColour_previews,	&QAction::triggered,
-	     this,				&MimeCategoryConfigPage::colourPreviewsTriggered );
+    connect( _ui->actionColour_previews,    &QAction::triggered,
+	     this,                          &MimeCategoryConfigPage::colourPreviewsTriggered );
 
-    connect( _ui->actionAdd_new_category,	&QAction::triggered,
-	     this,				&MimeCategoryConfigPage::addTriggered );
+    connect( _ui->actionAdd_new_category,   &QAction::triggered,
+	     this,                          &MimeCategoryConfigPage::addTriggered );
 
-    connect( _ui->actionRemove_category,	&QAction::triggered,
-	     this,				&MimeCategoryConfigPage::removeTriggered );
+    connect( _ui->actionRemove_category,    &QAction::triggered,
+	     this,                          &MimeCategoryConfigPage::removeTriggered );
 
-    connect( parent, &ConfigDialog::applyChanges,
-	     this,   &MimeCategoryConfigPage::applyChanges );
+    connect( parent,                        &ConfigDialog::applyChanges,
+	     this,                          &MimeCategoryConfigPage::applyChanges );
 }
 
 
@@ -177,7 +177,6 @@ void MimeCategoryConfigPage::applyChanges()
 
 void MimeCategoryConfigPage::fillListWidget()
 {
-//    const int currentRow = listWidget()->currentRow();
 //    listWidget()->clear(); // should always be empty, but future-proof it
     //logDebug() << listWidget()->count() << ", " << currentRow << Qt::endl;
 
@@ -194,7 +193,6 @@ void MimeCategoryConfigPage::fillListWidget()
     }
 
     listWidget()->sortItems();
-//    listWidget()->setCurrentRow( currentRow == -1 ? 0 : currentRow );
     listWidget()->setCurrentRow( 0 );
 }
 
@@ -211,8 +209,6 @@ void MimeCategoryConfigPage::currentItemChanged( QListWidgetItem * current,
                                                  QListWidgetItem * previous)
 {
     //logDebug() << current << ", " << previous << Qt::endl;
-
-//    listWidget()->sortItems();
 
     ListEditor::currentItemChanged( current, previous );
 

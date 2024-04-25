@@ -221,7 +221,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	PkgFileListCache * createFileListCache( PkgFileListCache::LookupType lookupType = PkgFileListCache::LookupByPkg ) const override;
+	PkgFileListCache * createFileListCache( PkgFileListCache::LookupType lookupType ) const override;
 
 	/**
 	 * Return a name suitable for a detailed queries for 'pkg'.

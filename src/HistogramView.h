@@ -274,13 +274,13 @@ namespace QDirStat
 	/**
 	 * Pens and brushes for the various elements of the histograms.
 	 **/
-	QBrush barBrush()      const { return _barBrush;      }
-	QBrush overflowSliceBrush()      const { return _overflowSliceBrush;      }
-	QPen   barPen()	       const { return _barPen;	      }
-	QPen   medianPen()     const { return _medianPen;     }
-	QPen   quartilePen()   const { return _quartilePen;   }
-	QPen   percentilePen() const { return _percentilePen; }
-	QPen   decilePen()     const { return _decilePen;     }
+	QBrush barBrush()           const { return _barBrush;           }
+	QBrush overflowSliceBrush() const { return _overflowSliceBrush; }
+	QPen   barPen()	            const { return _barPen;             }
+	QPen   medianPen()          const { return _medianPen;          }
+	QPen   quartilePen()        const { return _quartilePen;        }
+	QPen   percentilePen()      const { return _percentilePen;      }
+	QPen   decilePen()          const { return _decilePen;          }
 
 
 	/**
@@ -307,7 +307,7 @@ namespace QDirStat
 	 * _endPercentile.
 	 **/
 	bool percentileDisplayed( int index ) const
-		{ return index >= _startPercentile && index <= _endPercentile; }
+	    { return index >= _startPercentile && index <= _endPercentile; }
 
 	/**
 	 * Return the width of a bucket. All buckets have the same width.
@@ -333,11 +333,11 @@ namespace QDirStat
 	 * Convert a data value to the corresponding X axis point in the
 	 * histogram.
 	 **/
-	qreal scaleValue( qreal value );
+	qreal scaleValue( qreal value ) const;
 
 
 	// Graphical Elements
-	void addHistogram();
+//	void addHistogram();
 	void addHistogramBackground();
 	void addAxes();
 	void addYAxisLabel();
@@ -378,8 +378,8 @@ namespace QDirStat
          * Return the bottom left of the bounding rect.
 	 **/
 	QPointF addPie( const QRectF & rect,
-			qreal	       val1,
-			qreal	       val2,
+			qreal          val1,
+			qreal          val2,
 			const QBrush & brush1,
 			const QBrush & brush2 );
 
@@ -404,20 +404,6 @@ namespace QDirStat
          * Return 'true' if an overflow ("cutoff") panel is needed.
          **/
         bool needOverflowPanel() const { return _startPercentile > 0 || _endPercentile < 100; }
-
-	/**
-	 * Make the item text bold.  Use a template since this applies to two different classes
-	 * not derived from the same base class.
-	 **/
-	template<typename T>
-	void setBold( T * item )
-	{
-	    QFont font( item->font() );
-	    font.setBold( true );
-	    item->setFont( font );
-	}
-	void setBold( QGraphicsTextItem * item ) { setBold<QGraphicsTextItem>( item ); }
-//	void setBold( QGraphicsSimpleTextItem * item ) { setBold<QGraphicsSimpleTextItem>( item ); }
 
 
     private:

@@ -43,7 +43,7 @@ namespace QDirStat
 	 *
 	 * 'suffix' should start with ".", e.g. ".jpg".
 	 **/
-	FileSizeStats( FileInfo * subtree, const QString & suffix );
+	FileSizeStats( const FileInfo * subtree, const QString & suffix );
 
 
     protected:

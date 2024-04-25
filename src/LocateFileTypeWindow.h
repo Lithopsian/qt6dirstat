@@ -51,31 +51,21 @@ namespace QDirStat
 	 **/
 	~LocateFileTypeWindow() override;
 
-        /**
-         * Static method for using one shared instance of this class between
-         * multiple parts of the application. This will create a new instance
-         * if there is none yet (or any more).
-         **/
-        static LocateFileTypeWindow * sharedInstance();
+	/**
+	 * Static method for using one shared instance of this class between
+	 * multiple parts of the application. This will create a new instance
+	 * if there is none yet (or any more).
+	 **/
+	static LocateFileTypeWindow * sharedInstance();
 
 
     public:
 
-        /**
-         * Convenience function for creating, populating and showing the shared
-         * instance.  The suffix should start with '.', but not '*.".
-         **/
-        static void populateSharedInstance( const QString & suffix, FileInfo * subtree );
-
-        /**
-         * Obtain the subtree from the last used URL or 0 if none was found.
-         **/
-//        const Subtree & subtree() const { return _subtree; }
-
 	/**
-	 * Return the current search suffix with leading '*'.
+	 * Convenience function for creating, populating and showing the shared
+	 * instance.  The suffix should start with '.', but not '*.".
 	 **/
-	QString displaySuffix() const { return "*" + _suffix; }
+	static void populateSharedInstance( const QString & suffix, FileInfo * subtree );
 
 
     public slots:
@@ -92,10 +82,20 @@ namespace QDirStat
 	 * Select one of the search results in the main window's tree and
 	 * treemap widgets via their SelectionModel.
 	 **/
-	void selectResult( QTreeWidgetItem * item );
+	void selectResult( QTreeWidgetItem * item ) const;
 
 
     protected:
+
+	/**
+	 * Obtain the subtree from the last used URL or 0 if none was found.
+	 **/
+	// const Subtree & subtree() const { return _subtree; }
+
+	/**
+	 * Return the current search suffix with leading '*'.
+	 **/
+	QString displaySuffix() const { return "*" + _suffix; }
 
 	/**
 	 * Clear all data and widget contents.
@@ -125,14 +125,14 @@ namespace QDirStat
 	/**
 	 * Return all direct file children matching the current search suffix.
 	 **/
-	FileInfoSet matchingFiles( FileInfo * dir );
+	FileInfoSet matchingFiles( FileInfo * dir ) const;
 
 	/**
 	 * Select the first item in the list. This will also select it in the
 	 * main window, open the branch where this item is in and scroll the
 	 * main window's tree so that item is visible tere.
 	 **/
-	void selectFirstItem()
+	void selectFirstItem() const
 	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
 
 	/**
@@ -154,8 +154,9 @@ namespace QDirStat
 	//
 
 	Ui::LocateFileTypeWindow * _ui;
-        Subtree                    _subtree;
-	QString			   _suffix;
+
+	Subtree _subtree;
+	QString _suffix;
     };
 
 
@@ -197,15 +198,15 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	SuffixSearchResultItem( const QString & path,
-				int		count,
-				FileSize	totalSize );
+				int             count,
+				FileSize        totalSize );
 
 	/**
 	 * Getters for the item properties.
 	 **/
-	QString	 path()	      const { return _path; }
-	int	 count()      const { return _count; }
-	FileSize totalSize()  const { return _totalSize; }
+	const QString & path()       const { return _path; }
+	int             count()      const { return _count; }
+	FileSize        totalSize()  const { return _totalSize; }
 
 
     protected:
@@ -223,9 +224,9 @@ namespace QDirStat
 
     private:
 
-	QString		_path;
-	int		_count;
-	FileSize	_totalSize;
+	QString  _path;
+	int      _count;
+	FileSize _totalSize;
     };
 
 } // namespace QDirStat

@@ -29,20 +29,16 @@ namespace
      **/
     dev_t device( const QString & path )
     {
-	dev_t dev = 0;
 	struct stat statBuf;
 	const int result = stat( path.toUtf8(), &statBuf );
-	dev = statBuf.st_dev;
-
 	if ( result < 0 )
 	{
-	    logError() << "stat( " << path << " ) failed: "
-		       << formatErrno() << Qt::endl;
+	    logError() << "stat( " << path << " ) failed: " << formatErrno() << Qt::endl;
 
-	    dev = dev_t( -1 );
+	    return dev_t( -1 );
 	}
 
-	return dev;
+	return statBuf.st_dev;
     }
 
 
@@ -56,21 +52,20 @@ namespace
 	const QFileInfo fileInfo( rawPath );
 	QString path = fileInfo.canonicalPath();
 	QStringList components = path.split( "/", Qt::SkipEmptyParts );
-	QString lastPath;
 
-	// Go one directory level up as long as we are on the same device
-
-	while ( ! components.isEmpty() && device( path ) == dev )
+	// Work up the directory tree
+	while ( !components.isEmpty() )
 	{
-	    lastPath = path;
+	    // See if we are the top level on this device
 	    components.removeLast();
-	    path = "/" + components.join( "/" );
+	    const QString nextPath = "/" + components.join( "/" );
+	    if ( device( nextPath ) != dev )
+		return path;
+
+	    path = nextPath;
 	}
 
-	if ( components.isEmpty() && device( "/" ) == dev )
-	    lastPath = "/";
-
-	return lastPath;
+	return "/";
     }
 
 } // namespace
@@ -110,7 +105,6 @@ TrashDir * Trash::trashDir( const QString & path )
 
 	struct stat statBuf;
 	const int result = stat( trashPath.toUtf8(), &statBuf );
-
 	if ( result < 0 && errno == ENOENT ) // No such file or directory
 	{
 	    // No $TOPDIR/.Trash: Use $TOPDIR/.Trash-$UID
@@ -121,8 +115,7 @@ TrashDir * Trash::trashDir( const QString & path )
 	else if ( result < 0 )
 	{
 	    // stat() failed for some other reason (not "no such file or directory")
-	    THROW( FileException( trashPath, "stat() failed for " + trashPath
-				  + ": " + formatErrno() ) );
+	    THROW( FileException( trashPath, "stat failed for " + trashPath + ": " + formatErrno() ) );
 	}
 	else // stat() was successful
 	{
@@ -136,7 +129,7 @@ TrashDir * Trash::trashDir( const QString & path )
 	    }
 	    else // Not a directory or sticky bit not set
 	    {
-		if ( ! S_ISDIR( mode ) )
+		if ( !S_ISDIR( mode ) )
 		    THROW( FileException( trashPath, trashPath + " is not a directory" ) );
 		else
 		    THROW( FileException( trashPath, "Sticky bit required on " + trashPath ) );
@@ -175,7 +168,7 @@ bool Trash::trash( const QString & path )
     catch ( const FileException & ex )
     {
 	CAUGHT( ex );
-//	logError() << "Move to trash failed for " << path << Qt::endl;
+	logError() << "Move to trash failed for " << path << Qt::endl;
 
 	return false;
     }
@@ -223,16 +216,19 @@ namespace
 	    return true;
 
 	logInfo() << "mkdir " << path << Qt::endl;
-	const int result = mkdir( path.toUtf8(), mode );
 
-	if ( result < 0 && doThrow )
+	const int result = mkdir( path.toUtf8(), mode );
+	if ( result >= 0 )
+	    return true;
+
+	if ( doThrow )
 	{
 	    THROW( FileException( path,
 				  QString( "Could not create directory %1: %2" )
 				  .arg( path ).arg( formatErrno() ) ) );
 	}
 
-	return result >= 0;
+	return false;
     }
 
 } // namespace
@@ -252,29 +248,19 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
 
 QString TrashDir::uniqueName( const QString & path )
 {
+    const QDir filesDir( filesPath() );
+
     const QFileInfo file( path );
-    const QDir      filesDir( filesPath() );
+    QString name = file.fileName();
 
-    const QString baseName  = file.baseName();
-    const QString extension = file.completeSuffix();
-    int           count     = 0;
-    QString       name      = baseName;
-
-    if ( ! extension.isEmpty() )
-	name += "." + extension;
-
-    while ( filesDir.exists( name ) )
+    for ( int i = 1; filesDir.exists( name ); ++i )
     {
-	name = QString( "%1_%2" ).arg( baseName ).arg( ++count );
-
-	if ( ! extension.isEmpty() )
-	    name += "." + extension;
+	const QString baseName = file.baseName();
+	const QString suffix   = file.completeSuffix();
+	name = QString( "%1_%2" ).arg( baseName ).arg( i );
+	if ( !suffix.isEmpty() )
+	    name += "." + suffix;
     }
-
-    // We don't care if a .trashinfo file with that name already exists in the
-    // Trash/info directory: Without a corresponding file or directory in the
-    // Trash/files directory, that .trashinfo file is worthless anyway and can
-    // safely be overwritten.
 
     return name;
 }
@@ -285,7 +271,7 @@ void TrashDir::createTrashInfo( const QString & path,
 {
     QFile trashInfo( infoPath() + "/" + targetName + ".trashinfo" );
 
-    if ( ! trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
+    if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
 	THROW( FileException( trashInfo.fileName(), "Can't open " + trashInfo.fileName() ) );
 
     QTextStream str( &trashInfo );
@@ -303,6 +289,6 @@ void TrashDir::move( const QString & path,
 
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
     const bool success = file.rename( targetPath );
-    if ( ! success )
+    if ( !success )
 	THROW( FileException( path, "Could not move " + path + " to " + targetPath ) );
 }

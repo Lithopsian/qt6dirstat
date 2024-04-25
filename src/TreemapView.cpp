@@ -390,24 +390,26 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
     {
         _threadPool = new QThreadPool();
         CHECK_NEW( _threadPool );
+
+        // By default the number of CPUs, which will sometimes block creation of render threads
         _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
 
         TreemapTile * tile = new TreemapTile( this, newRoot, rect );
 
-        delete _threadPool;
+        delete _threadPool; // will wait for all the render threads to complete
 
         if ( treemapCancelled() )
         {
             // Logging is not thread-safe, use only for debugging
-//            logDebug() << "treemap cancelled, delete tiles" << Qt::endl;
+            //logDebug() << "treemap cancelled, delete tiles" << Qt::endl;
             delete tile;
             tile = nullptr;
         }
 
         return tile;
     } ) );
-    logDebug() << QThreadPool::globalInstance()->activeThreadCount() << " threads active" << Qt::endl;
 
+    //logDebug() << QThreadPool::globalInstance()->activeThreadCount() << " threads active" << Qt::endl;
 }
 
 
@@ -423,10 +425,12 @@ void TreemapView::treemapFinished()
     {
         if ( futureResult )
         {
+            // Rare, but it is possible that the build is cancelled, but the thread has already finished
             logDebug() << "completed treemap has been cancelled, delete tiles" << Qt::endl;
             delete futureResult;
         }
 
+        // We're finished with the future now, so can restart an interrupted build
         if ( _treemapCancel == TreemapCancelRestart )
             rebuildTreemap( _newRoot );
 
@@ -439,8 +443,8 @@ void TreemapView::treemapFinished()
         return;
     }
 
+    // Wipe the existing scene, if anything is there
     clear();
-
     if ( !scene() )
     {
         QGraphicsScene * newScene = new QGraphicsScene( this );
@@ -449,7 +453,7 @@ void TreemapView::treemapFinished()
     }
     resetTransform();
 
-    // Switch to the new scene
+    // Add the new treemap to the scene
     _rootTile = futureResult;
     scene()->setSceneRect( _rootTile->rect() );
     scene()->addItem( _rootTile );

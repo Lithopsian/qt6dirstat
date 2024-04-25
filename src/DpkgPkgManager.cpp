@@ -300,16 +300,16 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
     {
 	if ( !line.isEmpty() )
 	{
-	    QStringList fields = line.split( " | " );
+	    const QStringList fields = line.split( " | " );
 
 	    if ( fields.size() != 4 )
 		logError() << "Invalid dpkg-query output: \"" << line << "\n" << Qt::endl;
 	    else
 	    {
-		const QString name	= fields.takeFirst();
-		const QString version	= fields.takeFirst();
-		const QString arch	= fields.takeFirst();
-		const QString status	= fields.takeFirst();
+		const QString & name    = fields.at( 0 );
+		const QString & version = fields.at( 1 );
+		const QString & arch    = fields.at( 2 );
+		const QString & status  = fields.at( 3 );
 
 		if ( status == "install ok installed" || status == "hold ok installed" )
 		{

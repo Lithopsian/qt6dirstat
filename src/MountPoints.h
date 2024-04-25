@@ -49,10 +49,10 @@ namespace QDirStat
 	    _mountOptions { mountOptions.split( "," ) }
 	{}
 
-        /**
-         * Destructor.
-         **/
-        ~MountPoint();
+	/**
+	 * Destructor.
+	 **/
+	~MountPoint();
 
 	/**
 	 * Suppress copy and assignment constructors (would need deep copies)
@@ -137,7 +137,8 @@ namespace QDirStat
          * Return 'true' if this is a snap package, i.e. it is a squashfs
          * mounted below /snap.
          **/
-        bool isSnapPackage() const;
+        bool isSnapPackage() const
+	    { return _path.startsWith( "/snap" ) && _filesystemType.toLower() == "squashfs"; }
 
 	/**
 	 * Set the 'duplicate' flag. This should only be set while /proc/mounts
@@ -234,7 +235,7 @@ namespace QDirStat
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
 	 **/
-	MountPoints() {}
+	MountPoints();
 
 	/**
 	 * Destructor.
@@ -255,6 +256,17 @@ namespace QDirStat
 	 **/
 	static MountPoints * instance();
 
+	/**
+	 * Initialise the member variables.
+	 **/
+	void init();
+
+	/**
+	 * Clear the data structures used internally.
+	 **/
+	void clear();
+
+
     public:
 
 	/**
@@ -263,7 +275,7 @@ namespace QDirStat
 	 * caller, i.e. the caller should not delete it. The pointer remains
 	 * valid until the next call to clear().
 	 **/
-	static MountPoint * findByPath( const QString & path );
+	static const MountPoint * findByPath( const QString & path );
 
 	/**
 	 * Find the nearest mount point upwards in the directory hierarchy
@@ -273,7 +285,7 @@ namespace QDirStat
 	 * This might return 0 if none of the files containing mount
 	 * information (/proc/mounts, /etc/mtab) could be read.
 	 **/
-	static MountPoint * findNearestMountPoint( const QString & path );
+	static const MountPoint * findNearestMountPoint( const QString & path );
 
 	/**
 	 * Return the device name where 'dir' is on if it's a mount point.
@@ -313,13 +325,17 @@ namespace QDirStat
 	 * Return 'true' if size information for mount points is available.
 	 * This may depend on the build OS and the Qt version.
 	 **/
-	static bool hasSizeInfo();
+#if HAVE_Q_STORAGE_INFO
+	static bool hasSizeInfo() { return true; }
+#else
+	static bool hasSizeInfo() { return false; }
+#endif
 
-        /**
-         * Clear all information and reload it from disk.
-         * NOTICE: This invalidates ALL MountPoint pointers!
-         **/
-        static void reload() { instance()->ensurePopulated(); }
+	/**
+	 * Clear all information and reload it from disk.
+	 * NOTICE: This invalidates ALL MountPoint pointers!
+	 **/
+	static void reload() { instance()->init(); instance()->ensurePopulated(); }
 
 
     protected:
@@ -339,39 +355,38 @@ namespace QDirStat
 	bool read( const QString & filename );
 
 #if HAVE_Q_STORAGE_INFO
-
-        /**
-         * Fallback method if neither /proc/mounts nor /etc/mtab is available:
-         * Try using QStorageInfo. Return 'true' if any mount point was found.
-         **/
-        bool readStorageInfo();
+	/**
+	 * Fallback method if neither /proc/mounts nor /etc/mtab is available:
+	 * Try using QStorageInfo. Return 'true' if any mount point was found.
+	 **/
+	bool readStorageInfo();
 #endif
 
-        /**
-         * Post-process a mount point and add it to the internal list and map.
-         **/
-        void postProcess( MountPoint * mountPoint );
+	/**
+	 * Post-process a mount point and add it to the internal list and map.
+	 **/
+	void postProcess( MountPoint * mountPoint );
 
-        /**
-         * Add a mount point to the internal list and map.
-         **/
-        void add( MountPoint * mountPoint );
+	/**
+	 * Add a mount point to the internal list and map.
+	 **/
+	void add( MountPoint * mountPoint );
 
 	/**
 	 * Check if any of the mount points has filesystem type "btrfs".
 	 **/
 	bool checkForBtrfs();
 
-        /**
-         * Try to check with the external "lsblk" command (if available) what
-         * block devices use NTFS and populate _ntfsDevices with them.
-         **/
-        void findNtfsDevices();
+	/**
+	 * Try to check with the external "lsblk" command (if available) what
+	 * block devices use NTFS and populate _ntfsDevices with them.
+	 **/
+	void findNtfsDevices();
 
 	/**
 	 * Return 'true' if 'device' is mounted.
 	 **/
-	bool isDeviceMounted( const QString & device );
+	bool isDeviceMounted( const QString & device ) const;
 
 	/**
 	 * Dump all current mount points to the log. This does not call
@@ -387,11 +402,11 @@ namespace QDirStat
 	//
 
 	QList<MountPoint *>          _mountPointList;
-	QHash<QString, MountPoint *> _mountPointMap;
-        QStringList                  _ntfsDevices;
-	bool                         _isPopulated	{ false };
-	bool                         _hasBtrfs		{ false };
-	bool                         _checkedForBtrfs	{ false };
+	QHash<QString, const MountPoint *> _mountPointMap;
+	QStringList                  _ntfsDevices;
+	bool                         _isPopulated;
+	bool                         _hasBtrfs;
+	bool                         _checkedForBtrfs;
 
     }; // class MountPoints
 

@@ -305,20 +305,20 @@ namespace QDirStat
 	 * Setters (see the corresponding getter for documentation), mainly
 	 * for the config page.
 	 **/
-	void setActive		     ( bool		  active    ) { _active		       = active;    }
-	void setTitle		     ( const QString	& title	    );
-	void setCommand		     ( const QString	& command   ) { _command	       = command;   }
-	void setIcon		     ( const QString	& iconName  );
-	void setRecurse		     ( bool	 	  recurse   ) { _recurse	       = recurse;   }
-	void setAskForConfirmation   ( bool		  ask	    ) { _askForConfirmation    = ask;	    }
-	void setRefreshPolicy	     ( RefreshPolicy	  policy    ) { _refreshPolicy	       = policy;    }
-	void setWorksForDir	     ( bool		  canDo     ) { _worksForDir	       = canDo;	    }
-	void setWorksForFile	     ( bool		  canDo     ) { _worksForFile	       = canDo;	    }
-	void setWorksForDotEntry     ( bool		  canDo     ) { _worksForDotEntry      = canDo;	    }
+	void setActive               ( bool               active    ) { _active                = active;    }
+	void setTitle                ( const QString    & title     );
+	void setCommand              ( const QString    & command   ) { _command               = command;   }
+	void setIcon                 ( const QString    & iconName  );
+	void setRecurse              ( bool               recurse   ) { _recurse               = recurse;   }
+	void setAskForConfirmation   ( bool               ask       ) { _askForConfirmation    = ask;       }
+	void setRefreshPolicy        ( RefreshPolicy      policy    ) { _refreshPolicy         = policy;    }
+	void setWorksForDir          ( bool               canDo     ) { _worksForDir           = canDo;     }
+	void setWorksForFile         ( bool               canDo     ) { _worksForFile          = canDo;     }
+	void setWorksForDotEntry     ( bool               canDo     ) { _worksForDotEntry      = canDo;     }
 	void setOutputWindowPolicy   ( OutputWindowPolicy policy    ) { _outputWindowPolicy    = policy;    }
-	void setOutputWindowTimeout  ( int		  timeout   ) { _outputWindowTimeout   = timeout;   }
-	void setOutputWindowAutoClose( bool		  autoClose ) { _outputWindowAutoClose = autoClose; }
-	void setShell		     ( const QString	& sh	    ) { _shell		       = sh;	    }
+	void setOutputWindowTimeout  ( int                timeout   ) { _outputWindowTimeout   = timeout;   }
+	void setOutputWindowAutoClose( bool               autoClose ) { _outputWindowAutoClose = autoClose; }
+	void setShell                ( const QString    & sh        ) { _shell                 = sh;        }
 
 
     public slots:
@@ -353,7 +353,7 @@ namespace QDirStat
 	/**
 	 * Retrieve the directory part of a FileInfo's path.
 	 **/
-	const QString itemDir( const FileInfo * item ) const;
+	QString itemDir( const FileInfo * item ) const;
 
 	/**
 	 * Choose a suitable shell. Try this->shell() and fall back to

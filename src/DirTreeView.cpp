@@ -94,16 +94,16 @@ void DirTreeView::contextMenu( const QPoint & pos )
     ActionManager::addActions( &menu, actions1 );
 
     const QStringList actions2 = { "actionStopReading",
-	                           "actionRefreshAll",
+                                   "actionRefreshAll",
                                    "---",
-	                           "actionRefreshSelected",
-	                           "actionReadExcluded",
-	                           "actionContinueReading",
+                                   "actionRefreshSelected",
+                                   "actionReadExcluded",
+                                   "actionContinueReading",
                                    "---",
                                    "actionCopyPath",
                                    "actionMoveToTrash",
                                    "---",
-	                         };
+                                 };
     ActionManager::addEnabledActions( &menu, actions2 );
 
     // User-defined cleanups

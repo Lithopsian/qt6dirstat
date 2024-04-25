@@ -205,7 +205,7 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
 
 //    _stopwatch.start();
 
-    _parentView->threadPool()->waitForDone();
+//    _parentView->threadPool()->waitForDone(); // destructor already waits
 
 //    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : "") << Qt::endl;
 }
@@ -879,16 +879,16 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
-    const QStringList actions1 = { "actionTreemapZoomTo",
-                                   "actionTreemapZoomIn",
-                                   "actionTreemapZoomOut",
-                                   "actionResetTreemapZoom",
-                                   "---",
-                                   "actionCopyPath",
-                                   "actionMoveToTrash",
-                                   "---"
-                                 };
-    ActionManager::addActions( &menu, actions1 );
+    const QStringList actions = { "actionTreemapZoomTo",
+                                  "actionTreemapZoomIn",
+                                  "actionTreemapZoomOut",
+                                  "actionResetTreemapZoom",
+                                  "---",
+                                  "actionCopyPath",
+                                  "actionMoveToTrash",
+                                  "---"
+                                };
+    ActionManager::addActions( &menu, actions );
 
     // User-defined cleanups
     ActionManager::addEnabledCleanups( &menu );

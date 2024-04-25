@@ -23,7 +23,7 @@ using namespace QDirStat;
 
 
 
-QStringList PkgFileListCache::fileList( const QString & pkgName )
+QStringList PkgFileListCache::fileList( const QString & pkgName ) const
 {
     CHECK_LOOKUP_TYPE( LookupByPkg );
 
@@ -55,13 +55,6 @@ void PkgFileListCache::remove( const QString & pkgName )
     CHECK_LOOKUP_TYPE( LookupByPkg );
 
     _pkgFileNames.remove( pkgName );
-}
-
-
-void PkgFileListCache::clear()
-{
-    _pkgFileNames.clear();
-    _fileNames.clear();
 }
 
 

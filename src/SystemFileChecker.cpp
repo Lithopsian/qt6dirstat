@@ -39,7 +39,7 @@ namespace
              path.startsWith( "/opt/"   ) ||
              path.startsWith( "/proc/"  ) ||
              path.startsWith( "/sbin/"  ) ||
-             path.startsWith( "/sys/"   )   )
+             path.startsWith( "/sys/"   ) )
         {
             return true;
         }
@@ -101,6 +101,7 @@ bool SystemFileChecker::isSystemFile( const FileInfo * file )
 
     if ( file->isPseudoDir() && file->parent() )
         file = file->parent();
+
     if ( file->parent() && file->parent()->url() == "/" )
         return true;
 

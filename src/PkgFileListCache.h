@@ -22,7 +22,7 @@ namespace QDirStat
      * Cache class for a package file lists.
      *
      * This is useful when file lists for many packages need to be fetched;
-     * some package managers (albeit not all) have a command to return all file
+     * some package managers (not all!) have a command to return all file
      * lists for all packages at once with one single command which is
      * typically much faster than invoking a separate external command for each
      * installed package.
@@ -35,9 +35,9 @@ namespace QDirStat
 
 	enum LookupType
 	{
-	    LookupByPkg  = 1,		// Will use only containsPkg()
-	    LookupGlobal = 2,		// Will use only containsFile()
-	    LookupAll    = 0xFFFF	// Will use all
+	    LookupByPkg  = 0x01,	// Will use only containsPkg()
+	    LookupGlobal = 0x02,	// Will use only containsFile()
+	    LookupAll    = 0xFF,	// Will use all
 	};
 
 	/**
@@ -45,7 +45,7 @@ namespace QDirStat
 	 * for. This has significant impact on the memory footprint.
 	 **/
 	PkgFileListCache( const PkgManager * pkgManager,
-			  LookupType         lookupType = LookupByPkg ):
+			  LookupType         lookupType ):
 	    _pkgManager { pkgManager },
 	    _lookupType { lookupType }
 	{}
@@ -53,7 +53,7 @@ namespace QDirStat
 	/**
 	 * Return the sorted file list for a package.
 	 **/
-	QStringList fileList( const QString & pkgName );
+	QStringList fileList( const QString & pkgName ) const;
 
 	/**
 	 * Return 'true' if the cache contains any information about a package,
@@ -81,7 +81,7 @@ namespace QDirStat
 	/**
 	 * Clear the cache.
 	 **/
-	void clear();
+//	void clear() { _pkgFileNames.clear(); _fileNames.clear(); }
 
 	/**
 	 * Add one file for one package.

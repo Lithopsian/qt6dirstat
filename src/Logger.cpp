@@ -44,9 +44,9 @@ namespace
 	    case QtWarningMsg:  return LogSeverityWarning;
 	    case QtCriticalMsg: return LogSeverityError;
 	    case QtFatalMsg:    return LogSeverityError;
-    #if QT_VERSION >= 0x050500
-	    case QtInfoMsg:	    return LogSeverityInfo;
-    #endif
+#if QT_VERSION >= 0x050500
+	    case QtInfoMsg:     return LogSeverityInfo;
+#endif
 	}
 
 	return LogSeverityVerbose;
@@ -63,7 +63,6 @@ namespace
 	    // Remove utterly misleading message that will just dump a ton of bug
 	    // reports on the application maintainers just because some clueless
 	    // moron put this message into the Qt libs
-
 	    line.remove( "Reinstalling the application may fix this problem." );
 
 	    if ( !line.trimmed().isEmpty() )
@@ -261,7 +260,7 @@ namespace
 	for ( int i = logRotateCount - 1; i >= 0; --i )
 	{
 	    const QString currentName = i > 0 ? oldName( filename, i-1 ) : filename;
-	    QString newName	    = oldName( filename, i );
+	    const QString newName           = oldName( filename, i );
 
 	    if ( dir.exists( newName ) )
 	    {
@@ -424,7 +423,7 @@ void Logger::setDefaultLogger()
 }
 
 
-QTextStream & Logger::log( Logger *        logger,
+QTextStream & Logger::log( Logger        * logger,
 			   const QString & srcFile,
 			   int             srcLine,
 			   const QString & srcFunction,

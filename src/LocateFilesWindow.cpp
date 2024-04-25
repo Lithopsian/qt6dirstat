@@ -172,13 +172,13 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
 	FileInfo * item = *it;
-        if ( _treeWalker->check( item ) )
-        {
-            LocateListItem * locateListItem = new LocateListItem( item );
-            CHECK_NEW( locateListItem );
+	if ( _treeWalker->check( item ) )
+	{
+	    LocateListItem * locateListItem = new LocateListItem( item );
+	    CHECK_NEW( locateListItem );
 
-            _ui->treeWidget->addTopLevelItem( locateListItem );
-        }
+	    _ui->treeWidget->addTopLevelItem( locateListItem );
+	}
 
 	if ( item->hasChildren() )
 	    populateRecursive( item );
@@ -186,7 +186,7 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
 }
 
 
-void LocateFilesWindow::showResultsCount()
+void LocateFilesWindow::showResultsCount() const
 {
     const int results = _ui->treeWidget->topLevelItemCount();
     if ( _treeWalker->overflow() )
@@ -228,6 +228,7 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 	return;
 
     QMenu menu;
+
     const QStringList actions = { "actionCopyPath", "actionMoveToTrash", "---" };
     ActionManager::addEnabledActions( &menu, actions );
 
