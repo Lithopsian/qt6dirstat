@@ -66,6 +66,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 void UnreadableDirsWindow::initWidgets()
 {
     app()->setWidgetFontSize( _ui->treeWidget );
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     const QStringList headerLabels = { tr( "Directory" ),
 				       tr( "User" ),
@@ -73,8 +74,6 @@ void UnreadableDirsWindow::initWidgets()
 				       tr( "Permissions" ),
 				       tr( "Perm." )
 				     };
-
-    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
     _ui->treeWidget->setColumnCount( headerLabels.size() );
     _ui->treeWidget->setHeaderLabels( headerLabels );
 

@@ -161,8 +161,8 @@ namespace QDirStat
 	//
 
 	Ui::FileSizeStatsWindow * _ui;
-	BucketsTableModel	* _bucketsTableModel	{ nullptr };
-	FileSizeStats		* _stats		{ nullptr };
+	BucketsTableModel       * _bucketsTableModel	{ nullptr };
+	FileSizeStats           * _stats		{ nullptr };
 
     };
 

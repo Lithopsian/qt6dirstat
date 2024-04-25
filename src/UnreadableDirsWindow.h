@@ -130,7 +130,7 @@ namespace QDirStat
 	//
 
 	Ui::UnreadableDirsWindow * _ui;
-	Subtree			   _subtree;
+	Subtree                    _subtree;
 
     };
 

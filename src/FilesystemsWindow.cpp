@@ -25,10 +25,27 @@
 #include "Exception.h"
 
 
-#define WARN_PERCENT	10.0
+#define WARN_PERCENT 10.0
 
 
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Returns the icon filename for the given type of mount point.
+     **/
+    QString icon( const MountPoint * mountPoint )
+    {
+	if ( mountPoint->isNetworkMount() ) return "network.png";
+	if ( mountPoint->isSystemMount()  ) return "system.png";
+	if ( mountPoint->isDuplicate()    ) return "bind-mount.png";
+
+	return "mount-point.png";
+    }
+
+}
 
 
 FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
@@ -97,16 +114,6 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
     }
 
     return _sharedInstance;
-}
-
-
-QString FilesystemsWindow::icon( const MountPoint * mountPoint )
-{
-    if ( mountPoint->isNetworkMount() ) return "network.png";
-    if ( mountPoint->isSystemMount()  ) return "system.png";
-    if ( mountPoint->isDuplicate()    ) return "bind-mount.png";
-
-    return "mount-point.png";
 }
 
 
@@ -343,13 +350,13 @@ bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
 		return device() < other.device();
 	    return isNetworkMount() < other.isNetworkMount();
 
-	case FS_MountPathCol:		return mountPath()    < other.mountPath();
-	case FS_TypeCol:		return fsType()	      < other.fsType();
-	case FS_TotalSizeCol:		return totalSize()    < other.totalSize();
-	case FS_UsedSizeCol:		return usedSize()     < other.usedSize();
-	case FS_ReservedSizeCol:	return reservedSize() < other.reservedSize();
-	case FS_FreePercentCol:		return freePercent()  < other.freePercent();
-	case FS_FreeSizeCol:		return freeSize()     < other.freeSize();
+	case FS_MountPathCol:    return mountPath()    < other.mountPath();
+	case FS_TypeCol:         return fsType()       < other.fsType();
+	case FS_TotalSizeCol:    return totalSize()    < other.totalSize();
+	case FS_UsedSizeCol:     return usedSize()     < other.usedSize();
+	case FS_ReservedSizeCol: return reservedSize() < other.reservedSize();
+	case FS_FreePercentCol:  return freePercent()  < other.freePercent();
+	case FS_FreeSizeCol:     return freeSize()     < other.freeSize();
     }
 
     return QTreeWidgetItem::operator<( rawOther );

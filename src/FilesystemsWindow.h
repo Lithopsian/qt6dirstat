@@ -132,11 +132,6 @@ namespace QDirStat
 	QString selectedPath() const;
 
 	/**
-	 * Returns the icon filename for the give mount point.
-	 **/
-	QString icon( const MountPoint * mountPoint );
-
-	/**
 	 * Custom context menu signalled.
 	 **/
 	void contextMenu( const QPoint & pos );
@@ -189,16 +184,16 @@ namespace QDirStat
 
 	// Getters
 
-	const QString & device()    const { return _device;	  }
-	const QString & mountPath() const { return _mountPath;	  }
-	const QString & fsType()    const { return _fsType;	  }
-	FileSize totalSize()        const { return _totalSize;	  }
-	FileSize usedSize()         const { return _usedSize;	  }
-	FileSize reservedSize()     const { return _reservedSize;	  }
-	FileSize freePercent()      const { return 100.0 * _freeSize / _totalSize; }
-	FileSize freeSize()         const { return _freeSize;	  }
-	bool	 isNetworkMount()   const { return _isNetworkMount; }
-	bool	 isReadOnly()       const { return _isReadOnly;	  }
+	const QString & device()         const { return _device; }
+	const QString & mountPath()      const { return _mountPath; }
+	const QString & fsType()         const { return _fsType; }
+	FileSize        totalSize()      const { return _totalSize; }
+	FileSize        usedSize()       const { return _usedSize; }
+	FileSize        reservedSize()   const { return _reservedSize; }
+	FileSize        freePercent()    const { return 100.0 * _freeSize / _totalSize; }
+	FileSize        freeSize()       const { return _freeSize; }
+	bool            isNetworkMount() const { return _isNetworkMount; }
+	bool            isReadOnly()     const { return _isReadOnly; }
 
     protected:
 
@@ -215,15 +210,15 @@ namespace QDirStat
 
     private:
 
-	QString	 _device;
-	QString	 _mountPath;
-	QString	 _fsType;
+	QString  _device;
+	QString  _mountPath;
+	QString  _fsType;
 	FileSize _totalSize;
 	FileSize _usedSize;
 	FileSize _reservedSize;
 	FileSize _freeSize;
-	bool	 _isNetworkMount;
-	bool	 _isReadOnly;
+	bool     _isNetworkMount;
+	bool     _isReadOnly;
     };
 
 }

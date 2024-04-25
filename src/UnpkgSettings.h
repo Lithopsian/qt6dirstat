@@ -24,15 +24,15 @@ namespace QDirStat
     {
     public:
 
-        /**
-         * Default constructor, reads the configured settings.
-         **/
-        UnpkgSettings();
+	/**
+	 * Default constructor, reads the configured settings.
+	 **/
+	UnpkgSettings();
 
-        /**
-         * Alternate constructor, uses the four values passed in as
+	/**
+	 * Alternate constructor, uses the four values passed in as
 	 * the settings.
-         **/
+	 **/
 	UnpkgSettings( const QString & startingDir,
 		       const QStringList & excludeDirs,
 		       const QStringList & ignorePatterns,
@@ -43,49 +43,49 @@ namespace QDirStat
 	    _crossFilesystems { crossFilesystems }
 	{}
 
-        /**
-         * Alternate constructor, uses the string passed in as the
+	/**
+	 * Alternate constructor, uses the string passed in as the
 	 * startingDir instead of the value from the config file.
-         **/
+	 **/
 	UnpkgSettings( const QString & startingDir );
 
-        /**
-         * Returns the default settings in the form of an UnpkgSettings
+	/**
+	 * Returns the default settings in the form of an UnpkgSettings
 	 * object.
-         **/
+	 **/
 	static UnpkgSettings defaultSettings();
 
-        /**
-         * Return the startingDir setting.
-         **/
-        const QString & startingDir() const { return _startingDir; }
+	/**
+	 * Return the startingDir setting.
+	 **/
+	const QString & startingDir() const { return _startingDir; }
 
-        /**
-         * Return the excludeDirs setting.
-         **/
-        const QStringList & excludeDirs() const { return _excludeDirs; }
+	/**
+	 * Return the excludeDirs setting.
+	 **/
+	const QStringList & excludeDirs() const { return _excludeDirs; }
 
-        /**
-         * Return the ignorePatterns setting.
-         **/
-        const QStringList & ignorePatterns() const { return _ignorePatterns; }
+	/**
+	 * Return the ignorePatterns setting.
+	 **/
+	const QStringList & ignorePatterns() const { return _ignorePatterns; }
 
-        /**
-         * Return the crossFilesystems setting.  This is entirely independant
+	/**
+	 * Return the crossFilesystems setting.  This is entirely independant
 	 * of the global cross-filesystems setting and the cross-filesystems
 	 * flag used in the Open Directory dialog.
-         **/
-        bool crossFilesystems() const { return _crossFilesystems; }
+	 **/
+	bool crossFilesystems() const { return _crossFilesystems; }
 
 	/**
 	 * Write settings to the config file
 	 **/
-	void write();
+	void write() const;
 
-        /**
-         * Dump the values to the log, may be if-def'd out in release code.
-         **/
-        void dump() const;
+	/**
+	 * Dump the values to the log, may be if-def'd out in release code.
+	 **/
+	void dump() const;
 
 
     protected:
@@ -98,17 +98,16 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
+	//
+	// Data members
+	//
 
-        QString     _startingDir;
-        QStringList _excludeDirs;
-        QStringList _ignorePatterns;
+	QString     _startingDir;
+	QStringList _excludeDirs;
+	QStringList _ignorePatterns;
 	bool        _crossFilesystems;
 
     };  // UnpkgSettings
-
 
 }       // namespace QDirStat
 

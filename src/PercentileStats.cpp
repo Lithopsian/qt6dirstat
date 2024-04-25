@@ -16,7 +16,8 @@
 #include "Logger.h"
 
 
-#define VERBOSE_SORT_THRESHOLD	50000
+#define VERBOSE_SORT_THRESHOLD 50000
+#define VERBOSE_LOGGING 0
 
 
 using namespace QDirStat;
@@ -28,7 +29,7 @@ void PercentileStats::sort()
 	logDebug() << "Sorting " << size() << " elements" << Qt::endl;
 
     std::sort( begin(), end() );
-    _sorted = true;
+//    _sorted = true;
 
     if ( size() > VERBOSE_SORT_THRESHOLD )
 	logDebug() << "Sorting done." << Qt::endl;
@@ -113,8 +114,8 @@ qreal PercentileStats::quantile( int order, int number )
     if ( order < 2 )
 	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
 
-    if ( !_sorted )
-	sort();
+//    if ( !_sorted )
+//	sort();
 
     if ( number == 0 )
 	return first();
@@ -138,8 +139,8 @@ qreal PercentileStats::quantile( int order, int number )
 
 void PercentileStats::calculatePercentiles()
 {
-    if ( !_sorted )
-	sort();
+//    if ( !_sorted )
+//	sort();
 
     _percentiles.clear();
     _percentiles.reserve( 101 );
@@ -169,7 +170,7 @@ void PercentileStats::calculatePercentiles()
 	_cumulativeSums.append( runningTotal );
     }
 
-#if 0
+#if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
 	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[i] ) << Qt::endl;
@@ -197,11 +198,11 @@ void PercentileStats::fillBuckets( int bucketCount,
     if ( isEmpty() )
         return;
 
-    qreal startVal = _percentiles[ startPercentile ];
-    qreal endVal   = _percentiles[ endPercentile   ];
-    qreal bucketWidth = ( endVal - startVal ) / bucketCount;
+    const qreal startVal    = _percentiles[ startPercentile ];
+    const qreal endVal      = _percentiles[ endPercentile   ];
+    const qreal bucketWidth = ( endVal - startVal ) / bucketCount;
 
-#if 0
+#if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
                << " startVal: " << formatSize( startVal )

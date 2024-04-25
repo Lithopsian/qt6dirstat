@@ -30,22 +30,11 @@ namespace
      **/
     qreal upperPercentileThreshold( PercentileStats & stats )
     {
-        const int percentile = [&stats]()
-        {
-            if ( stats.size() <= 100 )                return 80;
-            if ( stats.size() * 0.10 <= MAX_RESULTS ) return 90;
-            if ( stats.size() * 0.05 <= MAX_RESULTS ) return 95;
-            if ( stats.size() * 0.01 <= MAX_RESULTS ) return 99;
-            return 0;
-        }();
+        if ( stats.size() <= 100               ) return stats.percentile( 80 );
+        if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 90 );
+        if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile( 95 );
+        if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile( 99 );
 
-        if ( percentile > 0 )
-        {
-            //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
-            return stats.percentile( percentile );
-        }
-
-        //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
         return stats.at( stats.size() - MAX_RESULTS );
     }
 
@@ -56,22 +45,11 @@ namespace
      **/
     qreal lowerPercentileThreshold( PercentileStats & stats )
     {
-        const int percentile = [&stats]()
-        {
-            if ( stats.size() <= 100 )                return 20;
-            if ( stats.size() * 0.10 <= MAX_RESULTS ) return 10;
-            if ( stats.size() * 0.05 <= MAX_RESULTS ) return 5;
-            if ( stats.size() * 0.01 <= MAX_RESULTS ) return 1;
-            return 0;
-        }();
+        if ( stats.size() <= 100               ) return stats.percentile( 20 );
+        if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 10 );
+        if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile(  5 );
+        if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile(  1 );
 
-        if ( percentile > 0 )
-        {
-            //logDebug() << "Threshold: " << percentile << ". percentile" << Qt::endl;
-            return stats.percentile( percentile );
-        }
-
-        //logDebug() << "Threshold: " << MAX_RESULTS << " items" << Qt::endl;
         return stats.at( MAX_RESULTS );
     }
 
@@ -127,7 +105,7 @@ bool FindFilesTreeWalker::check( FileInfo * item )
         return false;
     }
 
-    if ( ! item )
+    if ( !item )
         return false;
 
     if ( ( !_filter.findDirs()     || !item->isDir()     ) &&

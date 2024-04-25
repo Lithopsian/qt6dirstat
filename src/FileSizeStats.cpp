@@ -26,17 +26,17 @@ FileSizeStats::FileSizeStats( FileInfo * subtree ):
     // Avoid reallocations for potentially millions of list appends
     reserve( subtree->totalFiles() );
     collect( subtree );
-//    sort();
+    sort();
 }
 
 
-FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix ):
+FileSizeStats::FileSizeStats( const FileInfo * subtree, const QString & suffix ):
     PercentileStats ()
 {
     CHECK_PTR( subtree );
 
     collect( subtree, suffix );
-//    sort();
+    sort();
 }
 
 
@@ -46,7 +46,7 @@ void FileSizeStats::collect( const FileInfo * subtree )
         append( subtree->size() );
 
     for ( FileInfoIterator it( subtree ); *it; ++it )
-	collect( *it );
+        collect( *it );
 }
 
 
@@ -56,5 +56,5 @@ void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
         append( subtree->size() );
 
     for ( FileInfoIterator it( subtree ); *it; ++it )
-	collect( *it, suffix );
+        collect( *it, suffix );
 }

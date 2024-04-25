@@ -33,8 +33,6 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 
 void FileMTimeStats::collect( FileInfo * subtree )
 {
-    Q_CHECK_PTR( subtree );
-
     if ( isEmpty() )
         reserve( subtree->totalFiles() );
 
@@ -43,12 +41,12 @@ void FileMTimeStats::collect( FileInfo * subtree )
 
     for ( FileInfoIterator it( subtree ); *it; ++it )
     {
-	FileInfo * item = *it;
+        FileInfo * item = *it;
 
-	// Disregard symlinks, block devices and other special files
-	if ( item->hasChildren() )
-	    collect( item );
-	else if ( item->isFile() )
+        // Disregard symlinks, block devices and other special files
+        if ( item->hasChildren() )
+            collect( item );
+        else if ( item->isFile() )
             append( item->mtime() );
     }
 }

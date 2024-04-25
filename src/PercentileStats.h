@@ -124,12 +124,10 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Sort the collected data in ascending order.
-	 * This is necessary after all collect() calls.
-	 *
-	 * The functions accessing results like min(), max(), median(),
-	 * quantile(), percentile() etc. all implicitly sort the data if they
-	 * are not sorted yet.
+	 * Sort the collected data in ascending order.  This class does not
+	 * know if all the data that has been added to the list has been sorted,
+	 * so it is vital that sort() is called after all collect() calls are
+	 * complete, before the data is analysed.
 	 **/
 	void sort();
 
@@ -140,7 +138,7 @@ namespace QDirStat
 	QRealList _percentileSums;
 	QRealList _cumulativeSums;
 	QRealList _buckets;
-	bool      _sorted         { false };
+//	bool      _sorted         { false };
     };
 
 }	// namespace QDirStat

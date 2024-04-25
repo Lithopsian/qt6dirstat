@@ -157,7 +157,7 @@ void FileSizeStatsWindow::initWidgets()
     CHECK_NEW( _bucketsTableModel );
     _ui->bucketsTable->setModel( _bucketsTableModel );
 
-    const QList<QCommandLinkButton *> helpButtons = _ui->helpPage->findChildren<QCommandLinkButton *>();
+    const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
 	connect( helpButton, &QAbstractButton::clicked,
@@ -285,11 +285,11 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget  * table,
 
 	const QString text = [=]()
 	{
-	    if ( i == 0 )		return tr( "Min" );
-	    if ( i == order  )	return tr( "Max" );
-	    if ( i == median )	return tr( "Median" );
-	    if ( i == quartile1 )	return tr( "1. Quartile" );
-	    if ( i == quartile3 )	return tr( "3. Quartile" );
+	    if ( i == 0 )         return tr( "Min" );
+	    if ( i == order  )    return tr( "Max" );
+	    if ( i == median )    return tr( "Median" );
+	    if ( i == quartile1 ) return tr( "1. Quartile" );
+	    if ( i == quartile3 ) return tr( "3. Quartile" );
 
 	    return QString();
 	}();
@@ -316,10 +316,10 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget  * table,
 
     table->setRowCount( row );
 
-    setColAlignment( table, NumberCol, Qt::AlignRight );
-    setColAlignment( table, ValueCol,  Qt::AlignRight );
-    setColAlignment( table, NameCol,   Qt::AlignCenter);
-    setColAlignment( table, SumCol,    Qt::AlignRight );
+    setColAlignment( table, NumberCol,        Qt::AlignRight );
+    setColAlignment( table, ValueCol,         Qt::AlignRight );
+    setColAlignment( table, NameCol,          Qt::AlignCenter);
+    setColAlignment( table, SumCol,           Qt::AlignRight );
     setColAlignment( table, CumulativeSumCol, Qt::AlignRight );
 
     HeaderTweaker::resizeToContents( table->horizontalHeader() );
@@ -333,6 +333,7 @@ void FileSizeStatsWindow::loadHistogram()
     const int percentileCount = endPercentile - startPercentile;
     const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _ui->histogramView->bestBucketCount( dataCount );
+
     _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
 
     _bucketsTableModel->reset();
