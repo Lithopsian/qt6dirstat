@@ -16,7 +16,7 @@
 #include <QFontMetrics>
 #include <QLabel>
 #include <QObject>
-#include <QString>
+#include <QStringBuilder>
 #include <QTextStream>
 
 #include "FileSize.h"
@@ -80,14 +80,14 @@ namespace QDirStat
      * This is only intended for small values, typically less than 1,000.
      **/
     inline QString formatShortByteSize( FileSize size )
-	{ return QString( "%1 B" ).arg( size ); }
+	{ return QString::number( size ) % " B"; }
 
     /**
      * Format a string of the form "/ 3 links" for describing hard links.  If the
      * number of links is less than 2, an empty string is returned.
      **/
     inline QString formatLinksInline( nlink_t numLinks )
-	{ return numLinks > 1 ? QString( " / %1 links" ).arg( numLinks) : ""; }
+	{ return numLinks > 1 ? QString( " / %1 links" ).arg( numLinks) : QString(); }
 
     /**
      * Format a string of the form "<br/>3 links" for describing hard links on a
@@ -95,14 +95,14 @@ namespace QDirStat
      * an empty string is returned.
      **/
     inline QString formatLinksRichText( nlink_t numLinks )
-	{ return numLinks > 1 ? QString( "<br/>%1 hard links" ).arg( numLinks ) : ""; }
+	{ return numLinks > 1 ? QString( "<br/>%1 hard links" ).arg( numLinks ) : QString(); }
 
     /**
      * Wraps the text in html formatting to prevent line breaks except at explicit
      * newlines and break tags.
      **/
     inline QString whitespacePre( const QString & text )
-	{ return "<p style='white-space:pre'>" + text + "</p>"; }
+	{ return "<p style='white-space:pre'>" % text % "</p>"; }
 
     /**
      * Format a timestamp (like the latestMTime()) human-readable.
@@ -118,7 +118,7 @@ namespace QDirStat
      * Format a percentage.
      **/
     inline QString formatPercent( float percent )
-        { return percent < 0.0 ? "" : QString::number( percent, 'f', 1 ) + '%'; }
+        { return percent < 0.0 ? QString() : QString( QString::number( percent, 'f', 1 ) % '%' ); }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the
@@ -132,7 +132,7 @@ namespace QDirStat
      * Format a number in octal with a leading zero.
      **/
     inline QString formatOctal( int number )
-	{ return QString( "0" ) + QString::number( number, 8 ); }
+	{ return '0' % QString::number( number, 8 ); }
 
     /**
      * Format a file stat mode as octal.
@@ -146,7 +146,7 @@ namespace QDirStat
      *	   drwxr-xr-x  0755
      **/
     inline QString formatPermissions( mode_t mode )
-	{ return symbolicMode( mode ) + "  " + formatOctal( ALLPERMS & mode ); }
+	{ return symbolicMode( mode ) % "  " % formatOctal( ALLPERMS & mode ); }
 
     /**
      * Returns the string resized to the given width and padded with

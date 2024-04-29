@@ -52,7 +52,7 @@ namespace QDirStat
          * Suppress copy and assignment constructors (this is a singleton)
          **/
         QDirStatApp( const QDirStatApp & ) = delete;
-	QDirStatApp & operator=( const QDirStatApp & ) = delete;
+        QDirStatApp & operator=( const QDirStatApp & ) = delete;
 
 
     public:
@@ -118,7 +118,7 @@ namespace QDirStat
          * directory, not the invisible pseudo root) or 0 if the tree is
          * completely empty.
          **/
-        FileInfo * root() const;
+        FileInfo * firstToplevel() const;
 
         /**
          * Return the current item in the selection model.
@@ -149,9 +149,9 @@ namespace QDirStat
 
         /**
          * Set the font size of a widget (expected to be a tree widget) based on
-	 * the configured DirTree item size.
+         * the configured DirTree item size.
          **/
-	void setWidgetFontSize( QWidget * widget );
+        void setWidgetFontSize( QWidget * widget );
 
 
     private:

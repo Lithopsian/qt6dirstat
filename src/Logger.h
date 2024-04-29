@@ -234,7 +234,7 @@ inline QTextStream & operator<<( QTextStream & str, bool val )
     { return str << ( val ? "true" : "false" ); }
 
 inline QTextStream & operator<<( QTextStream & str, const QStringList &stringList )
-    { return str << stringList.join( ", " ); }
+    { return str << stringList.join( QLatin1String( ", " ) ); }
 
 inline QTextStream & operator<<( QTextStream & str, const QRectF & rect )
     { return str << "QRectF( x: " << rect.x() << " y: " << rect.y()

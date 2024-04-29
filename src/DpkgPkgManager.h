@@ -245,17 +245,19 @@ namespace QDirStat
 	 * or "diverted by".
 	*/
 	bool isDiversion( const QString & line ) const
-	    { return line.startsWith( "diversion by" ) || line.startsWith( "local diversion" ); }
+	    { return line.startsWith( QLatin1String( "diversion by" ) ) ||
+		     line.startsWith( QLatin1String( "local diversion" ) ); }
 	bool isLocalDiversion( const QString & line ) const
-	    { return line.startsWith( "local diversion" ); }
+	    { return line.startsWith( QLatin1String( "local diversion" ) ); }
 	bool isDiversionFrom( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( "from: " ); }
+	    { return isDiversion( line ) && line.contains( QLatin1String( "from: " ) ); }
 	bool isDiversionTo( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( "to: " ); }
+	    { return isDiversion( line ) && line.contains( QLatin1String( "to: " ) ); }
 	bool isDivertedBy( const QString & line ) const
-	    { return line.startsWith( "diverted by" ) || line.startsWith( "locally diverted" ); }
+	    { return line.startsWith( "diverted by" ) ||
+		     line.startsWith( QLatin1String( "locally diverted" ) ); }
 	bool isPackageDivert( const QString & line ) const
-	    { return line.startsWith( "package diverts" ); }
+	    { return line.startsWith( QLatin1String( "package diverts" ) ); }
 
 	/**
 	 * This searches the lines produced by a dpkg -S query.

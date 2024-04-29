@@ -139,7 +139,7 @@ namespace QDirStat
                                       const DataColumnList & colList )
     {
 	stream << "[ "
-               << DataColumns::toStringList( colList ).join( ", " )
+               << DataColumns::toStringList( colList ).join( QLatin1String( ", " ) )
                << " ]";
 
 	return stream;

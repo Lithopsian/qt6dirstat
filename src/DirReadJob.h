@@ -197,12 +197,6 @@ namespace QDirStat
 			    DirInfo       * subDir );
 
 	/**
-	 * Return 'true' if 'entryName' matches an exclude rule of the
-	 * ExcludeRule singleton or a temporary exclude rule of the DirTree.
-	 **/
-	bool matchesExcludeRule( const QString & entryName ) const;
-
-	/**
 	 * Return 'true' if 'entryName' should be ignored.
 	 **/
 	bool checkIgnoreFilters( const QString & entryName ) const;

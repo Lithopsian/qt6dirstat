@@ -105,7 +105,7 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
          **/
         QStringList parseFileList( const QString & output ) const override
-	    { return output.split( "\n" ); }
+	    { return output.split( '\n' ); }
 
 
     protected:

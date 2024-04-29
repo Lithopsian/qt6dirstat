@@ -86,7 +86,7 @@ namespace QDirStat
          *
          * This returns 'false' immediately if 'checkAnyFileChild' is not set.
          **/
-        bool matchDirectChildren( DirInfo * dir ) const;
+        bool matchDirectChildren( const DirInfo * dir ) const;
 
 	/**
 	 * Return 'true' if this exclude rule uses the full path to match
@@ -253,7 +253,7 @@ namespace QDirStat
          *
 	 * This will return 'true' if the text matches any rule.
          **/
-        bool matchDirectChildren( DirInfo * dir ) const;
+        bool matchDirectChildren( const DirInfo * dir ) const;
 
 	/**
 	 * Clear (delete) all exclude rules.

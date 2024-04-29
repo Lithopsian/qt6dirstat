@@ -229,8 +229,8 @@ namespace QDirStat
 	 * Getters for the item properties.
 	 **/
 	const QString & path()  const { return _path;  }
-//	FileSize        size()  const { return _size;  }
-//	time_t          mtime() const { return _mtime; }
+	FileSize        size()  const { return _size;  }
+	time_t          mtime() const { return _mtime; }
 
 
     protected:

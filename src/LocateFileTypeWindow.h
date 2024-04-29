@@ -88,11 +88,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Obtain the subtree from the last used URL or 0 if none was found.
-	 **/
-	// const Subtree & subtree() const { return _subtree; }
-
-	/**
 	 * Return the current search suffix with leading '*'.
 	 **/
 	QString displaySuffix() const { return "*" + _suffix; }

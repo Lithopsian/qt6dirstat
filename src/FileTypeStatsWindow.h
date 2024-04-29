@@ -38,9 +38,9 @@ namespace QDirStat
 	/**
 	 * Constructor.  Private, use the populateSharedInstance() function
 	 * for access to this window.
-         *
-         * This creates a file type statistics window, but it does not populate
-         * it with content yet.
+	 *
+	 * This creates a file type statistics window, but it does not populate
+	 * it with content yet.
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
@@ -52,38 +52,38 @@ namespace QDirStat
 	 **/
 	~FileTypeStatsWindow() override;
 
-        /**
-         * Static method for using one shared instance of this class between
-         * multiple parts of the application. This will create a new instance
-         * if there is none yet (or anymore).
-         **/
-        static FileTypeStatsWindow * sharedInstance( QWidget        * parent,
+	/**
+	 * Static method for using one shared instance of this class between
+	 * multiple parts of the application. This will create a new instance
+	 * if there is none yet (or anymore).
+	 **/
+	static FileTypeStatsWindow * sharedInstance( QWidget        * parent,
 						     SelectionModel * selectionModel );
 
 
     public:
 
-        /**
-         * Obtain the subtree from the last used URL.
-         **/
+	/**
+	 * Obtain the subtree from the last used URL.
+	 **/
 //        const Subtree & subtree() const { return _subtree; }
 
-        /**
-         * Convenience function for creating, populating and showing the shared
-         * instance.
-         **/
-        static void populateSharedInstance( QWidget        * mainWindow,
+	/**
+	 * Convenience function for creating, populating and showing the shared
+	 * instance.
+	 **/
+	static void populateSharedInstance( QWidget        * mainWindow,
 					    FileInfo       * subtree,
 					    SelectionModel * selectionModel );
 
 
     protected slots:
 
-        /**
-         * Automatically update with the current main window selection, if the
+	/**
+	 * Automatically update with the current main window selection, if the
 	 * checkbox is checked.
-         **/
-        void syncedPopulate( FileInfo * );
+	 **/
+	void syncedPopulate( FileInfo * );
 
 	/**
 	 * Refresh (reload) all data.
@@ -96,19 +96,11 @@ namespace QDirStat
 	 **/
 	void locateCurrentFileType();
 
-        /**
-         * Open a "File Size Statistics" window for the currently selected file
-         * type or re-popuolate it if it is still open.
-         **/
-	void sizeStatsForCurrentFileType();
-
 	/**
-	 * Reject the dialog contents, i.e. the user clicked the "Cancel"
-	 * or WM_CLOSE button.
-	 *
-	 * Reimplemented from QDialog.
+	 * Open a "File Size Statistics" window for the currently selected file
+	 * type or re-popuolate it if it is still open.
 	 **/
-//	void reject() override;
+	void sizeStatsForCurrentFileType();
 
 	/**
 	 * Enable or disable the actions depending on the current item.
@@ -133,43 +125,43 @@ namespace QDirStat
 	 **/
 	void populate( FileInfo * subtree );
 
-        /**
-         * Create a tree item for a category and add it to the tree.
-         **/
-        FileTypeItem * addCategoryItem( const QString & name,
+	/**
+	 * Create a tree item for a category and add it to the tree.
+	 **/
+	FileTypeItem * addCategoryItem( const QString & name,
                                         int             count,
                                         FileSize        sum );
 
-        /**
-         * Create a file type item for files matching a non-suffix rule of a
-         * category. This does not yet add it to the category parent item.
-         **/
-        SuffixFileTypeItem * addNonSuffixRuleItem( const MimeCategory * category );
+	/**
+	 * Create a file type item for files matching a non-suffix rule of a
+	 * category. This does not yet add it to the category parent item.
+	 **/
+	SuffixFileTypeItem * addNonSuffixRuleItem( const MimeCategory * category );
 
-        /**
-         * Create a file type item. This does not yet add it to a category
-         * item.
-         *
-         * This is important for file type items below the "Other" category:
-         * Those are created and collected first, but only the top X of them
-         * are actually added to the other category, the others are deleted.
-         **/
-        SuffixFileTypeItem * addSuffixFileTypeItem( const QString & suffix,
+	/**
+	 * Create a file type item. This does not yet add it to a category
+	 * item.
+	 *
+	 * This is important for file type items below the "Other" category:
+	 * Those are created and collected first, but only the top X of them
+	 * are actually added to the other category, the others are deleted.
+	 **/
+	SuffixFileTypeItem * addSuffixFileTypeItem( const QString & suffix,
                                                     int             count,
                                                     FileSize        sum );
 
-        /**
-         * Add the top X of 'otherItems' to 'otherCategory' and delete the
-         * rest.
-         **/
-        void addTopXOtherItems( FileTypeItem          * otherCategoryItem,
+	/**
+	 * Add the top X of 'otherItems' to 'otherCategory' and delete the
+	 * rest.
+	 **/
+	void addTopXOtherItems( FileTypeItem          * otherCategoryItem,
                                 QList<FileTypeItem *> & otherItems );
 
 	/**
-         * Return the suffix of the currently selected file type or an empty
-         * string if no suffix is selected.
-         **/
-        QString currentSuffix() const;
+	 * Return the suffix of the currently selected file type or an empty
+	 * string if no suffix is selected.
+	 **/
+	QString currentSuffix() const;
 
 	/**
 	 * Custom context menu signalled.
@@ -183,16 +175,16 @@ namespace QDirStat
 	 **/
 	void keyPressEvent( QKeyEvent * event ) override;
 
-        /**
-         * Resize event, reimplemented from QWidget.
+	/**
+	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
 	 * the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
-         **/
-        void resizeEvent( QResizeEvent * event ) override;
+	 **/
+	void resizeEvent( QResizeEvent * event ) override;
 
 
     private:
@@ -202,7 +194,7 @@ namespace QDirStat
 	//
 
 	Ui::FileTypeStatsWindow * _ui;
-        Subtree                   _subtree;
+	Subtree                   _subtree;
 	const FileTypeStats     * _stats { nullptr };
 
     };
@@ -243,10 +235,10 @@ namespace QDirStat
 	// Getters
 	//
 
-	QString  name()	      const { return _name; }
-	int      count()      const { return _count; }
-	FileSize totalSize()  const { return _totalSize; }
-	float    percentage() const { return _percentage; }
+	const QString & name()       const { return _name; }
+	int             count()      const { return _count; }
+	FileSize        totalSize()  const { return _totalSize; }
+	float           percentage() const { return _percentage; }
 
 	/**
 	 * Set the font to bold face for all columns.
@@ -315,7 +307,7 @@ namespace QDirStat
 	/**
 	 * Return this file type's suffix.
 	 **/
-	QString suffix() const { return _suffix; }
+	const QString & suffix() const { return _suffix; }
 
 
     protected:

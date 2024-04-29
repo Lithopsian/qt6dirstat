@@ -40,7 +40,7 @@ namespace QDirStat
          * longer than after read() is finished: Once created and queued, the
          * PkgReadJobs are self-sufficient. They don't need this reader.
          **/
-        PkgReader( DirTree * tree );
+        PkgReader();
 
         /**
          * Read installed packages from the system's package manager(s), select
@@ -51,7 +51,7 @@ namespace QDirStat
          * Qt event loop, so whenever there is no user or X11 event to process,
          * it will pick one read job and execute it.
          **/
-        void read( const PkgFilter & filter );
+        void read( DirTree * tree, const PkgFilter & filter );
 
         /**
          * Read parameters from the settings file.
@@ -65,18 +65,16 @@ namespace QDirStat
          * Create a read job for each package to read its file list from a file
          * list cache and add it to the read job queue.
          **/
-        void createCachePkgReadJobs( const PkgInfoList & pkgList );
+        void createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgList );
 
         /**
          * Create a read job for each package with a background process to read
          * its file list and add it as a blocked job to the read job queue.
          **/
-        void createAsyncPkgReadJobs( const PkgInfoList & pkgList );
+        void createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList );
 
 
         // Data members
-
-        DirTree * _tree;
 
         /** These can be set manually in the [Pkg] section of the config file at
          * ~/.config/QDirStat/QDirStat.config.

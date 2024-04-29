@@ -10,8 +10,8 @@
 #ifndef Cleanup_h
 #define Cleanup_h
 
-#define DESKTOP_APP_TERMINAL		"%terminal"
-#define DESKTOP_APP_FILE_MANAGER	"%filemanager"
+#define DESKTOP_APP_TERMINAL		QLatin1String( "%terminal" )
+#define DESKTOP_APP_FILE_MANAGER	QLatin1String( "%filemanager" )
 
 #include <QAction>
 #include <QList>

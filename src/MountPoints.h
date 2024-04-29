@@ -46,7 +46,7 @@ namespace QDirStat
 	    _device { device },
 	    _path { path },
 	    _filesystemType { filesystemType },
-	    _mountOptions { mountOptions.split( "," ) }
+	    _mountOptions { mountOptions.split( ',' ) }
 	{}
 
 	/**
@@ -85,23 +85,23 @@ namespace QDirStat
 	/**
 	 * Return the mount options as one comma-separated string.
 	 **/
-	QString mountOptionsStr() const { return _mountOptions.join( "," ); }
+	QString mountOptionsStr() const { return _mountOptions.join( ',' ); }
 
 	/**
 	 * Return 'true' if the filesystem is mounted read-only.
 	 **/
-	bool isReadOnly() const { return _mountOptions.contains( "ro" ); }
+	bool isReadOnly() const { return _mountOptions.contains( QLatin1String( "ro" ) ); }
 
 	/**
 	 * Return 'true' if the filesystem type of this mount point is "btrfs".
 	 **/
-	bool isBtrfs() const { return _filesystemType.toLower() == "btrfs"; }
+	bool isBtrfs() const { return _filesystemType.toLower() == QLatin1String( "btrfs" ); }
 
 	/**
 	 * Return 'true' if the filesystem type of this mount point starts with
 	 * "ntfs".
 	 **/
-        bool isNtfs() const { return _filesystemType.toLower().startsWith( "ntfs" ); }
+        bool isNtfs() const { return _filesystemType.toLower().startsWith( QLatin1String( "ntfs" ) ); }
 
 	/**
 	 * Return 'true' if this is a network filesystem like NFS or Samba
@@ -120,7 +120,7 @@ namespace QDirStat
          * Return 'true' if this is an autofs, i.e. a filesystem managed by the
          * automounter.
          **/
-        bool isAutofs() const { return _filesystemType.toLower() == "autofs"; }
+        bool isAutofs() const { return _filesystemType.toLower() == QLatin1String( "autofs" ); }
 
         /**
          * Return 'true' if this is an autofs that is not currently mounted.
@@ -138,7 +138,8 @@ namespace QDirStat
          * mounted below /snap.
          **/
         bool isSnapPackage() const
-	    { return _path.startsWith( "/snap" ) && _filesystemType.toLower() == "squashfs"; }
+	    { return _path.startsWith( QLatin1String( "/snap" ) ) &&
+		     _filesystemType.toLower() == QLatin1String( "squashfs" ); }
 
 	/**
 	 * Set the 'duplicate' flag. This should only be set while /proc/mounts

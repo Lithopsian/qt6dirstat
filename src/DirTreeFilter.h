@@ -71,7 +71,7 @@ namespace QDirStat
 	 * filename.  Used the the create method to generate a filter.
 	 **/
 	DirTreePatternFilter( const QString & pattern ):
-	    _wildcard { CaseSensitiveWildcard( pattern.contains( "/" ) ? pattern : QString( "*/" ) + pattern ) }
+	    _wildcard { CaseSensitiveWildcard( pattern.contains( '/' ) ? pattern : QString( "*/" ) + pattern ) }
 	{}
 
     public:

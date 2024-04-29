@@ -169,7 +169,7 @@ namespace QDirStat
         /**
          * Returns the name of the "root" package summary item url (ie. "Pkg:/").
          **/
-        static QString pkgSummaryUrl() { return pkgScheme() + "/"; }
+        static QString pkgSummaryUrl() { return pkgScheme() + '/'; }
 
 
     protected:

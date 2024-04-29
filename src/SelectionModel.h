@@ -27,7 +27,7 @@ namespace QDirStat
      * QDirStat::TreeMapView).
      *
      * This is only a thin wrapper around QItemSelectionModel. The
-     * QItemSelectionModel base class is the master with its QModelIndex based
+     * QItemSelectionModel base class is the master with its QModelIndex-based
      * selection; this subclass fetches that QModelIndex selection and
      * translates each item into a FileInfo pointer on demand.
      **/

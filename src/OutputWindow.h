@@ -11,7 +11,6 @@
 #define OutputWindow_h
 
 #include <QDialog>
-#include <QList>
 #include <QProcess>
 #include <QTextStream>
 #include <QStringList>
@@ -157,7 +156,7 @@ public:
     /**
      * Return the internal process list.
      **/
-    const QList<QProcess *> & processList() const { return _processList; }
+//    const QVector<QProcess *> & processList() const { return _processList; }
 
     /**
      * Return 'true' if any process in the internal process is still active.
@@ -346,7 +345,7 @@ private:
     //
 
     Ui::OutputWindow  * _ui;
-    QList<QProcess *>   _processList;
+    QVector<QProcess *> _processList;
     bool                _showOnStderr		{ false };
     bool                _noMoreProcesses	{ false };
     bool                _closed			{ false };

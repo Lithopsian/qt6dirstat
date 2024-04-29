@@ -649,6 +649,11 @@ namespace QDirStat
 	virtual bool hasChildren() const { return firstChild() || dotEntry(); }
 
 	/**
+	 * Returns true if this entry has no children.
+	 **/
+	bool isEmpty() const { return !hasChildren(); }
+
+	/**
 	 * Returns true if this entry is in subtree 'subtree', i.e. if this is
 	 * a child or grandchild etc. of 'subtree'.
 	 **/
@@ -658,8 +663,8 @@ namespace QDirStat
 	 * Locate a child somewhere in this subtree whose URL (i.e. complete
 	 * path) matches the URL passed. Returns 0 if there is no such child.
 	 *
-	 * Notice: This is a very expensive operation since the entire subtree
-	 * is searched recursively.
+	 * This is a very expensive operation since the entire subtree is
+	 * searched recursively.
 	 *
 	 * Derived classes might or might not wish to overwrite this method;
 	 * it's only advisable to do so if a derived class comes up with a
@@ -673,8 +678,8 @@ namespace QDirStat
 	/**
 	 * Insert a child into the children list.
 	 *
-	 * The order of children in this list is absolutely undefined;
-	 * don't rely on any implementation-specific order.
+	 * The order of children in this list is absolutely undefined; don't
+	 * rely on any implementation-specific order.
 	 *
 	 * This default implementation does nothing and this should be
 	 * overridden by a derived class.
@@ -745,8 +750,8 @@ namespace QDirStat
 	static QString atticName() { return QObject::tr( "<Ignored>" ); }
 
 	/**
-	 * Returns the tree level (depth) of this item.
-	 * The topmost level is 0.
+	 * Returns the tree level (depth) of this item. The topmost (invisible)
+	 * level is 0 and the visible root is 1.
 	 *
 	 * This is a (somewhat) expensive operation since it will recurse up
 	 * to the top of the tree.
@@ -768,8 +773,8 @@ namespace QDirStat
 	 * destructor: Important parts of the object might already be destroyed
 	 * (e.g., the virtual table - no more virtual methods).
 	 *
-	 * This default implementation does nothing.
-	 * Derived classes that can handle children should overwrite this.
+	 * This is currently not a virtual function and there is just a plain
+	 * function DirInfo::unlinkChild.
 	 **/
 //	virtual void unlinkChild( FileInfo * ) {}
 
@@ -942,22 +947,22 @@ namespace QDirStat
 						S_ISFIFO( _mode ) ||
 						S_ISSOCK( _mode ) ? true : false; }
 
-        /**
-         * Returns true if this is a symlink, but the (direct) link target does
-         * not exist. This does NOT check multiple symlink indirections,
-         * i.e. it does not check if the target is also a symlink if the target
-         * of that also exists.
-         **/
-        bool isBrokenSymLink() const
+	/**
+	 * Returns true if this is a symlink, but the (direct) link target does
+	 * not exist. This does NOT check multiple symlink indirections,
+	 * i.e. it does not check if the target is also a symlink if the target
+	 * of that also exists.
+	 **/
+	bool isBrokenSymLink() const
 	    { return isSymLink() ? !QFileInfo( QFileInfo( path() ).symLinkTarget() ).exists() : false; }
 
-        /**
-         * Return the (direct) target path if this is a symlink. This does not
-         * follow multiple symlink indirections, only the direct target.
-         *
-         * If this is not a symlink, an empty string is returned.
-         **/
-        QString symLinkTarget() const;
+	/**
+	 * Return the (direct) target path if this is a symlink. This does not
+	 * follow multiple symlink indirections, only the direct target.
+	 *
+	 * If this is not a symlink, an empty string is returned.
+	 **/
+	QString symLinkTarget() const;
 
 
     protected:
