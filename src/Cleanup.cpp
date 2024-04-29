@@ -199,16 +199,16 @@ namespace
 		// the background, but konsole not.
 	    const QString desktopApp = [ &desktop ]()
 	    {
-		if ( desktop == "gnome" ||
-		     desktop == "unity" ||
-		     desktop == "cinnamon"      ) return "gnome-terminal";
-		if ( desktop == "xfce"          ) return "xfce4-terminal";
-		if ( desktop == "lxde"          ) return "lxterminal";
-		if ( desktop == "enlightenment" ) return "terminology";
-		if ( desktop == "mate"          ) return "mate-terminal";
-		if ( desktop == "budgie"        ) return "tilix";
-		if ( desktop == "lxqt"          ) return "qterminal";
-		if ( desktop == "kde"           ) return "konsole --workdir %d";
+		if ( desktop == QLatin1String( "gnome" ) ||
+		     desktop == QLatin1String( "unity" ) ||
+		     desktop == QLatin1String( "cinnamon"      ) ) return "gnome-terminal";
+		if ( desktop == QLatin1String( "xfce"          ) ) return "xfce4-terminal";
+		if ( desktop == QLatin1String( "lxde"          ) ) return "lxterminal";
+		if ( desktop == QLatin1String( "enlightenment" ) ) return "terminology";
+		if ( desktop == QLatin1String( "mate"          ) ) return "mate-terminal";
+		if ( desktop == QLatin1String( "budgie"        ) ) return "tilix";
+		if ( desktop == QLatin1String( "lxqt"          ) ) return "qterminal";
+		if ( desktop == QLatin1String( "kde"           ) ) return "konsole --workdir %d";
 
 		return "";
 	    }();
@@ -253,16 +253,16 @@ namespace
 
 	    const QString desktopApp = [ &desktop ]()
 	    {
-		if ( desktop == "gnome" ||
-		     desktop == "unity"         ) return "nautilus";
-		if ( desktop == "xfce"          ) return "thunar";
-		if ( desktop == "lxde"          ) return "pcmanfm";
-		if ( desktop == "enlightenment" ) return "enlightenment-open";
-		if ( desktop == "mate"          ) return "caja";
-		if ( desktop == "cinnamon" ||
-		     desktop == "budgie"        ) return "nemo";
-		if ( desktop == "lxqt"          ) return "pcmanfm-qt";
-		if ( desktop == "kde"           ) return "dolphin";
+		if ( desktop == QLatin1String( "gnome" ) ||
+		     desktop == QLatin1String( "unity"         ) ) return "nautilus";
+		if ( desktop == QLatin1String( "xfce"          ) ) return "thunar";
+		if ( desktop == QLatin1String( "lxde"          ) ) return "pcmanfm";
+		if ( desktop == QLatin1String( "enlightenment" ) ) return "enlightenment-open";
+		if ( desktop == QLatin1String( "mate"          ) ) return "caja";
+		if ( desktop == QLatin1String( "cinnamon" ) ||
+		     desktop == QLatin1String( "budgie"        ) ) return "nemo";
+		if ( desktop == QLatin1String( "lxqt"          ) ) return "pcmanfm-qt";
+		if ( desktop == QLatin1String( "kde"           ) ) return "dolphin";
 
 		return "";
 	    }();
@@ -379,8 +379,8 @@ namespace
     {
 	QString expanded = expandDesktopSpecificApps( unexpanded );
 
-	expanded.replace( "%p", SysUtil::quoted( SysUtil::escaped( item->path() ) ) );
-	expanded.replace( "%n", SysUtil::quoted( SysUtil::escaped( item->name() ) ) );
+	expanded.replace( QLatin1String( "%p" ), SysUtil::quoted( SysUtil::escaped( item->path() ) ) );
+	expanded.replace( QLatin1String( "%n" ), SysUtil::quoted( SysUtil::escaped( item->name() ) ) );
 
 	const QString dirName = [ item ]()
 	{
@@ -394,7 +394,7 @@ namespace
 	}();
 
 	if ( !dirName.isEmpty() )
-	    expanded.replace( "%d", SysUtil::quoted( SysUtil::escaped( dirName ) ) );
+	    expanded.replace( QLatin1String( "%d" ), SysUtil::quoted( SysUtil::escaped( dirName ) ) );
 
 	// logDebug() << "Expanded: \"" << expanded << "\"" << Qt::endl;
 	return expanded;
@@ -523,7 +523,7 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 	    shell = defaultShell();
 
 	    if ( !shell.isEmpty() )
-		errMsg += "\n" + tr( "Using fallback %1" ).arg( shell );
+		errMsg += '\n' + tr( "Using fallback %1" ).arg( shell );
 	}
     }
 
@@ -566,7 +566,7 @@ SettingsEnumMapping Cleanup::outputWindowPolicyMapping()
 FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
 {
     // Only change the list when the command doesn't act on individual files
-    if ( _command.contains( "%n" ) || _command.contains( "%p" ) )
+    if ( _command.contains( QLatin1String( "%n" ) ) || _command.contains( QLatin1String( "%p" ) ) )
 	return sel;
 
     FileInfoSet parents;

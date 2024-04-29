@@ -282,7 +282,7 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
 {
     QString dev = _device;
 
-    if ( dev.startsWith( "/dev/mapper/luks-" ) )
+    if ( dev.startsWith( QLatin1String( "/dev/mapper/luks-" ) ) )
     {
         // Cut off insanely long generated device mapper LUKS names
         const int limit = sizeof( "/dev/mapper/luks-010203" ) - 1;

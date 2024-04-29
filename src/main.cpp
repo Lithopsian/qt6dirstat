@@ -122,7 +122,7 @@ int main( int argc, char *argv[] )
     // --cache must be the only (remaining) argument and must have one value
     else if ( openCache )
     {
-	if ( argList.size() != 1 || argList.first().startsWith( "-" ) )
+	if ( argList.size() != 1 || argList.first().startsWith( '-' ) )
 	{
 	    reportFatalError();
 	    usage();
@@ -134,7 +134,7 @@ int main( int argc, char *argv[] )
     // More than one non-option argument is invalid
     else if ( !argList.isEmpty() )
     {
-	if ( dontAsk || argList.first().startsWith( "-" ) || argList.size() > 1 )
+	if ( dontAsk || argList.first().startsWith( '-' ) || argList.size() > 1 )
 	{
 	    reportFatalError();
 	    usage();

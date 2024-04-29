@@ -185,8 +185,8 @@ QString FileInfo::url() const
     if ( isPseudoDir() ) // don't append "/." for dot entries and attics
 	return parentUrl;
 
-    if ( !parentUrl.endsWith( "/" ) && !_name.startsWith( "/" ) )
-	parentUrl += "/";
+    if ( !parentUrl.endsWith( '/' ) && !_name.startsWith( '/' ) )
+	parentUrl += '/';
 
     return parentUrl + _name;
 }
@@ -205,8 +205,8 @@ QString FileInfo::path() const
     if ( isPseudoDir() )
 	return parentPath;
 
-    if ( !parentPath.endsWith( "/" ) && !_name.startsWith( "/" ) )
-	parentPath += "/";
+    if ( !parentPath.endsWith( '/' ) && !_name.startsWith( '/' ) )
+	parentPath += '/';
 
     return parentPath + _name;
 }
@@ -215,26 +215,26 @@ QString FileInfo::path() const
 QString FileInfo::debugUrl() const
 {
     if ( _tree && this == _tree->root() )
-	return "<root>";
+	return _tree->rootDebugUrl();
 
     QString result = url();
 
     if ( isDotEntry() )
     {
-	result += "/" + dotEntryName();
+	result += '/' + dotEntryName();
     }
     else if ( isAttic() )
     {
 	if ( _parent )
 	{
 	    if ( _tree && _parent != _tree->root() )
-		result = _parent->debugUrl() + "/" + atticName();
+		result = _parent->debugUrl() + '/' + atticName();
 	}
         else
-            result += "/" + atticName();
+            result += '/' + atticName();
     }
 
-    result.replace( "//", "/" );
+    result.replace( QLatin1String( "//" ), QLatin1String( "/" ) );
 
     return result;
 }
@@ -244,7 +244,7 @@ int FileInfo::treeLevel() const
 {
     int level = 0;
 
-    for ( const FileInfo * parent = _parent; parent; parent = parent->parent() )
+    for ( const DirInfo * parent = _parent; parent; parent = parent->parent() )
 	level++;
 
     return level;
@@ -277,17 +277,16 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	if ( url.length() == 0 )		// Nothing left?
 	    return this;			// Hey! That's us!
 
-	if ( url.startsWith( "/" ) )	// If the next thing is a path delimiter,
+	// If the next thing is a path delimiter,
+	if ( url.startsWith( '/' ) )
 	{
-	    url.remove( 0, 1 );		// remove that leading delimiter.
+	    // remove that leading delimiter.
+	    url.remove( 0, 1 );
 	}
-	else				// No path delimiter at the beginning
+	else if ( _name.right(1) != QLatin1String( "/" ) && !isDotEntry() )
 	{
-	    if ( _name.right(1) != "/" &&	// and this is not the root directory
-		 !isDotEntry() )		// or a dot entry:
-	    {
-		return nullptr;			// This can't be any of our children.
-	    }
+	    // If this is not the root directory or a dot entry, it can't be one of our children
+	    return nullptr;
 	}
     }
 
@@ -308,7 +307,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	if ( attic() && url == atticName() )
 	    return attic();
 
-	if ( url == dotEntryName() + "/" + atticName() && dotEntry() && dotEntry()->attic() )
+	if ( url == dotEntryName() + '/' + atticName() && dotEntry() && dotEntry()->attic() )
 	    return dotEntry()->attic();
     }
 
@@ -318,7 +317,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
     // have children. This check is not strictly necessary, but it may
     // speed up things a bit if we don't search the non-directory children
     // if the rest of the URL consists of several pathname components.
-    if ( dotEntry() && !url.contains( "/" ) )  // No (more) "/" in this URL
+    if ( dotEntry() && !url.contains( '/' ) )  // No (more) "/" in this URL
     {
 	// logDebug() << "Searching DotEntry for " << url << " in " << this << Qt::endl;
 

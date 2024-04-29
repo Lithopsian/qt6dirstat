@@ -40,7 +40,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
                                  { "-Qo", path },
                                  &exitCode );
 
-    if ( exitCode != 0 || output.contains( "No package owns" ) )
+    if ( exitCode != 0 || output.contains( QLatin1String( "No package owns" ) ) )
 	return "";
 
     // Sample output:
@@ -52,7 +52,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     // name.
 
     output.remove( QRegularExpression( "^.*is owned by " ) );
-    const QString pkg = output.section( " ", 0, 0 );
+    const QString pkg = output.section( ' ', 0, 0 );
 
     return pkg;
 }
@@ -78,12 +78,12 @@ PkgInfoList PacManPkgManager::parsePkgList( const QString & output ) const
 {
     PkgInfoList pkgList;
 
-    const QStringList splitOutput = output.split( "\n" );
+    const QStringList splitOutput = output.split( '\n' );
     for ( const QString & line : splitOutput )
     {
         if ( ! line.isEmpty() )
         {
-            QStringList fields = line.split( " " );
+            QStringList fields = line.split( ' ' );
 
             if ( fields.size() != 2 )
                 logError() << "Invalid pacman -Qn output: \"" << line << "\n" << Qt::endl;

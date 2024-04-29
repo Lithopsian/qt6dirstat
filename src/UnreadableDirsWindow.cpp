@@ -106,7 +106,7 @@ void UnreadableDirsWindow::populate( FileInfo * newSubtree )
     _ui->treeWidget->sortByColumn( UD_Path, Qt::AscendingOrder );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
-    _ui->totalLabel->setText( rowCount > 1 ? QString::number( rowCount ) + " directories" : QString() );
+    _ui->totalLabel->setText( rowCount > 1 ? QString::number( rowCount ) + tr( " directories" ) : QString() );
 
     //logDebug() << count << " directories" << Qt::endl;
 

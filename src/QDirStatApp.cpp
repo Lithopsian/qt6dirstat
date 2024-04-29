@@ -82,7 +82,7 @@ QWidget * QDirStatApp::findMainWindow() const
 }
 
 
-FileInfo * QDirStatApp::root() const
+FileInfo * QDirStatApp::firstToplevel() const
 {
     return dirTree() ? dirTree()->firstToplevel() : nullptr;
 }
@@ -107,7 +107,7 @@ FileInfo * QDirStatApp::selectedDirInfoOrRoot() const
 {
     FileInfo * sel = selectedDirInfo();
 
-    return sel ? sel : root();
+    return sel ? sel : firstToplevel();
 }
 
 

@@ -57,7 +57,7 @@ namespace
 		    const QMessageLogContext & context,
 		    const QString            & msg )
     {
-	const QStringList lines = msg.split("\n");
+	const QStringList lines = msg.split( '\n' );
 	for ( QString line : lines )
 	{
 	    // Remove utterly misleading message that will just dump a ton of bug
@@ -130,7 +130,7 @@ namespace
 /*    QString prefixLines( const QString & prefix,
 			 const QString & multiLineText )
     {
-	const QStringList lines = multiLineText.split( "\n" );
+	const QStringList lines = multiLineText.split( '\n' );
 	QString result = lines.isEmpty() ? QString() : prefix;
 	result += lines.join( QString( "\n" ) + prefix );
 
@@ -224,7 +224,7 @@ namespace
     {
 	QString oldName = filename;
 	oldName.remove( QRegularExpression( "\\.log$" ) );
-	oldName += QString( "-%1.old" ).arg( no, 2, 10, QChar( '0' ) );
+	oldName += QString( "-%1.old" ).arg( no, 2, 10, QLatin1Char( '0' ) );
 
 	return oldName;
     }
@@ -309,8 +309,8 @@ namespace
     QString expandVariables( const QString & unexpanded )
     {
 	QString expanded = unexpanded;
-	expanded.replace( "$USER", userName() );
-	expanded.replace( "$UID" , QString::number( getuid() ) );
+	expanded.replace( QLatin1String( "$USER" ), userName() );
+	expanded.replace( QLatin1String( "$UID" ) , QString::number( getuid() ) );
 
 	return expanded;
     }
@@ -348,7 +348,7 @@ Logger::Logger( const QString & rawLogDir,
     if ( doRotate )
 	logRotate( logDir, filename, logRotateCount );
 
-    openLogFile( logDir + "/" + filename );
+    openLogFile( logDir + '/' + filename );
 }
 
 

@@ -41,18 +41,18 @@ namespace
         basePath_ret = "";
         name_ret = path;
 
-        if ( path != "/" && path.contains( "/" ) )
+        if ( path != QLatin1String( "/" ) && path.contains( '/' ) )
         {
-            QStringList components = path.split( "/", Qt::SkipEmptyParts );
+            QStringList components = path.split( '/', Qt::SkipEmptyParts );
 
             if ( !components.empty() )
                 name_ret = components.takeLast();
 
             if ( !components.empty() )
-                basePath_ret = components.join( "/" ) + "/";
+                basePath_ret = components.join( '/' ) + "/";
 
-            if ( path.startsWith( "/" ) )
-                basePath_ret.prepend( "/" );
+            if ( path.startsWith( '/' ) )
+                basePath_ret.prepend( '/' );
         }
     }
 } // namespace
@@ -151,8 +151,8 @@ QString BreadcrumbNavigator::html() const
             else
                 html += QString( "<a href=\"%1\">%2</a>" ).arg( crumb.url ).arg( name.toHtmlEscaped() );
 
-            if ( !name.endsWith( "/" ) )
-                html += "/";
+            if ( !name.endsWith( '/' ) )
+                html += '/';
         }
     }
 
@@ -206,7 +206,7 @@ int BreadcrumbNavigator::breadcrumbsLen() const
 
         len += name.length();
 
-        if ( !name.endsWith( "/" ) )
+        if ( !name.endsWith( '/' ) )
             ++len;      // For the "/" delimiter
     }
 

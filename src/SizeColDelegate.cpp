@@ -76,7 +76,7 @@ void SizeColDelegate::paint( QPainter                   * painter,
 
     const QBrush textBrush = index.data( Qt::ForegroundRole ).value<QBrush>();
 
-    const QStringList data = index.data( RawDataRole ).toStringList();
+    const QStringList data = index.data( SizeTextRole ).toStringList();
     const bool sparseFile = data.size() == 3;
     const QString & linksText = sparseFile ? data.at( 2 ) : "";
 
@@ -119,10 +119,10 @@ void SizeColDelegate::paint( QPainter                   * painter,
 QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
                                  const QModelIndex          & index) const
 {
-    const QStringList data = index.data( RawDataRole ).toStringList();
+    const QStringList data = index.data( SizeTextRole ).toStringList();
     if ( data.size() == 2 || data.size() == 3 )
     {
-	const QString text = data.join( "" );
+	const QString text = data.join( QLatin1String( "" ) );
 	const QFont font = index.data( Qt::FontRole ).value<QFont>();
 	const int width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
 	const int height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;

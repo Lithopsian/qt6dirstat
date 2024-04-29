@@ -292,8 +292,8 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
 
     switch ( (LocateListColumns)treeWidget()->sortColumn() )
     {
-	case LocateListSizeCol:  return _size  < other._size;
-	case LocateListMTimeCol: return _mtime < other._mtime;
+	case LocateListSizeCol:  return _size  < other.size();
+	case LocateListMTimeCol: return _mtime < other.mtime();
 	case LocateListPathCol:
 	case LocateListColumnCount: break;
     }

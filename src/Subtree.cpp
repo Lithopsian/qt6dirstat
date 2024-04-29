@@ -50,10 +50,10 @@ const DirInfo * Subtree::dir() const
 
 const QString & Subtree::url() const
 {
-    if ( _url == "<root>" && _tree )
+    if ( _tree && _url == _tree->rootDebugUrl() )
 	return _tree->url();
-    else
-	return _url;
+
+    return _url;
 }
 
 

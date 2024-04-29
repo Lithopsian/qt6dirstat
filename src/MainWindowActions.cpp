@@ -162,7 +162,7 @@ void MainWindow::updateActions()
 {
     const bool reading       = app()->dirTree()->isBusy();
     FileInfo * currentItem   = app()->currentItem();
-    FileInfo * firstToplevel = app()->root();
+    FileInfo * firstToplevel = app()->firstToplevel();
     const bool isTree        = firstToplevel && !reading;
     const bool pkgView       = firstToplevel && firstToplevel->isPkgInfo();
 
@@ -171,18 +171,18 @@ void MainWindow::updateActions()
     _ui->actionAskReadCache->setEnabled ( !reading );
     _ui->actionAskWriteCache->setEnabled( isTree && !pkgView );
 
-    const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
-    const bool        selSizeOne     = !reading && selectedItems.size() == 1;
     _ui->actionFindFiles->setEnabled   ( firstToplevel );
-    _ui->actionCopyPath->setEnabled    ( selSizeOne );
+    _ui->actionCopyPath->setEnabled    ( isTree && currentItem );
     _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
     _ui->actionGoToToplevel->setEnabled( firstToplevel );
 
-    const FileInfo * sel            = selectedItems.first();
-    const bool       oneDirSelected = selSizeOne && sel && sel->isDir() && !pkgView;
-    _ui->actionRefreshSelected->setEnabled( selSizeOne && !pkgView && !sel->isMountPoint() && !sel->isExcluded() );
-    _ui->actionContinueReading->setEnabled( oneDirSelected && sel->isMountPoint() );
-    _ui->actionReadExcluded->setEnabled   ( oneDirSelected && sel->isExcluded()   );
+    const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
+    const bool        sel            = selectedItems.size() > 0;
+    const FileInfo *  first          = sel ? selectedItems.first() : nullptr;
+    const bool        selSizeOne     = !reading && selectedItems.size() == 1 && !pkgView;
+    _ui->actionRefreshSelected->setEnabled( selSizeOne && !first->isMountPoint() && !first->isExcluded() );
+    _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
+    _ui->actionReadExcluded->setEnabled   ( selSizeOne && first->isExcluded()   );
 
     const bool pseudoDirSelected = selectedItems.containsPseudoDir();
     const bool pkgSelected       = selectedItems.containsPkg();

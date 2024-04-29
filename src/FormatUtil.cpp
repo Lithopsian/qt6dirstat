@@ -22,27 +22,27 @@ QString QDirStat::elideMiddle( const QString & text, int maxLen )
     if ( maxLen < 4 || text.size() < maxLen )
         return text;
 
-    return text.left( maxLen / 2 ) + "…" + text.right( maxLen / 2 - 1 );
+    return text.left( maxLen / 2 ) % "…" % text.right( maxLen / 2 - 1 );
 }
 
 
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
     static QStringList units = { QObject::tr( " bytes" ),
-	                         QObject::tr( " kB" ),
-	                         QObject::tr( " MB" ),
-	                         QObject::tr( " GB" ),
-	                         QObject::tr( " TB" ),
-	                         QObject::tr( " PB" ),
-	                         QObject::tr( " EB" ),
-	                         QObject::tr( " ZB" ),
-	                         QObject::tr( " YB" )
+                                 QObject::tr( " kB" ),
+                                 QObject::tr( " MB" ),
+                                 QObject::tr( " GB" ),
+                                 QObject::tr( " TB" ),
+                                 QObject::tr( " PB" ),
+                                 QObject::tr( " EB" ),
+                                 QObject::tr( " ZB" ),
+                                 QObject::tr( " YB" ),
                                };
 
     if ( lSize < 1000 )
     {
 	// Exact number of bytes, no decimals
-	return QString::number( lSize ) + units.at( 0 );
+	return QString::number( lSize ) % units.at( 0 );
     }
     else
     {
@@ -56,7 +56,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 	    ++unitIndex;
 	}
 
-	return QString::number( size, 'f', precision ) + units.at( unitIndex );
+	return QString::number( size, 'f', precision ) % units.at( unitIndex );
     }
 }
 
@@ -64,7 +64,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 QString QDirStat::formatTime( time_t rawTime )
 {
     if ( rawTime == (time_t)0 )
-	return "";
+	return QString();
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
     const QDateTime time = QDateTime::fromTime_t( rawTime );
@@ -77,48 +77,33 @@ QString QDirStat::formatTime( time_t rawTime )
 
 QString QDirStat::symbolicMode( mode_t mode )
 {
-    QString result;
-
-    // Type
-    if	    ( S_ISDIR ( mode ) )	  result = "d";
-    else if ( S_ISCHR ( mode ) )	  result = "c";
-    else if ( S_ISBLK ( mode ) )	  result = "b";
-    else if ( S_ISFIFO( mode ) )	  result = "p";
-    else if ( S_ISLNK ( mode ) )	  result = "l";
-    else if ( S_ISSOCK( mode ) )	  result = "s";
+    const QChar sticky = [ mode ]()
+    {
+	if ( S_ISDIR ( mode ) ) return 'd';
+	if ( S_ISCHR ( mode ) ) return 'c';
+	if ( S_ISBLK ( mode ) ) return 'b';
+	if ( S_ISFIFO( mode ) ) return 'p';
+	if ( S_ISLNK ( mode ) ) return 'l';
+	if ( S_ISSOCK( mode ) ) return 's';
+	return ' ';
+    }();
 
     // User
-    result += ( mode & S_IRUSR ) ? "r" : "-";
-    result += ( mode & S_IWUSR ) ? "w" : "-";
-
-    if ( mode & S_ISUID )
-	result += "s";
-    else
-	result += ( mode & S_IXUSR ) ? "x" : "-";
+    const QChar uRead    = ( mode & S_IRUSR ) ? 'r' : '-';
+    const QChar uWrite   = ( mode & S_IWUSR ) ? 'w' : '-';
+    const QChar uExecute = ( mode & S_ISUID ) ? 's' : ( mode & S_IXUSR ) ? 'x' : '-';
 
     // Group
-    result += ( mode & S_IRGRP ) ? "r" : "-";
-    result += ( mode & S_IWGRP ) ? "w" : "-";
-
-    if ( mode & S_ISGID )
-	result += "s";
-    else if ( mode & S_IXGRP )
-	result += "x";
-    else
-	result += "-";
+    const QChar gRead    = ( mode & S_IRGRP ) ? 'r' : '-';
+    const QChar gWrite   = ( mode & S_IWGRP ) ? 'w' : '-';
+    const QChar gExecute = ( mode & S_ISGID ) ? 's' : ( mode & S_IXGRP ) ? 'x' : '-';
 
     // Other
-    result += ( mode & S_IROTH ) ? "r" : "-";
-    result += ( mode & S_IWOTH ) ? "w" : "-";
+    const QChar oRead    = ( mode & S_IROTH ) ? 'r' : '-';
+    const QChar oWrite   = ( mode & S_IWOTH ) ? 'w' : '-';
+    const QChar oExecute = ( mode & S_ISVTX ) ? 't' : ( mode & S_IXOTH ) ? 'x' : '-';
 
-    if ( mode & S_ISVTX )
-	result += "t";
-    else if ( mode & S_IXOTH )
-	result += "x";
-    else
-	result += "-";
-
-    return result;
+    return sticky % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
 }
 
 
@@ -136,14 +121,14 @@ QString QDirStat::formatMillisec( qint64 millisec )
 	// so do it manually, 3 decimal places up to 1 sec, then 1 up to 10 secs, then none
 	const int   precision = millisec > 9999 ? 0 : millisec < 1000 ? 3 : 1;
 	const float sec       = (float)millisec / 1000.0;
-	return QObject::tr( "%1 sec" ).arg( sec, 0, 'f', precision );
+	return QString::number( sec, 'f', precision) % QObject::tr( " sec" );
     }
     else
     {
 	const int sec = millisec / 1000L;
-	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QChar( '0' ) )
-				    .arg( min,   2, 10, QChar( '0' ) )
-				    .arg( sec,   2, 10, QChar( '0' ) );
+	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QLatin1Char( '0' ) )
+				    .arg( min,   2, 10, QLatin1Char( '0' ) )
+				    .arg( sec,   2, 10, QLatin1Char( '0' ) );
     }
 }
 
@@ -164,7 +149,7 @@ QString QDirStat::monthAbbreviation( short month )
         case 10: return QObject::tr( "Oct" );
         case 11: return QObject::tr( "Nov" );
         case 12: return QObject::tr( "Dec" );
-	default: return "";
+        default: return QString();
     }
 }
 

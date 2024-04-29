@@ -101,7 +101,7 @@ QString SysUtil::runCommand( const QString     & command,
     process.setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
 
     if ( logCommand )
-	logDebug() << command << " " << args.join( " " ) << Qt::endl;
+	logDebug() << command << " " << args.join( ' ' ) << Qt::endl;
 
     process.start();
     const bool success = process.waitForFinished( timeout_sec * 1000 );
@@ -170,7 +170,7 @@ bool SysUtil::runningAsRoot()
 
 bool SysUtil::runningWithSudo()
 {
-    return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty();
+    return !QProcessEnvironment::systemEnvironment().value( QStringLiteral( "SUDO_USER" ), QString() ).isEmpty();
 }
 
 /*
@@ -206,7 +206,7 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 
     QStringList pathSegments = path.split( '/', Qt::SkipEmptyParts );
     pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString( path.startsWith( "/" ) ? "/" : "" ) + pathSegments.join( "/" );
+    const QString parentPath = QString( path.startsWith( '/' ) ? '/' : QString() ) + pathSegments.join( '/' );
     const DirSaver dir( parentPath );
 
     // We can't use access() here since that would follow symlinks.

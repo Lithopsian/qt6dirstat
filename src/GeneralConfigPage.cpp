@@ -62,8 +62,10 @@ void GeneralConfigPage::setup()
     _ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
     _ui->statusBarLongTimeoutSpinBox->setValue( mainWindow->longStatusBarTimeout() / 1000.0 );
 
-    _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) +
-                                  Settings::primaryFileName().replace( '/', "/⁠" ) ); // add word-joiner character
+    // add word-joiner character to stop unwanted line breaks
+    const QString joinedFileName = Settings::primaryFileName().replace( '/', QLatin1String( "/⁠" ) );
+    _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) + joinedFileName );
+
 }
 
 

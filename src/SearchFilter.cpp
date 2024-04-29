@@ -51,27 +51,27 @@ void SearchFilter::guessFilterMode()
     {
         _filterMode = SelectAll;
     }
-    else if ( _pattern.startsWith( "=" ) )
+    else if ( _pattern.startsWith( '=' ) )
     {
         _filterMode = ExactMatch;
         _pattern.remove( 0, 1 );
     }
     else if ( _pattern.startsWith( '*' ) ||
-              _pattern.contains( "*.*" )   )
+              _pattern.contains( QLatin1String( "*.*" ) ) )
     {
         _filterMode = Wildcard;
     }
-    else if ( _pattern.contains( ".*" ) ||
-              _pattern.contains( "^"  ) ||
-              _pattern.contains( "$"  ) ||
-              _pattern.contains( "("  ) ||
-              _pattern.contains( "|"  ) ||
-              _pattern.contains( "["  )   )
+    else if ( _pattern.contains( QLatin1String( ".*" ) ) ||
+              _pattern.contains( '^' ) ||
+              _pattern.contains( '$' ) ||
+              _pattern.contains( '(' ) ||
+              _pattern.contains( '|' ) ||
+              _pattern.contains( '[' ) )
     {
         _filterMode = RegExp;
     }
-    else if ( _pattern.contains( "*" ) ||
-              _pattern.contains( "?" )   )
+    else if ( _pattern.contains( '*' ) ||
+              _pattern.contains( '?' )   )
     {
         _filterMode = Wildcard;
     }

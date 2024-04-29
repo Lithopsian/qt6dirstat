@@ -509,11 +509,11 @@ void HistogramView::addXAxisLabel()
 
 void HistogramView::addXStartEndLabels()
 {
-    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : "P" + _startPercentile;
-    startLabel += "\n" + formatSize( percentile( _startPercentile ) );
+    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : 'P' + QString::number( _startPercentile );
+    startLabel += '\n' + formatSize( percentile( _startPercentile ) );
 
-    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : "P" + _endPercentile;
-    endLabel += "\n" + formatSize( percentile( _endPercentile ) );
+    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : 'P' + QString::number( _endPercentile );
+    endLabel += '\n' + formatSize( percentile( _endPercentile ) );
 
     QGraphicsTextItem * startItem = scene()->addText( startLabel );
     QGraphicsTextItem * endItem   = scene()->addText( endLabel );
@@ -672,7 +672,7 @@ QGraphicsTextItem * HistogramView::addText( const QPointF & pos, const QString &
 
 QPointF HistogramView::addText( const QPointF & pos, const QStringList & lines )
 {
-    const QGraphicsTextItem * textItem = addText( pos, lines.join( "\n" ) );
+    const QGraphicsTextItem * textItem = addText( pos, lines.join( '\n' ) );
 
     return QPoint( pos.x(), pos.y() + textItem->boundingRect().height() );
 }

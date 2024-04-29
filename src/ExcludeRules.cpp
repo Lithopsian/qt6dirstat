@@ -66,7 +66,6 @@ bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) co
         return false;
 
     const QString & matchText = _useFullPath ? fullPath : fileName;
-
     if ( matchText.isEmpty() || _pattern.isEmpty() )
 	return false;
 
@@ -74,7 +73,7 @@ bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) co
 }
 
 
-bool ExcludeRule::matchDirectChildren( DirInfo * dir ) const
+bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
 {
     if ( !_checkAnyFileChild || !dir )
         return false;
@@ -199,7 +198,7 @@ bool ExcludeRules::match( const QString & fullPath, const QString & fileName ) c
 }
 
 
-bool ExcludeRules::matchDirectChildren( DirInfo * dir ) const
+bool ExcludeRules::matchDirectChildren( const DirInfo * dir ) const
 {
     if ( !dir )
 	return false;

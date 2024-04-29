@@ -106,8 +106,8 @@ void OpenUnpkgDialog::setValues( const UnpkgSettings & settings )
 {
     settings.dump();
     _ui->startingDirComboBox->setCurrentText( settings.startingDir() );
-    _ui->excludeDirsTextEdit->setPlainText( settings.excludeDirs().join( "\n" ) );
-    _ui->ignorePatternsTextEdit->setPlainText( settings.ignorePatterns().join( "\n" ) );
+    _ui->excludeDirsTextEdit->setPlainText( settings.excludeDirs().join( '\n' ) );
+    _ui->ignorePatternsTextEdit->setPlainText( settings.ignorePatterns().join( '\n' ) );
     _ui->crossFilesystemsCheckBox->setChecked( settings.crossFilesystems() );
 }
 

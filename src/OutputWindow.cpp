@@ -31,7 +31,7 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    //logDebug() << "Creating" << Qt::endl;
+    //logDebug() << "Creating with parent " << parent << Qt::endl;
     readSettings();
 
     _ui->terminal->clear();
@@ -124,7 +124,7 @@ void OutputWindow::addStderr( const QString & output )
 {
     _errorCount++;
     addText( output, _stderrColor );
-    logWarning() << output << ( output.endsWith( "\n" ) ? "" : "\n" );
+    logWarning() << output << ( output.endsWith( '\n' ) ? "" : "\n" );
 
     if ( _showOnStderr && !isVisible() && !_closed )
 	show();
@@ -142,7 +142,7 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     QTextCharFormat format;
     format.setForeground( QBrush( textColor ) );
     cursor.setCharFormat( format );
-    cursor.insertText( rawText.endsWith( "\n" ) ? rawText : rawText + "\n" );
+    cursor.insertText( rawText.endsWith( '\n' ) ? rawText : rawText + "\n" );
 }
 
 
@@ -350,10 +350,12 @@ void OutputWindow::killAll()
     {
 	logInfo() << "Killing process " << process << Qt::endl;
 	process->kill();
-	_processList.removeAll( process );
 	process->deleteLater();
 	++killCount;
     }
+
+    _processList.clear();
+    _processList.squeeze();
 
     _killedAll = true;
     addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %1 processes." ).arg( killCount ) );
@@ -431,7 +433,7 @@ QString OutputWindow::command( QProcess * process )
     if ( args.isEmpty() )		// Nothing left?
 	return process->program();	// Ok, use the program name
     else
-	return args.join( " " );	// output only the real command and its args
+	return args.join( ' ' );	// output only the real command and its args
 }
 
 

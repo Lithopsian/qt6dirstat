@@ -180,7 +180,7 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree *tree )
 	     "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
 	     "\n", CACHE_FORMAT_VERSION );
 
-    writeTree( cache, tree->root()->firstChild() );
+    writeTree( cache, tree->firstToplevel() );
     gzclose( cache );
 
     return true;
@@ -256,8 +256,8 @@ namespace
 		    QString       & path_ret,
 		    QString       & name_ret )
     {
-	const bool  absolutePath = fileNameWithPath.startsWith( "/" );
-	QStringList components   = fileNameWithPath.split( "/", Qt::SkipEmptyParts );
+	const bool  absolutePath = fileNameWithPath.startsWith( '/' );
+	QStringList components   = fileNameWithPath.split( '/', Qt::SkipEmptyParts );
 
 	if ( components.isEmpty() )
 	{
@@ -267,10 +267,10 @@ namespace
 	else
 	{
 	    name_ret = components.takeLast();
-	    path_ret = components.join( "/" );
+	    path_ret = components.join( '/' );
 
 	    if ( absolutePath )
-		path_ret.prepend( "/" );
+		path_ret.prepend( '/' );
 	}
     }
 
@@ -286,10 +286,10 @@ namespace
 	if ( name.isEmpty() )
 	    return path;
 
-	if ( path == "/" )
+	if ( path == QLatin1String( "/" ) )
 	    return path + name;
 
-	return path + "/" + name;
+	return path + '/' + name;
     }
 
 } // namespace
@@ -493,7 +493,7 @@ void CacheReader::addItem()
     if ( !parent && _tree->root() )
     {
 	// The trivial case of an empty tree
-	if ( !_tree->root()->hasChildren() )
+	if ( _tree->root()->isEmpty() )
 	    parent = _tree->root();
 
 	// Try the easy way first - the starting point of this cache

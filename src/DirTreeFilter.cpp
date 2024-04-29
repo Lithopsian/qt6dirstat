@@ -26,7 +26,7 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
     if ( pattern.isEmpty() )
 	return nullptr;
 
-    if ( pattern.startsWith( "*." ) )
+    if ( pattern.startsWith( QLatin1String( "*." ) ) )
     {
 	// Remove the leading "*."
 	const QString suffix = QString( pattern ).remove( 0, 2 );

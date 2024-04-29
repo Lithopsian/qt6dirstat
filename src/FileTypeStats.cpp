@@ -185,7 +185,7 @@ void FileTypeStats::removeCruft()
 
 #if 0
     logDebug() << "Merged " << (int)cruft.size() << " suffixes to <no extension>: "
-	       << cruft.join( ", " ) << Qt::endl;
+	       << cruft.join( QLatin1String( ", " ) ) << Qt::endl;
 #endif
     logDebug() << "Merged to NO_SUFFIX " << totalMergedCount << " files "
 	       << "(" << formatSize( totalMergedSum ) << ")"

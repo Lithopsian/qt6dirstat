@@ -94,7 +94,7 @@ void ExcludeRulesConfigPage::fillListWidget()
 {
     listWidget()->clear();
 
-    const ExcludeRules * excludeRules =app()->dirTree()->excludeRules();
+    const ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
     for ( ExcludeRuleListIterator it = excludeRules->cbegin(); it != excludeRules->cend(); ++it )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules

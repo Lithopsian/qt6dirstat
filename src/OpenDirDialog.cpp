@@ -249,10 +249,10 @@ void OpenDirDialog::populatePathComboBox( const QString & fullPath )
 
     QString path;
 
-    const QStringList pathComponents = fullPath.split( "/", Qt::SkipEmptyParts );
+    const QStringList pathComponents = fullPath.split( '/', Qt::SkipEmptyParts );
     for ( const QString & component : pathComponents )
     {
-        path += "/" + component;
+        path += '/' + component;
         _ui->pathComboBox->addItem( path );
     }
 }
@@ -260,12 +260,12 @@ void OpenDirDialog::populatePathComboBox( const QString & fullPath )
 
 void OpenDirDialog::goUp()
 {
-    QStringList pathComponents = selectedPath().split( "/", Qt::SkipEmptyParts );
+    QStringList pathComponents = selectedPath().split( '/', Qt::SkipEmptyParts );
 
     if ( !pathComponents.isEmpty() )
         pathComponents.removeLast();
 
-    const QString path = "/" + pathComponents.join( "/" );
+    const QString path = '/' + pathComponents.join( '/' );
     if ( path != _lastPath )
     {
 #if VERBOSE_SELECTION

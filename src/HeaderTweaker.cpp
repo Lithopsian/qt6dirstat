@@ -464,7 +464,7 @@ void HeaderTweaker::resizeToContents( QHeaderView * header )
 
 DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )
 {
-    if ( layoutName == "L1" )
+    if ( layoutName == QLatin1String( "L1" ) )
 	return { NameCol,
                  PercentBarCol,
                  PercentNumCol,
@@ -472,7 +472,7 @@ DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )
                  LatestMTimeCol
 	       };
 
-    if ( layoutName == "L2" )
+    if ( layoutName == QLatin1String( "L2" ) )
 	return { NameCol,
 		 PercentBarCol,
 		 PercentNumCol,

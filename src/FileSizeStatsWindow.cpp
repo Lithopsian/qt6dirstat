@@ -47,7 +47,7 @@ namespace
 	}
     }
 
-    #if 0
+#if 0
     /**
      * Set the foreground (the text color) for all items in a table row.
      **/
@@ -60,7 +60,7 @@ namespace
 		item->setForeground( brush );
 	}
     }
-    #endif
+#endif
 
     /**
      * Set the background for all items in a table row.
@@ -204,11 +204,8 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
 
 void FileSizeStatsWindow::populate( FileInfo * subtree, const QString & suffix )
 {
-    QString url = subtree->debugUrl();
-    if ( url == "<root>" )
-	url = subtree->tree()->url();
-
-    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "%1 in %2" ).arg( suffix ).arg( url ) );
+    const QString url = subtree->tree()->url();
+    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*.%1 in %2" ).arg( suffix ).arg( url ) );
 
     delete _stats;
     if ( suffix.isEmpty() )

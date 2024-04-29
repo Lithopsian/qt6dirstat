@@ -167,7 +167,7 @@ void CleanupConfigPage::save( void * value )
     cleanup->setTitle  ( _ui->titleLineEdit->text()       );
     cleanup->setCommand( _ui->commandLineEdit->text()     );
 
-    if ( _ui->shellComboBox->currentText().startsWith( "$SHELL" ) )
+    if ( _ui->shellComboBox->currentText().startsWith( QLatin1String( "$SHELL" ) ) )
 	cleanup->setShell( "" );
     else
 	cleanup->setShell( _ui->shellComboBox->currentText() );

@@ -21,7 +21,6 @@
 #include "DirTree.h"
 #include "DirTreeCache.h"
 #include "DirTreeModel.h"
-#include "DiscoverActions.h"
 #include "Exception.h"
 #include "FormatUtil.h"
 #include "FileAgeStatsWindow.h"
@@ -85,7 +84,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->treemapView->setSelectionModel( app()->selectionModel() );
 
     _futureSelection.setTree( app()->dirTree() );
-    _futureSelection.setUseRootFallback( false );
+//    _futureSelection.setUseRootFallback( false );
     _futureSelection.setUseParentFallback( true );
 
     ActionManager::setActions( this, app()->selectionModel(), _ui->toolBar, _ui->menuCleanup );
@@ -403,25 +402,9 @@ void MainWindow::startingReading()
 
 namespace
 {
-    // Verbose logging functions, all callers might be commented out
-    [[gnu::unused]] QStringList modelTreeAncestors( const QModelIndex & index )
-    {
-	QStringList parents;
-
-	for ( QModelIndex parent = index; parent.isValid(); parent = index.model()->parent( parent ) )
-	{
-	    const QVariant data = index.model()->data( parent, 0 );
-	    if ( data.isValid() )
-		parents.prepend( data.toString() );
-	}
-
-	return parents;
-    }
-
-
-    [[gnu::unused]] void dumpModelTree( const QAbstractItemModel * model,
-			       const QModelIndex        & index,
-			       const QString            & indent )
+    [[gnu::unused]] void dumpModelTree(	const QAbstractItemModel * model,
+					const QModelIndex        & index,
+					const QString            & indent )
     {
 	const int rowCount = model->rowCount( index );
 	const QVariant data = model->data( index, Qt::DisplayRole );
@@ -451,7 +434,7 @@ void MainWindow::readingFinished()
     _ui->statusBar->showMessage( tr( "Finished. Elapsed time: " ) + elapsedTime, _longStatusBarTimeout );
     logInfo() << "Reading finished after " << elapsedTime << Qt::endl;
 
-    if ( app()->root() && app()->root()->errSubDirCount() > 0 )
+    if ( app()->firstToplevel() && app()->firstToplevel()->errSubDirCount() > 0 )
 	showDirPermissionsWarning();
 
     //dumpModelTree( app()->dirTreeModel(), QModelIndex(), "" );
@@ -572,7 +555,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     BusyPopup msg( tr( "Reading package database..." ), this );
 
     app()->dirTreeModel()->readPkg( pkgFilter );
-    app()->selectionModel()->setCurrentItem( app()->root() );
+    app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
 }
 
 
@@ -589,18 +572,14 @@ void MainWindow::pkgQuerySetup()
 
 void MainWindow::askFindFiles()
 {
-    bool cancelled;
-    const FileSearchFilter filter = FindFilesDialog::askFindFiles( &cancelled );
-
-    if ( !cancelled )
-	DiscoverActions::findFiles( filter );
+    FindFilesDialog::askFindFiles( this );
 }
 
 
 void MainWindow::setFutureSelection()
 {
     const FileInfoSet sel = app()->selectionModel()->selectedItems();
-    _futureSelection.set( sel.isEmpty() ? app()->selectionModel()->currentItem() : sel.first() );
+    _futureSelection.set( sel.isEmpty() ? app()->currentItem() : sel.first() );
 }
 
 
@@ -699,12 +678,6 @@ void MainWindow::applyFutureSelection()
     {
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
 
-	// The previous branch was the same, but it is gone now, so force it to have changed
-//        app()->selectionModel()->setCurrentBranch( nullptr, sel );
-/*
-        if ( branch )
-            app()->selectionModel()->setCurrentBranch( nullptr, branch );
-*/
         app()->selectionModel()->setCurrentItem( sel,
                                                  true);  // select
 
@@ -765,15 +738,9 @@ void MainWindow::askWriteCache()
 
     const bool ok = app()->dirTree()->writeCache( fileName );
     if ( ok )
-    {
 	showProgress( tr( "Directory tree written to file " ) + fileName );
-    }
     else
-    {
-	QMessageBox::warning( this,
-			      tr( "Error" ), // Title
-			      tr( "ERROR writing cache file " ) + fileName );
-    }
+	QMessageBox::warning( this, tr( "Error" ), tr( "ERROR writing cache file " ) + fileName );
 }
 
 
@@ -785,7 +752,7 @@ void MainWindow::updateWindowTitle( const QString & url )
 	windowTitle += tr( " [root]" );
 
     if ( _urlInWindowTitle )
-	windowTitle += " " + url;
+	windowTitle += ' ' + url;
 
     setWindowTitle( windowTitle );
 }
@@ -864,6 +831,8 @@ void MainWindow::cleanupFinished( int errorCount )
 
     if ( errorCount == 0 )
 	showProgress( tr( "Cleanup action finished successfully" ) );
+    else if ( errorCount == 1 )
+	showProgress( tr( "Cleanup action finished with 1 error" ) );
     else
 	showProgress( tr( "Cleanup action finished with %1 errors" ).arg( errorCount ) );
 }
@@ -899,31 +868,19 @@ void MainWindow::navigateUp()
     if ( currentItem )
     {
 	FileInfo * parent = currentItem->parent();
-        if ( parent && parent != app()->dirTree()->root() )
-        {
-            // Close and re-open the parent to enforce a screen update:
-            // Sometimes the bold font is not taken into account when moving
-            // upwards, and so every column is cut off (probably a Qt bug)
-            _ui->dirTreeView->setExpanded( parent, false );
-
-            app()->selectionModel()->setCurrentItem( parent,
-                                                     true ); // select
-
-            // Re-open the parent
-            _ui->dirTreeView->setExpanded( parent, true );
-        }
+	if ( parent && parent != app()->dirTree()->root() )
+	    app()->selectionModel()->setCurrentItem( parent, true ); // select
     }
 }
 
 
 void MainWindow::navigateToToplevel()
 {
-    FileInfo * toplevel = app()->root();
+    FileInfo * toplevel = app()->firstToplevel();
     if ( toplevel )
     {
 	expandTreeToLevel( 1 );
-	app()->selectionModel()->setCurrentItem( toplevel,
-                                                 true ); // select
+	app()->selectionModel()->setCurrentItem( toplevel, true ); // select
     }
 }
 
@@ -935,12 +892,10 @@ void MainWindow::navigateToUrl( const QString & url )
     if ( url.isEmpty() )
 	return;
 
-    FileInfo * sel = app()->dirTree()->locate( url,
-					       true ); // findPseudoDirs
+    FileInfo * sel = app()->dirTree()->locate( url, true ); // findPseudoDirs
     if ( sel )
     {
-	app()->selectionModel()->setCurrentItem( sel,
-						 true ); // select
+	app()->selectionModel()->setCurrentItem( sel, true ); // select
 	_ui->dirTreeView->setExpanded( sel, true );
     }
 }
@@ -997,7 +952,7 @@ void MainWindow::readFilesystem( const QString & path )
 void MainWindow::showDirPermissionsWarning()
 {
     if ( !_enableDirPermissionsMsg )
-	return; // never display, I know already
+	return;
 
     PanelMessage::showPermissionsMsg( this, _ui->vBox );
 
@@ -1008,7 +963,7 @@ void MainWindow::showDirPermissionsWarning()
 
 void MainWindow::showUnreadableDirs()
 {
-    UnreadableDirsWindow::populateSharedInstance( app()->root() );
+    UnreadableDirsWindow::populateSharedInstance( app()->firstToplevel() );
 }
 
 
@@ -1021,32 +976,6 @@ void MainWindow::closeChildren()
     PanelMessage::deletePermissionsMsg( this );
 }
 
-#if 0
-void MainWindow::itemClicked( const QModelIndex & index )
-{
-    if ( !verboseSelection() )
-	return;
-
-    if ( index.isValid() )
-    {
-	const FileInfo * item = static_cast<const FileInfo *>( index.internalPointer() );
-
-	logDebug() << "Clicked row " << index.row()
-		   << " col " << index.column()
-		   << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
-		   << "\t" << item
-		   << Qt::endl;
-	// << " data(0): " << index.model()->data( index, 0 ).toString()
-	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( " -> " ) << Qt::endl;
-    }
-    else
-    {
-	logDebug() << "Invalid model index" << Qt::endl;
-    }
-
-    Debug::dumpPersistentIndexList( app()->dirTreeModel()->persistentIndexList() );
-}
-#endif
 
 void MainWindow::selectionChanged()
 {
@@ -1067,7 +996,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
 {
     showSummary();
 
-    if ( !oldCurrent )
+    if ( !oldCurrent || !newCurrent )
 	updateFileDetailsView();
 
     if ( verboseSelection() )
@@ -1077,7 +1006,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
 	app()->selectionModel()->dumpSelectedItems();
     }
 
-    _ui->dirTreeView->setFocus();
+    _ui->dirTreeView->setFocus(); // no point leaving focus on the treemap
 
     updateActions();
 }

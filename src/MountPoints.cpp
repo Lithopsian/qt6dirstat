@@ -33,6 +33,13 @@ namespace
 	    logDebug() << mountPoint->path() << Qt::endl;
     }
 
+
+    void handleFuseblk( QString & fsType, const QStringList & ntfsDevices, const QString & device )
+    {
+        if ( fsType == QLatin1String( "fuseblk" ) && ntfsDevices.contains( device ) )
+            fsType = "ntfs";
+    }
+
 } // namespace
 
 
@@ -48,8 +55,8 @@ bool MountPoint::isNetworkMount() const
 {
     const QString fsType = _filesystemType.toLower();
 
-    if ( fsType.startsWith( "nfs"  ) ) return true;
-    if ( fsType.startsWith( "cifs" ) ) return true;
+    if ( fsType.startsWith( QLatin1String( "nfs"  ) ) ) return true;
+    if ( fsType.startsWith( QLatin1String( "cifs" ) ) ) return true;
 
     return false;
 }
@@ -64,11 +71,11 @@ bool MountPoint::isSystemMount() const
     // This check filters out system devices like "cgroup", "tmpfs", "sysfs"
     // and all those other kernel-table devices.
 
-    if ( !_device.contains( "/" ) ) return true;
+    if ( !_device.contains( '/' ) ) return true;
 
-    if ( _path.startsWith( "/dev"  ) ) return true;
-    if ( _path.startsWith( "/proc" ) ) return true;
-    if ( _path.startsWith( "/sys"  ) ) return true;
+    if ( _path.startsWith( QLatin1String( "/dev"  ) ) ) return true;
+    if ( _path.startsWith( QLatin1String( "/proc" ) ) ) return true;
+    if ( _path.startsWith( QLatin1String( "/sys"  ) ) ) return true;
 
     return false;
 }
@@ -150,13 +157,13 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 
     if ( !mountPoint )
     {
-	QStringList pathComponents = startPath.split( "/", Qt::SkipEmptyParts );
+	QStringList pathComponents = startPath.split( '/', Qt::SkipEmptyParts );
 
 	while ( !mountPoint && !pathComponents.isEmpty() )
 	{
 	    // Try one level upwards
 	    pathComponents.removeLast();
-	    path = QString( "/" ) + pathComponents.join( "/" );
+	    path = '/' + pathComponents.join( '/' );
 
 	    mountPoint = instance()->_mountPointMap.value( path, nullptr );
 	}
@@ -259,16 +266,14 @@ bool MountPoints::read( const QString & filename )
 	//   /dev/sda7 /work ext4 rw,relatime,data=ordered 0 0
 	//   nas:/share/work /nas/work nfs rw,local_lock=none 0 0
 
-	const QString & device   = fields[0];
-	QString path             = fields[1];
-	QString fsType           = fields[2];
-	const QString &mountOpts = fields[3];
+	const QString & device    = fields[0];
+	QString path              = fields[1];
+	QString fsType            = fields[2];
+	const QString & mountOpts = fields[3];
 	// ignoring fsck and dump order (0 0)
 
-        path.replace( "\\040", " " );
-
-        if ( fsType == "fuseblk" && _ntfsDevices.contains( device ) )
-            fsType = "ntfs";
+        path.replace( QLatin1String( "\\040" ), QLatin1String( " " ) );
+	handleFuseblk( fsType, _ntfsDevices, device );
 
 	MountPoint * mountPoint = new MountPoint( device, path, fsType, mountOpts );
 	CHECK_NEW( mountPoint );
@@ -341,8 +346,7 @@ bool MountPoints::readStorageInfo()
         const QString mountOptions = mount.isReadOnly() ? "ro" : QString();
 
         QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
-        if ( fsType == "fuseblk" && _ntfsDevices.contains( device ) )
-            fsType = "ntfs";
+	handleFuseblk( fsType, _ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint( device,
                                                   mount.rootPath(),
@@ -408,7 +412,7 @@ void MountPoints::findNtfsDevices()
                                                 false );      // ignoreErrCode
     if ( exitCode == 0 )
     {
-        const QStringList lines = output.split( "\n" )
+        const QStringList lines = output.split( '\n' )
             .filter( QRegularExpression( "\\s+ntfs", QRegularExpression::CaseInsensitiveOption ) );
 
         for ( const QString & line : lines )

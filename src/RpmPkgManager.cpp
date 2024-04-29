@@ -81,7 +81,7 @@ QString RpmPkgManager::owningPkg( const QString & path ) const
 					{ "-qf", "--queryformat", "%{name}", path },
 					&exitCode );
 
-    if ( exitCode != 0 || output.contains( "not owned by any package" ) )
+    if ( exitCode != 0 || output.contains( QLatin1String( "not owned by any package" ) ) )
 	return "";
 
     return output;
@@ -110,7 +110,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 {
     PkgInfoList pkgList;
 
-    const QStringList splitOutput = output.split( "\n" );
+    const QStringList splitOutput = output.split( '\n' );
     for ( const QString & line : splitOutput )
     {
 	if ( !line.isEmpty() )
@@ -125,7 +125,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 		const QString version = fields.takeFirst(); // includes release
 
 		QString arch = fields.takeFirst();
-		if ( arch == "(none)" )
+		if ( arch == QLatin1String( "(none)" ) )
 		    arch = "";
 
 		PkgInfo * pkg = new PkgInfo( name, version, arch, this );
@@ -148,7 +148,7 @@ QString RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
 
 QStringList RpmPkgManager::parseFileList( const QString & output ) const
 {
-    QStringList fileList = output.split( "\n" );
+    QStringList fileList = output.split( '\n' );
     fileList.removeAll( "(contains no files)" );
 
     return fileList;
@@ -162,10 +162,10 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
     QString name = pkg->baseName();
 
     if ( !pkg->version().isEmpty() )
-	name += "-" + pkg->version();
+	name += '-' + pkg->version();
 
     if ( !pkg->arch().isEmpty() )
-	name += "." + pkg->arch();
+	name += '.' + pkg->arch();
 
     return name;
 }
@@ -182,7 +182,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
     if ( exitCode != 0 )
 	return nullptr;
 
-    const QStringList lines = output.split( "\n" );
+    const QStringList lines = output.split( '\n' );
     output.clear(); // Free all that text ASAP
     logDebug() << lines.size() << " output lines" << Qt::endl;
 

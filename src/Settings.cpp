@@ -148,7 +148,7 @@ void Settings::beginGroup( const QString & prefix, int no )
 {
     _groupPrefix = prefix;
 
-    QSettings::beginGroup( QString( "%1_%2" ).arg( prefix ).arg( no, 2, 10, QChar( '0' ) ) );
+    QSettings::beginGroup( QString( "%1_%2" ).arg( prefix ).arg( no, 2, 10, QLatin1Char( '0' ) ) );
 }
 
 

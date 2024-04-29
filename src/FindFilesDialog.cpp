@@ -12,6 +12,7 @@
 #include "FindFilesDialog.h"
 #include "DirInfo.h"
 #include "DirTree.h"
+#include "DiscoverActions.h"
 #include "FileSearchFilter.h"
 #include "FormatUtil.h"
 #include "QDirStatApp.h"
@@ -38,8 +39,8 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    if ( app()->root() )
-        _lastPath = app()->root()->url();
+    if ( app()->firstToplevel() )
+        _lastPath = app()->firstToplevel()->url();
 
     connect( this, &FindFilesDialog::accepted,
              this, &FindFilesDialog::saveValues );
@@ -61,7 +62,7 @@ FindFilesDialog::~FindFilesDialog()
 
 FileSearchFilter FindFilesDialog::fileSearchFilter()
 {
-    FileInfo * subtree = _ui->wholeTreeRadioButton->isChecked() ? app()->root() : currentSubtree();
+    FileInfo * subtree = _ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
     const bool findDirs = _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked();
 
     FileSearchFilter filter( subtree ? subtree->toDirInfo() : nullptr,
@@ -86,13 +87,12 @@ DirInfo * FindFilesDialog::currentSubtree()
     }
     else
     {
-        subtree = app()->dirTree()->locate( _lastPath,
-                                            true     ); // findPseudoDirs
-        if ( !subtree ) // _lastPath outside of this tree?
+        subtree = app()->dirTree()->locate( _lastPath, true ); // findPseudoDirs
+        if ( !subtree ) // _lastPath outside of this tree
         {
-            if ( app()->root() )
+            if ( app()->firstToplevel() )
             {
-                subtree  = app()->root();
+                subtree  = app()->firstToplevel();
                 _lastPath = subtree->url();
             }
             else
@@ -106,20 +106,16 @@ DirInfo * FindFilesDialog::currentSubtree()
 }
 
 
-FileSearchFilter FindFilesDialog::askFindFiles( bool    * cancelled_ret,
-                                                QWidget * parent )
+void FindFilesDialog::askFindFiles( QWidget * parent )
 {
     FindFilesDialog dialog( parent );
+
     const int result = dialog.exec();
-
     const bool cancelled = ( result == QDialog::Rejected );
-
     const FileSearchFilter filter = cancelled ? FileSearchFilter() : dialog.fileSearchFilter();
 
-    if ( cancelled_ret )
-        *cancelled_ret = filter.pattern().isEmpty() ? true : cancelled;
-
-    return filter;
+    if ( !cancelled )
+        DiscoverActions::findFiles( filter );
 }
 
 

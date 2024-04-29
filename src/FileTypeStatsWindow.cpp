@@ -251,7 +251,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
                                              otherSum );
 
 	const QString name = otherItems.size() > TOP_X ? tr( "Other (top %1)" ).arg( TOP_X ) : tr( "Other" );
-        otherCategoryItem->setText( 0, name );
+	otherCategoryItem->setText( 0, name );
 
 	addTopXOtherItems( otherCategoryItem, otherItems );
     }
@@ -317,7 +317,7 @@ void FileTypeStatsWindow::addTopXOtherItems( FileTypeItem          * otherCatego
 
         logDebug() << "Discarding " << (int)otherItems.size()
                    << " suffixes below <other>: "
-                   << suffixes.join( ", " )
+                   << suffixes.join( QLatin1String( ", " ) )
                    << Qt::endl;
 #endif
         // Delete all items that are not in the top X
@@ -338,7 +338,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
     // Use the shared LocateFileTypeWindow instance.  Let it pick its own parent
     // so it doesn't get closed along with this window.
-    LocateFileTypeWindow::populateSharedInstance( "." + suffix, _subtree() );
+    LocateFileTypeWindow::populateSharedInstance( '.' + suffix, _subtree() );
 }
 
 
@@ -387,13 +387,12 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 	return;
 
     // The clicked item will always be the current item now
-    QString suffix = currentSuffix();
+    const QString suffix = currentSuffix();
     if ( suffix.isEmpty() )
 	return;
 
-    suffix.remove( 0, 1 );
-    _ui->actionLocate->setText( tr( "&Locate files with suffix *" ) + suffix );
-    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix *" ) + suffix );
+    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) + suffix );
+    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) + suffix );
 
     QMenu menu;
     menu.addAction( _ui->actionLocate );
@@ -440,9 +439,9 @@ QString SuffixFileTypeItem::itemName( const QString & suffix )
 
 
 FileTypeItem::FileTypeItem( const QString & name,
-			    int		    count,
-			    FileSize	    totalSize,
-			    float	    percentage ):
+			    int             count,
+			    FileSize        totalSize,
+			    float           percentage ):
     QTreeWidgetItem ( QTreeWidgetItem::UserType ),
     _name { name },
     _count { count },

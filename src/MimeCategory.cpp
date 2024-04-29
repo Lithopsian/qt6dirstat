@@ -31,7 +31,7 @@ namespace
      **/
     bool isSuffixPattern( const QString & pattern )
     {
-	if ( ! pattern.startsWith( "*." ) )
+	if ( ! pattern.startsWith( QLatin1String( "*." ) ) )
 	    return false;
 
 	const QString rest = pattern.mid( 2, -1 ); // Without leading "*."
@@ -93,9 +93,9 @@ void MimeCategory::addSuffix( const QString &	  rawSuffix,
 
     QString suffix = rawSuffix.trimmed();
 
-    if ( suffix.startsWith( "*." ) )
+    if ( suffix.startsWith( QLatin1String( "*." ) ) )
 	suffix.remove( 0, 2 );
-    else if ( suffix.startsWith( "." ) )
+    else if ( suffix.startsWith( '.' ) )
 	suffix.remove( 0, 1 );
 
     if ( caseSensitivity == Qt::CaseInsensitive )

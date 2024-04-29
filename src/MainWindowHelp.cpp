@@ -48,7 +48,7 @@ void MainWindow::showDonateDialog()
 {
     const QString url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EYJXAVLGNRR5W";
 
-    const QString text = QString( "<h2>Donate</h2>" ) + \
+    const QString text = tr( "<h2>Donate</h2>" ) + \
         "<p><nobr>" + \
         tr( "QDirStat is Free Open Source Software." ) + \
         "</nobr></p><p><nobr>" + \

@@ -74,7 +74,7 @@ void PkgQuery::checkPkgManagers()
         for ( const PkgManager * pkgManager : _pkgManagers )
             available << pkgManager->name();
 
-        logInfo() << "Found " << available.join( ", " )  << Qt::endl;
+        logInfo() << "Found " << available.join( QLatin1String( ", " ) )  << Qt::endl;
     }
 #endif
 }
@@ -111,8 +111,8 @@ QString PkgQuery::getOwningPackage( const QString & path )
 
     if ( _cache.contains( path ) )
     {
-	foundBy	   = "Cache";
-	pkg	   = *( _cache[ path ] );
+	foundBy = "Cache";
+	pkg     = *( _cache[ path ] );
     }
 
 

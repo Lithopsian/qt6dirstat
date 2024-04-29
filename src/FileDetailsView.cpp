@@ -194,7 +194,7 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	const QString fullTarget  = file->symLinkTarget();
 	QString shortTarget = fullTarget;
 	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( '/' ) )
-	    shortTarget = ".../" + SysUtil::baseName( fullTarget );
+	    shortTarget = QLatin1String( ".../" ) + SysUtil::baseName( fullTarget );
 	_ui->fileLinkLabel->setText( shortTarget );
 
 	if ( file->isBrokenSymLink() )
@@ -331,7 +331,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
 	return;
     }
 
-    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() + "/" );
+    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() + '/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();
@@ -414,7 +414,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 
 QString FileDetailsView::errorStyleSheet() const
 {
-    return QString( "QLabel { color:" + app()->dirTreeModel()->dirReadErrColor().name() + " }" );
+    return QString( "QLabel { color: %1; }" ).arg( app()->dirTreeModel()->dirReadErrColor().name() );
 }
 
 

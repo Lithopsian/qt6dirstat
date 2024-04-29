@@ -17,7 +17,6 @@
 #include "DirTree.h"
 #include "DirTreeCache.h"
 #include "DirInfo.h"
-#include "ExcludeRules.h"
 #include "MountPoints.h"
 #include "Exception.h"
 #include "Logger.h"
@@ -85,8 +84,8 @@ namespace
 	    return false;
 	}
 
-	const bool doCross = !mountPoint->isSystemMount()  &&	//  /dev, /proc, /sys, ...
-			     !mountPoint->isDuplicate()    &&	//  bind mount or multiple mounted
+	const bool doCross = !mountPoint->isSystemMount() &&	//  /dev, /proc, /sys, ...
+			     !mountPoint->isDuplicate()   &&	//  bind mount or multiple mounted
 			     !mountPoint->isNetworkMount();	//  NFS or CIFS (Samba)
 
 //        logDebug() << ( doCross ? "Reading" : "Not reading" )
@@ -195,7 +194,7 @@ void DirReadJob::deletingChild( FileInfo * deletedChild )
 
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
 				  DirInfo * dir,
-				  bool applyFileChildExcludeRules ):
+				  bool      applyFileChildExcludeRules ):
     DirReadJob ( tree, dir ),
     _applyFileChildExcludeRules { applyFileChildExcludeRules }
 {
@@ -217,7 +216,7 @@ void LocalDirReadJob::startReading()
 	switch ( errno )
 	{
 	    case EACCES:
-		logWarning() << "No permission to read directory " << _dirName << Qt::endl;
+		//logWarning() << "No permission to read directory " << _dirName << Qt::endl;
 		dir()->finishReading( DirPermissionDenied );
 		break;
 
@@ -259,7 +258,7 @@ void LocalDirReadJob::startReading()
 	while ( ( entry = readdir( diskDir ) ) )
 	{
 	    const QString entryName = QString::fromUtf8( entry->d_name );
-	    if ( entryName != "."  && entryName != ".."   )
+	    if ( entryName != QLatin1String( "." )  && entryName != QLatin1String( ".." )   )
 		entryMap.insert( entry->d_ino, entryName );
 	}
 
@@ -356,8 +355,7 @@ void LocalDirReadJob::startReading()
 	// are no such rules to begin with, the match function returns 'false'
 	// immediately, so the performance impact is minimal.
 
-	const bool excludeLate = _applyFileChildExcludeRules &&
-				 tree()->excludeRules()->matchDirectChildren( dir() );
+	const bool excludeLate = _applyFileChildExcludeRules && tree()->matchesDirectChildren( dir() );
 	if ( excludeLate )
 	    excludeDirLate();
 
@@ -375,7 +373,7 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
     dir()->insertChild( subDir );
     childAdded( subDir );
 
-    if ( matchesExcludeRule( entryName ) )
+    if ( tree()->matchesExcludeRule( fullName( entryName ), entryName ) )
     {
 	// Don't read children of excluded directories, just mark them
 	subDir->setExcluded();
@@ -405,20 +403,6 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
 }
 
 
-bool LocalDirReadJob::matchesExcludeRule( const QString & entryName ) const
-{
-    const QString full = fullName( entryName );
-
-    if ( tree()->excludeRules() && tree()->excludeRules()->match( full, entryName ) )
-	return true;
-
-    if ( tree()->tmpExcludeRules() && tree()->tmpExcludeRules()->match( full, entryName ) )
-	return true;
-
-    return false;
-}
-
-
 bool LocalDirReadJob::checkIgnoreFilters( const QString & entryName ) const
 {
     if ( !tree()->hasFilters() )
@@ -431,7 +415,7 @@ bool LocalDirReadJob::checkIgnoreFilters( const QString & entryName ) const
 bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 {
     const QString cacheFullName = fullName( cacheFileName );
-    const bool isToplevel = tree()->isTopLevel( dir() );
+    const bool isToplevel = dir() && tree()->root() == dir()->parent();
     DirInfo * parent = isToplevel ? nullptr : dir()->parent();
 
     CacheReadJob * cacheReadJob = new CacheReadJob( tree(), dir(), parent, cacheFullName );
@@ -517,7 +501,8 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
 
 QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
-    const QString dirName = _dirName == "/" ? "" : _dirName;  // Avoid leading // when in root dir
+    // Avoid leading // when in root dir
+    const QString dirName = _dirName == QLatin1String( "/" ) ? "" : _dirName;
 
     return dirName + "/" + entryName;
 }

@@ -393,10 +393,10 @@ void MimeCategoryConfigPage::save( void * value )
 	return;
 
     // Make a list of the patterns, one per line, and remove the empty entry caused by the trailing newline
-    QStringList caseSensitivePatterns = _ui->caseSensitivePatternsTextEdit->toPlainText().split( "\n" );
+    QStringList caseSensitivePatterns = _ui->caseSensitivePatternsTextEdit->toPlainText().split( '\n' );
     if ( !caseSensitivePatterns.isEmpty() && caseSensitivePatterns.last().isEmpty() )
 	caseSensitivePatterns.removeLast();
-    QStringList caseInsensitivePatterns = _ui->caseInsensitivePatternsTextEdit->toPlainText().split( "\n" );
+    QStringList caseInsensitivePatterns = _ui->caseInsensitivePatternsTextEdit->toPlainText().split( '\n' );
     if ( !caseInsensitivePatterns.isEmpty() && caseInsensitivePatterns.last().isEmpty() )
 	caseInsensitivePatterns.removeLast();
 
@@ -439,10 +439,10 @@ void MimeCategoryConfigPage::load( void * value )
 void MimeCategoryConfigPage::setPatternList( QPlainTextEdit    * textEdit,
 					     const QStringList & patternList )
 {
-    QString text = patternList.join( "\n" );
+    QString text = patternList.join( '\n' );
 
     if ( !text.isEmpty() )
-	text += "\n";	   // Let the user begin writing on a new line
+	text += '\n';	   // Let the user begin writing on a new line
 
     textEdit->setPlainText( text );
 }

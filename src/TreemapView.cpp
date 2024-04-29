@@ -299,8 +299,12 @@ void TreemapView::zoomOut()
 
 void TreemapView::resetZoom()
 {
-    if ( _tree && _tree->firstToplevel() )
-        rebuildTreemap( _tree->firstToplevel() );
+    if ( _tree )
+    {
+        FileInfo * firstToplevel = _tree->firstToplevel();
+        if ( firstToplevel )
+            rebuildTreemap( firstToplevel );
+    }
 }
 
 
@@ -311,17 +315,17 @@ bool TreemapView::canZoomIn() const
 
     // Work up the FileInfo tree because there might not be a tile for the current item
     const FileInfo *currentNode = _selectionModel->currentItem();
-    if (!currentNode)
+    if ( !currentNode )
         return false;
 
     const FileInfo *rootNode = _rootTile->orig();
-    if (currentNode == rootNode)
+    if ( currentNode == rootNode )
         return false;
 
-    while (currentNode && currentNode->parent() != rootNode)
+    while ( currentNode && currentNode->parent() != rootNode )
         currentNode = currentNode->parent();
 
-    if (currentNode && currentNode->isDirInfo())
+    if ( currentNode && currentNode->isDirInfo() )
         return true;
 
     return false;
@@ -330,10 +334,12 @@ bool TreemapView::canZoomIn() const
 
 bool TreemapView::canZoomOut() const
 {
-    if ( !_rootTile || !_tree->firstToplevel() )
+    if ( !_rootTile )
         return false;
 
-    return _rootTile->orig() != _tree->firstToplevel();
+    FileInfo * firstToplevel = _tree->firstToplevel();
+
+    return firstToplevel ? _rootTile->orig() != firstToplevel : false;
 }
 
 
@@ -586,9 +592,11 @@ void TreemapView::resizeEvent( QResizeEvent * event )
         if ( !newSize.isEmpty() && !oldSize.isEmpty() )
             scale( ( qreal )newSize.width() / oldSize.width(), ( qreal )newSize.height() / oldSize.height() );
     }
-    else if ( _tree && _tree->firstToplevel() )
+    else if ( _tree )
     {
-        rebuildTreemap( _tree->firstToplevel() );
+        FileInfo * firstToplevel = _tree->firstToplevel();
+        if ( firstToplevel )
+            rebuildTreemap( firstToplevel );
     }
 }
 
