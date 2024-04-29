@@ -10,8 +10,10 @@
 #include "Refresher.h"
 #include "DirTree.h"
 #include "DirInfo.h"
+#include "Exception.h"
 #include "Logger.h"
-
+#include "MainWindow.h"
+#include "QDirStatApp.h"
 
 using namespace QDirStat;
 
@@ -28,7 +30,20 @@ void Refresher::refresh()
 
 	DirTree * tree = _items.first()->tree();
 	if ( tree )
-	    tree->refresh( _items );
+	{
+	    // This can throw now, but not a lot we can do about it
+	    try
+	    {
+		tree->refresh( _items );
+	    }
+	    catch ( const SysCallFailedException & ex )
+	    {
+		CAUGHT( ex );
+		MainWindow * mainWindow = dynamic_cast<MainWindow *>( app()->findMainWindow() );
+		if ( mainWindow )
+		    mainWindow->showOpenDirErrorPopup( ex );
+	    }
+	}
     }
 
     this->deleteLater();

@@ -70,6 +70,14 @@ public:
      **/
     QVBoxLayout * messagePanelContainer() { return _ui->vBox; }
 
+    /**
+     * Show an error popup that a directory could not be opened and wait until
+     * the user confirmed it.
+     *
+     * The relevant information is all in the exception.
+     **/
+    void showOpenDirErrorPopup( const SysCallFailedException & ex );
+
 
 public slots:
 
@@ -155,6 +163,7 @@ protected:
      * Show details about the current selection in the details view.
      **/
     void updateFileDetailsView();
+
 
 public: // for the config dialog
 
@@ -288,7 +297,7 @@ protected slots:
      * Refresh after the tree has been sorted.
      **/
     void layoutChanged( const QList<QPersistentModelIndex> &,
-                        QAbstractItemModel::LayoutChangeHint );
+                        QAbstractItemModel::LayoutChangeHint changeHint );
 
     /**
      * Change display mode to "busy" (while reading a directory tree):
@@ -426,12 +435,6 @@ protected slots:
      **/
     void showSummary();
 
-#if 0
-    /**
-     * Debug: Item clicked in the tree widget.
-     **/
-    void itemClicked( const QModelIndex & index );
-#endif
     /**
      * Update the status bar and file details panel when the selection has
      * been changed.
@@ -616,14 +619,6 @@ protected:
      * directory. Return the parsed directory path.
      **/
     QString parseUnpkgStartingDir( const UnpkgSettings & unpkgSettings );
-
-    /**
-     * Show an error popup that a directory could not be opened and wait until
-     * the user confirmed it.
-     *
-     * The relevant information is all in the exception.
-     **/
-    void showOpenDirErrorPopup( const SysCallFailedException & ex );
 
     /**
      * Detect theme changes.  Currently only the file details panel needs to
