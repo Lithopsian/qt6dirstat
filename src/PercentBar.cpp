@@ -11,6 +11,7 @@
 #include <QTreeView>
 
 #include "PercentBar.h"
+#include "DirTreeModel.h"
 #include "Exception.h"
 #include "Logger.h"
 
@@ -39,20 +40,6 @@ namespace
 	    return contrastColor.darker();
     }
 
-
-    /**
-     * Find out the tree depth level of item 'index' by following its
-     * parent, parent's parent etc. to the top.
-     **/
-    int treeLevel( const QModelIndex & index )
-    {
-	int level = 0;
-	for ( QModelIndex item = index; item.isValid(); item = item.parent() )
-	    ++level;
-
-	return level;
-    }
-
 } // namespace
 
 
@@ -66,15 +53,9 @@ void PercentBarDelegate::paint( QPainter                   * painter,
     if ( index.isValid() && index.column() == _percentBarCol )
     {
 	bool ok = true;
-	float percent = index.data( RawDataRole ).toFloat( &ok );
-
+	const float percent = index.data( PercentRole ).toFloat( &ok );
 	if ( ok && percent >= 0.0f )
-	{
-	    if ( percent > 100.0f )
-		percent = 100.0f;
-
-	    PercentBarDelegate::paintPercentBar( painter, option, index, percent );
-	}
+	    PercentBarDelegate::paintPercentBar( painter, option, index, qMin( percent, 100.0f ) );
     }
 }
 
@@ -99,8 +80,8 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 					  const QModelIndex          & index,
 					  float                        percent ) const
 {
-    const int depth        = treeLevel( index ) - _invisibleLevels;
-    const int indentPixel  = depth * _indentation / 2;
+    const int depth       = index.data( TreeLevelRole ).toInt();
+    const int indentPixel = depth * _indentation / 2;
 
     const int xMargin = 4;
     const int yMargin = option.rect.height() / 6;

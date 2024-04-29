@@ -62,7 +62,7 @@ namespace QDirStat
 	 * instance.
 	 **/
 	static void populateSharedInstance( QWidget         * parent,
-                                            FileInfo        * subtree,
+					    FileInfo        * subtree,
 					    SelectionModel  * selectionModel );
 
 

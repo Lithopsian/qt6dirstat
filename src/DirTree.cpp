@@ -60,7 +60,7 @@ namespace
 	    if ( parent && parent != tree->root() )
 		name = SysUtil::baseName( url );
 
-	    if ( S_ISDIR( statInfo.st_mode ) )	// directory?
+	    if ( S_ISDIR( statInfo.st_mode ) )	// directory
 	    {
 		DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
 		CHECK_NEW( dir );
@@ -69,7 +69,10 @@ namespace
 		{
 		    parent->insertChild( dir );
 
-		    if ( !tree->isTopLevel( dir ) && !parent->isPkgInfo() && dir->device() != parent->device() )
+		    // Get the real parent for comparing device numbers, in case we're in an Attic
+		    if ( parent->isAttic() )
+			parent = parent->parent();
+		    if ( parent && parent != tree->root() && !parent->isPkgInfo() && dir->device() != parent->device() )
 		    {
 			logDebug() << dir << " is a mount point" << Qt::endl;
 			dir->setMountPoint();
@@ -78,7 +81,7 @@ namespace
 
 		return dir;
 	    }
-	    else				// no directory
+	    else				// not directory
 	    {
 		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
 		CHECK_NEW( file );
@@ -258,12 +261,12 @@ FileInfo * DirTree::firstToplevel() const
     return result;
 }
 
-
-bool DirTree::isTopLevel( FileInfo * item ) const
+/*
+bool DirTree::isToplevel( const FileInfo * item ) const
 {
-    return item && item->parent() && !item->parent()->parent();
+    return item && isRoot( item->parent() );
 }
-
+*/
 
 void DirTree::clear()
 {
@@ -342,7 +345,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	struct stat statInfo;
 	while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
 	{
-	    if ( item->parent() == _root )
+	    if ( item == _root || item->parent() == _root )
 	    {
 		// just try a full refresh, it will throw if even that isn't accessible any more
 		refresh( item->toDirInfo() );
@@ -374,7 +377,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 
 void DirTree::refresh( DirInfo * subtree )
 {
-    if ( subtree->parent() == _root )	// Refresh all (from first toplevel)
+    if ( subtree == _root || subtree->parent() == _root )	// Refresh all (from first toplevel)
     {
 	startReading( QDir::cleanPath( firstToplevel()->url() ) );
     }
@@ -453,7 +456,7 @@ void DirTree::childAddedNotify( FileInfo * newChild )
 
 void DirTree::deletingChildNotify( FileInfo * deletedChild )
 {
-    logDebug() << "Deleting child " << deletedChild << Qt::endl;
+    //logDebug() << "Deleting child " << deletedChild << Qt::endl;
     emit deletingChild( deletedChild );
 
     if ( deletedChild == _root )
@@ -464,41 +467,11 @@ void DirTree::deletingChildNotify( FileInfo * deletedChild )
 void DirTree::deleteSubtree( FileInfo *subtree )
 {
     //logDebug() << "Deleting subtree " << subtree << Qt::endl;
-    DirInfo * parent = subtree->parent();
 
-    // Send notification to anybody interested (e.g., to attached views)
+    // Send notification to anybody interested (e.g. to attached views)
     deletingChildNotify( subtree );
 
-    // If this was the last child of a dot entry
-    if ( parent && parent->isDotEntry() && !parent->hasChildren() )
-    {
-	// Get rid of that now empty and useless dot entry
-	if ( parent->parent() )
-	{
-	    if ( parent->parent()->isFinished() )
-	    {
-		// logDebug() << "Removing empty dot entry " << parent << Qt::endl;
-
-		deletingChildNotify( parent );
-		parent->parent()->deleteEmptyDotEntry();
-
-		delete parent;
-		parent = nullptr;
-	    }
-	}
-	else	// no parent - this should never happen (?)
-	{
-	    logError() << "Internal error: NOT killing dot entry without parent: " << parent << Qt::endl;
-
-	    // Better leave that dot entry alone - we shouldn't have come
-	    // here in the first place. Who knows what will happen if this
-	    // thing is deleted now?!
-	    //
-	    // Intentionally NOT calling:
-	    //     delete parent;
-	}
-    }
-
+    DirInfo * parent = subtree->parent();
     if ( parent )
     {
 	// Give the parent of the child to be deleted a chance to unlink the
@@ -508,11 +481,21 @@ void DirTree::deleteSubtree( FileInfo *subtree )
     }
 
     delete subtree;
+    emit childDeleted();
+
+    // If this was the last child of a dot entry
+    if ( parent && parent->isDotEntry() && !parent->hasChildren() && parent->parent()->isFinished() )
+    {
+	//logDebug() << "Removing empty dot entry " << parent << Qt::endl;
+
+	deletingChildNotify( parent );
+	parent->parent()->unlinkChild( parent );
+	delete parent;
+	emit childDeleted();
+    }
 
     if ( subtree == _root )
 	_root = nullptr;
-
-    emit childDeleted();
 }
 
 
@@ -608,8 +591,8 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
     sendStartingReading();
 
     // logDebug() << "Reading " << pkgFilter << Qt::endl;
-    PkgReader reader( this );
-    reader.read( pkgFilter );
+    PkgReader reader;
+    reader.read( this, pkgFilter );
 }
 
 
@@ -640,6 +623,27 @@ void DirTree::setTmpExcludeRules( ExcludeRules * newTmpRules )
 #endif
 
     _tmpExcludeRules = newTmpRules;
+}
+
+
+bool DirTree::matchesExcludeRule( const QString & fullName, const QString & entryName ) const
+{
+    if ( _excludeRules && _excludeRules->match( fullName, entryName ) )
+	return true;
+
+    if ( _tmpExcludeRules && _tmpExcludeRules->match( fullName, entryName ) )
+	return true;
+
+    return false;
+}
+
+
+bool DirTree::matchesDirectChildren( const DirInfo * dir ) const
+{
+    if ( excludeRules() && excludeRules()->matchDirectChildren( dir ) )
+	return true;
+
+    return false;
 }
 
 
@@ -686,7 +690,7 @@ void DirTree::recalc( DirInfo * dir )
 }
 
 
-void DirTree::detectClusterSize( FileInfo * item )
+void DirTree::detectClusterSize( const FileInfo * item )
 {
     if ( item &&
          item->isFile()     &&

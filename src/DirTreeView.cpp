@@ -68,7 +68,7 @@ void DirTreeView::readSettings()
     settings.endGroup();
 
     // Now we have all the settings for the percent bar delegate
-    _percentBarDelegate  = new PercentBarDelegate( this, PercentBarCol, barWidth, barBackground, barColors, 2 );
+    _percentBarDelegate  = new PercentBarDelegate( this, PercentBarCol, barWidth, barBackground, barColors );
     CHECK_NEW( _percentBarDelegate );
     setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
 }
@@ -129,16 +129,17 @@ const DirTreeModel * DirTreeView::dirTreeModel() const
 
 QModelIndexList DirTreeView::expandedIndexes() const
 {
-    const DirTreeModel * model = dirTreeModel();
-    if ( !model )
-	return QModelIndexList();
-
     QModelIndexList expandedList;
-    const auto indexList = model->persistentIndexList();
-    for ( const QModelIndex & index : indexList )
+
+    const DirTreeModel * model = dirTreeModel();
+    if ( model )
     {
-	if ( isExpanded( index ) )
-	    expandedList << index;
+	const auto indexList = model->persistentIndexList();
+	for ( const QModelIndex & index : indexList )
+	{
+	    if ( isExpanded( index ) )
+		expandedList << index;
+	}
     }
 
     return expandedList;

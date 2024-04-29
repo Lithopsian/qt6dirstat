@@ -12,6 +12,7 @@
 
 #include "FileAgeStatsWindow.h"
 #include "FileAgeStats.h"
+#include "DirTreeModel.h"
 #include "DiscoverActions.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
@@ -27,7 +28,7 @@
 
 // Remember to adapt the tooltip text for the "Locate" button in the .ui file
 // and the method docs in the .h file if this value is changed
-#define MAX_LOCATE_FILES        10000
+#define MAX_LOCATE_FILES  10000
 
 
 using namespace QDirStat;
@@ -323,8 +324,7 @@ void FileAgeStatsWindow::readSettings()
 						       YearListFilesPercentBarCol,
 						       percentBarWidth,
 						       percentBarBackground,
-						       filesPercentBarColors,
-						       1 );
+						       filesPercentBarColors );
     CHECK_NEW( _filesPercentBarDelegate );
     _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
 
@@ -332,8 +332,7 @@ void FileAgeStatsWindow::readSettings()
 						      YearListSizePercentBarCol,
 						      percentBarWidth,
 						      percentBarBackground,
-						      sizePercentBarColors,
-						      1 );
+						      sizePercentBarColors );
     CHECK_NEW( _sizePercentBarDelegate );
     _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
 }
@@ -381,7 +380,8 @@ YearListItem::YearListItem( const YearStats & yearStats ) :
     QTreeWidgetItem ( QTreeWidgetItem::UserType ),
     _stats { yearStats }
 {
-    const QString text = _stats.month > 0 ? monthAbbreviation( _stats.month ) : QString::number( _stats.year );
+    const bool monthItem = _stats.month > 0;
+    const QString text = monthItem ? monthAbbreviation( _stats.month ) : QString::number( _stats.year );
     set( YearListYearCol, Qt::AlignLeft, text );
 
     if ( _stats.filesCount > 0 )
@@ -391,8 +391,12 @@ YearListItem::YearListItem( const YearStats & yearStats ) :
 	set( YearListSizeCol,         Qt::AlignRight, "    " + formatSize( _stats.size     ) );
 	set( YearListSizePercentCol,  Qt::AlignRight, formatPercent  ( _stats.sizePercent  ) );
 
-	setData( YearListFilesPercentBarCol, RawDataRole, _stats.filesPercent );
-	setData( YearListSizePercentBarCol,  RawDataRole, _stats.sizePercent  );
+	setData( YearListFilesPercentBarCol, PercentRole, _stats.filesPercent );
+	setData( YearListSizePercentBarCol,  PercentRole, _stats.sizePercent  );
+
+	const bool treeLevel = monthItem ? 1 : 0;
+	setData( YearListFilesPercentBarCol, TreeLevelRole, treeLevel );
+	setData( YearListSizePercentBarCol,  TreeLevelRole, treeLevel );
     }
 }
 

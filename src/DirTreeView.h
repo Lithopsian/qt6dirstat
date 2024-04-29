@@ -81,7 +81,7 @@ namespace QDirStat
 
 	/**
 	 * Post the common context menu with actions (cleanup and other) for
-	 * 'item' at 'pos'.
+	 * item at 'pos'.
 	 **/
 	void contextMenu( const QPoint & pos );
 

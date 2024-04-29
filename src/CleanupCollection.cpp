@@ -12,7 +12,6 @@
 #include <QMessageBox>
 
 #include "CleanupCollection.h"
-#include "StdCleanup.h"
 #include "Cleanup.h"
 #include "DirTree.h"
 #include "Exception.h"
@@ -23,6 +22,7 @@
 #include "SelectionModel.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
+#include "StdCleanup.h"
 #include "Trash.h"
 
 
@@ -139,7 +139,7 @@ namespace
 	    }
 	    const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
 
-	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>" ) );
+	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( QLatin1String( "<br>" ) ) );
 	}();
 
 	const int ret = QMessageBox::question( qApp->activeWindow(),
@@ -175,7 +175,7 @@ CleanupCollection::CleanupCollection( QObject        * parent,
 
     // Available Cleanups depend on the currently-selected items
     connect( selectionModel, qOverload<>( &SelectionModel::selectionChanged ),
-	     this,	     &CleanupCollection::updateActions );
+	     this,           &CleanupCollection::updateActions );
 }
 
 
@@ -345,6 +345,9 @@ void CleanupCollection::execute()
 	return;
     }
 
+    // Remember the active window because it can lose focus if there is a confirmation dialog
+    QWidget * activeWindow = qApp->activeWindow();
+
     if ( cleanup->askForConfirmation() && !confirmation( cleanup, selection ) )
     {
 	logDebug() << "User declined confirmation" << Qt::endl;
@@ -353,7 +356,7 @@ void CleanupCollection::execute()
 
     emit startingCleanup( cleanup->cleanTitle() );
 
-    OutputWindow * outputWindow = new OutputWindow( qApp->activeWindow(), cleanup->outputWindowAutoClose() );
+    OutputWindow * outputWindow = new OutputWindow( activeWindow, cleanup->outputWindowAutoClose() );
     CHECK_NEW( outputWindow );
 
     switch ( cleanup->outputWindowPolicy() )
@@ -394,21 +397,33 @@ void CleanupCollection::execute()
 
     if ( cleanup->refreshPolicy() == Cleanup::AssumeDeleted )
     {
-	connect( outputWindow, &OutputWindow::lastProcessFinished,
-		 this,         &CleanupCollection::assumedDeleted );
+        // Use a normalized FileInfoSet to avoid trying to delete an
+	// item whose ancestor is, or is going to be, deleted
+	const FileInfoSet normalized = selection.normalized();
+	DirTree * tree = normalized.first()->tree();
 
-        // It is important to use the normalized FileInfoSet here to avoid a
-        // segfault because we are iterating over items whose ancestors we just
-        // deleted (thus invalidating pointers to it). Normalizing removes
-        // items from the set that also have any ancestors in the set.
-        for ( FileInfo * item : selection.invalidRemoved().normalized() )
-        {
-            DirTree * tree = item->tree();
-            if ( tree->isBusy() )
-                logWarning() << "Ignoring AssumeDeleted: DirTree is being read" << Qt::endl;
-            else
-                tree->deleteSubtree( item );
-        }
+	// Special case of deleting the toplevel
+	if ( normalized.first() == tree->firstToplevel() )
+	    // Set this here because signals won't get sent once the tree is empty
+	    _selectionModel->setCurrentItem( nullptr, true );
+
+	for ( FileInfo * item : normalized )
+	{
+	    // Don't do anything if a read is in progress or gets started
+	    if ( tree->isBusy() )
+		break;
+
+	    // Check if the item has already been deleted, by us or someone else
+	    if ( item->checkMagicNumber() )
+		tree->deleteSubtree( item );
+
+	    // Keep GUI responsive - multiple deletes in large directories can be slow
+	    qApp->processEvents();
+	}
+
+	// Any read will send signals when it is finished
+	if ( !tree->isBusy() )
+	    emit assumedDeleted();
     }
 
     outputWindow->noMoreProcesses();

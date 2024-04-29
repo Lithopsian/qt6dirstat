@@ -38,7 +38,9 @@ namespace QDirStat
 
     enum CustomRoles
     {
-	RawDataRole = Qt::UserRole
+	PercentRole = Qt::UserRole,
+	TreeLevelRole,
+	SizeTextRole,
     };
 
     class DirTreeModel: public QAbstractItemModel
@@ -182,7 +184,7 @@ namespace QDirStat
 	 * Returns the tree item size setting for a given icon directory string.
 	 **/
 	static DirTreeItemSize dirTreeItemSize( const QString & treeIconDir )
-	    { return treeIconDir.contains( "medium" ) ? DTIS_Medium : DTIS_Small; }
+	    { return treeIconDir.contains( QLatin1String( "medium" ) ) ? DTIS_Medium : DTIS_Small; }
 
 	/**
 	 * Returns the configured tree icon size.
@@ -320,6 +322,12 @@ namespace QDirStat
 	 **/
 	void busyDisplay();
 
+#if 0
+	/**
+	 * Item clicked in the tree widget, for debugging.
+	 **/
+	void itemClicked( const QModelIndex & index );
+#endif
 
     protected slots:
 

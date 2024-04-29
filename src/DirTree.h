@@ -112,16 +112,26 @@ namespace QDirStat
 	void setRoot( DirInfo * newRoot );
 
 	/**
-	 * Return the first toplevel item of this tree or 0 if there is
-	 * none. This is the logical root item.
+	 * Return a special printable url for the root item of this tree.
+	 **/
+	QString rootDebugUrl() const { return "<root>"; }
+
+	/**
+	 * Return the first toplevel item of this tree (that is, the first
+	 * child of the invisible root item) or 0 if there is none.  There
+	 * is normally only one child of the root item.
 	 **/
 	FileInfo * firstToplevel() const;
 
 	/**
-	 * Return 'true' if 'item' is a toplevel item, i.e. a direct child of
-	 * the root item.
+	 * Return 'true' if 'item' is the (invisible) root item.
 	 **/
-	bool isTopLevel( FileInfo *item ) const;
+//	bool isToplevel( const FileInfo * item ) const;
+
+	/**
+	 * Return 'true' if 'item' is the (invisible) root item.
+	 **/
+//	bool isRoot( const DirInfo * dir ) const { return dir && dir == _root; }
 
 	/**
 	 * Return the device of this tree's root item ("/dev/sda3" etc.).
@@ -266,7 +276,7 @@ namespace QDirStat
 	 * Return exclude rules specific to this tree (as opposed to the global
 	 * ones stored in the ExcludeRules singleton) or 0 if there are none.
 	 **/
-	const ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules; }
+//	const ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules; }
 
 	/**
 	 * Set exclude rules from the settings file.  The tree will create its
@@ -287,6 +297,18 @@ namespace QDirStat
 	 * exclude rules.
 	 **/
 	void setTmpExcludeRules( ExcludeRules * newTmpRules );
+
+	/**
+	 * Return 'true' if 'entryName' matches an exclude rule of the
+	 * ExcludeRule singleton or a temporary exclude rule of the DirTree.
+	 **/
+	bool matchesExcludeRule( const QString & fullName, const QString & entryName ) const;
+
+	/**
+	 * Return 'true' if any chiuldren of the given directory are matched
+	 * by an exclude rule of that type.
+	 **/
+	bool matchesDirectChildren( const DirInfo * dir ) const;
 
 	/**
 	 * Add a filter to ignore files during directory reading.
@@ -424,11 +446,6 @@ namespace QDirStat
 	void aborted();
 
 	/**
-	 * Emitted when reading the specified directory is started.
-	 **/
-	void dirStartingReading( DirInfo * dir );
-
-	/**
 	 * Emitted when reading the specified directory has been finished.
 	 * This is sent AFTER finalizeLocal( DirInfo * dir ).
 	 **/
@@ -457,7 +474,7 @@ namespace QDirStat
 	 * If the tree root (an item with no parent) is passed, then a full
 	 * re-read of the tree will be done.
 	 **/
-	void refresh( DirInfo * subtree = nullptr );
+	void refresh( DirInfo * subtree );
 
 	/**
 	 * Recursively force a complete recalculation of all sums.
@@ -467,7 +484,7 @@ namespace QDirStat
 	/**
 	 * Try to derive the cluster size from 'item'.
 	 **/
-	void detectClusterSize( FileInfo * item );
+	void detectClusterSize( const FileInfo * item );
 
 	/**
 	 * Clear all temporary exclude rules.
@@ -479,14 +496,12 @@ namespace QDirStat
 
 	// Data members
 
-	DirInfo       * _root;
-	DirReadJobQueue _jobQueue;
+	DirInfo         * _root;
+	QString           _url;
+	DirReadJobQueue   _jobQueue;
 
-//	QString         _device;
-	QString         _url;
-
-	ExcludeRules  * _excludeRules		{ nullptr };
-	ExcludeRules  * _tmpExcludeRules	{ nullptr };
+	ExcludeRules    * _excludeRules		{ nullptr };
+	ExcludeRules    * _tmpExcludeRules	{ nullptr };
 
 	QList<const DirTreeFilter *> _filters;
 

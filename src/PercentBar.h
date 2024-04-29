@@ -15,8 +15,6 @@
 #include <QStyledItemDelegate>
 #include <QTreeView>
 
-#include "DirTreeModel.h" // RawDataRole
-
 
 typedef QList<QColor> ColorList;
 
@@ -33,8 +31,8 @@ namespace QDirStat
      * install multiple of them, one for each column that should get a percent
      * bar.
      *
-     * The default behaviour is to use a percent value from the RawDataRole
-     * and render the percent bar with that value.  No bar will be displayed
+     * The percent value is obtained from the RawDataRole and the percent bar
+     * is rendered with that value.  No bar will be displayed
      * if the QVariant() returned is invalid or the float derived from it is
      * less than zero.
      *
@@ -42,8 +40,9 @@ namespace QDirStat
      *
      *    60.0%    ->   [======    ]
      *
-     * For indented tree levels, the percent bar is indented as well, and a
-     * different color is used for each indentation level.
+     * The percent bar is indented using the value obtained from the TreeLevelRole
+     * and the tree indentation, and a  different color may be used for each
+     * indentation level.
      **/
     class PercentBarDelegate: public QStyledItemDelegate
     {
@@ -59,14 +58,12 @@ namespace QDirStat
 			    int         percentBarCol,
 			    int         barWidth,
 			    QColor      barBackground,
-			    ColorList   fillColors,
-			    int         invisibleLevels ):
+			    ColorList   fillColors ):
 	    QStyledItemDelegate { treeView },
 	    _percentBarCol { percentBarCol },
 	    _sizeHintWidth { barWidth },
 	    _barBackground { barBackground },
 	    _fillColors { fillColors },
-	    _invisibleLevels { invisibleLevels },
 	    _indentation { treeView->indentation() }
 	{}
 
@@ -104,11 +101,10 @@ namespace QDirStat
 	// Data Members
 	//
 
-        int               _percentBarCol;
+	int               _percentBarCol;
 	int               _sizeHintWidth;
 	const QColor      _barBackground;
 	const ColorList   _fillColors;
-        int               _invisibleLevels;
 	int               _indentation;
 
     }; // class PercentBarDelegate
