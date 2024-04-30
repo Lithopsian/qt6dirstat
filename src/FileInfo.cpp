@@ -74,9 +74,9 @@ FileInfo::FileInfo( DirInfo           * parent,
      * Constructor from a stat buffer (i.e. based on an lstat() call).
      * This is the standard case.
      **/
+    _name { filename },
     _parent { parent },
     _tree { tree },
-    _name { filename },
     _isLocalFile { true },
     _isIgnored { false },
     _hasUidGidPerm { true }

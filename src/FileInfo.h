@@ -14,9 +14,9 @@
 #include <sys/stat.h>
 
 #include <QFileInfo>
-#include <QList>
-#include <QtMath>
+#include <QModelIndex>
 #include <QTextStream>
+#include <QtMath>
 
 #include "FileSize.h"
 
@@ -82,9 +82,9 @@ namespace QDirStat
 		  bool            isSparseFile,
 		  FileSize        blocks,
 		  nlink_t         links ):
+	    _name { filename },
 	    _parent { parent },
 	    _tree { tree },
-	    _name { filename },
 	    _isLocalFile { true },
 	    _isSparseFile { isSparseFile },
 	    _isIgnored { false },
@@ -973,13 +973,14 @@ namespace QDirStat
 
 	// Keep this short in order to use as little memory as possible -
 	// there will be a _lot_ of entries of this kind!
+	QString    _name;		// the file name (without path!)
+
 	DirInfo  * _parent;		// pointer to the parent (DirInfo) item
 	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
 	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
-	QString    _name;		// the file name (without path!)
 	bool       _isLocalFile   :1;	// flag: local or remote file?
 	bool       _isSparseFile  :1;	// flag: sparse file (file with "holes")?
 	bool       _isIgnored     :1;	// flag: ignored by rule?
@@ -1006,7 +1007,6 @@ namespace QDirStat
     //			       Static Functions
     //----------------------------------------------------------------------
 
-
     /**
      * Print the debugUrl() of a FileInfo in a debug stream.
      **/
@@ -1024,6 +1024,32 @@ namespace QDirStat
 
 	return stream;
     }
+
+
+    /**
+     * Print a QModelIndex of this model in text form to a debug stream.
+     **/
+    inline QTextStream & operator<<( QTextStream & stream, const QModelIndex & index )
+    {
+	if ( ! index.isValid() )
+	    stream << "<Invalid QModelIndex>";
+	else
+	{
+	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
+	    stream << "<QModelIndex row: " << index.row()
+		   << " col: " << index.column();
+
+	    if ( item && !item->checkMagicNumber() )
+		stream << " <INVALID FileInfo *>";
+	    else
+		stream << " " << item;
+
+	    stream << " >";
+	}
+
+	return stream;
+    }
+
 
 }	// namespace QDirStat
 

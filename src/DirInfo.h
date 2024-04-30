@@ -721,9 +721,7 @@ namespace QDirStat
 	DirSortInfo  * _sortInfo	{ nullptr };	// sorted children lists
 
 	// Summary data, not always current as indicated by the _summaryDirty flag
-	FileSize       _totalSize;
-	FileSize       _totalAllocatedSize;
-	FileSize       _totalBlocks;
+	DirReadState   _readState;
 	int            _totalItems;
 	int            _totalSubDirs;
 	int            _totalFiles;
@@ -731,10 +729,11 @@ namespace QDirStat
 	int            _totalUnignoredItems;
 	int            _directChildrenCount;
 	int            _errSubDirCount;
+	FileSize       _totalSize;
+	FileSize       _totalAllocatedSize;
+	FileSize       _totalBlocks;
 	time_t         _latestMtime;
 	time_t         _oldestFileMtime;
-
-	DirReadState   _readState;
 
     };	// class DirInfo
 
