@@ -299,7 +299,7 @@ void CleanupCollection::updateMenus()
 
     for ( QMenu * menu : _menus )
     {
-	if ( menu )
+//	if ( menu )
 	{
 	    // Remove all Cleanups from this menu
 	    removeAllFromWidget( menu );
@@ -317,7 +317,7 @@ void CleanupCollection::updateToolBars()
 
     for ( QToolBar * toolBar : _toolBars )
     {
-	if ( toolBar )
+//	if ( toolBar )
 	{
 	    // Remove all Cleanups from this tool bar
 	    removeAllFromWidget( toolBar );
@@ -377,12 +377,10 @@ void CleanupCollection::execute()
 	    break;
     }
 
-    if ( cleanup->refreshPolicy() == Cleanup::RefreshThis ||
-	 cleanup->refreshPolicy() == Cleanup::RefreshParent )
-    {
-	createRefresher( outputWindow,
-			 cleanup->refreshPolicy() == Cleanup::RefreshParent ? selection.parents() : selection );
-    }
+    if ( cleanup->refreshPolicy() == Cleanup::RefreshThis )
+	createRefresher( outputWindow, selection );
+    else if ( cleanup->refreshPolicy() == Cleanup::RefreshParent )
+	createRefresher( outputWindow, selection.parents() );
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
 	     this,         &CleanupCollection::cleanupFinished );
@@ -400,30 +398,8 @@ void CleanupCollection::execute()
         // Use a normalized FileInfoSet to avoid trying to delete an
 	// item whose ancestor is, or is going to be, deleted
 	const FileInfoSet normalized = selection.normalized();
-	DirTree * tree = normalized.first()->tree();
-
-	// Special case of deleting the toplevel
-	if ( normalized.first() == tree->firstToplevel() )
-	    // Set this here because signals won't get sent once the tree is empty
-	    _selectionModel->setCurrentItem( nullptr, true );
-
-	for ( FileInfo * item : normalized )
-	{
-	    // Don't do anything if a read is in progress or gets started
-	    if ( tree->isBusy() )
-		break;
-
-	    // Check if the item has already been deleted, by us or someone else
-	    if ( item->checkMagicNumber() )
-		tree->deleteSubtree( item );
-
-	    // Keep GUI responsive - multiple deletes in large directories can be slow
-	    qApp->processEvents();
-	}
-
-	// Any read will send signals when it is finished
-	if ( !tree->isBusy() )
-	    emit assumedDeleted();
+	normalized.first()->tree()->deleteSubtrees( normalized );
+	emit assumedDeleted();
     }
 
     outputWindow->noMoreProcesses();
@@ -635,7 +611,7 @@ void CleanupCollection::moveToTrash()
     // Move all selected items to trash
     for ( const FileInfo * item : selectedItems )
     {
-	QCoreApplication::processEvents(); // give the output window a chance
+	qApp->processEvents(); // give the output window a chance
 	if ( _trash->trash( item->path() ) )
 	    outputWindow->addStdout( tr( "Moved to trash: " ) + item->path() );
 	else

@@ -343,6 +343,12 @@ protected slots:
     void cleanupFinished( int errorCount );
 
     /**
+     * Notification that a Cleanup has completed and removed the affected
+     * items from the tree under refresh policy AssumeDeleted.
+     **/
+    void assumedDeleted();
+
+    /**
      * Navigate to the specified URL, i.e. make that directory the current and
      * selected one; scroll there and open the tree branches so that URL is
      * visible.

@@ -219,11 +219,10 @@ void SelectionModel::updateCurrentBranch( FileInfo * newItem )
 void SelectionModel::prepareRefresh( const FileInfoSet & refreshSet )
 {
     FileInfo * current = _currentItem ? _currentItem : refreshSet.first();
-    DirInfo  * dir = nullptr;
 
     if ( current )
     {
-	dir = current->isDirInfo() ? current->toDirInfo() : current->parent();
+	DirInfo * dir = current->isDirInfo() ? current->toDirInfo() : current->parent();
 
 	if ( dir && dir->isPseudoDir() )
 	    dir = dir->parent();
@@ -232,12 +231,16 @@ void SelectionModel::prepareRefresh( const FileInfoSet & refreshSet )
 	// ancestor (but not that item itself) in the refreshSet.
 	while ( dir && refreshSet.containsAncestorOf( dir ) )
 	    dir = dir->parent();
+
+	if ( dir != dir->tree()->root() )
+	{
+	    if ( _verbose )
+		logDebug() << "Selecting " << dir << Qt::endl;
+
+	    updateCurrentBranch( dir );
+	}
     }
 
-    if ( _verbose )
-	logDebug() << "Selecting " << dir << Qt::endl;
-
-    updateCurrentBranch( dir );
 }
 
 

@@ -181,12 +181,12 @@ void DirReadJob::childAdded( FileInfo *newChild )
     _tree->childAddedNotify( newChild );
 }
 
-
+/*
 void DirReadJob::deletingChild( FileInfo * deletedChild )
 {
     _tree->deletingChildNotify( deletedChild );
 }
-
+*/
 
 
 
@@ -221,7 +221,8 @@ void LocalDirReadJob::startReading()
 		break;
 
 	    default:
-		logWarning() << QString( "Unable to read directory %1 (errno=%2)" ).arg( _dirName ).arg( errno ) << Qt::endl;
+		const QString msg = "Unable to read directory %1 (errno=%2)";
+		logWarning() << msg.arg( _dirName ).arg( errno ) << Qt::endl;
 		dir()->finishReading( DirError );
 		break;
 	}

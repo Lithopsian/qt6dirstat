@@ -28,6 +28,7 @@ namespace QDirStat
     class DirInfo;
     class DirTree;
     class FileInfo;
+    class FileInfoSet;
     class PkgFilter;
 
     enum DirTreeItemSize
@@ -80,12 +81,6 @@ namespace QDirStat
 	 **/
 	QModelIndexList persistentIndexList() const
 	    { return QAbstractItemModel::persistentIndexList(); }
-
-	/**
-	 * Return 'true' if the application uses a dark widget theme.
-	 **/
-	static bool usingDarkTheme()
-	    { return QGuiApplication::palette().color( QPalette::Active, QPalette::Base ).lightness() < 160; }
 
 	/**
 	 * Return the color configured for directories with a read error.
@@ -175,18 +170,6 @@ namespace QDirStat
 	DirTreeItemSize dirTreeItemSize() const { return _treeItemSize; }
 
 	/**
-	 * Returns the tree icon directory for the given enum value.
-	 **/
-	static QString treeIconDir( DirTreeItemSize treeItemSize )
-	    { return treeItemSize == DTIS_Medium ? ":/icons/tree-medium/" : ":/icons/tree-small/"; }
-
-	/**
-	 * Returns the tree item size setting for a given icon directory string.
-	 **/
-	static DirTreeItemSize dirTreeItemSize( const QString & treeIconDir )
-	    { return treeIconDir.contains( QLatin1String( "medium" ) ) ? DTIS_Medium : DTIS_Small; }
-
-	/**
 	 * Returns the configured tree icon size.
 	 **/
 	QSize dirTreeIconSize() const
@@ -200,16 +183,6 @@ namespace QDirStat
 			     bool useBoldForDominant,
 			     DirTreeItemSize dirTreeItemSize,
 			     int updateTimerMillisec );
-
-	/**
-	 * Read parameters from settings file.
-	 **/
-	void readSettings();
-
-	/**
-	 * Write parameters to settings file.
-	 **/
-	void writeSettings();
 
 	/**
 	 * Refresh the selected items: Re-read their contents from disk.
@@ -251,38 +224,6 @@ namespace QDirStat
 	Qt::SortOrder sortOrder() const { return _sortOrder; }
 
 	/**
-	 * Return data to be displayed for the specified model index and role.
-	 **/
-	QVariant data( const QModelIndex & index, int role ) const override;
-
-	/**
-	 * Return header data (in this case: column header texts) for the
-	 * specified section (column number).
-	 **/
-	QVariant headerData( int	     section,
-			     Qt::Orientation orientation,
-			     int	     role ) const override;
-
-	/**
-	 * Return item flags for the specified model index. This specifies if
-	 * the item can be selected, edited etc.
-	 **/
-	Qt::ItemFlags flags( const QModelIndex & index ) const override;
-
-	/**
-	 * Return the model index for the specified row (direct tree child
-	 * number) and column of item 'parent'.
-	 **/
-	QModelIndex index( int row,
-			   int column,
-			   const QModelIndex & parent = QModelIndex() ) const override;
-
-	/**
-	 * Return the parent model index of item 'index'.
-	 **/
-	QModelIndex parent( const QModelIndex & index ) const override;
-
-	/**
 	 * Sort the model.
 	 **/
 	void sort( int column,
@@ -308,19 +249,8 @@ namespace QDirStat
 	 **/
 	const QIcon & networkIcon() const { return _networkIcon; }
 
-	/**
-	 * Return whether the FileInfo item exists and is still valid.
-	 **/
-	static bool checkMagicNumber( const FileInfo * item );
-
 
     public slots:
-
-	/**
-	 * Fix up sort order while reading: Sort by read jobs if the sort
-	 * column is the PercentBarCol.
-	 **/
-	void busyDisplay();
 
 #if 0
 	/**
@@ -330,12 +260,6 @@ namespace QDirStat
 #endif
 
     protected slots:
-
-	/**
-	 * Fix up sort order after reading is finished: No longer Sort by read
-	 * jobs if the sort column is the PercentBarCol.
-	 **/
-	void idleDisplay();
 
 	/**
 	 * Process notification that the read job for 'dir' is finished.
@@ -356,14 +280,14 @@ namespace QDirStat
 	void sendPendingUpdates();
 
 	/**
-	 * Notification that a subtree is about to be deleted.
+	 * Notification that items are going to be deleted from the tree.
+	 * A set of items with the same parent can be notified in a single
+	 * call.  The Qt documentation isn't clear on the matter, but in
+	 * practice the rows don't have to be contiguous (possibly due to
+	 * some specific aspect of our model).  In fact, all the child rows
+	 * could be notified for simplicity and it still works.
 	 **/
-	void deletingChild( const FileInfo * child );
-
-	/**
-	 * Notification that deleting a subtree is done.
-	 **/
-	void childDeleted();
+	void deletingChildren( DirInfo * parent, const FileInfoSet & children );
 
 	/**
 	 * Notification that a subtree is about to be cleared.
@@ -371,12 +295,27 @@ namespace QDirStat
 	void clearingSubtree( DirInfo * subtree );
 
 	/**
-	 * Notification that clearing a subtree is done.
+	 * End removing rows.
+	 *
+	 * Unlike the QAbstractItemModel's implementation, this method checks
+	 * if removing rows is in progress in the first place so there will not
+	 * be a segfault (!) if endRemoveRows is called without a corresponding
+	 * beginRemoveRows().
 	 **/
-	void subtreeCleared( DirInfo * subtree );
+	void endRemoveRows();
 
 
     protected:
+
+	/**
+	 * Read parameters from settings file.
+	 **/
+	void readSettings();
+
+	/**
+	 * Write parameters to settings file.
+	 **/
+	void writeSettings();
 
 	/**
 	 * Create a new tree (and delete the old one if there is one)
@@ -389,6 +328,18 @@ namespace QDirStat
 	void loadIcons();
 
 	/**
+	 * Returns the tree icon directory for the given enum value.
+	 **/
+	static QString treeIconDir( DirTreeItemSize treeItemSize )
+	    { return treeItemSize == DTIS_Medium ? ":/icons/tree-medium/" : ":/icons/tree-small/"; }
+
+	/**
+	 * Returns the tree item size setting for a given icon directory string.
+	 **/
+	static DirTreeItemSize dirTreeItemSize( const QString & treeIconDir )
+	    { return treeIconDir.contains( QLatin1String( "medium" ) ) ? DTIS_Medium : DTIS_Small; }
+
+	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about
 	 * new children (all the children of 'dir'). This might become
 	 * recursive if any of those children in turn are already finished.
@@ -399,6 +350,11 @@ namespace QDirStat
 	 * Notify the view about changed data of 'dir'.
 	 **/
 	void dataChangedNotify( DirInfo * dir );
+
+	/**
+	 * Notify the model about layout changes.
+	 **/
+	void idleDisplay();
 
 	/**
 	 * Update the persistent indexes with current row after sorting etc.
@@ -418,12 +374,18 @@ namespace QDirStat
 	 * Invalidate all persistent indexes in 'subtree'. 'includeParent'
 	 * indicates if 'subtree' itself will become invalid.
 	 **/
-	void invalidatePersistent( const FileInfo * subtree, bool includeParent );
+//	void invalidatePersistent( const FileInfo * subtree, bool includeParent );
 
 	/**
 	 * Return the icon to be displayed in the tree for this item.
 	 **/
 	QVariant columnIcon ( FileInfo * item, int col ) const;
+
+	/**
+	 * Return 'true' if the application uses a dark widget theme.
+	 **/
+	static bool usingDarkTheme()
+	    { return QGuiApplication::palette().color( QPalette::Active, QPalette::Base ).lightness() < 160; }
 
 	/**
 	 * Find the child number 'childNo' among the children of 'parent'.
@@ -442,19 +404,6 @@ namespace QDirStat
 	 **/
 	void beginRemoveRows( const QModelIndex & parent, int first, int last );
 
-	/**
-	 * End removing rows.
-	 *
-	 * Unlike the QAbstractItemModel's implementation, this method checks
-	 * if removing rows is in progress in the first place so there will not
-	 * be a segfault (!) if endRemoveRows is called without a corresponding
-	 * beginRemoveRows().
-	 *
-	 * As usual, Qt's item classes don't even give it an honest try to do
-	 * the most basic checking. This implementation does.
-	 **/
-	void endRemoveRows();
-
 	//
 	// Reimplemented from QAbstractItemModel:
 	//
@@ -469,6 +418,38 @@ namespace QDirStat
 	 **/
 	int columnCount( const QModelIndex & ) const override
 	    { return DataColumns::colCount(); }
+
+	/**
+	 * Return data to be displayed for the specified model index and role.
+	 **/
+	QVariant data( const QModelIndex & index, int role ) const override;
+
+	/**
+	 * Return header data (in this case: column header texts) for the
+	 * specified section (column number).
+	 **/
+	QVariant headerData( int             section,
+			     Qt::Orientation orientation,
+			     int             role ) const override;
+
+	/**
+	 * Return item flags for the specified model index. This specifies if
+	 * the item can be selected, edited etc.
+	 **/
+	Qt::ItemFlags flags( const QModelIndex & index ) const override;
+
+	/**
+	 * Return the model index for the specified row (direct tree child
+	 * number) and column of item 'parent'.
+	 **/
+	QModelIndex index( int row,
+			   int column,
+			   const QModelIndex & parent = QModelIndex() ) const override;
+
+	/**
+	 * Return the parent model index of item 'index'.
+	 **/
+	QModelIndex parent( const QModelIndex & index ) const override;
 
 
     private:
@@ -516,31 +497,6 @@ namespace QDirStat
 	QIcon  _pkgIcon;
 
     };	// class DirTreeModel
-
-
-    /**
-     * Print a QModelIndex of this model in text form to a debug stream.
-     **/
-    inline QTextStream & operator<< ( QTextStream & stream, const QModelIndex & index )
-    {
-	if ( ! index.isValid() )
-	    stream << "<Invalid QModelIndex>";
-	else
-	{
-	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
-	    stream << "<QModelIndex row: " << index.row()
-		   << " col: " << index.column();
-
-	    if ( DirTreeModel::checkMagicNumber( item ) )
-		stream << " <INVALID FileInfo *>";
-	    else
-		stream << " " << item;
-
-	    stream << " >";
-	}
-
-	return stream;
-    }
 
 }	// namespace QDirStat
 

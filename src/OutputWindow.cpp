@@ -348,7 +348,7 @@ void OutputWindow::killAll()
 
     for ( QProcess * process : _processList )
     {
-	logInfo() << "Killing process " << process << Qt::endl;
+	//logInfo() << "Killing process " << process << Qt::endl;
 	process->kill();
 	process->deleteLater();
 	++killCount;

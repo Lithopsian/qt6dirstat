@@ -64,7 +64,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
-
+//logDebug() << sizeof( FileInfo ) << "/" << sizeof( DirInfo ) << Qt::endl;
     _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
     CHECK_NEW( _historyButtons );
 
@@ -190,7 +190,7 @@ void MainWindow::connectSignals()
 	     this,                     &MainWindow::cleanupFinished );
 
     connect( cleanupCollection,        &CleanupCollection::assumedDeleted,
-             _ui->treemapView,         &TreemapView::enable );
+             this,                     &MainWindow::assumedDeleted );
 
     connect( _ui->treemapView,         &TreemapView::treemapChanged,
 	     this,                     &MainWindow::updateActions );
@@ -482,6 +482,7 @@ void MainWindow::openDir( const QString & url )
 
     try
     {
+	app()->dirTreeModel()->clear();
 	app()->dirTreeModel()->openUrl( url );
 	const QString & dirTreeUrl = app()->dirTree()->url();
 	updateWindowTitle( dirTreeUrl );
@@ -500,6 +501,7 @@ void MainWindow::openDir( const QString & url )
 
 void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
 {
+    app()->selectionModel()->clear();
     _ui->breadcrumbNavigator->clear();
     updateWindowTitle( "" );
     app()->dirTree()->sendFinished();
@@ -598,6 +600,8 @@ void MainWindow::refreshAll()
 
     //logDebug() << "Refreshing " << url << Qt::endl;
 
+    app()->dirTreeModel()->clear();
+
     if ( PkgInfo::isPkgUrl( url ) )
     {
 	readPkg( url );
@@ -637,21 +641,23 @@ void MainWindow::refreshSelected()
     busyDisplay();
 
     FileInfo * sel = app()->selectionModel()->selectedItems().first();
-    while ( sel && ( !sel->isDir() || sel->isPseudoDir() ) && sel->parent() )
+    while ( sel && !sel->isDir() && sel->parent() != sel->tree()->root() )
 	sel = sel->parent();
 
-    if ( sel && sel->isDirInfo() )
+    if ( sel )
     {
 	// logDebug() << "Refreshing " << sel << Qt::endl;
-	app()->dirTreeModel()->busyDisplay();
+//	app()->dirTreeModel()->busyDisplay();
 
 	FileInfoSet refreshSet;
 	refreshSet << sel;
-	app()->selectionModel()->prepareRefresh( refreshSet );
+
+//	setFutureSelection();
+//	app()->selectionModel()->prepareRefresh( refreshSet );
 
 	try
 	{
-	    app()->dirTree()->refresh( refreshSet );
+	    sel->tree()->refresh( refreshSet );
 	}
 	catch ( const SysCallFailedException & ex )
 	{
@@ -835,6 +841,26 @@ void MainWindow::cleanupFinished( int errorCount )
 	showProgress( tr( "Cleanup action finished with 1 error" ) );
     else
 	showProgress( tr( "Cleanup action finished with %1 errors" ).arg( errorCount ) );
+}
+
+
+void MainWindow::assumedDeleted()
+{
+    if ( app()->firstToplevel() )
+    {
+	// There won't be a selected item now, so select the current item, or root
+	FileInfo * currentItem = app()->currentItem();
+	app()->selectionModel()->setCurrentItem( currentItem ? currentItem : app()->firstToplevel(), true );
+    }
+    else
+    {
+	// Special case of the whole tree being deleted, no selection to trigger updateActions
+	_historyButtons->clearHistory();
+	updateActions();
+    }
+
+    if ( !app()->dirTree()->isBusy() )
+	_ui->treemapView->enable();
 }
 
 

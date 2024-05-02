@@ -87,6 +87,16 @@ namespace QDirStat
 	 **/
 	void setCurrentItem( FileInfo * item, bool select = false );
 
+	/**
+	 * Set the selected items, i.e., replace the complete selection.
+	 **/
+	void setSelectedItems( const FileInfoSet & selectedItems );
+
+	/**
+	 * Clear all contents.
+	 **/
+	void clear();
+
 
     public slots:
 
@@ -110,16 +120,11 @@ namespace QDirStat
 //	void extendSelection( FileInfo * item, bool clear = false );
 
 	/**
-	 * Set the selected items, i.e., replace the complete selection.
+	 * Search the dir tree for an item with the specified path and, if
+	 * successful, make it the current item.
+	 *
+	 * See also setCurrentItem( FileInfo *, bool ).
 	 **/
-	void setSelectedItems( const FileInfoSet & selectedItems );
-
-        /**
-         * Search the dir tree for an item with the specified path and, if
-         * successful, make it the current item.
-         *
-         * See also setCurrentItem( FileInfo *, bool ).
-         **/
 	void setCurrentItem( const QString & path );
 
 	/**
@@ -149,6 +154,7 @@ namespace QDirStat
 	 * item to the log.
 	 **/
 	void dumpSelectedItems();
+
 
     signals:
 
@@ -187,10 +193,6 @@ namespace QDirStat
 	void propagateSelectionChanged( const QItemSelection &,
 					const QItemSelection & );
 
-	/**
-	 * Clear all old contents.
-	 **/
-	void clear();
 	/**
 	 * Notification that a child is about to be deleted.
 	 **/

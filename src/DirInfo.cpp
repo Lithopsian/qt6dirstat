@@ -956,6 +956,7 @@ DirSortInfo::DirSortInfo( DirInfo     * parent,
     if ( parent->attic() )
 	_sortedChildren.append( parent->attic() );
 
+    // Populate a simple map of FileInfo pointers to sorted child numbers
     int childNumber = 0;
     _childNumbers.reserve( _sortedChildren.size() );
     for ( FileInfo * item : _sortedChildren )
@@ -999,7 +1000,7 @@ void DirSortInfo::findDominantChildren()
 		   << Qt::endl;
 #endif
 
-	// Add the children that are larger than the threashold to the dominant children list
+	// Return the child number of the first child after the dominance threshold
 	for ( FileInfo * child : _sortedChildren )
 	{
 	    if ( child->subtreeAllocatedPercent() < dominanceThreshold )

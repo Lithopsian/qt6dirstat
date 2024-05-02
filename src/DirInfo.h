@@ -580,7 +580,6 @@ namespace QDirStat
 	 **/
 	bool isDominantChild( FileInfo * child )
 	    { return _sortInfo ? _sortInfo->_childNumbers.value( child, -1 ) < _sortInfo->firstNonDominantChild() : false; }
-//	    { return _sortInfo ? _sortInfo->dominantChildren()->contains( child ) : false; }
 
 	/**
 	 * Finish reading the directory: Set the specified read state, send

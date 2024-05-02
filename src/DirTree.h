@@ -79,9 +79,25 @@ namespace QDirStat
 	void refresh( const FileInfoSet & refreshSet );
 
 	/**
-	 * Delete a subtree.
+	 * Delete a "subtree".  This is expected to be a directory and so no
+	 * check is made for an empty dot entry parent.  The model is notified
+	 * with a list of the children (just one) being deleted.
 	 **/
-	void deleteSubtree( FileInfo * subtree );
+	void deleteSubtree( DirInfo * subtree );
+
+	/**
+	 * Delete a list of subtrees.  These are grouped by parent, and each group
+	 * of children with the same parent is notified to the model as a single
+	 * list. This complex approach is because beginRemoveRows() is rather slow,
+	 * especially for large directories.  Calling it tens or hundreds of times
+	 * locks the program for many seconds or more.  Now only truly pathological
+	 * selections of items with hundreds of distinct parents are slow enough to
+	 * be an issue.
+	 *
+	 * Additionally, after the children of each parent have been deleted, check
+	 * if it is now an empty dot entry and delete it as well.
+	 **/
+	void deleteSubtrees( const FileInfoSet & subtrees );
 
 	/**
 	 * Delete all children of a subtree, but leave the subtree inself
@@ -139,12 +155,15 @@ namespace QDirStat
 //	const QString & device() const { return _device; }
 
 	/**
-	 * Clear all items of this tree.
+	 * Clear all items of this tree.  This should only be called from
+	 * DirTreeModel unless you have some other special way of ensuring that
+	 * the model is aware that the tree is being emptied.
 	 **/
 	void clear();
 
 	/**
-	 * Clear all items, exclude rules and filters of this tree.
+	 * Clear all exclude rules and filters of this tree.  The items themselves
+	 * are not cleared since this can only be done safely by the model.
 	 **/
 	void reset();
 
@@ -211,7 +230,7 @@ namespace QDirStat
 	 * Directory read jobs are required to call this for each deleted child
 	 * so the tree can emit the corresponding deletingChild() signal.
 	 **/
-	void deletingChildNotify( FileInfo *deletedChild );
+//	void deletingChildNotify( FileInfo *deletedChild );
 
 	/**
 	 * Notification that one or more children have been deleted.
@@ -400,14 +419,23 @@ namespace QDirStat
 	void deletingChild( FileInfo * deletedChild );
 
 	/**
-	 * Emitted after a child is deleted. If you are interested which child
-	 * it was, better use the deletingChild() signal.
-	 *
-	 * childDeleted() is only useful to rebuild a view etc. completely.
-	 * If possible, this signal is sent only once for multiple deletions -
-	 * e.g., when entire subtrees are deleted.
+	 * Emitted when several children, with the same parent, are
+	 * about to be deleted.  This will be followed by a childrenDeleted()
+	 * signal after the children have been deleted.  A deletingChild()
+	 * signal will also be generated for each individual child.
 	 **/
-	void childDeleted();
+	void deletingChildren( DirInfo * parent, const FileInfoSet & deletedChildren );
+
+	/**
+	 * Emitted after a set of children have been deleted following the
+	 * deletingChildren() signal.
+	 **/
+	void childrenDeleted();
+
+	/**
+	 * Emitted when the tree needs to be cleared by the model.
+	 **/
+//	void modelClear();
 
 	/**
 	 * Emitted when the tree is about to be cleared.
@@ -423,7 +451,7 @@ namespace QDirStat
 	/**
 	 * Emitted when clearing a subtree is finished.
 	 **/
-	void subtreeCleared( DirInfo * subtree );
+	void subtreeCleared();
 
 	/**
 	 * Emitted when reading is started.
@@ -477,6 +505,14 @@ namespace QDirStat
 	void refresh( DirInfo * subtree );
 
 	/**
+	 * Delete a child from the tree.  A signal is emitted for this child
+	 * specifically, used by SelectionModel.  This is protected: the
+	 * deleteSubtree(s) functions should be used by external callers to
+	 * properly notify DirTreeModel.
+	 **/
+	void deleteChild( FileInfo * child );
+
+	/**
 	 * Recursively force a complete recalculation of all sums.
 	 **/
 	void recalc( DirInfo * dir );
@@ -508,8 +544,8 @@ namespace QDirStat
 	bool _crossFilesystems	{ false };
 	bool _isBusy		{ false };
 	bool _beingDestroyed	{ false };
-        bool _haveClusterSize	{ false };
-        int  _blocksPerCluster	{ 0 };
+	bool _haveClusterSize	{ false };
+	int  _blocksPerCluster	{ 0 };
 	bool _ignoreHardLinks	{ false };
 
     };	// class DirTree

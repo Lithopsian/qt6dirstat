@@ -200,6 +200,17 @@ namespace
 	}
     }
 
+
+    /**
+     * Recurse through the tree from 'dir' on and ignore any empty dirs
+     **/
+    void createLocalDirReadJob( DirTree * tree, FileInfo * item )
+    {
+	LocalDirReadJob * job = new LocalDirReadJob( tree, item->toDirInfo(), false );
+	CHECK_NEW( job );
+	tree->addJob( job );
+    }
+
 } // namespace
 
 
@@ -235,7 +246,7 @@ void DirTree::setRoot( DirInfo *newRoot )
     {
 	emit deletingChild( _root );
 	delete _root;
-	emit childDeleted();
+	emit childrenDeleted();
     }
 
     _root = newRoot;
@@ -287,7 +298,6 @@ void DirTree::clear()
 
 void DirTree::reset()
 {
-    clear();
     clearTmpExcludeRules();
     clearFilters();
 }
@@ -295,9 +305,6 @@ void DirTree::reset()
 
 void DirTree::startReading( const QString & rawUrl )
 {
-    if ( _root->hasChildren() )
-	clear();
-
     const QFileInfo fileInfo( rawUrl );
     const QString canonicalPath = fileInfo.canonicalFilePath();
     _url = canonicalPath.isEmpty() ? fileInfo.absoluteFilePath() : canonicalPath;
@@ -310,21 +317,15 @@ void DirTree::startReading( const QString & rawUrl )
 
     sendStartingReading();
 
-    FileInfo * item = stat( _url, this, _root ); // will throw if it fails
-    if ( item )
+    FileInfo * item = stat( _url, this, _root );
+    if ( item ) // should always be an item, will throw if there is an error
     {
 	childAddedNotify( item );
 
 	if ( item->isDirInfo() )
-	{
-	    LocalDirReadJob * job = new LocalDirReadJob( this, item->toDirInfo(), false );
-	    CHECK_NEW( job );
-	    addJob( job );
-	}
+	    createLocalDirReadJob( this, item );
 	else
-	{
 	    sendFinished();
-	}
 
 	emit readJobFinished( _root );
     }
@@ -377,9 +378,15 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 
 void DirTree::refresh( DirInfo * subtree )
 {
+    if ( subtree->isPseudoDir() )
+	subtree = subtree->parent();
+
     if ( subtree == _root || subtree->parent() == _root )	// Refresh all (from first toplevel)
     {
-	startReading( QDir::cleanPath( firstToplevel()->url() ) );
+	// Get the url to refresh before we clear the tree
+	const QString url = firstToplevel()->url();
+	clearSubtree( _root ); // will notify the model
+	startReading( QDir::cleanPath( url ) );
     }
     else	// Refresh subtree
     {
@@ -394,23 +401,12 @@ void DirTree::refresh( DirInfo * subtree )
 
 	deleteSubtree( subtree );
 
-	FileInfo * item = stat( url, this, parent ); // will throw if it fails
-	if ( item )
+	FileInfo * item = stat( url, this, parent );
+	if ( item ) // should always be an item, will throw if there is an error
 	{
 	    childAddedNotify( item );
-
-	    LocalDirReadJob * job = new LocalDirReadJob( this, item->toDirInfo(), false );
-	    CHECK_NEW( job );
-	    addJob( job );
+	    createLocalDirReadJob( this, item );
 	}
-
-//	subtree->reset();
-//	subtree->setExcluded( false );
-//	subtree->setReadState( DirReading );
-
-//	LocalDirReadJob * job = new LocalDirReadJob( this, subtree, false );
-//	CHECK_NEW( job);
-//	addJob( job );
     }
 }
 
@@ -453,7 +449,7 @@ void DirTree::childAddedNotify( FileInfo * newChild )
 	emit childAdded( newChild->dotEntry() );
 }
 
-
+/*
 void DirTree::deletingChildNotify( FileInfo * deletedChild )
 {
     //logDebug() << "Deleting child " << deletedChild << Qt::endl;
@@ -462,40 +458,87 @@ void DirTree::deletingChildNotify( FileInfo * deletedChild )
     if ( deletedChild == _root )
 	_root = nullptr;
 }
+*/
 
-
-void DirTree::deleteSubtree( FileInfo *subtree )
+void DirTree::deleteChild( FileInfo * child )
 {
-    //logDebug() << "Deleting subtree " << subtree << Qt::endl;
+    //logDebug() << "Deleting " << child << Qt::endl;
 
-    // Send notification to anybody interested (e.g. to attached views)
-    deletingChildNotify( subtree );
+    // Send notification to anybody interested (e.g. SelectionModel)
+    emit deletingChild( child );
 
-    DirInfo * parent = subtree->parent();
+    DirInfo * parent = child->parent();
+
+    // Give the parent of the child to be deleted a chance to unlink the child
+    // from its children list and take care of internal summary fields
     if ( parent )
-    {
-	// Give the parent of the child to be deleted a chance to unlink the
-	// child from its children list and take care of internal summary
-	// fields
-	parent->unlinkChild( subtree );
-    }
+	parent->unlinkChild( child );
 
-    delete subtree;
-    emit childDeleted();
+    delete child;
+//    emit childDeleted();
 
-    // If this was the last child of a dot entry
-    if ( parent && parent->isDotEntry() && !parent->hasChildren() && parent->parent()->isFinished() )
-    {
-	//logDebug() << "Removing empty dot entry " << parent << Qt::endl;
-
-	deletingChildNotify( parent );
-	parent->parent()->unlinkChild( parent );
-	delete parent;
-	emit childDeleted();
-    }
-
-    if ( subtree == _root )
+    if ( child == _root )
 	_root = nullptr;
+}
+
+
+void DirTree::deleteSubtree( DirInfo * subtree )
+{
+    // Make a FileInfoSet to use in the signal to DirTreeModel
+    FileInfoSet children;
+    children << subtree;
+
+    emit deletingChildren( subtree->parent(), children );
+    deleteChild( subtree );
+    emit childrenDeleted();
+}
+
+
+void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
+{
+    // Don't do anything if a read is in progress or gets started
+    if ( _isBusy )
+	return;
+
+    if ( subtrees.contains( _root ) )
+	emit clearing();
+
+    // Create a map to group the items by parent
+    QMultiMap<DirInfo *, FileInfo *>parents;
+    for ( FileInfo * subtree : subtrees )
+    {
+	// Check if the item has already been deleted, by us or someone else
+	if ( subtree->checkMagicNumber() )
+	{
+	    DirInfo * parent = subtree->parent();
+	    if ( parent )
+		parents.insert( parent, subtree );
+	}
+    }
+
+    // Loop over the parents, deleting the children of each in one group
+    for ( DirInfo * parent : parents.uniqueKeys() )
+    {
+	FileInfoSet children;
+	const auto & constParents = parents;
+	const auto range = constParents.equal_range( parent );
+	for ( auto it = range.first; it != range.second; ++it )
+	    children << it.value();
+
+	emit deletingChildren( parent, children );
+
+	for ( FileInfo * child : children )
+	    deleteChild( child );
+
+	emit childrenDeleted();
+
+	// If that was the last child of a dot entry
+	if ( parent && parent->isDotEntry() && !parent->hasChildren() && parent->parent()->isFinished() )
+	{
+	    //logDebug() << "Removing empty dot entry " << parent << Qt::endl;
+	    deleteSubtree( parent );
+	}
+    }
 }
 
 
@@ -505,7 +548,7 @@ void DirTree::clearSubtree( DirInfo * subtree )
     {
 	emit clearingSubtree( subtree );
 	subtree->clear();
-	emit subtreeCleared( subtree );
+	emit subtreeCleared();
     }
 }
 
@@ -585,7 +628,7 @@ bool DirTree::readCache( const QString & cacheFileName )
 
 void DirTree::readPkg( const PkgFilter & pkgFilter )
 {
-    clear();
+//    clear();
     _url = pkgFilter.url();
 
     sendStartingReading();

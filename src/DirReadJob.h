@@ -129,7 +129,7 @@ namespace QDirStat
 	 * Derived classes are not required to handle child deletion at all,
 	 * but if they do, calling this method is required.
 	 **/
-	void deletingChild( FileInfo *deletedChild );
+//	void deletingChild( FileInfo * deletedChild );
 
 	/**
 	 * Send job finished notification to the associated tree.

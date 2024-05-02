@@ -15,7 +15,9 @@
 #include "ExcludeRules.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
+#include "FileInfoSet.h"
 #include "FormatUtil.h"
+#include "PkgFilter.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Logger.h"
@@ -38,6 +40,15 @@ namespace
     FileInfo * internalPointerCast( const QModelIndex & index )
     {
 	return static_cast<FileInfo *>( index.internalPointer() );
+    }
+
+
+    /**
+     * Return whether the FileInfo item exists and is still valid.
+     **/
+    bool checkMagicNumber( const FileInfo * item )
+    {
+	return item && item->checkMagicNumber();
     }
 
 
@@ -212,16 +223,15 @@ namespace
 
 	if ( item->isPkgInfo() && item->readState() == DirAborted )
 	{
-	    if ( col == PercentBarCol )
-		return QObject::tr( "[aborted]" );
-	    if ( !item->firstChild() && col != NameCol )
-		return '?';
+	    if ( col == PercentBarCol )                  return QObject::tr( "[aborted]" );
+	    if ( !item->firstChild() && col != NameCol ) return '?';
 	}
 
 	switch ( col )
 	{
 	    case PercentBarCol:
 	    {
+		// Leave to delegate except for special cases
 		if ( item->isBusy() )     return QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
 		if ( item->isExcluded() ) return QObject::tr( "[excluded]" );
 		return QVariant();
@@ -348,12 +358,8 @@ namespace
 	if ( !subtree )
 	    return 0;
 
-	int count = subtree->directChildrenCount();
-
-	if ( subtree->attic() )
-	    ++count;
-
-	return count;
+	const int count = subtree->directChildrenCount();
+	return subtree->attic() ? count + 1 : count;
     }
 
 
@@ -398,7 +404,7 @@ namespace
 
 
     /**
-     * Raw data for direct communication with the PercentBarDelegate
+     * Percent float value for direct communication with the PercentBarDelegate
      **/
     QVariant percentData( const DirTree * tree, FileInfo * item )
     {
@@ -414,7 +420,7 @@ namespace
 
 
     /**
-     * Raw data for direct communication with the SizeColDelegate
+     * QStringList for direct communication with the SizeColDelegate
      **/
     QVariant sizeTextData( FileInfo * item )
     {
@@ -553,9 +559,6 @@ void DirTreeModel::createTree()
 
     _tree->setExcludeRules();
 
-    connect( _tree, &DirTree::startingReading,
-	     this,  &DirTreeModel::busyDisplay );
-
     connect( _tree, &DirTree::finished,
 	     this,  &DirTreeModel::readingFinished );
 
@@ -565,17 +568,17 @@ void DirTreeModel::createTree()
     connect( _tree, &DirTree::readJobFinished,
 	     this,  &DirTreeModel::readJobFinished );
 
-    connect( _tree, &DirTree::deletingChild,
-	     this,  &DirTreeModel::deletingChild );
+    connect( _tree, &DirTree::deletingChildren,
+	     this,  &DirTreeModel::deletingChildren );
+
+    connect( _tree, &DirTree::childrenDeleted,
+	     this,  &DirTreeModel::endRemoveRows );
 
     connect( _tree, &DirTree::clearingSubtree,
 	     this,  &DirTreeModel::clearingSubtree );
 
     connect( _tree, &DirTree::subtreeCleared,
-	     this,  &DirTreeModel::subtreeCleared );
-
-    connect( _tree, &DirTree::childDeleted,
-	     this,  &DirTreeModel::childDeleted );
+	     this,  &DirTreeModel::endRemoveRows );
 }
 
 
@@ -602,7 +605,6 @@ void DirTreeModel::openUrl( const QString & url )
 {
     CHECK_PTR( _tree );
 
-    clear();
     _updateTimer.start();
     _tree->startReading( url );
 }
@@ -610,10 +612,9 @@ void DirTreeModel::openUrl( const QString & url )
 
 void DirTreeModel::readPkg( const PkgFilter & pkgFilter )
 {
-    // logDebug() << "Reading " << pkgFilter << Qt::endl;
+    //logDebug() << "Reading " << pkgFilter << Qt::endl;
     CHECK_PTR( _tree );
 
-    clear();
     _updateTimer.start();
     _tree->readPkg( pkgFilter );
 }
@@ -655,28 +656,49 @@ FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 }
 
 
-int DirTreeModel::rowNumber( const FileInfo * child ) const
-{
-    DirInfo * parent = child->parent();
-    if ( !parent )
-	return 0;
-
-    const int row = parent->childNumber( _sortCol, _sortOrder, child );
-    if ( row < 0 )
-    {
-	// Not found, should never happen
-	logError() << "Child " << child << " (" << (void *)child << ")"
-		   << " not found in " << parent << Qt::endl;
-
-	dumpDirectChildren( parent );
-    }
-
-    return row;
-}
-
 //
 // Reimplemented from QAbstractItemModel
 //
+
+QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parentIndex ) const
+{
+    if ( !_tree  || !_tree->root() || !hasIndex( row, column, parentIndex ) )
+	return QModelIndex();
+
+    FileInfo * parent = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
+    CHECK_MAGIC( parent );
+
+    if ( parent->isDirInfo() )
+    {
+	FileInfo * child = findChild( parent->toDirInfo(), row );
+	CHECK_PTR( child );
+
+	return createIndex( row, column, child );
+    }
+
+    return QModelIndex();
+}
+
+
+QModelIndex DirTreeModel::parent( const QModelIndex & index ) const
+{
+    if ( !index.isValid() )
+	return QModelIndex();
+
+    const FileInfo * child = internalPointerCast( index );
+    if ( !checkMagicNumber( child ) )
+	return QModelIndex();
+
+    FileInfo * parent = child->parent();
+    if ( !parent || parent == _tree->root() )
+	return QModelIndex();
+
+    const int row = rowNumber( parent );
+    // logDebug() << "Parent of " << child << " is " << parent << " #" << row << Qt::endl;
+
+    return createIndex( row, 0, parent );
+}
+
 
 int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 {
@@ -865,46 +887,6 @@ Qt::ItemFlags DirTreeModel::flags( const QModelIndex & index ) const
 }
 
 
-QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parentIndex ) const
-{
-    if ( !_tree  || !_tree->root() || !hasIndex( row, column, parentIndex ) )
-	return QModelIndex();
-
-    FileInfo * parent = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
-    CHECK_MAGIC( parent );
-
-    if ( parent->isDirInfo() )
-    {
-	FileInfo * child = findChild( parent->toDirInfo(), row );
-	CHECK_PTR( child );
-
-	return createIndex( row, column, child );
-    }
-
-    return QModelIndex();
-}
-
-
-QModelIndex DirTreeModel::parent( const QModelIndex & index ) const
-{
-    if ( !index.isValid() )
-	return QModelIndex();
-
-    const FileInfo * child = internalPointerCast( index );
-    if ( !checkMagicNumber( child ) )
-	return QModelIndex();
-
-    FileInfo * parent = child->parent();
-    if ( !parent || parent == _tree->root() )
-	return QModelIndex();
-
-    const int row = rowNumber( parent );
-    // logDebug() << "Parent of " << child << " is " << parent << " #" << row << Qt::endl;
-
-    return createIndex( row, 0, parent );
-}
-
-
 void DirTreeModel::sort( int column, Qt::SortOrder order )
 {
     if ( column == _sortCol && order == _sortOrder )
@@ -925,43 +907,6 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
 
     //logDebug() << "After layoutChanged()" << Qt::endl;
     // dumpPersistentIndexList( persistentIndexList() );
-}
-
-
-//---------------------------------------------------------------------------
-
-
-void DirTreeModel::busyDisplay()
-{
-    emit layoutAboutToBeChanged();
-    updatePersistentIndexes();
-    emit layoutChanged();
-}
-
-
-void DirTreeModel::idleDisplay()
-{
-    emit layoutAboutToBeChanged();
-    updatePersistentIndexes();
-    emit layoutChanged();
-}
-
-
-QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
-{
-    CHECK_PTR( _tree );
-    CHECK_PTR( _tree->root() );
-
-//    if ( checkMagicNumber( item ) && item != _tree->root() )
-    if ( checkMagicNumber( item ) )
-    {
-	const int row = rowNumber( item );
-	// logDebug() << item << " is row #" << row << " of " << item->parent() << Qt::endl;
-	if ( row >= 0 )
-	    return createIndex( row, column, item );
-    }
-
-    return QModelIndex();
 }
 
 
@@ -1099,7 +1044,6 @@ void DirTreeModel::dataChangedNotify( DirInfo * dir )
 void DirTreeModel::readingFinished()
 {
     _updateTimer.stop();
-    idleDisplay();
     sendPendingUpdates();
 
     // dumpPersistentIndexList( persistentIndexList() );
@@ -1136,13 +1080,13 @@ void DirTreeModel::beginRemoveRows( const QModelIndex & parent, int first, int l
 	logError() << "Removing rows already in progress" << Qt::endl;
 	return;
     }
-
+/* an invalid QModelIndex is used for the root node (ie. parent of firstToplevel)
     if ( !parent.isValid() )
     {
 	logError() << "Invalid QModelIndex" << parent << ", " << first << ", " << last << Qt::endl;
 	return;
     }
-
+*/
     _removingRows = true;
     QAbstractItemModel::beginRemoveRows( parent, first, last );
 }
@@ -1158,25 +1102,28 @@ void DirTreeModel::endRemoveRows()
 }
 
 
-void DirTreeModel::deletingChild( const FileInfo * child )
+void DirTreeModel::deletingChildren( DirInfo * parent, const FileInfoSet & children )
 {
-    // logDebug() << "Deleting child " << child << Qt::endl;
-
-    if ( child->parent() && ( child->parent() == _tree->root() || child->parent()->isTouched() ) )
+    const QModelIndex parentIndex = modelIndex( parent );
+    int firstRow = rowCount( parentIndex );
+    int lastRow = 0;
+    for ( const FileInfo * child : children )
     {
-	const QModelIndex parentIndex = modelIndex( child->parent() );
-	const int row = rowNumber( child );
-	//logDebug() << "beginRemoveRows for " << child << " row " << row << Qt::endl;
-	beginRemoveRows( parentIndex, row, row );
+	if ( child->parent() == parent ) // just a sanity check, should always be true
+	{
+	    const int row = rowNumber( child );
+	    if ( row > lastRow )
+		lastRow = row;
+	    if ( row < firstRow )
+		firstRow = row;
+	}
+
+//	invalidatePersistent( child, true );
     }
 
-    invalidatePersistent( child, true );
-}
+    //logDebug() << "beginRemoveRows for " << parent << ": rows " << firstRow << "-" << lastRow << Qt::endl;
 
-
-void DirTreeModel::childDeleted()
-{
-    endRemoveRows();
+    beginRemoveRows( parentIndex, firstRow, lastRow );
 }
 
 
@@ -1186,25 +1133,17 @@ void DirTreeModel::clearingSubtree( DirInfo * subtree )
 
     if ( subtree == _tree->root() || subtree->isTouched() )
     {
-	const QModelIndex subtreeIndex = modelIndex( subtree );
 	const int count = directChildrenCount( subtree );
 	if ( count > 0 )
-	{
-	    //logDebug() << "beginRemoveRows for " << subtree << " row 0 to " << count - 1 << Qt::endl;
-	    beginRemoveRows( subtreeIndex, 0, count - 1 );
-	}
+	    beginRemoveRows( modelIndex( subtree ), 0, count - 1 );
+
+	//logDebug() << "beginRemoveRows for " << subtree << " row 0 to " << count - 1 << Qt::endl;
     }
 
-    invalidatePersistent( subtree, false );
+//    invalidatePersistent( subtree, false );
 }
 
-
-void DirTreeModel::subtreeCleared( DirInfo * )
-{
-    endRemoveRows();
-}
-
-
+/*
 void DirTreeModel::invalidatePersistent( const FileInfo * subtree,
 					 bool             includeParent )
 {
@@ -1214,37 +1153,28 @@ void DirTreeModel::invalidatePersistent( const FileInfo * subtree,
 	const FileInfo * item = internalPointerCast( index );
 	CHECK_PTR( item );
 
-	if ( !item->checkMagicNumber() || item->isInSubtree( subtree ) )
+	if ( !item->checkMagicNumber() ||
+	     ( item->isInSubtree( subtree ) && ( item != subtree || includeParent ) ) )
 	{
-	    if ( item != subtree || includeParent )
-	    {
-		//logDebug() << "Invalidating " << index << Qt::endl;
-		changePersistentIndex( index, QModelIndex() );
-	    }
+	    //logDebug() << "Invalidating " << index << Qt::endl;
+	    changePersistentIndex( index, QModelIndex() );
 	}
     }
-
 }
-
-
-bool DirTreeModel::checkMagicNumber( const FileInfo * item )
-{
-    return item && item->checkMagicNumber();
-}
-
+*/
 #if 0
 void DirTreeModel::itemClicked( const QModelIndex & index )
 {
     if ( index.isValid() )
     {
-	const FileInfo * item = static_cast<const FileInfo *>( index.internalPointer() );
+	const FileInfo * item = internalPointerCast( index );
 
 	logDebug() << "Clicked row " << index.row()
 		   << " col " << index.column()
 		   << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
 		   << "\t" << item
+	 	   << " data(0): " << index.model()->data( index, 0 ).toString()
 		   << Qt::endl;
-	// << " data(0): " << index.model()->data( index, 0 ).toString()
 	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( QLatin1String( " -> " ) ) << Qt::endl;
     }
     else
@@ -1255,3 +1185,40 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
     dumpPersistentIndexList( persistentIndexList() );
 }
 #endif
+
+
+QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
+{
+    CHECK_PTR( _tree );
+    CHECK_PTR( _tree->root() );
+
+    if ( checkMagicNumber( item ) && item != _tree->root() )
+    {
+	const int row = rowNumber( item );
+	//logDebug() << item << " is row #" << row << " of " << item->parent() << Qt::endl;
+	if ( row >= 0 )
+	    return createIndex( row, column, item );
+    }
+
+    return QModelIndex();
+}
+
+
+int DirTreeModel::rowNumber( const FileInfo * child ) const
+{
+    DirInfo * parent = child->parent();
+    if ( !parent )
+	return 0;
+
+    const int row = parent->childNumber( _sortCol, _sortOrder, child );
+    if ( row < 0 )
+    {
+	// Not found, should never happen
+	logError() << "Child " << child << " (" << (void *)child << ")"
+		   << " not found in " << parent << Qt::endl;
+
+	dumpDirectChildren( parent );
+    }
+
+    return row;
+}
