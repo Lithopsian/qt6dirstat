@@ -28,8 +28,8 @@
 #define MAX_ERROR_COUNT			1000
 
 #define VERBOSE_READ			0
-#define VERBOSE_CACHE_DIRS		0
-#define VERBOSE_CACHE_FILE_INFOS	0
+#define VERBOSE_CACHE_DIRS		1
+#define VERBOSE_CACHE_FILE_INFOS	1
 #define DEBUG_LOCATE_PARENT		0
 
 
@@ -534,7 +534,7 @@ void CacheReader::addItem()
 	}
     }
 
-    if ( ( mode & S_IFDIR ) == S_IFDIR ) // directory
+    if ( S_ISDIR( mode ) ) // directory
     {
 	QString url = ( parent == _tree->root() ) ? buildPath( path, name ) : name;
 #if VERBOSE_CACHE_DIRS
