@@ -118,11 +118,11 @@ namespace QDirStat
 	 * uses PkgFilter::Auto as the default filter mode to determine the
 	 * filter mode from any special characters present in the URL, e.g.
 	 *
-	 * "Pkg:/"		       -> PkgFilter::SelectAll
-	 * contains "*" or "?"	       -> PkgFilter::Wildcard
+	 * "Pkg:/"                     -> PkgFilter::SelectAll
+	 * contains "*" or "?"         -> PkgFilter::Wildcard
 	 * contains "^" or "$" or ".*" -> PkgFilter::RegExp
-	 * "Pkg:/=foo"		       -> PkgFilter::ExactMatch
-	 * otherwise		       -> PkgFilter::StartsWith
+	 * "Pkg:/=foo"                 -> PkgFilter::ExactMatch
+	 * otherwise                   -> PkgFilter::StartsWith
 	 **/
 	void readPkg( const PkgFilter & pkgFilter );
 

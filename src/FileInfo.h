@@ -248,6 +248,20 @@ namespace QDirStat
 	dev_t device() const { return _device; }
 
 	/**
+	 * Return the row number for this item within its parent's sorted
+	 * children.  Note that it may not be valid if the children haven't
+	 * been sorted yet or if the sort order is obsolete.
+	 **/
+	int rowNumber() const { return _rowNumber; }
+
+	/**
+	 * Return the row number for this item within its parent's sorted
+	 * children.  Note that it may not be valid if the children haven't
+	 * been sorted yet or if the sort order is obsolete.
+	 **/
+	void setRowNumber( int rowNumber ) { _rowNumber = rowNumber; }
+
+	/**
 	 * The file permissions and object type as returned by lstat().
 	 * You might want to use the respective convenience methods instead:
 	 * isDir(), isFile(), ...
@@ -979,6 +993,7 @@ namespace QDirStat
 	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
+	int        _rowNumber { 0 };	// order when the children are sorted
 	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
 	bool       _isLocalFile   :1;	// flag: local or remote file?

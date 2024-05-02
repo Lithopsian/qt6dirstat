@@ -20,8 +20,6 @@ namespace QDirStat
     class DirTree;
     class DotEntry;
 
-    typedef QHash<const FileInfo *, int> ChildNumbers;
-
     /**
      * Small class to contain information about sorted children of a
      * DirInfo object.  Relatively few DirInfo objects will generally
@@ -34,35 +32,36 @@ namespace QDirStat
 
 	/**
 	 * Constructor, from a DirInfo parent item and sort order.  The
-	 * _sortedChildren list and _childNumbers lists are populated
-	 * with the direct children plus any Attic.  This information is
-	 * currently only used by DirTreeModel and is optimized for speed
-	 * due to the numerous lookups required.
+	 * _sortedChildren list is populated with the direct children plus
+	 * any Attic.  This information is currently only used by DirTreeModel
+	 * and is optimized for speed due to the numerous lookups required.
+	 * The row numbers of each child are stored on the FileInfo object
+	 * when the children are sorted.
 	 **/
-	DirSortInfo( DirInfo     * parent,
-	             DataColumn    sortCol,
-		     Qt::SortOrder sortOrder );
+	DirSortInfo( DirInfo       * parent,
+	             DataColumn      sortCol,
+		     Qt::SortOrder   sortOrder );
 
 	/**
 	 * Return a pointer to the dominant children list, creating it if
 	 * necessary.
 	 **/
 	int firstNonDominantChild()
-	    { if ( _firstNonDominantChild < 0 ) findDominantChildren(); return _firstNonDominantChild; }
+	    { return _firstNonDominantChild < 0 ? findDominantChildren() : _firstNonDominantChild; }
 
 	/**
 	 * Create a dominant children list, and populate it as appropriate.  The created
 	 * list may be empty if no children are dominant.
 	 **/
-	void findDominantChildren();
+	int findDominantChildren();
 
 
-	DataColumn     _sortedCol;
-	Qt::SortOrder  _sortedOrder;
-	FileInfoList   _sortedChildren;
-	FileInfoList * _dominantChildren { nullptr };
-	ChildNumbers   _childNumbers;
-	int            _firstNonDominantChild { -1 };
+	// Data members
+
+	DataColumn    _sortedCol;
+	Qt::SortOrder _sortedOrder;
+	FileInfoList  _sortedChildren;
+	int           _firstNonDominantChild { -1 };
 
     };	// class DirSortInfo
 
@@ -480,11 +479,13 @@ namespace QDirStat
 
 	/**
 	 * Return the numeric position of the given child pointer in the
-	 * sorted children list.  This is retrieved from a map as indexOf()
-	 * becomes very slow on long lists and this is executed frequently.
+	 * sorted children list.  This is defined here so DirTreeModel can use
+	 * it inline.  The first call ensures that the row number on FileInfo
+	 * is valid for the requested sort order, also inline unless a new
+	 * sort is required.
 	 **/
 	int childNumber( DataColumn sortCol, Qt::SortOrder sortOrder, const FileInfo * child )
-	    { return sortInfo( sortCol, sortOrder )->_childNumbers.value( child, -1 ); }
+	    { sortInfo( sortCol, sortOrder );  return child->rowNumber(); }
 
 	/**
 	 * Check if this directory is locked. This is purely a user lock
@@ -579,7 +580,7 @@ namespace QDirStat
 	 * the sort information has already been generated.
 	 **/
 	bool isDominantChild( FileInfo * child )
-	    { return _sortInfo ? _sortInfo->_childNumbers.value( child, -1 ) < _sortInfo->firstNonDominantChild() : false; }
+	    { return _sortInfo ? child->rowNumber() < _sortInfo->firstNonDominantChild() : false; }
 
 	/**
 	 * Finish reading the directory: Set the specified read state, send

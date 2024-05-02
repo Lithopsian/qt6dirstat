@@ -12,7 +12,7 @@
 #include "Exception.h"
 
 
-#define VERBOSE_DELAY           0
+#define VERBOSE_DELAY 0
 
 
 using namespace QDirStat;
@@ -54,7 +54,7 @@ void AdaptiveTimer::deliveryTimeout()
     _payload();
 
     // Average the payload time to smooth out any stray spikes
-    ( _payloadTime += _payloadStopwatch.elapsed() ) /= 2;
+    _payloadTime = ( _payloadTime + _payloadStopwatch.elapsed() ) / 2;
 
     //logDebug() << "deliveryTime=" << _deliveryTime << Qt::endl;
 

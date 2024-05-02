@@ -911,9 +911,9 @@ void DirInfo::finishReading( DirReadState readState )
 
 
 
-DirSortInfo::DirSortInfo( DirInfo     * parent,
-                          DataColumn    sortCol,
-			  Qt::SortOrder sortOrder ):
+DirSortInfo::DirSortInfo( DirInfo       * parent,
+                          DataColumn      sortCol,
+			  Qt::SortOrder   sortOrder ):
     _sortedCol { sortCol },
     _sortedOrder { sortOrder }
 {
@@ -949,7 +949,7 @@ DirSortInfo::DirSortInfo( DirInfo     * parent,
 	THROW( Exception( QString( "_directChildrenCount of %1 corrupted; is %2, should be %3" )
 			  .arg( parent->debugUrl() )
 			  .arg( parent->directChildrenCount() )
-			  .arg( _sortedChildren->size() ) ) );
+			  .arg( _sortedChildren.size() ) ) );
     }
 #endif
 
@@ -958,13 +958,12 @@ DirSortInfo::DirSortInfo( DirInfo     * parent,
 
     // Populate a simple map of FileInfo pointers to sorted child numbers
     int childNumber = 0;
-    _childNumbers.reserve( _sortedChildren.size() );
     for ( FileInfo * item : _sortedChildren )
-	_childNumbers.insert( item, childNumber++ );
+	item->setRowNumber( childNumber++ );
 }
 
 
-void DirSortInfo::findDominantChildren()
+int DirSortInfo::findDominantChildren()
 {
     _firstNonDominantChild = [ this ]()
     {
@@ -996,7 +995,7 @@ void DirSortInfo::findDominantChildren()
 #if VERBOSE_DOMINANCE_CHECK
 	logDebug() << this
 		   << "  median: "    << formatPercent( medianPercent )
-		   << "  threshold: " << formatPercent( FileSize( dominanceThreshold ) )
+		   << "  threshold: " << formatPercent( dominanceThreshold )
 		   << Qt::endl;
 #endif
 
@@ -1004,10 +1003,12 @@ void DirSortInfo::findDominantChildren()
 	for ( FileInfo * child : _sortedChildren )
 	{
 	    if ( child->subtreeAllocatedPercent() < dominanceThreshold )
-		return _childNumbers.value( child, -1 );
+		return child->rowNumber();
 	}
 
 	// Should never get here, children can't all be dominant
 	return 0;
     }();
+
+    return _firstNonDominantChild;
 }
