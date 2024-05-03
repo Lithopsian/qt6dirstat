@@ -385,6 +385,7 @@ void DirTree::refresh( DirInfo * subtree )
     {
 	// Get the url to refresh before we clear the tree
 	const QString url = firstToplevel()->url();
+	emit clearing();
 	clearSubtree( _root ); // will notify the model
 	startReading( QDir::cleanPath( url ) );
     }

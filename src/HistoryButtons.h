@@ -42,7 +42,7 @@ namespace QDirStat
 	/**
 	 * Clear the complete history.
 	 **/
-	void clearHistory() { _history->clear(); }
+	void clear() { _history->clear(); }
 
 	/**
 	 * Access to the history manager.

@@ -64,7 +64,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
-//logDebug() << sizeof( FileInfo ) << "/" << sizeof( DirInfo ) << Qt::endl;
+
     _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
     CHECK_NEW( _historyButtons );
 
@@ -456,6 +456,8 @@ void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
 {
     if ( changeHint == QAbstractItemModel::VerticalSortHint )
     {
+	_ui->dirTreeView->scrollToCurrent();
+
 	// Remember this order to restore after the next tree read
 	_sortCol = app()->dirTreeModel()->sortColumn();
 	_sortOrder = app()->dirTreeModel()->sortOrder();
@@ -465,7 +467,7 @@ void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
 
 void MainWindow::openUrl( const QString & url )
 {
-    _historyButtons->clearHistory();
+    _historyButtons->clear();
 
     if ( PkgInfo::isPkgUrl( url ) )
 	readPkg( url );
@@ -501,6 +503,7 @@ void MainWindow::openDir( const QString & url )
 
 void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
 {
+    _historyButtons->clear();
     app()->selectionModel()->clear();
     _ui->breadcrumbNavigator->clear();
     updateWindowTitle( "" );
@@ -527,6 +530,7 @@ void MainWindow::askOpenDir()
 
     if ( !path.isEmpty() )
     {
+	_historyButtons->clear();
 	tree->reset();
 	tree->setCrossFilesystems( crossFilesystems );
 	openDir( path );
@@ -541,6 +545,7 @@ void MainWindow::askOpenPkg()
 
     if ( !cancelled )
     {
+	_historyButtons->clear();
 	app()->dirTree()->reset();
 	readPkg( pkgFilter );
     }
@@ -652,7 +657,6 @@ void MainWindow::refreshSelected()
 	FileInfoSet refreshSet;
 	refreshSet << sel;
 
-//	setFutureSelection();
 //	app()->selectionModel()->prepareRefresh( refreshSet );
 
 	try
@@ -707,11 +711,11 @@ void MainWindow::stopReading()
 
 void MainWindow::readCache( const QString & cacheFileName )
 {
-    app()->dirTreeModel()->clear();
-    _historyButtons->clearHistory();
-
     if ( cacheFileName.isEmpty() )
 	return;
+
+    app()->dirTreeModel()->clear();
+    _historyButtons->clear();
 
     if ( !app()->dirTree()->readCache( cacheFileName ) )
     {
@@ -848,14 +852,15 @@ void MainWindow::assumedDeleted()
 {
     if ( app()->firstToplevel() )
     {
-	// There won't be a selected item now, so select the current item, or root
+	// There won't be a selected item now, so select the current item and bring it into view
 	FileInfo * currentItem = app()->currentItem();
 	app()->selectionModel()->setCurrentItem( currentItem ? currentItem : app()->firstToplevel(), true );
+	_ui->dirTreeView->scrollToCurrent();
     }
     else
     {
 	// Special case of the whole tree being deleted, no selection to trigger updateActions
-	_historyButtons->clearHistory();
+	_historyButtons->clear();
 	updateActions();
     }
 
@@ -970,6 +975,7 @@ void MainWindow::showFilesystems()
 
 void MainWindow::readFilesystem( const QString & path )
 {
+    _historyButtons->clear();
      app()->dirTree()->reset();
      openDir( path );
 }

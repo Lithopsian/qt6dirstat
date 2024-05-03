@@ -13,6 +13,7 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DirTreeFilter.h"
+#include "HistoryButtons.h"
 #include "PkgManager.h"
 #include "PkgQuery.h"
 #include "ExcludeRules.h"
@@ -37,7 +38,10 @@ void MainWindow::askOpenUnpkg()
     OpenUnpkgDialog dialog( this );
 
     if ( dialog.exec() == QDialog::Accepted )
+    {
+	_historyButtons->clear();
 	showUnpkgFiles( dialog.values() );
+    }
 }
 
 

@@ -85,7 +85,6 @@ void HistoryButtons::initHistoryButtons()
     QMenu * backMenu    = new QMenu();
     QMenu * forwardMenu = new QMenu();
 
-
     connect( backMenu, &QMenu::aboutToShow,
              this,     &HistoryButtons::updateHistoryMenu );
 

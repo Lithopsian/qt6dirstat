@@ -23,6 +23,7 @@ History::History()
 
 void History::clear()
 {
+    logDebug() << "Clearing history" << Qt::endl;
     _items.clear();
     _current = -1;
 }
