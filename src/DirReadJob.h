@@ -350,11 +350,6 @@ namespace QDirStat
 	void enqueue( DirReadJob * job );
 
 	/**
-	 * Remove the head of the queue and return it.
-	 **/
-//	DirReadJob * dequeue();
-
-	/**
 	 * Get the head of the queue (the next job that is due for processing).
 	 **/
 	DirReadJob * head() const { return _queue.first();}

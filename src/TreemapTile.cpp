@@ -687,7 +687,7 @@ void TreemapTile::invalidateCushions()
     setBrush( QBrush() );
 
     const auto items = childItems();
-    for ( QGraphicsItem *graphicsItem : items )
+    for ( QGraphicsItem * graphicsItem : items )
     {
         TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
         if ( tile )

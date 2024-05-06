@@ -79,11 +79,13 @@ namespace QDirStat
 	void refresh( const FileInfoSet & refreshSet );
 
 	/**
-	 * Delete a "subtree".  This is expected to be a directory and so no
-	 * check is made for an empty dot entry parent.  The model is notified
-	 * with a list of the children (just one) being deleted.
+	 * Delete a child from the tree.  A signal is emitted for this child
+	 * specifically, used by SelectionModel, but not deletingChildren()
+	 * signals for the data model.  Either the caller should notify the model
+	 * or this should only be called when the model is not yet aware it even
+	 * has children.
 	 **/
-	void deleteSubtree( DirInfo * subtree );
+	void deleteSubtree( FileInfo * child );
 
 	/**
 	 * Delete a list of subtrees.  These are grouped by parent, and each group
@@ -225,24 +227,6 @@ namespace QDirStat
 	void childAddedNotify( FileInfo *newChild );
 
 	/**
-	 * Notification that a child is about to be deleted.
-	 *
-	 * Directory read jobs are required to call this for each deleted child
-	 * so the tree can emit the corresponding deletingChild() signal.
-	 **/
-//	void deletingChildNotify( FileInfo *deletedChild );
-
-	/**
-	 * Notification that one or more children have been deleted.
-	 *
-	 * Directory read jobs are required to call this when one or more
-	 * children are deleted so the tree can emit the corresponding
-	 * deletingChild() signal. For multiple deletions (e.g. entire
-	 * subtrees) this should only happen once at the end.
-	 **/
-//	void childDeletedNotify();
-
-	/**
 	 * Send a startingReading() signal.
 	 **/
 	void sendStartingReading();
@@ -360,7 +344,7 @@ namespace QDirStat
 	 * so any FileInfo / DirInfo pointers stored outside the tree might
 	 * have become invalid.
 	 **/
-	bool beingDestroyed() const { return _beingDestroyed; }
+//	bool beingDestroyed() const { return _beingDestroyed; }
 
 	/**
 	 * Return the number of 512-bytes blocks per cluster.
@@ -410,8 +394,10 @@ namespace QDirStat
 
 	/**
 	 * Emitted when a child has been added.
+	 *
+	 * Currently nobody uses this signal.
 	 **/
-	void childAdded( FileInfo * newChild );
+//	void childAdded( FileInfo * newChild );
 
 	/**
 	 * Emitted when a child is about to be deleted.
@@ -505,12 +491,11 @@ namespace QDirStat
 	void refresh( DirInfo * subtree );
 
 	/**
-	 * Delete a child from the tree.  A signal is emitted for this child
-	 * specifically, used by SelectionModel.  This is protected: the
-	 * deleteSubtree(s) functions should be used by external callers to
-	 * properly notify DirTreeModel.
+	 * Delete a directory: so no check is made for an empty dot entry parent.
+	 * The model is notified with a list of the children (just one) being
+	 * deleted.
 	 **/
-	void deleteChild( FileInfo * child );
+	void deleteDir( DirInfo * subtree );
 
 	/**
 	 * Recursively force a complete recalculation of all sums.
@@ -543,7 +528,7 @@ namespace QDirStat
 
 	bool _crossFilesystems	{ false };
 	bool _isBusy		{ false };
-	bool _beingDestroyed	{ false };
+//	bool _beingDestroyed	{ false };
 	bool _haveClusterSize	{ false };
 	int  _blocksPerCluster	{ 0 };
 	bool _ignoreHardLinks	{ false };

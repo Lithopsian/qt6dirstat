@@ -11,8 +11,6 @@
 #include <fcntl.h>      // AT_ constants (fstatat() flags)
 #include <unistd.h>     // access(), R_OK, X_OK
 
-#include <QMutableListIterator>
-
 #include "DirReadJob.h"
 #include "DirTree.h"
 #include "DirTreeCache.h"
@@ -138,7 +136,7 @@ DirReadJob::DirReadJob( DirTree * tree,
 
 DirReadJob::~DirReadJob()
 {
-    if ( !_tree->beingDestroyed() )
+//    if ( !_tree->beingDestroyed() )
     {
 	// Only do this if the tree is not in the process of being destroyed;
 	// otherwise all FileInfo / DirInfo pointers pointing into that tree
@@ -226,6 +224,7 @@ void LocalDirReadJob::startReading()
 		dir()->finishReading( DirError );
 		break;
 	}
+
     }
     else
     {
@@ -242,8 +241,6 @@ void LocalDirReadJob::startReading()
     {
 	dir()->setReadState( DirReading );
 
-	int dirFd = dirfd( diskDir );
-
 	// QMultiMap (just like QMap) guarantees sort order by keys, so we are
 	// now iterating over the directory entries by i-number order. Most
 	// filesystems will benefit from that since they store i-nodes sorted
@@ -255,11 +252,12 @@ void LocalDirReadJob::startReading()
 	// would go missing in the DirTree.
 	QMultiMap<ino_t, QString> entryMap;
 
+	int dirFd = dirfd( diskDir );
 	struct dirent * entry;
 	while ( ( entry = readdir( diskDir ) ) )
 	{
 	    const QString entryName = QString::fromUtf8( entry->d_name );
-	    if ( entryName != QLatin1String( "." )  && entryName != QLatin1String( ".." )   )
+	    if ( entryName != QLatin1String( "." ) && entryName != QLatin1String( ".." )   )
 		entryMap.insert( entry->d_ino, entryName );
 	}
 
@@ -272,9 +270,9 @@ void LocalDirReadJob::startReading()
 	for ( const QString & entryName : entryMap )
 	{
 	    struct stat statInfo;
-	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 )	// OK?
+	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 )	// OK
 	    {
-		if ( S_ISDIR( statInfo.st_mode ) )	// directory child?
+		if ( S_ISDIR( statInfo.st_mode ) )	// directory child
 		{
 		    DirInfo *subDir = new DirInfo( dir(), tree(), entryName, statInfo );
 		    CHECK_NEW( subDir );
@@ -284,7 +282,7 @@ void LocalDirReadJob::startReading()
 		}
 		else  // non-directory child
 		{
-		    if ( entryName == defaultCacheName )	// .qdirstat.cache.gz found?
+		    if ( entryName == defaultCacheName )	// .qdirstat.cache.gz found
 		    {
 			logDebug() << "Found cache file " << defaultCacheName << Qt::endl;
 
@@ -293,19 +291,16 @@ void LocalDirReadJob::startReading()
 			// reading right now, the directory is finished reading, the read job
 			// (this object) was just deleted, and we may no longer access any
 			// member variables; just return.
-
 			if ( readCacheFile( entryName ) )
 			    return;
 		    }
 
 #if DONT_TRUST_NTFS_HARD_LINKS
-
                     if ( statInfo.st_nlink > 1 && isNtfs() )
                     {
+#if !VERBOSE_NTFS_HARD_LINKS
                         // NTFS seems to return bogus hard link counts; use 1 instead.
                         // See  https://github.com/shundhammer/qdirstat/issues/88
-
-#if !VERBOSE_NTFS_HARD_LINKS
                         if ( !_warnedAboutNtfsHardLinks )
 #endif
                         {
@@ -339,30 +334,21 @@ void LocalDirReadJob::startReading()
 
 	closedir( diskDir );
 
-	//
 	// Check all entries against exclude rules that match against any
 	// direct non-directory entry.  Don't do this check for the top-level
 	// directory.  This is only relevant to the main set of exclude rules;
 	// the temporary rules cannot include this type of rule.
 	//
-	// Doing this now is a performance optimization: This could also be
-	// done immediately after each entry is read, but that would mean
-	// iterating over all exclude rules for every single directory entry,
-	// even if there are no exclude rules that match against any
-	// files, so it would be a general performance penalty.
-	//
 	// Doing this after all entries are read means more cleanup if any
 	// exclude rule does match, but that is the exceptional case; if there
 	// are no such rules to begin with, the match function returns 'false'
 	// immediately, so the performance impact is minimal.
-
 	const bool excludeLate = _applyFileChildExcludeRules && tree()->matchesDirectChildren( dir() );
 	if ( excludeLate )
 	    excludeDirLate();
 
 	dir()->finishReading( excludeLate ? DirOnRequestOnly : DirFinished );
     }
-
 
     finished();
     // Don't add anything after finished() since this deletes this job!
@@ -443,7 +429,7 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	}
 	else
 	{
-	    //logDebug() << "Clearing subtree" << dir() << Qt::endl;
+	    //logDebug() << "Deleting subtree " << dirLocal << Qt::endl;
 
 	    dirLocal->parent()->setReadState( DirReading );
 
@@ -451,6 +437,8 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	    queue()->killSubtree( dirLocal, cacheReadJob );	// Will delete this job as well!
 	    // All data members of this object are invalid from here on!
 
+	    // Use the delete function that doesn't notify the model: the parent DirState ...
+	    // ... is DirReading, so the model thinks there are no children
 	    treeLocal->deleteSubtree( dirLocal );
 	}
 
@@ -503,7 +491,7 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
 QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
     // Avoid leading // when in root dir
-    const QString dirName = _dirName == QLatin1String( "/" ) ? "" : _dirName;
+    const QString dirName = _dirName == QLatin1String( "/" ) ? QString() : _dirName;
 
     return dirName + "/" + entryName;
 }
@@ -569,19 +557,15 @@ CacheReadJob::~CacheReadJob()
 
 void CacheReadJob::read()
 {
-    if ( !_reader )
+    if ( _reader )
     {
-	finished();
-	return;
+	//logDebug() << "Reading 1000 cache lines" << Qt::endl;
+	_reader->read( 1000 );
+	if ( _reader->ok() && !_reader->eof() )
+	    return;
     }
 
-    //logDebug() << "Reading 1000 cache lines" << Qt::endl;
-    _reader->read( 1000 );
-    if ( _reader->eof() || !_reader->ok() )
-    {
-	//logDebug() << "Cache reading finished - ok: " << _reader->ok() << Qt::endl;
-	finished();
-    }
+    finished();
 }
 
 
@@ -612,23 +596,11 @@ void DirReadJobQueue::enqueue( DirReadJob * job )
 	if ( !_timer.isActive() )
 	{
 	    // logDebug() << "First job queued" << Qt::endl;
-//	    emit startingReading();
 	    _timer.start( 0 );
 	}
     }
 }
 
-/*
-DirReadJob * DirReadJobQueue::dequeue()
-{
-    DirReadJob * job = _queue.takeFirst();
-
-    if ( job )
-	job->setQueue( nullptr );
-
-    return job;
-}
-*/
 
 void DirReadJobQueue::clear()
 {
@@ -641,13 +613,13 @@ void DirReadJobQueue::clear()
 
 void DirReadJobQueue::abort()
 {
-    for ( DirReadJob * job : _queue )
+    for ( const DirReadJob * job : _queue )
     {
 	if ( job->dir() )
 	    job->dir()->readJobAborted( job->dir() );
     }
 
-    for ( DirReadJob * job : _blocked )
+    for ( const DirReadJob * job : _blocked )
     {
 	if ( job->dir() )
 	    job->dir()->readJobAborted( job->dir() );

@@ -34,24 +34,6 @@ using namespace QDirStat;
 
 namespace
 {
-    /**
-     * Cast a QModelIndex internal pointer to a FileInfo pointer.
-     **/
-    FileInfo * internalPointerCast( const QModelIndex & index )
-    {
-	return static_cast<FileInfo *>( index.internalPointer() );
-    }
-
-
-    /**
-     * Return whether the FileInfo item exists and is still valid.
-     **/
-    bool checkMagicNumber( const FileInfo * item )
-    {
-	return item && item->checkMagicNumber();
-    }
-
-
     // Debug helpers: static so they should disappear if they aren't being used.
     // Verbose logging functions, all callers might be commented out
     [[gnu::unused]] QStringList modelTreeAncestors( const QModelIndex & index )
@@ -109,6 +91,24 @@ namespace
 
 
     /**
+     * Cast a QModelIndex internal pointer to a FileInfo pointer.
+     **/
+    FileInfo * internalPointerCast( const QModelIndex & index )
+    {
+	return static_cast<FileInfo *>( index.internalPointer() );
+    }
+
+
+    /**
+     * Return whether the FileInfo item exists and is still valid.
+     **/
+    bool checkMagicNumber( const FileInfo * item )
+    {
+	return item && item->checkMagicNumber();
+    }
+
+
+    /**
      * Format a percentage value as string if it is non-negative.
      **/
     QVariant formatPercentQVariant( float percent )
@@ -129,7 +129,7 @@ namespace
     QStringList sparseSizeText( FileInfo * item )
     {
 	const QString sizeText = formatSize( item->rawByteSize() );
-	const QString allocText = " (" % formatSize( item->rawAllocatedSize() ) % ')';
+	const QString allocText = QString( " (%1)" ).arg( formatSize( item->rawAllocatedSize() ) );
 	const QString linksText = formatLinksInline( item->links() );
 	return { sizeText, allocText, linksText };
     }
@@ -201,13 +201,13 @@ namespace
 	if ( item->isDirInfo() )
 	    return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
 
-	if ( item->isSparseFile() ) // delegate will use RawDataRole
+	if ( item->isSparseFile() ) // delegate will use SizeTextRole
 	    return QVariant();
 
 	if ( item->links() > 1 )
 	    return linksSizeText( item );
 
-	if ( useSmallFileSizeText( item ) ) // delegate will use RawDataRole
+	if ( useSmallFileSizeText( item ) ) // delegate will use SizeTextRole
 	    return QVariant();
 
 	// ... and standard formatting for everything else
@@ -224,7 +224,7 @@ namespace
 	if ( item->isPkgInfo() && item->readState() == DirAborted )
 	{
 	    if ( col == PercentBarCol )                  return QObject::tr( "[aborted]" );
-	    if ( !item->firstChild() && col != NameCol ) return '?';
+	    if ( !item->firstChild() && col != NameCol ) return "?";
 	}
 
 	switch ( col )
@@ -266,7 +266,7 @@ namespace
 		    case TotalItemsCol:
 		    case TotalFilesCol:
 		    case TotalSubDirsCol:
-			return '?';
+			return "?";
 		}
 	    }
 
@@ -715,16 +715,6 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
     {
 	case DirQueued:
 	case DirReading:
-	    // Don't mess with directories that are currently being read: If we
-	    // tell our view about them, the view might begin fetching model
-	    // indexes for them, and when the tree later sends the
-	    // readJobFinished() signal, the beginInsertRows() call in our
-	    // readJobFinished() slot will confuse the view; it would assume
-	    // that the number of children reported in that beginInsertRows()
-	    // call needs to be added to the number reported here. We'd have to
-	    // keep track how many children we already reported, and how many
-	    // new ones to report later.
-	    //
 	    // Better keep it simple: Don't report any children until they
 	    // are complete.
 	    break;
@@ -975,16 +965,14 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 	return;
     }
 
-    const QModelIndex index = modelIndex( dir );
-    const int count = directChildrenCount( dir );
     // dumpDirectChildren( dir );
-
+    const int count = directChildrenCount( dir );
     if ( count > 0 )
     {
 	// logDebug() << "Notifying view about " << count << " new children of " << dir << Qt::endl;
 
 	dir->lock();
-	beginInsertRows( index, 0, count - 1 );
+	beginInsertRows( modelIndex( dir ), 0, count - 1 );
 	dir->unlock();
 	endInsertRows();
     }
@@ -1031,7 +1019,6 @@ void DirTreeModel::dataChangedNotify( DirInfo * dir )
 
     const QModelIndex topLeft     = modelIndex( dir );
     const QModelIndex bottomRight = createIndex( topLeft.row(), DataColumns::lastCol(), dir );
-
     emit dataChanged( topLeft, bottomRight, { Qt::DisplayRole } );
 
     // logDebug() << "Data changed for " << dir << Qt::endl;
@@ -1106,6 +1093,9 @@ void DirTreeModel::deletingChildren( DirInfo * parent, const FileInfoSet & child
 {
     const QModelIndex parentIndex = modelIndex( parent );
     int firstRow = rowCount( parentIndex );
+//    if ( firstRow == 0 )
+//	return;
+
     int lastRow = 0;
     for ( const FileInfo * child : children )
     {
