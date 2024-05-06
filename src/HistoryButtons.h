@@ -47,13 +47,39 @@ namespace QDirStat
 	/**
 	 * Access to the history manager.
 	 **/
-	//	History * history() { return _history; }
+//	History * history() { return _history; }
 
 	/**
 	 * Enable or disable the browser-like "Go Back" and "Go Forward"
 	 * actions.
 	 **/
 	void updateActions();
+
+	/**
+	 * Locks the history (temporarily) so that changes to the current
+	 * item are not recorded in the history.
+	 **/
+	void lock() { _locked = true; }
+
+	/**
+	 * Returns whether the history is locked.
+	 **/
+//        void locked() const { return _locked; }
+
+	/**
+	 * Unlocked the history so that changes to the current item are
+	 * recorded in the history.  If the given current item url does not
+	 * match the current history position, it is recorded as the most
+	 * most recent.
+	 **/
+	void unlock( const FileInfo * currentItem );
+
+	/**
+	 * Remove items from the history list that can no longer be found in
+	 * the tree and make sure that there are not duplicate urls in
+	 * successive positions.
+	 **/
+//	 void clean( const FileInfo * currentItem );
 
 
     public slots:
@@ -74,7 +100,7 @@ namespace QDirStat
 	 * Add a FileInfo item to the history if it's a directory and its URL
 	 * is not the same as the current history item.
 	 **/
-	void addToHistory( FileInfo * item );
+	void addToHistory( const FileInfo * item );
 
 
     signals:
@@ -118,6 +144,7 @@ namespace QDirStat
 	History * _history;
 	QAction * _actionGoBack;
 	QAction * _actionGoForward;
+	bool      _locked { false };
 
     };
 }	// namespace QDirStat

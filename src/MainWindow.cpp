@@ -96,7 +96,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     app()->dirTreeModel()->setBaseFont( _ui->dirTreeView->font() );
 
 #ifdef Q_OS_MACX
-    // This makes the application to look more "native" on macOS
+    // This makes the application look more "native" on macOS
     setUnifiedTitleAndToolBarOnMac( true );
     _ui->toolBar->setMovable( false );
 #endif
@@ -124,9 +124,7 @@ void MainWindow::checkPkgManagerSupport()
 {
     if ( !PkgQuery::haveGetInstalledPkgSupport() || !PkgQuery::haveFileListSupport() )
     {
-	logInfo() << "No package manager support "
-		  << "for getting installed packages or file lists"
-		  << Qt::endl;
+	logInfo() << "No package manager support for getting installed packages or file lists" << Qt::endl;
 
 	_ui->actionOpenPkg->setEnabled( false );
     }
@@ -134,9 +132,7 @@ void MainWindow::checkPkgManagerSupport()
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     if ( !pkgManager || !pkgManager->supportsFileListCache() )
     {
-	logInfo() << "No package manager support "
-		  << "for getting a file lists cache"
-		  << Qt::endl;
+	logInfo() << "No package manager support for getting a file lists cache" << Qt::endl;
 
 	_ui->actionOpenUnpkg->setEnabled( false );
     }
@@ -326,6 +322,7 @@ void MainWindow::busyDisplay()
     //logInfo() << Qt::endl;
 
     _stopWatch.start();
+    _historyButtons->lock();
     _ui->treemapView->disable();
     updateActions();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
@@ -370,6 +367,7 @@ void MainWindow::idleDisplay()
     }
 
     updateFileDetailsView();
+    _historyButtons->unlock( app()->selectionModel()->currentItem() );
 }
 
 
@@ -396,7 +394,7 @@ void MainWindow::startingReading()
     // And don't do it for package reads because so many toplevel packages slow things down
     if ( !PkgInfo::isPkgUrl( app()->dirTree()->url() ) )
 	// After a short delay so there is a tree to open
-	QTimer::singleShot( 0, [this]() { expandTreeToLevel( 1 ); } );
+	QTimer::singleShot( 0, [ this ]() { expandTreeToLevel( 1 ); } );
 }
 
 
@@ -640,6 +638,7 @@ void MainWindow::refreshAll()
 void MainWindow::refreshSelected()
 {
     // logDebug() << "Setting future selection: " << _futureSelection.subtree() << Qt::endl;
+
     enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
@@ -652,12 +651,11 @@ void MainWindow::refreshSelected()
     if ( sel )
     {
 	// logDebug() << "Refreshing " << sel << Qt::endl;
-//	app()->dirTreeModel()->busyDisplay();
 
 	FileInfoSet refreshSet;
 	refreshSet << sel;
 
-//	app()->selectionModel()->prepareRefresh( refreshSet );
+//	app()->selectionModel()->prepareForRefresh( refreshSet );
 
 	try
 	{
@@ -681,9 +679,6 @@ void MainWindow::refreshSelected()
 void MainWindow::applyFutureSelection()
 {
     FileInfo * sel = _futureSelection.subtree();
-//    DirInfo  * branch = _futureSelection.dir();
-    _futureSelection.clear();
-
     if ( sel )
     {
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
@@ -696,6 +691,8 @@ void MainWindow::applyFutureSelection()
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }
+
+    _futureSelection.clear();
 }
 
 
@@ -720,8 +717,7 @@ void MainWindow::readCache( const QString & cacheFileName )
     if ( !app()->dirTree()->readCache( cacheFileName ) )
     {
 	idleDisplay();
-	const QString msg = pad( tr( "Can't read cache file " ) + cacheFileName, 50 );
-	QMessageBox::warning( this, tr( "Error" ), msg );
+	QMessageBox::warning( this, tr( "Error" ), tr( "Can't read cache file " ) + cacheFileName );
     }
 }
 
@@ -784,10 +780,8 @@ void MainWindow::showCurrent( FileInfo * item )
 {
     if ( item )
     {
-	QString msg = QString( "%1  (%2%3)" )
-	    .arg( item->debugUrl() )
-	    .arg( item->sizePrefix() )
-	    .arg( formatSize( item->totalSize() ) );
+	const QString size = formatSize( item->totalSize() );
+	QString msg = QString( "%1  (%2%3)" ).arg( item->debugUrl() ).arg( item->sizePrefix() ).arg( size );
 
 	if ( item->readState() == DirPermissionDenied || item->readState() == DirError )
 	    msg += "  " + _ui->fileDetailsView->readStateMsg( item->readState() );
@@ -803,20 +797,17 @@ void MainWindow::showCurrent( FileInfo * item )
 
 void MainWindow::showSummary()
 {
-    FileInfoSet sel = app()->selectionModel()->selectedItems();
+    const FileInfoSet sel = app()->selectionModel()->selectedItems();
     const int count = sel.size();
 
-    if ( count <= 1 )
+    if ( count > 1 )
     {
-	showCurrent( app()->currentItem() );
+	const QString size = formatSize( sel.normalized().totalSize() );
+	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" ).arg( count ).arg( size ) );
     }
     else
     {
-	sel = sel.normalized();
-
-	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" )
-				     .arg( count )
-				     .arg( formatSize( sel.totalSize() ) ) );
+	showCurrent( app()->currentItem() );
     }
 }
 
@@ -826,6 +817,7 @@ void MainWindow::startingCleanup( const QString & cleanupName )
     // Note that this is not called for actions that are not owned by the
     // CleanupCollection such as _ui->actionMoveToTrash().
 
+    _historyButtons->lock();
     setFutureSelection();
 
     showProgress( tr( "Starting cleanup action " ) + cleanupName );
@@ -839,12 +831,18 @@ void MainWindow::cleanupFinished( int errorCount )
 
     //logDebug() << "Error count: " << errorCount << Qt::endl;
 
-    if ( errorCount == 0 )
-	showProgress( tr( "Cleanup action finished successfully" ) );
-    else if ( errorCount == 1 )
-	showProgress( tr( "Cleanup action finished with 1 error" ) );
-    else
-	showProgress( tr( "Cleanup action finished with %1 errors" ).arg( errorCount ) );
+    const QString msg = [ errorCount ]()
+    {
+	if ( errorCount == 0 )
+	    return tr( "Cleanup action finished successfully" );
+
+	if ( errorCount == 1 )
+	    return tr( "Cleanup action finished with 1 error" );
+
+	return tr( "Cleanup action finished with %1 errors" ).arg( errorCount );
+    }();
+
+    showProgress( msg );
 }
 
 
@@ -856,6 +854,7 @@ void MainWindow::assumedDeleted()
 	FileInfo * currentItem = app()->currentItem();
 	app()->selectionModel()->setCurrentItem( currentItem ? currentItem : app()->firstToplevel(), true );
 	_ui->dirTreeView->scrollToCurrent();
+	_historyButtons->unlock( currentItem );
     }
     else
     {
@@ -935,6 +934,8 @@ void MainWindow::navigateToUrl( const QString & url )
 void MainWindow::moveToTrash()
 {
     // Note that moveToTrash() is not a subclass of Cleanup
+
+    _historyButtons->lock();
 
     // Save the selection - at least the first selected item
     setFutureSelection();
@@ -1055,6 +1056,9 @@ void MainWindow::changeEvent( QEvent * event )
 
 void MainWindow::quit()
 {
+    // Stop in-progress reads cleanly
+    stopReading();
+
     QCoreApplication::quit();
 }
 
