@@ -42,6 +42,17 @@ namespace QDirStat
         Trash();
 
         /**
+         * Destructor.
+         **/
+        ~Trash() { qDeleteAll( _trashDirs ); }
+
+        /**
+         * Suppress copy constructors, would need a deep copy.
+         **/
+        Trash( const Trash & ) = delete;
+        Trash & operator=( const Trash & ) = delete;
+
+        /**
          * Throw a file or directory into the trash.
          * Return 'true' on success, 'false' on error.
          **/
@@ -51,7 +62,7 @@ namespace QDirStat
          * Restore a file or directory from the trash to its original location.
          * Return 'true' on success, 'false' on error.
          **/
-    //    static bool restore( const QString & path );
+//        static bool restore( const QString & path );
 
         /**
          * Empty the trash can, i.e. delete all its contents permanently.
@@ -61,13 +72,14 @@ namespace QDirStat
          * trash directories that were used during the life time of the singleton
          * of this class.
          **/
-    //    static void empty();
+//        static void empty();
 
 
     protected:
 
         /**
-         * Return the trash dir for 'path'.
+         * Return the trash dir for 'path', creating it if necsssary and falling
+         * back to the home trash dir if necessary.
          **/
         TrashDir * trashDir( const QString & path );
 
@@ -78,8 +90,8 @@ namespace QDirStat
         // Data members
         //
 
-        TrashDir  * _homeTrashDir;
-        TrashDirMap _trashDirs;
+        TrashDir    * _homeTrashDir;
+        TrashDirMap   _trashDirs;
 
     };	// class Trash
 
@@ -111,7 +123,7 @@ namespace QDirStat
         /**
          * Return the full path for this trash directory.
          **/
-        QString path() const { return _path; }
+        const QString & path() const { return _path; }
 
         /**
          * Create a name that is unique within this trash directory.
@@ -157,7 +169,9 @@ namespace QDirStat
 
         QString _path;
         dev_t   _device;
-    };
+
+    };  // class TrashDir
+
 }	// namespace QDirStat
 
 
