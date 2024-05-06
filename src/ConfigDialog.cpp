@@ -49,13 +49,6 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
 }
 
 
-ConfigDialog::~ConfigDialog()
-{
-    // logDebug() << "ConfigDialog destructor" << Qt::endl;
-    delete _ui;
-}
-
-
 ConfigDialog * ConfigDialog::sharedInstance( QWidget * parent )
 {
     static QPointer<ConfigDialog> _sharedInstance = nullptr;

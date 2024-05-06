@@ -59,12 +59,6 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
 }
 
 
-OpenDirDialog::~OpenDirDialog()
-{
-    delete _ui;
-}
-
-
 void OpenDirDialog::initPathComboBox()
 {
     QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();

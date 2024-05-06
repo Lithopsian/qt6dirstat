@@ -227,7 +227,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~ExcludeRules();
+	~ExcludeRules() { clear(); }
 
 	/**
 	 * Suppress copy and assignment constructors (wouldn't do a deep copy)

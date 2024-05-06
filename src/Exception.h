@@ -205,7 +205,7 @@ public:
     IndexOutOfRangeException( int             invalidIndex,
 			      int             validMin,
 			      int             validMax,
-			      const QString & msg = "" ):
+			      const QString & msg = QString() ):
 	Exception ( errMsg( invalidIndex, validMin, validMax, msg ) ),
 	_invalidIndex { invalidIndex },
 	_validMin { validMin },
@@ -233,7 +233,7 @@ protected:
     QString errMsg( int             invalidIndex,
 		    int             validMin,
 		    int             validMax,
-		    const QString & msg = "" ) const;
+		    const QString & msg = QString() ) const;
 
 private:
 

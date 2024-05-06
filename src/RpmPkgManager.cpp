@@ -55,12 +55,6 @@ namespace
 } // namespace
 
 
-RpmPkgManager::RpmPkgManager()
-{
-    readSettings();
-}
-
-
 bool RpmPkgManager::isPrimaryPkgManager() const
 {
     return tryRunCommand( QString( "%1 -qf %1" ).arg( rpmCommand() ),

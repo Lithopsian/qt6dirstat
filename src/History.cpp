@@ -23,7 +23,7 @@ History::History()
 
 void History::clear()
 {
-    logDebug() << "Clearing history" << Qt::endl;
+    //logDebug() << "Clearing history" << Qt::endl;
     _items.clear();
     _current = -1;
 }
@@ -86,22 +86,14 @@ void History::add( const QString & item )
     while ( canGoForward() )
         _items.removeLast();  // _current remains the same!
 
-
-    // If the history capacity is reached, remove the oldest items
-    // until there is space for one more.
-
+    // If the history capacity is reached, remove the oldest item until there is space
     while ( _items.size() >= capacity() )
     {
         _items.removeFirst();
-
-        // Since we removed all items after the current one in the previous
-        // step, the current one is the last one.
         _current = _items.size() - 1;
     }
 
-
     // Add the new item
-
     _items << item;
     _current++;
 

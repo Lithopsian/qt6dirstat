@@ -38,47 +38,10 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~PanelMessage() override;
+	~PanelMessage() override { delete _ui; }
+
 
     public:
-	/**
-	 * Constructor.
-	 **/
-//	PanelMessage( QWidget		* parent,
-//		      const QString	& heading,
-//		      const QString	& msg );
-
-	/**
-	 * Set the "Details..." link text.
-	 **/
-//	void setDetails( const QString & urlText );
-
-	/**
-	 * Connect the "Details..." hyperlink to a receiver's slot.
-	 * The hyperlink is only shown if it is connected.
-	 *
-	 * Use the same Qt macros as if connecting a normal widget:
-	 *
-	 *   connectDetailsLink( someAction, SLOT( triggered() ) );
-	 **/
-//	void connectDetailsLink( const QObject * receiver,
-//				 const char    * slotName );
-
-	/**
-	 * Connect the "Details..." hyperlink to a web URL that will be opened
-	 * in an external browser.
-	 **/
-//	void setDetailsUrl( const QString & url );
-
-	/**
-	 * Return the URL set with setDetailsUrl().
-	 **/
-//	const QLabel * detailsLinkLabel() const { return _ui->detailsLinkLabel; }
-
-	/**
-	 * Set the icon. If not set, a generic light bulb icon is used.
-	 **/
-//	void setIcon( const QPixmap & pixmap );
 
 	/**
 	 * Delete any panel message child of 'parent' that is currently

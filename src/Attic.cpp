@@ -15,22 +15,6 @@
 using namespace QDirStat;
 
 
-Attic::Attic( DirTree * tree,
-	      DirInfo * parent ) :
-    DirInfo ( parent, tree, atticName() )
-{
-    _isIgnored = true;
-/*
-    if ( parent )
-    {
-	_device = parent->device();
-	_mode	= parent->mode();
-	_uid	= parent->uid();
-	_gid	= parent->gid();
-    }*/
-}
-
-
 FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
 {
     if ( !_tree || !_parent )

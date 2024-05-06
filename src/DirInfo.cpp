@@ -121,12 +121,6 @@ DirInfo::DirInfo( DirInfo       * parent,
 }
 
 
-DirInfo::~DirInfo()
-{
-    clear();
-}
-
-
 void DirInfo::initCounts()
 {
     // logDebug() << this << Qt::endl;

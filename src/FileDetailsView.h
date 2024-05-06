@@ -44,7 +44,7 @@ namespace QDirStat
 	/**
 	 * Destructor
 	 **/
-	~FileDetailsView() override;
+	~FileDetailsView() override { delete _ui; }
 
 	/**
 	 * Show an empty page.

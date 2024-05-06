@@ -40,7 +40,7 @@ namespace QDirStat
          * longer than after read() is finished: Once created and queued, the
          * PkgReadJobs are self-sufficient. They don't need this reader.
          **/
-        PkgReader();
+        PkgReader() { readSettings(); }
 
         /**
          * Read installed packages from the system's package manager(s), select

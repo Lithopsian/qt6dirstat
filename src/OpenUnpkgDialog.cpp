@@ -59,31 +59,26 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 }
 
 
-OpenUnpkgDialog::~OpenUnpkgDialog()
-{
-    delete _ui;
-}
-
-
 QString OpenUnpkgDialog::startingDir() const
 {
-    return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : "";
+    return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString();
 }
 
 
 QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit *widget ) const
 {
-    QStringList result;
+    QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
 
-    const QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
-    for ( QString line : lines )
+    QMutableListIterator it( lines );
+    while ( it.hasNext() )
     {
-	line = line.trimmed();
-	if ( !line.isEmpty() )
-	    result << line;
+	const QString & line = it.next();
+	it.setValue( line.trimmed() );
+	if ( it.value().isEmpty() )
+	    it.remove();
     }
 
-    return result;
+    return lines;
 }
 
 

@@ -147,7 +147,7 @@ namespace QDirStat
 	 * on which the cleanup action is performed, or their respective
 	 * parents.
 	 **/
-	void prepareRefresh( const FileInfoSet & refreshSet );
+	void prepareForRefresh( const FileInfoSet & refreshSet );
 
 	/**
 	 * For debugging: Dump the currently selected items and the current

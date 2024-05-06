@@ -48,7 +48,9 @@ namespace QDirStat
 	 * children of 'parent' (unsorted!). The dot entry is treated as a
 	 * subdirectory.
 	 **/
-	FileInfoIterator( const FileInfo * parent );
+	FileInfoIterator( const FileInfo * parent ):
+	    _parent { parent }
+	{ next(); }
 
 	/**
 	 * Return the current child object or 0 if there is no more.

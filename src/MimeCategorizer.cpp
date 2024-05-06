@@ -121,20 +121,6 @@ MimeCategorizer * MimeCategorizer::instance()
 }
 
 
-MimeCategorizer::MimeCategorizer():
-    QObject()
-{
-    //logDebug() << "Creating MimeCategorizer" << Qt::endl;
-    readSettings();
-}
-
-
-MimeCategorizer::~MimeCategorizer()
-{
-    clear();
-}
-
-
 void MimeCategorizer::clear()
 {
     qDeleteAll( _categories );

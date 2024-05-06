@@ -21,6 +21,10 @@
 #include "Exception.h"
 
 
+#define DESKTOP_APP_TERMINAL		QLatin1String( "%terminal" )
+#define DESKTOP_APP_FILE_MANAGER	QLatin1String( "%filemanager" )
+
+
 using namespace QDirStat;
 
 

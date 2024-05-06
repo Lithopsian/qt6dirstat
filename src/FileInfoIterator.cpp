@@ -20,13 +20,6 @@ using namespace QDirStat;
 
 
 
-FileInfoIterator::FileInfoIterator( const FileInfo * parent ) :
-    _parent { parent }
-{
-    next();
-}
-
-
 void FileInfoIterator::next()
 {
     if ( !_directChildrenProcessed )

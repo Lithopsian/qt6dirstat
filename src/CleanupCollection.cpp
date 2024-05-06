@@ -605,7 +605,7 @@ void CleanupCollection::moveToTrash()
     // Prepare refresher
     createRefresher( outputWindow, selectedItems.parents() );
 
-    // Window will never show for quick and successful trashes
+    // Don't show window for quick and successful trashes
     outputWindow->showAfterTimeout();
 
     // Move all selected items to trash
@@ -624,7 +624,7 @@ void CleanupCollection::moveToTrash()
 
 void CleanupCollection::createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet )
 {
-    _selectionModel->prepareRefresh( refreshSet );
+    _selectionModel->prepareForRefresh( refreshSet );
     Refresher * refresher = new Refresher( this, refreshSet );
     CHECK_NEW( refresher );
 

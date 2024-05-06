@@ -150,12 +150,6 @@ ExcludeRules::ExcludeRules( const QStringList & paths,
 }
 
 
-ExcludeRules::~ExcludeRules()
-{
-    clear();
-}
-
-
 void ExcludeRules::clear()
 {
     qDeleteAll( _rules );

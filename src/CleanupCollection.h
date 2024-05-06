@@ -29,7 +29,7 @@ namespace QDirStat
     class SelectionModel;
     class Trash;
 
-    typedef QList<Cleanup *>		CleanupList;
+    typedef QList<Cleanup *>            CleanupList;
     typedef CleanupList::const_iterator CleanupListIterator;
 
     /**
@@ -45,10 +45,10 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	CleanupCollection( QObject	  * parent,
+	CleanupCollection( QObject        * parent,
 			   SelectionModel * selectionModel,
-			   QToolBar	  * toolBar,
-			   QMenu	  * menu );
+			   QToolBar       * toolBar,
+			   QMenu          * menu );
 
 	/**
 	 * Destructor
@@ -226,7 +226,8 @@ namespace QDirStat
 	QList<QPointer<QMenu>>    _menus;
 	QList<QPointer<QToolBar>> _toolBars;
 
-    };
+    };	// class CleanupCollection
+
 }	// namespace QDirStat
 
 

@@ -29,56 +29,6 @@ PanelMessage::PanelMessage( QWidget * parent ):
 
 
 
-PanelMessage::~PanelMessage()
-{
-    delete _ui;
-}
-
-/*
-void PanelMessage::setDetails( const QString & urlText )
-{
-    _ui->detailsLinkLabel->setText( "<a href=\"details\">" + urlText + "</a>" );
-}
-
-
-void PanelMessage::connectDetailsLink( const QObject * receiver,
-				       const char    * slotName )
-{
-    _ui->detailsLinkLabel->show();
-
-    connect( _ui->detailsLinkLabel,	SIGNAL( linkActivated( QString ) ),
-	     receiver,			slotName );
-}
-
-
-void PanelMessage::setDetailsUrl( const QString & url )
-{
-    _detailsUrl = url;
-    connectDetailsLink( this, SLOT( openDetailsUrl() ) );
-}
-
-
-void PanelMessage::openDetailsUrl( const QString & url ) const
-{
-    logDebug() << url << Qt::endl;
-    SysUtil::openInBrowser( url );
-}
-
-
-void PanelMessage::setIcon( const QPixmap & pixmap )
-{
-    if ( pixmap.isNull() )
-    {
-	_ui->iconLabel->hide();
-    }
-    else
-    {
-	_ui->iconLabel->setPixmap( pixmap );
-	_ui->iconLabel->show();
-    }
-}
-*/
-
 PanelMessage * PanelMessage::createMsg( QWidget * parent, QVBoxLayout * vBox )
 {
     CHECK_PTR(vBox);

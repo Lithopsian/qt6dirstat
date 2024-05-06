@@ -102,7 +102,7 @@ namespace QDirStat
     inline QTextStream & operator<< ( QTextStream            & stream,
                                       const FileSearchFilter & filter )
     {
-        QString findType = filter.findFiles() ? QLatin1String( "files" ) : QLatin1String( "" );
+        QString findType = filter.findFiles() ? "files" : "";
 
         if ( filter.findDirs() )
         {

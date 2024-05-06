@@ -34,12 +34,6 @@ GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
 }
 
 
-GeneralConfigPage::~GeneralConfigPage()
-{
-    delete _ui;
-}
-
-
 void GeneralConfigPage::setup()
 {
     // All the values on this page are held in variables in MainWindow and

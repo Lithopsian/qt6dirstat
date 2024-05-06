@@ -81,7 +81,7 @@ void MainWindow::openActionUrl()
     if ( !action )
 	return;
 
-    const QString url = action->statusTip();
+    const QString url = action->statusTip();logDebug() << url << Qt::endl;
     if ( url.isEmpty() )
 	logError() << "No URL in statusTip() for action " << action->objectName() << Qt::endl;
     else

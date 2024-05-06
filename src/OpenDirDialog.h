@@ -53,7 +53,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~OpenDirDialog() override;
+	~OpenDirDialog() override { delete _ui; }
 
 	/**
 	 * The path of the directory the user selected.

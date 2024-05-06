@@ -136,23 +136,6 @@ FileInfo::FileInfo( DirInfo           * parent,
 }
 
 
-FileInfo::~FileInfo()
-{
-    _magic = 0;
-
-    /**
-     * The destructor should also take care of unlinking this object from
-     * its parent's children list, but regrettably that just doesn't work: At
-     * this point (within the destructor) parts of the object are already
-     * destroyed, e.g., the virtual table - virtual methods don't work any
-     * more. Thus, somebody from outside must call unlinkChild() just prior
-     * to the actual "delete".
-     *
-     * This sucks, but it's the C++ standard.
-     **/
-}
-
-
 FileSize FileInfo::size() const
 {
     const FileSize size = _isSparseFile ? _allocatedSize : _size;

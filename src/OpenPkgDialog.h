@@ -37,7 +37,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~OpenPkgDialog() override;
+	~OpenPkgDialog() override { delete _ui; }
 
 	/**
 	 * Open an "open package" dialog and wait for the user to enter

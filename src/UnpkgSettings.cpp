@@ -34,20 +34,6 @@ namespace
 } // namespace
 
 
-UnpkgSettings::UnpkgSettings()
-{
-    read();
-}
-
-
-UnpkgSettings::UnpkgSettings( const QString & startingDir ):
-    UnpkgSettings () // reads the config file settings
-{
-    // Override the settings starting dir
-    _startingDir = startingDir;
-}
-
-
 void UnpkgSettings::read()
 {
     QDirStat::Settings settings;

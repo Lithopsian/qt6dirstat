@@ -180,12 +180,6 @@ namespace
 } // namespace
 
 
-PkgReader::PkgReader()
-{
-    readSettings();
-}
-
-
 void PkgReader::read( DirTree * tree, const PkgFilter & filter )
 {
     //logInfo() << "Reading " << filter << Qt::endl;

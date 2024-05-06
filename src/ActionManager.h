@@ -41,7 +41,7 @@ namespace QDirStat
 	ActionManager() {}
 
 	/**
-	 * Return the singleton instance of this class.  Orivate, use
+	 * Return the singleton instance of this class.  Private, use
 	 * the static methods for access.
 	 **/
 	static ActionManager * instance();
@@ -147,7 +147,7 @@ namespace QDirStat
 	//
 
 	QList<QPointer<const QWidget>>   _widgetTrees;
-	CleanupCollection              * _cleanupCollection;
+	CleanupCollection              * _cleanupCollection { nullptr };
 
     };	// class ActionManager
 

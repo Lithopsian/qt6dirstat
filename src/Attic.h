@@ -35,8 +35,9 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	Attic( DirTree * tree,
-	       DirInfo * parent = nullptr );
+	Attic( DirTree * tree, DirInfo * parent = nullptr ):
+	    DirInfo ( parent, tree, atticName() )
+	{ _isIgnored = true; }
 
 	/**
 	 * Check if this is an attic entry where ignored files and directories

@@ -51,13 +51,6 @@ namespace
 }
 
 
-HistogramView::HistogramView( QWidget * parent ):
-    QGraphicsView ( parent )
-{
-    init();
-}
-
-
 void HistogramView::init()
 {
     _stats = nullptr;

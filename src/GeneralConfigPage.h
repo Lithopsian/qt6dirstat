@@ -24,7 +24,7 @@ namespace QDirStat
     public:
 
         GeneralConfigPage( ConfigDialog * parent );
-        ~GeneralConfigPage() override;
+        ~GeneralConfigPage() override { delete _ui; }
 
 
     protected slots:

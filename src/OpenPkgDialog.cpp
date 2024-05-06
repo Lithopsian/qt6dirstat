@@ -33,12 +33,6 @@ OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
 }
 
 
-OpenPkgDialog::~OpenPkgDialog()
-{
-    delete _ui;
-}
-
-
 PkgFilter OpenPkgDialog::pkgFilter()
 {
     if ( _ui->allPkgRadioButton->isChecked() )

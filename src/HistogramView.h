@@ -55,26 +55,28 @@ namespace QDirStat
 
     public:
 
-        /**
-         * zValue (altitude) for the different graphics elements
-         **/
-        enum GraphicsItemLayer
-        {
-            PanelBackgroundLayer = -100,
-            MiscLayer = 0, // Default if no zValue specified
-            BarLayer,
-            AxisLayer,
-            HoverBarLayer,
-            MarkerLayer,
-            SpecialMarkerLayer,
-            TextLayer,
-        };
+	/**
+	 * zValue (altitude) for the different graphics elements
+	 **/
+	enum GraphicsItemLayer
+	{
+	    PanelBackgroundLayer = -100,
+	    MiscLayer = 0, // Default if no zValue specified
+	    BarLayer,
+	    AxisLayer,
+	    HoverBarLayer,
+	    MarkerLayer,
+	    SpecialMarkerLayer,
+	    TextLayer,
+	};
 
 
 	/**
 	 * Constructor.
 	 **/
-	HistogramView( QWidget * parent = nullptr );
+	HistogramView( QWidget * parent = nullptr ):
+	    QGraphicsView ( parent )
+	{ init(); }
 
 	/**
 	 * Clear all data and all displayed graphics

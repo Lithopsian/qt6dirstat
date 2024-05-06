@@ -37,7 +37,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~ConfigDialog() override;
+	~ConfigDialog() override { delete _ui; }
 
 	/**
 	 * Static method for using one shared instance of this class between

@@ -10,7 +10,6 @@
 #ifndef History_h
 #define History_h
 
-#include <QString>
 #include <QStringList>
 
 
@@ -30,12 +29,19 @@ namespace QDirStat
      **/
     class History
     {
+
     public:
 
         /**
          * Constructor.
          **/
         History();
+
+        /**
+         * Replaces the entire history list.
+         **/
+        void set( QStringList & newItems, int newCurrentIndex )
+            { _items = newItems; _current = newCurrentIndex; }
 
         /**
          * Add an item to the history stack. If the stack's capacity is
@@ -138,11 +144,7 @@ namespace QDirStat
         inline int capacity() const { return HISTORY_MAX; }
 
         /**
-         * Return all items of the history stack at once. This is very similar
-         * to
-         *
-         *     for ( int i=0; i < history.size(); i++ )
-         *         doSomething( history.item( i );
+         * Return all items of the history stack at once.
          **/
         const QStringList & allItems() const { return _items; }
 

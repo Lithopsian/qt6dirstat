@@ -113,12 +113,6 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
 }
 
 
-FileDetailsView::~FileDetailsView()
-{
-    delete _ui;
-}
-
-
 void FileDetailsView::clear()
 {
     setCurrentPage( _ui->emptyPage );
@@ -194,7 +188,7 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	const QString fullTarget  = file->symLinkTarget();
 	QString shortTarget = fullTarget;
 	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( '/' ) )
-	    shortTarget = QLatin1String( ".../" ) + SysUtil::baseName( fullTarget );
+	    shortTarget = ".../" + SysUtil::baseName( fullTarget );
 	_ui->fileLinkLabel->setText( shortTarget );
 
 	if ( file->isBrokenSymLink() )

@@ -134,7 +134,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~DirInfo() override;
+	~DirInfo() override { clear(); }
 
 	/**
 	 * Returns the number of hard links, always zero for DirInfo objects.

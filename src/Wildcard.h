@@ -92,7 +92,7 @@ namespace QDirStat
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
 	static QString anchoredPattern( const QString & expression )
-	    { return QString() + QLatin1String( "\\A(?:" ) + expression + QLatin1String( ")\\z" ); }
+	    { return QString() + "\\A(?:" + expression + ")\\z"; }
 #endif
 
 	/**

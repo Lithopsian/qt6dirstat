@@ -10,16 +10,10 @@
 #define DONT_DEPRECATE_STRERROR
 #include "Logger.h"
 
-#include <QFile>
-#include <QDir>
 #include <QDateTime>
-#include <QString>
-#include <QRectF>
-#include <QPointF>
-#include <QSizeF>
-#include <QSize>
-#include <QStringList>
+#include <QDir>
 #include <QRegularExpression>
+#include <QStringList>
 
 #include <stdio.h>	// stderr, fprintf()
 #include <stdlib.h>	// abort(), mkdtemp()
@@ -63,23 +57,21 @@ namespace
 	    // Remove utterly misleading message that will just dump a ton of bug
 	    // reports on the application maintainers just because some clueless
 	    // moron put this message into the Qt libs
-	    line.remove( "Reinstalling the application may fix this problem." );
+	    line.remove( QLatin1String( "Reinstalling the application may fix this problem." ) );
 
 	    if ( !line.trimmed().isEmpty() )
 	    {
-		Logger::log( 0, // use default logger
-			     context.file, context.line, context.function,
-			     toLogSeverity( msgType ) )
+		Logger::log( 0, context.file, context.line, context.function, toLogSeverity( msgType ) )
 		    << "[Qt] " << line << Qt::endl;
 	    }
 	}
 
 	if ( msgType == QtFatalMsg )
 	{
-	    if ( msg.contains( "Could not connect to display" ) ||
-		 msg.contains( "failed to start because no Qt platform plugin" ) )
+	    if ( msg.contains( QLatin1String( "Could not connect to display" ) ) ||
+		 msg.contains( QLatin1String( "failed to start because no Qt platform plugin" ) ) )
 	    {
-		if ( msg.contains( "Reinstalling the application may fix this problem" ) )
+		if ( msg.contains( QLatin1String( "Reinstalling the application may fix this problem" ) ) )
 		{
 		    // Suppress this new message which is complete and utter garbage:
 		    //
@@ -92,8 +84,8 @@ namespace
 		    // Even a simple "I don't know what the problem is" is more
 		    // helpful than this.
 		    //
-		    const QString text = "FATAL: Could not connect to the display.";
-		    fprintf( stderr, "\n%s\n", qPrintable( text ) );
+		    const char * text = "FATAL: Could not connect to the display.";
+		    fprintf( stderr, "\n%s\n", text );
 		    logError() << text << Qt::endl;
 		}
 		else
@@ -449,7 +441,7 @@ QTextStream & Logger::log( const QString & srcFile,
     if ( severity < _logLevel )
 	return _nullStream;
 
-    const QString sev = [ severity ]()
+    const auto sev = [ severity ]()
     {
 	switch ( severity )
 	{

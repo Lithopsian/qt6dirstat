@@ -43,14 +43,6 @@ namespace
 } // namespace
 
 
-MountPoint::~MountPoint()
-{
-#if HAVE_Q_STORAGE_INFO
-    delete _storageInfo;
-#endif
-}
-
-
 bool MountPoint::isNetworkMount() const
 {
     const QString fsType = _filesystemType.toLower();

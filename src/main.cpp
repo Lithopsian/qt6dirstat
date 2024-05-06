@@ -74,8 +74,7 @@ bool commandLineSwitch( const QString & longName,
 			const QString & shortName,
 			QStringList   & argList )
 {
-    if ( argList.contains( longName  ) ||
-	 argList.contains( shortName )	 )
+    if ( argList.contains( longName ) || argList.contains( shortName ) )
     {
 	argList.removeAll( longName  );
 	argList.removeAll( shortName );
@@ -98,7 +97,7 @@ void reportFatalError()
 {
     QStringList argList = QCoreApplication::arguments();
     argList.removeFirst(); // Remove program name
-    cerr << "FATAL: Bad command line args: " << qPrintable( argList.join( " " ) ) << std::endl;
+    cerr << "FATAL: Bad command line args: " << qPrintable( argList.join( ' ' ) ) << std::endl;
 }
 
 
@@ -147,8 +146,8 @@ int main( int argc, char *argv[] )
     logVersion();
 
     // Set org/app name for QSettings
-    QCoreApplication::setOrganizationName  ( "Qt6DirStat" );
-    QCoreApplication::setApplicationName   ( "Qt6DirStat" );
+    QCoreApplication::setOrganizationName( "Qt6DirStat" );
+    QCoreApplication::setApplicationName ( "Qt6DirStat" );
 //    QCoreApplication::setApplicationVersion( QDIRSTAT_VERSION );
 
     MainWindow * mainWin = new MainWindow( slowUpdate );

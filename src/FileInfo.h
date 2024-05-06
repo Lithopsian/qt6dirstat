@@ -172,10 +172,14 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 *
-	 * Don't forget to call FileInfo::unlinkChild() when deleting
-	 * objects of this class!
+	 * The destructor should also take care of unlinking this object from
+	 * its parent's children list, but regrettably that just doesn't work: At
+	 * this point (within the destructor) parts of the object are already
+	 * destroyed, e.g., the virtual table - virtual methods don't work any
+	 * more. Thus, somebody from outside must call unlinkChild() just prior
+	 * to the actual "delete".
 	 **/
-	virtual ~FileInfo();
+	virtual ~FileInfo() { _magic = 0; }
 
 	/**
 	 * Check with the magic number if this object is valid.

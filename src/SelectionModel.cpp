@@ -216,7 +216,7 @@ void SelectionModel::updateCurrentBranch( FileInfo * newItem )
 }
 
 
-void SelectionModel::prepareRefresh( const FileInfoSet & refreshSet )
+void SelectionModel::prepareForRefresh( const FileInfoSet & refreshSet )
 {
     FileInfo * current = _currentItem ? _currentItem : refreshSet.first();
 
@@ -249,8 +249,18 @@ void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
     _selectedItemsDirty = true;
     _selectedItems.clear();
 
-    if ( _currentItem && _currentItem->isInSubtree( deletedChild ) )
+    // When the last child is deleted, the current item is lost (by QAbstractItemModel?)
+    if ( !_currentItem )
+    {
+	// The most sensible choice seems to be the parent of the last child being deleted
+	if ( deletedChild->parent() != _dirTreeModel->tree()->root() )
+	    setCurrentItem( deletedChild->parent() );
+    }
+    else if ( _currentItem->isInSubtree( deletedChild ) )
+    {
+	// Not sure this can happen, but this should avoid a dangling pointer
 	setCurrentItem( nullptr );
+    }
 }
 
 

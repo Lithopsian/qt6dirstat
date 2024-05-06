@@ -27,7 +27,7 @@ namespace QDirStat
 	/**
 	 * Default constructor, reads the configured settings.
 	 **/
-	UnpkgSettings();
+	UnpkgSettings() { read(); }
 
 	/**
 	 * Alternate constructor, uses the four values passed in as
@@ -47,7 +47,7 @@ namespace QDirStat
 	 * Alternate constructor, uses the string passed in as the
 	 * startingDir instead of the value from the config file.
 	 **/
-	UnpkgSettings( const QString & startingDir );
+	UnpkgSettings( const QString & startingDir ) { _startingDir = startingDir; }
 
 	/**
 	 * Returns the default settings in the form of an UnpkgSettings

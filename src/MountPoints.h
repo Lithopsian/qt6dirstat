@@ -52,7 +52,11 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~MountPoint();
+#if HAVE_Q_STORAGE_INFO
+	~MountPoint() { delete _storageInfo; }
+#else
+	~MountPoint() = default;
+#endif
 
 	/**
 	 * Suppress copy and assignment constructors (would need deep copies)

@@ -8,8 +8,8 @@
  */
 
 #include "Refresher.h"
-#include "DirTree.h"
 #include "DirInfo.h"
+#include "DirTree.h"
 #include "Exception.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -31,7 +31,7 @@ void Refresher::refresh()
 	DirTree * tree = _items.first()->tree();
 	if ( tree )
 	{
-	    // This can throw now, but not a lot we can do about it
+	    // This can throw when refreshing the root and it is no longer accessible
 	    try
 	    {
 		tree->refresh( _items );

@@ -31,7 +31,7 @@ namespace QDirStat
     {
     public:
 
-	RpmPkgManager();
+	RpmPkgManager() { readSettings(); }
 
 	/**
 	 * Return the name of this package manager.

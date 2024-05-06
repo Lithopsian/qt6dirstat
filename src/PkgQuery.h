@@ -149,9 +149,9 @@ namespace QDirStat
 
 	// Data members
 
-	QList <const PkgManager *> _pkgManagers;
+	QList<const PkgManager *> _pkgManagers;
 
-	QCache<QString, QString>   _cache; // mapping of paths and package names
+	QCache<QString, QString>  _cache; // mapping of paths and package names
 
     }; // class PkgQuery
 

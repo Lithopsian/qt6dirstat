@@ -54,7 +54,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~OpenUnpkgDialog() override;
+	~OpenUnpkgDialog() override { delete _ui; }
 
 	/**
 	 * Get all values from the widgets at once.
