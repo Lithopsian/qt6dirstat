@@ -207,21 +207,6 @@ void MainWindow::connectSignals()
 }
 
 
-void MainWindow::updateSettings( bool urlInWindowTitle,
-                                 bool useTreemapHover,
-                                 int  statusBarTimeout,
-                                 int  longStatusBarTimeout )
-{
-    _urlInWindowTitle = urlInWindowTitle;
-    updateWindowTitle( app()->dirTree()->url() );
-
-    _ui->treemapView->setUseTreemapHover( useTreemapHover );
-
-    _statusBarTimeout     = statusBarTimeout;
-    _longStatusBarTimeout = longStatusBarTimeout;
-}
-
-
 void MainWindow::readSettings()
 {
     QDirStat::Settings settings;
@@ -297,6 +282,13 @@ void MainWindow::writeSettings()
     settings.endGroup();
 
     writeLayoutSettings();  // see MainWindowLayout.cpp
+}
+
+
+void MainWindow::setUrlInWindowTitle( bool newValue )
+{
+    _urlInWindowTitle = newValue;
+    updateWindowTitle( app()->dirTree()->url() );
 }
 
 
@@ -521,7 +513,7 @@ void MainWindow::askOpenDir()
     bool crossFilesystems = tree->crossFilesystems();
 
 #if USE_CUSTOM_OPEN_DIR_DIALOG
-    const QString path = QDirStat::OpenDirDialog::askOpenDir( this, &crossFilesystems );
+    const QString path = QDirStat::OpenDirDialog::askOpenDir( this, crossFilesystems );
 #else
     const QString path = QFileDialog::getExistingDirectory( this, tr("Select directory to scan") );
 #endif

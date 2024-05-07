@@ -51,13 +51,14 @@ void GeneralConfigPage::setup()
         _ui->treeIconThemeComboBox->setCurrentIndex( dirTreeModel->dirTreeItemSize() );
     }
 
-    _ui->urlInWindowTitleCheckBox->setChecked( mainWindow->urlInWindowTitle() );
-    _ui->useTreemapHoverCheckBox->setChecked ( mainWindow->treemapView()->useTreemapHover() );
+    _ui->urlInWindowTitleCheckBox->setChecked  ( mainWindow->urlInWindowTitle() );
+    _ui->dirReadWarningCheckBox->setChecked    ( mainWindow->showDirPermissionsMsg() );
+    _ui->useTreemapHoverCheckBox->setChecked   ( mainWindow->treemapView()->useTreemapHover() );
     _ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
-    _ui->statusBarLongTimeoutSpinBox->setValue( mainWindow->longStatusBarTimeout() / 1000.0 );
+    _ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
 
     // add word-joiner character to stop unwanted line breaks
-    const QString joinedFileName = Settings::primaryFileName().replace( '/', QLatin1String( "/⁠" ) );
+    const QString joinedFileName = Settings::primaryFileName().replace( '/', "/⁠" );
     _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) + joinedFileName );
 
 }
@@ -80,9 +81,10 @@ void GeneralConfigPage::applyChanges()
                                       _ui->treeUpdateIntervalSpinBox->value() );
     }
 
-    mainWindow->updateSettings( _ui->urlInWindowTitleCheckBox->isChecked(),
-                                _ui->useTreemapHoverCheckBox->isChecked(),
-                                1000 * _ui->statusBarShortTimeoutSpinBox->value(),
-                                1000 * _ui->statusBarLongTimeoutSpinBox->value() );
+    mainWindow->setUrlInWindowTitle              ( _ui->urlInWindowTitleCheckBox->isChecked() );
+    mainWindow->setShowDirPermissionsMsg         ( _ui->dirReadWarningCheckBox->isChecked() );
+    mainWindow->treemapView()->setUseTreemapHover( _ui->useTreemapHoverCheckBox->isChecked() );
+    mainWindow->setStatusBarTimeout              ( 1000 * _ui->statusBarShortTimeoutSpinBox->value() );
+    mainWindow->setLongStatusBarTimeout          ( 1000 * _ui->statusBarLongTimeoutSpinBox->value() );
 
 }

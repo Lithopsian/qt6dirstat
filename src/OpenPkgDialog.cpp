@@ -8,8 +8,10 @@
  */
 
 #include "OpenPkgDialog.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "Logger.h"
+#include "Settings.h"
+#include "SettingsHelpers.h"
 
 
 using namespace QDirStat;
@@ -30,6 +32,14 @@ OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
     connect( _ui->pkgPatternField, &QLineEdit::textChanged,
              this,                 &OpenPkgDialog::textEdited );
 
+    readWindowSettings( this, "OpenPkgDialog" );
+}
+
+
+OpenPkgDialog::~OpenPkgDialog()
+{
+    delete _ui;
+    writeWindowSettings( this, "OpenPkgDialog" );
 }
 
 

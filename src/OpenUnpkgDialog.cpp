@@ -59,6 +59,13 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 }
 
 
+OpenUnpkgDialog::~OpenUnpkgDialog()
+{
+    delete _ui;
+    writeWindowSettings( this, "OpenUnpkgDialog" );
+}
+
+
 QString OpenUnpkgDialog::startingDir() const
 {
     return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString();
@@ -111,7 +118,7 @@ void OpenUnpkgDialog::readSettings()
 {
     setValues( UnpkgSettings() );
 
-    readWindowSettings( this, "OpenUnkpgDialog" );
+    readWindowSettings( this, "OpenUnpkgDialog" );
 }
 
 
@@ -119,6 +126,4 @@ void OpenUnpkgDialog::writeSettings()
 {
     UnpkgSettings settings = values();
     settings.write();
-
-    writeWindowSettings( this, "OpenUnkpgDialog" );
 }

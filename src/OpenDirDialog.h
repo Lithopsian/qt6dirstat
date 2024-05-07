@@ -39,7 +39,7 @@ namespace QDirStat
 	 * 'crossFilesystems' (if non-null) returns the "cross filesystems"
 	 * flag of the dialog.
 	 **/
-	static QString askOpenDir( QWidget * parent, bool * crossFilesystems );
+	static QString askOpenDir( QWidget * parent, bool & crossFilesystems );
 
 
     protected:
@@ -53,7 +53,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~OpenDirDialog() override { delete _ui; }
+	~OpenDirDialog() override;
 
 	/**
 	 * The path of the directory the user selected.
@@ -116,19 +116,13 @@ namespace QDirStat
 	 **/
 	void pathEdited( bool ok );
 
-	/**
-	 * Select a directory once everything is initialized and the first
-	 * signals are processed.
-	 **/
-	void initialSelection();
-
 
     protected:
 
 	void initPathComboBox();
 	void initDirTree();
 	void initConnections();
-	void populatePathComboBox( const QString & path );
+	void populatePathComboBox();
 
 
     private:

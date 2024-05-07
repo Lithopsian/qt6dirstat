@@ -178,28 +178,32 @@ public: // for the config dialog
     TreemapView * treemapView() const { return _ui->treemapView; }
 
     /**
-     * Return the setting for UrlInWindowTitle
+     * The setting for whether the url of the current tree root is
+     * included in the window title.
      **/
     bool urlInWindowTitle() const { return _urlInWindowTitle; }
+    void setUrlInWindowTitle( bool newValue );
+
+    /**
+     * The setting for whether the read permissions warning panel message
+     * is displayed when not all directories can be read due to
+     * insufficient permissions.
+     **/
+    bool showDirPermissionsMsg() const { return _showDirPermissionsMsg; }
+    void setShowDirPermissionsMsg( bool newValue ) { _showDirPermissionsMsg = newValue; }
 
     /**
      * Return the setting for StatusBarTimeoutMillisec
      **/
     int statusBarTimeout() const { return _statusBarTimeout; }
+    void setStatusBarTimeout( int newValue ) { _statusBarTimeout = newValue; }
 
     /**
      * Return the setting for Long StatusBarTimeout
      **/
     int longStatusBarTimeout() const { return _longStatusBarTimeout; }
+    void setLongStatusBarTimeout( int newValue ) { _longStatusBarTimeout = newValue; }
 
-    /**
-     * Update internal settings from the general configuration page.
-     * Any changes will be saved to the config file in the destructor.
-     **/
-    void updateSettings( bool urlInWindowTitle,
-                         bool useTreemapHover,
-                         int statusBarTimeout,
-                         int longStatusBarTimeout );
 
 protected slots:
 

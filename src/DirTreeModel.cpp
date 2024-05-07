@@ -518,11 +518,7 @@ void DirTreeModel::updateSettings( bool crossFilesystems,
 				   DirTreeItemSize dirTreeItemSize,
 				   int updateTimerMillisec )
 {
-    // Avoid overwriting the dialog setting unless there is an actual change
-    if ( _crossFilesystems != crossFilesystems )
-	_tree->setCrossFilesystems( _crossFilesystems );
     _crossFilesystems = crossFilesystems;
-
     _useBoldForDominantItems = useBoldForDominant;
     _treeItemSize = dirTreeItemSize;
     _updateTimerMillisec = updateTimerMillisec;

@@ -55,7 +55,15 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
     _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
     _ui->pathComboBox->setFocus();
 
-    QTimer::singleShot( 200, this, &OpenDirDialog::initialSelection );
+    setPath( QDir::currentPath() );
+}
+
+
+OpenDirDialog::~OpenDirDialog()
+{
+    // Always save the window geometry, even if cancelled
+    writeSettings();
+    delete _ui;
 }
 
 
@@ -84,7 +92,7 @@ void OpenDirDialog::initDirTree()
                                  QDir::NoDot      |
                                  QDir::NoDotDot   |
                                  QDir::NoSymLinks |
-                                 QDir::Drives      );
+                                 QDir::Drives );
 
     _ui->dirTreeView->setModel( _filesystemModel );
     _ui->dirTreeView->hideColumn( 3 );  // Date Modified
@@ -112,27 +120,12 @@ void OpenDirDialog::initConnections()
     connect( _validator,        &ExistingDirValidator::isOk,
              this,              &OpenDirDialog::pathEdited );
 
-    connect( this,              &OpenDirDialog::accepted,
-             this,              &OpenDirDialog::writeSettings );
-
     connect( _ui->pathSelector, &PathSelector::pathSelected,
              this,              &OpenDirDialog::setPathAndExpand );
 
     connect( _ui->pathSelector, &PathSelector::pathDoubleClicked,
              this,              &OpenDirDialog::setPathAndAccept );
 
-}
-
-
-void OpenDirDialog::initialSelection()
-{
-    const QString path = QDir::currentPath();
-
-#if VERBOSE_SELECTION
-    logDebug() << "Selecting " << path << Qt::endl;
-#endif
-
-    setPath( path );
 }
 
 
@@ -167,16 +160,18 @@ void OpenDirDialog::setPath( const QString & path )
     // This would mean that the dirTreeView also isn't notified,
     // so any change would not become visible in the tree.
 
-    populatePathComboBox( path );
+    _ui->dirTreeView->setCurrentIndex( _filesystemModel->index( path ) );
 
+    populatePathComboBox();
     QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();
     if ( lineEdit )
         lineEdit->setText( path );
 
-//    _ui->pathSelector->selectParentMountPoint( path );
-    const QModelIndex index = _filesystemModel->index( path );
-    _ui->dirTreeView->setCurrentIndex( index );
-    _ui->dirTreeView->scrollTo( index );
+    // Once the tree is populated and expanded, scroll to the selected row
+    QTimer::singleShot( 250, [ this, path ]()
+    {
+        _ui->dirTreeView->scrollTo( _filesystemModel->index( path ) );
+    } );
 
     _lastPath = path;
     _settingPath = false;
@@ -210,63 +205,31 @@ void OpenDirDialog::pathEdited( bool ok )
     const SignalBlocker sigBlockerComboBox ( _ui->pathComboBox );
     const SignalBlocker sigBlockerValidator( _validator );
 
-    const QString path = _ui->pathComboBox->currentText();
-    if ( path != _lastPath )
-    {
-#if VERBOSE_SELECTION
-        logDebug() << "New path:" << path << Qt::endl;
-#endif
-        setPath( path );
-    }
+    setPath( _ui->pathComboBox->currentText() );
 }
 
 
 void OpenDirDialog::treeSelection( const QModelIndex & newCurrentItem,
                                    const QModelIndex & )
 {
-    const QString path = _filesystemModel->filePath( newCurrentItem );
-
-    if ( path != _lastPath )
-    {
-#if VERBOSE_SELECTION
-        logDebug() << "Selecting " << path << Qt::endl;
-#endif
-        setPath( path );
-    }
+    setPath( _filesystemModel->filePath( newCurrentItem ) );
 }
 
 
-void OpenDirDialog::populatePathComboBox( const QString & fullPath )
+void OpenDirDialog::populatePathComboBox()
 {
     _ui->pathComboBox->clear();
-    _ui->pathComboBox->addItem( "/" );
 
-    QString path;
-
-    const QStringList pathComponents = fullPath.split( '/', Qt::SkipEmptyParts );
-    for ( const QString & component : pathComponents )
-    {
-        path += '/' + component;
-        _ui->pathComboBox->addItem( path );
-    }
+    for ( QModelIndex index = _ui->dirTreeView->currentIndex(); index.isValid(); index =_filesystemModel->parent( index ) )
+        _ui->pathComboBox->addItem( _filesystemModel->filePath( index ) );
 }
 
 
 void OpenDirDialog::goUp()
 {
-    QStringList pathComponents = selectedPath().split( '/', Qt::SkipEmptyParts );
-
-    if ( !pathComponents.isEmpty() )
-        pathComponents.removeLast();
-
-    const QString path = '/' + pathComponents.join( '/' );
-    if ( path != _lastPath )
-    {
-#if VERBOSE_SELECTION
-        logDebug() << "Navigating up to " << path << Qt::endl;
-#endif
-        setPath( path );
-    }
+    const QModelIndex parentIndex = _filesystemModel->parent( _ui->dirTreeView->currentIndex() );
+    if ( parentIndex.isValid() )
+        setPath( _filesystemModel->filePath( parentIndex ) );
 }
 
 
@@ -288,12 +251,13 @@ void OpenDirDialog::readSettings()
 
 void OpenDirDialog::writeSettings()
 {
-    Settings settings;
     // logDebug() << Qt::endl;
 
     // Do NOT write _crossFilesystems back to the settings here; this is done
     // from the config dialog. The value in this dialog is just temporary for
     // the current program run.
+
+    Settings settings;
 
     writeWindowSettings( this, "OpenDirDialog" );
 
@@ -303,11 +267,11 @@ void OpenDirDialog::writeSettings()
 }
 
 
-QString OpenDirDialog::askOpenDir( QWidget * parent, bool * crossFilesystems )
+QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
 {
-    static bool _crossFilesystems = *crossFilesystems;
+//    static bool _crossFilesystems = crossFilesystems;
 
-    OpenDirDialog dialog( parent, _crossFilesystems );
+    OpenDirDialog dialog( parent, crossFilesystems );
     dialog.pathSelector()->addHomeDir();
     dialog.pathSelector()->addMountPoints( MountPoints::normalMountPoints() );
     //logDebug() << "Waiting for user selection" << Qt::endl;
@@ -319,9 +283,8 @@ QString OpenDirDialog::askOpenDir( QWidget * parent, bool * crossFilesystems )
     }
 
     // Remember the flag just for the next time the dialog is opened
-    _crossFilesystems = dialog.crossFilesystems();
-    if ( crossFilesystems )
-        *crossFilesystems = _crossFilesystems;
+    crossFilesystems = dialog.crossFilesystems();
+//    crossFilesystems = _crossFilesystems;
 
     const QString path = dialog.selectedPath();
     //logInfo() << "User selected path " << path << Qt::endl;
