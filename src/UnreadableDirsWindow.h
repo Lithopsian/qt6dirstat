@@ -11,7 +11,6 @@
 #define UnreadableDirsWindow_h
 
 #include <QDialog>
-#include <QPointer>
 #include <QTreeWidgetItem>
 
 #include "ui_unreadable-dirs-window.h"

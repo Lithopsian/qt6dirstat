@@ -7,12 +7,14 @@
  *              Ian Nartowicz
  */
 
+#include <QPointer>
+
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "HeaderTweaker.h"
-#include "QDirStatApp.h"        // dirTreeModel
+#include "QDirStatApp.h"        // dirTreeModel()
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
 #include "Logger.h"

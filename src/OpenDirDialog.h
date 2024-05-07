@@ -58,7 +58,7 @@ namespace QDirStat
 	/**
 	 * The path of the directory the user selected.
 	 **/
-        QString selectedPath() const;
+	QString selectedPath() const { return _ui->pathComboBox->currentText(); }
 
 	/**
 	 * The "cross filesystems" flag of this dialog (overriding the global
@@ -87,12 +87,12 @@ namespace QDirStat
 	/**
 	 * Set a path in the dirTree and expand (open) that branch.
 	 **/
-	void setPathAndExpand( const QString & path );
+	void pathSelected( const QString & path );
 
 	/**
 	 * Set a path in the dirTree and accept the dialog.
 	 **/
-	void setPathAndAccept( const QString & path );
+	void pathDoubleClicked( const QString & path );
 
 	/**
 	 * Go up one directory level.
@@ -115,6 +115,11 @@ namespace QDirStat
 	 * 'ok' is the result of the validator's check.
 	 **/
 	void pathEdited( bool ok );
+
+	/**
+	 * Scroll to the currently-selected tree item.
+	 **/
+	void scrollTo();
 
 
     protected:

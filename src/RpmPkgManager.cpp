@@ -13,7 +13,6 @@
 #include <iostream>	// cerr/endl;
 
 #include <QElapsedTimer>
-#include <QPointer>
 
 #include "RpmPkgManager.h"
 #include "MainWindow.h"
