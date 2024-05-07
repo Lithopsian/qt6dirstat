@@ -145,7 +145,7 @@ namespace
 	    newTrashDir = new TrashDir( trashPath, dev );
 	    CHECK_NEW( newTrashDir );
 	}
-	catch ( const FileException &ex )
+	catch ( const FileException & ex )
 	{
 	    CAUGHT( ex );
 	    logWarning() << "Failed to create trash directory " << trashPath << Qt::endl;
@@ -161,6 +161,7 @@ namespace
 
 Trash::Trash()
 {
+    // Best guess for the home trash path
     const QString homePath  = QDir::homePath();
     const dev_t homeDevice  = device( homePath );
     const QString homeTrash = [ &homePath ]()
@@ -175,7 +176,7 @@ Trash::Trash()
 	_homeTrashDir = new TrashDir( homeTrash, homeDevice );
 	CHECK_NEW( _homeTrashDir );
     }
-    catch ( const FileException &ex )
+    catch ( const FileException & ex )
     {
 	CAUGHT( ex );
 	logWarning() << "Cannot create home trash dir " << homeTrash << Qt::endl;
@@ -183,6 +184,7 @@ Trash::Trash()
 	_homeTrashDir = nullptr;
     }
 
+    // Store it even if it is null
     _trashDirs[ homeDevice ] = _homeTrashDir;
 }
 

@@ -20,7 +20,7 @@ QString Wildcard::wildcardToRegularExpression(const QString & pattern,
     QString rx;
     rx.reserve(wclen + wclen / 16);
     qsizetype i = 0;
-    const QChar *wc = pattern.data();
+    const QChar * wc = pattern.data();
 
     struct GlobSettings {
         char16_t nativePathSeparator;

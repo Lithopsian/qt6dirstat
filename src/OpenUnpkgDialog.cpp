@@ -72,7 +72,7 @@ QString OpenUnpkgDialog::startingDir() const
 }
 
 
-QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit *widget ) const
+QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget ) const
 {
     QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
 

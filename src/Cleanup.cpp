@@ -420,7 +420,7 @@ Cleanup::Cleanup( const Cleanup * other ):
 }
 
 
-void Cleanup::setTitle( const QString &title )
+void Cleanup::setTitle( const QString & title )
 {
     _title = title;
     QAction::setText( _title );
@@ -434,7 +434,7 @@ void Cleanup::setIcon( const QString & iconName )
 }
 
 
-bool Cleanup::worksFor( FileInfo *item ) const
+bool Cleanup::worksFor( FileInfo * item ) const
 {
     if ( !_active || !item )
 	return false;
@@ -449,7 +449,7 @@ bool Cleanup::worksFor( FileInfo *item ) const
 }
 
 
-void Cleanup::execute( FileInfo *item, OutputWindow * outputWindow )
+void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
 {
     if ( _recurse )
     {
@@ -474,7 +474,7 @@ void Cleanup::execute( FileInfo *item, OutputWindow * outputWindow )
 }
 
 
-QString Cleanup::itemDir( const FileInfo *item ) const
+QString Cleanup::itemDir( const FileInfo * item ) const
 {
     QString dir = item->path();
 

@@ -234,7 +234,7 @@ int FileInfo::treeLevel() const
 }
 
 
-bool FileInfo::isInSubtree( const FileInfo *subtree ) const
+bool FileInfo::isInSubtree( const FileInfo * subtree ) const
 {
     for ( const FileInfo * ancestor = this; ancestor; ancestor = ancestor->parent() )
     {

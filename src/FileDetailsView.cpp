@@ -119,7 +119,7 @@ void FileDetailsView::clear()
 }
 
 
-void FileDetailsView::setCurrentPage( QWidget *page )
+void FileDetailsView::setCurrentPage( QWidget * page )
 {
     // Simply hiding all other widgets is not enough: The QStackedLayout will
     // still reserve screen space for the largest widget. The other pages

@@ -124,7 +124,7 @@ namespace QDirStat
 	 * minimize the screen space requirements: No extra space is reserved
 	 * for any of the other pages which might be larger than this one.
 	 **/
-	void setCurrentPage( QWidget *page );
+	void setCurrentPage( QWidget * page );
 
 	/**
 	 * Sets the label to the category for this file, and enables

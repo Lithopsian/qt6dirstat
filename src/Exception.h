@@ -272,7 +272,7 @@ private:
  *	   THROW( Exception( "Catastrophic failure" ) );
  *	   ...
  *     }
- *     catch( const Exception &exception )
+ *     catch( const Exception & exception )
  *     {
  *	   CAUGHT( exception );
  *	   ...clean up to prevent memory leaks etc. ...

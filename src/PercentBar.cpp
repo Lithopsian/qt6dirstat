@@ -27,7 +27,7 @@ namespace
     /**
      * Return a color that contrasts with 'contrastColor'.
      **/
-    QColor contrastingColor( const QColor &desiredColor, const QColor &contrastColor )
+    QColor contrastingColor( const QColor & desiredColor, const QColor & contrastColor )
     {
 	if ( desiredColor != contrastColor )
 	    return desiredColor;

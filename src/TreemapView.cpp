@@ -260,7 +260,7 @@ void TreemapView::zoomTo()
         return;
 
     // Work from the FileInfo tree because there might not be a tile for the current item
-    FileInfo *newNode = _selectionModel->currentItem();
+    FileInfo * newNode = _selectionModel->currentItem();
     if ( !newNode->isDirInfo() )
         newNode = newNode->parent();
 
@@ -275,7 +275,7 @@ void TreemapView::zoomIn()
         return;
 
     // Work up the FileInfo tree because there might not be a tile for the current item
-    FileInfo *newNode = _selectionModel->currentItem();
+    FileInfo * newNode = _selectionModel->currentItem();
     while ( newNode && newNode->parent() != _rootTile->orig() )
         newNode = newNode->parent();
 
@@ -314,11 +314,11 @@ bool TreemapView::canZoomIn() const
         return false;
 
     // Work up the FileInfo tree because there might not be a tile for the current item
-    const FileInfo *currentNode = _selectionModel->currentItem();
+    const FileInfo * currentNode = _selectionModel->currentItem();
     if ( !currentNode )
         return false;
 
-    const FileInfo *rootNode = _rootTile->orig();
+    const FileInfo * rootNode = _rootTile->orig();
     if ( currentNode == rootNode )
         return false;
 
@@ -737,7 +737,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
             tile->setSelected( true );
     }
 
-    const FileInfo *currentItem = _selectionModel->currentItem();
+    const FileInfo * currentItem = _selectionModel->currentItem();
     const TreemapTile * tile = map.isEmpty() ? findTile( _rootTile, currentItem ) : map.value( currentItem, nullptr );
     if ( tile )
         setCurrentTile( tile );

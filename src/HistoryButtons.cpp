@@ -133,7 +133,7 @@ void HistoryButtons::initHistoryButtons()
 
 void HistoryButtons::updateHistoryMenu()
 {
-    QMenu *menu = qobject_cast<QMenu *>( sender() );
+    QMenu * menu = qobject_cast<QMenu *>( sender() );
     if ( !menu )
         return;
 

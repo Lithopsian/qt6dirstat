@@ -183,7 +183,7 @@ public slots:
      * Add one or more lines of stdout to show in the output area.
      * This is typically displayed in amber.
      **/
-    void addStdout( const QString &output );
+    void addStdout( const QString & output );
 
     /**
      * Add one or more lines of stderr to show in the output area.

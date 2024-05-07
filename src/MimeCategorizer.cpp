@@ -164,7 +164,7 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item ) const
 
     if ( item->isFile() )
     {
-	const MimeCategory *matchedCategory = category( item->name(), 0 );
+	const MimeCategory * matchedCategory = category( item->name(), 0 );
 	if ( matchedCategory )
 	    return matchedCategory;
 

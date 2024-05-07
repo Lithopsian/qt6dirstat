@@ -187,14 +187,14 @@ public:
      *
      * If 'logger' is 0, the default logger is used.
      */
-    static LogSeverity logLevel( Logger *logger );
+    static LogSeverity logLevel( Logger * logger );
 
     /**
      * Set the log level of the specified logger.
      *
      * If 'logger' is 0, the default logger is used.
      */
-    static void setLogLevel( Logger *logger, LogSeverity newLevel );
+    static void setLogLevel( Logger * logger, LogSeverity newLevel );
 
 
 
@@ -233,7 +233,7 @@ private:
 inline QTextStream & operator<<( QTextStream & str, bool val )
     { return str << ( val ? "true" : "false" ); }
 
-inline QTextStream & operator<<( QTextStream & str, const QStringList &stringList )
+inline QTextStream & operator<<( QTextStream & str, const QStringList & stringList )
     { return str << stringList.join( QLatin1String( ", " ) ); }
 
 inline QTextStream & operator<<( QTextStream & str, const QRectF & rect )

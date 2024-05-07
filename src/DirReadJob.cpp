@@ -96,7 +96,7 @@ namespace
     /**
      * Delete all jobs from the given queue, except 'exceptJob'.
      **/
-    int killQueue( DirInfo * subtree, QList<DirReadJob *> &queue, const DirReadJob * exceptJob )
+    int killQueue( DirInfo * subtree, QList<DirReadJob *> & queue, const DirReadJob * exceptJob )
     {
 	int count = 0;
 
@@ -174,17 +174,10 @@ void DirReadJob::finished()
 }
 
 
-void DirReadJob::childAdded( FileInfo *newChild )
+void DirReadJob::childAdded( FileInfo * newChild )
 {
     _tree->childAddedNotify( newChild );
 }
-
-/*
-void DirReadJob::deletingChild( FileInfo * deletedChild )
-{
-    _tree->deletingChildNotify( deletedChild );
-}
-*/
 
 
 
@@ -274,7 +267,7 @@ void LocalDirReadJob::startReading()
 	    {
 		if ( S_ISDIR( statInfo.st_mode ) )	// directory child
 		{
-		    DirInfo *subDir = new DirInfo( dir(), tree(), entryName, statInfo );
+		    DirInfo * subDir = new DirInfo( dir(), tree(), entryName, statInfo );
 		    CHECK_NEW( subDir );
 
 		    processSubDir( entryName, subDir );
@@ -479,7 +472,7 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
      * Not much we can do when lstat() didn't work; let's at
      * least create an (almost empty) entry as a placeholder.
      */
-    DirInfo *child = new DirInfo( dir(), tree(), entryName );
+    DirInfo * child = new DirInfo( dir(), tree(), entryName );
     CHECK_NEW( child );
     child->finalizeLocal();
     child->setReadState( DirError );
@@ -638,7 +631,7 @@ void DirReadJobQueue::timeSlicedRead()
 }
 
 
-void DirReadJobQueue::jobFinishedNotify( DirReadJob *job )
+void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
 {
     if ( job )
     {

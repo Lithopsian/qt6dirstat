@@ -117,7 +117,7 @@ namespace QDirStat
 	 * added so this notification can be passed up to the DirTree which in
 	 * turn emits a corresponding signal.
 	 **/
-	void childAdded( FileInfo *newChild );
+	void childAdded( FileInfo * newChild );
 
 	/**
 	 * Notification that a child is about to be deleted.
@@ -399,7 +399,7 @@ namespace QDirStat
 	 * This takes that job out of the queue and deletes it.
 	 * Read jobs are required to call this when they are finished.
 	 **/
-	void jobFinishedNotify( DirReadJob *job );
+	void jobFinishedNotify( DirReadJob * job );
 
 
     signals:

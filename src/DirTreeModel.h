@@ -265,7 +265,7 @@ namespace QDirStat
 	 * Process notification that the read job for 'dir' is finished.
 	 * Other read jobs might still be pending.
 	 **/
-	void readJobFinished( DirInfo *dir );
+	void readJobFinished( DirInfo * dir );
 
 	/**
 	 * Process notification that reading the dir tree is completely

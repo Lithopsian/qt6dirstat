@@ -233,14 +233,12 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
     // diverting package may include the file explicitly, but often creates a symlink
     // (eg. to /etc/alternatives) on install.
 
+    const QString pathResolved = resolvePath( path );
+
     int exitCode = -1;
-    const QFileInfo fileInfo( path );
-    const QString filename = fileInfo.fileName();
     const QString output = runCommand( "/usr/bin/dpkg", { "-S", path }, &exitCode, 1, false, false );
     if ( exitCode != 0 )
 	return "";
-
-    const QString pathResolved = resolvePath( path );
 
     const QStringList lines = output.trimmed().split( '\n' );
     for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
@@ -295,6 +293,7 @@ PkgInfoList DpkgPkgManager::installedPkg() const
 PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 {
     PkgInfoList pkgList;
+
     const QStringList splitOutput = output.split( '\n' );
     for ( const QString & line : splitOutput )
     {
@@ -334,11 +333,15 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 {
     QStringList fileList;
+
     const QStringList lines = output.split( '\n' );
     for ( const QString & line : lines )
     {
 	if ( isDivertedBy( line ) )
 	{
+	    if ( fileList.isEmpty() ) // should never happen, but avoids a crash
+		continue;
+
 	    // previous line referred to a file that has been diverted to a different location
 	    fileList.removeLast();
 
@@ -347,7 +350,7 @@ QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 	    const QString & divertedFile = fields.last();
 
 	    if ( fields.size() == 2 && !divertedFile.isEmpty() )
-		fileList << resolvePath(divertedFile);
+		fileList << resolvePath( divertedFile );
 	}
 	else if ( line != QLatin1String( "/." ) && !isPackageDivert( line ) )
 	    fileList << resolvePath( line );
@@ -381,7 +384,6 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 {
     int exitCode = -1;
     QString output = runCommand( "/usr/bin/dpkg", { "-S", "*" }, &exitCode );
-
     if ( exitCode != 0 )
 	return nullptr;
 

@@ -161,7 +161,7 @@ namespace
 
 
 
-bool CacheWriter::writeCache( const QString & fileName, const DirTree *tree )
+bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
 {
     if ( !tree || !tree->root() )
 	return false;

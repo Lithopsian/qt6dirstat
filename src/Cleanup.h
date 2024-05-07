@@ -237,7 +237,7 @@ namespace QDirStat
 	 * collected in the same output window.
 	 *
 	 * Possible values:
-	 *mapping
+	 *
 	 * ShowAlways: Always open an output window. This makes sense for
 	 * cleanup actions that take a while, like compressing files, recoding
 	 * videos, recompressing JPG images.

@@ -325,22 +325,22 @@ namespace QDirStat
 	 * Lay out all members of 'row' within 'rect' along its longer side.
 	 * Returns the new rectangle with the layouted area subtracted.
 	 **/
-	void layoutRow( Orientation dir,
-			QRectF & rect,
+	void layoutRow( Orientation                    dir,
+			QRectF                       & rect,
 			FileInfoSortedBySizeIterator & it,
-			const FileInfo *rowEnd,
-			FileSize rowTotal,
-			double primary,
-			double secondary );
+			const FileInfo               * rowEnd,
+			FileSize                       rowTotal,
+			double                         primary,
+			double                         secondary );
 
 	/**
 	 * Paint this tile.
 	 *
 	 * Reimplemented from QGraphicsRectItem.
 	 **/
-	void paint( QPainter			   * painter,
+	void paint( QPainter                       * painter,
 		    const QStyleOptionGraphicsItem * option,
-		    QWidget			   * widget = nullptr ) override;
+		    QWidget                        * widget = nullptr ) override;
 
 	/**
 	 * Notification that item attributes (such as the 'selected' state)

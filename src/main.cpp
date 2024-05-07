@@ -101,7 +101,7 @@ void reportFatalError()
 }
 
 
-int main( int argc, char *argv[] )
+int main( int argc, char * argv[] )
 {
     QApplication qtApp( argc, argv );
     QStringList argList = QCoreApplication::arguments();

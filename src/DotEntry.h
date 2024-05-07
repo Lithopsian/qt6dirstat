@@ -70,7 +70,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/
-	void insertChild( FileInfo *newChild ) override;
+	void insertChild( FileInfo * newChild ) override;
 
 	/**
 	 * Recursively finalize all directories from here on -

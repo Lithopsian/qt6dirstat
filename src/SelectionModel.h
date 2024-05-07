@@ -196,7 +196,7 @@ namespace QDirStat
 	/**
 	 * Notification that a child is about to be deleted.
 	 **/
-	void deletingChildNotify( FileInfo *deletedChild );
+	void deletingChildNotify( FileInfo * deletedChild );
 
 
     private:

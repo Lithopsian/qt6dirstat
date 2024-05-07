@@ -224,7 +224,7 @@ namespace QDirStat
 	 * Directory read jobs are required to call this for each child added
 	 * so the tree can emit the corresponding childAdded() signal.
 	 **/
-	void childAddedNotify( FileInfo *newChild );
+	void childAddedNotify( FileInfo * newChild );
 
 	/**
 	 * Send a startingReading() signal.

@@ -24,16 +24,16 @@ namespace
 {
     Cleanup * openFileManagerHere( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Open File Mana&ger Here" ),
-					"%filemanager",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Open File Mana&ger Here" ),
+					 "%filemanager",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/file-manager.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_G );
@@ -44,16 +44,16 @@ namespace
 
     Cleanup * openTerminalHere( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Open &Terminal Here" ),
-					"%terminal",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Open &Terminal Here" ),
+					 "%terminal",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/terminal.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_T );
@@ -64,17 +64,17 @@ namespace
 
     Cleanup * checkFileType( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Check File T&ype" ),
-					"file %n | sed -e 's/[:,] /\\n  /g'",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					false,
-					true,
-					false,
-					Cleanup::ShowAlways );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Check File T&ype" ),
+					 "file %n | sed -e 's/[:,] /\\n  /g'",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 false,
+					 true,
+					 false,
+					 Cleanup::ShowAlways );
 	CHECK_NEW( cleanup );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_Y );
 
@@ -84,16 +84,16 @@ namespace
 
     Cleanup * compressSubtree( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "&Compress" ),
-					"cd ..; tar cjvf %n.tar.bz2 %n && rm -rf %n",
-					false,
-					false,
-					Cleanup::RefreshParent,
-					true,
-					false,
-					false );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "&Compress" ),
+					 "cd ..; tar cjvf %n.tar.bz2 %n && rm -rf %n",
+					 false,
+					 false,
+					 Cleanup::RefreshParent,
+					 true,
+					 false,
+					 false );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -102,16 +102,16 @@ namespace
 
     Cleanup * makeClean( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "&make clean" ),
-					"make clean",
-					false,
-					false,
-					Cleanup::RefreshThis,
-					true,
-					false,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "&make clean" ),
+					 "make clean",
+					 false,
+					 false,
+					 Cleanup::RefreshThis,
+					 true,
+					 false,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -120,17 +120,17 @@ namespace
 
     Cleanup * gitClean( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "&git clean" ),
-					"git clean -dfx",
-					false,
-					true,
-					Cleanup::RefreshThis,
-					true,
-					false,
-					true,
-					Cleanup::ShowAlways );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "&git clean" ),
+					 "git clean -dfx",
+					 false,
+					 true,
+					 Cleanup::RefreshThis,
+					 true,
+					 false,
+					 true,
+					 Cleanup::ShowAlways );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -139,16 +139,16 @@ namespace
 
     Cleanup * deleteJunk( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Delete &Junk Files" ),
-					"rm -f *~ *.bak *.auto core",
-					true,
-					false,
-					Cleanup::RefreshThis,
-					true,
-					false,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Delete &Junk Files" ),
+					 "rm -f *~ *.bak *.auto core",
+					 true,
+					 false,
+					 Cleanup::RefreshThis,
+					 true,
+					 false,
+					 true );
 	CHECK_NEW( cleanup );
 	cleanup->setShell( "/bin/bash" );
 
@@ -158,16 +158,16 @@ namespace
 
     Cleanup * hardDelete( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "&Delete (no way to undelete!)" ),
-					"rm -rf %p",
-					false,
-					true,
-					Cleanup::RefreshParent,
-					true,
-					true,
-					false );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "&Delete (no way to undelete!)" ),
+					 "rm -rf %p",
+					 false,
+					 true,
+					 Cleanup::RefreshParent,
+					 true,
+					 true,
+					 false );
 	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/delete.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_Delete );
@@ -178,16 +178,16 @@ namespace
 
     Cleanup * clearDirContents( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Clear Directory C&ontents" ),
-					"rm -rf %d/*",
-					false,
-					true,
-					Cleanup::RefreshThis,
-					true,
-					false,
-					false );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Clear Directory C&ontents" ),
+					 "rm -rf %d/*",
+					 false,
+					 true,
+					 Cleanup::RefreshThis,
+					 true,
+					 false,
+					 false );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -198,16 +198,16 @@ namespace
 
     Cleanup * echoargs( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "echoargs" ),
-					"echoargs %p",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "echoargs" ),
+					 "echoargs %p",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -216,16 +216,16 @@ namespace
 
     Cleanup * echoargsMixed( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Output on stdout and stderr" ),
-					"echoargs_mixed %n one two three four",
-					false,
-					true,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Output on stdout and stderr" ),
+					 "echoargs_mixed %n one two three four",
+					 false,
+					 true,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -234,16 +234,16 @@ namespace
 
     Cleanup * segfaulter( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Segfaulter" ),
-					"segfaulter",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Segfaulter" ),
+					 "segfaulter",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -252,16 +252,16 @@ namespace
 
     Cleanup * commandNotFound( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Nonexistent command" ),
-					"wrglbrmpf",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Nonexistent command" ),
+					 "wrglbrmpf",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;
@@ -270,16 +270,16 @@ namespace
 
     Cleanup * sleepy( QObject * parent )
     {
-	Cleanup *cleanup = new Cleanup( parent,
-					true,
-					QObject::tr( "Sleepy echoargs" ),
-					"sleep 1; echoargs %p",
-					false,
-					false,
-					Cleanup::NoRefresh,
-					true,
-					true,
-					true );
+	Cleanup * cleanup = new Cleanup( parent,
+					 true,
+					 QObject::tr( "Sleepy echoargs" ),
+					 "sleep 1; echoargs %p",
+					 false,
+					 false,
+					 Cleanup::NoRefresh,
+					 true,
+					 true,
+					 true );
 	CHECK_NEW( cleanup );
 
 	return cleanup;

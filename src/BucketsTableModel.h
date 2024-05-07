@@ -85,7 +85,7 @@ namespace QDirStat
 	 * Return item flags for the specified model index. This specifies if
 	 * the item can be selected, edited etc.
 	 **/
-	Qt::ItemFlags flags( const QModelIndex &index ) const override
+	Qt::ItemFlags flags( const QModelIndex & index ) const override
 	    { return QAbstractTableModel::flags( index ) | Qt::ItemIsSelectable; }
 
 

@@ -121,7 +121,7 @@ void MimeCategoryConfigPage::setup()
     updateActions();
 
     // Get the treemap configuration settings from the main treemapView
-    const TreemapView *treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
+    const TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
     if ( !treemapView )
 	return;
 
@@ -146,7 +146,7 @@ void MimeCategoryConfigPage::applyChanges()
     //logDebug() << Qt::endl;
 
     // Save the treemap settings first, there might not be anything else to do
-    TreemapView *treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
+    TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
     if ( treemapView )
     {
 //	treemapView->setFixedColor( QColor( _ui->tileColorEdit->text() ) );
@@ -181,11 +181,11 @@ void MimeCategoryConfigPage::fillListWidget()
     //logDebug() << listWidget()->count() << ", " << currentRow << Qt::endl;
 
 
-    const MimeCategoryList *categories = &(MimeCategorizer::instance()->categories());
+    const MimeCategoryList * categories = &(MimeCategorizer::instance()->categories());
     for ( int i = 0; i < categories->size(); ++i )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real categories
-	MimeCategory *category = new MimeCategory( *categories->at( i ) );
+	MimeCategory * category = new MimeCategory( *categories->at( i ) );
 
 	QListWidgetItem * item = new ListEditorItem( category->name(), category );
 	CHECK_NEW( item );
@@ -531,8 +531,8 @@ void MimeCategoryConfigPage::populateTreemapView()
     const FileSize maxSize   = 100*1024*1024;	// 100 MB
 
     // Generate a random number of files with random sizes
-    QRandomGenerator *random = QRandomGenerator::global();
-    for ( DirInfo *parent : { dir1, dir11, dir11, dir11, dir12, dir2, dir21, dir211, dir211, dir212 } )
+    QRandomGenerator * random = QRandomGenerator::global();
+    for ( DirInfo * parent : { dir1, dir11, dir11, dir11, dir12, dir2, dir21, dir211, dir211, dir212 } )
     {
 	const int fileCount = random->bounded( 1, 100 );
 	for ( int i=0; i < fileCount; i++ )
@@ -559,7 +559,7 @@ void MimeCategoryConfigPage::adjustShadingWidth()
     // Keep the colour preview the same width always
     for ( int x = 0; x < listWidget()->count(); ++x )
     {
-	QListWidgetItem *item = listWidget()->item( x );
+	QListWidgetItem * item = listWidget()->item( x );
 	setBackground( item );
     }
 }
@@ -569,7 +569,7 @@ void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
 {
     //logDebug() << Qt::endl;
 
-    TreemapView *treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
+    TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
     _ui->actionColour_previews->setChecked( treemapView->colourPreviews() );
 
     QMenu menu;

@@ -38,11 +38,11 @@ void GeneralConfigPage::setup()
 {
     // All the values on this page are held in variables in MainWindow and
     // DirTreeModel (or DirTree).
-    const MainWindow *mainWindow = (MainWindow *)app()->findMainWindow();
+    const MainWindow * mainWindow = (MainWindow *)app()->findMainWindow();
     if ( !mainWindow ) // yikes!
         return;
 
-    const DirTreeModel *dirTreeModel = app()->dirTreeModel();
+    const DirTreeModel * dirTreeModel = app()->dirTreeModel();
     if ( dirTreeModel )
     {
         _ui->crossFilesystemsCheckBox->setChecked  ( dirTreeModel->crossFilesystems() );
@@ -68,11 +68,11 @@ void GeneralConfigPage::applyChanges()
 {
     //logDebug() << Qt::endl;
 
-    MainWindow *mainWindow = (MainWindow *)app()->findMainWindow();
+    MainWindow * mainWindow = (MainWindow *)app()->findMainWindow();
     if ( !mainWindow )
         return;
 
-    DirTreeModel *dirTreeModel = app()->dirTreeModel();
+    DirTreeModel * dirTreeModel = app()->dirTreeModel();
     if ( dirTreeModel )
     {
         dirTreeModel->updateSettings( _ui->crossFilesystemsCheckBox->isChecked(),

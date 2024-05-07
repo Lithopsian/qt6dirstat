@@ -643,7 +643,7 @@ namespace QDirStat
 	/**
 	 * Set the "next" pointer.
 	 **/
-	void setNext( FileInfo *newNext ) { _next = newNext; }
+	void setNext( FileInfo * newNext ) { _next = newNext; }
 
 	/**
 	 * Returns the first child of this item or 0 if there is none.
@@ -675,7 +675,7 @@ namespace QDirStat
 	 * Returns true if this entry is in subtree 'subtree', i.e. if this is
 	 * a child or grandchild etc. of 'subtree'.
 	 **/
-	bool isInSubtree( const FileInfo *subtree ) const;
+	bool isInSubtree( const FileInfo * subtree ) const;
 
 	/**
 	 * Locate a child somewhere in this subtree whose URL (i.e. complete

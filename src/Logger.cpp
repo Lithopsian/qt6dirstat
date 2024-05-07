@@ -475,7 +475,7 @@ QTextStream & Logger::log( const QString & srcFile,
 }
 
 
-void Logger::newline( Logger *logger )
+void Logger::newline( Logger * logger )
 {
     if ( !logger )
 	logger = Logger::defaultLogger();
@@ -485,7 +485,7 @@ void Logger::newline( Logger *logger )
 }
 
 
-LogSeverity Logger::logLevel( Logger *logger )
+LogSeverity Logger::logLevel( Logger * logger )
 {
     if ( !logger )
 	logger = Logger::defaultLogger();
@@ -497,7 +497,7 @@ LogSeverity Logger::logLevel( Logger *logger )
 }
 
 
-void Logger::setLogLevel( Logger *logger, LogSeverity newLevel )
+void Logger::setLogLevel( Logger * logger, LogSeverity newLevel )
 {
     if ( !logger )
 	logger = Logger::defaultLogger();
