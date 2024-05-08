@@ -17,15 +17,6 @@
 using namespace QDirStat;
 
 
-QString QDirStat::elideMiddle( const QString & text, int maxLen )
-{
-    if ( maxLen < 4 || text.size() < maxLen )
-        return text;
-
-    return text.left( maxLen / 2 ) % "…" % text.right( maxLen / 2 - 1 );
-}
-
-
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
     static QStringList units = { QObject::tr( " bytes" ),
@@ -120,7 +111,7 @@ QString QDirStat::formatMillisec( qint64 millisec )
 	// .arg doesn't offer enough control over decimal places and significant figures
 	// so do it manually, 3 decimal places up to 1 sec, then 1 up to 10 secs, then none
 	const int   precision = millisec > 9999 ? 0 : millisec < 1000 ? 3 : 1;
-	const float sec       = (float)millisec / 1000.0;
+	const float sec       = millisec / 1000.0;
 	return QString::number( sec, 'f', precision) % QObject::tr( " sec" );
     }
     else
@@ -151,6 +142,15 @@ QString QDirStat::monthAbbreviation( short month )
         case 12: return QObject::tr( "Dec" );
         default: return QString();
     }
+}
+
+
+QString QDirStat::elideMiddle( const QString & text, int maxLen )
+{
+    if ( maxLen < 4 || text.size() < maxLen )
+        return text;
+
+    return text.left( maxLen / 2 ) % "…" % text.right( maxLen / 2 - 1 );
 }
 
 

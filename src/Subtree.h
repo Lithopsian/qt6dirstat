@@ -49,6 +49,12 @@ namespace QDirStat
         Subtree() = default;
 
         /**
+         * Constructor from the FileInfo * pointer.  This sets the tree, url,
+         * and parent url from the FileInfo object.
+         **/
+        Subtree( FileInfo * fileInfo ) { set( fileInfo ); }
+
+        /**
          * Copy constructor.
          *
          * clone() doesn't work properly, and probably isn't necessary given
@@ -66,11 +72,11 @@ namespace QDirStat
 //            { clone( other ); return *this; }
 
         /**
-         * Assignment Operator for a FileInfo pointer. This is an alias for
+         * Assignment operator for a FileInfo pointer. This is an alias for
          * set().
          **/
-        Subtree & operator=( FileInfo * subtree )
-            { set( subtree ); return *this; }
+        Subtree & operator=( FileInfo * fileInfo )
+            { set( fileInfo ); return *this; }
 
         /**
          * Return the DirTree.
@@ -146,7 +152,7 @@ namespace QDirStat
          * means if using the root as a fallback is enabled the next call to
          * subtree() will return the tree's root.
          **/
-        void set( FileInfo * subtree );
+        void set( FileInfo * fileInfo );
 
         /**
          * Clear the subtree (but keep the tree).

@@ -81,8 +81,8 @@ FileAgeStatsWindow::~FileAgeStatsWindow()
 }
 
 
-FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget         * parent,
-							 SelectionModel  * selectionModel )
+FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget        * parent,
+							 SelectionModel * selectionModel )
 {
     static QPointer<FileAgeStatsWindow> _sharedInstance = nullptr;
 
@@ -131,16 +131,16 @@ void FileAgeStatsWindow::initWidgets()
 
 
 void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-						 FileInfo       * subtree,
+						 FileInfo       * fileInfo,
 						 SelectionModel * selectionModel )
 {
-    if ( !subtree || !selectionModel )
+    if ( !fileInfo || !selectionModel )
         return;
 
     // Get the shared instance, creating it if necessary
     FileAgeStatsWindow * instance = sharedInstance( mainWindow, selectionModel );
 
-    instance->populate( subtree );
+    instance->populate( fileInfo );
     instance->_ui->treeWidget->sortByColumn( YearListYearCol, Qt::DescendingOrder );
     instance->show();
 }
@@ -158,12 +158,12 @@ void FileAgeStatsWindow::syncedPopulate( FileInfo * )
 }
 
 
-void FileAgeStatsWindow::populate( FileInfo * newSubtree )
+void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 {
-    //logDebug() << "populating with " << newSubtree << Qt::endl;
+    //logDebug() << "populating with " << fileInfo << Qt::endl;
 
     clear();
-    _subtree = newSubtree;
+    _subtree = fileInfo;
 
     _ui->headingUrl->setStatusTip( _subtree.url() );
 
@@ -299,18 +299,17 @@ void FileAgeStatsWindow::readSettings()
     _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow",       true ).toBool() );
     _startGapsWithCurrentYear    = settings.value( "StartGapsWithCurrentYear", true ).toBool();
     int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
-    const QColor percentBarBackground = readColorEntry( settings,
-							"PercentBarBackground",
-							QColor( 160, 160, 160 ) );
-    const ColorList filesPercentBarColors = readColorListEntry( settings,
-								"FilesPercentBarColors",
-								{ 0xbb0000, 0x00aa00 } );
-    const ColorList sizePercentBarColors  = readColorListEntry( settings,
-								"SizePercentBarColors",
-								{ 0xee0000, 0x00cc00 } );
+
+    const QColor percentBarBackground =
+	readColorEntry    ( settings, "PercentBarBackground",  QColor( 160, 160, 160 ) );
+    const ColorList filesPercentBarColors =
+	readColorListEntry( settings, "FilesPercentBarColors", { 0xbb0000, 0x00aa00 } );
+    const ColorList sizePercentBarColors =
+	readColorListEntry( settings, "SizePercentBarColors",  { 0xee0000, 0x00cc00 } );
 
     settings.setDefaultValue( "StartGapsWithCurrentYear", _startGapsWithCurrentYear );
     settings.setDefaultValue( "PercentBarWidth",          percentBarWidth           );
+
     setDefaultValue( settings, "PercentBarBackground",  percentBarBackground  );
     setDefaultValue( settings, "FilesPercentBarColors", filesPercentBarColors );
     setDefaultValue( settings, "SizePercentBarColors",  sizePercentBarColors  );
@@ -380,6 +379,7 @@ YearListItem::YearListItem( const YearStats & yearStats ) :
     QTreeWidgetItem ( QTreeWidgetItem::UserType ),
     _stats { yearStats }
 {
+    logDebug() << _stats.year << " " << _stats.month << Qt::endl;
     const bool monthItem = _stats.month > 0;
     const QString text = monthItem ? monthAbbreviation( _stats.month ) : QString::number( _stats.year );
     set( YearListYearCol, Qt::AlignLeft, text );
@@ -417,7 +417,7 @@ bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const YearListItem & other = dynamic_cast<const YearListItem &>( rawOther );
-
+logDebug() << _stats.year << "/" << other._stats.year << " " << _stats.month << "/" << other._stats.month << Qt::endl;
     switch ( (YearListColumns)treeWidget()->sortColumn() )
     {
 	case YearListYearCol:

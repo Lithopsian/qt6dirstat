@@ -24,8 +24,8 @@
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "Logger.h"
 
 
 // Number of suffixes in the "other" category
@@ -175,7 +175,6 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _ui->treeWidget->setSortingEnabled( false );
 
     // Create toplevel items for the categories
-    logDebug() << Qt::endl;
     QHash<const MimeCategory *, FileTypeItem *> categoryItem;
     FileTypeItem * otherCategoryItem = nullptr;
 
@@ -349,7 +348,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
     if ( suffix.isEmpty() || !dir )
         return;
 
-    //logDebug() << "Size stats for " << suffix << Qt::endl;
+    //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
 
     FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, suffix );
 }

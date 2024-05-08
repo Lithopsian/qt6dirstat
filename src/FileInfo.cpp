@@ -39,8 +39,8 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Helper functions for calculating percentages of item sizes relative
-     * to their parent.
+     * Returns whether a FileInfo item is in a state where there can
+     * be meaningful percentages of its size and allocated size.
      **/
     bool hasPercent( const FileInfo * item )
     {
@@ -58,6 +58,10 @@ namespace
 
 	return true;
     }
+
+    /**
+     * Returns the percentage value based on a size and the parent's size.
+     **/
     float percent( FileSize size, FileSize parentSize)
     {
 	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
@@ -70,25 +74,19 @@ FileInfo::FileInfo( DirInfo           * parent,
 		    DirTree           * tree,
 		    const QString     & filename,
 		    const struct stat & statInfo ):
-    /**
-     * Constructor from a stat buffer (i.e. based on an lstat() call).
-     * This is the standard case.
-     **/
     _name { filename },
     _parent { parent },
     _tree { tree },
     _isLocalFile { true },
     _isIgnored { false },
-    _hasUidGidPerm { true }
+    _hasUidGidPerm { true },
+    _device { statInfo.st_dev },
+    _mode { statInfo.st_mode },
+    _links { statInfo.st_nlink },
+    _uid { statInfo.st_uid },
+    _gid { statInfo.st_gid },
+    _mtime { statInfo.st_mtime }
 {
-//    CHECK_PTR( statInfo );
-
-    _device = statInfo.st_dev;
-    _mode   = statInfo.st_mode;
-    _links  = statInfo.st_nlink;
-    _uid    = statInfo.st_uid;
-    _gid    = statInfo.st_gid;
-    _mtime  = statInfo.st_mtime;
 
     if ( isSpecial() )
     {
@@ -124,7 +122,7 @@ FileInfo::FileInfo( DirInfo           * parent,
 	    logDebug() << "Found sparse file: " << this
 		       << "    Byte size: "     << formatSize( _size )
 		       << "  Allocated: "       << formatSize( _allocatedSize )
-		       << " (" << (int) _blocks << " blocks)"
+		       << " (" << (int)_blocks << " blocks)"
 		       << Qt::endl;
 #endif
 
@@ -422,7 +420,7 @@ bool FileInfo::filesystemCanReportBlocks() const
 	    return false;
     }
 
-    // logDebug() << "Checking block size of " << dir << ": " << (int) dir->blocks() << Qt::endl;
+    // logDebug() << "Checking block size of " << dir << ": " << (int)dir->blocks() << Qt::endl;
 
     // A real directory never has a size == 0, so we can skip this check.
     return dir->blocks() > 0;

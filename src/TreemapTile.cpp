@@ -69,7 +69,7 @@ namespace
                 sum += size;
 
                 // Again, only ratios matter, so avoid the size / sum division by multiplying both by sum
-                const double rowHeight = ( double )sum * sum; // * really sum * rowHeight / remainingTotal
+                const double rowHeight = (double)sum * sum; // * really sum * rowHeight / remainingTotal
                 const double rowScale = rowWidthScale; // really rowWidth * size / sum
                 const double aspectRatio = qMin( rowHeight / (rowScale * firstSize), rowScale * size / rowHeight );
                 if ( aspectRatio < bestAspectRatio )
@@ -621,7 +621,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 {
     //logDebug() << rect << Qt::endl;
 
-    static const double ambientIntensity = ( double )_parentView->ambientLight() / 255;
+    static const double ambientIntensity = (double)_parentView->ambientLight() / 255;
     static const double intensityScaling = 1.0 - ambientIntensity;
     static const double lightX = _parentView->lightX() * intensityScaling;
     static const double lightY = _parentView->lightY() * intensityScaling;

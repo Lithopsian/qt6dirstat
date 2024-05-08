@@ -16,6 +16,7 @@
 #include "DotEntry.h"
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
+#include "MainWindow.h"
 #include "QDirStatApp.h"        // SelectionModel, findMainWindow()
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
@@ -99,15 +100,15 @@ void LocateFileTypeWindow::initWidgets()
 }
 
 
-void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileInfo * subtree )
+void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileInfo * fileInfo )
 {
-    if ( suffix.isEmpty() || !subtree )
+    if ( suffix.isEmpty() || !fileInfo )
         return;
 
     // Get the shared instance, creating it if necessary
     LocateFileTypeWindow * instance = sharedInstance();
 
-    instance->populate( suffix, subtree );
+    instance->populate( suffix, fileInfo );
     instance->_ui->treeWidget->sortByColumn( SSR_PathCol, Qt::AscendingOrder );
     instance->selectFirstItem();
     instance->show();
@@ -115,17 +116,17 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
 }
 
 
-void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * newSubtree )
+void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo )
 {
     clear();
 
     _suffix  = suffix;
-    _subtree = newSubtree;
+    _subtree = fileInfo;
 
     // For better Performance: Disable sorting while inserting many items
     _ui->treeWidget->setSortingEnabled( false );
 
-    populateRecursive( newSubtree ? newSubtree : _subtree() );
+    populateRecursive( fileInfo ? fileInfo : _subtree() );
 
     _ui->treeWidget->setSortingEnabled( true );
 

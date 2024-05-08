@@ -46,12 +46,6 @@
 namespace QDirStat
 {
     /**
-     * Elide a long string, remnoving characters from the middle to fit
-     * with maxLen characters.
-     **/
-    QString elideMiddle( const QString & text, int maxLen );
-
-    /**
      * Can't use a default argument when using this as a function pointer,
      * so we really need the above overloaded version.
      **/
@@ -176,6 +170,12 @@ namespace QDirStat
 #else
 	{ return QFontMetrics( font ).horizontalAdvance( text ); }
 #endif
+
+    /**
+     * Elide a long string, remnoving characters from the middle to fit
+     * with maxLen characters.
+     **/
+    QString elideMiddle( const QString & text, int maxLen );
 
     /**
      * Elide the text to fit within 'maxSize' using the label widget font

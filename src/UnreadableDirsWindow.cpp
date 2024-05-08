@@ -14,6 +14,7 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "HeaderTweaker.h"
+#include "MainWindow.h"
 #include "QDirStatApp.h"        // dirTreeModel()
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
@@ -87,24 +88,24 @@ void UnreadableDirsWindow::initWidgets()
 }
 
 
-void UnreadableDirsWindow::populateSharedInstance( FileInfo * subtree )
+void UnreadableDirsWindow::populateSharedInstance( FileInfo * fileInfo )
 {
-    if ( !subtree )
+    if ( !fileInfo )
         return;
 
-    sharedInstance()->populate( subtree );
+    sharedInstance()->populate( fileInfo );
     sharedInstance()->show();
 }
 
 
-void UnreadableDirsWindow::populate( FileInfo * newSubtree )
+void UnreadableDirsWindow::populate( FileInfo * fileInfo )
 {
     _ui->treeWidget->clear();
-    _subtree = newSubtree;
+    _subtree = fileInfo;
 
     //logDebug() << "Locating all unreadable dirs below " << _subtree.url() << Qt::endl;
 
-    populateRecursive( newSubtree ? newSubtree : _subtree() );
+    populateRecursive( fileInfo ? fileInfo : _subtree() );
     _ui->treeWidget->sortByColumn( UD_Path, Qt::AscendingOrder );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
@@ -122,12 +123,12 @@ void UnreadableDirsWindow::populate( FileInfo * newSubtree )
 }
 
 
-void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
+void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 {
-    if ( !subtree || !subtree->isDirInfo() )
+    if ( !fileInfo || !fileInfo->isDirInfo() )
 	return;
 
-    DirInfo * dir = subtree->toDirInfo();
+    DirInfo * dir = fileInfo->toDirInfo();
     if ( dir->readError() )
     {
 	UnreadableDirListItem * searchResultItem = new UnreadableDirListItem( dir );

@@ -45,7 +45,7 @@ namespace
 
 	for ( QAction * action : widget->actions() )
 	{
-	    Cleanup * cleanup = dynamic_cast<Cleanup *>( action );
+	    Cleanup * cleanup = qobject_cast<Cleanup *>( action );
 	    if ( cleanup )
 		widget->removeAction( cleanup );
 	}

@@ -23,7 +23,7 @@ namespace
 {
     bool isSystemUid( uid_t uid )
     {
-        return uid < (uid_t) MIN_NON_SYSTEM_UID;
+        return uid < (uid_t)MIN_NON_SYSTEM_UID;
     }
 
 

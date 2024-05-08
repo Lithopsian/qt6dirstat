@@ -107,7 +107,7 @@ namespace
 	    gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).data() ); // relative path
 
 	// Write size
-	gzprintf( cache, "\t%s", formatSize( item->rawByteSize() ).toUtf8().data() );
+	gzprintf( cache, "\t%s", formatSize( item->rawByteSize() ).toUtf8().constData() );
 
 	// For uid, gid, and permissions (mode also identifies the object type)
 	gzprintf( cache, "\t%4d\t%4d\t%06o", item->uid(), item->gid(), item->mode() );
@@ -116,7 +116,7 @@ namespace
 	gzprintf( cache, "\t0x%lx", (unsigned long)item->mtime() );
 
 	// Write allocated size (and dummy to maintain compatibility with earlier formats)
-	gzprintf( cache, "\t%s\t|", formatSize( item->rawAllocatedSize() ).toUtf8().data() );
+	gzprintf( cache, "\t%s\t|", formatSize( item->rawAllocatedSize() ).toUtf8().constData() );
 
 	// Optional fields
 	if ( item->isExcluded() )
@@ -128,7 +128,7 @@ namespace
 	if ( item->isSparseFile() )
 	    gzprintf( cache, "\tblocks: %lld", item->blocks() );
 	if ( item->isFile() && item->links() > 1 )
-	    gzprintf( cache, "\tlinks: %u", (unsigned) item->links() );
+	    gzprintf( cache, "\tlinks: %u", (unsigned)item->links() );
 
 	// One item per line
 	gzputc( cache, '\n' );
@@ -166,7 +166,7 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
     if ( !tree || !tree->root() )
 	return false;
 
-    gzFile cache = gzopen( (const char *) fileName.toUtf8(), "w" );
+    gzFile cache = gzopen( (const char *) fileName.toUtf8().constData(), "w" );
     if ( cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
@@ -300,7 +300,7 @@ CacheReader::CacheReader( const QString & fileName,
 			  DirTree       * tree,
 			  DirInfo       * parent,
 			  bool            markFromCache ):
-    _cache { gzopen( fileName.toUtf8(), "r" ) },
+    _cache { gzopen( fileName.toUtf8().constData(), "r" ) },
     _markFromCache { markFromCache },
     _tree { tree },
     _parent { parent }
@@ -479,9 +479,7 @@ void CacheReader::addItem()
     FileSize alloc = readSize( alloc_str );
 
     // Blocks: only stored for sparse files, otherwise just guess from the file size
-    const FileSize blocks = blocks_str ?
-			    strtoll( blocks_str, 0, 10 ) :
-			    qCeil( (float)alloc / STD_BLOCK_SIZE );
+    const FileSize blocks = blocks_str ? strtoll( blocks_str, 0, 10 ) : qCeil( (float)alloc / STD_BLOCK_SIZE );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
@@ -846,5 +844,5 @@ QString CacheReader::unescapedPath( const QString & rawPath ) const
     const QString protocol = "foo:";
     const QString url = protocol + cleanPath( rawPath );
 
-    return QUrl::fromEncoded( url.toUtf8() ).path();
+    return QUrl( url ).path();
 }

@@ -176,7 +176,7 @@ namespace
 	}
 
 	const QFileInfo dirInfo( logDir );
-	if ( (uid_t) dirInfo.ownerId() != getuid() )
+	if ( (uid_t)dirInfo.ownerId() != getuid() )
 	{
 	    logError() << "ERROR: Directory " << logDir << " is not owned by " << userName() << Qt::endl;
 
@@ -456,7 +456,7 @@ QTextStream & Logger::log( const QString & srcFile,
 	return "";
     }();
 
-    _logStream << timeStamp() << " " << "[" << (int) getpid() << "] " << sev << " ";
+    _logStream << timeStamp() << " " << "[" << (int)getpid() << "] " << sev << " ";
 
     if ( !srcFile.isEmpty() )
     {

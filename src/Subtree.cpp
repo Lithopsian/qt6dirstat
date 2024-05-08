@@ -10,7 +10,6 @@
 #include "Subtree.h"
 #include "DirInfo.h"
 #include "DirTree.h"
-//#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -57,17 +56,17 @@ const QString & Subtree::url() const
 }
 
 
-void Subtree::set( FileInfo * subtree )
+void Subtree::set( FileInfo * fileInfo )
 {
     _parentUrl.clear();
 
-    if ( subtree )
+    if ( fileInfo )
     {
-	_tree = subtree->tree();
-	_url  = subtree->debugUrl();
+	_tree = fileInfo->tree();
+	_url  = fileInfo->debugUrl();
 
-	if ( subtree->parent() )
-            _parentUrl = subtree->parent()->debugUrl();
+	if ( fileInfo->parent() )
+            _parentUrl = fileInfo->parent()->debugUrl();
     }
     else
     {

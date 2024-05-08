@@ -109,7 +109,7 @@ bool SearchFilter::matches( const QString & str ) const
             return str.contains( _pattern, caseSensitivity );
     }
 
-    logError() << "Undefined filter mode " << ( int )_filterMode << Qt::endl;
+    logError() << "Undefined filter mode " << (int)_filterMode << Qt::endl;
 
     return false;
 }

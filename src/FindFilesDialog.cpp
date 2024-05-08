@@ -62,10 +62,10 @@ FindFilesDialog::~FindFilesDialog()
 
 FileSearchFilter FindFilesDialog::fileSearchFilter()
 {
-    FileInfo * subtree = _ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
+    FileInfo * fileInfo = _ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
     const bool findDirs = _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked();
 
-    FileSearchFilter filter( subtree ? subtree->toDirInfo() : nullptr,
+    FileSearchFilter filter( fileInfo ? fileInfo->toDirInfo() : nullptr,
                              _ui->patternField->text(),
                              static_cast<SearchFilter::FilterMode>( _ui->filterModeComboBox->currentIndex() ),
                              _ui->caseSensitiveCheckBox->isChecked(),
@@ -80,20 +80,20 @@ FileSearchFilter FindFilesDialog::fileSearchFilter()
 
 DirInfo * FindFilesDialog::currentSubtree()
 {
-    FileInfo * subtree = app()->selectedDirInfo();
-    if ( subtree )
+    FileInfo * fileInfo = app()->selectedDirInfo();
+    if ( fileInfo )
     {
-        _lastPath = subtree->url();
+        _lastPath = fileInfo->url();
     }
     else
     {
-        subtree = app()->dirTree()->locate( _lastPath, true ); // findPseudoDirs
-        if ( !subtree ) // _lastPath outside of this tree
+        fileInfo = app()->dirTree()->locate( _lastPath, true ); // findPseudoDirs
+        if ( !fileInfo ) // _lastPath outside of this tree
         {
             if ( app()->firstToplevel() )
             {
-                subtree  = app()->firstToplevel();
-                _lastPath = subtree->url();
+                fileInfo  = app()->firstToplevel();
+                _lastPath = fileInfo->url();
             }
             else
             {
@@ -102,7 +102,7 @@ DirInfo * FindFilesDialog::currentSubtree()
         }
     }
 
-    return subtree ? subtree->toDirInfo() : nullptr;
+    return fileInfo ? fileInfo->toDirInfo() : nullptr;
 }
 
 

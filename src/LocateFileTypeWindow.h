@@ -65,7 +65,7 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.  The suffix should start with '.', but not '*.".
 	 **/
-	static void populateSharedInstance( const QString & suffix, FileInfo * subtree );
+	static void populateSharedInstance( const QString & suffix, FileInfo * fileInfo );
 
 
     public slots:
@@ -103,13 +103,13 @@ namespace QDirStat
 	void initWidgets();
 
 	/**
-	 * Populate the window: Locate files with 'suffix' in 'subtree'.
+	 * Populate the window: Locate files with 'suffix' in 'fileInfo'.
 	 *
 	 * This clears the old search results first, then searches the subtree
 	 * and populates the search result list with the directories where
 	 * matching files were found.
 	 **/
-	void populate( const QString & suffix, FileInfo * subtree = nullptr );
+	void populate( const QString & suffix, FileInfo * fileInfo = nullptr );
 
 	/**
 	 * Recursively locate directories that contain files matching the

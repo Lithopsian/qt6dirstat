@@ -62,7 +62,7 @@ namespace QDirStat
 	 * Any suffix should start with '.', but not '*.".
 	 **/
 	static void populateSharedInstance( QWidget       * mainWindow,
-					    FileInfo      * subtree,
+					    FileInfo      * fileInfo,
 					    const QString & suffix = "" );
 
 
@@ -109,7 +109,7 @@ namespace QDirStat
 	/**
 	 * Populate with new content.
 	 **/
-	void populate( FileInfo * subtree, const QString & suffix );
+	void populate( FileInfo * fileInfo, const QString & suffix );
 
 	/**
 	 * Update the values for the option widgets from the current ones from

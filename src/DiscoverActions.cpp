@@ -24,23 +24,23 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Common function to derive a subtree and call the common LocateFilesWindow.
+     * Common function to derive a directory and call the common LocateFilesWindow.
      **/
     void discoverFiles( TreeWalker    * treeWalker,
                         int             sortCol,
                         Qt::SortOrder   sortOrder,
                         const QString & headingText,
-                        FileInfo      * subtree = nullptr )
+                        FileInfo      * fileInfo = nullptr )
     {
-        if ( !subtree )
-            subtree = app()->selectedDirInfoOrRoot();
+        if ( !fileInfo )
+            fileInfo = app()->selectedDirInfoOrRoot();
 
-        if ( subtree )
+        if ( fileInfo )
         {
-            // Should always be a subtree, but if not then do nothing
+            // Should always be a fileInfo, but if not then do nothing
             LocateFilesWindow::populateSharedInstance( treeWalker,
-						       subtree,
-						       headingText.arg( subtree->url() ),
+						       fileInfo,
+						       headingText.arg( fileInfo->url() ),
 						       sortCol,
 						       sortOrder );
         }
@@ -87,7 +87,7 @@ void DiscoverActions::discoverHardLinkedFiles()
 
 void DiscoverActions::discoverBrokenSymLinks()
 {
-    BusyPopup msg( QObject::tr( "Checking symlinks..." ), app()->findMainWindow() );
+    BusyPopup msg( QObject::tr( "Checking symlinks..." ) );
     discoverFiles( new BrokenSymLinksTreeWalker(),
                    LocateListPathCol,
                    Qt::AscendingOrder,
@@ -129,5 +129,5 @@ void DiscoverActions::findFiles( const FileSearchFilter & filter )
 		   LocateListPathCol,
 		   Qt::AscendingOrder,
 		   QObject::tr( "Search results for '%1' in %2" ).arg( filter.pattern() ),
-		   filter.subtree() );
+		   filter.dir() );
 }

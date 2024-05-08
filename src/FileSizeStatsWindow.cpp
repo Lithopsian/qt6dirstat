@@ -21,8 +21,8 @@
 #include "HistogramView.h"
 #include "MainWindow.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -191,27 +191,28 @@ void FileSizeStatsWindow::initWidgets()
 
 
 void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
-						  FileInfo      * subtree,
+						  FileInfo      * fileInfo,
 						  const QString & suffix  )
 {
-    if ( !subtree )
+    if ( !fileInfo )
 	return;
 
-    sharedInstance( mainWindow )->populate( subtree, suffix );
+    sharedInstance( mainWindow )->populate( fileInfo, suffix );
     sharedInstance( mainWindow )->show();
 }
 
 
-void FileSizeStatsWindow::populate( FileInfo * subtree, const QString & suffix )
+void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
-    const QString url = subtree->tree()->url();
+    const Subtree subtree( fileInfo );
+    const QString & url = subtree.url();
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*.%1 in %2" ).arg( suffix ).arg( url ) );
 
     delete _stats;
     if ( suffix.isEmpty() )
-	_stats = new FileSizeStats( subtree );
+	_stats = new FileSizeStats( fileInfo );
     else
-	_stats = new FileSizeStats( subtree, suffix );
+	_stats = new FileSizeStats( fileInfo, suffix );
     CHECK_NEW( _stats );
     _stats->calculatePercentiles();
 

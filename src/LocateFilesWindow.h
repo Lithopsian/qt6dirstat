@@ -70,7 +70,7 @@ namespace QDirStat
 	 * is closed.
          **/
 	static void populateSharedInstance( TreeWalker    * treeWalker,
-					    FileInfo      * subtree,
+					    FileInfo      * fileInfo,
 					    const QString & headingText,
 					    int             sortCol,
 					    Qt::SortOrder   sortOrder );
@@ -119,13 +119,13 @@ namespace QDirStat
 
 	/**
 	 * Populate the window: Use the TreeWalker to find matching tree items
-	 * in 'subtree'.
+	 * in 'fileInfo'.
 	 *
 	 * This clears the old search results first, then searches the subtree
 	 * and populates the search result list with the items where
 	 * TreeWalker::check() returns 'true'.
 	 **/
-	void populate( FileInfo * subtree );
+	void populate( FileInfo * fileInfo );
 
 	/**
 	 * Set a new TreeWalker for this window. This deletes the old one.

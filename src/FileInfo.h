@@ -389,7 +389,7 @@ namespace QDirStat
 	 * The ratio of size() / allocatedSize() in percent.
 	 **/
 	int usedPercent() const
-	    { return _allocatedSize > 0 && _size > 0 ? qRound( ( 100.0 * size() ) / allocatedSize() ) : 100; }
+	    { return _allocatedSize > 0 && _size > 0 ? qRound( 100.0 * size() / allocatedSize() ) : 100; }
 
 	/**
 	 * The allocated size without taking multiple hard links into account.
@@ -909,7 +909,6 @@ namespace QDirStat
 	 **/
 	PkgInfo * pkgInfoParent() const;
 
-
 	//
 	// File type / mode convenience methods.
 	// These are simply shortcuts to the respective macros from
@@ -997,7 +996,7 @@ namespace QDirStat
 	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
-	int        _rowNumber { 0 };	// order when the children are sorted
+	int        _rowNumber { 0 };	// order of this child when the children are sorted
 	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
 	bool       _isLocalFile   :1;	// flag: local or remote file?

@@ -38,7 +38,7 @@ namespace QDirStat
          * Constructor: Create a search filter with the specified pattern and
          * filter mode.
          *
-         * 'subtree' is the directory node to start searching from.
+         * 'dir' is the directory node to start searching from.
          *
          * Filter mode "Auto" tries to guess a useful mode from the pattern:
          *
@@ -49,7 +49,7 @@ namespace QDirStat
          * - If it starts with "=", it uses "ExactMatch".
          * - If it's empty, it uses "SelectAll".
          **/
-        FileSearchFilter( DirInfo       * subtree,
+        FileSearchFilter( DirInfo       * dir,
                           const QString & pattern,
                           FilterMode      filterMode,
                           bool            caseSensitive,
@@ -61,7 +61,7 @@ namespace QDirStat
 			  filterMode,
 			  Contains,         // defaultFilterMode
 			  caseSensitive ),  // case-insensitive
-	    _subtree { subtree },
+	    _dir { dir },
 	    _findFiles { findFiles },
 	    _findDirs { findDirs },
 	    _findSymLinks { findSymLinks },
@@ -82,15 +82,15 @@ namespace QDirStat
         void setFindPkgs    ( bool value ) { _findPkgs     = value; }
 */
         /**
-         * Subtree to start the search from
+         * Directory to start the search from
          **/
-        DirInfo * subtree() const { return _subtree; }
-        void setSubtree( DirInfo * subtree ) { _subtree = subtree; }
+        DirInfo * dir() const { return _dir; }
+        void setDir( DirInfo * dir ) { _dir = dir; }
 
 
     private:
 
-        DirInfo * _subtree;
+        DirInfo * _dir;
         bool      _findFiles	{ true };
         bool      _findDirs	{ true };
         bool      _findSymLinks	{ true };

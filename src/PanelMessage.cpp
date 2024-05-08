@@ -50,7 +50,7 @@ void PanelMessage::showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox )
 	permissionsMsg->_ui->stackedWidget->setCurrentWidget( permissionsMsg->_ui->permissionsPage );
 
 	connect( permissionsMsg->_ui->detailsLinkLabel, &QLabel::linkActivated,
-		 static_cast<MainWindow *>( parent ),  &MainWindow::showUnreadableDirs );
+		 qobject_cast<MainWindow *>( parent ),  &MainWindow::showUnreadableDirs );
     }
 }
 

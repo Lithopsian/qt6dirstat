@@ -82,7 +82,7 @@ namespace QDirStat
          * Convenience function for creating, populating and showing the shared
          * instance.
          **/
-        static void populateSharedInstance( FileInfo * newSubtree );
+        static void populateSharedInstance( FileInfo * fileInfo );
 
 	/**
 	 * Obtain the subtree from the last used URL or 0 if none was found.
@@ -107,19 +107,19 @@ namespace QDirStat
 	void initWidgets();
 
 	/**
-	 * Populate the window: Locate unreadable directories in 'subtree'.
+	 * Populate the window: Locate unreadable directories.
 	 *
 	 * This clears the old search results first, then searches the subtree
 	 * and populates the search result list with the directories could not
 	 * be read.
 	 **/
-	void populate( FileInfo * newSubtree );
+	void populate( FileInfo * fileInfo );
 
 	/**
 	 * Recursively find unreadable directories in a subtree and add an
 	 * entry to the tree widget for each one.
 	 **/
-	void populateRecursive( FileInfo * subtree );
+	void populateRecursive( FileInfo * fileInfo );
 
 
     private:
