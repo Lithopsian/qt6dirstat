@@ -63,12 +63,11 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
 
         if ( item && item->isFile() )
         {
-            const auto yearAndMonth = item->yearAndMonth();
-            const short year = yearAndMonth.first;
-            const short month = yearAndMonth.second;
+            const auto  yearAndMonth = item->yearAndMonth();
+            const short year         = yearAndMonth.first;
+            const short month        = yearAndMonth.second;
 
             YearStats & yearStats = _yearStats[ year ];
-
             yearStats.year = year;
             yearStats.filesCount++;
             yearStats.size += item->size();

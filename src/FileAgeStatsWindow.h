@@ -62,7 +62,7 @@ namespace QDirStat
 	 * instance.
 	 **/
 	static void populateSharedInstance( QWidget         * parent,
-					    FileInfo        * subtree,
+					    FileInfo        * fileInfo,
 					    SelectionModel  * selectionModel );
 
 
@@ -91,7 +91,7 @@ namespace QDirStat
 	 * Automatically update with the current main window selection, if the
 	 * checkbox is checked.
 	 **/
-	void syncedPopulate( FileInfo * subtree );
+	void syncedPopulate( FileInfo * fileInfo );
 
 	/**
 	 * Refresh (reload) all data.
@@ -127,7 +127,7 @@ namespace QDirStat
 	/**
 	 * Populate the window.
 	 **/
-	void populate( FileInfo * subtree );
+	void populate( FileInfo * fileInfo );
 
 	/**
 	 * Clear all data and widget contents.
@@ -242,12 +242,15 @@ namespace QDirStat
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;
 
+	/**
+	 * Helper function to set both the column text and alignment.
+	 **/
 	void set( YearListColumns col, Qt::Alignment alignment, const QString & text );
 
 
     private:
 
-	const YearStats & _stats;
+	const YearStats _stats;
 
     };	// class YearListItem
 
