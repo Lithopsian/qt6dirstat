@@ -9,7 +9,6 @@
 
 #define DONT_DEPRECATE_STRERROR // for Logger.h
 
-#include <unistd.h>	// access(), getuid(), geteduid(), readlink()
 #include <errno.h>
 #include <pwd.h>	// getpwuid()
 #include <grp.h>	// getgrgid()
@@ -17,11 +16,9 @@
 #include <sys/stat.h>   // lstat()
 #include <sys/types.h>
 
-#include <QProcess>
-
 #include "SysUtil.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -136,12 +133,10 @@ QString SysUtil::runCommand( const QString     & command,
 
     if ( logOutput || ( process.exitCode() != 0 && !ignoreErrCode ) )
     {
-        const QString logOutput = output.trimmed();
-
-        if ( logOutput.contains( '\n' ) )
+        if ( output.contains( '\n' ) )
             logDebug() << "Output: \n" << output << Qt::endl;
         else
-            logDebug() << "Output: \"" << logOutput << "\"" << Qt::endl;
+            logDebug() << "Output: \"" << output.trimmed() << "\"" << Qt::endl;
     }
 
     return output;
@@ -155,44 +150,6 @@ void SysUtil::openInBrowser( const QString & url )
     QProcess::startDetached( "/usr/bin/xdg-open", { url } );
 }
 */
-
-bool SysUtil::haveCommand( const QString & command )
-{
-    return access( command.toUtf8(), X_OK ) == 0;
-}
-
-
-bool SysUtil::runningAsRoot()
-{
-    return geteuid() == 0;
-}
-
-
-bool SysUtil::runningWithSudo()
-{
-    return !QProcessEnvironment::systemEnvironment().value( QStringLiteral( "SUDO_USER" ), QString() ).isEmpty();
-}
-
-/*
-bool SysUtil::runningAsTrueRoot()
-{
-    return runningAsRoot() && !runningWithSudo();
-}
-*/
-
-QString SysUtil::homeDir( uid_t uid )
-{
-    const struct passwd * pw = getpwuid( uid );
-
-    return pw ? QString::fromUtf8( pw->pw_dir ) : QString();
-}
-
-
-QString SysUtil::symLinkTarget( const QString & path )
-{
-    return QString::fromUtf8( readLink( path ) );
-}
-
 /*
 bool SysUtil::isBrokenSymLink( const QString & path )
 {
@@ -241,12 +198,6 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 }
 */
 
-QByteArray SysUtil::readLink( const QString & path )
-{
-    return readLink( path.toUtf8() );
-}
-
-
 QByteArray SysUtil::readLink( const QByteArray & path )
 {
 #ifndef PATH_MAX
@@ -278,13 +229,14 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 }
 
 
-// See also FileInfo::baseName()
-
 QString SysUtil::baseName( const QString & fileName )
 {
     //logDebug() << fileName << Qt::endl;
     const QStringList segments = fileName.split( '/', Qt::SkipEmptyParts );
-    return segments.isEmpty() ? "" : segments.last();
+    if ( !segments.isEmpty() )
+	return segments.last();
+
+    return QString();
 }
 
 
@@ -293,8 +245,8 @@ QString SysUtil::userName( uid_t uid )
     const struct passwd * pw = getpwuid( uid );
     if ( pw )
 	return pw->pw_name;
-    else
-	return QString::number( uid );
+
+    return QString::number( uid );
 }
 
 
@@ -303,6 +255,16 @@ QString SysUtil::groupName( gid_t gid )
     const struct group * grp = getgrgid( gid );
     if ( grp )
 	return grp->gr_name;
-    else
-	return QString::number( gid );
+
+    return QString::number( gid );
+}
+
+
+QString SysUtil::homeDir( uid_t uid )
+{
+    const struct passwd * pw = getpwuid( uid );
+    if ( pw )
+	return QString::fromUtf8( pw->pw_dir );
+
+    return QString();
 }

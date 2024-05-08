@@ -10,8 +10,10 @@
 #ifndef SysUtil_h
 #define SysUtil_h
 
-#include <sys/types.h> // uid_t
+#include <unistd.h>	// access(), getuid(), geteduid(), readlink()
+#include <sys/types.h>	// uid_t
 
+#include <QProcess>
 #include <QString>
 #include <QRegularExpression>
 
@@ -110,7 +112,8 @@ namespace QDirStat
 	/**
 	 * Return 'true' if the specified command is available and executable.
 	 **/
-	bool haveCommand( const QString & command );
+	inline static bool haveCommand( const QString & command )
+	    { return access( command.toUtf8(), X_OK ) == 0; }
 
 	/**
 	 * Open a URL in the desktop's default browser (using the
@@ -122,18 +125,21 @@ namespace QDirStat
 	 * Check if this program runs with root privileges, i.e. with effective
 	 * user ID 0.
 	 **/
-	bool runningAsRoot();
+	inline static bool runningAsRoot()
+	    { return geteuid() == 0; }
 
 	/**
 	 * Check if this program runs with 'sudo'.
 	 **/
-	bool runningWithSudo();
+	inline static bool runningWithSudo()
+	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty(); }
 
 	/**
 	 * Check if this program runs as the real root user, with root
 	 * permissions, but not with 'sudo'.
 	 **/
-//	bool runningAsTrueRoot();
+	inline static bool runningAsTrueRoot()
+	    { return runningAsRoot() && !runningWithSudo(); }
 
 	/**
 	 * Return the home directory of the user with the specified user ID.
@@ -141,30 +147,10 @@ namespace QDirStat
 	QString homeDir( uid_t uid );
 
         /**
-         * Return the (first level) target of a symbolic link, i.e. the path
-         * that the link points to. That target may again be a symlink;
-         * this function does not follow multiple levels of symlinks.
-         *
-         * If 'path' is not a symlink, this returns an empty string.
-         *
-         * This function assumes UTF-8 encoding of names in the filesystem.
-         **/
-        QString symLinkTarget( const QString & path );
-
-        /**
          * Return 'true' if a symbolic link is broken, i.e. the (first level)
          * target of the symlink does not exist in the filesystem.
          **/
 //        bool isBrokenSymLink( const QString & path );
-
-        /**
-         * Read the (first level) target of a symbolic link, assuming UTF-8
-         * encoding of names in the filesystem.
-         * This is a more user-friendly version of readlink(2).
-         *
-         * This returns an empty QByteArray if 'path' is not a symlink.
-         **/
-        QByteArray readLink( const QString & path );
 
         /**
          * Read the (first level) target of a symbolic link.
@@ -176,6 +162,28 @@ namespace QDirStat
          * This returns an empty QByteArray if 'path' is not a symlink.
          **/
         QByteArray readLink( const QByteArray & path );
+
+        /**
+         * Read the (first level) target of a symbolic link, assuming UTF-8
+         * encoding of names in the filesystem.
+         * This is a more user-friendly version of readlink(2).
+         *
+         * This returns an empty QByteArray if 'path' is not a symlink.
+         **/
+        inline static QByteArray readLink( const QString & path )
+	    { return readLink( path.toUtf8() ); }
+
+        /**
+         * Return the (first level) target of a symbolic link, i.e. the path
+         * that the link points to. That target may again be a symlink;
+         * this function does not follow multiple levels of symlinks.
+         *
+         * If 'path' is not a symlink, this returns an empty string.
+         *
+         * This function assumes UTF-8 encoding of names in the filesystem.
+         **/
+        inline static QString symLinkTarget( const QString & path )
+	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**
 	 * Return the last pathname component of a file name.
