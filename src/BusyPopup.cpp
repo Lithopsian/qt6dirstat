@@ -11,6 +11,8 @@
 
 #include "BusyPopup.h"
 #include "Logger.h"
+#include "MainWindow.h"
+#include "QDirStatApp.h"
 
 
 #define PROCESS_EVENTS_MILLISEC 500
@@ -33,9 +35,8 @@ namespace
 
 
 BusyPopup::BusyPopup( const QString & text,
-		      QWidget       * parent,
 		      bool            autoPost ):
-    QLabel ( text, parent, Qt::SplashScreen )
+    QLabel ( text, app()->findMainWindow(), Qt::SplashScreen )
 {
     setMargin( 15 );
     setWindowTitle( QString() );

@@ -240,7 +240,7 @@ void RpmPkgManager::rebuildRpmDbWarning() const
     }
 
     // Add a panel message so the user is sure to see this message.
-    MainWindow * mainWindow = (MainWindow *)app()->findMainWindow();
+    MainWindow * mainWindow = app()->findMainWindow();
     if ( mainWindow )
 	PanelMessage::showRpmMsg( mainWindow, mainWindow->messagePanelContainer() );
 

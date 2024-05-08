@@ -39,7 +39,7 @@ void Refresher::refresh()
 	    catch ( const SysCallFailedException & ex )
 	    {
 		CAUGHT( ex );
-		MainWindow * mainWindow = dynamic_cast<MainWindow *>( app()->findMainWindow() );
+		MainWindow * mainWindow = app()->findMainWindow();
 		if ( mainWindow )
 		    mainWindow->showOpenDirErrorPopup( ex );
 	    }

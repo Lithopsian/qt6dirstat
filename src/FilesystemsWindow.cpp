@@ -61,7 +61,7 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     initWidgets();
     readWindowSettings( this, "FilesystemsWindow" );
 
-    MainWindow * mainWindow = dynamic_cast<MainWindow *>( app()->findMainWindow() );
+    MainWindow * mainWindow = app()->findMainWindow();
     if ( mainWindow )
     {
 	connect( this,       &FilesystemsWindow::readFilesystem,

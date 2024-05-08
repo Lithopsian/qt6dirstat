@@ -549,7 +549,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
     pkgQuerySetup();
-    BusyPopup msg( tr( "Reading package database..." ), this );
+    BusyPopup msg( tr( "Reading package database..." ) );
 
     app()->dirTreeModel()->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );

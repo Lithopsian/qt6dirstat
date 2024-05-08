@@ -63,7 +63,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     }
 
     pkgQuerySetup();
-    BusyPopup msg( tr( "Reading package database..." ), this );
+    BusyPopup msg( tr( "Reading package database..." ) );
 
     setUnpkgExcludeRules( unpkgSettings );
     setUnpkgFilters( unpkgSettings, pkgManager );

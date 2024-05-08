@@ -121,22 +121,22 @@ void MimeCategoryConfigPage::setup()
     updateActions();
 
     // Get the treemap configuration settings from the main treemapView
-    const TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
-    if ( !treemapView )
+    const MainWindow * mainWindow = app()->findMainWindow();
+    if ( !mainWindow )
 	return;
 
-    _ui->squarifiedCheckBox->setChecked( treemapView->squarify() );
-    _ui->cushionShadingCheckBox->setChecked( treemapView->doCushionShading() );
-    _ui->cushionHeightSpinBox->setValue( treemapView->cushionHeight() );
-    _ui->heightScaleFactorSpinBox->setValue( treemapView->heightScaleFactor() );
-    _ui->minTileSizeSpinBox->setValue( treemapView->minTileSize() );
+    _ui->squarifiedCheckBox->setChecked    ( mainWindow->treemapView()->squarify() );
+    _ui->cushionShadingCheckBox->setChecked( mainWindow->treemapView()->doCushionShading() );
+    _ui->cushionHeightSpinBox->setValue    ( mainWindow->treemapView()->cushionHeight() );
+    _ui->heightScaleFactorSpinBox->setValue( mainWindow->treemapView()->heightScaleFactor() );
+    _ui->minTileSizeSpinBox->setValue      ( mainWindow->treemapView()->minTileSize() );
 
-    if ( treemapView->fixedColor().isValid() )
-	_ui->tileColorEdit->setText( treemapView->fixedColor().name() );
+    if ( mainWindow->treemapView()->fixedColor().isValid() )
+	_ui->tileColorEdit->setText( mainWindow->treemapView()->fixedColor().name() );
 
-    _ui->cushionHeightLabel->setEnabled( _ui->cushionShadingCheckBox->isChecked() );
-    _ui->cushionHeightSpinBox->setEnabled( _ui->cushionShadingCheckBox->isChecked() );
-    _ui->heightScaleFactorLabel->setEnabled( _ui->cushionShadingCheckBox->isChecked() );
+    _ui->cushionHeightLabel->setEnabled      ( _ui->cushionShadingCheckBox->isChecked() );
+    _ui->cushionHeightSpinBox->setEnabled    ( _ui->cushionShadingCheckBox->isChecked() );
+    _ui->heightScaleFactorLabel->setEnabled  ( _ui->cushionShadingCheckBox->isChecked() );
     _ui->heightScaleFactorSpinBox->setEnabled( _ui->cushionShadingCheckBox->isChecked() );
 }
 
@@ -146,16 +146,16 @@ void MimeCategoryConfigPage::applyChanges()
     //logDebug() << Qt::endl;
 
     // Save the treemap settings first, there might not be anything else to do
-    TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
-    if ( treemapView )
+    const MainWindow * mainWindow = app()->findMainWindow();
+    if ( mainWindow )
     {
 //	treemapView->setFixedColor( QColor( _ui->tileColorEdit->text() ) );
-	treemapView->configChanged( QColor( _ui->tileColorEdit->text() ),
-				    _ui->squarifiedCheckBox->isChecked(),
-				    _ui->cushionShadingCheckBox->isChecked(),
-				    _ui->cushionHeightSpinBox->value(),
-				    _ui->heightScaleFactorSpinBox->value(),
-				    _ui->minTileSizeSpinBox->value() );
+	mainWindow->treemapView()->configChanged( QColor( _ui->tileColorEdit->text() ),
+						 _ui->squarifiedCheckBox->isChecked(),
+						 _ui->cushionShadingCheckBox->isChecked(),
+						 _ui->cushionHeightSpinBox->value(),
+						 _ui->heightScaleFactorSpinBox->value(),
+						 _ui->minTileSizeSpinBox->value() );
     }
 
     // The patterns for the current category might have been modified and not yet saved to the category
@@ -224,19 +224,23 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     if ( !item )
 	return;
 
-    const MimeCategory * category = CATEGORY_CAST( value( item ) );
-    if (!category )
+    const MainWindow * mainWindow = app()->findMainWindow();
+    if ( !mainWindow )
 	return;
 
-    const bool previews = ((MainWindow *)app()->findMainWindow())->treemapView()->colourPreviews();
+    const MimeCategory * category = CATEGORY_CAST( value( item ) );
+    if ( !category )
+	return;
 
-    const qreal width = listWidget()->width();
+    const bool previews = mainWindow->treemapView()->colourPreviews();
+
+    const qreal width         = listWidget()->width();
     const qreal backgroundEnd = previews ? ( width - 21 ) / width : width;
-    const qreal shadingStart = ( width - 20 ) / width;
+    const qreal shadingStart  = ( width - 20 ) / width;
     const qreal shadingMiddle = ( width - 10 ) / width;
 
-    const QPalette palette = listWidget()->palette();
-    const bool current = item == listWidget()->currentItem();
+    const QPalette palette       = listWidget()->palette();
+    const bool current           = item == listWidget()->currentItem();
     const QColor backgroundColor = current ? Qt::lightGray : palette.color( QPalette::Active, QPalette::Base );
 
     QLinearGradient gradient( 0, 0, 1, 0 );
@@ -569,8 +573,11 @@ void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
 {
     //logDebug() << Qt::endl;
 
-    TreemapView * treemapView = ((MainWindow *)app()->findMainWindow())->treemapView();
-    _ui->actionColour_previews->setChecked( treemapView->colourPreviews() );
+    const MainWindow * mainWindow = app()->findMainWindow();
+    if ( !mainWindow )
+	return;
+
+    _ui->actionColour_previews->setChecked( mainWindow->treemapView()->colourPreviews() );
 
     QMenu menu;
     menu.addAction( _ui->actionAdd_new_category );
@@ -585,7 +592,11 @@ void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
 void MimeCategoryConfigPage::colourPreviewsTriggered( bool checked )
 {
     // Context menu colour previews toggle action
-    ((MainWindow *)app()->findMainWindow())->treemapView()->setColourPreviews( checked );
+    const MainWindow * mainWindow = app()->findMainWindow();
+    if ( !mainWindow )
+	return;
+
+    mainWindow->treemapView()->setColourPreviews( checked );
     adjustShadingWidth();
 }
 

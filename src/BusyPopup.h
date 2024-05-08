@@ -39,13 +39,13 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a BusyPopup with the specified text.
+	 * Create a BusyPopup with the specified text.  This always uses
+	 * the main window as its parent.
 	 *
 	 * If 'autoPost' is 'true', automatically post it, i.e. show it and
 	 * process events for some milliseconds to makes sure it is rendered.
 	 **/
 	BusyPopup( const QString & text,
-		   QWidget       * parent   = nullptr,
 		   bool            autoPost = true );
 
 	/**

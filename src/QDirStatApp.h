@@ -12,12 +12,13 @@
 
 
 class QWidget;
+class MainWindow;
 
 
 namespace QDirStat
 {
-    class DirTreeModel;
     class DirTree;
+    class DirTreeModel;
     class FileInfo;
     class SelectionModel;
 
@@ -111,7 +112,7 @@ namespace QDirStat
          * correct window stacking order (and avoid having subwindows disappear
          * behind the main window). Return 0 if there is no MainWindow (yet).
          **/
-        QWidget * findMainWindow() const;
+        MainWindow * findMainWindow() const;
 
         /**
          * Return the DirTree's root directory (the first real toplevel

@@ -8,6 +8,7 @@
  */
 
 #include "QDirStatApp.h"
+#include "DirInfo.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "MainWindow.h"
@@ -67,9 +68,9 @@ DirTree * QDirStatApp::dirTree() const
 }
 
 
-QWidget * QDirStatApp::findMainWindow() const
+MainWindow * QDirStatApp::findMainWindow() const
 {
-    QWidget * mainWin = nullptr;
+    MainWindow * mainWin = nullptr;
     const QWidgetList toplevel = QApplication::topLevelWidgets();
 
     for ( QWidgetList::const_iterator it = toplevel.cbegin(); it != toplevel.cend() && !mainWin; ++it )
@@ -99,7 +100,7 @@ FileInfo * QDirStatApp::selectedDirInfo() const
     const FileInfoSet selectedItems = _selectionModel->selectedItems();
     FileInfo * sel = selectedItems.first();
 
-    return !sel || sel->isDirInfo() ? sel : ( FileInfo * )sel->parent();
+    return !sel || sel->isDirInfo() ? sel : static_cast<FileInfo *>( sel->parent() );
 }
 
 

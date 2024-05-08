@@ -118,7 +118,7 @@ const DirTreeModel * DirTreeView::dirTreeModel() const
     if ( !model() )
 	return nullptr;
 
-    const DirTreeModel * dirTreeModel = dynamic_cast<const DirTreeModel *>( model() );
+    const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( model() );
     if ( dirTreeModel )
 	return dirTreeModel;
 
