@@ -290,8 +290,7 @@ void DirTree::clear()
     }
 
     _isBusy           = false;
-    _haveClusterSize  = false;
-    _blocksPerCluster = 0;
+    _blocksPerCluster = -1;
 //    _device.clear();
 }
 
@@ -443,8 +442,7 @@ void DirTree::finalizeTree()
 
 void DirTree::childAddedNotify( FileInfo * newChild )
 {
-    //logDebug() << Qt::endl;
-    if ( !_haveClusterSize )
+    if ( !haveClusterSize() )
         detectClusterSize( newChild );
 
 //    emit childAdded( newChild ); // nobody listening for this
@@ -735,7 +733,6 @@ void DirTree::detectClusterSize( const FileInfo * item )
          item->size()   < 2 * STD_BLOCK_SIZE )
     {
         _blocksPerCluster = item->blocks();
-        _haveClusterSize  = true;
 
         logInfo() << "Cluster size: " << _blocksPerCluster << " blocks ("
                   << formatSize( clusterSize() ) << ")" << Qt::endl;

@@ -25,13 +25,13 @@ namespace QDirStat
 
     /**
      * This class provides some infrastructure as well as global data for a
-     * directory tree. It acts as the glue that holds things together: The root
+     * directory tree. It acts as the glue that holds things together: the root
      * item from which to descend into the subtrees, the read queue and some
      * global policies (like whether or not to cross filesystems while reading
      * directories).
      *
-     * Notice that this class uses a "pseudo root" to better conform with Qt's
-     * notion of tree views and the corresponding data models: They use an
+     * Note that this class uses a "pseudo root" to better conform with Qt's
+     * notion of tree views and the corresponding data models: they use an
      * invisible root item to support multiple toplevel items.
      *
      * @short Directory tree global data and infrastructure
@@ -58,7 +58,7 @@ namespace QDirStat
 	 * Actually start reading.
 	 *
 	 * It's not very pretty that this is required as a separate method, but
-	 * this cannot simply be done in the constructor: We need to give the
+	 * this cannot simply be done in the constructor: we need to give the
 	 * caller a chance to set up Qt signal connections, and for this the
 	 * constructor must return before any signals are sent, i.e. before
 	 * anything is read.
@@ -142,7 +142,7 @@ namespace QDirStat
 	FileInfo * firstToplevel() const;
 
 	/**
-	 * Return 'true' if 'item' is the (invisible) root item.
+	 * Return 'true' if 'item' is the (visible) root item.
 	 **/
 //	bool isToplevel( const FileInfo * item ) const;
 
@@ -150,11 +150,6 @@ namespace QDirStat
 	 * Return 'true' if 'item' is the (invisible) root item.
 	 **/
 //	bool isRoot( const DirInfo * dir ) const { return dir && dir == _root; }
-
-	/**
-	 * Return the device of this tree's root item ("/dev/sda3" etc.).
-	 **/
-//	const QString & device() const { return _device; }
 
 	/**
 	 * Clear all items of this tree.  This should only be called from
@@ -173,7 +168,7 @@ namespace QDirStat
 	 * Locate a child somewhere in the tree whose URL (i.e. complete path)
 	 * matches the URL passed. Returns 0 if there is no such child.
 	 *
-	 * Notice: This is a very expensive operation since the entire tree is
+	 * Note that this is a very expensive operation since the entire tree is
 	 * searched recursively.
 	 *
 	 * 'findPseudoDirs' specifies if locating pseudo directories like "dot
@@ -205,10 +200,11 @@ namespace QDirStat
 	/**
 	 * Returns whether reads should cross filesystem boundaries.
 	 *
-	 * Notice: This can only be avoided with local directories where the
-	 * device number a file resides on can be obtained.
+	 * Note that this can only be avoided with local directories where the
+	 * device number can be obtained.
 	 *
-	 * This flag may be modified in the Open dialog or Unpkg dialog.
+	 * This flag is initialised from a configuration setting, but may be
+	 * modified from the Open dialog or Unpkg dialog.
 	 **/
 	bool crossFilesystems() const { return _crossFilesystems; }
 
@@ -254,12 +250,14 @@ namespace QDirStat
 	/**
 	 * Write the complete tree to a cache file.
 	 *
-	 * Returns true if OK, false upon error.
+	 * Returns true if OK, false if there was an error.
 	 **/
 	bool writeCache( const QString & cacheFileName );
 
 	/**
 	 * Read a cache file.
+	 *
+	 * Returns true if OK, false if there was an error.
 	 **/
 	bool readCache( const QString & cacheFileName );
 
@@ -340,19 +338,12 @@ namespace QDirStat
 	bool hasFilters() const { return !_filters.isEmpty(); }
 
 	/**
-	 * Return 'true' if this DirTree is in the process of being destroyed,
-	 * so any FileInfo / DirInfo pointers stored outside the tree might
-	 * have become invalid.
-	 **/
-//	bool beingDestroyed() const { return _beingDestroyed; }
-
-	/**
 	 * Return the number of 512-bytes blocks per cluster.
 	 *
 	 * This may be 0 if no small file (< 512 bytes) was found in this tree
 	 * yet.
 	 **/
-	int blocksPerCluster() const { return _blocksPerCluster; }
+//	int blocksPerCluster() const { return _blocksPerCluster; }
 
 	/**
 	 * Return the cluster size of this tree, i.e. the disk space allocation
@@ -376,8 +367,6 @@ namespace QDirStat
 	 * separate subtrees that all share hard links between each other, but
 	 * not within the same subtree. Some backup systems use this strategy
 	 * to save disk space.
-	 *
-	 * Use this with caution.
 	 *
 	 * This flag will be read from the config file from the outside
 	 * (DirTreeModel) and set from there using this function.
@@ -417,11 +406,6 @@ namespace QDirStat
 	 * deletingChildren() signal.
 	 **/
 	void childrenDeleted();
-
-	/**
-	 * Emitted when the tree needs to be cleared by the model.
-	 **/
-//	void modelClear();
 
 	/**
 	 * Emitted when the tree is about to be cleared.
@@ -512,6 +496,11 @@ namespace QDirStat
 	 **/
 	void clearTmpExcludeRules() { setTmpExcludeRules( nullptr ); }
 
+	/**
+	 * Clear all temporary exclude rules.
+	 **/
+	bool haveClusterSize() const { return _blocksPerCluster > 0; }
+
 
     private:
 
@@ -528,10 +517,8 @@ namespace QDirStat
 
 	bool _crossFilesystems	{ false };
 	bool _isBusy		{ false };
-//	bool _beingDestroyed	{ false };
-	bool _haveClusterSize	{ false };
-	int  _blocksPerCluster	{ 0 };
 	bool _ignoreHardLinks	{ false };
+	int  _blocksPerCluster	{ -1 };
 
     };	// class DirTree
 

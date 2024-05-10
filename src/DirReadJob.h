@@ -272,18 +272,14 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor that uses a cache file that is not open yet.
-	 *
-	 * The cache file contents are loaded into the (empty) tree.
+	 * Constructor that reads the file contents into an empty tree.
 	 **/
 	CacheReadJob( DirTree       * tree,
 		      const QString & cacheFileName );
 
 	/**
-	 * Constructor that uses a cache file that is not open yet.
-	 *
-	 * The cache reader first checks that the cache file contents
-	 * match the given toplevel
+	 * Constructor that checks that the cache file contents match the
+	 * given toplevel.
 	 **/
 	CacheReadJob( DirTree       * tree,
 		      DirInfo       * dir,
