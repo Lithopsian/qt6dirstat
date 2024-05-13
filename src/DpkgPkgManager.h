@@ -254,7 +254,7 @@ namespace QDirStat
 	bool isDiversionTo( const QString & line ) const
 	    { return isDiversion( line ) && line.contains( QLatin1String( "to: " ) ); }
 	bool isDivertedBy( const QString & line ) const
-	    { return line.startsWith( "diverted by" ) ||
+	    { return line.startsWith( QLatin1String( "diverted by" ) ) ||
 		     line.startsWith( QLatin1String( "locally diverted" ) ); }
 	bool isPackageDivert( const QString & line ) const
 	    { return line.startsWith( QLatin1String( "package diverts" ) ); }

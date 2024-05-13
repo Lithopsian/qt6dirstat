@@ -74,14 +74,14 @@ namespace QDirStat
      * This is only intended for small values, typically less than 1,000.
      **/
     inline QString formatShortByteSize( FileSize size )
-	{ return QString::number( size ) % " B"; }
+	{ return QString::number( size ) % QObject::tr(" B" ); }
 
     /**
      * Format a string of the form "/ 3 links" for describing hard links.  If the
      * number of links is less than 2, an empty string is returned.
      **/
     inline QString formatLinksInline( nlink_t numLinks )
-	{ return numLinks > 1 ? QString( " / %1 links" ).arg( numLinks) : QString(); }
+	{ return numLinks > 1 ? QObject::tr( " / %1 links" ).arg( numLinks) : QString(); }
 
     /**
      * Format a string of the form "<br/>3 links" for describing hard links on a
@@ -89,7 +89,7 @@ namespace QDirStat
      * an empty string is returned.
      **/
     inline QString formatLinksRichText( nlink_t numLinks )
-	{ return numLinks > 1 ? QString( "<br/>%1 hard links" ).arg( numLinks ) : QString(); }
+	{ return numLinks > 1 ? QObject::tr( "<br/>%1 hard links" ).arg( numLinks ) : QString(); }
 
     /**
      * Wraps the text in html formatting to prevent line breaks except at explicit
@@ -112,7 +112,7 @@ namespace QDirStat
      * Format a percentage.
      **/
     inline QString formatPercent( float percent )
-        { return percent < 0.0 ? QString() : QString( QString::number( percent, 'f', 1 ) % '%' ); }
+	{ return percent < 0.0 ? QString() : QString::number( percent, 'f', 1 ) % '%'; }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the

@@ -56,8 +56,7 @@ namespace
 
 bool RpmPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( QString( "%1 -qf %1" ).arg( rpmCommand() ),
-			  QRegularExpression( "^rpm.*" ) );
+    return tryRunCommand( QString( "%1 -qf %1" ).arg( rpmCommand() ), "^rpm.*" );
 }
 
 

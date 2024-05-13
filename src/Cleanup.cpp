@@ -479,7 +479,7 @@ QString Cleanup::itemDir( const FileInfo * item ) const
     QString dir = item->path();
 
     if ( !item->isDir() && !item->isPseudoDir() )
-	dir.replace( QRegularExpression( "/[^/]*$" ), "" );
+	dir.remove( QRegularExpression( "/[^/]*$" ) );
 
     return dir;
 }

@@ -102,25 +102,26 @@ namespace QDirStat
     inline QTextStream & operator<< ( QTextStream            & stream,
                                       const FileSearchFilter & filter )
     {
-        QString findType = filter.findFiles() ? "files" : "";
+        QStringList findTypes;
+
+        if ( filter.findFiles() )
+            findTypes << "files";
 
         if ( filter.findDirs() )
-        {
-            if ( ! findType.isEmpty() )
-                findType += " + ";
+            findTypes << "dirs";
 
-            findType += "dirs";
-        }
+        if ( filter.findPkgs() )
+            findTypes << "pkgs";
 
         if ( filter.findSymLinks() )
-            findType += " + symlinks";
+            findTypes << "symlinks";
 
         stream << "<FileSearchFilter \""
                << filter.pattern()
                << "\" mode \""
                << SearchFilter::toString( filter.filterMode() )
                << "\" for "
-               << findType
+               << findTypes.join( QLatin1String( " + " ) )
                <<( filter.isCaseSensitive()? " case sensitive" : "" )
                << ">";
 

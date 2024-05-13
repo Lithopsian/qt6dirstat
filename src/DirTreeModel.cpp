@@ -155,7 +155,7 @@ namespace
     {
 	const FileSize size = item->size();
 	const QString sizeText = size < 1000 ? formatShortByteSize( size ) : formatSize( size );
-	const QString allocText = QString( " (%1k)" ).arg( item->allocatedSize() / 1024 );
+	const QString allocText = QObject::tr( " (%1k)" ).arg( item->allocatedSize() / 1024 );
 	return { sizeText, allocText };
     }
 
@@ -329,7 +329,7 @@ namespace
 	    case PermissionsCol:
 	    {
 		QFont font( baseFont );
-		font.setFamily( "monospace" );
+		font.setFamily( QStringLiteral( "monospace" ) );
 		return font;
 	    }
 

@@ -57,9 +57,9 @@ void HistogramView::init()
 
     _geometryDirty  = true;
 
-    _startPercentile	    = 0;    // data min
-    _endPercentile	    = 100;  // data max
-    _useLogHeightScale	    = false;
+    _startPercentile   = 0;    // data min
+    _endPercentile     = 100;  // data max
+    _useLogHeightScale = false;
 }
 
 
@@ -68,10 +68,7 @@ void HistogramView::clear()
     init();
 
     if ( scene() )
-    {
 	scene()->clear();
-//	scene()->invalidate( scene()->sceneRect() );
-    }
 }
 
 
@@ -177,7 +174,7 @@ qreal HistogramView::percentileSum( int fromIndex, int toIndex ) const
     qreal sum = 0.0;
 
     for ( int i = fromIndex; i <= toIndex; ++i )
-	sum += _stats->percentileSums()[i];
+	sum += _stats->percentileSums()[ i ];
 
     return sum;
 }
@@ -231,9 +228,9 @@ void HistogramView::autoStartEndPercentiles()
 	return;
     }
 
-    const qreal q1	= percentile( 25 );
-    const qreal q3	= percentile( 75 );
-    const qreal qDist	= q3 - q1;
+    const qreal q1    = percentile( 25 );
+    const qreal q3    = percentile( 75 );
+    const qreal qDist = q3 - q1;
 
     // Outliers are classed as more than three times the IQR beyond the 3rd quartile
     // Just use the IQR beyond the 1st quartile to match the typical skewed file size distribution
@@ -366,7 +363,6 @@ void HistogramView::fitToViewport()
 		   << Qt::endl;
 #endif
 	setTransform( QTransform() ); // Reset scaling
-//	ensureVisible( rect, 0, 0 );
     }
 }
 
@@ -402,15 +398,15 @@ void HistogramView::rebuild()
     const QPalette palette = scene()->palette();
     scene()->setBackgroundBrush( palette.base() );
 
-    _panelBackground	  = palette.alternateBase();
-    _barBrush		  = QColor( 0xB0, 0xB0, 0xD0 );
-    _barPen		  = QColor( 0x40, 0x40, 0x50 );
-    _medianPen		  = QPen( palette.linkVisited().color(), 2 );
-    _quartilePen	  = QPen( palette.link().color(), 2 );
-    _percentilePen	  = palette.color( QPalette::Disabled, QPalette::ButtonText );
-    _decilePen		  = palette.buttonText().color();
-    _piePen		  = palette.text().color();
-    _overflowSliceBrush	  = QColor( 0xD0, 0x40, 0x20 );
+    _panelBackground    = palette.alternateBase();
+    _barBrush           = QColor( 0xB0, 0xB0, 0xD0 );
+    _barPen             = QColor( 0x40, 0x40, 0x50 );
+    _medianPen          = QPen( palette.linkVisited().color(), 2 );
+    _quartilePen        = QPen( palette.link().color(), 2 );
+    _percentilePen      = palette.color( QPalette::Disabled, QPalette::ButtonText );
+    _decilePen          = palette.buttonText().color();
+    _piePen             = palette.text().color();
+    _overflowSliceBrush = QColor( 0xD0, 0x40, 0x20 );
 
     if ( _stats->buckets().size() < 1 || _stats->percentileList().size() != 101 )
     {
@@ -539,13 +535,13 @@ void HistogramView::addQuartileText()
 	const QString medianText = tr( "Median: " ) + formatSize( percentile( 50 ) );
 	const QString q3Text     = tr( "Q3: "     ) + formatSize( percentile( 75 ) );
 
-	QGraphicsTextItem * q1Item     = scene()->addText( q1Text );
+	QGraphicsTextItem * q1Item     = scene()->addText( q1Text     );
 	QGraphicsTextItem * medianItem = scene()->addText( medianText );
-	QGraphicsTextItem * q3Item     = scene()->addText( q3Text );
+	QGraphicsTextItem * q3Item     = scene()->addText( q3Text     );
 
-	q1Item->setDefaultTextColor( _quartilePen.color() );
-	medianItem->setDefaultTextColor( _medianPen.color() );
-	q3Item->setDefaultTextColor( _quartilePen.color() );
+	q1Item->setDefaultTextColor    ( _quartilePen.color() );
+	medianItem->setDefaultTextColor( _medianPen.color()   );
+	q3Item->setDefaultTextColor    ( _quartilePen.color() );
 
 	setBold( medianItem);
 	setBold( q1Item);
@@ -767,44 +763,6 @@ void HistogramView::addOverflowPanel()
     }
 }
 
-/*
-void HistogramView::addBar( qreal barWidth,
-			    int   number,
-			    qreal fillHeight )
-{
-    QRectF rect( number * barWidth, 0, barWidth, -_histogramHeight );
-    QGraphicsRectItem * invisibleBar = new QGraphicsRectItem( rect.normalized() );
-    CHECK_NEW( invisibleBar );
-
-    // Setting NoPen so this rectangle remains invisible: This full-height
-    // rectangle is just for the tooltip. For the bar content, we create a visible
-    // separate child item with the correct height.
-//    invisibleBar->setPen( Qt::NoPen );
-    invisibleBar->setZValue( HistogramView::BarLayer );
-    invisibleBar->setFlags( QGraphicsItem::ItemHasNoContents );
-    invisibleBar->setAcceptHoverEvents( true );
-
-    const int numFiles = bucket( number );
-    const QString tooltip = whitespacePre( QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4 ... %5" )
-	.arg( number + 1 )
-	.arg( numFiles )
-	.arg( numFiles == 1 ? "file" : "files" )
-	.arg( formatSize( bucketStart( number ) ) )
-	.arg( formatSize( bucketEnd  ( number ) ) ) );
-    invisibleBar->setToolTip( tooltip );
-
-    // Filled rectangle is relative to its parent
-    QRectF childRect( rect.x(), 0, rect.width(), -fillHeight);
-    QGraphicsRectItem * filledRect = new QGraphicsRectItem( childRect.normalized(), invisibleBar );
-    CHECK_NEW( filledRect );
-
-    filledRect->setPen( barPen() );
-    filledRect->setBrush( barBrush() );
-
-//    filledRect->setFlags( QGraphicsItem::ItemIsSelectable );
-    scene()->addItem( invisibleBar );
-}
-*/
 
 void HistogramView::addLine( int             percentileIndex,
 			     const QString & name,

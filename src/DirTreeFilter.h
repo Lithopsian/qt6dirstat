@@ -68,10 +68,10 @@ namespace QDirStat
 	/**
 	 * Constructor. If 'pattern' contains a slash ("/"), it is matched
 	 * against the complete path. Otherwise, it is matched only against the
-	 * filename.  Used the the create method to generate a filter.
+	 * filename.  Used by the create method to generate a filter.
 	 **/
 	DirTreePatternFilter( const QString & pattern ):
-	    _wildcard { CaseSensitiveWildcard( pattern.contains( '/' ) ? pattern : QString( "*/" ) + pattern ) }
+	    _wildcard { CaseSensitiveWildcard( pattern.contains( '/' ) ? pattern : "*/" + pattern ) }
 	{}
 
     public:

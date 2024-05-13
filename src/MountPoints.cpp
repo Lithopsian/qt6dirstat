@@ -383,14 +383,13 @@ bool MountPoints::checkForBtrfs()
 void MountPoints::findNtfsDevices()
 {
     _ntfsDevices.clear();
-    QString lsblkCommand = "/bin/lsblk";
 
+    QString lsblkCommand = "/bin/lsblk";
     if ( !SysUtil::haveCommand( lsblkCommand ) )
         lsblkCommand = "/usr/bin/lsblk";
     if ( !SysUtil::haveCommand( lsblkCommand ) )
     {
         logInfo() << "No lsblk command available" << Qt::endl;
-
         return;
     }
 

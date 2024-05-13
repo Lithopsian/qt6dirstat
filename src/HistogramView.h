@@ -339,7 +339,6 @@ namespace QDirStat
 
 
 	// Graphical Elements
-//	void addHistogram();
 	void addHistogramBackground();
 	void addAxes();
 	void addYAxisLabel();
@@ -397,15 +396,15 @@ namespace QDirStat
 	 **/
 	void resizeEvent( QResizeEvent * event ) override;
 
-        /**
-         * Calculate the content geometry to fit into 'newSize'.
-         **/
-        void calcGeometry( const QSize & newSize );
+	/**
+	 * Calculate the content geometry to fit into 'newSize'.
+	 **/
+	void calcGeometry( const QSize & newSize );
 
-        /**
-         * Return 'true' if an overflow ("cutoff") panel is needed.
-         **/
-        bool needOverflowPanel() const { return _startPercentile > 0 || _endPercentile < 100; }
+	/**
+	 * Return 'true' if an overflow ("cutoff") panel is needed.
+	 **/
+	bool needOverflowPanel() const { return _startPercentile > 0 || _endPercentile < 100; }
 
 
     private:
@@ -423,9 +422,9 @@ namespace QDirStat
 	// Flags and settings
 	const bool _showMedian			{ true };
 	const bool _showQuartiles		{ true };
-	int        _percentileStep		{ 0 };
 	const int  _leftMarginPercentiles	{ 0 };
 	const int  _rightMarginPercentiles	{ 5 };
+	int        _percentileStep		{ 0 };
 
 	// Brushes and Pens
 	QBrush _panelBackground;
@@ -444,11 +443,11 @@ namespace QDirStat
 	bool   _geometryDirty;
 
 	// Not static since there will only ever be one HistogramView and most of the time none
-	const qreal _leftBorder		{ 40.0 };
-	const qreal _rightBorder	{ 10.0 };
-	const qreal _topBorder		{ 30.0 };
-	const qreal _bottomBorder	{ 50.0 };
-	const qreal _viewMargin		{ 10.0 };
+	const qreal _leftBorder		{  40.0 };
+	const qreal _rightBorder	{  10.0 };
+	const qreal _topBorder		{  30.0 };
+	const qreal _bottomBorder	{  50.0 };
+	const qreal _viewMargin		{  10.0 };
 
 	const qreal _axisExtraLength	{   5.0 };
 	const qreal _markerExtraHeight	{  15.0 };

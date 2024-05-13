@@ -747,7 +747,7 @@ void MainWindow::updateWindowTitle( const QString & url )
     QString windowTitle = "Qt6DirStat";
 
     if ( SysUtil::runningAsRoot() )
-	windowTitle += tr( " [root]" );
+	windowTitle += " [root]";
 
     if ( _urlInWindowTitle )
 	windowTitle += ' ' + url;

@@ -462,20 +462,20 @@ void MimeCategorizer::replaceCategories( const MimeCategoryList & categories )
 void MimeCategorizer::ensureMandatoryCategories()
 {
     // Remember this category so we don't have to search for it every time
-    _executableCategory = findCategoryByName( CATEGORY_EXECUTABLE );
+    _executableCategory = findCategoryByName( executableCategoryName() );
     if ( !_executableCategory )
     {
 	// Special catchall category for files that don't match anything else, cannot be deleted
-	_executableCategory = create( tr( CATEGORY_EXECUTABLE ), Qt::magenta );
+	_executableCategory = create( executableCategoryName(), Qt::magenta );
 	writeSettings( _categories );
     }
 
     // Remember this category so we don't have to search for it every time
-    _symlinkCategory = findCategoryByName( CATEGORY_SYMLINK );
+    _symlinkCategory = findCategoryByName( symlinkCategoryName() );
     if ( !_symlinkCategory )
     {
 	// Special category for symlinks regardless of the filename, cannot be deleted
-	_symlinkCategory = create( tr( CATEGORY_SYMLINK ), Qt::blue );
+	_symlinkCategory = create( symlinkCategoryName(), Qt::blue );
 	writeSettings( _categories );
     }
 }
@@ -539,7 +539,7 @@ void MimeCategorizer::addDefaultCategories()
 			"*.list, *.log.0, *.log.1, *.odc, *.odg, *.odp, *.ods, *.odt, "
 			"*.otc, *.otp, *.ots, *.ott" );
 
-    addDefaultCategory( tr( CATEGORY_EXECUTABLE ),
+    addDefaultCategory( executableCategoryName(),
 			Qt::magenta,
 			"",
 			"*.jsa, *.ucode, lft.db, traceproto.db, traceroute.db" );
@@ -619,7 +619,7 @@ void MimeCategorizer::addDefaultCategories()
 			"",
 			"*.f90, *.mod.c, *.ui, moc_*.cpp, qrc_*.cpp, ui_*.h" );
 
-    addDefaultCategory( tr( CATEGORY_SYMLINK ),
+    addDefaultCategory( symlinkCategoryName(),
 			Qt::blue,
 			"",
 			"" );

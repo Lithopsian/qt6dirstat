@@ -18,10 +18,6 @@
 #include "Wildcard.h"
 
 
-#define CATEGORY_EXECUTABLE "executable"
-#define CATEGORY_SYMLINK "symlink"
-
-
 namespace QDirStat
 {
     /* Suffixes matches return a list (possibly with only one entry) of pairs.
@@ -139,6 +135,16 @@ namespace QDirStat
 	 * will also be written to the settings file.
 	 **/
 	void replaceCategories( const MimeCategoryList & categories );
+
+	/**
+	 * Return the (translated) name of the fixed category for executables.
+	 **/
+	QString executableCategoryName() const { return tr( "executable" ); }
+
+	/**
+	 * Return the (translated) name of the fixed category for symlinks.
+	 **/
+	QString symlinkCategoryName() const { return tr( "symlink" ); }
 
 
     protected:

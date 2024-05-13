@@ -122,11 +122,10 @@ QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
     const QStringList data = index.data( SizeTextRole ).toStringList();
     if ( data.size() == 2 || data.size() == 3 )
     {
-	const QString text = data.join( QLatin1String( "" ) );
+	const QString text = data.join( QLatin1String() );
 	const QFont font = index.data( Qt::FontRole ).value<QFont>();
 	const int width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
 	const int height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
-	const QSize size( width, height );
 #if 0
 	logDebug() << "size hint for \"" << text << "\": " << width << ", " << height << Qt::endl;
 #endif

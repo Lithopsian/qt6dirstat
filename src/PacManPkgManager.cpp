@@ -22,8 +22,7 @@ using SysUtil::haveCommand;
 
 bool PacManPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( "/usr/bin/pacman -Qo /usr/bin/pacman",
-                          QRegularExpression( ".*is owned by pacman.*" ) );
+    return tryRunCommand( "/usr/bin/pacman -Qo /usr/bin/pacman", ".*is owned by pacman.*" );
 }
 
 

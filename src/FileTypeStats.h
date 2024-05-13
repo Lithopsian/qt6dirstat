@@ -16,8 +16,8 @@
 
 // Using a suffix that can never occur: A slash is illegal in Linux/Unix
 // filenames.
-#define NO_SUFFIX        "//<No Suffix>"
-#define NON_SUFFIX_RULE  "//<Other>"
+#define NO_SUFFIX        QLatin1String( "//<No Suffix>" )
+#define NON_SUFFIX_RULE  QLatin1String( "//<Other>" )
 
 
 namespace QDirStat
@@ -114,8 +114,8 @@ namespace QDirStat
 	/**
 	 * Return the percentage of 'size' of the tree total size.
 	 **/
-	double percentage( FileSize size ) const
-	    { return totalSize() == 0LL ? 0.0 : 100.0 * size / (double)totalSize(); }
+	float percentage( FileSize size ) const
+	    { return totalSize() == 0LL ? 0.0 : 100.0 * size / totalSize(); }
 
 	//
 	// Iterators

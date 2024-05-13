@@ -139,7 +139,7 @@ protected:
     /**
      * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:").
      **/
-    static QString unpkgScheme() { return "Unpkg:"; }
+    static QLatin1String unpkgScheme() { return QLatin1String( "Unpkg:" ); }
 
     /**
      * Disable the treemap, reset the permissions warning, breadcrumbs,

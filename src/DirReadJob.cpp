@@ -486,7 +486,7 @@ QString LocalDirReadJob::fullName( const QString & entryName ) const
     // Avoid leading // when in root dir
     const QString dirName = _dirName == QLatin1String( "/" ) ? QString() : _dirName;
 
-    return dirName + "/" + entryName;
+    return dirName + '/' + entryName;
 }
 
 

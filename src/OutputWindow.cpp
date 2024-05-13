@@ -204,7 +204,6 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 		// processes with a shell, that exit code would be the exit
 		// code of the shell; that would only be useful if the shell
 		// crashed or could not be started.
-
 		logError() << "Process crashed." << Qt::endl;
 		addStderr( tr( "Process crashed." ) );
 	    }

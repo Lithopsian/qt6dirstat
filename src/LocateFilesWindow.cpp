@@ -42,8 +42,6 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    CHECK_PTR( _treeWalker );
-
     initWidgets();
     readWindowSettings( this, "LocateFilesWindow" );
 
@@ -74,7 +72,8 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
 
     if ( _sharedInstance )
     {
-	_sharedInstance->setTreeWalker( treeWalker );
+	delete _sharedInstance->_treeWalker;
+	_sharedInstance->_treeWalker = treeWalker;
     }
     else
     {
@@ -89,15 +88,6 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
 void LocateFilesWindow::clear()
 {
     _ui->treeWidget->clear();
-}
-
-
-void LocateFilesWindow::setTreeWalker( TreeWalker * newTreeWalker )
-{
-    CHECK_PTR( newTreeWalker );
-
-    delete _treeWalker;
-    _treeWalker = newTreeWalker;
 }
 
 
@@ -295,8 +285,10 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case LocateListSizeCol:  return _size  < other.size();
 	case LocateListMTimeCol: return _mtime < other.mtime();
+
 	case LocateListPathCol:
-	case LocateListColumnCount: break;
+	case LocateListColumnCount:
+	    break;
     }
 
     return QTreeWidgetItem::operator<( rawOther );

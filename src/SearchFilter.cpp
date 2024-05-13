@@ -38,10 +38,7 @@ SearchFilter::SearchFilter( const QString & pattern,
 
     // Make an attempt to recover from guessing an invalid regexp
     if ( filterMode == Auto && _filterMode == RegExp && !_regexp.isValid() )
-    {
         _filterMode = StartsWith;
-        logDebug() << _regexp.errorString() << Qt::endl;
-    }
 }
 
 
@@ -71,7 +68,7 @@ void SearchFilter::guessFilterMode()
         _filterMode = RegExp;
     }
     else if ( _pattern.contains( '*' ) ||
-              _pattern.contains( '?' )   )
+              _pattern.contains( '?' ) )
     {
         _filterMode = Wildcard;
     }
@@ -85,9 +82,7 @@ void SearchFilter::guessFilterMode()
     }
 
 #if 0
-    logDebug() << "using filter mode " << toString( _filterMode )
-               << " from \"" << _pattern << "\""
-               << Qt::endl;
+    logDebug() << "using filter mode " << toString( _filterMode ) << " from \"" << _pattern << "\"" << Qt::endl;
 #endif
 }
 
@@ -126,19 +121,3 @@ void SearchFilter::setCaseSensitive( bool sensitive )
     }
 }
 */
-
-QString SearchFilter::toString( FilterMode filterMode )
-{
-    switch ( filterMode )
-    {
-        case Contains:   return "Contains";
-        case StartsWith: return "StartsWith";
-        case ExactMatch: return "ExactMatch";
-        case Wildcard:   return "Wildcard";
-        case RegExp:     return "Regexp";
-        case SelectAll:  return "SelectAll";
-        case Auto:       return "Auto";
-    }
-
-    return QString( "<Unknown FilterMode %1" ).arg( ( int )filterMode );
-}

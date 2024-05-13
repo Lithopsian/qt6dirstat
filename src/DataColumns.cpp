@@ -25,32 +25,32 @@ DataColumnList DataColumns::allColumns()
 }
 
 
-QString DataColumns::toString( DataColumn col )
+QLatin1String DataColumns::toString( DataColumn col )
 {
     switch ( col )
     {
-	case NameCol:             return "NameCol";
-	case PercentBarCol:       return "PercentBarCol";
-	case PercentNumCol:       return "PercentNumCol";
-	case SizeCol:             return "SizeCol";
-	case TotalItemsCol:       return "TotalItemsCol";
-	case TotalFilesCol:       return "TotalFilesCol";
-	case TotalSubDirsCol:     return "TotalSubDirsCol";
-	case LatestMTimeCol:      return "LatestMTimeCol";
-        case OldestFileMTimeCol:  return "OldestFileMTimeCol";
-	case UserCol:             return "UserCol";
-	case GroupCol:            return "GroupCol";
-	case PermissionsCol:      return "PermissionsCol";
-	case OctalPermissionsCol: return "OctalPermissionsCol";
-	case UndefinedCol:        return "UndefinedCol";
-	case ReadJobsCol:         return "ReadJobsCol";
+	case NameCol:             return QLatin1String( "NameCol" );
+	case PercentBarCol:       return QLatin1String( "PercentBarCol" );
+	case PercentNumCol:       return QLatin1String( "PercentNumCol" );
+	case SizeCol:             return QLatin1String( "SizeCol" );
+	case TotalItemsCol:       return QLatin1String( "TotalItemsCol" );
+	case TotalFilesCol:       return QLatin1String( "TotalFilesCol" );
+	case TotalSubDirsCol:     return QLatin1String( "TotalSubDirsCol" );
+	case LatestMTimeCol:      return QLatin1String( "LatestMTimeCol" );
+        case OldestFileMTimeCol:  return QLatin1String( "OldestFileMTimeCol" );
+	case UserCol:             return QLatin1String( "UserCol" );
+	case GroupCol:            return QLatin1String( "GroupCol" );
+	case PermissionsCol:      return QLatin1String( "PermissionsCol" );
+	case OctalPermissionsCol: return QLatin1String( "OctalPermissionsCol" );
+	case UndefinedCol:        return QLatin1String( "UndefinedCol" );
+	case ReadJobsCol:         return QLatin1String( "ReadJobsCol" );
 
 	// Intentionally omitting 'default' so the compiler
 	// can catch unhandled enum values
     }
 
     logError() << "Unknown DataColumn " << (int)col << Qt::endl;
-    return QString();
+    return QLatin1String();
 }
 
 

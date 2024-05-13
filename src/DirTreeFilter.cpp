@@ -76,6 +76,8 @@ bool DirTreeSuffixFilter::ignore( const QString & path ) const
 }
 
 
+
+
 DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager )
 {
     CHECK_PTR( pkgManager );
@@ -84,8 +86,6 @@ DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager )
     _fileListCache = pkgManager->createFileListCache( PkgFileListCache::LookupGlobal );
     //logInfo() << "Done." << Qt::endl;
 }
-
-
 
 
 DirTreePkgFilter::~DirTreePkgFilter()

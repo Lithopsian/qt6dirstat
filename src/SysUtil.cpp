@@ -24,10 +24,10 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const QString            & commandLine,
-			     const QRegularExpression & expectedResult,
-			     bool                       logCommand,
-			     bool                       logOutput )
+bool SysUtil::tryRunCommand( const QString & commandLine,
+			     const QString & expectedResult,
+			     bool            logCommand,
+			     bool            logOutput )
 {
     int exitCode = -1;
     QString output = runCommand( commandLine, &exitCode,
@@ -40,7 +40,7 @@ bool SysUtil::tryRunCommand( const QString            & commandLine,
 	return false;
     }
 
-    const bool expected = expectedResult.match( output ).hasMatch();
+    const bool expected = QRegularExpression( expectedResult ).match( output ).hasMatch();
 
     return expected;
 }

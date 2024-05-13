@@ -184,7 +184,7 @@ namespace QDirStat
 	 * rectangle 'rect'.
 	 **/
 	TreemapTile( TreemapView  * parentView,
-		     FileInfo	  * orig,
+		     FileInfo     * orig,
 		     const QRectF & rect );
 
 	/**
@@ -201,17 +201,17 @@ namespace QDirStat
 	 * used for delegation from the HorizontalTreemapTile and
 	 * VerticalTreemapTile derived classes.
 	 **/
-	TreemapTile( TreemapTile	  * parentTile,
-		     FileInfo		  * orig,
-		     const QRectF	  & rect );
+	TreemapTile( TreemapTile  * parentTile,
+		     FileInfo     * orig,
+		     const QRectF & rect );
 
 	/**
 	 * Constructor used for squarified children
 	 **/
-	TreemapTile( TreemapTile		* parentTile,
-		     FileInfo			* orig,
-		     const QRectF		& rect,
-		     const CushionSurface	& cushionSurface );
+	TreemapTile( TreemapTile          * parentTile,
+		     FileInfo             * orig,
+		     const QRectF         & rect,
+		     const CushionSurface & cushionSurface );
 
     public:
 
@@ -449,17 +449,17 @@ namespace QDirStat
 
 	// Data members
 
-	TreemapView		* _parentView;
-	FileInfo		* _orig;
+	TreemapView             * _parentView;
+	FileInfo                * _orig;
 
-	CushionSurface		  _cushionSurface;
-	QPixmap			  _cushion;
+	CushionSurface            _cushionSurface;
+	QPixmap                   _cushion;
 
 	SelectedTileHighlighter * _highlighter { nullptr };
 
 //	bool _firstTile;
 //	bool _lastTile;
-//	QElapsedTimer	_stopwatch;
+//	QElapsedTimer _stopwatch;
 
     }; // class TreemapTile
 

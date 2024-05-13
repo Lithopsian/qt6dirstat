@@ -218,7 +218,7 @@ void FileTypeStats::removeEmpty()
 
 bool FileTypeStats::isCruft( const QString & suffix, const MimeCategory * category ) const
 {
-    // Unknown category should all have been marked in _otherCategory already
+    // Unknown categories should all have been marked in _otherCategory already
     if ( suffix == NO_SUFFIX || category != _otherCategory )
 	return false;
 

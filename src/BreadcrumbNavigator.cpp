@@ -49,7 +49,7 @@ namespace
                 name_ret = components.takeLast();
 
             if ( !components.empty() )
-                basePath_ret = components.join( '/' ) + "/";
+                basePath_ret = components.join( '/' ) + '/';
 
             if ( path.startsWith( '/' ) )
                 basePath_ret.prepend( '/' );
@@ -149,7 +149,7 @@ QString BreadcrumbNavigator::html() const
             if ( crumb.url.isEmpty() )
                 html += name.toHtmlEscaped();
             else
-                html += QString( "<a href=\"%1\">%2</a>" ).arg( crumb.url ).arg( name.toHtmlEscaped() );
+                html += QStringLiteral( "<a href=\"%1\">%2</a>" ).arg( crumb.url ).arg( name.toHtmlEscaped() );
 
             if ( !name.endsWith( '/' ) )
                 html += '/';

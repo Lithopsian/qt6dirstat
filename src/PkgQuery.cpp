@@ -29,10 +29,6 @@
 
 using namespace QDirStat;
 
-using SysUtil::runCommand;
-using SysUtil::tryRunCommand;
-using SysUtil::haveCommand;
-
 
 PkgQuery * PkgQuery::instance()
 {

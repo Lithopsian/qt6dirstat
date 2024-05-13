@@ -61,7 +61,7 @@ namespace
 
 bool DpkgPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( "/usr/bin/dpkg -S /usr/bin/dpkg", QRegularExpression( "^dpkg:.*" ) );
+    return tryRunCommand( "/usr/bin/dpkg -S /usr/bin/dpkg", "^dpkg:.*" );
 }
 
 

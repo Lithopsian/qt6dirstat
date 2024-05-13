@@ -47,10 +47,10 @@ namespace QDirStat
 	 * Log the command that is executed if 'logCommand' is 'true',
 	 * log the command's output if 'logOutput' is 'true'.
 	 **/
-	bool tryRunCommand( const QString            & commandLine,
-			    const QRegularExpression & expectedResult,
-			    bool                       logCommand = LOG_COMMANDS,
-			    bool                       logOutput  = LOG_OUTPUT );
+	bool tryRunCommand( const QString & commandLine,
+			    const QString & expectedResult,
+			    bool            logCommand = LOG_COMMANDS,
+			    bool            logOutput  = LOG_OUTPUT );
 
 	/**
 	 * Run a command line and return its output. If exitCode_ret is

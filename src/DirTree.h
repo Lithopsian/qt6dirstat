@@ -132,7 +132,7 @@ namespace QDirStat
 	/**
 	 * Return a special printable url for the root item of this tree.
 	 **/
-	QString rootDebugUrl() const { return "<root>"; }
+	QLatin1String rootDebugUrl() const { return QLatin1String( "<root>" ); }
 
 	/**
 	 * Return the first toplevel item of this tree (that is, the first

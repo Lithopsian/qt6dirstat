@@ -96,7 +96,7 @@ namespace QDirStat
 	/**
 	 * Convert a column to string
 	 **/
-	QString toString( DataColumn col );
+	QLatin1String toString( DataColumn col );
 
 	/**
 	 * Convert string to column

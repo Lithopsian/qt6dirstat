@@ -86,9 +86,24 @@ namespace QDirStat
 //        void setCaseSensitive( bool sensitive = true );
 
         /**
-         * Convert a filter mode to a string.
+         * Convert a filter mode to a string.  Only used for logging stream
+         * operators in the various classes derived from this one.
          **/
-        static QString toString( FilterMode filterMode );
+        inline static QString toString( FilterMode filterMode )
+        {
+            switch ( filterMode )
+            {
+                case Contains:   return "Contains";
+                case StartsWith: return "StartsWith";
+                case ExactMatch: return "ExactMatch";
+                case Wildcard:   return "Wildcard";
+                case RegExp:     return "Regexp";
+                case SelectAll:  return "SelectAll";
+                case Auto:       return "Auto";
+            }
+
+            return QString( "<Unknown FilterMode %1" ).arg( ( int )filterMode );
+        }
 
 
     protected:
@@ -103,11 +118,11 @@ namespace QDirStat
 
         // Data members
 
-        QString             _pattern;
-        QRegularExpression  _regexp;
-        FilterMode          _filterMode;
-        FilterMode          _defaultFilterMode;
-        bool                _caseSensitive;
+        QString            _pattern;
+        QRegularExpression _regexp;
+        FilterMode         _filterMode;
+        FilterMode         _defaultFilterMode;
+        bool               _caseSensitive;
 
     };  // class SearchFilter
 

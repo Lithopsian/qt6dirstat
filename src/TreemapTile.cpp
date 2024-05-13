@@ -245,9 +245,9 @@ VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
 }
 
 // constructor for squarified layout, with the cushion specified explicitly to allow for a row cushion
-TreemapTile::TreemapTile( TreemapTile  * parentTile,
-                          FileInfo     * orig,
-                          const QRectF & rect,
+TreemapTile::TreemapTile( TreemapTile          * parentTile,
+                          FileInfo             * orig,
+                          const QRectF         & rect,
                           const CushionSurface & cushionSurface ):
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
