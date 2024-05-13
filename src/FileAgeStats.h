@@ -31,7 +31,7 @@ namespace QDirStat
     {
     public:
 
-        short    year;                     // 1970-2037 (time_t range)
+        short    year;                     // 1970 (time_t 0 seconds) - 32767
         short    month;                    // 1-12 or 0 for the  complete year
         int      filesCount     { 0 };
         float    filesPercent   { 0.0 };   // 0.0 .. 100.0

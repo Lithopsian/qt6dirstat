@@ -89,7 +89,6 @@ FileTypeStatsWindow::~FileTypeStatsWindow()
 
     writeWindowSettings( this, "FileTypeStatsWindow" );
 
-    delete _stats;
     delete _ui;
 }
 
@@ -166,9 +165,6 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     clear();
     _subtree = newSubtree;
 
-    delete _stats;
-    _stats = new FileTypeStats( _subtree() );
-
     _ui->headingUrl->setStatusTip( _subtree.url() );
 
     // Don't sort until all items are added
@@ -178,26 +174,31 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     QHash<const MimeCategory *, FileTypeItem *> categoryItem;
     FileTypeItem * otherCategoryItem = nullptr;
 
-    for ( CategoryFileSizeMapIterator it = _stats->categorySumBegin(); it != _stats->categorySumEnd(); ++it )
+    FileTypeStats stats( _subtree() );
+    for ( CategoryFileSizeMapIterator it = stats.categorySumBegin(); it != stats.categorySumEnd(); ++it )
     {
 	const MimeCategory * category = it.key();
 	if ( category )
 	{
             // Add a category item
 	    const FileSize sum       = it.value();
-            const int      count     = _stats->categoryCount( category );
-	    FileTypeItem * catItem   = addCategoryItem( category->name(), count, sum );
+            const int      count     = stats.categoryCount( category );
+	    FileTypeItem * catItem   = addCategoryItem( category->name(), count, sum, stats.percentage( sum ) );
 	    categoryItem[ category ] = catItem;
 
-	    if ( category == _stats->otherCategory() )
+	    if ( category == stats.otherCategory() )
 	    {
 		otherCategoryItem = catItem;
 	    }
-            else if ( _stats->categoryNonSuffixRuleCount( category ) > 0 )
+            else if ( stats.categoryNonSuffixRuleCount( category ) > 0 )
 	    {
 		// Add an <Other> item below the category for files
 		// matching any non-suffix rules
-		SuffixFileTypeItem * item = addNonSuffixRuleItem( category );
+		const int      count   = stats.categoryNonSuffixRuleCount( category );
+		const FileSize sum     = stats.categoryNonSuffixRuleSum  ( category );
+		const float    percent = stats.percentage( sum );
+
+		SuffixFileTypeItem * item = addSuffixFileTypeItem( NON_SUFFIX_RULE, count, sum, percent );
 		catItem->addChild( item );
 	    }
 	}
@@ -209,13 +210,14 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     FileSize otherSum   = 0LL;
 
     // Create items for each individual suffix (below a category)
-    for ( StringFileSizeMapIterator it = _stats->suffixSumBegin(); it != _stats->suffixSumEnd(); ++it )
+    for ( StringFileSizeMapIterator it = stats.suffixSumBegin(); it != stats.suffixSumEnd(); ++it )
     {
 	const QString      & suffix   = it.key().first;
 	const MimeCategory * category = it.key().second;
 	const FileSize       sum      = it.value();
-	const int            count    = _stats->suffixCount( suffix, category );
-	SuffixFileTypeItem * item     = addSuffixFileTypeItem( suffix, count, sum );
+	const int            count    = stats.suffixCount( suffix, category );
+	const float          percent  = stats.percentage( sum );
+	SuffixFileTypeItem * item     = addSuffixFileTypeItem( suffix, count, sum, percent );
 
 	if ( category )
 	{
@@ -242,12 +244,12 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     }
 
     // Put remaining "other" items below a separate category
-
     if ( !otherItems.isEmpty() )
     {
-	otherCategoryItem = addCategoryItem( _stats->otherCategory()->name(),
+	otherCategoryItem = addCategoryItem( stats.otherCategory()->name(),
                                              otherCount,
-                                             otherSum );
+                                             otherSum,
+					     stats.percentage( otherSum ) );
 
 	const QString name = otherItems.size() > TOP_X ? tr( "Other (top %1)" ).arg( TOP_X ) : tr( "Other" );
 	otherCategoryItem->setText( 0, name );
@@ -260,9 +262,12 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 }
 
 
-FileTypeItem * FileTypeStatsWindow::addCategoryItem( const QString & name, int count, FileSize sum )
+FileTypeItem * FileTypeStatsWindow::addCategoryItem( const QString & name,
+						     int count,
+						     FileSize sum,
+						     float percent )
 {
-    FileTypeItem * item = new FileTypeItem( name, count, sum, _stats->percentage( sum ) );
+    FileTypeItem * item = new FileTypeItem( name, count, sum, percent );
     CHECK_NEW( item );
 
     _ui->treeWidget->addTopLevelItem( item );
@@ -271,21 +276,12 @@ FileTypeItem * FileTypeStatsWindow::addCategoryItem( const QString & name, int c
 }
 
 
-SuffixFileTypeItem * FileTypeStatsWindow::addNonSuffixRuleItem( const MimeCategory * category )
-{
-    const QString  suffix = NON_SUFFIX_RULE;
-    const FileSize sum    = _stats->categoryNonSuffixRuleSum  ( category );
-    const int      count  = _stats->categoryNonSuffixRuleCount( category );
-
-    return addSuffixFileTypeItem( suffix, count, sum );
-}
-
-
 SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString & suffix,
                                                                  int             count,
-                                                                 FileSize        sum )
+                                                                 FileSize        sum,
+                                                                 float           percent )
 {
-    SuffixFileTypeItem * item = new SuffixFileTypeItem( suffix, count, sum, _stats->percentage( sum ) );
+    SuffixFileTypeItem * item = new SuffixFileTypeItem( suffix, count, sum, percent );
     CHECK_NEW( item );
 
     return item;

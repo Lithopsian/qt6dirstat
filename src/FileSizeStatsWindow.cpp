@@ -118,8 +118,8 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     setAttribute( Qt::WA_DeleteOnClose );
 
     CHECK_NEW( _ui );
-
     _ui->setupUi( this );
+
     initWidgets();
     readWindowSettings( this, "FileSizeStatsWindow" );
 }
@@ -286,8 +286,8 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget  * table,
 	    if ( i == 0 )         return tr( "Min" );
 	    if ( i == order  )    return tr( "Max" );
 	    if ( i == median )    return tr( "Median" );
-	    if ( i == quartile1 ) return tr( "1. Quartile" );
-	    if ( i == quartile3 ) return tr( "3. Quartile" );
+	    if ( i == quartile1 ) return tr( "1st quartile" );
+	    if ( i == quartile3 ) return tr( "3rd quartile" );
 
 	    return QString();
 	}();

@@ -128,11 +128,6 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo );
 
 	/**
-	 * Set a new TreeWalker for this window. This deletes the old one.
-	 **/
-	void setTreeWalker( TreeWalker * newTreeWalker );
-
-	/**
 	 * Set the sort column and sort order (Qt::AscendingOrder or
 	 * Qt::DescendingOrder), sort the list and select the first item.
 	 **/
@@ -181,8 +176,9 @@ namespace QDirStat
 	//
 
 	Ui::LocateFilesWindow * _ui;
-	TreeWalker            * _treeWalker;
-	Subtree                 _subtree;
+
+	TreeWalker * _treeWalker;
+	Subtree      _subtree;
     };
 
 

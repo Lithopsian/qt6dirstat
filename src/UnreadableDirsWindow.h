@@ -184,8 +184,11 @@ namespace QDirStat
 
 	/**
 	 * Less-than operator for sorting.
+	 *
+	 * Currently, all columns sort by their text value, so this override
+	 * is not required.
 	 **/
-	bool operator<( const QTreeWidgetItem & other ) const override;
+//	bool operator<( const QTreeWidgetItem & other ) const override;
 
     private:
 

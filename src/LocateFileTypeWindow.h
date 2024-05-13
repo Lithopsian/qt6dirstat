@@ -68,15 +68,12 @@ namespace QDirStat
 	static void populateSharedInstance( const QString & suffix, FileInfo * fileInfo );
 
 
-    public slots:
+    protected slots:
 
 	/**
 	 * Refresh (reload) all data.
 	 **/
 	void refresh();
-
-
-    protected slots:
 
 	/**
 	 * Select one of the search results in the main window's tree and

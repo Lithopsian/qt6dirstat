@@ -91,8 +91,8 @@ void LocateFileTypeWindow::initWidgets()
 
     _ui->treeWidget->setColumnCount( SSR_ColumnCount );
     _ui->treeWidget->setHeaderLabels( { tr( "Number" ), tr( "Total Size" ), tr( "Directory" ) } );
-    _ui->treeWidget->headerItem()->setTextAlignment( SSR_CountCol, Qt::AlignHCenter );
-    _ui->treeWidget->headerItem()->setTextAlignment( SSR_TotalSizeCol, Qt::AlignHCenter );
+    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+    _ui->treeWidget->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
 
     _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
@@ -131,8 +131,8 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     _ui->treeWidget->setSortingEnabled( true );
 
     const int count = _ui->treeWidget->topLevelItemCount();
-    const QString intro = ( count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count ) );
-    const QString heading = tr( " with %2 files below %3" ).arg( displaySuffix() ).arg( _subtree.url() );
+    const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
+    const QString heading = tr( " with %1 files below %2" ).arg( displaySuffix() ).arg( _subtree.url() );
     _ui->heading->setStatusTip( intro + heading );
 
 //    logDebug() << count << " directories" << Qt::endl;
@@ -262,8 +262,10 @@ bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case SSR_CountCol:     return _count     < other.count();
 	case SSR_TotalSizeCol: return _totalSize < other.totalSize();
+
 	case SSR_PathCol:
-	case SSR_ColumnCount: break;
+	case SSR_ColumnCount:
+	    break;
     }
 
     return QTreeWidgetItem::operator<( rawOther );

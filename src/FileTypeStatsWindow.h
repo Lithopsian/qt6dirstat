@@ -130,13 +130,16 @@ namespace QDirStat
 	 **/
 	FileTypeItem * addCategoryItem( const QString & name,
                                         int             count,
-                                        FileSize        sum );
+                                        FileSize        sum,
+                                        float           percent );
 
 	/**
 	 * Create a file type item for files matching a non-suffix rule of a
 	 * category. This does not yet add it to the category parent item.
 	 **/
-	SuffixFileTypeItem * addNonSuffixRuleItem( const MimeCategory * category );
+//	SuffixFileTypeItem * addNonSuffixRuleItem( const MimeCategory * category,
+//                                                   int                  count,
+//                                                   FileSize             sum );
 
 	/**
 	 * Create a file type item. This does not yet add it to a category
@@ -148,7 +151,8 @@ namespace QDirStat
 	 **/
 	SuffixFileTypeItem * addSuffixFileTypeItem( const QString & suffix,
                                                     int             count,
-                                                    FileSize        sum );
+                                                    FileSize        sum,
+                                                    float           percent );
 
 	/**
 	 * Add the top X of 'otherItems' to 'otherCategory' and delete the
@@ -195,7 +199,6 @@ namespace QDirStat
 
 	Ui::FileTypeStatsWindow * _ui;
 	Subtree                   _subtree;
-	const FileTypeStats     * _stats { nullptr };
 
     };
 

@@ -90,7 +90,7 @@ void FileAgeStats::calcPercentages()
 {
     // Sum up the totals over all years
     int totalFilesCount      = 0;
-    FileSize totalFilesSize  = 0;
+    FileSize totalFilesSize  = 0LL;
 
     for ( const YearStats & stats : _yearStats )
     {

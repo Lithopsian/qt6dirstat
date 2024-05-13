@@ -75,14 +75,14 @@ void UnreadableDirsWindow::initWidgets()
 				       tr( "User" ),
 				       tr( "Group" ),
 				       tr( "Permissions" ),
-				       tr( "Perm." )
+				       tr( "Perm." ),
 				     };
     _ui->treeWidget->setColumnCount( headerLabels.size() );
     _ui->treeWidget->setHeaderLabels( headerLabels );
 
     // Center the column headers except the first (Directory).
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-    _ui->treeWidget->headerItem()->setTextAlignment( 0, Qt::AlignLeft | Qt::AlignVCenter );
+    _ui->treeWidget->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
 
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
@@ -184,7 +184,7 @@ void UnreadableDirListItem::set( UnreadableDirectories col, const QString & text
     setTextAlignment( col, alignment | Qt::AlignVCenter );
 }
 
-
+/*
 bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )
@@ -206,4 +206,4 @@ bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
 
     return QTreeWidgetItem::operator<( rawOther );
 }
-
+*/

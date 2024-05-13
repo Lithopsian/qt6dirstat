@@ -142,17 +142,17 @@ namespace QDirStat
 	/**
 	 * Create an item in the years tree / list widget for each year
 	 **/
-	void populateListWidget();
+	void populateListWidget( FileInfo * fileInfo );
 
 	/**
 	 * Fill the gaps between years.
 	 **/
-	void fillGaps();
+	void fillGaps( const FileAgeStats & stats );
 
 	/**
 	 * Find the gaps between years.
 	 **/
-	YearsList findGaps() const;
+	YearsList findGaps( const FileAgeStats & stats ) const;
 
 	/**
 	 * Return the currently selected item in the tree widget or 0
@@ -161,12 +161,7 @@ namespace QDirStat
 	const YearListItem * selectedItem() const;
 
 	/**
-	 * Returns whether a locate should be performed for the current selection.
-	 **/
-	bool canLocate( const YearListItem * item ) const;
-
-	/**
-	 * Key press event for detecting evnter/return.
+	 * Key press event for detecting enter/return.
 	 *
 	 * Reimplemented from QWidget.
 	 **/
@@ -189,7 +184,6 @@ namespace QDirStat
 	//
 
 	Ui::FileAgeStatsWindow * _ui;
-	FileAgeStats           * _stats 			{ nullptr };
 	PercentBarDelegate     * _filesPercentBarDelegate	{ nullptr };
 	PercentBarDelegate     * _sizePercentBarDelegate	{ nullptr };
 	Subtree                  _subtree;
@@ -228,9 +222,19 @@ namespace QDirStat
 	YearListItem( const YearStats & yearStats );
 
 	/**
-	 * Return the statistics values.
+	 * Return the year for this item.
 	 **/
-	const YearStats & stats() const { return _stats; }
+	short year() const { return _year; }
+
+	/**
+	 * Return the month for this item.
+	 **/
+	short month() const { return _month; }
+
+	/**
+	 * Return the files count for this item.
+	 **/
+	short filesCount() const { return _filesCount; }
 
 
     protected:
@@ -250,7 +254,12 @@ namespace QDirStat
 
     private:
 
-	const YearStats _stats;
+	short    _year;
+	short    _month;
+	int      _filesCount;
+	float    _filesPercent;
+	FileSize _size;
+	float    _sizePercent;
 
     };	// class YearListItem
 

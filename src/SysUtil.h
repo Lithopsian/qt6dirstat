@@ -226,13 +226,13 @@ namespace QDirStat
 	 * a backslash for an embedded double quote.
 	 **/
 	inline static QString escaped( const QString & unescaped )
-	    { return QString( unescaped ).replace( "'", "'\\''" ); }
+	    { return QString( unescaped ).replace( '\'', QLatin1String( "'\\''" ) ); }
 
 	/**
 	 * Return a string in single quotes.
 	 **/
 	inline static QString quoted( const QString & unquoted )
-	    { return "'" + unquoted + "'"; }
+	    { return '\'' + unquoted + '\''; }
 
     }	// namespace SysUtil
 

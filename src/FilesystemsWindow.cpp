@@ -36,7 +36,7 @@ namespace
     /**
      * Returns the icon filename for the given type of mount point.
      **/
-    QString icon( const MountPoint * mountPoint )
+    const char * icon( const MountPoint * mountPoint )
     {
 	if ( mountPoint->isNetworkMount() ) return "network.png";
 	if ( mountPoint->isSystemMount()  ) return "system.png";
@@ -103,8 +103,6 @@ FilesystemsWindow::~FilesystemsWindow()
 
 FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 {
-    //logDebug() << _sharedInstance << Qt::endl;
-
     static QPointer<FilesystemsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
@@ -259,7 +257,7 @@ void FilesystemsWindow::contextMenu( const QPoint & pos )
 
 void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 {
-    if ( !selectedPath().isEmpty() && QList<int>( { Qt::Key_Return, Qt::Key_Enter } ).contains( event->key() ) )
+    if ( !selectedPath().isEmpty() && ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
 	readSelectedFilesystem();
     else
 	QDialog::keyPressEvent( event );
@@ -282,15 +280,12 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
 {
     QString dev = _device;
 
-    if ( dev.startsWith( QLatin1String( "/dev/mapper/luks-" ) ) )
+    // Cut off insanely long generated device mapper names
+    const int limit = sizeof( "/dev/mapper/luks-123456" );
+    if ( dev.size() > limit )
     {
-        // Cut off insanely long generated device mapper LUKS names
-        const int limit = sizeof( "/dev/mapper/luks-010203" ) - 1;
-        if ( dev.size() > limit )
-        {
-            dev = dev.left( limit ) + "…"; // ellipsis
-            setToolTip( FS_DeviceCol, _device );
-        }
+	dev = dev.left( limit - 1 ) + "…"; // ellipsis
+	setToolTip( FS_DeviceCol, _device );
     }
 
     set( FS_DeviceCol,    Qt::AlignLeft,    dev );
