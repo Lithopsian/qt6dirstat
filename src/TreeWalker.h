@@ -10,13 +10,13 @@
 #ifndef TreeWalker_h
 #define TreeWalker_h
 
-#include "FileInfo.h"
+#include "FileSize.h"
 #include "FileSearchFilter.h"
 
 
 namespace QDirStat
 {
-    class PercentileStats;
+    class FileInfo;
 
     /**
      * Abstract base class to walk recursively through a FileInfo tree to check
@@ -104,8 +104,7 @@ namespace QDirStat
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->size() >= _threshold; }
+        bool check( FileInfo * item ) override;
 
     private:
 
@@ -125,8 +124,7 @@ namespace QDirStat
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->mtime() >= _threshold; }
+        bool check( FileInfo * item ) override;
 
     private:
 
@@ -146,8 +144,7 @@ namespace QDirStat
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->mtime() <= _threshold; }
+        bool check( FileInfo * item ) override;
 
     private:
 
@@ -162,8 +159,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->links() > 1; }
+        bool check( FileInfo * item ) override;
     };
 
 
@@ -174,8 +170,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override
-            { return item && item->isSymLink() && item->isBrokenSymLink(); }
+        bool check( FileInfo * item ) override;
     };
 
 
@@ -186,8 +181,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->isSparseFile(); }
+        bool check( FileInfo * item ) override;
     };
 
 
@@ -203,8 +197,7 @@ namespace QDirStat
             _year { year }
         {}
 
-        bool check( FileInfo * item ) override
-            { return item && item->isFile() && item->yearAndMonth().first == _year; }
+        bool check( FileInfo * item ) override;
 
     private:
 

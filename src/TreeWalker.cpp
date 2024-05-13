@@ -8,6 +8,7 @@
  */
 
 #include "TreeWalker.h"
+#include "FileInfo.h"
 #include "FileSizeStats.h"
 #include "FileMTimeStats.h"
 #include "SysUtil.h"
@@ -64,6 +65,12 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 }
 
 
+bool LargestFilesTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->size() >= _threshold;
+}
+
+
 void NewFilesTreeWalker::prepare( FileInfo * subtree )
 {
     TreeWalker::prepare( subtree );
@@ -72,11 +79,47 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 }
 
 
+bool NewFilesTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->mtime() >= _threshold;
+}
+
+
 void OldFilesTreeWalker::prepare( FileInfo * subtree )
 {
     TreeWalker::prepare( subtree );
     FileMTimeStats stats( subtree );
     _threshold = ( time_t )lowerPercentileThreshold( stats );
+}
+
+
+bool OldFilesTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->mtime() <= _threshold;
+}
+
+
+bool HardLinkedFilesTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->links() > 1;
+}
+
+
+bool BrokenSymLinksTreeWalker::check( FileInfo * item )
+{
+    return item && item->isSymLink() && item->isBrokenSymLink();
+}
+
+
+bool SparseFilesTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->isSparseFile();
+}
+
+
+bool FilesFromYearTreeWalker::check( FileInfo * item )
+{
+    return item && item->isFile() && item->yearAndMonth().first == _year;
 }
 
 
