@@ -47,7 +47,9 @@ namespace QDirStat
 	 * Alternate constructor, uses the string passed in as the
 	 * startingDir instead of the value from the config file.
 	 **/
-	UnpkgSettings( const QString & startingDir ) { _startingDir = startingDir; }
+	UnpkgSettings( const QString & startingDir ):
+	    UnpkgSettings () // reads the config file settings
+	    { _startingDir = startingDir; } // overrides the starting dir
 
 	/**
 	 * Returns the default settings in the form of an UnpkgSettings
