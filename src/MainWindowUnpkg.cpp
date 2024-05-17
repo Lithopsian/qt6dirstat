@@ -8,16 +8,16 @@
  */
 
 #include "MainWindow.h"
-#include "QDirStatApp.h"
 #include "OpenUnpkgDialog.h"
+#include "BusyPopup.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DirTreeFilter.h"
+#include "ExcludeRules.h"
 #include "HistoryButtons.h"
 #include "PkgManager.h"
 #include "PkgQuery.h"
-#include "ExcludeRules.h"
-#include "BusyPopup.h"
+#include "QDirStatApp.h"
 #include "Exception.h"
 #include "Logger.h"
 

@@ -116,7 +116,7 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 			   _fillColors.at( qMin( depth, _fillColors.size()-1 ) ) );
 
 	// Draw 3D shadows.
-	const QColor background = painter->background().color();
+	const QColor & background = painter->background().color();
 
 	painter->setPen( contrastingColor( Qt::black, background ) );
 	painter->drawLine( x, y, x+w, y );

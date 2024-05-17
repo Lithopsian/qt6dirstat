@@ -7,10 +7,11 @@
  *              Ian Nartowicz
  */
 
-#include <QRegularExpression>
+#include <QFileInfo>
 #include <QProcess>
 #include <QProcessEnvironment>
-#include <QFileInfo>
+#include <QRegularExpression>
+#include <QStringBuilder>
 
 #include "Cleanup.h"
 #include "DirInfo.h"
@@ -78,7 +79,7 @@ namespace
 
 	for ( const QString & appPath : paths )
 	{
-	    if ( SysUtil::haveCommand( appPath + '/' + app.section( ' ', 0, 0 ) ) )
+	    if ( SysUtil::haveCommand( appPath % '/' % app.section( ' ', 0, 0 ) ) )
 		return true;
 	}
 
@@ -527,7 +528,7 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 	    shell = defaultShell();
 
 	    if ( !shell.isEmpty() )
-		errMsg += '\n' + tr( "Using fallback %1" ).arg( shell );
+		errMsg += '\n' % tr( "Using fallback " ) % shell;
 	}
     }
 

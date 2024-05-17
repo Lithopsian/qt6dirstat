@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QStringBuilder>
-
 #include "DirTreeModel.h"
 #include "DirInfo.h"
 #include "DirTree.h"
@@ -141,7 +139,7 @@ namespace
      **/
     QString linksSizeText( FileInfo * item )
     {
-	return QString( formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) );
+	return QString( formatSize( item->rawByteSize() ) + formatLinksInline( item->links() ) );
     }
 
 
@@ -199,7 +197,7 @@ namespace
 	    return QVariant();
 
 	if ( item->isDirInfo() )
-	    return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
+	    return QString( item->sizePrefix() + formatSize( item->totalAllocatedSize() ) );
 
 	if ( item->isSparseFile() ) // delegate will use SizeTextRole
 	    return QVariant();
@@ -272,9 +270,9 @@ namespace
 
 	    switch ( col )
 	    {
-		case TotalItemsCol:      return QVariant( item->sizePrefix() % QString::number( item->totalItems() ) );
-		case TotalFilesCol:      return QVariant( item->sizePrefix() % QString::number( item->totalFiles() ) );
-		case TotalSubDirsCol:    return QVariant( item->sizePrefix() % QString::number( item->totalSubDirs() ) );
+		case TotalItemsCol:      return item->sizePrefix() + QString::number( item->totalItems() );
+		case TotalFilesCol:      return item->sizePrefix() + QString::number( item->totalFiles() );
+		case TotalSubDirsCol:    return item->sizePrefix() + QString::number( item->totalSubDirs() );
 		case OldestFileMTimeCol: return formatTime( item->oldestFileMtime() );
 	    }
 	}
@@ -388,7 +386,7 @@ namespace
     QVariant sizeColTooltip( FileInfo * item )
     {
 	if ( item->isDirInfo() )
-	    return item->sizePrefix() + formatByteSize( item->totalAllocatedSize() );
+	    return QVariant( item->sizePrefix() + formatByteSize( item->totalAllocatedSize() ) );
 
 	QString text = item->sizePrefix() + formatByteSize( item->rawByteSize() );
 

@@ -63,7 +63,7 @@ MainWindow::MainWindow( bool slowUpdate ):
 {
     CHECK_NEW( _ui );
     _ui->setupUi( this );
-    _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
+    _ui->menubar->setCornerWidget( new QLabel( QStringLiteral( MENUBAR_VERSION ) ) );
 
     _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
     CHECK_NEW( _historyButtons );
@@ -559,6 +559,8 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 void MainWindow::pkgQuerySetup()
 {
     closeChildren();
+    _updateTimer.stop();
+    _ui->statusBar->clearMessage();
     _ui->breadcrumbNavigator->clear();
     _ui->fileDetailsView->clear();
     app()->dirTreeModel()->clear();
@@ -586,7 +588,7 @@ void MainWindow::refreshAll()
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
 
-    const QString url = app()->dirTree()->url();
+    const QString & url = app()->dirTree()->url();
     if ( url.isEmpty() )
     {
 	askOpenDir();

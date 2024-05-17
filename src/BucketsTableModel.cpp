@@ -53,7 +53,7 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
             }
 
         case Qt::TextAlignmentRole:
-            return (int)Qt::AlignVCenter | Qt::AlignRight;
+            return QVariant( Qt::AlignVCenter | Qt::AlignRight );
 
         default:
             return QVariant();

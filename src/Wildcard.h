@@ -81,25 +81,25 @@ namespace QDirStat
 	 * Helper for the rather long-winded way that a QRegularExpression is made
 	 * from a wildcard-style string.
 	 **/
-	static QRegularExpression wildcardRegularExpression( const QString & pattern,
-							     PatternOptions  options )
+	static QRegularExpression wildcardRegularExpression( const QString  & pattern,
+							     PatternOptions   options )
 	    { return QRegularExpression( wildcardToRegularExpression( pattern ), options ); }
 
 	/**
-	 * This function was added in 5.12.  It converts any valid regular
+	 * This function was added to Qt in 5.12.  It converts any valid regular
 	 * expression pattern string into an anchored string.  It doesn't check
 	 * whether the pattern is already anchored.
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
 	static QString anchoredPattern( const QString & expression )
-	    { return QString() + "\\A(?:" + expression + ")\\z"; }
+	    { return "\\A(?:" + expression + ")\\z"; }
 #endif
 
 	/**
 	 * This function was added in 5.12, but its behaviour until 6.6 was
 	 * to not match slashes as part of any wildcard.  This behaviour is
 	 * undesirable for matching paths and not the way that QRegExp behaved,
-	 * so the function is overloaded here.
+	 * so the function is backported here.
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 )
 	static QString wildcardToRegularExpression( const QString & pattern,

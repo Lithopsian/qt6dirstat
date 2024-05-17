@@ -30,12 +30,12 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor.  Declared explicitly only so it can be virtual.
 	 **/
 	DirTreeFilter() = default;
 
 	/**
-	 * Destructor.
+	 * Destructor.  Declared explicitly only so it can be virtual.
 	 **/
 	virtual ~DirTreeFilter() = default;
 

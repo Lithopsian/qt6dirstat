@@ -15,6 +15,7 @@
 #include <QDateTime>
 #include <QFile>
 #include <QProcessEnvironment>
+#include <QStringBuilder>
 #include <QTextStream>
 
 #include "Trash.h"
@@ -83,7 +84,7 @@ namespace
 	{
 	    // See if we are the top level on this device
 	    components.removeLast();
-	    const QString nextPath = '/' + components.join( '/' );
+	    const QString nextPath = '/' % components.join( '/' );
 	    if ( device( nextPath ) != dev )
 		return path;
 
@@ -99,7 +100,7 @@ namespace
 	const QString topDir = toplevel( path, dev );
 
 	// Check if there is $TOPDIR/.Trash
-	QString trashPath = topDir + "/.Trash";
+	QString trashPath = topDir % "/.Trash";
 
 	struct stat statBuf;
 	const int result = stat( trashPath.toUtf8(), &statBuf );
@@ -115,7 +116,7 @@ namespace
 
 	    // No $TOPDIR/.Trash: Use $TOPDIR/.Trash-$UID
 	    logInfo() << "No " << trashPath << Qt::endl;
-	    trashPath += QString( "-%1" ).arg( getuid() );
+	    trashPath += '-' % QString::number( getuid() );
 	}
 	else // stat() was successful
 	{
@@ -134,7 +135,7 @@ namespace
 	    }
 
 	    // Use $TOPDIR/.Trash/$UID
-	    trashPath += QString( "/%1" ).arg( getuid() );
+	    trashPath += '/' % QString::number( getuid() );
 	}
 
 	logInfo() << "Using " << trashPath << Qt::endl;
@@ -167,8 +168,8 @@ Trash::Trash()
     const QString homeTrash = [ &homePath ]()
     {
 	const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString() );
-	return xdgHome.isEmpty() ? homePath + "/.local/share" : xdgHome;
-    }() + "/Trash";
+	return xdgHome.isEmpty() ? homePath % "/.local/share" : xdgHome;
+    }() % "/Trash";
 
     // new TrashDir can throw, although very unlikely for the home device
     try
@@ -281,7 +282,7 @@ QString TrashDir::uniqueName( const QString & path )
 	const QString suffix   = file.completeSuffix();
 	name = QString( "%1_%2" ).arg( baseName ).arg( i );
 	if ( !suffix.isEmpty() )
-	    name += '.' + suffix;
+	    name += '.' % suffix;
     }
 
     return name;
@@ -291,10 +292,10 @@ QString TrashDir::uniqueName( const QString & path )
 void TrashDir::createTrashInfo( const QString & path,
 				const QString & targetName )
 {
-    QFile trashInfo( QString( "%1/%2.trashinfo" ).arg( infoPath() ).arg( targetName ) );
+    QFile trashInfo( infoPath() % '/' % targetName % ".trashinfo" );
 
     if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
-	THROW( FileException( trashInfo.fileName(), "Can't open " + trashInfo.fileName() ) );
+	THROW( FileException( trashInfo.fileName(), "Can't open " % trashInfo.fileName() ) );
 
     QTextStream str( &trashInfo );
     str << "[Trash Info]" << Qt::endl;
@@ -307,7 +308,7 @@ void TrashDir::move( const QString & path,
 		     const QString & targetName )
 {
     QFile file( path );
-    const QString targetPath = filesPath() + '/' + targetName;
+    const QString targetPath = filesPath() % '/' % targetName;
 
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
     const bool success = file.rename( targetPath );

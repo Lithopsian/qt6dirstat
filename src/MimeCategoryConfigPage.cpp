@@ -335,10 +335,9 @@ void MimeCategoryConfigPage::pickCategoryColor()
     if ( currentItem )
     {
 	const MimeCategory * category = CATEGORY_CAST( value( currentItem ) );
-	QColor color = category->color();
-	color = QColorDialog::getColor( color,
-					window(), // parent
-					tr( "Pick a category color" ) );
+	const QColor color = QColorDialog::getColor( category->color(),
+						     window(), // parent
+						     tr( "Pick a category color" ) );
 
 	if ( color.isValid() )
 	    _ui->categoryColorEdit->setText( color.name() );

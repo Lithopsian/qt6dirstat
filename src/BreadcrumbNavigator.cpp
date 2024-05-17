@@ -49,7 +49,7 @@ namespace
                 name_ret = components.takeLast();
 
             if ( !components.empty() )
-                basePath_ret = components.join( '/' ) + '/';
+                basePath_ret = components.join( '/' ) % '/';
 
             if ( path.startsWith( '/' ) )
                 basePath_ret.prepend( '/' );
@@ -75,7 +75,6 @@ BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
 
 void BreadcrumbNavigator::setPath( const FileInfo * item )
 {
-    //logDebug() << Qt::endl;
     fillBreadcrumbs( item );
     shortenBreadcrumbs();
     setText( html() );
@@ -149,7 +148,7 @@ QString BreadcrumbNavigator::html() const
             if ( crumb.url.isEmpty() )
                 html += name.toHtmlEscaped();
             else
-                html += QStringLiteral( "<a href=\"%1\">%2</a>" ).arg( crumb.url ).arg( name.toHtmlEscaped() );
+                html += "<a href=\"" % crumb.url % "\">" % name.toHtmlEscaped() % "</a>";
 
             if ( !name.endsWith( '/' ) )
                 html += '/';

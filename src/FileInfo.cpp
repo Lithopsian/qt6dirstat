@@ -169,7 +169,7 @@ QString FileInfo::url() const
     if ( !parentUrl.endsWith( '/' ) && !_name.startsWith( '/' ) )
 	parentUrl += '/';
 
-    return parentUrl + _name;
+    return parentUrl % _name;
 }
 
 
@@ -189,7 +189,7 @@ QString FileInfo::path() const
     if ( !parentPath.endsWith( '/' ) && !_name.startsWith( '/' ) )
 	parentPath += '/';
 
-    return parentPath + _name;
+    return parentPath % _name;
 }
 
 
@@ -202,17 +202,17 @@ QString FileInfo::debugUrl() const
 
     if ( isDotEntry() )
     {
-	result += '/' + dotEntryName();
+	result += '/' % dotEntryName();
     }
     else if ( isAttic() )
     {
 	if ( _parent )
 	{
 	    if ( _tree && _parent != _tree->root() )
-		result = _parent->debugUrl() + '/' + atticName();
+		result = _parent->debugUrl() % '/' % atticName();
 	}
         else
-            result += '/' + atticName();
+            result += '/' % atticName();
     }
 
     result.replace( QLatin1String( "//" ), QLatin1String( "/" ) );
@@ -288,7 +288,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	if ( attic() && url == atticName() )
 	    return attic();
 
-	if ( url == dotEntryName() + '/' + atticName() && dotEntry() && dotEntry()->attic() )
+	if ( url == dotEntryName() % '/' % atticName() && dotEntry() && dotEntry()->attic() )
 	    return dotEntry()->attic();
     }
 

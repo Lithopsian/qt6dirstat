@@ -181,7 +181,7 @@ class BadMagicNumberException: public Exception
 {
 public:
     BadMagicNumberException( const void * badPointer ):
-	Exception ( QString( "Magic number check failed for address 0x%1" ).arg( (qulonglong) badPointer, 0, 16 ) )
+	Exception ( QString( "Magic number check failed for address 0x%1" ).arg( (qulonglong)badPointer, 0, 16 ) )
     {}
 
     ~BadMagicNumberException() noexcept override = default;

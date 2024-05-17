@@ -395,7 +395,7 @@ void MountPoints::findNtfsDevices()
 
     int exitCode;
     const QString output = SysUtil::runCommand( lsblkCommand,
-                                                QStringList() << "--noheading" << "--list" << "--output" << "name,fstype",
+                                                { "--noheading", "--list", "--output", "name,fstype" },
                                                 &exitCode,
                                                 LSBLK_TIMEOUT_SEC,
                                                 false,        // logCommand

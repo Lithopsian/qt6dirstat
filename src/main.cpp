@@ -74,18 +74,17 @@ bool commandLineSwitch( const QString & longName,
 			const QString & shortName,
 			QStringList   & argList )
 {
-    if ( argList.contains( longName ) || argList.contains( shortName ) )
-    {
-	argList.removeAll( longName  );
-	argList.removeAll( shortName );
-        //logDebug() << "Found " << longName << Qt::endl;
-	return true;
-    }
-    else
+    if ( !argList.contains( longName ) && !argList.contains( shortName ) )
     {
         // logDebug() << "No " << longName << Qt::endl;
 	return false;
     }
+
+    //logDebug() << "Found " << longName << Qt::endl;
+    argList.removeAll( longName  );
+    argList.removeAll( shortName );
+
+    return true;
 }
 
 
@@ -151,20 +150,20 @@ int main( int argc, char * argv[] )
 //    QCoreApplication::setApplicationVersion( QDIRSTAT_VERSION );
 
     MainWindow * mainWin = new MainWindow( slowUpdate );
-    CHECK_PTR( mainWin );
+    CHECK_NEW( mainWin );
     mainWin->show();
 
-    if ( argList.isEmpty() )
+    if ( !argList.isEmpty() )
     {
-        if ( !dontAsk )
-            mainWin->askOpenDir();
-    }
-    else
-    {
+	const QString & arg = argList.first();
 	if ( openCache )
-	    mainWin->readCache( argList.at(1) );
+	    mainWin->readCache( arg );
 	else
-	    mainWin->openUrl( argList.first() );
+	    mainWin->openUrl( arg );
+    }
+    else if ( !dontAsk )
+    {
+	mainWin->askOpenDir();
     }
 
     qtApp.exec();

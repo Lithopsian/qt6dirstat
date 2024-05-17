@@ -7,6 +7,9 @@
  *              Ian Nartowicz
  */
 
+#include <QStringBuilder>
+
+#include "PkgFilter.h"
 #include "PkgFilter.h"
 #include "PkgInfo.h"
 #include "Logger.h"
@@ -19,7 +22,7 @@ using namespace QDirStat;
 QString PkgFilter::normalizedPattern( const QString & pattern )
 {
     QString normalizedPattern = pattern;
-    const QString pkgPrefix = QString( "^%1*" ).arg( PkgInfo::pkgSummaryUrl() );
+    const QString pkgPrefix = '^' % PkgInfo::pkgSummaryUrl() % '*';
     normalizedPattern.remove( QRegularExpression( pkgPrefix, QRegularExpression::CaseInsensitiveOption ) );
     normalizedPattern.remove( QRegularExpression( "/.*$" ) );
 
@@ -32,5 +35,5 @@ QString PkgFilter::normalizedPattern( const QString & pattern )
 
 QString PkgFilter::url() const
 {
-    return PkgInfo::pkgSummaryUrl() + pattern();
+    return PkgInfo::pkgSummaryUrl() % pattern();
 }

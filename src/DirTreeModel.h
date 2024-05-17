@@ -162,7 +162,7 @@ namespace QDirStat
 	/**
 	 * Return the icon directory for the current tree item size setting.
 	 **/
-	QString treeIconDir() const { return treeIconDir( _treeItemSize ); }
+	QLatin1String treeIconDir() const { return treeIconDir( _treeItemSize ); }
 
 	/**
 	 * Returns the current tree item size setting.
@@ -330,8 +330,12 @@ namespace QDirStat
 	/**
 	 * Returns the tree icon directory for the given enum value.
 	 **/
-	static QString treeIconDir( DirTreeItemSize treeItemSize )
-	    { return treeItemSize == DTIS_Medium ? ":/icons/tree-medium/" : ":/icons/tree-small/"; }
+	static QLatin1String treeIconDir( DirTreeItemSize treeItemSize )
+	{
+	    return treeItemSize == DTIS_Medium ?
+		                   QLatin1String( ":/icons/tree-medium/" ) :
+		                   QLatin1String( ":/icons/tree-small/" );
+	}
 
 	/**
 	 * Returns the tree item size setting for a given icon directory string.

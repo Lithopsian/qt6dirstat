@@ -24,18 +24,18 @@ using namespace QDirStat;
 
 QString MainWindow::layoutName( const QAction * action ) const
 {
-    if ( action == _ui->actionLayout1 ) return "L1";
-    if ( action == _ui->actionLayout2 ) return "L2";
-    if ( action == _ui->actionLayout3 ) return "L3";
+    if ( action == _ui->actionLayout1 ) return HeaderTweaker::l1Name();
+    if ( action == _ui->actionLayout2 ) return HeaderTweaker::l2Name();
+    if ( action == _ui->actionLayout3 ) return HeaderTweaker::l3Name();
     return QString();
 }
 
 
 QAction * MainWindow::layoutAction( const QString & layoutName ) const
 {
-    if ( layoutName == QLatin1String( "L1" ) ) return _ui->actionLayout1;
-    if ( layoutName == QLatin1String( "L2" ) ) return _ui->actionLayout2;
-    if ( layoutName == QLatin1String( "L3" ) ) return _ui->actionLayout3;
+    if ( layoutName == HeaderTweaker::l1Name() ) return _ui->actionLayout1;
+    if ( layoutName == HeaderTweaker::l2Name() ) return _ui->actionLayout2;
+    if ( layoutName == HeaderTweaker::l3Name() ) return _ui->actionLayout3;
     return nullptr;
 }
 
@@ -55,12 +55,9 @@ void MainWindow::initLayouts( const QString & currentLayoutName )
 
     // Note that the column layouts are handled in the HeaderTweaker and its
     // ColumnLayout helper class; see also HeaderTweaker.h and .cpp.
-    //
-    // The layout names "L1", "L2", "L3" here are important: They need to match
-    // the names in the HeaderTweaker.
-    initLayout( "L1", currentLayoutName );
-    initLayout( "L2", currentLayoutName );
-    initLayout( "L3", currentLayoutName );
+    initLayout( HeaderTweaker::l1Name(), currentLayoutName );
+    initLayout( HeaderTweaker::l2Name(), currentLayoutName );
+    initLayout( HeaderTweaker::l3Name(), currentLayoutName );
 }
 
 

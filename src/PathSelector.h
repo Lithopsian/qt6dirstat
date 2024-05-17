@@ -132,8 +132,7 @@ namespace QDirStat
 	PathSelectorItem( const QString & path,
 			  PathSelector  * parent = nullptr ):
 	    QListWidgetItem ( path, parent ),
-	    _path { path },
-	    _mountPoint { nullptr }
+	    _path { path }
 	{}
 
 	/**
@@ -148,17 +147,10 @@ namespace QDirStat
 	 **/
 	const QString & path() const { return _path; }
 
-	/**
-	 * Return the mount point or 0 if this is a plain path without a mount
-	 * point.
-	 **/
-	const MountPoint * mountPoint() const { return _mountPoint; }
-
 
     private:
 
 	QString      _path;
-	MountPoint * _mountPoint;
     };
 
 }	// namespace QDirStat

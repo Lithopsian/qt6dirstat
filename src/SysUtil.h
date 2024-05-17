@@ -210,20 +210,15 @@ namespace QDirStat
 	QString groupName( gid_t gid );
 
 	/**
-	 * Return a string with all occurrences of a single quote escaped with
-	 * backslash.
+	 * Return a string with all occurrences of a single quote escaped.  For
+	 * shells, this means effectively closing the first part of the string
+	 * with a single quote, inserting a backslash to escape the single quote,
+	 * then opening the remaining part of the string with another single quote.
 	 *
-	 * While any sane person would expect this should be done with a backslash
-	 * in front of the single quote, i.e. \', this is not how shells do it.
-	 * Instead, you have to terminate the string with one single quote, then
-	 * put the single quote in a new quoted string that, but this time using
-	 * double quotes, and finally reopen the original string with another
-	 * single quote.
+	 * Thus, 'Don't do this' becomes 'Don'\''t do this'.
 	 *
-	 * Thus, 'Don't do this' becomes 'Don'"'"'t do this'.
-	 *
-	 * This does not exactly become any prettier with the C compiler requiring
-	 * a backslash for an embedded double quote.
+	 * Note that the backslash itself must be escaped inside the C++ string
+	 * or it would be interpreted as escaping the follopwing character.
 	 **/
 	inline static QString escaped( const QString & unescaped )
 	    { return QString( unescaped ).replace( '\'', QLatin1String( "'\\''" ) ); }

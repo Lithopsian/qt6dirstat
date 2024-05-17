@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <QStringList>
 
 #include <stdio.h>	// stderr, fprintf()
@@ -124,7 +125,7 @@ namespace
     {
 	const QStringList lines = multiLineText.split( '\n' );
 	QString result = lines.isEmpty() ? QString() : prefix;
-	result += lines.join( QString( "\n" ) + prefix );
+	result += lines.join( QString( "\n" ) % prefix );
 
 	return result;
     }
@@ -180,7 +181,7 @@ namespace
 	{
 	    logError() << "ERROR: Directory " << logDir << " is not owned by " << userName() << Qt::endl;
 
-	    QByteArray nameTemplate( QString( logDir + "-XXXXXX" ).toUtf8() );
+	    QByteArray nameTemplate( QString( logDir % "-XXXXXX" ).toUtf8() );
 	    const char * result = mkdtemp( nameTemplate.data() );
 	    if ( result )
 	    {
@@ -277,7 +278,7 @@ namespace
 	    }
 	}
 
-	const QStringList matches = dir.entryList( QStringList() << oldNamePattern( filename ), QDir::Files );
+	const QStringList matches = dir.entryList( QStringList( oldNamePattern( filename ) ), QDir::Files );
 	for ( const QString & match : matches )
 	{
 	    if ( !keepers.contains( match ) )
@@ -340,7 +341,7 @@ Logger::Logger( const QString & rawLogDir,
     if ( doRotate )
 	logRotate( logDir, filename, logRotateCount );
 
-    openLogFile( logDir + '/' + filename );
+    openLogFile( logDir % '/' % filename );
 }
 
 

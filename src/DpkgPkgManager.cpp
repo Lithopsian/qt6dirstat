@@ -7,8 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
+#include <QStringBuilder>
 
 #include "PkgInfo.h"
 #include "DpkgPkgManager.h"
@@ -53,7 +54,7 @@ namespace
 	const QString realpath = QFileInfo( pathInfo ).canonicalFilePath();
 
 	//logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
-	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath + '/' + filename : pathname;
+	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath % '/' % filename : pathname;
     }
 
 } // namespace
@@ -102,7 +103,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
 			 false,		// don't log output
 			 true );	// ignore likely error code
     if ( exitCode != 0 )
-	return "";
+	return QString();
 
     return searchOwningPkg( path, output );
 }
@@ -135,12 +136,12 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 		continue;
 
 	    const QString & path1 = fields1.last();
-	    const QString divertPkg = isLocalDiversion( *line ) ? "" : fields1.first().split( ' ' ).at( 2 );
+	    const QString divertPkg = isLocalDiversion( *line ) ? QString() : fields1.first().split( ' ' ).at( 2 );
 
 	    // the next line should contain the path where this file now resides
 	    // (or would reside if it hasn't been diverted yet)
 	    if ( ++line == lines.end() )
-		return "";
+		return QString();
 
 	    if ( !isDiversionTo( *line ) )
 		continue;
@@ -160,7 +161,7 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 		continue;
 
 	    if ( ++line == lines.end() )
-		return "";
+		return QString();
 
 	    // and the line after that might give the package and the original file path
 	    const QStringList fields3 = line->split( ": " );
@@ -212,12 +213,12 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 	{
 	    //logDebug() << " " << pkgRealpath << Qt::endl;
 	    // Is this the exact file we were looking for?
-	    if ( pkgRealpath + '/' + pkgFilename == path )
+	    if ( pkgRealpath % '/' % pkgFilename == path )
 		return packages.first();
 	}
     }
 
-    return "";
+    return QString();
 }
 
 
@@ -238,7 +239,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
     int exitCode = -1;
     const QString output = runCommand( "/usr/bin/dpkg", { "-S", path }, &exitCode, 1, false, false );
     if ( exitCode != 0 )
-	return "";
+	return QString();
 
     const QStringList lines = output.trimmed().split( '\n' );
     for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
@@ -252,7 +253,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 	// The next line should be a diversion to line
 	if ( ++line != lines.end() && isDiversionTo( *line ) )
 	{
-	    const QString divertingPkg = (*line).split( ' ' ).at( 2 );
+	    const QString & divertingPkg = (*line).split( ' ' ).at( 2 );
 	    //logDebug() << *line << Qt::endl;
 
 	    if ( ++line != lines.end() )
@@ -272,7 +273,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 	}
     }
 
-    return "";
+    return QString();
 }
 
 
@@ -302,7 +303,7 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 	    const QStringList fields = line.split( " | " );
 
 	    if ( fields.size() != 4 )
-		logError() << "Invalid dpkg-query output: \"" << line << "\n" << Qt::endl;
+		logError() << "Invalid dpkg-query output: \"" << line << Qt::endl << Qt::endl;
 	    else
 	    {
 		const QString & name    = fields.at( 0 );
@@ -368,14 +369,14 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
     QString name = pkg->baseName();
 
     if ( pkg->isMultiVersion() )
-	name += '_' + pkg->version();
+	name += '_' % pkg->version();
 
     if ( pkg->isMultiArch() )
-	name += ':' + pkg->arch();
+	name += ':' % pkg->arch();
 
     return name;
 #else
-    return pkg->arch() == QLatin1String( "all" ) ? pkg->baseName() : pkg->baseName() + ':' + pkg->arch();
+    return pkg->arch() == QLatin1String( "all" ) ? pkg->baseName() : pkg->baseName() % ':' % pkg->arch();
 #endif
 }
 
@@ -424,7 +425,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	    // to see if the file really belongs to that package
 	    const QStringList fields1 = line->split( ": " );
 	    const QString & path1 = fields1.last();
-	    QString divertingPkg = isLocalDiversion( *line ) ? "" : fields1.first().split( ' ' ).at( 2 );
+	    const QString divertingPkg = isLocalDiversion( *line ) ? QString() : fields1.first().split( ' ' ).at( 2 );
 
 	    // the next line should contain the path where this file now resides
 	    ++line;

@@ -97,7 +97,7 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
          **/
         QString fileListCommand( const PkgInfo * pkg ) const override
-	    { return QString( "/usr/bin/pacman -Qlq %1" ).arg( pkg->baseName() ); }
+	    { return "/usr/bin/pacman -Qlq " + pkg->baseName(); }
 
         /**
          * Parse the output of the file list command.

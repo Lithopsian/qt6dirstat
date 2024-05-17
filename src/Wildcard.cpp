@@ -25,8 +25,8 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
     struct GlobSettings
     {
         char16_t nativePathSeparator;
-        QString starEscape;
-        QString questionMarkEscape;
+        QLatin1String starEscape;
+        QLatin1String questionMarkEscape;
     };
 
     const GlobSettings settings = [ options ]() {
@@ -34,14 +34,14 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
         {
             // using [\d\D] to mean "match everything";
             // dot doesn't match newlines, unless in /s mode
-            return GlobSettings{ u'\0', QStringLiteral( u"[\\d\\D]*" ), QStringLiteral( u"[\\d\\D]" ) };
+            return GlobSettings{ u'\0', QLatin1String( "[\\d\\D]*" ), QLatin1String( "[\\d\\D]" ) };
         }
         else
         {
 #ifdef Q_OS_WIN
-            return GlobSettings{ u'\\', QStringLiteral( u"[^/\\\\]*" ), QStringLiteral( u"[^/\\\\]" ) };
+            return GlobSettings{ u'\\', QLatin1String( "[^/\\\\]*" ), QLatin1String( "[^/\\\\]" ) };
 #else
-            return GlobSettings{ u'/', QStringLiteral( u"[^/]*" ), QStringLiteral( u"[^/]" ) };
+            return GlobSettings{ u'/', QLatin1String( "[^/]*" ), QLatin1String( "[^/]" ) };
 #endif
         }
     }();
@@ -66,15 +66,15 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
             case '\\':
 #ifdef Q_OS_WIN
                 if ( options.testFlag( NonPathWildcardConversion ) )
-                    rx += u"\\\\";
+                    rx += QLatin1String( "\\\\" );
                 else
-                    rx += u"[/\\\\]";
+                    rx += QLatin1String( "[/\\\\]" );
                 break;
             case '/':
                 if ( options.testFlag( NonPathWildcardConversion ) )
                     rx += u'/';
                 else
-                    rx += u"[/\\\\]";
+                    rx += QLatin1String( "[/\\\\]" );
                 break;
 #endif
 
@@ -128,8 +128,8 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
         }
     }
 
-    if (!(options & UnanchoredWildcardConversion))
-        rx = anchoredPattern(rx);
+    if  ( !( options & UnanchoredWildcardConversion ) )
+        rx = anchoredPattern( rx );
 
     return rx;
 }

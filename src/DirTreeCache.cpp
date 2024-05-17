@@ -9,6 +9,7 @@
 
 #include <ctype.h>
 
+#include <QStringBuilder>
 #include <QUrl>
 
 #include "DirTreeCache.h"
@@ -46,7 +47,7 @@ namespace
     QString formatSize( FileSize size )
     {
 	// Multiples of 1024 are common, any larger multiple freakishly rare
-	return size >= KB && size % KB == 0 ? QString( "%1K" ).arg( size / KB ) : QString::number( size );
+	return size >= KB && size % KB == 0 ? QString::number( size / KB ) % "K" : QString::number( size );
     }
 
 
@@ -287,9 +288,9 @@ namespace
 	    return path;
 
 	if ( path == QLatin1String( "/" ) )
-	    return path + name;
+	    return path % name;
 
-	return path + '/' + name;
+	return path % '/' % name;
     }
 
 } // namespace
@@ -842,7 +843,7 @@ QString CacheReader::unescapedPath( const QString & rawPath ) const
     // Using a protocol part to avoid directory names with a colon ":"
     // being cut off because it looks like a URL protocol.
     const QString protocol = "foo:";
-    const QString url = protocol + cleanPath( rawPath );
+    const QString url = protocol % cleanPath( rawPath );
 
     return QUrl( url ).path();
 }

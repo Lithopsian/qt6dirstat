@@ -13,13 +13,13 @@
 #include "DirTreeModel.h"
 #include "FileInfo.h"
 #include "FileInfoSet.h"
+#include "FormatUtil.h"
 #include "MimeCategorizer.h"
 #include "MountPoints.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
 #include "SystemFileChecker.h"
 #include "SysUtil.h"
-#include "FormatUtil.h"
 #include "Logger.h"
 #include "Exception.h"
 
@@ -40,7 +40,7 @@ namespace
 		  const QString & prefix = "" )
     {
 	CHECK_PTR( label );
-	label->setText( prefix + QString( "%L1" ).arg( number ) );
+	label->setText( prefix % QString( "%L1" ).arg( number ) );
     }
 
 
@@ -188,13 +188,13 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	const QString fullTarget  = file->symLinkTarget();
 	QString shortTarget = fullTarget;
 	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( '/' ) )
-	    shortTarget = ".../" + SysUtil::baseName( fullTarget );
+	    shortTarget = ".../" % SysUtil::baseName( fullTarget );
 	_ui->fileLinkLabel->setText( shortTarget );
 
 	if ( file->isBrokenSymLink() )
 	{
 	    _ui->fileLinkLabel->setStyleSheet( errorStyleSheet() );
-	    _ui->fileLinkLabel->setToolTip( fullTarget + tr( " (broken)" ) );
+	    _ui->fileLinkLabel->setToolTip( fullTarget % tr( " (broken)" ) );
 	}
 	else if ( shortTarget != fullTarget )
 	{
@@ -326,7 +326,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
 	return;
     }
 
-    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() + '/' );
+    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();

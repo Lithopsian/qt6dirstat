@@ -191,7 +191,7 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	QString fileListCommand( const PkgInfo * pkg ) const override
-	    { return QString( "/usr/bin/dpkg-query --listfiles %1" ).arg( queryName( pkg ) ); }
+	    { return "/usr/bin/dpkg-query --listfiles " + queryName( pkg ); }
 
 	/**
 	 * Parse the output of the file list command.

@@ -126,25 +126,27 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
 PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 				    PathSelector * parent ):
     QListWidgetItem ( parent ),
-    _path { mountPoint->path() },
-    _mountPoint { mountPoint }
+    _path { mountPoint->path() }
 {
     QString text = _path + "\n";
 
-    if ( _mountPoint->hasSizeInfo() && _mountPoint->totalSize() > 0 )
-	text += formatSize( _mountPoint->totalSize() ) + "  ";
+    if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
+	text += formatSize( mountPoint->totalSize() ) + "  ";
 
-    text += _mountPoint->filesystemType();
+    text += mountPoint->filesystemType();
     setText( text );
 
-    QString tooltip = _mountPoint->device();
+    QString tooltip = mountPoint->device();
 
 #if SHOW_SIZES_IN_TOOLTIP
-    if ( _mountPoint->hasSizeInfo() )
+    if ( mountPoint->hasSizeInfo() )
     {
-        tooltip += QObject::tr( "\n\nUsed: " )         + formatSize( _mountPoint->usedSize() );
-        tooltip += QObject::tr( "\nFree for users: " ) + formatSize( _mountPoint->freeSizeForUser() );
-        tooltip += QObject::tr( "\nFree for root: " )  + formatSize( _mountPoint->freeSizeForRoot() );
+        tooltip += QObject::tr( "<br/><tr><td>Used:</td><td align='right'>%1</td></tr>" )
+		.arg( formatSize( mountPoint->usedSize() ) );
+        tooltip += QObject::tr( "<tr><td>Free for users: </td><td align='right'>%1</td></tr>" )
+		.arg( formatSize( mountPoint->freeSizeForUser() ) );
+        tooltip += QObject::tr( "<tr><td>Free for root:</td><td align='right'>%1</td></tr>" )
+		.arg( formatSize( mountPoint->freeSizeForRoot() ) );
     }
 #endif
 

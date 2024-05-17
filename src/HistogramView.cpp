@@ -455,7 +455,7 @@ void HistogramView::addHistogramBackground()
 
 void HistogramView::addAxes()
 {
-    QPen pen( QColor( scene()->palette().text().color() ), 2 );
+    QPen pen( scene()->palette().text().color(), 2 );
 
     QGraphicsItem * xAxis = scene()->addLine( 0, 0, _histogramWidth + _axisExtraLength , 0, pen );
     QGraphicsItem * yAxis = scene()->addLine( 0, 0, 0, -( _histogramHeight + _axisExtraLength ) , pen );
@@ -498,11 +498,11 @@ void HistogramView::addXAxisLabel()
 
 void HistogramView::addXStartEndLabels()
 {
-    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : 'P' + QString::number( _startPercentile );
-    startLabel += '\n' + formatSize( percentile( _startPercentile ) );
+    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : 'P' % QString::number( _startPercentile );
+    startLabel += '\n' % formatSize( percentile( _startPercentile ) );
 
-    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : 'P' + QString::number( _endPercentile );
-    endLabel += '\n' + formatSize( percentile( _endPercentile ) );
+    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : 'P' % QString::number( _endPercentile );
+    endLabel += '\n' % formatSize( percentile( _endPercentile ) );
 
     QGraphicsTextItem * startItem = scene()->addText( startLabel );
     QGraphicsTextItem * endItem   = scene()->addText( endLabel );
@@ -531,9 +531,9 @@ void HistogramView::addQuartileText()
     {
 	const qreal textSpacing = 30.0;
 
-	const QString q1Text     = tr( "Q1: "     ) + formatSize( percentile( 25 ) );
-	const QString medianText = tr( "Median: " ) + formatSize( percentile( 50 ) );
-	const QString q3Text     = tr( "Q3: "     ) + formatSize( percentile( 75 ) );
+	const QString q1Text     = tr( "Q1: "     ) % formatSize( percentile( 25 ) );
+	const QString medianText = tr( "Median: " ) % formatSize( percentile( 50 ) );
+	const QString q3Text     = tr( "Q3: "     ) % formatSize( percentile( 75 ) );
 
 	QGraphicsTextItem * q1Item     = scene()->addText( q1Text     );
 	QGraphicsTextItem * medianItem = scene()->addText( medianText );
@@ -701,12 +701,12 @@ void HistogramView::addOverflowPanel()
 	{ tr( "Min (P0) ... P%1" ).arg( _startPercentile ),
 	  _startPercentile == 0 ?
 		tr( "no files cut off" ) :
-		formatSize( percentile( 0 ) ) + "..." + formatSize( percentile( _startPercentile ) ),
+		formatSize( percentile( 0 ) ) % "..." % formatSize( percentile( _startPercentile ) ),
 	  "",
 	  tr( "P%1 ... Max (P100)" ).arg( _endPercentile ),
 	  _endPercentile == 100 ?
 		tr( "no files cut off" ) :
-		formatSize( percentile( _endPercentile ) ) + "..." + formatSize( percentile( 100 ) ),
+		formatSize( percentile( _endPercentile ) ) % "..." % formatSize( percentile( 100 ) ),
 	  "",
 	};
     nextPos = addText( nextPos, lines );
@@ -748,7 +748,7 @@ void HistogramView::addOverflowPanel()
 
 
     // Caption for the lower pie chart
-    const QStringList pieCaption2 = { formatSize( cutoffDiskSpace ) + " cut off",
+    const QStringList pieCaption2 = { formatSize( cutoffDiskSpace ) % " cut off",
 				      tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
                                       ""
                                     };
@@ -775,7 +775,7 @@ void HistogramView::addLine( int             percentileIndex,
 						      x,
 						      -( _histogramHeight + _markerExtraHeight ) );
 
-    line->setToolTip( whitespacePre( name + "<br/>" + formatSize( value ) ) );
+    line->setToolTip( whitespacePre( name % "<br/>" % formatSize( value ) ) );
     line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );
     line->setPen( pen );
     line->setFlags( QGraphicsLineItem::ItemIsSelectable );

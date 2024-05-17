@@ -50,7 +50,7 @@ namespace
 	// Pick a suitable color for the special text, based on the theme settings, whether
 	// it is for a sparse file, and whether the item should be rendered as disabled
 	const bool selected = option.state & QStyle::State_Selected;
-	const QColor background = selected ? option.palette.highlight().color() : option.palette.base().color();
+	const QColor & background = selected ? option.palette.highlight().color() : option.palette.base().color();
 
        if ( background.lightness() < LIGHTNESS_THRESHOLD )
        {
@@ -78,7 +78,7 @@ void SizeColDelegate::paint( QPainter                   * painter,
 
     const QStringList data = index.data( SizeTextRole ).toStringList();
     const bool sparseFile = data.size() == 3;
-    const QString & linksText = sparseFile ? data.at( 2 ) : "";
+    const QString linksText = sparseFile ? data.at( 2 ) : "";
 
     if ( data.size() == 2 || data.size() == 3 )
     {
@@ -123,9 +123,9 @@ QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
     if ( data.size() == 2 || data.size() == 3 )
     {
 	const QString text = data.join( QLatin1String() );
-	const QFont font = index.data( Qt::FontRole ).value<QFont>();
-	const int width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
-	const int height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
+	const QFont font   = index.data( Qt::FontRole ).value<QFont>();
+	const int width    = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
+	const int height   = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
 #if 0
 	logDebug() << "size hint for \"" << text << "\": " << width << ", " << height << Qt::endl;
 #endif

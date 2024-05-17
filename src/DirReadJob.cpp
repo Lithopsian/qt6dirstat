@@ -11,6 +11,8 @@
 #include <fcntl.h>      // AT_ constants (fstatat() flags)
 #include <unistd.h>     // access(), R_OK, X_OK
 
+#include <QStringBuilder>
+
 #include "DirReadJob.h"
 #include "DirTree.h"
 #include "DirTreeCache.h"
@@ -259,7 +261,6 @@ void LocalDirReadJob::startReading()
 #else
 	const int flags = AT_SYMLINK_NOFOLLOW;
 #endif
-	const QString defaultCacheName = DEFAULT_CACHE_NAME;
 	for ( const QString & entryName : entryMap )
 	{
 	    struct stat statInfo;
@@ -275,9 +276,9 @@ void LocalDirReadJob::startReading()
 		}
 		else  // non-directory child
 		{
-		    if ( entryName == defaultCacheName )	// .qdirstat.cache.gz found
+		    if ( entryName == QLatin1String( DEFAULT_CACHE_NAME ) )	// .qdirstat.cache.gz found
 		    {
-			logDebug() << "Found cache file " << defaultCacheName << Qt::endl;
+			logDebug() << "Found cache file " << DEFAULT_CACHE_NAME << Qt::endl;
 
 			// Try to read the cache file. If that was successful and the toplevel
 			// path in that cache file matches the path of the directory we are
@@ -486,7 +487,7 @@ QString LocalDirReadJob::fullName( const QString & entryName ) const
     // Avoid leading // when in root dir
     const QString dirName = _dirName == QLatin1String( "/" ) ? QString() : _dirName;
 
-    return dirName + '/' + entryName;
+    return dirName % '/' % entryName;
 }
 
 

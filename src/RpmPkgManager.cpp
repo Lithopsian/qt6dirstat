@@ -56,7 +56,7 @@ namespace
 
 bool RpmPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( QString( "%1 -qf %1" ).arg( rpmCommand() ), "^rpm.*" );
+    return tryRunCommand( rpmCommand() % " -qf " % rpmCommand(), "^rpm.*" );
 }
 
 
@@ -134,7 +134,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 
 QString RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
 {
-    return QString( "%1 -ql %2" ).arg( rpmCommand() ).arg( queryName( pkg ) );
+    return rpmCommand() % " -ql " %  queryName( pkg );
 }
 
 
@@ -154,10 +154,10 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
     QString name = pkg->baseName();
 
     if ( !pkg->version().isEmpty() )
-	name += '-' + pkg->version();
+	name += '-' % pkg->version();
 
     if ( !pkg->arch().isEmpty() )
-	name += '.' + pkg->arch();
+	name += '.' % pkg->arch();
 
     return name;
 }

@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <QMenu>
 #include <QAction>
+#include <QMenu>
 
 #include "HeaderTweaker.h"
 #include "DirTreeView.h"
@@ -65,7 +65,7 @@ void HeaderTweaker::initHeader()
 void HeaderTweaker::createColumnLayout( const QString & layoutName)
 {
     ColumnLayout * layout = new ColumnLayout( layoutName );
-    CHECK_PTR( layout );
+    CHECK_NEW( layout );
     _layouts[ layoutName ] = layout;
 }
 
@@ -73,13 +73,13 @@ void HeaderTweaker::createColumnLayout( const QString & layoutName)
 void HeaderTweaker::createColumnLayouts()
 {
     // Layout L1: Short
-    createColumnLayout( "L1" );
+    createColumnLayout( l1Name() );
 
     // L2: Classic QDirStat Style
-    createColumnLayout( "L2" );
+    createColumnLayout( l2Name() );
 
     // L3: Full
-    createColumnLayout( "L3" );
+    createColumnLayout( l3Name() );
 }
 
 
@@ -392,11 +392,11 @@ void HeaderTweaker::addMissingColumns( DataColumnList & colList )
 }
 
 
-void HeaderTweaker::changeLayout( const QString & name )
+void HeaderTweaker::changeLayout( const QString & layoutName )
 {
-    if ( !_layouts.contains( name ) )
+    if ( !_layouts.contains( layoutName ) )
     {
-	logError() << "No layout " << name << Qt::endl;
+	logError() << "No layout " << layoutName << Qt::endl;
 	return;
     }
 
@@ -405,7 +405,7 @@ void HeaderTweaker::changeLayout( const QString & name )
     if ( _currentLayout )
 	saveLayout( _currentLayout );
 
-    _currentLayout = _layouts[ name ];
+    _currentLayout = _layouts[ layoutName ];
     applyLayout( _currentLayout );
 }
 
@@ -464,7 +464,7 @@ void HeaderTweaker::resizeToContents( QHeaderView * header )
 
 DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )
 {
-    if ( layoutName == QLatin1String( "L1" ) )
+    if ( layoutName == HeaderTweaker::l1Name() )
 	return { NameCol,
                  PercentBarCol,
                  PercentNumCol,
@@ -472,7 +472,7 @@ DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )
                  LatestMTimeCol
 	       };
 
-    if ( layoutName == QLatin1String( "L2" ) )
+    if ( layoutName == HeaderTweaker::l2Name() )
 	return { NameCol,
 		 PercentBarCol,
 		 PercentNumCol,
