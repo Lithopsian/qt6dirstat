@@ -160,7 +160,7 @@ namespace
 	    return nullptr;
 	}
 
-	QStringList args	  = command.split( QRegularExpression( "\\s+" ) );
+	QStringList args       = command.split( QRegularExpression( "\\s+" ) );
 	const QString program = args.takeFirst();
 
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();

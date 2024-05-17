@@ -19,7 +19,13 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QSplitter" name="mainWinSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
       <widget class="QSplitter" name="topViewsSplitter">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
        <widget class="QWidget" name="treeViewContainer" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
          <property name="spacing">
@@ -106,16 +112,7 @@
         <property name="widgetResizable">
          <bool>true</bool>
         </property>
-        <widget class="QDirStat::FileDetailsView" name="fileDetailsView">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>79</width>
-           <height>587</height>
-          </rect>
-         </property>
-        </widget>
+        <widget class="QDirStat::FileDetailsView" name="fileDetailsView"/>
        </widget>
       </widget>
       <widget class="QDirStat::TreemapView" name="treemapView">
@@ -137,14 +134,6 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1115</width>
-     <height>21</height>
-    </rect>
-   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>

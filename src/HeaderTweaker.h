@@ -54,7 +54,15 @@ namespace QDirStat
 	/**
 	 * Switch the layout to the one with the specified name.
 	 **/
-	void changeLayout( const QString & name );
+	void changeLayout( const QString & layoutName );
+
+	/**
+	 * Return the names of the three layouts.
+	 **/
+	inline static QLatin1String l1Name() { return QLatin1String( "L1" ); }
+	inline static QLatin1String l2Name() { return QLatin1String( "L2" ); }
+	inline static QLatin1String l3Name() { return QLatin1String( "L3" ); }
+
 
     protected slots:
 
@@ -258,7 +266,7 @@ namespace QDirStat
 	    name { name }
 	{}
 
-	QString	       name;
+	QString        name;
 	DataColumnList columns;
 
 	/**

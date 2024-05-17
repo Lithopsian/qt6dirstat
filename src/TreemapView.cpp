@@ -363,7 +363,7 @@ void TreemapView::rebuildTreemap()
 
     rebuildTreemap( root );
 
-    _savedRootUrl = "";
+    _savedRootUrl = QString();
     //logDebug() << _savedRootUrl << Qt::endl;
 }
 
@@ -559,7 +559,7 @@ void TreemapView::deleteNotify( FileInfo * )
         {
             // A shortcut for the most common case: No zoom. Simply use the
             // tree's root for the next treemap rebuild.
-            _savedRootUrl = "";
+            _savedRootUrl = QString();
         }
     }
     else

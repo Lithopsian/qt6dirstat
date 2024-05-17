@@ -96,14 +96,14 @@ namespace
 	    QStringList patterns = category->humanReadablePatternList( Qt::CaseInsensitive );
 
 	    if ( patterns.isEmpty() )
-		patterns << "";
+		patterns << QString();
 
 	    settings.setValue( "PatternsCaseInsensitive", patterns );
 
 	    patterns = category->humanReadablePatternList( Qt::CaseSensitive );
 
 	    if ( patterns.isEmpty() )
-		patterns << "";
+		patterns << QString();
 
 	    settings.setValue( "PatternsCaseSensitive", patterns );
 
@@ -182,7 +182,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 						QString	* suffix_ret ) const
 {
     if ( suffix_ret )
-	*suffix_ret = "";
+	*suffix_ret = QString();
 
     if ( filename.isEmpty() )
 	return nullptr;
@@ -326,7 +326,8 @@ void MimeCategorizer::buildMaps()
 	buildWildcardLists( category );
     }
 
-    logDebug() << "maps built in " << stopwatch.restart() << "ms - " << _wildcards.size() << " regular expressions" << Qt::endl;
+    logDebug() << "maps built in " << stopwatch.restart() << "ms - "
+               << _wildcards.size() << " regular expressions" << Qt::endl;
 }
 
 
@@ -426,14 +427,14 @@ void MimeCategorizer::readSettings()
 	settings.beginGroup( groupName );
 
 	QString name  = settings.value( "Name", groupName ).toString();
-	QColor	color = readColorEntry( settings, "Color", QColor( "#b0b0b0" ) );
+	QColor	color = readColorEntry( settings, "Color", "#b0b0b0" );
 	QStringList patternsCaseInsensitive = settings.value( "PatternsCaseInsensitive" ).toStringList();
-	QStringList patternsCaseSensitive   = settings.value( "PatternsCaseSensitive"	).toStringList();
+	QStringList patternsCaseSensitive   = settings.value( "PatternsCaseSensitive"   ).toStringList();
 
 	//logDebug() << name << Qt::endl;
 	MimeCategory * category = create( name, color );
 	category->addPatterns( patternsCaseInsensitive, Qt::CaseInsensitive );
-	category->addPatterns( patternsCaseSensitive,	Qt::CaseSensitive   );
+	category->addPatterns( patternsCaseSensitive,   Qt::CaseSensitive   );
 
 	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
     }
@@ -482,7 +483,7 @@ void MimeCategorizer::ensureMandatoryCategories()
 
 
 void MimeCategorizer::addDefaultCategory( const QString & name,
-					  const QColor & color,
+					  const QColor  & color,
 					  const QString & caseInsensitivePatterns,
 					  const QString & caseSensitivePatterns )
 {
@@ -504,11 +505,11 @@ void MimeCategorizer::addDefaultCategories()
     addDefaultCategory( tr( "archive (uncompressed)" ),
 			"#88ff88",
 			"*.cpio, *.tar",
-			"" );
+			QString() );
 
     addDefaultCategory( tr( "configuration file" ),
 			"#aabbff",
-			"",
+			QString(),
 			"*.alias, *.cfg, *.conf, *.conffiles, *.config, *.dep, "
 			"*.desktop, *.ini, *.kmap, *.lang, *.my, *.page, *.properties, "
 			"*.rc, *.service, *.shlibs, *.symbols, *.templates, *.theme, "
@@ -517,7 +518,7 @@ void MimeCategorizer::addDefaultCategories()
 
     addDefaultCategory( tr( "database" ),
 			"#22aaff",
-			"",
+			QString(),
 			"*.alias.bin, *.builtin.bin, *.dat, *.db, *.dep.bin, *.enc, "
 			"*.hwdb, *.idx, *.lm, *.md5sums, *.odb, *.order, *.sbstore, "
 			"*.sqlite, *.sqlite-wal, *.symbols.bin, *.tablet, *.vlpset, "
@@ -541,35 +542,35 @@ void MimeCategorizer::addDefaultCategories()
 
     addDefaultCategory( executableCategoryName(),
 			Qt::magenta,
-			"",
+			QString(),
 			"*.jsa, *.ucode, lft.db, traceproto.db, traceroute.db" );
 
     addDefaultCategory( tr( "font" ),
 			"#44ddff",
-			"",
+			QString(),
 			"*.afm, *.bdf, *.cache-7, *.cache-8, *.otf, *.pcf, *.pcf.gz, "
 			"*.pf1, *.pf2, *.pfa, *.pfb, *.t1, *.ttf" );
 
     addDefaultCategory( tr( "game file" ),
 			"#ff88dd",
-			"",
+			QString(),
 			"*.MHK, *.bsp, *.mdl, *.pak, *.wad" );
 
     addDefaultCategory( tr( "icon" ),
 			"#00ddff",
 			"*.icns, *.ico, *.xpm",
-			"" );
+			QString() );
 
     addDefaultCategory( tr( "image" ),
 			"#00ffff",
 			"*.gif, *.jpeg, *.jpg, *.jxl, *.mng, *.png, *.tga, *.tif, *.tiff, "
 			"*.webp, *.xcf.bz2, *.xcf.gz",
-			"" );
+			QString() );
 
     addDefaultCategory( tr( "image (uncompressed)" ),
 			"#88ffff",
 			"*.bmp, *.pbm, *.pgm, *.pnm, *.ppm, *.spr, *.svg, *.xcf",
-			"" );
+			QString() );
 
     addDefaultCategory( tr( "junk" ),
 			"#ff0000",
@@ -580,7 +581,7 @@ void MimeCategorizer::addDefaultCategories()
 			"#ffff00",
 			"*.aac, *.ape, *.f4a, *.f4b, *.flac, *.m4a, *.m4b, *.mid, *.mka, "
 			"*.mp3, *.oga, *.ogg, *.opus, *.ra, *.rax, *.wav, *.wma",
-			"" );
+			QString() );
 
     addDefaultCategory( tr( "object file" ),
 			"#ee8822",
@@ -596,7 +597,7 @@ void MimeCategorizer::addDefaultCategories()
 
     addDefaultCategory( tr( "script" ),
 			"#ff8888",
-			"",
+			QString(),
 			"*.BAT, *.bash, *.bashrc, *.csh, *.js, *.ksh, *.m4, *.pl, *.pm, "
 			"*.postinst, *.postrm, *.preinst, *.prerm, *.sh, *.tcl, *.tmac, "
 			"*.xba, *.zsh" );
@@ -608,7 +609,7 @@ void MimeCategorizer::addDefaultCategories()
 
     addDefaultCategory( tr( "source file" ),
 			"#ffbb44",
-			"",
+			QString(),
 			"*.S, *.S_shipped, *.asm, *.c, *.cc, *.cmake, *.cpp, *.cxx, *.dts, "
 			"*.dtsi, *.el, *.f, *.fuc3, *.fuc3.h, *.fuc5, *.fuc5.h, *.gir, *.h, "
 			"*.h_shipped, *.hpp, *.java, *.msg, *.ph, *.php, *.po, *.pot, *.pro, "
@@ -616,20 +617,20 @@ void MimeCategorizer::addDefaultCategories()
 
     addDefaultCategory( tr( "source file (generated)" ),
 			"#ffaa22",
-			"",
+			QString(),
 			"*.f90, *.mod.c, *.ui, moc_*.cpp, qrc_*.cpp, ui_*.h" );
 
     addDefaultCategory( symlinkCategoryName(),
 			Qt::blue,
-			"",
-			"" );
+			QString(),
+			QString() );
 
     addDefaultCategory( tr( "video" ),
 			"#aa44ff",
 			"*.asf, *.avi, *.divx, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, "
 			"*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.ogm, *.ogv, *.rm, "
 			"*.vdr, *.vob, *.webm, *.wmp, *.wmv",
-			"" );
+			QString() );
 
     writeSettings( _categories );
 }

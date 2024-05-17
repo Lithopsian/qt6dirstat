@@ -45,11 +45,13 @@ namespace QDirStat
 
 	/**
 	 * Alternate constructor, uses the string passed in as the
-	 * startingDir instead of the value from the config file.
+	 * startingDir instead of the value from the config file.  The
+	 * delegated constructor reads the configuration file, and
+	 * startingDir is then overwritten.
 	 **/
 	UnpkgSettings( const QString & startingDir ):
-	    UnpkgSettings () // reads the config file settings
-	    { _startingDir = startingDir; } // overrides the starting dir
+	    UnpkgSettings ()
+	{ _startingDir = startingDir; }
 
 	/**
 	 * Returns the default settings in the form of an UnpkgSettings
