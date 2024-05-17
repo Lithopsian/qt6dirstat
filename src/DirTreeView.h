@@ -11,7 +11,6 @@
 #define DirTreeView_h
 
 #include <QTreeView>
-#include <QTreeWidget>
 
 #include "PercentBar.h" // ColorList
 
@@ -78,6 +77,21 @@ namespace QDirStat
 
 
     protected slots:
+
+	/**
+	 * Check that auto-sized columns are wide enough for the contents of
+	 * the current visible rows.  Qt only checks up to 1,000 rows when it
+	 * first displays a tree, and doesn't re-check until a repaint is
+	 * forced, so a column may not be wide enough for the contents of
+	 * some rows when there are more than 1,000 items visible in the tree.
+	 *
+	 * We check here and emit a signal if a column needs to be wider to
+	 * fit any of the rows currently visible.  Only certain columns are
+	 * checked, where rows can have different widths: NameCol,
+	 * PercentNumCol, SizeCol, TotalItemsCol, TotalFilesCol,
+	 * TotalSubDirsCol, UserCol, and GroupCol.
+	 **/
+	void scrolled( int value );
 
 	/**
 	 * Post the common context menu with actions (cleanup and other) for

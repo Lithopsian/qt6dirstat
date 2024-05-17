@@ -9,6 +9,7 @@
 
 #include <QMenu>
 #include <QKeyEvent>
+#include <QScrollBar>
 
 #include "DirTreeView.h"
 #include "ActionManager.h"
@@ -39,6 +40,9 @@ DirTreeView::DirTreeView( QWidget * parent ):
     setItemDelegateForColumn( SizeCol, _sizeColDelegate );
 
     readSettings();
+
+    connect ( verticalScrollBar(), &QScrollBar::valueChanged,
+	      this,                &DirTreeView::scrolled );
 
     connect( this, &DirTreeView::customContextMenuRequested,
 	     this, &DirTreeView::contextMenu );
@@ -237,3 +241,42 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
     QTreeView::keyPressEvent( event );
 }
 
+
+void DirTreeView::scrolled( int )
+{
+//    logDebug() << Qt::endl;
+
+    // Restrict checking to visible rows
+    const int precision = header()->resizeContentsPrecision();
+    header()->setResizeContentsPrecision( 0 );
+
+    for ( DataColumn col : { NameCol,
+			     PercentNumCol,
+			     SizeCol,
+			     TotalItemsCol,
+			     TotalFilesCol,
+			     TotalSubDirsCol,
+			     UserCol,
+			     GroupCol
+			   } )
+    {
+	// Only check visible columns that are configured to auto-size
+	const int section = DataColumns::toViewCol( col );
+	if ( !header()->isSectionHidden( section ) &&
+	     header()->sectionResizeMode( section ) == QHeaderView::ResizeToContents )
+	{
+	    // Signal an update if the required width is more than the current width
+	    if ( sizeHintForColumn( section ) > header()->sectionSize( section ) )
+	    {
+		// Pick a row, any row, just to make Qt reassess the columns
+		emit _sizeColDelegate->sizeHintChanged( indexAt( { 0, 0 } ) );
+		break;
+	    }
+	}
+    }
+
+    // Return the checked rows limit to the default
+    header()->setResizeContentsPrecision( precision );
+
+//    logDebug() << Qt::endl;
+}
