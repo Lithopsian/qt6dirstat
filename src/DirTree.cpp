@@ -396,15 +396,17 @@ void DirTree::refresh( DirInfo * subtree )
 
 	//logDebug() << "Refreshing subtree " << subtree << Qt::endl;
 
-	//  Make copies of some key information beefore it is deleted
+	//  Make copies of some key information before it is deleted
 	const QString url = subtree->url();
 	DirInfo * parent = subtree->parent();
+	if ( parent->isAttic() )
+	    parent = parent->parent();
 
 	deleteDir( subtree );
 
 	// Recreate the deleted subtree
 	FileInfo * item = stat( url, this, parent );
-	if ( item ) // should always be an item, will throw if there is an error
+	if ( item ) // should always be an item, stat() will throw if there is an error
 	{
 	    childAddedNotify( item );
 	    createLocalDirReadJob( this, item );

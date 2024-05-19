@@ -896,7 +896,7 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
 
 void DirInfo::finishReading( DirReadState readState )
 {
-    // logDebug() << dir << Qt::endl;
+    // logDebug() << this << Qt::endl;
     setReadState( readState );
     finalizeLocal();
     _tree->sendReadJobFinished( this );
