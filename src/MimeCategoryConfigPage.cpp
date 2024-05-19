@@ -68,13 +68,13 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     connect( _ui->cushionShadingCheckBox,   &QCheckBox::stateChanged,
 	     this,                          &MimeCategoryConfigPage::cushionShadingChanged );
 
-    connect( _ui->cushionHeightSpinBox,     qOverload<double>( &QDoubleSpinBox::valueChanged ),
+    connect( _ui->cushionHeightSpinBox,     QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
 	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->heightScaleFactorSpinBox, qOverload<double>( &QDoubleSpinBox::valueChanged ),
+    connect( _ui->heightScaleFactorSpinBox, QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
 	     this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->minTileSizeSpinBox,       qOverload<int>( &QSpinBox::valueChanged ),
+    connect( _ui->minTileSizeSpinBox,       QOverload<int>::of( &QSpinBox::valueChanged ),
 	     this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->horizontalSplitter,       &QSplitter::splitterMoved,

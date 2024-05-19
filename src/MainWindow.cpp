@@ -171,9 +171,9 @@ void MainWindow::connectSignals()
 	     _ui->breadcrumbNavigator, &BreadcrumbNavigator::setPath );
 
     connect( _ui->breadcrumbNavigator, &BreadcrumbNavigator::pathClicked,
-	     selectionModel,           qOverload<const QString &>( &SelectionModel::setCurrentItem ) );
+	     selectionModel,           &SelectionModel::setCurrentItemPath );
 
-    connect( selectionModel,           qOverload<>( &SelectionModel::selectionChanged ),
+    connect( selectionModel,           &SelectionModel::selectionChanged,
 	     this,                     &MainWindow::selectionChanged );
 
     connect( selectionModel,           &SelectionModel::currentItemChanged,

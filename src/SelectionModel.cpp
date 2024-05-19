@@ -26,7 +26,7 @@ SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
     connect( this, &SelectionModel::currentChanged,
 	     this, &SelectionModel::propagateCurrentChanged );
 
-    connect( this, qOverload<const QItemSelection &, const QItemSelection &>( &QItemSelectionModel::selectionChanged ),
+    connect( this, &QItemSelectionModel::selectionChanged,
 	     this, &SelectionModel::propagateSelectionChanged );
 
     connect( dirTreeModel->tree(), &DirTree::deletingChild,
@@ -103,7 +103,7 @@ void SelectionModel::propagateSelectionChanged( const QItemSelection &,
 {
     _selectedItemsDirty = true;
     emit selectionChanged();
-    emit selectionChanged( selectedItems() );
+    emit selectionChangedItems( selectedItems() );
 }
 
 /*
@@ -187,7 +187,7 @@ void SelectionModel::setCurrentItem( FileInfo * item, bool select )
 }
 
 
-void SelectionModel::setCurrentItem( const QString & path )
+void SelectionModel::setCurrentItemPath( const QString & path )
 {
     FileInfo * item = _dirTreeModel->tree()->locate( path,
 						     true ); // findPseudoDirs
@@ -284,15 +284,15 @@ void SelectionModel::dumpSelectedItems()
 SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * parent ):
     QObject ( parent )
 {
-    connect( master, qOverload<const FileInfoSet &>( &SelectionModel::selectionChanged ),
-	     this,   qOverload<const FileInfoSet &>( &SelectionModelProxy::selectionChanged ) );
+    connect( master, &SelectionModel::selectionChangedItems,
+	     this,   &SelectionModelProxy::selectionChangedItems );
 
     connect( master, &SelectionModel::currentItemChanged,
 	     this,   &SelectionModelProxy::currentItemChanged );
 
     // The signals below aren't used at the moment
-//    connect( master, qOverload<const QItemSelection &, const QItemSelection &>( &QItemSelectionModel::selectionChanged ),
-//	     this,   qOverload<const QItemSelection &, const QItemSelection &>( &SelectionModelProxy::selectionChanged ) );
+//    connect( master, QOverload<const QItemSelection &, const QItemSelection &>::of( &QItemSelectionModel::selectionChanged,
+//	     this,   QOverload<const QItemSelection &, const QItemSelection &>::of( &SelectionModelProxy::selectionChanged );
 
 //    connect( master, &SelectionModel::currentChanged,
 //	     this,   &SelectionModelProxy::currentChanged );
@@ -303,8 +303,8 @@ SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * par
 //    connect( master, &SelectionModel::currentRowChanged,
 //	     this,   &SelectionModelProxy::currentRowChanged );
 
-//    connect( master, qOverload<>( &SelectionModel::selectionChanged ),
-//	     this,   qOverload<>( &SelectionModelProxy::selectionChanged ) );
+//    connect( master, &SelectionModel::selectionChanged,
+//	     this,   &SelectionModelProxy::selectionChanged );
 
 //    connect( master, &SelectionModel::currentBranchChanged,
 //	     this,   &SelectionModelProxy::currentBranchChanged );

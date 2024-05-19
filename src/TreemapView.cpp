@@ -176,7 +176,7 @@ void TreemapView::setSelectionModel( SelectionModel * selectionModel )
     connect( _selectionModelProxy, &SelectionModelProxy::currentItemChanged,
              this,                 &TreemapView::updateCurrentItem );
 
-    connect( _selectionModelProxy, qOverload<const FileInfoSet &>( &SelectionModelProxy::selectionChanged ),
+    connect( _selectionModelProxy, &SelectionModelProxy::selectionChangedItems,
              this,                 &TreemapView::updateSelection);
 
     // Connect this one here because it is only relevant in the real treemap

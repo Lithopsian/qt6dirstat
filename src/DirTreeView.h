@@ -159,7 +159,7 @@ namespace QDirStat
 
 	// Data members
 
-	PercentBarDelegate * _percentBarDelegate	{ nullptr };
+	PercentBarDelegate * _percentBarDelegate;
 	SizeColDelegate    * _sizeColDelegate;
 	HeaderTweaker      * _headerTweaker;
 

@@ -76,7 +76,7 @@ QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget ) const
 {
     QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
 
-    QMutableListIterator it( lines );
+    QMutableListIterator<QString> it( lines );
     while ( it.hasNext() )
     {
 	const QString & line = it.next();

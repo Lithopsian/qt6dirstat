@@ -41,11 +41,11 @@ DirTreeView::DirTreeView( QWidget * parent ):
 
     readSettings();
 
-    connect ( verticalScrollBar(), &QScrollBar::valueChanged,
-	      this,                &DirTreeView::scrolled );
+    connect( verticalScrollBar(), &QScrollBar::valueChanged,
+	     this,                &DirTreeView::scrolled );
 
-    connect( this, &DirTreeView::customContextMenuRequested,
-	     this, &DirTreeView::contextMenu );
+    connect( this,                &QTreeView::customContextMenuRequested,
+	     this,                &DirTreeView::contextMenu );
 }
 
 

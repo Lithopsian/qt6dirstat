@@ -125,7 +125,7 @@ namespace QDirStat
 	 *
 	 * See also setCurrentItem( FileInfo *, bool ).
 	 **/
-	void setCurrentItem( const QString & path );
+	void setCurrentItemPath( const QString & path );
 
 	/**
 	 * Make 'item' the current branch. This is meant to notify connected
@@ -168,7 +168,7 @@ namespace QDirStat
 	 * Emitted when the selection changes.
 	 **/
 	void selectionChanged();
-	void selectionChanged( const FileInfoSet & selectedItems );
+	void selectionChangedItems( const FileInfoSet & selectedItems );
 
 	/**
 	 * Emitted when the current branch changes. Tree views can use this to
@@ -266,7 +266,7 @@ namespace QDirStat
 
 	// from SelectionModel
 //	void selectionChanged();
-	void selectionChanged( const FileInfoSet & selectedItems );
+	void selectionChangedItems( const FileInfoSet & selectedItems );
 	void currentItemChanged( FileInfo * newCurrent, const FileInfo * oldCurrent );
 //	void currentBranchChanged( const QModelIndex & branch );
 

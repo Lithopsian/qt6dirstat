@@ -182,7 +182,7 @@ void FileSizeStatsWindow::initWidgets()
     connect( _ui->endPercentileSlider,      &QSlider::valueChanged,
 	     this,                          &FileSizeStatsWindow::endValueChanged );
 
-    connect( _ui->markersComboBox,          qOverload<int>( &QComboBox::currentIndexChanged ),
+    connect( _ui->markersComboBox,          QOverload<int>::of( &QComboBox::currentIndexChanged ),
 	     this,                          &FileSizeStatsWindow::markersChanged );
 
     connect( _ui->percentileFilterCheckBox, &QCheckBox::stateChanged,

@@ -48,7 +48,7 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     enableWidgets();
     updateActions();
 
-    connect( _ui->outputWindowPolicyComboBox, qOverload<int>( &QComboBox::currentIndexChanged ),
+    connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
 	     this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,

@@ -493,7 +493,7 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 {
     CHECK_PTR( _readFileListProcess );
 
-    connect( _readFileListProcess, qOverload<int, QProcess::ExitStatus>( &QProcess::finished ),
+    connect( _readFileListProcess, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
 	     this,                 &AsyncPkgReadJob::readFileListFinished );
 }
 

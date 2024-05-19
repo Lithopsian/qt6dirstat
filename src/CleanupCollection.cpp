@@ -174,7 +174,7 @@ CleanupCollection::CleanupCollection( QObject        * parent,
 //    (void)Cleanup::desktopSpecificApps();
 
     // Available Cleanups depend on the currently-selected items
-    connect( selectionModel, qOverload<>( &SelectionModel::selectionChanged ),
+    connect( selectionModel, QOverload<>::of( &SelectionModel::selectionChanged ),
 	     this,           &CleanupCollection::updateActions );
 }
 
@@ -299,14 +299,11 @@ void CleanupCollection::updateMenus()
 
     for ( QMenu * menu : _menus )
     {
-//	if ( menu )
-	{
-	    // Remove all Cleanups from this menu
-	    removeAllFromWidget( menu );
+	// Remove all Cleanups from this menu
+	removeAllFromWidget( menu );
 
-	    // Add the current cleanups in the current order
-	    addToMenu( menu );
-	}
+	// Add the current cleanups in the current order
+	addToMenu( menu );
     }
 }
 
@@ -317,14 +314,11 @@ void CleanupCollection::updateToolBars()
 
     for ( QToolBar * toolBar : _toolBars )
     {
-//	if ( toolBar )
-	{
-	    // Remove all Cleanups from this tool bar
-	    removeAllFromWidget( toolBar );
+	// Remove all Cleanups from this tool bar
+	removeAllFromWidget( toolBar );
 
-	    // Add the current cleanups in the current order
-	    addToToolBar( toolBar );
-	}
+	// Add the current cleanups in the current order
+	addToToolBar( toolBar );
     }
 }
 

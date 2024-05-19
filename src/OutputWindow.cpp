@@ -94,13 +94,13 @@ void OutputWindow::addProcess( QProcess * process )
 	     this,    &OutputWindow::readStderr );
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 6, 0 )
-    connect( process, qOverload<QProcess::ProcessError >( &QProcess::error ),
+    connect( process, QOverload<QProcess::ProcessError>::of( &QProcess::error ),
 #else
     connect( process, &QProcess::errorOccurred,
 #endif
 	     this,    &OutputWindow::processError );
 
-    connect( process, qOverload<int, QProcess::ExitStatus>( &QProcess::finished ),
+    connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
 	     this,    &OutputWindow::processFinishedSlot );
 
     if ( !hasActiveProcess() )

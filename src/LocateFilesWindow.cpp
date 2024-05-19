@@ -208,7 +208,7 @@ void LocateFilesWindow::locateInMainWindow( QTreeWidgetItem * item )
     CHECK_PTR( _subtree.tree() );
 
     // logDebug() << "Locating " << searchResult->path() << " in tree" << Qt::endl;
-    app()->selectionModel()->setCurrentItem( searchResult->path() );
+    app()->selectionModel()->setCurrentItemPath( searchResult->path() );
 }
 
 
