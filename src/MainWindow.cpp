@@ -706,6 +706,7 @@ void MainWindow::readCache( const QString & cacheFileName )
 	return;
 
     app()->dirTreeModel()->clear();
+    app()->dirTree()->reset();
     _historyButtons->clear();
 
     if ( !app()->dirTree()->readCache( cacheFileName ) )
