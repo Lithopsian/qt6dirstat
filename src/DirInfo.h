@@ -610,10 +610,9 @@ namespace QDirStat
 	    { _firstChild = newfirstChild; }
 
 	/**
-	 * Return the dot entry for this node. If it doesn't have one yet,
-	 * create it first.
+	 * If this directory doesn't have a dot entry, create one.
 	 **/
-	DotEntry * ensureDotEntry();
+	void ensureDotEntry();
 
 	/**
 	 * Return the attic for this node. If it doesn't have one yet, create

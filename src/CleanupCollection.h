@@ -30,7 +30,6 @@ namespace QDirStat
     class Trash;
 
     typedef QList<Cleanup *>            CleanupList;
-    typedef CleanupList::const_iterator CleanupListIterator;
 
     /**
      * Set of Cleanup actions to be performed for DirTree items, consisting of

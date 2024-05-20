@@ -110,15 +110,14 @@ void CleanupConfigPage::fillListWidget()
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	Cleanup * newCleanup = new Cleanup( cleanup );
+	CHECK_NEW( cleanup );
 
 	QListWidgetItem * item = new ListEditorItem( newCleanup->cleanTitle(), newCleanup );
 	CHECK_NEW( item );
 	listWidget()->addItem( item );
     }
 
-    QListWidgetItem * firstItem = listWidget()->item(0);
-    if ( firstItem )
-	listWidget()->setCurrentItem( firstItem );
+    listWidget()->setCurrentRow( 0 );
 }
 
 

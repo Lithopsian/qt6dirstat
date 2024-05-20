@@ -180,12 +180,11 @@ void MimeCategoryConfigPage::fillListWidget()
 //    listWidget()->clear(); // should always be empty, but future-proof it
     //logDebug() << listWidget()->count() << ", " << currentRow << Qt::endl;
 
-
-    const MimeCategoryList * categories = &(MimeCategorizer::instance()->categories());
-    for ( int i = 0; i < categories->size(); ++i )
+    for ( const MimeCategory * mimeCategory : MimeCategorizer::instance()->categories() )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real categories
-	MimeCategory * category = new MimeCategory( *categories->at( i ) );
+	MimeCategory * category = new MimeCategory( *mimeCategory );
+	CHECK_NEW( category );
 
 	QListWidgetItem * item = new ListEditorItem( category->name(), category );
 	CHECK_NEW( item );

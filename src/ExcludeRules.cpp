@@ -123,8 +123,8 @@ namespace
 	if ( excludeRules->isEmpty() )
 	    logDebug() << "No exclude rules defined" << Qt::endl;
 
-	for ( ExcludeRuleListIterator it = excludeRules->cbegin(); it != excludeRules->cend(); ++it )
-	    logDebug() << *it << Qt::endl;
+	for ( const ExcludeRule * excludeRule : *excludeRules )
+	    logDebug() << excludeRule << Qt::endl;
     }
 
 } // namespace

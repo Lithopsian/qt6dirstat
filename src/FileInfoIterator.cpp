@@ -45,9 +45,9 @@ void FileInfoIterator::next()
 }
 
 
-FileInfoSortedBySizeIterator::FileInfoSortedBySizeIterator( FileInfo		* parent,
-							    FileSize		( *itemTotalSize )( FileInfo * ),
-							    Qt::SortOrder	sortOrder )
+FileInfoSortedBySizeIterator::FileInfoSortedBySizeIterator( FileInfo      * parent,
+							    FileSize      ( *itemTotalSize )( FileInfo * ),
+							    Qt::SortOrder   sortOrder )
 {
     _sortedChildren.reserve( parent->directChildrenCount() );
     for ( FileInfoIterator it( parent ); *it; ++it )

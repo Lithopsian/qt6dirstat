@@ -77,10 +77,10 @@ namespace QDirStat
 
     private:
 
-	const FileInfo	* _parent;
-	FileInfo	* _current			{ nullptr };
-	bool		  _directChildrenProcessed	{ false };
-	bool		  _dotEntryProcessed		{ false };
+	const FileInfo * _parent;
+	FileInfo       * _current			{ nullptr };
+	bool             _directChildrenProcessed	{ false };
+	bool             _dotEntryProcessed		{ false };
 
     };	// class FileInfoIterator
 
@@ -93,9 +93,9 @@ namespace QDirStat
 	 * Constructor. Children below 'minSize' will be ignored by this
 	 * iterator.
 	 **/
-	FileInfoSortedBySizeIterator( FileInfo		* parent,
-				      FileSize		( *itemTotalSize )( FileInfo * ) = nullptr,
-				      Qt::SortOrder	sortOrder = Qt::DescendingOrder );
+	FileInfoSortedBySizeIterator( FileInfo      * parent,
+				      FileSize      ( *itemTotalSize )( FileInfo * ) = nullptr,
+				      Qt::SortOrder   sortOrder = Qt::DescendingOrder );
 
 	/**
 	 * Return the current child object or 0 if there is no more.

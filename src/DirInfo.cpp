@@ -181,7 +181,7 @@ void DirInfo::reset()
 }
 
 
-DotEntry * DirInfo::ensureDotEntry()
+void DirInfo::ensureDotEntry()
 {
     if ( !_dotEntry )
     {
@@ -190,8 +190,6 @@ DotEntry * DirInfo::ensureDotEntry()
 	_dotEntry = new DotEntry( _tree, this );
 	CHECK_NEW( _dotEntry );
     }
-
-    return _dotEntry;
 }
 
 
@@ -911,13 +909,10 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
     _sortedCol { sortCol },
     _sortedOrder { sortOrder }
 {
-    // Generate unsorted children list
+    // Generate the unsorted children list, including a dot entry
     _sortedChildren.reserve( parent->directChildrenCount() + 1 );
-    for ( FileInfo * child = parent->firstChild(); child; child = child->next() )
-	_sortedChildren.append( child );
-
-    if ( parent->dotEntry() )
-	_sortedChildren.append( parent->dotEntry() );
+    for ( FileInfoIterator it( parent ); *it; ++it )
+	_sortedChildren.append( *it );
 
     // logDebug() << "Sorting children of " << this << " by " << sortCol << Qt::endl;
 

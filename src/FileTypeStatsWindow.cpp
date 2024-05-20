@@ -181,9 +181,9 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 	if ( category )
 	{
             // Add a category item
-	    const FileSize sum       = it.value();
-            const int      count     = stats.categoryCount( category );
-	    FileTypeItem * catItem   = addCategoryItem( category->name(), count, sum, stats.percentage( sum ) );
+	    const FileSize   sum     = it.value();
+            const int        count   = stats.categoryCount( category );
+	    FileTypeItem   * catItem = addCategoryItem( category->name(), count, sum, stats.percentage( sum ) );
 	    categoryItem[ category ] = catItem;
 
 	    if ( category == stats.otherCategory() )

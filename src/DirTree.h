@@ -297,7 +297,7 @@ namespace QDirStat
 	 * are set with this function). Call this with 0 to remove the existing
 	 * exclude rules.
 	 **/
-	void setTmpExcludeRules( ExcludeRules * newTmpRules );
+	void setTmpExcludeRules( const ExcludeRules * newTmpRules );
 
 	/**
 	 * Return 'true' if 'entryName' matches an exclude rule of the
@@ -510,8 +510,8 @@ namespace QDirStat
 	QString           _url;
 	DirReadJobQueue   _jobQueue;
 
-	ExcludeRules    * _excludeRules		{ nullptr };
-	ExcludeRules    * _tmpExcludeRules	{ nullptr };
+	const ExcludeRules    * _excludeRules		{ nullptr };
+	const ExcludeRules    * _tmpExcludeRules	{ nullptr };
 
 	QList<const DirTreeFilter *> _filters;
 

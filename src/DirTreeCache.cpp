@@ -149,7 +149,7 @@ namespace
 	if ( !item->isDotEntry() )
 	    writeItem( cache, item );
 
-	// Write file children
+	// Write file children immediately following the parent entry
 	if ( item->dotEntry() )
 	    writeTree( cache, item->dotEntry() );
 

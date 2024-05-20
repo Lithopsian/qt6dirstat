@@ -269,11 +269,13 @@ namespace QDirStat
 	/**
 	 * Return a const iterator for the first exclude rule.
 	 **/
+	ExcludeRuleListIterator begin() const { return cbegin(); }
 	ExcludeRuleListIterator cbegin() const { return _rules.constBegin(); }
 
 	/**
 	 * Return a const iterator for past the last exclude rule.
 	 **/
+	ExcludeRuleListIterator end() const { return cend(); }
 	ExcludeRuleListIterator cend() const { return _rules.constEnd(); }
 
 	/**

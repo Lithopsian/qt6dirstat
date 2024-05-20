@@ -76,11 +76,12 @@ void ExcludeRulesConfigPage::applyChanges()
 
     // Check if anything changed before writing, just for fun
     const ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
-    ExcludeRuleListIterator it = excludeRules->cbegin();
-    for ( int i = 0; i < rules.size() || it != excludeRules->cend(); ++i, ++it )
+    for ( ExcludeRuleListIterator itOld = excludeRules->cbegin(), itNew = rules.cbegin();
+          itNew != rules.cend() || itOld != excludeRules->cend();
+	  ++itNew, ++itOld )
     {
 	// If we ran past the end of either list, or the rules don't match ...
-	if ( it == excludeRules->cend() || i == rules.size() || *it != rules.at( i ) )
+	if ( itNew == rules.cend() || itOld == excludeRules->cend() || *itOld != *itNew )
 	{
 	    excludeRules->writeSettings( rules );
 	    app()->dirTree()->setExcludeRules();
@@ -94,11 +95,10 @@ void ExcludeRulesConfigPage::fillListWidget()
 {
     listWidget()->clear();
 
-    const ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
-    for ( ExcludeRuleListIterator it = excludeRules->cbegin(); it != excludeRules->cend(); ++it )
+    for ( const ExcludeRule * excludeRule : *( app()->dirTree()->excludeRules() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
-	ExcludeRule * rule = new ExcludeRule( *( *it ) );
+	ExcludeRule * rule = new ExcludeRule( *excludeRule );
 	CHECK_NEW( rule );
 
 	QListWidgetItem * item = new ListEditorItem( rule->pattern(), rule );
@@ -106,10 +106,7 @@ void ExcludeRulesConfigPage::fillListWidget()
 	listWidget()->addItem( item );
     }
 
-    QListWidgetItem * firstItem = listWidget()->item(0);
-
-    if ( firstItem )
-	listWidget()->setCurrentItem( firstItem );
+    listWidget()->setCurrentRow( 0 );
 }
 
 
