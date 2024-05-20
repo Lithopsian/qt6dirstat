@@ -136,13 +136,12 @@ namespace
 //	if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
 //	    return;
 
-	// Not using FileInfoIterator because we don't want to iterate over the dot
-	// entry as well, just the normal children.
-
 	FileInfoList ignoredChildren;
 
-	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
+	for ( auto it = FileInfoIterator( dir ); *it; ++it )
+//	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
 	{
+	    FileInfo * child = *it;
 	    if ( child->isIgnored() )
 		// Don't move the child right here, otherwise the iteration breaks
 		ignoredChildren << child;
@@ -641,7 +640,7 @@ void DirTree::setExcludeRules()
 }
 
 
-void DirTree::setTmpExcludeRules( ExcludeRules * newTmpRules )
+void DirTree::setTmpExcludeRules( const ExcludeRules * newTmpRules )
 {
     delete _tmpExcludeRules;
 
@@ -650,8 +649,8 @@ void DirTree::setTmpExcludeRules( ExcludeRules * newTmpRules )
     {
 	logDebug() << "New tmp exclude rules:" << Qt::endl;
 
-	for ( ExcludeRuleListIterator it = newTmpRules->cbegin(); it != newTmpRules->cend(); ++it )
-	    logDebug() << *it << Qt::endl;
+	for ( const ExcludeRule * excludeRule : *newTmpRules )
+	    logDebug() << excludeRule << Qt::endl;
     }
     else
     {
@@ -677,7 +676,7 @@ bool DirTree::matchesExcludeRule( const QString & fullName, const QString & entr
 
 bool DirTree::matchesDirectChildren( const DirInfo * dir ) const
 {
-    if ( excludeRules() && excludeRules()->matchDirectChildren( dir ) )
+    if ( _excludeRules && _excludeRules->matchDirectChildren( dir ) )
 	return true;
 
     return false;
