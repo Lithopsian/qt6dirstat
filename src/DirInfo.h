@@ -39,7 +39,7 @@ namespace QDirStat
 	 * when the children are sorted.
 	 **/
 	DirSortInfo( DirInfo       * parent,
-	             DataColumn      sortCol,
+		     DataColumn      sortCol,
 		     Qt::SortOrder   sortOrder );
 
 	/**
@@ -50,8 +50,9 @@ namespace QDirStat
 	    { return _firstNonDominantChild < 0 ? findDominantChildren() : _firstNonDominantChild; }
 
 	/**
-	 * Create a dominant children list, and populate it as appropriate.  The created
-	 * list may be empty if no children are dominant.
+	 * Determine the first child in the sorted children list that is not
+	 * considered to be dominant and return it.  This may be the first child
+	 * in the list (ie. 0) if no children are dominant.
 	 **/
 	int findDominantChildren();
 

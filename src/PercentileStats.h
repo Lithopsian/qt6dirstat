@@ -34,10 +34,6 @@ namespace QDirStat
 
     public:
 
-	// All calculation functions below will sort the internal data first if
-	// they are not sorted yet. This is why they are not const.  Note that
-	// HistogramView now uses the percentile list to get these values.
-
 	/**
 	 * Calculate the median.
 	 **/
@@ -67,7 +63,7 @@ namespace QDirStat
 	 * Calculate a percentile directly, without creating or using
 	 * _percentileList.  Treewalker uses this for one-off queries.
 	 **/
-	qreal percentile( int number ) { return quantile( 100, number ); }
+	qreal percentile( int number ) const { return quantile( 100, number ); }
 
 	/**
 	 * Calculate a quantile: Find the quantile no. 'number' of order
@@ -77,7 +73,7 @@ namespace QDirStat
 	 * maximum is quantile( 2, 2 ). The first quartile is quantile( 4, 1 ),
 	 * the first percentile is quantile( 100, 1 ).
 	 **/
-	qreal quantile( int order, int number );
+	qreal quantile( int order, int number ) const;
 
 	/**
 	 * Calculates the percentiles list and sums for this set of data.  Not
@@ -138,8 +134,8 @@ namespace QDirStat
 	QRealList _percentileSums;
 	QRealList _cumulativeSums;
 	QRealList _buckets;
-//	bool      _sorted         { false };
-    };
+
+    };	// class PercentileStats
 
 }	// namespace QDirStat
 

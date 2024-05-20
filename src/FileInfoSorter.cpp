@@ -27,12 +27,10 @@ bool FileInfoSorter::operator() ( FileInfo * a, FileInfo * b ) const
     {
 	case NameCol:
 	    {
-		// Sort ignored items last
-		if ( a->isIgnored() != b->isIgnored() ) return b->isIgnored();
-
-		// The dot entry (there can only be one) should always come last
+		// The dot entry should come "last" aphabetically
 		if ( a->isDotEntry() ) return false;
 		if ( b->isDotEntry() ) return true;
+
 		return a->name() < b->name();
 	    }
 
@@ -43,27 +41,27 @@ bool FileInfoSorter::operator() ( FileInfo * a, FileInfo * b ) const
 		a->totalAllocatedSize() < b->totalAllocatedSize() :
 		a->totalSize() < b->totalSize();
 
-	case TotalItemsCol:	  return a->totalItems()      < b->totalItems();
-	case TotalFilesCol:	  return a->totalFiles()      < b->totalFiles();
-	case TotalSubDirsCol:	  return a->totalSubDirs()    < b->totalSubDirs();
-	case LatestMTimeCol:	  return a->latestMtime()     < b->latestMtime();
+	case TotalItemsCol:       return a->totalItems()      < b->totalItems();
+	case TotalFilesCol:       return a->totalFiles()      < b->totalFiles();
+	case TotalSubDirsCol:     return a->totalSubDirs()    < b->totalSubDirs();
+	case LatestMTimeCol:      return a->latestMtime()     < b->latestMtime();
 	case OldestFileMTimeCol:
-            {
-                time_t a_time = a->oldestFileMtime();
-                time_t b_time = b->oldestFileMtime();
+	    {
+		time_t a_time = a->oldestFileMtime();
+		time_t b_time = b->oldestFileMtime();
 
-                if ( a_time == 0 ) return false;
-                if ( b_time == 0 ) return true;
+		if ( a_time == 0 ) return false;
+		if ( b_time == 0 ) return true;
 
-                return a_time < b_time;
-            }
+		return a_time < b_time;
+	    }
 
-	case UserCol:		  return a->uid()	      < b->uid();
-	case GroupCol:		  return a->gid()	      < b->gid();
-	case PermissionsCol:	  return a->mode()	      < b->mode();
-	case OctalPermissionsCol: return a->mode()	      < b->mode();
-	case ReadJobsCol:	  return a->pendingReadJobs() < b->pendingReadJobs();
-	case UndefinedCol:	  return false;
+	case UserCol:             return a->uid()             < b->uid();
+	case GroupCol:            return a->gid()             < b->gid();
+	case PermissionsCol:      return a->mode()            < b->mode();
+	case OctalPermissionsCol: return a->mode()            < b->mode();
+	case ReadJobsCol:         return a->pendingReadJobs() < b->pendingReadJobs();
+	case UndefinedCol:        return false;
 	    // Intentionally omitting the 'default' branch
 	    // so the compiler can warn about unhandled enum values
     }

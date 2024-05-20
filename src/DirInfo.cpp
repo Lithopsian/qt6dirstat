@@ -930,7 +930,7 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
 		      FileInfoSorter( sortCol, sortOrder ) );
 
 #if DIRECT_CHILDREN_COUNT_SANITY_CHECK
-    // Do the sanity check before adding the attic, because it isn't a direct child
+    // Do the sanity check before adding the attic, because it isn't in the direct children count
     if ( _sortedChildren.size() != parent->directChildrenCount() )
     {
 	dumpChildrenList( parent, _sortedChildren );
@@ -945,7 +945,7 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
     if ( parent->attic() )
 	_sortedChildren.append( parent->attic() );
 
-    // Populate a simple map of FileInfo pointers to sorted child numbers
+    // Store the sort order number for each item directly on the FileInfo object
     int childNumber = 0;
     for ( FileInfo * item : _sortedChildren )
 	item->setRowNumber( childNumber++ );
@@ -971,7 +971,7 @@ int DirSortInfo::findDominantChildren()
 	if ( _sortedOrder != Qt::DescendingOrder )
 	    return 0;
 
-	const qreal count = qMin( _sortedChildren.size(), 30 );
+	const qreal count = qMin( _sortedChildren.size(), DOMINANCE_ITEM_COUNT );
 
 	// Declare that only one child (ie. 100%) doesn't count as dominant
 	if ( count < 2 )

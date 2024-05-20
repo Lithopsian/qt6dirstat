@@ -19,7 +19,6 @@
 #include "SettingsHelpers.h"
 #include "SysUtil.h"
 #include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;
@@ -38,14 +37,10 @@ namespace
 		     Settings      * from,
 		     Settings      * to )
     {
-	CHECK_PTR( from );
-	CHECK_PTR( to   );
-
 	if ( !to->hasGroup( groupPrefix ) )
 	{
-#if 0
 	    logInfo() << "Migrating " << groupPrefix << "* to " << to->name() << Qt::endl;
-#endif
+
 	    const QStringList groups = from->findGroups( groupPrefix );
 	    for ( const QString & group : groups )
 	    {
@@ -113,7 +108,7 @@ namespace
 		}
 		else
 		{
-#if 1
+#if 0
 		    logDebug() << "Success: chown " << filename
 			       << " to UID "  << uid
 			       << " and GID " << gid

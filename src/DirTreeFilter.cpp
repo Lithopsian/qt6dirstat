@@ -15,7 +15,7 @@
 #include "PkgManager.h"
 
 
-#define VERBOSE_MATCH 0
+#define VERBOSE_MATCH 1
 
 
 using namespace QDirStat;
@@ -28,11 +28,11 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
 
     if ( pattern.startsWith( QLatin1String( "*." ) ) )
     {
-	// Remove the leading "*."
-	const QString suffix = QString( pattern ).remove( 0, 2 );
+	// Remove the leading "*"
+	const QString suffix = QString( pattern ).remove( 0, 1 );
 
 	// Use a suffix filter if the suffix contains only "word" characters
-	if ( QRegularExpression( "\\A(?:\\w+)\\z" ).match( suffix ).hasMatch() )
+	if ( QRegularExpression( "\\A\\.(?:\\w+)\\z" ).match( suffix ).hasMatch() )
 	{
 	    const DirTreeFilter * filter = new DirTreeSuffixFilter( suffix );
 	    CHECK_NEW( filter );

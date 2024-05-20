@@ -69,16 +69,9 @@ void ProcessStarter::processFinished( int,
 
     if ( _started )
     {
-        if ( _waiting.isEmpty() )
-        {
-            // logDebug() << "All processes started." << Qt::endl;
-
-            if ( _autoDelete )
-                deleteLater();
-        }
-        else
-        {
+        if ( !_waiting.isEmpty() )
             startProcesses();
-        }
+        else if ( _autoDelete )
+            deleteLater();
     }
 }

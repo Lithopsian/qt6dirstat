@@ -346,7 +346,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 
     //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
 
-    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, suffix );
+    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, '.' + suffix );
 }
 
 

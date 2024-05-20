@@ -206,7 +206,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 {
     const Subtree subtree( fileInfo );
     const QString & url = subtree.url();
-    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*.%1 in %2" ).arg( suffix ).arg( url ) );
+    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix ).arg( url ) );
 
     delete _stats;
     if ( suffix.isEmpty() )

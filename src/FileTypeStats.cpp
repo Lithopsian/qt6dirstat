@@ -92,7 +92,9 @@ void FileTypeStats::collect( const FileInfo * dir )
 
                 if ( suffix.isEmpty() )
                 {
-                    if ( item->name().contains( '.' ) && !item->name().startsWith( '.' ) )
+		    // See if there is a dot other than a leading dot
+		    if ( item->name().lastIndexOf( '.' ) > 0 )
+//                    if ( item->name().contains( '.' ) && !item->name().startsWith( '.' ) )
                     {
                         // Fall back to the last (i.e. the shortest) suffix if the
                         // MIME categorizer didn't know it: Use section -1 (the

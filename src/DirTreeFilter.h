@@ -74,6 +74,7 @@ namespace QDirStat
 	    _wildcard { CaseSensitiveWildcard( pattern.contains( '/' ) ? pattern : "*/" + pattern ) }
 	{}
 
+
     public:
 
 	/**

@@ -29,7 +29,6 @@ void PercentileStats::sort()
 	logDebug() << "Sorting " << size() << " elements" << Qt::endl;
 
     std::sort( begin(), end() );
-//    _sorted = true;
 
     if ( size() > VERBOSE_SORT_THRESHOLD )
 	logDebug() << "Sorting done." << Qt::endl;
@@ -103,7 +102,7 @@ qreal PercentileStats::max()
 }
 */
 
-qreal PercentileStats::quantile( int order, int number )
+qreal PercentileStats::quantile( int order, int number ) const
 {
     if ( isEmpty() )
 	return 0.0;
@@ -113,9 +112,6 @@ qreal PercentileStats::quantile( int order, int number )
 
     if ( order < 2 )
 	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
-
-//    if ( !_sorted )
-//	sort();
 
     if ( number == 0 )
 	return first();
@@ -139,9 +135,6 @@ qreal PercentileStats::quantile( int order, int number )
 
 void PercentileStats::calculatePercentiles()
 {
-//    if ( !_sorted )
-//	sort();
-
     _percentiles.clear();
     _percentiles.reserve( 101 );
 

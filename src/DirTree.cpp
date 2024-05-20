@@ -106,8 +106,6 @@ namespace
      **/
     void unatticAll( DirInfo * dir )
     {
-	CHECK_PTR( dir );
-
 	if ( dir->attic() )
 	{
 	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
@@ -133,21 +131,21 @@ namespace
 	if ( !dir )
 	    return;
 
-//	if ( dir->totalIgnoredItems() == 0 && dir->totalUnignoredItems() > 0 )
-//	    return;
-
-	FileInfoList ignoredChildren;
-
-	for ( auto it = FileInfoIterator( dir ); *it; ++it )
-//	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
+	const FileInfoList ignoredChildren = [ dir ]()
 	{
-	    FileInfo * child = *it;
-	    if ( child->isIgnored() )
-		// Don't move the child right here, otherwise the iteration breaks
-		ignoredChildren << child;
-	    else
-		moveIgnoredToAttic( child->toDirInfo() );
-	}
+	    FileInfoList ignoredChildren;
+
+	    for ( FileInfoIterator it( dir ); *it; ++it )
+	    {
+		FileInfo * child = *it;
+		if ( child->isIgnored() )
+		    ignoredChildren << child;
+		else
+		    moveIgnoredToAttic( child->toDirInfo() );
+	    }
+
+	    return ignoredChildren;
+	}();
 
 	for ( FileInfo * child : ignoredChildren )
 	{
@@ -175,8 +173,6 @@ namespace
      **/
     void ignoreEmptyDirs( DirInfo * dir )
     {
-	CHECK_PTR( dir );
-
 	FileInfo * child = dir->firstChild();
 	FileInfoList ignoredChildren;
 
@@ -229,8 +225,6 @@ DirTree::DirTree():
 
 DirTree::~DirTree()
 {
-//    _beingDestroyed = true;
-
     delete _root;
     delete _excludeRules;
     delete _tmpExcludeRules;
