@@ -476,14 +476,6 @@ void TreemapTile::layoutRow( Orientation                    dir,
 
         ++it;
     }
-
-    // Subtract this row from the remaining rectangle
-//    if (dir == TreemapHorizontal)
-//        rect.adjust(0, height, 0, 0);
-//    else
-//        rect.adjust(height, 0, 0, 0);
-
-    //logDebug() << "Left over:" << " " << newRect << " " << this << Qt::endl;
 }
 
 void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )

@@ -360,7 +360,7 @@ private:
  * Check if an index is in range:
  * VALID_MIN <= INDEX <= VALID_MAX
  *
- * Throws InvalidWidgetException if out of range.
+ * Throws IndexOutOfRangeException if out of range.
  **/
 #define CHECK_INDEX_MSG( INDEX, VALID_MIN, VALID_MAX, MSG )	\
     do								\

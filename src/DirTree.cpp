@@ -601,6 +601,8 @@ bool DirTree::readCache( const QString & cacheFileName )
     sendStartingReading();
 
     CacheReadJob * readJob = new CacheReadJob( this, cacheFileName );
+    CHECK_NEW( readJob );
+
     if ( !readJob->reader() )
     {
 	delete readJob;
@@ -698,8 +700,6 @@ bool DirTree::checkIgnoreFilters( const QString & path ) const
 
 void DirTree::recalc( DirInfo * dir )
 {
-    CHECK_PTR( dir );
-
     FileInfo * child = dir->firstChild();
 
     while ( child )

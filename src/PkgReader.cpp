@@ -124,9 +124,6 @@ namespace
      **/
     void addToTree( DirTree * tree, const PkgInfoList & pkgList )
     {
-	CHECK_PTR( tree );
-	CHECK_PTR( tree->root() );
-
 	PkgInfo * top = new PkgInfo( tree, tree->root() );
 	CHECK_NEW( top );
 
@@ -149,9 +146,6 @@ namespace
      **/
     QProcess * createReadFileListProcess( PkgInfo * pkg )
     {
-	CHECK_PTR( pkg );
-	CHECK_PTR( pkg->pkgManager() );
-
 	const QString command = pkg->pkgManager()->fileListCommand( pkg );
 
 	if ( command.isEmpty() )
@@ -167,6 +161,7 @@ namespace
 	env.insert( "LANG", "C" ); // Prevent output in translated languages
 
 	QProcess * process = new QProcess();
+	CHECK_NEW( process );
 	process->setProgram( program );
 	process->setArguments( args );
 	process->setProcessEnvironment( env );

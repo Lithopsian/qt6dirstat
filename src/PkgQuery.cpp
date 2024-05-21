@@ -78,7 +78,7 @@ void PkgQuery::checkPkgManagers()
 
 void PkgQuery::checkPkgManager( const PkgManager * pkgManager )
 {
-    CHECK_PTR( pkgManager );
+    CHECK_NEW( pkgManager );
 
     if ( pkgManager->isPrimaryPkgManager() )
     {

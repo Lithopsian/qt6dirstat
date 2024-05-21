@@ -106,7 +106,6 @@ void OpenDirDialog::initConnections()
 {
     const QItemSelectionModel * selectionModel = _ui->dirTreeView->selectionModel();
     QPushButton * okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
-    CHECK_PTR( okButton );
 
     connect( selectionModel,    &QItemSelectionModel::currentChanged,
              this,              &OpenDirDialog::treeSelection );

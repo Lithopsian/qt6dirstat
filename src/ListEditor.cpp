@@ -144,7 +144,6 @@ void ListEditor::moveToBottom()
 void ListEditor::add()
 {
     void * value = createValue();
-    CHECK_NEW( value );
 
     ListEditorItem * item = new ListEditorItem( valueText( value ), value );
     CHECK_NEW( item );

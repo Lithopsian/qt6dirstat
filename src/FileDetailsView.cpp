@@ -36,8 +36,8 @@ namespace
      * Set a label with a number and an optional prefix.
      **/
     void setLabel( QLabel        * label,
-		  int             number,
-		  const QString & prefix = "" )
+		   int             number,
+		   const QString & prefix = "" )
     {
 	CHECK_PTR( label );
 	label->setText( prefix % QString( "%L1" ).arg( number ) );
@@ -164,8 +164,6 @@ void FileDetailsView::showDetails( FileInfo * file )
 
 void FileDetailsView::showFileInfo( FileInfo * file )
 {
-    CHECK_PTR( file );
-
     const bool isSpecial = file->isSpecial();
     const bool isSymlink = file->isSymLink();
 
@@ -253,8 +251,6 @@ QString FileDetailsView::formatFilesystemObjectType( const FileInfo * file )
 
 void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 {
-    CHECK_PTR( file );
-
     // If this is in a package view, then we know it is a packaged file
     const PkgInfo * pkg = file->pkgInfoParent();
 
@@ -377,8 +373,6 @@ QString FileDetailsView::readStateMsg( int readState )
 
 void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 {
-    CHECK_PTR( dir );
-
     const QString msg = subtreeMsg( dir );
     if ( msg.isEmpty() )
     {
@@ -421,8 +415,6 @@ QString FileDetailsView::dirColorStyle( const DirInfo * dir ) const
 
 void FileDetailsView::showDirNodeInfo( const DirInfo * dir )
 {
-    CHECK_PTR( dir );
-
     _ui->dirOwnSizeCaption->setVisible( dir->size() > 0 );
     _ui->dirOwnSizeLabel->setVisible  ( dir->size() > 0 );
     setLabel( _ui->dirOwnSizeLabel, dir->size() );

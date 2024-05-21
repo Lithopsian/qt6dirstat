@@ -11,6 +11,7 @@
 #include "BusyPopup.h"
 #include "DirInfo.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "FileSearchFilter.h"
 #include "FormatUtil.h"
 #include "LocateFilesWindow.h"
@@ -32,13 +33,15 @@ namespace
                         const QString & headingText,
                         FileInfo      * fileInfo = nullptr )
     {
-        if ( !fileInfo )
-            fileInfo = app()->selectedDirInfoOrRoot();
+	CHECK_NEW( treeWalker );
 
-        if ( fileInfo )
-        {
-            // Should always be a fileInfo, but if not then do nothing
-            LocateFilesWindow::populateSharedInstance( treeWalker,
+	if ( !fileInfo )
+	    fileInfo = app()->selectedDirInfoOrRoot();
+
+	if ( fileInfo )
+	{
+	    // Should always be a fileInfo, but if not then do nothing
+	    LocateFilesWindow::populateSharedInstance( treeWalker,
 						       fileInfo,
 						       headingText.arg( fileInfo->url() ),
 						       sortCol,
@@ -126,8 +129,8 @@ void DiscoverActions::discoverFilesFromMonth( const QString & path, short year, 
 void DiscoverActions::findFiles( const FileSearchFilter & filter )
 {
     discoverFiles( new FindFilesTreeWalker( filter ),
-		   LocateListPathCol,
-		   Qt::AscendingOrder,
-		   QObject::tr( "Search results for '%1' in %2" ).arg( filter.pattern() ),
-		   filter.dir() );
+                   LocateListPathCol,
+                   Qt::AscendingOrder,
+                   QObject::tr( "Search results for '%1' in %2" ).arg( filter.pattern() ),
+                   filter.dir() );
 }

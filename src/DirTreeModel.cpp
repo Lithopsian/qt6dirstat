@@ -217,8 +217,6 @@ namespace
      **/
     QVariant columnText( DirTree * tree, FileInfo * item, int col )
     {
-	CHECK_PTR( item );
-
 	if ( item->isPkgInfo() && item->readState() == DirAborted )
 	{
 	    if ( col == PercentBarCol )                  return QObject::tr( "[aborted]" );
@@ -665,7 +663,6 @@ QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parent
     if ( parent->isDirInfo() )
     {
 	FileInfo * child = findChild( parent->toDirInfo(), row );
-	CHECK_PTR( child );
 
 	return createIndex( row, column, child );
     }
@@ -1135,8 +1132,6 @@ void DirTreeModel::invalidatePersistent( const FileInfo * subtree,
     for ( const QModelIndex & index : indexList )
     {
 	const FileInfo * item = internalPointerCast( index );
-	CHECK_PTR( item );
-
 	if ( !item->checkMagicNumber() ||
 	     ( item->isInSubtree( subtree ) && ( item != subtree || includeParent ) ) )
 	{

@@ -607,9 +607,9 @@ namespace QDirStat
 
 	TreemapTile         * _rootTile			{ nullptr };
 	HighlightRect       * _currentTileHighlighter	{ nullptr };
-        SceneMask           * _sceneMask		{ nullptr };
+	SceneMask           * _sceneMask		{ nullptr };
 	FileInfo            * _newRoot			{ nullptr };
-        HighlightRectList     _parentHighlightList;
+	HighlightRectList     _parentHighlightList;
 	QString	              _savedRootUrl;
 
 	bool   _colourPreviews;
@@ -618,8 +618,8 @@ namespace QDirStat
 	bool   _forceCushionGrid;
 //	bool   _enforceContrast;
 //	bool   _useFixedColor;
-        bool   _useDirGradient;
-        bool   _useTreemapHover;
+	bool   _useDirGradient;
+	bool   _useTreemapHover;
 
 	QColor _tileFixedColor;
 	QColor _currentItemColor;
@@ -629,8 +629,8 @@ namespace QDirStat
 	QColor _outlineColor;
 //	QColor _fileFillColor;
 	QColor _dirFillColor;
-        QColor _dirGradientStart;
-        QColor _dirGradientEnd;
+	QColor _dirGradientStart;
+	QColor _dirGradientEnd;
 	QLinearGradient _dirGradient;
 
 	const double _lightX { 0.09759 };

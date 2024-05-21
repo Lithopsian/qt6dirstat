@@ -134,6 +134,7 @@ QMenu * HeaderTweaker::createHiddenColMenu( QWidget * parent )
 {
     int actionCount = 0;
     QMenu * hiddenColMenu = new QMenu( tr( "Hidden &Columns" ), parent );
+    CHECK_NEW( hiddenColMenu );
 
     for ( int section = 0; section < _header->count(); ++section )
     {

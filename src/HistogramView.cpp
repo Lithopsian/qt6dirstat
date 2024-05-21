@@ -774,6 +774,7 @@ void HistogramView::addLine( int             percentileIndex,
 						      _markerExtraHeight,
 						      x,
 						      -( _histogramHeight + _markerExtraHeight ) );
+    CHECK_NEW( line );
 
     line->setToolTip( whitespacePre( name % "<br/>" % formatSize( value ) ) );
     line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );

@@ -318,8 +318,6 @@ void MimeCategorizer::buildMaps()
 
     for ( const MimeCategory * category : _categories )
     {
-	CHECK_PTR( category );
-
 	addExactKeys( category );
 	addSuffixKeys( category );
 	addWildcardKeys( category );

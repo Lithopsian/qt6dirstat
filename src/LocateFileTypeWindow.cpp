@@ -200,17 +200,19 @@ void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
     SuffixSearchResultItem * searchResult = dynamic_cast<SuffixSearchResultItem *>( item );
     CHECK_DYNAMIC_CAST( searchResult, "SuffixSearchResultItem" );
 
-    CHECK_PTR( _subtree.tree() );
+    DirTree * tree = _subtree.tree();
+    if ( tree )
+    {
+	FileInfo * dir = _subtree.tree()->locate( searchResult->path() );
 
-    FileInfo * dir = _subtree.tree()->locate( searchResult->path() );
+	const FileInfoSet matches = matchingFiles( dir );
+	if ( !matches.isEmpty() )
+	    app()->selectionModel()->setCurrentItem( matches.first(), true );
 
-    const FileInfoSet matches = matchingFiles( dir );
-    if ( !matches.isEmpty() )
-	app()->selectionModel()->setCurrentItem( matches.first(), true );
+	app()->selectionModel()->setSelectedItems( matches );
 
-    app()->selectionModel()->setSelectedItems( matches );
-
-    // logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
+	// logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
+    }
 }
 
 

@@ -660,7 +660,7 @@ void TreemapView::setCurrentTile( const TreemapTile * tile )
 
     if ( _currentTileHighlighter )
     {
-        //logDebug() " Highting the current tile" << Qt::endl;
+        //logDebug() " Highlighting the current tile" << Qt::endl;
 
         if ( tile == _rootTile )
             _currentTileHighlighter->hide(); // Don't highlight the root tile
@@ -827,7 +827,10 @@ void TreemapView::highlightParents( const TreemapTile * tile )
     }
 
     if ( !_parentHighlightList.isEmpty() )
+    {
         _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 );
+        CHECK_NEW( _sceneMask );
+    }
 }
 
 

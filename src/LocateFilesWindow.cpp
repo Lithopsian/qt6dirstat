@@ -205,8 +205,6 @@ void LocateFilesWindow::locateInMainWindow( QTreeWidgetItem * item )
     LocateListItem * searchResult = dynamic_cast<LocateListItem *>( item );
     CHECK_DYNAMIC_CAST( searchResult, "LocateListItem" );
 
-    CHECK_PTR( _subtree.tree() );
-
     // logDebug() << "Locating " << searchResult->path() << " in tree" << Qt::endl;
     app()->selectionModel()->setCurrentItemPath( searchResult->path() );
 }
