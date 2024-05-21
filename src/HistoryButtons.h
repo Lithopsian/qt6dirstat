@@ -12,8 +12,6 @@
 
 #include <QObject>
 
-#include "History.h"
-
 
 class QAction;
 
@@ -21,6 +19,7 @@ class QAction;
 namespace QDirStat
 {
     class FileInfo;
+    class History;
 
     class HistoryButtons: public QObject
     {
@@ -42,7 +41,7 @@ namespace QDirStat
 	/**
 	 * Clear the complete history.
 	 **/
-	void clear() { _history->clear(); }
+	void clear();
 
 	/**
 	 * Access to the history manager.

@@ -12,7 +12,6 @@
 
 #include <QString>
 
-#include "FileInfo.h"
 #include "Logger.h"
 
 

@@ -10,8 +10,6 @@
 #ifndef Settings_h
 #define Settings_h
 
-#include <QColor>
-#include <QFont>
 #include <QSettings>
 #include <QStringList>
 #include <QSet>

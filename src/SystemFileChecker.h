@@ -10,8 +10,6 @@
 #ifndef SystemFileChecker_h
 #define SystemFileChecker_h
 
-#include <QString>
-
 
 namespace QDirStat
 {

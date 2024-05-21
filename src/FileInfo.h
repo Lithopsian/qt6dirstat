@@ -16,9 +16,9 @@
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QTextStream>
-#include <QtMath>
+#include <QtMath> // qCeil()
 
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 #define FileInfoMagic 4242

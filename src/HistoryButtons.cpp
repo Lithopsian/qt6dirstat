@@ -12,6 +12,7 @@
 #include <QMenu>
 
 #include "HistoryButtons.h"
+#include "History.h"
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "Logger.h"
@@ -37,6 +38,12 @@ HistoryButtons::HistoryButtons( QAction * actionGoBack,
 HistoryButtons::~HistoryButtons()
 {
     delete _history;
+}
+
+
+void HistoryButtons::clear()
+{
+    _history->clear();
 }
 
 

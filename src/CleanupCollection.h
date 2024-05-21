@@ -13,7 +13,6 @@
 #include <QList>
 #include <QObject>
 #include <QPointer>
-#include <QStringList>
 
 
 class QMenu;
@@ -29,7 +28,7 @@ namespace QDirStat
     class SelectionModel;
     class Trash;
 
-    typedef QList<Cleanup *>            CleanupList;
+    typedef QList<Cleanup *> CleanupList;
 
     /**
      * Set of Cleanup actions to be performed for DirTree items, consisting of
@@ -211,6 +210,16 @@ namespace QDirStat
 	 * Create a refresher for the given refresh set.
 	 **/
 	void createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet );
+
+	/**
+	 * Return a mapping from RefreshPolicy to string.
+	 **/
+//	static SettingsEnumMapping refreshPolicyMapping();
+
+	/**
+	 * Return a mapping from OutputWindowPolicy to string.
+	 **/
+//	static SettingsEnumMapping outputWindowPolicyMapping();
 
 
     private:

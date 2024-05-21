@@ -15,6 +15,8 @@
 #include <QList>
 #include <QSettings>
 
+#include "Typedefs.h" // ColorList
+
 
 class QSettings;
 
@@ -26,9 +28,9 @@ namespace QDirStat
     /**
      * Read a color in RGB format (#RRGGBB) from the settings.
      **/
-    QColor readColorEntry( const QSettings & settings,
-			   const QString   & entryName,
-			   const QColor    & fallback );
+    QColor readColorEntry( QSettings     & settings,
+			   const QString & entryName,
+			   const QColor  & fallback );
 
     /**
      * Write a color in RGB format (#RRGGBB) to the settings.
@@ -41,25 +43,25 @@ namespace QDirStat
      * Read a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) from the
      * settings.
      **/
-    QList<QColor> readColorListEntry( const QSettings     & settings,
-				      const QString       & entryName,
-				      const QList<QColor> & fallback );
+    ColorList readColorListEntry( const QSettings  & settings,
+				  const QString    & entryName,
+				  const ColorList  & fallback );
 
     /**
      * Write a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) to the
      * settings.
      **/
-    void writeColorListEntry( QSettings           & settings,
-			      const QString       & entryName,
-			      const QList<QColor> & colors );
+    void writeColorListEntry( QSettings       & settings,
+			      const QString   & entryName,
+			      const ColorList & colors );
 
     /**
      * Read a font in string format  from the settings.
      * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
      **/
-    QFont readFontEntry( const QSettings & settings,
-                         const QString   & entryName,
-                         const QFont     & fallback );
+    QFont readFontEntry( QSettings     & settings,
+                         const QString & entryName,
+                         const QFont   & fallback );
 
     /**
      * Write a font in string format to the settings.
@@ -91,12 +93,12 @@ namespace QDirStat
     /**
      * Set a value, but only if that key is not already in the settings.
      **/
-    inline void setDefaultValue( QSettings & settings, const QString & key, const QColor        & value )
-	{ if ( !settings.contains( key ) ) writeColorEntry( settings, key, value ); }
-    inline void setDefaultValue( QSettings & settings, const QString & key, const QFont         & value )
-	{ if ( !settings.contains( key ) ) writeFontEntry( settings, key, value ); }
-    inline void setDefaultValue( QSettings & settings, const QString & key, const QList<QColor> & value )
-	{ if ( !settings.contains( key ) ) writeColorListEntry( settings, key, value ); }
+    void setDefaultValue( QSettings & settings, const QString & key, const QColor    & value );
+//	{ if ( !settings.contains( key ) ) writeColorEntry( settings, key, value ); }
+    void setDefaultValue( QSettings & settings, const QString & key, const QFont     & value );
+//	{ if ( !settings.contains( key ) ) writeFontEntry( settings, key, value ); }
+    void setDefaultValue( QSettings & settings, const QString & key, const ColorList & value );
+//	{ if ( !settings.contains( key ) ) writeColorListEntry( settings, key, value ); }
 
     /**
      * Read window settings (size and position) from the settings and apply

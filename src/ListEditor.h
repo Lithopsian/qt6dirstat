@@ -10,11 +10,9 @@
 #ifndef ListEditor_h
 #define ListEditor_h
 
-#include <QWidget>
+#include <QAbstractButton>
 #include <QListWidgetItem>
-
-
-class QAbstractButton;
+#include <QWidget>
 
 
 namespace QDirStat

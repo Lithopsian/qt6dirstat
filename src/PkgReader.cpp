@@ -263,9 +263,9 @@ void PkgReader::readSettings()
     _minCachePkgListSize    = settings.value( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
     _verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
 
-    settings.setDefaultValue( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  );
-    settings.setDefaultValue( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE );
-    settings.setDefaultValue( "VerboseMissingPkgFiles", false );
+    settings.setDefaultValue( "MaxParallelProcesses",   _maxParallelProcesses   );
+    settings.setDefaultValue( "MinCachePkgListSize",    _minCachePkgListSize    );
+    settings.setDefaultValue( "VerboseMissingPkgFiles", _verboseMissingPkgFiles );
 
     settings.endGroup();
 }

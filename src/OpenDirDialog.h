@@ -11,11 +11,9 @@
 #define OpenDirDialog_h
 
 #include <QDialog>
-#include <QModelIndex>
+#include <QFileSystemModel>
 
 #include "ui_open-dir-dialog.h"
-
-class QFileSystemModel;
 
 
 namespace QDirStat

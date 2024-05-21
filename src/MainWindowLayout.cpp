@@ -153,10 +153,10 @@ void MainWindow::readLayoutSetting( const QString & layoutName )
     const bool showBreadcrumbs  = settings.value( "ShowCurrentPath",  true ).toBool();
     const bool showDetailsPanel = settings.value( "ShowDetailsPanel", true ).toBool();
     const bool showTreemap      = settings.value( "ShowTreemap",      true ).toBool();
-    const bool treemapOnSide    = settings.value( "TreemapOnSide",   false ).toBool();
+//    const bool treemapOnSide    = settings.value( "TreemapOnSide",   false ).toBool();
     settings.endGroup();
 
-    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showTreemap, treemapOnSide };
+    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showTreemap };
     layoutAction( layoutName )->setData( data );
 }
 

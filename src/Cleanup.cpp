@@ -548,26 +548,6 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 }
 
 
-SettingsEnumMapping Cleanup::refreshPolicyMapping()
-{
-    return { { NoRefresh,     "NoRefresh"     },
-	     { RefreshThis,   "RefreshThis"   },
-	     { RefreshParent, "RefreshParent" },
-	     { AssumeDeleted, "AssumeDeleted" },
-	   };
-}
-
-
-SettingsEnumMapping Cleanup::outputWindowPolicyMapping()
-{
-    return { { ShowAlways,        "ShowAlways"        },
-	     { ShowIfErrorOutput, "ShowIfErrorOutput" },
-	     { ShowAfterTimeout,  "ShowAfterTimeout"  },
-	     { ShowNever,         "ShowNever"         },
-	   };
-}
-
-
 FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
 {
     // Only change the list when the command doesn't act on individual files

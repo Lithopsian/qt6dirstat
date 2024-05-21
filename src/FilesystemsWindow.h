@@ -14,7 +14,7 @@
 #include <QTreeWidgetItem>
 
 #include "ui_filesystems-window.h"
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat

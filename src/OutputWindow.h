@@ -13,7 +13,6 @@
 #include <QDialog>
 #include <QProcess>
 #include <QTextStream>
-#include <QStringList>
 
 #include "ui_output-window.h"
 
@@ -210,13 +209,6 @@ public slots:
      * Read parameters from the settings.
      **/
     void readSettings();
-
-    /**
-     * Write parameters to the settings.
-     *
-     * Not currently used as none of the settings can be changed from within the program.
-     **/
-//    void writeSettings();
 
 
 protected slots:

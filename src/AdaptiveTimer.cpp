@@ -18,7 +18,7 @@
 using namespace QDirStat;
 
 
-AdaptiveTimer::AdaptiveTimer( QObject * parent, QList<float> delays, QList<int> cooldowns ):
+AdaptiveTimer::AdaptiveTimer( QObject * parent, Delays delays, Cooldowns cooldowns ):
     QObject ( parent ),
     _delays { delays },
     _cooldowns { cooldowns }

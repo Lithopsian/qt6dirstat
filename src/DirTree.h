@@ -10,14 +10,13 @@
 #ifndef DirTree_h
 #define DirTree_h
 
-#include "FileSize.h"
 #include "DirReadJob.h" // DirReadJobQueue
+#include "Typedefs.h"   // FileSize
 
 
 namespace QDirStat
 {
     class DirInfo;
-    class DirReadJob;
     class FileInfoSet;
     class ExcludeRules;
     class DirTreeFilter;

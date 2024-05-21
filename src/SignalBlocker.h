@@ -34,7 +34,7 @@ public:
 
 private:
     QObject * _obj;
-    bool      	_oldBlocked;
+    bool      _oldBlocked;
 };
 
 #endif // SignalBlocker_h

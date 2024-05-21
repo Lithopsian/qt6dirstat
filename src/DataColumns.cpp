@@ -56,7 +56,7 @@ QLatin1String DataColumns::toString( DataColumn col )
 
 DataColumn DataColumns::fromString( const QString & str )
 {
-    if ( str == QLatin1String( "TotalSizeCol" ) ) // Backwards compatibility for settings
+    if ( str == QLatin1String( "TotalSizeCol" ) ) // Backwards compatibility
         return SizeCol;
 
     for ( int col = firstCol(); col <= lastCol(); ++col )

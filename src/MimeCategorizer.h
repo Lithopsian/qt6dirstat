@@ -10,8 +10,8 @@
 #ifndef MimeCategorizer_h
 #define MimeCategorizer_h
 
-#include <QObject>
 #include <QBitArray>
+#include <QObject>
 #include <QReadWriteLock>
 
 #include "MimeCategory.h"

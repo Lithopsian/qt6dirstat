@@ -15,7 +15,6 @@
 #include <QTextStream>
 
 #include "Wildcard.h"
-#include "SettingsHelpers.h"
 
 
 namespace QDirStat

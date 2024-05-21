@@ -15,7 +15,7 @@
 
 #include "ui_locate-file-type-window.h"
 #include "FileInfoSet.h"
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 #include "Subtree.h"
 
 

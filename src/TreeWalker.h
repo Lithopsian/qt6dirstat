@@ -10,8 +10,8 @@
 #ifndef TreeWalker_h
 #define TreeWalker_h
 
-#include "FileSize.h"
 #include "FileSearchFilter.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat

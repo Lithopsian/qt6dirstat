@@ -590,14 +590,14 @@ void DirInfo::unlinkChild( FileInfo * deletedChild )
 
     if ( deletedChild == _attic )
     {
-	logDebug() << "Unlinking (ie. deleting) attic " << deletedChild << Qt::endl;
+	//logDebug() << "Unlinking (ie. deleting) attic " << deletedChild << Qt::endl;
 	_attic = nullptr;
 	return;
     }
 
     if ( deletedChild == _dotEntry )
     {
-	logDebug() << "Unlinking (ie. deleting) dot entry " << deletedChild << Qt::endl;
+	//logDebug() << "Unlinking (ie. deleting) dot entry " << deletedChild << Qt::endl;
 	_dotEntry = nullptr;
 	return;
     }

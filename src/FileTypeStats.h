@@ -11,7 +11,7 @@
 #define FileTypeStats_h
 
 #include "ui_file-type-stats-window.h"
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 // Using a suffix that can never occur: A slash is illegal in Linux/Unix

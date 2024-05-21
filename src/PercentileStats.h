@@ -10,7 +10,7 @@
 #ifndef PercentileStats_h
 #define PercentileStats_h
 
-#include <QList>
+#include <QVector>
 
 
 typedef QVector<qreal> QRealList;

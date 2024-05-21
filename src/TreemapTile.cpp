@@ -10,7 +10,6 @@
 #include <math.h>
 
 #include <QElapsedTimer>
-#include <QGraphicsSceneMouseEvent>
 #include <QImage>
 #include <QMenu>
 #include <QPainter>

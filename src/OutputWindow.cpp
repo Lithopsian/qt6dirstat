@@ -67,7 +67,6 @@ OutputWindow::~OutputWindow()
 	qDeleteAll( _processList );
     }
 
-//    writeSettings();  // nothing can be changed while the program is running
     delete _ui;
 }
 
@@ -492,20 +491,6 @@ void OutputWindow::readSettings()
     _ui->terminal->setFont( _terminalDefaultFont );
 }
 
-/*
-void OutputWindow::writeSettings()
-{
-    QDirStat::Settings settings;
-
-    settings.beginGroup( "OutputWindow" );
-    writeColorEntry( settings, "TerminalBackground", _terminalBackground  );
-    writeColorEntry( settings, "CommandTextColor"  , _commandTextColor    );
-    writeColorEntry( settings, "StdoutTextColor"   , _stdoutColor         );
-    writeColorEntry( settings, "StdErrTextColor"   , _stderrColor         );
-    writeFontEntry ( settings, "TerminalFont"      , _terminalDefaultFont );
-    settings.endGroup();
-}
-*/
 
 int OutputWindow::defaultShowTimeout()
 {
@@ -513,6 +498,7 @@ int OutputWindow::defaultShowTimeout()
 
     settings.beginGroup( "OutputWindow" );
     int defaultShowTimeout = settings.value( "DefaultShowTimeoutMillisec", 500 ).toInt();
+    settings.setDefaultValue( "DefaultShowTimeoutMillisec", defaultShowTimeout );
     settings.endGroup();
 
     return defaultShowTimeout;

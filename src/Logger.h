@@ -10,10 +10,10 @@
 #ifndef Logger_h
 #define Logger_h
 
+#include <QFile>
 #include <QRectF>
 #include <QSizeF>
 #include <QStringList>
-#include <QFile>
 #include <QTextStream>
 
 

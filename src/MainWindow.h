@@ -10,16 +10,15 @@
 #ifndef MainWindow_h
 #define MainWindow_h
 
-#include <QMainWindow>
 #include <QElapsedTimer>
-#include <QString>
+#include <QMainWindow>
+#include <QMouseEvent>
 #include <QTimer>
 
 #include "ui_main-window.h"
 #include "Subtree.h"
 
 
-class QMouseEvent;
 class SysCallFailedException;
 
 

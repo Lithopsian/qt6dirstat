@@ -11,10 +11,7 @@
 #define Cleanup_h
 
 #include <QAction>
-#include <QList>
 #include <QTextStream>
-
-#include "SettingsHelpers.h"
 
 
 class OutputWindow;
@@ -222,6 +219,13 @@ namespace QDirStat
 	enum RefreshPolicy refreshPolicy() const { return _refreshPolicy; }
 
 	/**
+	 * Return whether the refresh policy requires a refresh, either of
+	 * the item itself or its parent,
+	 **/
+	bool requiresRefresh() const
+	    { return _refreshPolicy == RefreshThis || _refreshPolicy == RefreshParent; }
+
+	/**
 	 * Return the policy when an output window (see also OutputWindow) for
 	 * this clean action is shown. Since cleanup actions start shell
 	 * commands, the output of those shell commands might be important,
@@ -272,16 +276,6 @@ namespace QDirStat
 	 * cleanup task is done and there was no error.
 	 **/
 	bool outputWindowAutoClose() const { return _outputWindowAutoClose; }
-
-	/**
-	 * Return a mapping from RefreshPolicy to string.
-	 **/
-	static SettingsEnumMapping refreshPolicyMapping();
-
-	/**
-	 * Return a mapping from OutputWindowPolicy to string.
-	 **/
-	static SettingsEnumMapping outputWindowPolicyMapping();
 
 	/**
 	 * From a FileInfoSet, create a list of unique items based

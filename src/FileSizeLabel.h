@@ -12,7 +12,7 @@
 
 #include <QLabel>
 
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 #define ALLOCATED_FAT_PERCENT	33

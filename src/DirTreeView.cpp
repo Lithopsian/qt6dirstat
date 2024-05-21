@@ -64,7 +64,6 @@ void DirTreeView::readSettings()
     settings.beginGroup( "DirTreeView" );
     const int barWidth = settings.value( "PercentBarWidth", 150 ).toInt();
     settings.setDefaultValue( "PercentBarWidth", barWidth );
-    settings.setDefaultValue( "PercentBarWidth", barWidth );
     const QColor barBackground = readColorEntry( settings, "PercentBarBackground", QColor( 160, 160, 160 ) );
     setDefaultValue( settings, "PercentBarBackground", barBackground );
     const ColorList barColors = readColorListEntry( settings, "PercentBarColors", percentBarDefaultColors() );
@@ -244,8 +243,6 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
 
 void DirTreeView::scrolled( int )
 {
-//    logDebug() << Qt::endl;
-
     // Restrict checking to visible rows
     const int precision = header()->resizeContentsPrecision();
     header()->setResizeContentsPrecision( 0 );
@@ -277,6 +274,4 @@ void DirTreeView::scrolled( int )
 
     // Return the checked rows limit to the default
     header()->setResizeContentsPrecision( precision );
-
-//    logDebug() << Qt::endl;
 }

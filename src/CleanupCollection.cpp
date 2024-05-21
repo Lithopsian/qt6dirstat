@@ -8,13 +8,14 @@
  */
 
 #include <QMenu>
-#include <QToolBar>
 #include <QMessageBox>
+#include <QToolBar>
 
 #include "CleanupCollection.h"
 #include "Cleanup.h"
 #include "DirTree.h"
 #include "Exception.h"
+#include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "OutputWindow.h"
@@ -150,6 +151,26 @@ namespace
 	return ret == QMessageBox::Yes;
     }
 
+
+    SettingsEnumMapping refreshPolicyMapping()
+    {
+	return { { Cleanup::NoRefresh,     "NoRefresh"     },
+		 { Cleanup::RefreshThis,   "RefreshThis"   },
+		 { Cleanup::RefreshParent, "RefreshParent" },
+		 { Cleanup::AssumeDeleted, "AssumeDeleted" },
+	       };
+    }
+
+
+    SettingsEnumMapping outputWindowPolicyMapping()
+    {
+	return { { Cleanup::ShowAlways,        "ShowAlways"        },
+		 { Cleanup::ShowIfErrorOutput, "ShowIfErrorOutput" },
+		 { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"  },
+		 { Cleanup::ShowNever,         "ShowNever"         },
+	       };
+    }
+
 } // namespace
 
 
@@ -219,10 +240,7 @@ void CleanupCollection::remove( Cleanup * cleanup )
 void CleanupCollection::addStdCleanups()
 {
     for ( Cleanup * cleanup : StdCleanup::stdCleanups( this ) )
-    {
-	CHECK_PTR( cleanup );
 	add( cleanup );
-    }
 
     writeSettings( _cleanupList );
 
@@ -280,11 +298,20 @@ void CleanupCollection::updateActions()
     const bool busy             = sel.containsBusyItem();
     const bool treeBusy         = sel.treeIsBusy();
     const bool canCleanup       = !atticSelected && !pkgSelected && !busy && !empty;
+    const bool pkgView = [ empty, &sel ]()
+    {
+	if ( empty )
+	    return false;
+
+	const FileInfo * firstToplevel = sel.first()->tree()->firstToplevel();
+	return firstToplevel && firstToplevel->isPkgInfo();
+    }();
 
     for ( Cleanup * cleanup : _cleanupList )
     {
 	const bool enable = canCleanup && cleanup->isActive() &&
 			    ( !treeBusy         || cleanup->refreshPolicy() == Cleanup::NoRefresh ) &&
+			    ( !pkgView          || !cleanup->requiresRefresh() ) &&
 			    ( !dirSelected      || cleanup->worksForDir() ) &&
 			    ( !dotEntrySelected || cleanup->worksForDotEntry() ) &&
 			    ( !fileSelected     || cleanup->worksForFile() );
@@ -456,8 +483,8 @@ void CleanupCollection::readSettings()
 {
     clear();
 
-    const SettingsEnumMapping refreshPolicyMapping      = Cleanup::refreshPolicyMapping();
-    const SettingsEnumMapping outputWindowPolicyMapping = Cleanup::outputWindowPolicyMapping();
+    const SettingsEnumMapping refreshMapping      = refreshPolicyMapping();
+    const SettingsEnumMapping outputWindowMapping = outputWindowPolicyMapping();
 
     CleanupSettings settings;
 
@@ -484,11 +511,11 @@ void CleanupCollection::readSettings()
 
 	const int refreshPolicy	 = readEnumEntry( settings, "RefreshPolicy",
 						  Cleanup::NoRefresh,
-						  refreshPolicyMapping );
+						  refreshMapping );
 
 	const int outputWindowPolicy = readEnumEntry( settings, "OutputWindowPolicy",
 						      Cleanup::ShowAfterTimeout,
-						      outputWindowPolicyMapping );
+						      outputWindowMapping );
 
 	if ( command.isEmpty() || title.isEmpty() )
 	{
@@ -530,8 +557,8 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
     // Remove all leftover cleanup descriptions
     settings.removeGroups( settings.groupPrefix() );
 
-    const SettingsEnumMapping refreshPolicyMapping = Cleanup::refreshPolicyMapping();
-    const SettingsEnumMapping windowPolicyMapping  = Cleanup::outputWindowPolicyMapping();
+    const SettingsEnumMapping refreshMapping = refreshPolicyMapping();
+    const SettingsEnumMapping outputWindowMapping  = outputWindowPolicyMapping();
 
     // Using a separate group for each cleanup for better readability in the
     // file.
@@ -568,8 +595,8 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 	if ( cleanup->outputWindowTimeout() > 0 )
 	    settings.setValue( "OutputWindowTimeout", cleanup->outputWindowTimeout() );
 
-	writeEnumEntry( settings, "RefreshPolicy",      cleanup->refreshPolicy(),      refreshPolicyMapping );
-	writeEnumEntry( settings, "OutputWindowPolicy", cleanup->outputWindowPolicy(), windowPolicyMapping );
+	writeEnumEntry( settings, "RefreshPolicy",      cleanup->refreshPolicy(),      refreshMapping );
+	writeEnumEntry( settings, "OutputWindowPolicy", cleanup->outputWindowPolicy(), outputWindowMapping );
 
 	if ( !cleanup->shell().isEmpty() )
 	     settings.setValue( "Shell", cleanup->shell() );

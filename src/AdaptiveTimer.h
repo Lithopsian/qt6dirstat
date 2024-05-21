@@ -10,10 +10,10 @@
 #ifndef AdaptiveTimer_h
 #define AdaptiveTimer_h
 
-#include <QObject>
-#include <QTimer>
 #include <QElapsedTimer>
 #include <QList>
+#include <QObject>
+#include <QTimer>
 
 
 namespace QDirStat
@@ -39,8 +39,8 @@ namespace QDirStat
     {
         Q_OBJECT
 
-        typedef QList<float> Delays;
-        typedef QList<int> Cooldowns;
+        typedef QList<float>          Delays;
+        typedef QList<int>            Cooldowns;
         typedef std::function<void()> Payload;
 
     public:

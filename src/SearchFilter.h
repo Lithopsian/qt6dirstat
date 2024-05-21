@@ -10,7 +10,6 @@
 #ifndef SearchFilter_h
 #define SearchFilter_h
 
-#include <QString>
 #include <QRegularExpression>
 #include <QTextStream>
 

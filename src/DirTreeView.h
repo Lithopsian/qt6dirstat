@@ -12,7 +12,7 @@
 
 #include <QTreeView>
 
-#include "PercentBar.h" // ColorList
+#include "Typedefs.h" // ColorList
 
 
 namespace QDirStat

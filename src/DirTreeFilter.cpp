@@ -15,7 +15,7 @@
 #include "PkgManager.h"
 
 
-#define VERBOSE_MATCH 1
+#define VERBOSE_MATCH 0
 
 
 using namespace QDirStat;

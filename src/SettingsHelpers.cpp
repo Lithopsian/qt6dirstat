@@ -18,20 +18,18 @@
 
 namespace QDirStat
 {
-    QColor readColorEntry( const QSettings & settings,
-			   const QString   & entryName,
-			   const QColor    & fallback )
+    QColor readColorEntry( QSettings     & settings,
+			   const QString & entryName,
+			   const QColor  & fallback )
     {
 	const QColor color( settings.value( entryName ).toString() );
-	if ( !color.isValid() )
-	{
-#if 0
-	    logDebug() << "Using fallback for " << entryName << ": " << fallback.name() << Qt::endl;
-#endif
-	    return fallback;
-	}
+	if ( color.isValid() )
+	    return color;
 
-	return color;
+	logDebug() << "Using fallback for " << entryName << ": " << fallback.name() << Qt::endl;
+	writeColorEntry( settings, entryName, fallback );
+
+	return fallback;
     }
 
 
@@ -43,11 +41,11 @@ namespace QDirStat
     }
 
 
-    QList<QColor> readColorListEntry( const QSettings     & settings,
-				      const QString       & entryName,
-				      const QList<QColor> & fallback )
+    ColorList readColorListEntry( const QSettings & settings,
+				  const QString   & entryName,
+				  const ColorList & fallback )
     {
-	QList<QColor> colorList;
+	ColorList colorList;
 
 	const QStringList strList = settings.value( entryName ).toStringList();
 	for ( const QString & rgb : strList )
@@ -67,9 +65,9 @@ namespace QDirStat
     }
 
 
-    void writeColorListEntry( QSettings           & settings,
-			      const QString       & entryName,
-			      const QList<QColor> & colors )
+    void writeColorListEntry( QSettings       & settings,
+			      const QString   & entryName,
+			      const ColorList & colors )
     {
 	QStringList strList;
 
@@ -80,9 +78,9 @@ namespace QDirStat
     }
 
 
-    QFont readFontEntry( const QSettings & settings,
-			 const QString   & entryName,
-			 const QFont     & fallback )
+    QFont readFontEntry( QSettings     & settings,
+			 const QString & entryName,
+			 const QFont   & fallback )
     {
 	if ( settings.contains( entryName ) )
 	{
@@ -92,6 +90,9 @@ namespace QDirStat
 	    if ( font.fromString( fontName ) )
 		return font;
 	}
+
+	logDebug() << "Using fallback for " << entryName << ": " << fallback.family() << Qt::endl;
+	writeFontEntry( settings, entryName, fallback );
 
 	return fallback;
     }
@@ -169,6 +170,26 @@ namespace QDirStat
         settings.setValue( "WindowSize", widget->size() );
 
         settings.endGroup();
+    }
+
+    void setDefaultValue( QSettings & settings, const QString & key, const QColor & value )
+    {
+	if ( !settings.contains( key ) )
+	    writeColorEntry( settings, key, value );
+    }
+
+
+    void setDefaultValue( QSettings & settings, const QString & key, const QFont & value )
+    {
+	if ( !settings.contains( key ) )
+	    writeFontEntry( settings, key, value );
+    }
+
+
+    void setDefaultValue( QSettings & settings, const QString & key, const ColorList & value )
+    {
+	if ( !settings.contains( key ) )
+	    writeColorListEntry( settings, key, value );
     }
 
 } // namespace QDirStat

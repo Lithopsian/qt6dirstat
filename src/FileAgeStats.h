@@ -13,7 +13,7 @@
 #include <QHash>
 #include <QList>
 
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat

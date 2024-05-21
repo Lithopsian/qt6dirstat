@@ -11,9 +11,7 @@
 #define HistogramView_h
 
 #include <QFont>
-#include <QGraphicsItem>
 #include <QGraphicsView>
-#include <QList>
 
 
 namespace QDirStat

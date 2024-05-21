@@ -11,7 +11,6 @@
 #include <QFileInfo>
 #include <QStringBuilder>
 
-#include "PkgInfo.h"
 #include "DpkgPkgManager.h"
 #include "PkgFileListCache.h"
 #include "SysUtil.h"

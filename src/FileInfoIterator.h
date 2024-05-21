@@ -10,8 +10,6 @@
 #ifndef FileInfoIterator_h
 #define FileInfoIterator_h
 
-#include <QList>
-
 
 namespace QDirStat
 {

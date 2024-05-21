@@ -18,7 +18,7 @@
 #include <QStringBuilder>
 #include <QTextStream>
 
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 #ifndef ALLPERMS

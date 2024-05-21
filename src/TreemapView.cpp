@@ -198,10 +198,10 @@ void TreemapView::readSettings()
     _forceCushionGrid   = settings.value( "ForceCushionGrid",  false ).toBool();
     _useDirGradient     = settings.value( "UseDirGradient",    true  ).toBool();
 
-    _ambientLight       = settings.value( "AmbientLight",      DefaultAmbientLight ).toInt();
+    _ambientLight       = settings.value( "AmbientLight",      DefaultAmbientLight      ).toInt();
     _heightScaleFactor  = settings.value( "HeightScaleFactor", DefaultHeightScaleFactor ).toDouble();
-    _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight ).toDouble();
-    _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize ).toInt();
+    _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight     ).toDouble();
+    _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize       ).toInt();
 
     _tileFixedColor     = readColorEntry( settings, "TileFixedColor",     QColor()                   );
     _currentItemColor   = readColorEntry( settings, "CurrentItemColor",   Qt::red                    );

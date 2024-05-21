@@ -14,7 +14,7 @@
 #include <QSharedPointer>
 
 #include "DirReadJob.h"
-#include "PkgInfo.h"
+#include "PkgInfo.h" // PkgInfoList
 
 
 namespace QDirStat
@@ -53,11 +53,6 @@ namespace QDirStat
          **/
         void read( DirTree * tree, const PkgFilter & filter );
 
-        /**
-         * Read parameters from the settings file.
-         **/
-        void readSettings();
-
 
     protected:
 
@@ -72,6 +67,11 @@ namespace QDirStat
          * its file list and add it as a blocked job to the read job queue.
          **/
         void createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList );
+
+        /**
+         * Read parameters from the settings file.
+         **/
+        void readSettings();
 
 
         // Data members

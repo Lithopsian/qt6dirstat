@@ -10,10 +10,9 @@
 #ifndef FileInfoSet_h
 #define FileInfoSet_h
 
-#include <QMetaType>
 #include <QSet>
 
-#include "FileSize.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat

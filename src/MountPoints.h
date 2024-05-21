@@ -10,10 +10,12 @@
 #ifndef MountPoints_h
 #define MountPoints_h
 
+#include <QList>
 #include <QString>
 #include <QStringList>
-#include <QList>
 #include <QTextStream>
+
+#include "Typedefs.h" // FileSize
 
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
@@ -23,8 +25,6 @@ typedef void * QStorageInfo;
 #  define HAVE_Q_STORAGE_INFO 1
 #  include <QStorageInfo>
 #endif
-
-#include "FileSize.h"
 
 
 namespace QDirStat

@@ -15,8 +15,7 @@
 #include <QStyledItemDelegate>
 #include <QTreeView>
 
-
-typedef QList<QColor> ColorList;
+#include "Typedefs.h" // ColorList
 
 
 namespace QDirStat

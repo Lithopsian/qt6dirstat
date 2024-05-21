@@ -15,8 +15,8 @@
 namespace QDirStat
 {
     /* An enum for the backported function wildcardToRegularExpression only added
-     * in 5.12.  It also includes NonPathWildcardConversion added in 6.6, which
-     * might become a useful feature.  Can be added here unconditionally.
+     * in 5.12.  It also includes NonPathWildcardConversion added in 6.6.  Can be
+     * added here unconditionally and only used as required.
      **/
     enum WildcardConversionOption {
 	DefaultWildcardConversion = 0x0,

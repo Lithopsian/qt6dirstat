@@ -11,14 +11,11 @@
 #define TreemapTile_h
 
 #include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
 #include <QTextStream>
 #include <QVector>
 
-#include "FileSize.h"
-
-
-class QGraphicsSceneMouseEvent;
-class QGraphicsSceneHoverEvent;
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat
@@ -55,7 +52,6 @@ namespace QDirStat
 	CushionHeightSequence::const_iterator _constLast;
     };
 
-//    typedef QVector<double> CushionHeightSequence;
 
     /**
      * Helper class for cushioned treemaps: This class holds the polynome

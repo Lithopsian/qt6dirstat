@@ -342,7 +342,7 @@ void FileAgeStatsWindow::writeSettings()
     Settings settings;
 
     settings.beginGroup( "FileAgeStatsWindow" );
-    settings.setValue( "SyncWithMainWindow",       _ui->syncCheckBox->isChecked() );
+    settings.setValue( "SyncWithMainWindow", _ui->syncCheckBox->isChecked() );
     settings.endGroup();
 
     writeWindowSettings( this, "FileAgeStatsWindow" );

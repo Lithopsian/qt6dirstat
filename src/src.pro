@@ -30,6 +30,9 @@ INSTALLS	+= TARGET desktop icons
 
 
 # QMAKE_CXXFLAGS	+=  -Wno-deprecated -Wno-deprecated-declarations
+# QMAKE_CXXFLAGS	+=  -std=c++11
+# QMAKE_CXXFLAGS	+=  -flto=auto
+# QMAKE_LDDFLAGS	+=  -flto=auto
 
 
 SOURCES	  = main.cpp			\
@@ -216,13 +219,13 @@ HEADERS	  =				\
 	    UnreadableDirsWindow.h	\
 	    FileAgeStats.h		\
 	    FileAgeStatsWindow.h	\
-	    FileSize.h			\
 	    FileTypeStatsWindow.h	\
 	    FormatUtil.h		\
 	    History.h			\
 	    HistoryButtons.h		\
 	    TreeWalker.h		\
 	    TreemapView.h		\
+	    Typedefs.h			\
 	    Version.h			\
 	    Wildcard.h
 

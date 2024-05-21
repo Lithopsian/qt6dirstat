@@ -10,8 +10,8 @@
 #ifndef DirReadJob_h
 #define DirReadJob_h
 
-#include <QTimer>
 #include <QTextStream>
+#include <QTimer>
 
 
 namespace QDirStat

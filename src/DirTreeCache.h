@@ -14,7 +14,7 @@
 
 #include <QRegularExpression>
 
-#include "FileSize.h"
+#include "Typedefs.h" //FileSize
 
 
 #define DEFAULT_CACHE_NAME	".qdirstat.cache.gz"

@@ -10,10 +10,7 @@
 #ifndef RpmPkgManager_h
 #define RpmPkgManager_h
 
-#include <QString>
-
 #include "PkgManager.h"
-#include "PkgInfo.h"
 
 
 namespace QDirStat
