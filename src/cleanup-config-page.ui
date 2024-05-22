@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>CleanupConfigPage</class>
  <widget class="QWidget" name="CleanupConfigPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>563</width>
-    <height>563</height>
-   </rect>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <widget class="QSplitter" name="splitter">
@@ -318,15 +310,15 @@ will be executed once for each selected item</string>
              </size>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="worksForPage">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>234</width>
-               <height>136</height>
+               <width>185</width>
+               <height>93</height>
               </rect>
              </property>
              <attribute name="label">
@@ -387,7 +379,7 @@ will be executed once for each selected item</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>234</width>
+               <width>235</width>
                <height>136</height>
               </rect>
              </property>
@@ -517,8 +509,8 @@ will be executed once for each selected item</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>234</width>
-               <height>136</height>
+               <width>224</width>
+               <height>82</height>
               </rect>
              </property>
              <attribute name="label">
@@ -616,6 +608,29 @@ will be executed once for each selected item</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>listWidget</tabstop>
+  <tabstop>activeGroupBox</tabstop>
+  <tabstop>titleLineEdit</tabstop>
+  <tabstop>commandLineEdit</tabstop>
+  <tabstop>recurseCheckBox</tabstop>
+  <tabstop>askForConfirmationCheckBox</tabstop>
+  <tabstop>refreshPolicyComboBox</tabstop>
+  <tabstop>worksForDirCheckBox</tabstop>
+  <tabstop>worksForFilesCheckBox</tabstop>
+  <tabstop>worksForDotEntriesCheckBox</tabstop>
+  <tabstop>outputWindowPolicyComboBox</tabstop>
+  <tabstop>outputWindowDefaultTimeout</tabstop>
+  <tabstop>outputWindowTimeoutSpinBox</tabstop>
+  <tabstop>outputWindowAutoClose</tabstop>
+  <tabstop>shellComboBox</tabstop>
+  <tabstop>addButton</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>moveUpButton</tabstop>
+  <tabstop>moveDownButton</tabstop>
+  <tabstop>moveToTopButton</tabstop>
+  <tabstop>moveToBottomButton</tabstop>
+ </tabstops>
  <resources>
   <include location="../../qdirstat-master/src/icons.qrc"/>
   <include location="icons.qrc"/>

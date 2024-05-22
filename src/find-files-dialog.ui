@@ -272,6 +272,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>patternField</tabstop>
+  <tabstop>filterModeComboBox</tabstop>
+  <tabstop>caseSensitiveCheckBox</tabstop>
+  <tabstop>findFilesRadioButton</tabstop>
+  <tabstop>findDirectoriesRadioButton</tabstop>
+  <tabstop>findBothRadioButton</tabstop>
+  <tabstop>findSymLinksCheckBox</tabstop>
+  <tabstop>wholeTreeRadioButton</tabstop>
+  <tabstop>currentSubtreeRadioButton</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

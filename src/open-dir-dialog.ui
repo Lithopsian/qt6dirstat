@@ -104,6 +104,9 @@
            <property name="editable">
             <bool>true</bool>
            </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
            <item>
             <property name="text">
              <string notr="true">/</string>
@@ -165,6 +168,10 @@ just for this program run.</string>
  </customwidgets>
  <tabstops>
   <tabstop>pathComboBox</tabstop>
+  <tabstop>dirTreeView</tabstop>
+  <tabstop>crossFilesystemsCheckBox</tabstop>
+  <tabstop>upButton</tabstop>
+  <tabstop>pathSelector</tabstop>
  </tabstops>
  <resources>
   <include location="icons.qrc"/>

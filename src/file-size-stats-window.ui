@@ -59,7 +59,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="histogramPage">
       <attribute name="title">
@@ -518,8 +518,25 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>histogramView</tabstop>
   <tabstop>openOptionsButton</tabstop>
+  <tabstop>closeOptionsButton</tabstop>
+  <tabstop>autoButton</tabstop>
+  <tabstop>startPercentileSlider</tabstop>
+  <tabstop>endPercentileSlider</tabstop>
+  <tabstop>markersComboBox</tabstop>
+  <tabstop>startPercentileSpinBox</tabstop>
+  <tabstop>endPercentileSpinBox</tabstop>
+  <tabstop>percentileFilterCheckBox</tabstop>
   <tabstop>percentileTable</tabstop>
+  <tabstop>bucketsTable</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>medianPercentilesHelpButton</tabstop>
+  <tabstop>histogramsInGeneralHelpButton</tabstop>
+  <tabstop>fileSizeHistogramHelpButton</tabstop>
+  <tabstop>overflowAreaHelpButton</tabstop>
+  <tabstop>histogramOptionsHelpButton</tabstop>
   <tabstop>closeButton</tabstop>
+  <tabstop>percentilesTableHelpButton</tabstop>
+  <tabstop>bucketsTableHelpButton</tabstop>
  </tabstops>
  <resources/>
  <connections>

@@ -281,6 +281,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>urlInWindowTitleCheckBox</tabstop>
+  <tabstop>crossFilesystemsCheckBox</tabstop>
+  <tabstop>useBoldForDominantCheckBox</tabstop>
+  <tabstop>dirReadWarningCheckBox</tabstop>
+  <tabstop>treeIconThemeComboBox</tabstop>
+  <tabstop>treeUpdateIntervalSpinBox</tabstop>
+  <tabstop>useTreemapHoverCheckBox</tabstop>
+  <tabstop>statusBarShortTimeoutSpinBox</tabstop>
+  <tabstop>statusBarLongTimeoutSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

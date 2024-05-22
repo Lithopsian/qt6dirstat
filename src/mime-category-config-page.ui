@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MimeCategoryConfigPage</class>
  <widget class="QWidget" name="MimeCategoryConfigPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>550</width>
-    <height>488</height>
-   </rect>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_6">
    <item>
     <widget class="QSplitter" name="horizontalSplitter">
@@ -157,7 +149,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_17">
        <attribute name="title">
@@ -575,6 +567,25 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>listWidget</tabstop>
+  <tabstop>nameLineEdit</tabstop>
+  <tabstop>categoryColorButton</tabstop>
+  <tabstop>categoryColorEdit</tabstop>
+  <tabstop>caseInsensitivePatternsTextEdit</tabstop>
+  <tabstop>caseSensitivePatternsTextEdit</tabstop>
+  <tabstop>addButton</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>treemapView</tabstop>
+  <tabstop>squarifiedCheckBox</tabstop>
+  <tabstop>cushionShadingCheckBox</tabstop>
+  <tabstop>cushionHeightSpinBox</tabstop>
+  <tabstop>heightScaleFactorSpinBox</tabstop>
+  <tabstop>tileColorButton</tabstop>
+  <tabstop>tileColorEdit</tabstop>
+  <tabstop>minTileSizeSpinBox</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

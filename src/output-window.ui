@@ -281,6 +281,15 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>terminal</tabstop>
+  <tabstop>killButton</tabstop>
+  <tabstop>autoCloseCheckBox</tabstop>
+  <tabstop>zoomInButton</tabstop>
+  <tabstop>zoomOutButton</tabstop>
+  <tabstop>resetZoomButton</tabstop>
+  <tabstop>closeButton</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

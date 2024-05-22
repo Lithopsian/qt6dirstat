@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ExcludeRulesConfigPage</class>
  <widget class="QWidget" name="ExcludeRulesConfigPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>529</width>
-    <height>378</height>
-   </rect>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <widget class="QSplitter" name="splitter">
@@ -311,6 +303,23 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>listWidget</tabstop>
+  <tabstop>patternLineEdit</tabstop>
+  <tabstop>caseSensitiveCheckBox</tabstop>
+  <tabstop>fixedStringRadioButton</tabstop>
+  <tabstop>wildcardsRadioButton</tabstop>
+  <tabstop>regexpRadioButton</tabstop>
+  <tabstop>dirNameWithoutPathRadioButton</tabstop>
+  <tabstop>fullPathRadioButton</tabstop>
+  <tabstop>checkAnyFileChildRadioButton</tabstop>
+  <tabstop>addButton</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>moveDownButton</tabstop>
+  <tabstop>moveToBottomButton</tabstop>
+  <tabstop>moveToTopButton</tabstop>
+  <tabstop>moveUpButton</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>
