@@ -207,8 +207,8 @@ void TreemapView::readSettings()
     _currentItemColor   = readColorEntry( settings, "CurrentItemColor",   Qt::red                    );
     _selectedItemsColor = readColorEntry( settings, "SelectedItemsColor", Qt::yellow                 );
     _highlightColor     = readColorEntry( settings, "HighlightColor",     Qt::white                  );
-    _cushionGridColor   = readColorEntry( settings, "CushionGridColor",   QColor( 0x80, 0x80, 0x80 ) );
-    _outlineColor       = readColorEntry( settings, "OutlineColor",       QColor()                   );
+    _cushionGridColor   = readColorEntry( settings, "CushionGridColor",   Qt::darkGray               );
+    _outlineColor       = readColorEntry( settings, "OutlineColor",       Qt::black                  );
     _dirFillColor       = readColorEntry( settings, "DirFillColor",       QColor( 0x60, 0x60, 0x60 ) );
     _dirGradientStart   = readColorEntry( settings, "DirGradientStart",   QColor( 0x60, 0x60, 0x70 ) );
     _dirGradientEnd     = readColorEntry( settings, "DirGradientEnd",     QColor( 0x70, 0x70, 0x80 ) );
