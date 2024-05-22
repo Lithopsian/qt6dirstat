@@ -313,7 +313,6 @@ void MainWindow::busyDisplay()
 {
     //logInfo() << Qt::endl;
 
-    _stopWatch.start();
     _historyButtons->lock();
     _ui->treemapView->disable();
     updateActions();
@@ -471,6 +470,7 @@ void MainWindow::openUrl( const QString & url )
 void MainWindow::openDir( const QString & url )
 {
     enableDirPermissionsMsg();
+    _stopWatch.start();
 
     try
     {
@@ -559,6 +559,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 void MainWindow::pkgQuerySetup()
 {
     closeChildren();
+    _stopWatch.start();
     _updateTimer.stop();
     _ui->statusBar->clearMessage();
     _ui->breadcrumbNavigator->clear();
@@ -605,6 +606,8 @@ void MainWindow::refreshAll()
     }
     else
     {
+	_stopWatch.start();
+
 	// This will throw if the url no longer exists or is inaccessible
 	try
 	{
@@ -636,7 +639,7 @@ void MainWindow::refreshSelected()
     enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
-    busyDisplay();
+//    busyDisplay();
 
     FileInfo * sel = app()->selectionModel()->selectedItems().first();
     while ( sel && !sel->isDir() && sel->parent() != sel->tree()->root() )
@@ -646,6 +649,7 @@ void MainWindow::refreshSelected()
     {
 	// logDebug() << "Refreshing " << sel << Qt::endl;
 
+	_stopWatch.start();
 	FileInfoSet refreshSet;
 	refreshSet << sel;
 
