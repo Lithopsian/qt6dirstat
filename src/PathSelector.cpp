@@ -75,9 +75,9 @@ void PathSelector::addMountPoints( const QList<MountPoint *> & mountPoints )
 }
 
 
-void PathSelector::slotItemSelected( const QListWidgetItem * origItem )
+void PathSelector::slotItemSelected( const QListWidgetItem * widgetItem )
 {
-    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( origItem );
+    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( widgetItem );
     if ( item )
     {
 	// logVerbose() << "Selected path " << item->path() << Qt::endl;
@@ -86,9 +86,9 @@ void PathSelector::slotItemSelected( const QListWidgetItem * origItem )
 }
 
 
-void PathSelector::slotItemDoubleClicked( const QListWidgetItem * origItem )
+void PathSelector::slotItemDoubleClicked( const QListWidgetItem * widgetItem )
 {
-    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( origItem );
+    const PathSelectorItem * item = dynamic_cast<const PathSelectorItem *>( widgetItem );
     if ( item )
     {
 	// logVerbose() << "Double-clicked path " << item->path() << Qt::endl;

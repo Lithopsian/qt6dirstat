@@ -7,10 +7,10 @@
  *              Ian Nartowicz
  */
 
-#include <QPushButton>
-#include <QLineEdit>
 #include <QDir>
 #include <QFileSystemModel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QTimer>
 
 #include "OpenDirDialog.h"
@@ -23,13 +23,7 @@
 #include "Exception.h"
 
 
-// The ExistingDirCompleter is useful if there are no other navigation tools
-// that compete for widget focus and user attention, but here it's only
-// confusing: The dirTreeView, the pathCompleter and the pathComboBox fire off
-// a cascade of signals for every tiny change, and that makes the completer
-// behave very erratic.
-#define USE_COMPLETER           0
-#define VERBOSE_SELECTION       0
+#define VERBOSE_SELECTION 0
 
 
 using namespace QDirStat;
@@ -46,16 +40,21 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
 
     MountPoints::reload();
 
+    _ui->pathSelector->addHomeDir();
+    _ui->pathSelector->addMountPoints( MountPoints::normalMountPoints() );
+    _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
+
     initPathComboBox();
     initDirTree();
-
     initConnections();
     readSettings();
 
-    _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
-    _ui->pathComboBox->setFocus();
-
     setPath( QDir::currentPath() );
+    QTimer::singleShot( 250, this, [ this ]()
+    {
+        // Have to scroll to this after the tree has actually been instantiated
+        _ui->dirTreeView->scrollTo( _filesystemModel->index( _lastPath ) );
+    } );
 }
 
 
@@ -72,12 +71,6 @@ void OpenDirDialog::initPathComboBox()
     QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();
     if ( lineEdit )
         lineEdit->setClearButtonEnabled( true );
-
-#if USE_COMPLETER
-    QCompleter * completer = new ExistingDirCompleter( this );
-    CHECK_NEW( completer );
-    _ui->pathComboBox->setCompleter( completer );
-#endif
 
     _validator = new ExistingDirValidator( this );
     CHECK_NEW( _validator );
@@ -98,14 +91,13 @@ void OpenDirDialog::initDirTree()
     _ui->dirTreeView->hideColumn( 3 );  // Date Modified
     _ui->dirTreeView->hideColumn( 2 );  // Type
     _ui->dirTreeView->hideColumn( 1 );  // Size
-//    _ui->dirTreeView->setHeaderHidden( true );
 }
 
 
 void OpenDirDialog::initConnections()
 {
     const QItemSelectionModel * selectionModel = _ui->dirTreeView->selectionModel();
-    QPushButton * okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
+    const QPushButton         * okButton       = _ui->buttonBox->button( QDialogButtonBox::Ok );
 
     connect( selectionModel,    &QItemSelectionModel::currentChanged,
              this,              &OpenDirDialog::treeSelection );
@@ -130,55 +122,38 @@ void OpenDirDialog::initConnections()
 
 void OpenDirDialog::setPath( const QString & path )
 {
-    if ( _settingPath || path == _lastPath )
+    // Important to stop signal cascades
+    if ( path == _lastPath )
         return;
-
-    // This flag is needed to avoid signal cascades from all the different
-    // widgets in the dialog: The pathSelector (the "places"), the
-    // pathComboBox, the dirTreeView. If they change their current path, they
-    // will also fire off signals to notify all their subscribers which will
-    // then change their current path and fire off their signals. We need to
-    // break that cycle; that's what this flag is for.
-    //
-    // Unfortunately just blocking the signals sometimes has bad side effects
-    // (see below).
-    _settingPath = true;
 
 #if VERBOSE_SELECTION
     logDebug() << "Selecting " << path << Qt::endl;
 #endif
 
-    SignalBlocker sigBlockerPathSelector( _ui->pathSelector );
     // Can't block signals of the dirTreeView's selection model:
     // This would mean that the dirTreeView also isn't notified,
     // so any change would not become visible in the tree.
+    const SignalBlocker sigBlockerValidator( _validator );
 
-    _ui->dirTreeView->setCurrentIndex( _filesystemModel->index( path ) );
-
-    populatePathComboBox();
-    QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();
-    if ( lineEdit )
-        lineEdit->setText( path );
-
-    // Once the tree is populated and expanded, scroll to the selected row
-    QTimer::singleShot( 250, this, &OpenDirDialog::scrollTo );
+    const QModelIndex currentIndex = _filesystemModel->index( path );
+    populatePathComboBox( currentIndex );
+    _ui->dirTreeView->setCurrentIndex( currentIndex );
 
     _lastPath = path;
-    _settingPath = false;
-}
-
-
-void OpenDirDialog::scrollTo()
-{
-    _ui->dirTreeView->scrollTo( _filesystemModel->index( _lastPath ) );
 }
 
 
 void OpenDirDialog::pathSelected( const QString & path )
 {
+#if VERBOSE_SELECTION
+    logDebug() << "Selected " << path << Qt::endl;
+#endif
+
+    // Can block selection model here as we manually select and scroll in the tree
+    const SignalBlocker sigBlockerSelection( _ui->dirTreeView->selectionModel() );
+
     setPath( path );
 
-    SignalBlocker sigBlockerPathSelector( _ui->pathSelector );
     const QModelIndex index = _filesystemModel->index( path );
     _ui->dirTreeView->collapseAll();
     _ui->dirTreeView->setExpanded( index, true );
@@ -195,43 +170,57 @@ void OpenDirDialog::pathDoubleClicked( const QString & path )
 
 void OpenDirDialog::pathEdited( bool ok )
 {
-    if ( !ok || _settingPath )
+    if ( !ok )
         return;
 
-    const SignalBlocker sigBlockerComboBox ( _ui->pathComboBox );
-    const SignalBlocker sigBlockerValidator( _validator );
+#if VERBOSE_SELECTION
+    logDebug() << _ui->pathComboBox->currentText() << Qt::endl;
+#endif
 
     setPath( _ui->pathComboBox->currentText() );
 }
 
 
-void OpenDirDialog::treeSelection( const QModelIndex & newCurrentItem,
-                                   const QModelIndex & )
+void OpenDirDialog::treeSelection( const QModelIndex & newCurrentItem )
 {
+#if VERBOSE_SELECTION
+    logDebug() << _ui->pathComboBox->currentText() << Qt::endl;
+#endif
+
     setPath( _filesystemModel->filePath( newCurrentItem ) );
 }
 
 
-void OpenDirDialog::populatePathComboBox()
+void OpenDirDialog::populatePathComboBox( const QModelIndex & currentIndex )
 {
-    _ui->pathComboBox->clear();
+    // Keep the contents if the new path is already in the list
+    for ( int i=0; i < _ui->pathComboBox->count(); ++i )
+    {
+        if ( _ui->pathComboBox->itemText( i ) == _filesystemModel->filePath( currentIndex ) )
+        {
+            _ui->pathComboBox->setCurrentIndex( i );
+            return;
+        }
+    }
 
-    for ( QModelIndex index = _ui->dirTreeView->currentIndex(); index.isValid(); index =_filesystemModel->parent( index ) )
+    // Build a new list from the current path and all its ancestors
+    _ui->pathComboBox->clear();
+    for ( QModelIndex index = currentIndex; index.isValid(); index = _filesystemModel->parent( index ) )
         _ui->pathComboBox->addItem( _filesystemModel->filePath( index ) );
 }
 
 
 void OpenDirDialog::goUp()
 {
-    if ( _ui->pathComboBox->count() > 1 )
-        _ui->pathComboBox->removeItem( 0 );
+    // Just move one place in the combobox list
+    const int nextIndex = _ui->pathComboBox->currentIndex() + 1;
+    if ( nextIndex < _ui->pathComboBox->count() )
+        _ui->pathComboBox->setCurrentIndex( nextIndex );
 }
 
 
 void OpenDirDialog::readSettings()
 {
-    // logDebug() << Qt::endl;
-
     readWindowSettings( this, "OpenDirDialog" );
 
     Settings settings;
@@ -246,8 +235,6 @@ void OpenDirDialog::readSettings()
 
 void OpenDirDialog::writeSettings()
 {
-    // logDebug() << Qt::endl;
-
     // Do NOT write _crossFilesystems back to the settings here; this is done
     // from the config dialog. The value in this dialog is just temporary for
     // the current program run.
@@ -265,8 +252,6 @@ void OpenDirDialog::writeSettings()
 QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
 {
     OpenDirDialog dialog( parent, crossFilesystems );
-    dialog.pathSelector()->addHomeDir();
-    dialog.pathSelector()->addMountPoints( MountPoints::normalMountPoints() );
     //logDebug() << "Waiting for user selection" << Qt::endl;
 
     if ( dialog.exec() == QDialog::Rejected )

@@ -74,12 +74,12 @@ namespace QDirStat
 	/**
 	 * Signal forwarder to translate a selected item into a path.
 	 **/
-	void slotItemSelected( const QListWidgetItem * item );
+	void slotItemSelected( const QListWidgetItem * widgetItem );
 
 	/**
 	 * Signal forwarder to translate a selected item into a path.
 	 **/
-	void slotItemDoubleClicked( const QListWidgetItem * item );
+	void slotItemDoubleClicked( const QListWidgetItem * widgetItem );
 
 
     protected:

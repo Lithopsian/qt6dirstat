@@ -67,7 +67,7 @@ namespace QDirStat
 	/**
 	 * Return this dialog's path selector so it can be populated.
 	 **/
-	PathSelector * pathSelector() const { return _ui->pathSelector; }
+//	PathSelector * pathSelector() const { return _ui->pathSelector; }
 
 	/**
 	 * Read settings from the config file
@@ -105,8 +105,7 @@ namespace QDirStat
        /**
 	 * Notification that the user selected a directory in the tree
 	 **/
-	void treeSelection( const QModelIndex & newCurrentItem,
-			    const QModelIndex & oldCurrentItem );
+	void treeSelection( const QModelIndex & newCurrentItem );
 
 	/**
 	 * Notification that the user edited a path in the combo box.
@@ -114,18 +113,13 @@ namespace QDirStat
 	 **/
 	void pathEdited( bool ok );
 
-	/**
-	 * Scroll to the currently-selected tree item.
-	 **/
-	void scrollTo();
-
 
     protected:
 
 	void initPathComboBox();
 	void initDirTree();
 	void initConnections();
-	void populatePathComboBox();
+	void populatePathComboBox( const QModelIndex & currentIndex );
 
 
     private:
@@ -133,7 +127,6 @@ namespace QDirStat
 	Ui::OpenDirDialog    * _ui;
 	QFileSystemModel     * _filesystemModel;
 	ExistingDirValidator * _validator;
-	bool                   _settingPath { false };
 	QString                _lastPath;
 
     };	// class OpenDirDialog

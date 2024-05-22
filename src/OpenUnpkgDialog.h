@@ -114,7 +114,7 @@ namespace QDirStat
 	 * leading and trailing whitespace removed from each line and without
 	 * empty lines.
 	 **/
-	QStringList cleanedLines( const QPlainTextEdit * widget ) const;
+	static QStringList cleanedLines( const QPlainTextEdit * widget );
 
 
     private:

@@ -22,13 +22,13 @@ QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 {
     const bool ok = !input.isEmpty() && QDir( input ).exists();
 
-    emit const_cast<ExistingDirValidator *>( this )->isOk( ok );
-
 #if 0
     logDebug() << "Checking \"" << input << "\": "
                << ( ok ? "OK" : "no such directory" )
                << Qt::endl;
 #endif
+
+    emit const_cast<ExistingDirValidator *>( this )->isOk( ok );
 
     return ok ? QValidator::Acceptable : QValidator::Intermediate;
 }

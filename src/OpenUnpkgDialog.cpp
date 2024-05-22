@@ -40,11 +40,8 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     if ( lineEdit )
         lineEdit->setClearButtonEnabled( true );
 
-    QPushButton * resetButton = _ui->buttonBox->button( QDialogButtonBox::RestoreDefaults );
-    CHECK_PTR( resetButton );
-
-    QPushButton * okButton = _ui->buttonBox->button( QDialogButtonBox::Ok );
-    CHECK_PTR( okButton );
+    const QPushButton * resetButton = _ui->buttonBox->button( QDialogButtonBox::RestoreDefaults );
+    const QPushButton * okButton    = _ui->buttonBox->button( QDialogButtonBox::Ok );
 
     connect( resetButton, &QPushButton::clicked,
 	     this,        &OpenUnpkgDialog::restoreDefaults );
@@ -72,9 +69,9 @@ QString OpenUnpkgDialog::startingDir() const
 }
 
 
-QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget ) const
+QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget )
 {
-    QStringList lines  = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
+    QStringList lines = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
 
     QMutableListIterator<QString> it( lines );
     while ( it.hasNext() )
