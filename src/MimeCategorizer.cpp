@@ -493,7 +493,7 @@ void MimeCategorizer::addDefaultCategory( const QString & name,
 void MimeCategorizer::addDefaultCategories()
 {
     addDefaultCategory( tr( "archive (compressed)" ),
-			"#00ff00",
+			Qt::green,
 			"*.7z, *.arj, *.bz2, *.cab, *.cpio.gz, *.gz, *.jmod, "
 			"*.jsonlz4, *.lz, *.lzo, *.rar, *.tar.bz2, *.tar.gz, "
 			"*.tar.lz, *.tar.lzo, *.tar.xz, *.tar.zst, *.tbz2, "
@@ -560,7 +560,7 @@ void MimeCategorizer::addDefaultCategories()
 			QString() );
 
     addDefaultCategory( tr( "image" ),
-			"#00ffff",
+			Qt::cyan,
 			"*.gif, *.jpeg, *.jpg, *.jxl, *.mng, *.png, *.tga, *.tif, *.tiff, "
 			"*.webp, *.xcf.bz2, *.xcf.gz",
 			QString() );
@@ -571,12 +571,12 @@ void MimeCategorizer::addDefaultCategories()
 			QString() );
 
     addDefaultCategory( tr( "junk" ),
-			"#ff0000",
+			Qt::red,
 			"*.bak, *.keep, *.old, *.~",
 			"core" );
 
     addDefaultCategory( tr( "music" ),
-			"#ffff00",
+			Qt::yellow,
 			"*.aac, *.ape, *.f4a, *.f4b, *.flac, *.m4a, *.m4b, *.mid, *.mka, "
 			"*.mp3, *.oga, *.ogg, *.opus, *.ra, *.rax, *.wav, *.wma",
 			QString() );
