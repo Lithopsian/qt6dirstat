@@ -306,10 +306,12 @@ CacheReader::CacheReader( const QString & fileName,
     _tree { tree },
     _parent { parent }
 {
+    if ( !tree )
+	return;
+
     if ( _cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
-	_ok = false;
 	return;
     }
 

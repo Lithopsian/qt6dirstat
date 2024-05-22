@@ -25,7 +25,8 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
     _treeView { parent },
     _header { header }
 {
-    CHECK_PTR( _header );
+    CHECK_PTR( parent );
+    CHECK_PTR( header );
 
     _header->setContextMenuPolicy( Qt::CustomContextMenu );
     _header->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );

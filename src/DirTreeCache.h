@@ -222,7 +222,7 @@ namespace QDirStat
 	char    * _fields[ MAX_FIELDS_PER_LINE ];
 	int       _fieldsCount;
 	bool      _markFromCache;
-	bool      _ok		{ true };
+	bool      _ok		{ false };
         int       _errorCount	{ 0 };
 
 	DirTree	* _tree;

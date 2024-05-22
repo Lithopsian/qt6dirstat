@@ -239,7 +239,7 @@ void TreemapView::writeSettings()
     settings.setValue( "MinTileSize",       _minTileSize       );
 
     writeOptionalColorEntry( settings, "TileFixedColor", _tileFixedColor );
-    writeOptionalColorEntry( settings, "OutlineColor"  , _outlineColor       );
+    writeOptionalColorEntry( settings, "OutlineColor"  , _outlineColor   );
 
     writeColorEntry( settings, "CurrentItemColor",   _currentItemColor   );
     writeColorEntry( settings, "SelectedItemsColor", _selectedItemsColor );
