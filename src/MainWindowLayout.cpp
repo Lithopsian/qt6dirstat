@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QActionGroup>
 #include <QContextMenuEvent>
 
 #include "MainWindow.h"
