@@ -112,7 +112,7 @@ namespace QDirStat
 	/**
 	 * Return 'true' if the specified command is available and executable.
 	 **/
-	inline static bool haveCommand( const QString & command )
+	inline bool haveCommand( const QString & command )
 	    { return access( command.toUtf8(), X_OK ) == 0; }
 
 	/**
@@ -125,20 +125,20 @@ namespace QDirStat
 	 * Check if this program runs with root privileges, i.e. with effective
 	 * user ID 0.
 	 **/
-	inline static bool runningAsRoot()
+	inline bool runningAsRoot()
 	    { return geteuid() == 0; }
 
 	/**
 	 * Check if this program runs with 'sudo'.
 	 **/
-	inline static bool runningWithSudo()
+	inline bool runningWithSudo()
 	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty(); }
 
 	/**
 	 * Check if this program runs as the real root user, with root
 	 * permissions, but not with 'sudo'.
 	 **/
-	inline static bool runningAsTrueRoot()
+	inline bool runningAsTrueRoot()
 	    { return runningAsRoot() && !runningWithSudo(); }
 
 	/**
@@ -170,7 +170,7 @@ namespace QDirStat
          *
          * This returns an empty QByteArray if 'path' is not a symlink.
          **/
-        inline static QByteArray readLink( const QString & path )
+        inline QByteArray readLink( const QString & path )
 	    { return readLink( path.toUtf8() ); }
 
         /**
@@ -182,7 +182,7 @@ namespace QDirStat
          *
          * This function assumes UTF-8 encoding of names in the filesystem.
          **/
-        inline static QString symLinkTarget( const QString & path )
+        inline QString symLinkTarget( const QString & path )
 	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**
@@ -220,13 +220,13 @@ namespace QDirStat
 	 * Note that the backslash itself must be escaped inside the C++ string
 	 * or it would be interpreted as escaping the follopwing character.
 	 **/
-	inline static QString escaped( const QString & unescaped )
+	inline QString escaped( const QString & unescaped )
 	    { return QString( unescaped ).replace( '\'', QLatin1String( "'\\''" ) ); }
 
 	/**
 	 * Return a string in single quotes.
 	 **/
-	inline static QString quoted( const QString & unquoted )
+	inline QString quoted( const QString & unquoted )
 	    { return '\'' + unquoted + '\''; }
 
     }	// namespace SysUtil

@@ -115,6 +115,7 @@ MainWindow::~MainWindow()
 
     delete _ui;
     delete _historyButtons;
+    delete _layoutActionGroup;
 
     // logDebug() << "Main window destroyed" << Qt::endl;
 }
@@ -161,6 +162,9 @@ void MainWindow::connectSignals()
     connect( dirTreeModel,             &DirTreeModel::layoutChanged,
 	     this,                     &MainWindow::layoutChanged );
 
+    connect( selectionModel,           &SelectionModel::currentBranchChanged,
+	     _ui->dirTreeView,         &DirTreeView::closeAllExcept );
+
     connect( selectionModel,           &SelectionModel::currentItemChanged,
 	     _historyButtons,          &HistoryButtons::addToHistory );
 
@@ -199,11 +203,6 @@ void MainWindow::connectSignals()
 
     connect( &_updateTimer,            &QTimer::timeout,
 	     this,                     &MainWindow::showElapsedTime );
-
-    // Here because DirTreeView doesn't have a selectionModel when it is first constructed
-    connect( selectionModel,           &SelectionModel::currentBranchChanged,
-	     _ui->dirTreeView,         &DirTreeView::closeAllExcept );
-
 }
 
 
@@ -413,6 +412,20 @@ namespace
     }
 
 } // namespace
+
+
+void MainWindow::dumpSelectedItems()
+{
+    logDebug() << "Current item: " << app()->selectionModel()->currentItem() << Qt::endl;
+
+    const FileInfoSet items = app()->selectionModel()->selectedItems();
+    logDebug() << items.size() << " items selected" << Qt::endl;
+
+    for ( const FileInfo * item : items )
+	logDebug() << "	 Selected: " << item << Qt::endl;
+
+    logNewline();
+}
 
 
 void MainWindow::readingFinished()
@@ -1017,7 +1030,7 @@ void MainWindow::selectionChanged()
     if ( verboseSelection() )
     {
 	logNewline();
-	app()->selectionModel()->dumpSelectedItems();
+	dumpSelectedItems();
     }
 
     updateActions();
@@ -1035,7 +1048,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
     {
 	logDebug() << "new current: " << newCurrent << Qt::endl;
 	logDebug() << "old current: " << oldCurrent << Qt::endl;
-	app()->selectionModel()->dumpSelectedItems();
+	dumpSelectedItems();
     }
 
     _ui->dirTreeView->setFocus(); // no point leaving focus on the treemap

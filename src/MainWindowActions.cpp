@@ -36,8 +36,7 @@ void MainWindow::connectMenuActions()
     addAction( _ui->actionExpandTreeLevel9 );    // Ctrl-9
     addAction( _ui->actionVerboseSelection );    // Shift-F7
     addAction( _ui->actionDumpSelection );       // F7
-    connect( _ui->actionDumpSelection, &QAction::triggered,
-             app()->selectionModel(),  &SelectionModel::dumpSelectedItems );
+    connectAction( _ui->actionDumpSelection,      &MainWindow::dumpSelectedItems );
 
     // CleanupCollection::add() handles the cleanup actions
 
@@ -113,17 +112,13 @@ void MainWindow::connectMenuActions()
     mapTreeExpandAction( _ui->actionExpandTreeLevel8, 8 );
     mapTreeExpandAction( _ui->actionExpandTreeLevel9, 9 );
 
-    // History button actions
-    connectHistoryButton( _ui->actionGoBack,    &HistoryButtons::historyGoBack );
-    connectHistoryButton( _ui->actionGoForward, &HistoryButtons::historyGoForward );
-
     // Connect the (non-class) DiscoverActions functions
-    connect( _ui->actionDiscoverLargestFiles,    &QAction::triggered, &DiscoverActions::discoverLargestFiles );
-    connect( _ui->actionDiscoverNewestFiles,     &QAction::triggered, &DiscoverActions::discoverNewestFiles );
-    connect( _ui->actionDiscoverOldestFiles,     &QAction::triggered, &DiscoverActions::discoverOldestFiles );
-    connect( _ui->actionDiscoverHardLinkedFiles, &QAction::triggered, &DiscoverActions::discoverHardLinkedFiles );
-    connect( _ui->actionDiscoverBrokenSymLinks,  &QAction::triggered, &DiscoverActions::discoverBrokenSymLinks );
-    connect( _ui->actionDiscoverSparseFiles,     &QAction::triggered, &DiscoverActions::discoverSparseFiles );
+    connectFunctorAction( _ui->actionDiscoverLargestFiles,    &DiscoverActions::discoverLargestFiles );
+    connectFunctorAction( _ui->actionDiscoverNewestFiles,     &DiscoverActions::discoverNewestFiles );
+    connectFunctorAction( _ui->actionDiscoverOldestFiles,     &DiscoverActions::discoverOldestFiles );
+    connectFunctorAction( _ui->actionDiscoverHardLinkedFiles, &DiscoverActions::discoverHardLinkedFiles );
+    connectFunctorAction( _ui->actionDiscoverBrokenSymLinks,  &DiscoverActions::discoverBrokenSymLinks );
+    connectFunctorAction( _ui->actionDiscoverSparseFiles,     &DiscoverActions::discoverSparseFiles );
 }
 
 
@@ -152,19 +147,19 @@ void MainWindow::connectTreemapAction( QAction * action, void( TreemapView::*act
 }
 
 
-void MainWindow::connectHistoryButton( QAction * action, void( HistoryButtons::*actee )( void ) )
+void MainWindow::connectFunctorAction( QAction * action, void( *actee )( void ) )
 {
-    connect( action, &QAction::triggered, _historyButtons, actee );
+    connect( action, &QAction::triggered, actee );
 }
 
 
 void MainWindow::updateActions()
 {
-    const bool reading       = app()->dirTree()->isBusy();
-    FileInfo * currentItem   = app()->currentItem();
-    FileInfo * firstToplevel = app()->firstToplevel();
-    const bool isTree        = firstToplevel && !reading;
-    const bool pkgView       = firstToplevel && firstToplevel->isPkgInfo();
+    const bool       reading       = app()->dirTree()->isBusy();
+    const FileInfo * currentItem   = app()->currentItem();
+    const FileInfo * firstToplevel = app()->firstToplevel();
+    const bool       isTree        = firstToplevel && !reading;
+    const bool       pkgView       = firstToplevel && firstToplevel->isPkgInfo();
 
     _ui->actionStopReading->setEnabled  ( reading );
     _ui->actionRefreshAll->setEnabled   ( isTree );
@@ -178,7 +173,7 @@ void MainWindow::updateActions()
 
     const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
     const bool        sel            = selectedItems.size() > 0;
-    const FileInfo *  first          = sel ? selectedItems.first() : nullptr;
+    const FileInfo  * first          = sel ? selectedItems.first() : nullptr;
     const bool        selSizeOne     = !reading && selectedItems.size() == 1 && !pkgView;
     _ui->actionRefreshSelected->setEnabled( selSizeOne && !first->isMountPoint() && !first->isExcluded() );
     _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
@@ -215,22 +210,22 @@ void MainWindow::mousePressEvent( QMouseEvent * event )
     {
 	// Handle the back / forward buttons on the mouse to act like the
 	// history back / forward buttons in the tool bar
-        switch ( event->button() )
-        {
-            case Qt::BackButton:
+	switch ( event->button() )
+	{
+	    case Qt::BackButton:
 		if ( _ui->actionGoBack->isEnabled() )
 		    _ui->actionGoBack->trigger();
-                break;
+		break;
 
-            case Qt::ForwardButton:
+	    case Qt::ForwardButton:
 		if ( _ui->actionGoForward->isEnabled() )
 		    _ui->actionGoForward->trigger();
-                break;
+		break;
 
-            default:
-                QMainWindow::mousePressEvent( event );
-                break;
-        }
+	    default:
+		QMainWindow::mousePressEvent( event );
+		break;
+	}
     }
 }
 

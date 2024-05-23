@@ -264,21 +264,6 @@ void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
 }
 
 
-void SelectionModel::dumpSelectedItems()
-{
-    const FileInfoSet items = selectedItems();
-    logDebug() << "Current item: " << _currentItem << Qt::endl;
-    logDebug() << items.size() << " items selected" << Qt::endl;
-
-    for ( const FileInfo * item : items )
-	logDebug() << "	 Selected: " << item << Qt::endl;
-
-    logNewline();
-}
-
-
-
-
 
 
 SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * parent ):

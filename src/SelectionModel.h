@@ -149,12 +149,6 @@ namespace QDirStat
 	 **/
 	void prepareForRefresh( const FileInfoSet & refreshSet );
 
-	/**
-	 * For debugging: Dump the currently selected items and the current
-	 * item to the log.
-	 **/
-	void dumpSelectedItems();
-
 
     signals:
 

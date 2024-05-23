@@ -499,7 +499,7 @@ protected:
     void mapTreeExpandAction( QAction * action, int level );
     void connectToggleAction( QAction * action, void( MainWindow::*actee )( bool ) );
     void connectTreemapAction( QAction * action, void( TreemapView::*actee )( void ) );
-    void connectHistoryButton( QAction * action, void( HistoryButtons::*actee )( void ) );
+    void connectFunctorAction( QAction * action, void( *actee )( void ) );
 
     /**
      * Map actions to action names (eg. "L3").
@@ -647,6 +647,12 @@ protected:
      * Reimplemented from QMainWindow.
      **/
     void contextMenuEvent( QContextMenuEvent * event ) override;
+
+    /**
+     * For debugging: dump the currently selected items and the current
+     * item to the log.
+     **/
+    void dumpSelectedItems();
 
 
 private:

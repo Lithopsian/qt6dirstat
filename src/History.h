@@ -141,7 +141,7 @@ namespace QDirStat
          * that it will keep. Once the capacity is reached, each 'add()' first
          * discards the oldest item (i.e. item( 0 )).
          **/
-        inline int capacity() const { return HISTORY_MAX; }
+        int capacity() const { return HISTORY_MAX; }
 
         /**
          * Return all items of the history stack at once.

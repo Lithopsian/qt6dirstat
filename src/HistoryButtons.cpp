@@ -123,17 +123,23 @@ void HistoryButtons::initHistoryButtons()
     CHECK_NEW( backMenu );
     CHECK_NEW( forwardMenu );
 
-    connect( backMenu, &QMenu::aboutToShow,
-             this,     &HistoryButtons::updateHistoryMenu );
+    connect( backMenu,         &QMenu::aboutToShow,
+             this,             &HistoryButtons::updateHistoryMenu );
 
-    connect( backMenu, &QMenu::triggered,
-             this,     &HistoryButtons::historyMenuAction );
+    connect( backMenu,         &QMenu::triggered,
+             this,             &HistoryButtons::historyMenuAction );
 
-    connect( forwardMenu, &QMenu::aboutToShow,
-             this,        &HistoryButtons::updateHistoryMenu );
+    connect( forwardMenu,      &QMenu::aboutToShow,
+             this,             &HistoryButtons::updateHistoryMenu );
 
-    connect( forwardMenu, &QMenu::triggered,
-             this,        &HistoryButtons::historyMenuAction );
+    connect( forwardMenu,      &QMenu::triggered,
+             this,             &HistoryButtons::historyMenuAction );
+
+    connect( _actionGoBack,    &QAction::triggered,
+             this,             &HistoryButtons::historyGoBack );
+
+    connect( _actionGoForward, &QAction::triggered,
+             this,             &HistoryButtons::historyGoForward );
 
     _actionGoBack->setMenu   ( backMenu    );
     _actionGoForward->setMenu( forwardMenu );
