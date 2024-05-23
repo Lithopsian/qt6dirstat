@@ -59,7 +59,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="histogramPage">
       <attribute name="title">
@@ -328,14 +328,6 @@
           <bool>true</bool>
          </property>
          <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>476</width>
-            <height>546</height>
-           </rect>
-          </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_6">
