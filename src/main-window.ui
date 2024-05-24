@@ -16,11 +16,24 @@
     <normaloff>:/icons/qdirstat.svg</normaloff>:/icons/qdirstat.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+    <item alignment="Qt::AlignTop">
+     <widget class="QDirStat::BreadcrumbNavigator" name="breadcrumbNavigator">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="textInteractionFlags">
+       <set>Qt::TextBrowserInteraction</set>
+      </property>
+     </widget>
+    </item>
     <item>
      <widget class="QSplitter" name="mainWinSplitter">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
       <widget class="QSplitter" name="topViewsSplitter">
        <property name="orientation">
@@ -48,19 +61,6 @@
            <property name="spacing">
             <number>4</number>
            </property>
-           <item>
-            <widget class="QDirStat::BreadcrumbNavigator" name="breadcrumbNavigator">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="textInteractionFlags">
-              <set>Qt::TextBrowserInteraction</set>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QDirStat::DirTreeView" name="dirTreeView">
              <property name="contextMenuPolicy">
@@ -105,35 +105,71 @@
          </item>
         </layout>
        </widget>
-       <widget class="QScrollArea" name="fileDetailsPanel">
+       <widget class="QScrollArea" name="topFileDetailsPanel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="widgetResizable">
          <bool>true</bool>
         </property>
-        <widget class="QDirStat::FileDetailsView" name="fileDetailsView"/>
+        <widget class="QDirStat::FileDetailsView" name="fileDetailsView">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>79</width>
+           <height>280</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </widget>
-      <widget class="QDirStat::TreemapView" name="treemapView">
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+      <widget class="QSplitter" name="bottomViewsSplitter">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="renderHints">
-        <set>QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
-       </property>
-       <property name="optimizationFlags">
-        <set>QGraphicsView::DontAdjustForAntialiasing|QGraphicsView::DontSavePainterState</set>
-       </property>
+       <widget class="QDirStat::TreemapView" name="treemapView">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="renderHints">
+         <set>QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
+        </property>
+        <property name="optimizationFlags">
+         <set>QGraphicsView::DontAdjustForAntialiasing|QGraphicsView::DontSavePainterState</set>
+        </property>
+       </widget>
+       <widget class="QScrollArea" name="bottomFileDetailsPanel">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1115</width>
+     <height>21</height>
+    </rect>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
@@ -175,16 +211,13 @@
     <addaction name="actionLayout2"/>
     <addaction name="actionLayout3"/>
     <addaction name="separator"/>
+    <addaction name="actionShowDirTree"/>
     <addaction name="actionShowBreadcrumbs"/>
     <addaction name="actionShowDetailsPanel"/>
     <addaction name="actionShowTreemap"/>
     <addaction name="separator"/>
     <addaction name="actionTreemapOnSide"/>
-    <addaction name="separator"/>
-    <addaction name="actionFileSizeStats"/>
-    <addaction name="actionFileTypeStats"/>
-    <addaction name="actionFileAgeStats"/>
-    <addaction name="actionShowFilesystems"/>
+    <addaction name="actionDetailsWithTreemap"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -257,6 +290,11 @@
     <addaction name="actionDiscoverHardLinkedFiles"/>
     <addaction name="actionDiscoverBrokenSymLinks"/>
     <addaction name="actionDiscoverSparseFiles"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileSizeStats"/>
+    <addaction name="actionFileTypeStats"/>
+    <addaction name="actionFileAgeStats"/>
+    <addaction name="actionShowFilesystems"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -471,7 +509,7 @@
      <normaloff>:/icons/magnifier-zoom-actual.png</normaloff>:/icons/magnifier-zoom-actual.png</iconset>
    </property>
    <property name="text">
-    <string>Zoom Treemap &amp;To</string>
+    <string>&amp;Zoom Treemap To</string>
    </property>
    <property name="toolTip">
     <string>Zoom the treemap in to the selected item</string>
@@ -533,7 +571,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Tree&amp;map</string>
+    <string>Show &amp;Treemap</string>
    </property>
    <property name="toolTip">
     <string>Enable or disable showing the treemap view</string>
@@ -591,7 +629,7 @@
   </action>
   <action name="actionRefreshSelected">
    <property name="text">
-    <string>Refresh &amp;Selected</string>
+    <string>Re&amp;fresh Selected</string>
    </property>
    <property name="shortcut">
     <string>F6</string>
@@ -686,7 +724,7 @@
   </action>
   <action name="actionFileSizeStats">
    <property name="text">
-    <string>File &amp;Size Statistics</string>
+    <string>File Si&amp;ze Statistics</string>
    </property>
    <property name="toolTip">
     <string>Open the file size statistics window</string>
@@ -703,7 +741,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show &amp;Details Panel</string>
+    <string>Show Details &amp;Panel</string>
    </property>
   </action>
   <action name="actionLayout1">
@@ -888,8 +926,11 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Treemap as side &amp;panel</string>
+    <string>Treemap as &amp;Side Panel</string>
    </property>
   </action>
   <action name="actionFileAgeStats">
@@ -997,6 +1038,28 @@
    </property>
    <property name="text">
     <string>Show &amp;Breadcrumbs</string>
+   </property>
+  </action>
+  <action name="actionDetailsWithTreemap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>File Details &amp;with Treemap</string>
+   </property>
+  </action>
+  <action name="actionShowDirTree">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;DirTree</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
    </property>
   </action>
  </widget>

@@ -50,6 +50,7 @@ class MainWindow: public QMainWindow
     {
         LayoutShowBreadcrumbs,
         LayoutShowDetails,
+        LayoutShowDirTree,
         LayoutShowTreemap,
 //        LayoutTreemapOnSide,
     };
@@ -334,6 +335,12 @@ protected slots:
     void treemapAsSidePanel( bool asSidePanel );
 
     /**
+     * Switch between showing the file details panel next to the
+     * directory tree or next to the treemap.
+     **/
+    void detailsWithTreemap( bool withPanel );
+
+    /**
      * Notification that a cleanup action was started.
      **/
     void startingCleanup( const QString & cleanupName );
@@ -457,6 +464,12 @@ protected slots:
      **/
     void currentItemChanged( FileInfo * newCurrent, const FileInfo * oldCurrent );
 
+    /**
+     * For debugging: dump the currently selected items and the current
+     * item to the log.
+     **/
+    void dumpSelectedItems();
+
 
 protected:
 
@@ -551,6 +564,8 @@ protected:
         { return action->data().toList().at( LayoutShowBreadcrumbs ).toBool(); }
      bool layoutShowDetailsPanel( const QAction * action ) const
         { return action->data().toList().at( LayoutShowDetails ).toBool(); }
+     bool layoutShowDirTree( const QAction * action ) const
+        { return action->data().toList().at( LayoutShowDirTree ).toBool(); }
      bool layoutShowTreemap( const QAction * action ) const
         { return action->data().toList().at( LayoutShowTreemap ).toBool(); }
 //     bool layoutTreemapOnSide( const QAction * action ) const
@@ -566,6 +581,11 @@ protected:
      * Save whether the details panel is visible in the current layout.
      **/
     void updateLayoutDetailsPanel( bool detailsPanelVisible );
+
+    /**
+     * Save whether the directory tree is visible in the current layout.
+     **/
+    void updateLayoutDirTree( bool dirTreeVisible );
 
     /**
      * Save whether the treemap is visible in the current layout.
@@ -648,12 +668,6 @@ protected:
      * Reimplemented from QMainWindow.
      **/
     void contextMenuEvent( QContextMenuEvent * event ) override;
-
-    /**
-     * For debugging: dump the currently selected items and the current
-     * item to the log.
-     **/
-    void dumpSelectedItems();
 
 
 private:

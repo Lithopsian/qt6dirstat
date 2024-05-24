@@ -63,14 +63,16 @@ void MainWindow::connectMenuActions()
     connectAction( _ui->actionLayout1,            &MainWindow::changeLayoutSlot );
     connectAction( _ui->actionLayout2,            &MainWindow::changeLayoutSlot );
     connectAction( _ui->actionLayout3,            &MainWindow::changeLayoutSlot );
-    connectAction( _ui->actionFileSizeStats,      &MainWindow::showFileSizeStats );
-    connectAction( _ui->actionFileTypeStats,      &MainWindow::showFileTypeStats );
-    connectAction( _ui->actionFileAgeStats,       &MainWindow::showFileAgeStats );
-    connectAction( _ui->actionShowFilesystems,    &MainWindow::showFilesystems );
 
     // Go menu
     connectAction( _ui->actionGoUp,               &MainWindow::navigateUp );
     connectAction( _ui->actionGoToToplevel,       &MainWindow::navigateToToplevel );
+
+    // Discover menu
+    connectAction( _ui->actionFileSizeStats,      &MainWindow::showFileSizeStats );
+    connectAction( _ui->actionFileTypeStats,      &MainWindow::showFileTypeStats );
+    connectAction( _ui->actionFileAgeStats,       &MainWindow::showFileAgeStats );
+    connectAction( _ui->actionShowFilesystems,    &MainWindow::showFilesystems );
 
     // Help menu
     connectAction( _ui->actionHelp,               &MainWindow::openActionUrl );
@@ -88,11 +90,13 @@ void MainWindow::connectMenuActions()
     connectAction( _ui->actionDonate,             &MainWindow::showDonateDialog );
 
     // Toggle actions
-    connectToggleAction( _ui->actionShowBreadcrumbs,  &MainWindow::updateLayoutBreadcrumbs );
-    connectToggleAction( _ui->actionShowDetailsPanel, &MainWindow::updateLayoutDetailsPanel );
-    connectToggleAction( _ui->actionShowTreemap,      &MainWindow::updateLayoutTreemap );
-    connectToggleAction( _ui->actionTreemapOnSide,    &MainWindow::treemapAsSidePanel );
-    connectToggleAction( _ui->actionVerboseSelection, &MainWindow::toggleVerboseSelection );
+    connectToggleAction( _ui->actionShowBreadcrumbs,    &MainWindow::updateLayoutBreadcrumbs );
+    connectToggleAction( _ui->actionShowDetailsPanel,   &MainWindow::updateLayoutDetailsPanel );
+    connectToggleAction( _ui->actionShowDirTree,        &MainWindow::updateLayoutDirTree );
+    connectToggleAction( _ui->actionShowTreemap,        &MainWindow::updateLayoutTreemap );
+    connectToggleAction( _ui->actionTreemapOnSide,      &MainWindow::treemapAsSidePanel );
+    connectToggleAction( _ui->actionDetailsWithTreemap, &MainWindow::detailsWithTreemap );
+    connectToggleAction( _ui->actionVerboseSelection,   &MainWindow::toggleVerboseSelection );
 
     // Treemap actions
     connectTreemapAction( _ui->actionTreemapZoomTo,    &TreemapView::zoomTo );

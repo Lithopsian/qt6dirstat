@@ -71,9 +71,9 @@ MainWindow::MainWindow( bool slowUpdate ):
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
     // The first call to app() creates the QDirStatApp and with it
-    // - the DirTreeModel
-    // - the DirTree (owned and managed by the DirTreeModel)
-    // - the SelectionModel
+    // - DirTreeModel
+    // - DirTree (owned and managed by DirTreeModel)
+    // - SelectionModel
     if ( slowUpdate )
         app()->dirTreeModel()->setSlowUpdate();
 
@@ -220,27 +220,29 @@ void MainWindow::readSettings()
     const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
     _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
 
-    _ui->actionVerboseSelection->setChecked( settings.value( "VerboseSelection",      false ).toBool() );
-    _ui->treemapView->setUseTreemapHover   ( settings.value( "UseTreemapHover",       false ).toBool() );
-    _ui->actionShowMenuBar->setChecked     ( settings.value( "ShowMenuBar",           true  ).toBool() );
-    _ui->actionShowStatusBar->setChecked   ( settings.value( "ShowStatusBar",         true  ).toBool() );
-    _ui->fileDetailsView->setLabelLimit    ( settings.value( "FileDetailsLabelLimit", 0     ).toInt()  );
+    _ui->actionVerboseSelection->setChecked  ( settings.value( "VerboseSelection",      false ).toBool() );
+    _ui->treemapView->setUseTreemapHover     ( settings.value( "UseTreemapHover",       false ).toBool() );
+    _ui->actionShowMenuBar->setChecked       ( settings.value( "ShowMenuBar",           true  ).toBool() );
+    _ui->actionShowStatusBar->setChecked     ( settings.value( "ShowStatusBar",         true  ).toBool() );
+    _ui->actionDetailsWithTreemap->setChecked( settings.value( "DetailsWithTreemap",    false ).toBool() );
+    _ui->fileDetailsView->setLabelLimit      ( settings.value( "FileDetailsLabelLimit", 0     ).toInt()  );
 
     settings.endGroup();
 
     settings.beginGroup( "MainWindow-Subwindows" );
-    const QByteArray mainSplitterState = settings.value( "MainSplitter" , QByteArray() ).toByteArray();
-    const QByteArray topSplitterState  = settings.value( "TopSplitter"  , QByteArray() ).toByteArray();
+    const QByteArray mainSplitterState    = settings.value( "MainSplitter"    , QByteArray() ).toByteArray();
+    const QByteArray detailsSplitterState = settings.value( "DetailsSplitter" , QByteArray() ).toByteArray();
     settings.endGroup();
 
     showBars();
 
     readWindowSettings( this, "MainWindow" );
 
-    if ( !mainSplitterState.isNull() )
+    if ( !mainSplitterState.isEmpty() )
 	_ui->mainWinSplitter->restoreState( mainSplitterState );
+    _ui->actionTreemapOnSide->setChecked( _ui->mainWinSplitter->orientation() == Qt::Horizontal );
 
-    if ( topSplitterState.isNull() )
+    if ( detailsSplitterState.isEmpty() )
     {
 	// The window geometry isn't set yet, so just put in something vaguely workable
 	_ui->topViewsSplitter->setStretchFactor( 0, 1 );
@@ -248,7 +250,8 @@ void MainWindow::readSettings()
     }
     else
     {
-	_ui->topViewsSplitter->restoreState( topSplitterState );
+	_ui->topViewsSplitter->restoreState( detailsSplitterState );
+	_ui->bottomViewsSplitter->restoreState( detailsSplitterState );
     }
 
     initLayouts( layoutName );
@@ -260,24 +263,27 @@ void MainWindow::writeSettings()
     QDirStat::Settings settings;
 
     settings.beginGroup( "MainWindow" );
-    settings.setValue( "VerboseSelection",         verboseSelection()                    );
-    settings.setValue( "Layout",                   currentLayoutName()                   );
-    settings.setValue( "ShowMenuBar",              _ui->actionShowMenuBar->isChecked()   );
-    settings.setValue( "ShowStatusBar",            _ui->actionShowStatusBar->isChecked() );
-    settings.setValue( "ShowDirPermissionsMsg",    _showDirPermissionsMsg                );
-    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout                     );
-    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout                 );
-    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                     );
-    settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover()   );
-    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit()    );
-    settings.setValue( "State",                    saveState()                           );
+    settings.setValue( "VerboseSelection",         verboseSelection()                         );
+    settings.setValue( "Layout",                   currentLayoutName()                        );
+    settings.setValue( "DetailsWithTreemap",       _ui->actionDetailsWithTreemap->isChecked() );
+    settings.setValue( "ShowMenuBar",              _ui->actionShowMenuBar->isChecked()        );
+    settings.setValue( "ShowStatusBar",            _ui->actionShowStatusBar->isChecked()      );
+    settings.setValue( "ShowDirPermissionsMsg",    _showDirPermissionsMsg                     );
+    settings.setValue( "StatusBarTimeoutMillisec", _statusBarTimeout                          );
+    settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout                      );
+    settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                          );
+    settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover()        );
+    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit()         );
+    settings.setValue( "State",                    saveState()                                );
     settings.endGroup();
 
     writeWindowSettings( this, "MainWindow" );
 
+    const QSplitter * visibleSplitter =
+	_ui->actionDetailsWithTreemap->isChecked() ? _ui->bottomViewsSplitter : _ui->topViewsSplitter;
     settings.beginGroup( "MainWindow-Subwindows" );
-    settings.setValue( "MainSplitter", _ui->mainWinSplitter->saveState()  );
-    settings.setValue( "TopSplitter",  _ui->topViewsSplitter->saveState() );
+    settings.setValue( "MainSplitter",    _ui->mainWinSplitter->saveState()  );
+    settings.setValue( "DetailsSplitter", visibleSplitter->saveState() );
     settings.endGroup();
 
     writeLayoutSettings();  // see MainWindowLayout.cpp
@@ -305,6 +311,20 @@ void MainWindow::treemapAsSidePanel( bool asSidePanel )
 {
     _ui->mainWinSplitter->setOrientation ( asSidePanel ? Qt::Horizontal : Qt::Vertical );
     _ui->topViewsSplitter->setOrientation( asSidePanel ? Qt::Vertical : Qt::Horizontal );
+    _ui->bottomViewsSplitter->setOrientation( asSidePanel ? Qt::Vertical : Qt::Horizontal );
+}
+
+
+void MainWindow::detailsWithTreemap( bool withTreemap )
+{
+    QScrollArea * oldParent = withTreemap ? _ui->topFileDetailsPanel : _ui->bottomFileDetailsPanel;
+    QScrollArea * newParent = withTreemap ? _ui->bottomFileDetailsPanel : _ui->topFileDetailsPanel;
+
+    newParent->setVisible( _ui->actionShowDetailsPanel->isChecked() );
+    newParent->setWidget( oldParent->takeWidget() );
+    oldParent->hide();
+
+    updateFileDetailsView();
 }
 
 
