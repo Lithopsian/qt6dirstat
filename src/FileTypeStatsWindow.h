@@ -24,7 +24,6 @@ namespace QDirStat
     class FileTypeStats;
     class MimeCategory;
     class FileTypeItem;
-    class SelectionModel;
     class SuffixFileTypeItem;
 
     /**
@@ -44,8 +43,7 @@ namespace QDirStat
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
-	FileTypeStatsWindow( QWidget        * parent,
-			     SelectionModel * selectionModel );
+	FileTypeStatsWindow( QWidget * parent );
 
 	/**
 	 * Destructor.
@@ -57,8 +55,7 @@ namespace QDirStat
 	 * multiple parts of the application. This will create a new instance
 	 * if there is none yet (or anymore).
 	 **/
-	static FileTypeStatsWindow * sharedInstance( QWidget        * parent,
-						     SelectionModel * selectionModel );
+	static FileTypeStatsWindow * sharedInstance( QWidget * parent );
 
 
     public:
@@ -73,17 +70,24 @@ namespace QDirStat
 	 * instance.
 	 **/
 	static void populateSharedInstance( QWidget        * mainWindow,
-					    FileInfo       * subtree,
-					    SelectionModel * selectionModel );
+					    FileInfo       * subtree );
 
 
     protected slots:
 
 	/**
 	 * Automatically update with the current main window selection, if the
-	 * checkbox is checked.
+	 * sync checkbox is checked and if the current item has changed.
 	 **/
-	void syncedPopulate( FileInfo * );
+	void syncedPopulate();
+
+	/**
+	 * Automatically update with the current main window selection, if the
+	 * checkbox is checked.  This dos not compare the current item to the
+	 * current subtree since the subtree is likely to fall back to root
+	 * after a refresh of the tree.
+	 **/
+	void syncedRefresh();
 
 	/**
 	 * Refresh (reload) all data.
@@ -109,11 +113,6 @@ namespace QDirStat
 
 
     protected:
-
-	/**
-	 * Clear all data and widget contents.
-	 **/
-	void clear();
 
 	/**
 	 * One-time initialization of the widgets in this window.
@@ -188,7 +187,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
 
 
     private:

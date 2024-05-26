@@ -40,7 +40,10 @@ namespace QDirStat
          * longer than after read() is finished: Once created and queued, the
          * PkgReadJobs are self-sufficient. They don't need this reader.
          **/
-        PkgReader() { readSettings(); }
+        PkgReader( DirTree * tree, const PkgFilter & filter ) { read( tree, filter); }
+
+
+    protected:
 
         /**
          * Read installed packages from the system's package manager(s), select
@@ -52,9 +55,6 @@ namespace QDirStat
          * it will pick one read job and execute it.
          **/
         void read( DirTree * tree, const PkgFilter & filter );
-
-
-    protected:
 
         /**
          * Create a read job for each package to read its file list from a file

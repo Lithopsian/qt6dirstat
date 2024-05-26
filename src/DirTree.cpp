@@ -598,8 +598,6 @@ bool DirTree::writeCache( const QString & cacheFileName )
 
 bool DirTree::readCache( const QString & cacheFileName )
 {
-    sendStartingReading();
-
     CacheReadJob * readJob = new CacheReadJob( this, cacheFileName );
     CHECK_NEW( readJob );
 
@@ -610,6 +608,7 @@ bool DirTree::readCache( const QString & cacheFileName )
 	return false;
     }
 
+    sendStartingReading();
     addJob( readJob );
     return true;
 }
@@ -617,14 +616,13 @@ bool DirTree::readCache( const QString & cacheFileName )
 
 void DirTree::readPkg( const PkgFilter & pkgFilter )
 {
-//    clear();
     _url = pkgFilter.url();
 
     sendStartingReading();
 
     // logDebug() << "Reading " << pkgFilter << Qt::endl;
-    PkgReader reader;
-    reader.read( this, pkgFilter );
+    PkgReader reader( this, pkgFilter );
+//    reader.read( this, pkgFilter );
 }
 
 

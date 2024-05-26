@@ -207,6 +207,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     const Subtree subtree( fileInfo );
     const QString & url = subtree.url();
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix ).arg( url ) );
+    resizeEvent( nullptr );
 
     delete _stats;
     if ( suffix.isEmpty() )
@@ -440,8 +441,8 @@ void FileSizeStatsWindow::showHelp()
 }
 
 
-void FileSizeStatsWindow::resizeEvent( QResizeEvent * event )
+void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
 }

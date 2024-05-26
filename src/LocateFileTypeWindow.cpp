@@ -71,20 +71,6 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
 }
 
 
-void LocateFileTypeWindow::clear()
-{
-    _suffix.clear();
-    _ui->treeWidget->clear();
-}
-
-
-void LocateFileTypeWindow::refresh()
-{
-    populate( _suffix, _subtree() );
-    selectFirstItem();
-}
-
-
 void LocateFileTypeWindow::initWidgets()
 {
     app()->setWidgetFontSize( _ui->treeWidget );
@@ -118,13 +104,12 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
 
 void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo )
 {
-    clear();
-
     _suffix  = suffix;
     _subtree = fileInfo;
 
     // For better Performance: Disable sorting while inserting many items
     _ui->treeWidget->setSortingEnabled( false );
+    _ui->treeWidget->clear();
 
     populateRecursive( fileInfo ? fileInfo : _subtree() );
 
@@ -134,6 +119,9 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
     const QString heading = tr( " with %1 files below %2" ).arg( displaySuffix() ).arg( _subtree.url() );
     _ui->heading->setStatusTip( intro + heading );
+
+    // Force a redraw of the header from the status tip
+    resizeEvent( nullptr );
 
 //    logDebug() << count << " directories" << Qt::endl;
 }
@@ -192,6 +180,13 @@ FileInfoSet LocateFileTypeWindow::matchingFiles( FileInfo * item ) const
 }
 
 
+void LocateFileTypeWindow::refresh()
+{
+    populate( _suffix, _subtree() );
+    selectFirstItem();
+}
+
+
 void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
 {
     if ( !item )
@@ -216,10 +211,10 @@ void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
 }
 
 
-void LocateFileTypeWindow::resizeEvent( QResizeEvent * event )
+void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->heading, _ui->heading->statusTip(), event->size().width() - 24 );
+    elideLabel( _ui->heading, _ui->heading->statusTip(), size().width() - 24 );
 }
 
 

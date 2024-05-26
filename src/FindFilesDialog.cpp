@@ -80,7 +80,7 @@ FileSearchFilter FindFilesDialog::fileSearchFilter()
 
 DirInfo * FindFilesDialog::currentSubtree()
 {
-    FileInfo * fileInfo = app()->selectedDirInfo();
+    FileInfo * fileInfo = app()->currentDirInfo();
     if ( fileInfo )
     {
         _lastPath = fileInfo->url();

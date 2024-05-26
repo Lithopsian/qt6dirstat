@@ -22,7 +22,6 @@ namespace QDirStat
 {
     class FileAgeStats;
     class PercentBarDelegate;
-    class SelectionModel;
     class YearListItem;
 
     /**
@@ -39,8 +38,7 @@ namespace QDirStat
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
-	FileAgeStatsWindow( QWidget         * parent,
-			    SelectionModel  * selectionModel );
+	FileAgeStatsWindow( QWidget * parent );
 
 	/**
 	 * Destructor.
@@ -51,8 +49,7 @@ namespace QDirStat
 	 * Returns the shared instance pointer for this windw.  It is created if
 	 * it doesn't already exist.
 	 **/
-	static FileAgeStatsWindow * sharedInstance( QWidget         * parent,
-						    SelectionModel  * selectionModel );
+	static FileAgeStatsWindow * sharedInstance( QWidget * parent );
 
 
     public:
@@ -62,8 +59,7 @@ namespace QDirStat
 	 * instance.
 	 **/
 	static void populateSharedInstance( QWidget         * parent,
-					    FileInfo        * fileInfo,
-					    SelectionModel  * selectionModel );
+					    FileInfo        * fileInfo );
 
 
     signals:
@@ -91,7 +87,15 @@ namespace QDirStat
 	 * Automatically update with the current main window selection, if the
 	 * checkbox is checked.
 	 **/
-	void syncedPopulate( FileInfo * fileInfo );
+	void syncedPopulate();
+
+	/**
+	 * Automatically update with the current main window selection, if the
+	 * checkbox is checked.  This dos not compare the current item to the
+	 * current subtree since the subtree is likely to fall back to root
+	 * after a refresh of the tree.
+	 **/
+	void syncedRefresh();
 
 	/**
 	 * Refresh (reload) all data.
@@ -128,11 +132,6 @@ namespace QDirStat
 	 * Populate the window.
 	 **/
 	void populate( FileInfo * fileInfo );
-
-	/**
-	 * Clear all data and widget contents.
-	 **/
-	void clear();
 
 	/**
 	 * One-time initialization of the widgets in this window.
@@ -176,7 +175,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
 
 
 	//

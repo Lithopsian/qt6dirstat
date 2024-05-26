@@ -140,7 +140,7 @@ namespace QDirStat
 
     private:
 
-	DirTree         *  _tree;
+	DirTree         * _tree;
 	DirInfo         * _dir;
 	DirReadJobQueue * _queue	{ nullptr };
 	bool              _started	{ false };

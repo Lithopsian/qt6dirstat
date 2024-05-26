@@ -82,6 +82,43 @@ namespace
 	return qRound( ( 100.0 * dir->totalSize() ) / dir->totalAllocatedSize() );
     }
 
+
+    /**
+     * Return a string describing the type of a FileInfo object.
+     **/
+    QString formatFilesystemObjectType( const FileInfo * file )
+    {
+	if ( file->isFile()        ) return QObject::tr( "file"             );
+	if ( file->isSymLink()     ) return QObject::tr( "symbolic link"    );
+	if ( file->isBlockDevice() ) return QObject::tr( "block device"     );
+	if ( file->isCharDevice()  ) return QObject::tr( "character device" );
+	if ( file->isFifo()        ) return QObject::tr( "named pipe"       );
+	if ( file->isSocket()      ) return QObject::tr( "socket"           );
+
+	logWarning() << " unexpected mode: " << file->mode() << Qt::endl;
+	return QString();
+    }
+
+
+    /**
+     * Return a stylesheet string to set a label text to the configured
+     * directory read error colour.
+     **/
+    QString errorStyleSheet()
+    {
+	return QString( "QLabel { color: %1; }" ).arg( app()->dirTreeModel()->dirReadErrColor().name() );
+    }
+
+
+    /**
+     * Return a stylesheet string to set a label text to the configured
+     * directory read error colour.
+     **/
+    QString dirColorStyle( const DirInfo * dir )
+    {
+	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : "";
+    }
+
 } // namespace
 
 
@@ -110,12 +147,6 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
 
     connect( MimeCategorizer::instance(), &MimeCategorizer::categoriesChanged,
              this,                        &FileDetailsView::categoriesChanged );
-}
-
-
-void FileDetailsView::clear()
-{
-    setCurrentPage( _ui->emptyPage );
 }
 
 
@@ -232,20 +263,6 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 
 //    if ( !file->isSparseFile() )
 //	_ui->fileSizeLabel->suppressIfSameContent( _ui->fileAllocatedLabel, _ui->fileAllocatedCaption );
-}
-
-
-QString FileDetailsView::formatFilesystemObjectType( const FileInfo * file )
-{
-    if      ( file->isFile()        ) return tr( "file"             );
-    else if ( file->isSymLink()     ) return tr( "symbolic link"    );
-    else if ( file->isBlockDevice() ) return tr( "block device"     );
-    else if ( file->isCharDevice()  ) return tr( "character device" );
-    else if ( file->isFifo()        ) return tr( "named pipe"       );
-    else if ( file->isSocket()      ) return tr( "socket"           );
-
-    logWarning() << " unexpected mode: " << file->mode() << Qt::endl;
-    return QString();
 }
 
 
@@ -398,18 +415,6 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	_ui->dirSubDirCountLabel->clear();
 	_ui->dirLatestMTimeLabel->clear();
     }
-}
-
-
-QString FileDetailsView::errorStyleSheet() const
-{
-    return QString( "QLabel { color: %1; }" ).arg( app()->dirTreeModel()->dirReadErrColor().name() );
-}
-
-
-QString FileDetailsView::dirColorStyle( const DirInfo * dir ) const
-{
-    return dir->readState() == DirPermissionDenied ? errorStyleSheet() : "";
 }
 
 

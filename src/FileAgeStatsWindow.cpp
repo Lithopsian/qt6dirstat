@@ -12,6 +12,7 @@
 
 #include "FileAgeStatsWindow.h"
 #include "FileAgeStats.h"
+#include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DiscoverActions.h"
 #include "FileInfo.h"
@@ -47,8 +48,7 @@ namespace
 }
 
 
-FileAgeStatsWindow::FileAgeStatsWindow( QWidget        * parent,
-					SelectionModel * selectionModel ):
+FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
     QDialog ( parent ),
     _ui { new Ui::FileAgeStatsWindow }
 {
@@ -61,6 +61,15 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget        * parent,
 
     initWidgets();
     readSettings();
+
+    const DirTree        * dirTree        = app()->dirTree();
+    const SelectionModel * selectionModel = app()->selectionModel();
+
+    connect( dirTree,            &DirTree::aborted,
+             this,               &FileAgeStatsWindow::syncedRefresh );
+
+    connect( dirTree,            &DirTree::finished,
+             this,               &FileAgeStatsWindow::syncedRefresh );
 
     connect( selectionModel,     &SelectionModel::currentItemChanged,
              this,               &FileAgeStatsWindow::syncedPopulate );
@@ -77,7 +86,7 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget        * parent,
     connect( _ui->treeWidget,    &QTreeWidget::itemSelectionChanged,
              this,               &FileAgeStatsWindow::enableActions );
 
-    connect( this, &FileAgeStatsWindow::locateFilesFromYear, &DiscoverActions::discoverFilesFromYear );
+    connect( this, &FileAgeStatsWindow::locateFilesFromYear,  &DiscoverActions::discoverFilesFromYear );
 
     connect( this, &FileAgeStatsWindow::locateFilesFromMonth, &DiscoverActions::discoverFilesFromMonth );
 }
@@ -93,30 +102,17 @@ FileAgeStatsWindow::~FileAgeStatsWindow()
 }
 
 
-FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget        * parent,
-							 SelectionModel * selectionModel )
+FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
 {
     static QPointer<FileAgeStatsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
     {
-	_sharedInstance = new FileAgeStatsWindow( parent, selectionModel );
+	_sharedInstance = new FileAgeStatsWindow( parent );
 	CHECK_NEW( _sharedInstance );
     }
 
     return _sharedInstance;
-}
-
-
-void FileAgeStatsWindow::clear()
-{
-    _ui->treeWidget->clear();
-}
-
-
-void FileAgeStatsWindow::refresh()
-{
-    populate( _subtree() );
 }
 
 
@@ -143,14 +139,13 @@ void FileAgeStatsWindow::initWidgets()
 
 
 void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-						 FileInfo       * fileInfo,
-						 SelectionModel * selectionModel )
+						 FileInfo       * fileInfo )
 {
-    if ( !fileInfo || !selectionModel )
+    if ( !fileInfo )
         return;
 
     // Get the shared instance, creating it if necessary
-    FileAgeStatsWindow * instance = sharedInstance( mainWindow, selectionModel );
+    FileAgeStatsWindow * instance = sharedInstance( mainWindow );
 
     instance->populate( fileInfo );
     instance->_ui->treeWidget->sortByColumn( YearListYearCol, Qt::DescendingOrder );
@@ -158,15 +153,28 @@ void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
 }
 
 
-void FileAgeStatsWindow::syncedPopulate( FileInfo * )
+void FileAgeStatsWindow::refresh()
+{
+    populate( _subtree() );
+}
+
+
+void FileAgeStatsWindow::syncedRefresh()
+{
+    if ( _ui->syncCheckBox->isChecked() )
+	refresh();
+}
+
+
+void FileAgeStatsWindow::syncedPopulate()
 {
     // Refresh if the checkbox is set
     if ( !_ui->syncCheckBox->isChecked() )
 	return;
 
-    FileInfo * newSelection = app()->selectedDirInfoOrRoot();
+    FileInfo * newSelection = app()->currentDirInfo();
     if ( newSelection != _subtree() )
-        populate( newSelection );
+	populate( newSelection );
 }
 
 
@@ -174,12 +182,17 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 {
     //logDebug() << "populating with " << fileInfo << Qt::endl;
 
-    clear();
+    _ui->treeWidget->clear();
+
+    if ( !fileInfo )
+	return;
+
     _subtree = fileInfo;
 
     _ui->headingUrl->setStatusTip( _subtree.url() );
+    resizeEvent( nullptr );
 
-    // For better Performance: disable sorting while inserting many (not many!) items
+    // For better Performance: disable sorting while inserting (not!) many items
     _ui->treeWidget->setSortingEnabled( false );
     populateListWidget(_subtree() );
     _ui->treeWidget->setSortingEnabled( true );
@@ -194,33 +207,33 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 
     for ( short year : stats.years() )
     {
-        YearStats * yearStats = stats.yearStats( year );
-        if ( yearStats )
-        {
-            // Add a year item
-            YearListItem * item = new YearListItem( *yearStats );
-            CHECK_NEW( item );
-            _ui->treeWidget->addTopLevelItem( item );
+	YearStats * yearStats = stats.yearStats( year );
+	if ( yearStats )
+	{
+	    // Add a year item
+	    YearListItem * item = new YearListItem( *yearStats );
+	    CHECK_NEW( item );
+	    _ui->treeWidget->addTopLevelItem( item );
 
-            // Add the month items if applicable
-            if ( stats.monthStatsAvailableFor( year ) )
-            {
-                for ( short month = 1; month <= 12; month++ )
-                {
-                    YearStats * monthStats = stats.monthStats( year, month );
-                    if ( monthStats )
-                    {
-                        YearListItem * monthItem = new YearListItem( *monthStats );
-                        CHECK_NEW( monthItem );
+	    // Add the month items if applicable
+	    if ( stats.monthStatsAvailableFor( year ) )
+	    {
+		for ( short month = 1; month <= 12; month++ )
+		{
+		    YearStats * monthStats = stats.monthStats( year, month );
+		    if ( monthStats )
+		    {
+			YearListItem * monthItem = new YearListItem( *monthStats );
+			CHECK_NEW( monthItem );
 
-                        if ( monthStats->filesCount == 0 )
-                            monthItem->setFlags( Qt::NoItemFlags ); // disabled
+			if ( monthStats->filesCount == 0 )
+			    monthItem->setFlags( Qt::NoItemFlags ); // disabled
 
-                        item->addChild( monthItem );
-                    }
-                }
-            }
-        }
+			item->addChild( monthItem );
+		    }
+		}
+	    }
+	}
     }
 
     fillGaps( stats );
@@ -231,11 +244,11 @@ void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
 {
     for ( short year : findGaps( stats ) )
     {
-        YearListItem * item = new YearListItem( YearStats( year ) );
-        CHECK_NEW( item );
+	YearListItem * item = new YearListItem( YearStats( year ) );
+	CHECK_NEW( item );
 
-        item->setFlags( Qt::NoItemFlags ); // disabled
-        _ui->treeWidget->addTopLevelItem( item );
+	item->setFlags( Qt::NoItemFlags ); // disabled
+	_ui->treeWidget->addTopLevelItem( item );
     }
 }
 
@@ -246,16 +259,16 @@ YearsList FileAgeStatsWindow::findGaps( const FileAgeStats & stats ) const
 
     const YearsList & years = stats.years(); // sorted in ascending order
     if ( years.isEmpty() )
-        return gaps;
+	return gaps;
 
     const short lastYear = _startGapsWithCurrentYear ? stats.thisYear() : years.last();
     if ( lastYear - years.first() == years.count() - 1 )
-        return gaps;
+	return gaps;
 
     for ( short yr = years.first(); yr <= lastYear; yr++ )
     {
-        if ( !years.contains( yr ) )
-            gaps << yr;
+	if ( !years.contains( yr ) )
+	    gaps << yr;
     }
 
     return gaps;
@@ -273,13 +286,13 @@ void FileAgeStatsWindow::locateFiles()
     const YearListItem * item = selectedItem();
     if ( item && canLocate( item ) )
     {
-        const short month = item->month();
-        const short year  = item->year();
+	const short month = item->month();
+	const short year  = item->year();
 
-        if ( month > 0 && year > 0 )
-            emit locateFilesFromMonth( _subtree.url(), year, month );
-        else if ( year > 0 )
-            emit locateFilesFromYear( _subtree.url(), year );
+	if ( month > 0 && year > 0 )
+	    emit locateFilesFromMonth( _subtree.url(), year, month );
+	else if ( year > 0 )
+	    emit locateFilesFromYear( _subtree.url(), year );
     }
 }
 
@@ -366,10 +379,10 @@ void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
-void FileAgeStatsWindow::resizeEvent( QResizeEvent * event )
+void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
 }
 
 
@@ -383,7 +396,6 @@ YearListItem::YearListItem( const YearStats & stats ) :
     _filesPercent { stats.filesPercent },
     _size { stats.size },
     _sizePercent { stats.sizePercent }
-//    _stats { yearStats }
 {
     const bool monthItem = _month > 0;
     const QString text = monthItem ? monthAbbreviation( _month ) : QString::number( _year );

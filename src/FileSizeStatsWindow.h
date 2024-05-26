@@ -151,7 +151,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
 
 
     private:

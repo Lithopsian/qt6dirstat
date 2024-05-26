@@ -108,11 +108,6 @@ namespace QDirStat
 //	TreeWalker * treeWalker() const { return _treeWalker; }
 
 	/**
-	 * Clear all data and widget contents.
-	 **/
-	void clear();
-
-	/**
 	 * One-time initialization of the widgets in this window.
 	 **/
 	void initWidgets();
@@ -166,7 +161,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent *) override;
 
 
     private:
@@ -203,7 +198,7 @@ namespace QDirStat
      * and the corresponding DirInfo * has to be fetched again with
      * DirTree::locate() (which is an expensive operation), but it is a lot
      * safer in case the tree is modified, i.e. if the user starts cleanup
-     * operations or refreshes the tree from disk: Not only are no pointers
+     * operations or refreshes the tree from disk: not only are no pointers
      * stored that might become invalid, but the search result remains valid
      * even after such an operation since the strings (the paths) will still
      * match an object in the tree in most cases.

@@ -136,7 +136,8 @@ namespace QDirStat
 	/**
 	 * Return the first toplevel item of this tree (that is, the first
 	 * child of the invisible root item) or 0 if there is none.  There
-	 * is normally only one child of the root item.
+	 * is normally only one child of the root item and it is nearly
+	 * always a directory (eg. "/" ).
 	 **/
 	FileInfo * firstToplevel() const;
 

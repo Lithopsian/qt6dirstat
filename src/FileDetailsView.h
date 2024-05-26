@@ -49,7 +49,7 @@ namespace QDirStat
 	/**
 	 * Show an empty page.
 	 **/
-	void clear();
+	void clear() { setCurrentPage( _ui->emptyPage ); }
 
 	/**
 	 * Show a summary of multiple selected items.
@@ -137,16 +137,6 @@ namespace QDirStat
 	 **/
 	void setLabelLimited( QLabel * label, const QString & text );
 
-	/**
-	 * Return a stylesheet string to set a label text to the configured
-	 * directory read error colour.
-	 **/
-	QString errorStyleSheet() const;
-
-	/**
-	 * Return a stylesheet string to set the color of the directory permissions label.
-	 **/
-	QString dirColorStyle( const DirInfo * dir ) const;
 
 	// Boilerplate widget setting methods
 
@@ -158,8 +148,6 @@ namespace QDirStat
 	void setSystemFileWarningVisibility( bool visible );
 	void setFilePkgBlockVisibility( bool visible );
 	void setDirBlockVisibility( bool visible );
-
-	QString formatFilesystemObjectType( const FileInfo * file );
 
 
     private:

@@ -387,12 +387,12 @@ void MainWindow::updateFileDetailsView()
 	return;
 
     const FileInfoSet sel = app()->selectionModel()->selectedItems();
-    if ( sel.isEmpty() )
-	_ui->fileDetailsView->showDetails( app()->currentItem() );
-    else if ( sel.count() == 1 )
+    if ( sel.count() > 1 )
+	_ui->fileDetailsView->showDetails( sel );
+    else if ( !sel.isEmpty() )
 	_ui->fileDetailsView->showDetails( sel.first() );
     else
-	_ui->fileDetailsView->showDetails( sel );
+	_ui->fileDetailsView->showDetails( app()->currentItem() );
 }
 
 
@@ -672,7 +672,6 @@ void MainWindow::refreshSelected()
     enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
-//    busyDisplay();
 
     FileInfo * sel = app()->selectionModel()->selectedItems().first();
     while ( sel && !sel->isDir() && sel->parent() != sel->tree()->root() )
@@ -742,15 +741,15 @@ void MainWindow::readCache( const QString & cacheFileName )
     if ( cacheFileName.isEmpty() )
 	return;
 
-    app()->dirTreeModel()->clear();
-    app()->dirTree()->reset();
-    _historyButtons->clear();
+    _stopWatch.start();
 
     if ( !app()->dirTree()->readCache( cacheFileName ) )
     {
 	idleDisplay();
 	QMessageBox::warning( this, tr( "Error" ), tr( "Can't read cache file " ) + cacheFileName );
     }
+
+    updateActions();
 }
 
 
@@ -759,10 +758,13 @@ void MainWindow::askReadCache()
     const QString fileName = QFileDialog::getOpenFileName( this, // parent
 							   tr( "Select QDirStat cache file" ),
 							   DEFAULT_CACHE_NAME );
-    if ( !fileName.isEmpty() )
-	readCache( fileName );
+    if ( fileName.isEmpty() )
+	return;
 
-    updateActions();
+    app()->dirTreeModel()->clear();
+    app()->dirTree()->reset();
+    _historyButtons->clear();
+    readCache( fileName );
 }
 
 
@@ -984,19 +986,19 @@ void MainWindow::openConfigDialog()
 
 void MainWindow::showFileTypeStats()
 {
-    FileTypeStatsWindow::populateSharedInstance( this, app()->selectedDirInfoOrRoot(), app()->selectionModel() );
+    FileTypeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
 }
 
 
 void MainWindow::showFileSizeStats()
 {
-    FileSizeStatsWindow::populateSharedInstance( this, app()->selectedDirInfoOrRoot() );
+    FileSizeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
 }
 
 
 void MainWindow::showFileAgeStats()
 {
-    FileAgeStatsWindow::populateSharedInstance( this, app()->selectedDirInfoOrRoot(), app()->selectionModel() );
+    FileAgeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
 }
 
 

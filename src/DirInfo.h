@@ -409,9 +409,10 @@ namespace QDirStat
 	void readJobFinished( DirInfo * dir );
 
 	/**
-	 * Notification of an aborted directory read job for 'dir'.
+	 * Notification of an aborted directory read job.  The aborted status
+	 * is propagated up to all the ancestors this DirInfo.
 	 **/
-	void readJobAborted( DirInfo * dir );
+	void readJobAborted();
 
 	/**
 	 * Finalize this directory level after reading it is completed. This
@@ -697,6 +698,12 @@ namespace QDirStat
 	 * children.
 	 **/
 	void cleanupAttics();
+
+	/**
+	 * Notification of an aborted directory read job for 'dir'.  Provided
+	 * so that the aborted status can propagate up the tree.
+	 **/
+//	void readJobAborted( DirInfo * dir );
 
 
     private:

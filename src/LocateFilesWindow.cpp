@@ -85,12 +85,6 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
 }
 
 
-void LocateFilesWindow::clear()
-{
-    _ui->treeWidget->clear();
-}
-
-
 void LocateFilesWindow::refresh()
 {
     populate( _subtree() );
@@ -140,18 +134,20 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
 {
     // logDebug() << "populating with " << fileInfo << Qt::endl;
 
-    clear();
-
     _subtree = fileInfo;
     _treeWalker->prepare( _subtree() );
 
     // For better Performance: Disable sorting while inserting many items
     _ui->treeWidget->setSortingEnabled( false );
+    _ui->treeWidget->clear();
 
     populateRecursive( fileInfo ? fileInfo : _subtree() );
     showResultsCount();
 
     _ui->treeWidget->setSortingEnabled( true );
+
+    // Force a redraw of the header from the status tip
+    resizeEvent( nullptr );
 }
 
 
@@ -235,10 +231,14 @@ void LocateFilesWindow::addCleanupHotkeys()
 }
 
 
-void LocateFilesWindow::resizeEvent( QResizeEvent * event )
+void LocateFilesWindow::resizeEvent( QResizeEvent * )
 {
+    // Format the heading with the current url, which may be a fallback
+    const FileInfo * fileInfo = _subtree();
+    const QString heading = _ui->heading->statusTip().arg( fileInfo ? fileInfo->url() : QString() );
+
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->heading, _ui->heading->statusTip(), event->size().width() - 24 );
+    elideLabel( _ui->heading, heading, size().width() - 24 );
 }
 
 

@@ -90,11 +90,6 @@ namespace QDirStat
 	QString displaySuffix() const { return "*" + _suffix; }
 
 	/**
-	 * Clear all data and widget contents.
-	 **/
-	void clear();
-
-	/**
 	 * One-time initialization of the widgets in this window.
 	 **/
 	void initWidgets();
@@ -136,7 +131,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
 
 
     private:

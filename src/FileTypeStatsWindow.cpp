@@ -15,6 +15,7 @@
 
 #include "FileTypeStatsWindow.h"
 #include "FileTypeStats.h"
+#include "DirTree.h"
 #include "FileInfo.h"
 #include "FileSizeStatsWindow.h"
 #include "FormatUtil.h"
@@ -35,8 +36,7 @@
 using namespace QDirStat;
 
 
-FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
-					  SelectionModel * selectionModel ):
+FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     QDialog ( parent ),
     _ui { new Ui::FileTypeStatsWindow }
 {
@@ -53,6 +53,18 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
     // Add actions to this window to get the hotkeys
     addAction( _ui->actionLocate );
     addAction( _ui->actionSizeStats );
+
+    const DirTree        * dirTree        = app()->dirTree();
+    const SelectionModel * selectionModel = app()->selectionModel();
+
+    connect( dirTree,              &DirTree::aborted,
+             this,                 &FileTypeStatsWindow::syncedRefresh );
+
+    connect( dirTree,              &DirTree::finished,
+             this,                 &FileTypeStatsWindow::syncedRefresh );
+
+    connect( selectionModel,       &SelectionModel::currentItemChanged,
+	     this,                 &FileTypeStatsWindow::syncedPopulate );
 
     connect( _ui->treeWidget,      &QTreeWidget::currentItemChanged,
 	     this,                 &FileTypeStatsWindow::enableActions );
@@ -77,9 +89,6 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget        * parent,
 
     connect( _ui->actionSizeStats, &QAction::triggered,
 	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
-
-    connect( selectionModel,       &SelectionModel::currentItemChanged,
-	     this,                 &FileTypeStatsWindow::syncedPopulate );
 }
 
 
@@ -93,25 +102,17 @@ FileTypeStatsWindow::~FileTypeStatsWindow()
 }
 
 
-FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget        * parent,
-							   SelectionModel * selectionModel)
+FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
 {
     static QPointer<FileTypeStatsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
     {
-	_sharedInstance = new FileTypeStatsWindow( parent, selectionModel );
+	_sharedInstance = new FileTypeStatsWindow( parent );
 	CHECK_NEW( _sharedInstance );
     }
 
     return _sharedInstance;
-}
-
-
-void FileTypeStatsWindow::clear()
-{
-    _ui->treeWidget->clear();
-    enableActions( nullptr );
 }
 
 
@@ -128,44 +129,55 @@ void FileTypeStatsWindow::initWidgets()
 }
 
 
-void FileTypeStatsWindow::refresh()
-{
-    populate( _subtree() );
-}
-
-
 void FileTypeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-						  FileInfo       * subtree,
-						  SelectionModel * selectionModel )
+						  FileInfo       * subtree )
 {
-    if ( !subtree || !selectionModel )
+    if ( !subtree )
         return;
 
-    FileTypeStatsWindow * instance = sharedInstance( mainWindow, selectionModel );
+    FileTypeStatsWindow * instance = sharedInstance( mainWindow );
     instance->populate( subtree );
     instance->_ui->treeWidget->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
     instance->show();
 }
 
 
-void FileTypeStatsWindow::syncedPopulate( FileInfo * )
+void FileTypeStatsWindow::refresh()
+{
+    populate( _subtree() );
+}
+
+
+void FileTypeStatsWindow::syncedRefresh()
+{
+    if ( _ui->syncCheckBox->isChecked() )
+	refresh();
+}
+
+
+void FileTypeStatsWindow::syncedPopulate()
 {
     if ( !_ui->syncCheckBox->isChecked() )
 	return;
 
-    FileInfo * newSelection = app()->selectedDirInfoOrRoot();
+    FileInfo * newSelection = app()->currentDirInfo();
     if ( newSelection != _subtree() )
         populate( newSelection );
 }
 
 
-
 void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 {
-    clear();
+    _ui->treeWidget->clear();
+    enableActions( nullptr );
+
+    if ( !newSubtree )
+	return;
+
     _subtree = newSubtree;
 
     _ui->headingUrl->setStatusTip( _subtree.url() );
+    resizeEvent( nullptr );
 
     // Don't sort until all items are added
     _ui->treeWidget->setSortingEnabled( false );
@@ -415,10 +427,10 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
-void FileTypeStatsWindow::resizeEvent( QResizeEvent * event )
+void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), event->size().width() - 200 );
+    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
 }
 
 

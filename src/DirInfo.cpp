@@ -650,12 +650,12 @@ void DirInfo::readJobFinished( DirInfo * dir )
 }
 
 
-void DirInfo::readJobAborted( DirInfo * dir )
+void DirInfo::readJobAborted()
 {
     _readState = DirAborted;
 
     if ( _parent )
-	_parent->readJobAborted( dir );
+	_parent->readJobAborted();
 }
 
 

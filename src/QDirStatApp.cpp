@@ -95,20 +95,11 @@ FileInfo * QDirStatApp::currentItem() const
 }
 
 
-FileInfo * QDirStatApp::selectedDirInfo() const
+FileInfo * QDirStatApp::currentDirInfo() const
 {
-    const FileInfoSet selectedItems = _selectionModel->selectedItems();
-    FileInfo * sel = selectedItems.first();
+    FileInfo * sel = currentItem();
 
-    return !sel || sel->isDirInfo() ? sel : static_cast<FileInfo *>( sel->parent() );
-}
-
-
-FileInfo * QDirStatApp::selectedDirInfoOrRoot() const
-{
-    FileInfo * sel = selectedDirInfo();
-
-    return sel ? sel : firstToplevel();
+    return !sel || sel->isDirInfo() ? sel : sel->parent();
 }
 
 

@@ -33,19 +33,19 @@ namespace
                         const QString & headingText,
                         FileInfo      * fileInfo = nullptr )
     {
-	CHECK_NEW( treeWalker );
+        CHECK_NEW( treeWalker );
 
-	if ( !fileInfo )
-	    fileInfo = app()->selectedDirInfoOrRoot();
+        if ( !fileInfo )
+            fileInfo = app()->currentDirInfo();
 
-	if ( fileInfo )
-	{
-	    // Should always be a fileInfo, but if not then do nothing
-	    LocateFilesWindow::populateSharedInstance( treeWalker,
-						       fileInfo,
-						       headingText.arg( fileInfo->url() ),
-						       sortCol,
-						       sortOrder );
+        if ( fileInfo )
+        {
+            // Should always be a fileInfo, but if not then do nothing
+            LocateFilesWindow::populateSharedInstance( treeWalker,
+                                                       fileInfo,
+                                                       headingText,
+                                                       sortCol,
+                                                       sortOrder );
         }
     }
 
@@ -110,7 +110,8 @@ void DiscoverActions::discoverSparseFiles()
 void DiscoverActions::discoverFilesFromYear( const QString & path, short year )
 {
     discoverFiles( new FilesFromYearTreeWalker( year ),
-                   LocateListMTimeCol, Qt::DescendingOrder,
+                   LocateListMTimeCol,
+                   Qt::DescendingOrder,
                    QObject::tr( "Files from %1 in %2" ).arg( year ),
                    app()->dirTree()->locate( path, true ) );
 }

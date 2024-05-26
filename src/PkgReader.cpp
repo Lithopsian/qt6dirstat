@@ -179,6 +179,8 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
 {
     //logInfo() << "Reading " << filter << Qt::endl;
 
+    readSettings();
+
     PkgInfoList pkgList = filteredPkgList( filter );
     if ( pkgList.isEmpty() )
     {
