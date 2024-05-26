@@ -610,13 +610,13 @@ void DirReadJobQueue::abort()
     for ( const DirReadJob * job : _queue )
     {
 	if ( job->dir() )
-	    job->dir()->readJobAborted( job->dir() );
+	    job->dir()->readJobAborted();
     }
 
     for ( const DirReadJob * job : _blocked )
     {
 	if ( job->dir() )
-	    job->dir()->readJobAborted( job->dir() );
+	    job->dir()->readJobAborted();
     }
 
     clear();

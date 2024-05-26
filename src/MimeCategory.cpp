@@ -66,8 +66,8 @@ namespace
 
 
 
-void MimeCategory::addExactMatch( const QString & rawPattern,
-				  Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addExactMatch( const QString       & rawPattern,
+				  Qt::CaseSensitivity   caseSensitivity )
 {
     QString pattern = rawPattern.trimmed();
 
@@ -86,8 +86,8 @@ void MimeCategory::addExactMatch( const QString & rawPattern,
 }
 
 
-void MimeCategory::addSuffix( const QString &	  rawSuffix,
-			      Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addSuffix( const QString       & rawSuffix,
+			      Qt::CaseSensitivity   caseSensitivity )
 {
     // Normalize suffix: Remove leading "*." or "."
 
@@ -113,8 +113,8 @@ void MimeCategory::addSuffix( const QString &	  rawSuffix,
 }
 
 
-void MimeCategory::addWildcardSuffix( const QString & rawPattern,
-				      Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addWildcardSuffix( const QString       & rawPattern,
+				      Qt::CaseSensitivity   caseSensitivity )
 {
     QString pattern = rawPattern.trimmed();
 
@@ -133,8 +133,8 @@ void MimeCategory::addWildcardSuffix( const QString & rawPattern,
 }
 
 
-void MimeCategory::addWildcard( const QString & rawPattern,
-				Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addWildcard( const QString       & rawPattern,
+				Qt::CaseSensitivity   caseSensitivity )
 {
     const QString pattern = rawPattern.trimmed();
 
@@ -150,8 +150,8 @@ void MimeCategory::addWildcard( const QString & rawPattern,
 }
 
 
-void MimeCategory::addPattern( const QString &	   rawPattern,
-			       Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addPattern( const QString       & rawPattern,
+			       Qt::CaseSensitivity   caseSensitivity )
 {
     const QString pattern = rawPattern.trimmed();
 
@@ -166,8 +166,8 @@ void MimeCategory::addPattern( const QString &	   rawPattern,
 }
 
 
-void MimeCategory::addPatterns( const QStringList & patterns,
-				Qt::CaseSensitivity caseSensitivity )
+void MimeCategory::addPatterns( const QStringList   & patterns,
+				Qt::CaseSensitivity   caseSensitivity )
 {
     for ( const QString & rawPattern : patterns )
     {
