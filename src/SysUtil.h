@@ -15,6 +15,7 @@
 
 #include <QProcess>
 #include <QString>
+#include <QStringBuilder>
 #include <QRegularExpression>
 
 
@@ -227,7 +228,7 @@ namespace QDirStat
 	 * Return a string in single quotes.
 	 **/
 	inline QString quoted( const QString & unquoted )
-	    { return '\'' + unquoted + '\''; }
+	    { return '\'' % unquoted % '\''; }
 
     }	// namespace SysUtil
 

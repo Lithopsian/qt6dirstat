@@ -104,7 +104,7 @@ namespace
 
 		// Pad the title to avoid tiny dialog boxes
 		const int spaces = qMax( textWidth( font, name ) / spaceWidth, 40 );
-		const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+		const QString title = pad( cleanup->cleanTitle(), spaces );
 		const QString itemType = item->isDirInfo() ?
 					 QObject::tr( "for directory" ) :
 					 QObject::tr( "for file" );
@@ -138,7 +138,7 @@ namespace
 		if ( lineSpaces > spaces )
 		    spaces = lineSpaces;
 	    }
-	    const QString title = cleanup->cleanTitle() + QString( spaces, ' ' );
+	    const QString title = pad( cleanup->cleanTitle(), spaces );
 
 	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( QLatin1String( "<br>" ) ) );
 	}();
