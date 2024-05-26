@@ -78,7 +78,7 @@ void MainWindow::initLayout( const QString & layoutName, const QString & current
 void MainWindow::changeLayoutSlot()
 {
     // Get the layout to use from data() from the QAction that sent the signal.
-    const QAction * action   = qobject_cast<QAction *>( sender() );
+    const QAction * action = qobject_cast<QAction *>( sender() );
     changeLayout( layoutName( action ) );
 }
 
@@ -95,6 +95,7 @@ void MainWindow::changeLayout( const QString & name )
 	_ui->actionShowBreadcrumbs->setChecked ( layoutShowBreadcrumbs ( action ) );
 	_ui->actionShowDetailsPanel->setChecked( layoutShowDetailsPanel( action ) );
 	_ui->actionShowTreemap->setChecked     ( layoutShowTreemap     ( action ) );
+	_ui->actionShowDirTree->setChecked     ( layoutShowDirTree     ( action ) );
 //	_ui->actionTreemapOnSide->setChecked   ( layoutTreemapOnSide   ( action ) );
     }
     else
@@ -113,9 +114,25 @@ void MainWindow::updateLayoutBreadcrumbs( bool breadcrumbsVisible )
 void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
 {
     //logDebug() << detailsPanelVisible << Qt::endl;
-    _ui->fileDetailsPanel->setVisible( detailsPanelVisible );
-    updateFileDetailsView();
+    if ( detailsPanelVisible )
+    {
+	detailsWithTreemap( _ui->actionDetailsWithTreemap->isChecked() );
+    }
+    else
+    {
+	_ui->topFileDetailsPanel->hide();
+	_ui->bottomFileDetailsPanel->hide();
+    }
+
     setData( LayoutShowDetails, detailsPanelVisible );
+}
+
+
+void MainWindow::updateLayoutDirTree( bool dirTreeVisible )
+{
+    //logDebug() << dirTreeVisible << Qt::endl;
+    _ui->treeViewContainer->setVisible( dirTreeVisible );
+    setData( LayoutShowDirTree, dirTreeVisible );
 }
 
 
@@ -149,13 +166,15 @@ void MainWindow::readLayoutSetting( const QString & layoutName )
     Settings settings;
 
     settings.beginGroup( "TreeViewLayout_" + layoutName );
-    const bool showBreadcrumbs  = settings.value( "ShowCurrentPath",  true ).toBool();
-    const bool showDetailsPanel = settings.value( "ShowDetailsPanel", true ).toBool();
-    const bool showTreemap      = settings.value( "ShowTreemap",      true ).toBool();
-//    const bool treemapOnSide    = settings.value( "TreemapOnSide",   false ).toBool();
+    const bool showBreadcrumbs    = settings.value( "ShowCurrentPath",    true ).toBool();
+    const bool showDetailsPanel   = settings.value( "ShowDetailsPanel",   true ).toBool();
+    const bool showDirTree        = settings.value( "ShowDirTree",        true ).toBool();
+    const bool showTreemap        = settings.value( "ShowTreemap",        true ).toBool();
+//    const bool treemapOnSide      = settings.value( "TreemapOnSide",      false ).toBool();
+//    const bool detailsWithTreemap = settings.value( "DetailsWithTreemap", false ).toBool();
     settings.endGroup();
 
-    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showTreemap };
+    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showDirTree, showTreemap };
     layoutAction( layoutName )->setData( data );
 }
 
@@ -167,6 +186,7 @@ void MainWindow::writeLayoutSetting( const QAction * action )
     settings.beginGroup( "TreeViewLayout_" + layoutName( action ) );
     settings.setValue( "ShowCurrentPath",  layoutShowBreadcrumbs ( action ) );
     settings.setValue( "ShowDetailsPanel", layoutShowDetailsPanel( action ) );
+    settings.setValue( "ShowDirTree",      layoutShowDirTree     ( action ) );
     settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
 //    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
     settings.endGroup();
@@ -202,6 +222,7 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
                                            "---",
                                            "actionShowBreadcrumbs",
                                            "actionShowDetailsPanel",
+                                           "actionShowDirTree",
                                            "actionShowTreemap",
 //                                           "actionTreemapOnSide",
                                          };
