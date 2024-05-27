@@ -8,6 +8,7 @@
  */
 
 #include "PkgManager.h"
+#include "Exception.h"
 #include "SysUtil.h"
 
 
@@ -16,6 +17,8 @@ using namespace QDirStat;
 
 QStringList PkgManager::fileList( const PkgInfo * pkg ) const
 {
+    CHECK_PTR( pkg );
+
     const QString command = fileListCommand( pkg );
     if ( !command.isEmpty() )
     {

@@ -309,6 +309,8 @@ CacheReader::CacheReader( const QString & fileName,
     if ( !tree )
 	return;
 
+    CHECK_PTR( _tree->root() );
+
     if ( _cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
@@ -339,17 +341,31 @@ CacheReader::CacheReader( const QString & fileName,
 
 CacheReader::~CacheReader()
 {
+    //logDebug() << "Cache reading finished" << Qt::endl;
+
+    if ( _ok && !gzeof( _cache ) )
+    {
+	// Treat this as a user abort, although it might conceivably be an error
+	if ( _toplevel )
+	{
+	    // Mark the top level of the cache file as aborted, which will propagate up
+	    _toplevel->readJobAborted();
+
+	    // No way to know what is complete, so remove everything else
+	    _tree->clearSubtree( _toplevel );
+	}
+    }
+
     if ( _cache )
 	gzclose( _cache );
-
-    //logDebug() << "Cache reading finished" << Qt::endl;
 
     // Only finalize if we actually created anything
     if ( _toplevel )
     {
-	// logDebug() << "Finalizing recursive for " << _toplevel << Qt::endl;
-	finalizeRecursive( _toplevel );
-	_toplevel->finalizeAll();
+	// Need to finalize the parent when replacing a subtree, as it will have been marked DirReading
+	DirInfo * toplevel = _parent ? _parent : _toplevel;
+	finalizeRecursive( toplevel );
+	toplevel->finalizeAll();
     }
 }
 
@@ -491,7 +507,7 @@ void CacheReader::addItem()
     DirInfo * parent = _latestDir;
 
     // The next directory might not be a child of the previous one
-    if ( !parent && _tree->root() )
+    if ( !parent )
     {
 	// The trivial case of an empty tree
 	if ( _tree->root()->isEmpty() )
@@ -550,26 +566,22 @@ void CacheReader::addItem()
 	    dir->setFromCache();
 
 	_latestDir = dir;
-
-	if ( parent )
-	    parent->insertChild( dir );
-
-	if ( !_tree->root() )
-	{
-	    _tree->setRoot( dir );
-	    _parent = dir;
-	}
+	parent->insertChild( dir );
 
 	if ( !_toplevel )
-	    _toplevel = _parent ? _parent : dir;
+	    _toplevel = dir;
 
 	_tree->childAddedNotify( dir );
 
-	if ( dir != _toplevel )
+	// Don't finalize the top level of a complete tree until the whole read is done
+	if ( dir != _toplevel || _parent )
 	{
-	    // Don't treat the top level of our tree as a mount point even if it is
+	    // Don't treat the top level of the entire tree as a mount point even if it is
 	    if ( !MountPoints::device( dir->url() ).isEmpty() )
+	    {
+		//logDebug() << dir << " is mountpoint" << Qt::endl;
 		dir->setMountPoint();
+	    }
 
 	    // Don't try to exclude anything ourselves, just mark directories
 	    // that are flagged in the cache file.
@@ -593,7 +605,6 @@ void CacheReader::addItem()
 
 		dir->finalizeLocal();
 		dir->readJobFinished( dir ); // propagates the unread count
-//		_latestDir = 0;
 	    }
 	}
     }

@@ -1040,13 +1040,7 @@ void DirTreeModel::beginRemoveRows( const QModelIndex & parent, int first, int l
 	logError() << "Removing rows already in progress" << Qt::endl;
 	return;
     }
-/* an invalid QModelIndex is used for the root node (ie. parent of firstToplevel)
-    if ( !parent.isValid() )
-    {
-	logError() << "Invalid QModelIndex" << parent << ", " << first << ", " << last << Qt::endl;
-	return;
-    }
-*/
+
     _removingRows = true;
     QAbstractItemModel::beginRemoveRows( parent, first, last );
 }
@@ -1150,8 +1144,6 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 
 QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
 {
-    CHECK_PTR( _tree->root() );
-
     if ( checkMagicNumber( item ) && item != _tree->root() )
     {
 	const int row = rowNumber( item );

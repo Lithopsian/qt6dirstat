@@ -39,7 +39,6 @@ namespace
 		   int             number,
 		   const QString & prefix = "" )
     {
-	CHECK_PTR( label );
 	label->setText( prefix % QString( "%L1" ).arg( number ) );
     }
 
@@ -51,7 +50,6 @@ namespace
 		   FileSize        size,
 		   const QString & prefix = "" )
     {
-	CHECK_PTR( label );
 	label->setValue( size, prefix );
     }
 
@@ -598,7 +596,6 @@ void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
 
 void FileDetailsView::setLabelLimited( QLabel * label, const QString & text )
 {
-    CHECK_PTR( label );
     const QString limitedText = elideMiddle( text, _labelLimit );
     label->setText( limitedText );
 }

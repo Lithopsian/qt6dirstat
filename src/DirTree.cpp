@@ -72,9 +72,13 @@ namespace
 		    // Get the real parent for comparing device numbers, in case we're in an Attic
 		    if ( parent->isAttic() )
 			parent = parent->parent();
-		    if ( parent && parent != tree->root() && !parent->isPkgInfo() && dir->device() != parent->device() )
+		    if ( parent &&
+			 parent != tree->root() &&
+			 !parent->isPkgInfo() &&
+			 !parent->isFromCache() &&
+			 dir->device() != parent->device() )
 		    {
-			logDebug() << dir << " is a mount point" << Qt::endl;
+			logDebug() << dir << " is a mount point under " << parent << Qt::endl;
 			dir->setMountPoint();
 		    }
 		}
@@ -232,7 +236,7 @@ DirTree::~DirTree()
     clearFilters();
 }
 
-
+/*
 void DirTree::setRoot( DirInfo *newRoot )
 {
     if ( _root )
@@ -247,7 +251,7 @@ void DirTree::setRoot( DirInfo *newRoot )
     FileInfo * realRoot = firstToplevel();
     _url = realRoot ? realRoot->url() : "";
 }
-
+*/
 
 FileInfo * DirTree::firstToplevel() const
 {
@@ -395,7 +399,7 @@ void DirTree::refresh( DirInfo * subtree )
 	if ( parent->isAttic() )
 	    parent = parent->parent();
 
-	deleteDir( subtree );
+	deleteSubtree( subtree );
 
 	// Recreate the deleted subtree
 	FileInfo * item = stat( url, this, parent );
@@ -447,7 +451,7 @@ void DirTree::childAddedNotify( FileInfo * newChild )
 }
 
 
-void DirTree::deleteSubtree( FileInfo * child )
+void DirTree::deleteChild( FileInfo * child )
 {
     //logDebug() << "Deleting " << child << Qt::endl;
 
@@ -468,14 +472,14 @@ void DirTree::deleteSubtree( FileInfo * child )
 }
 
 
-void DirTree::deleteDir( DirInfo * subtree )
+void DirTree::deleteSubtree( DirInfo * subtree )
 {
     // Make a FileInfoSet to use in the signal to DirTreeModel
     FileInfoSet subtrees;
     subtrees << subtree;
 
     emit deletingChildren( subtree->parent(), subtrees );
-    deleteSubtree( subtree );
+    deleteChild( subtree );
     emit childrenDeleted();
 }
 
@@ -515,7 +519,7 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	emit deletingChildren( parent, children );
 
 	for ( FileInfo * child : children )
-	    deleteSubtree( child );
+	    deleteChild( child );
 
 	emit childrenDeleted();
 
@@ -523,7 +527,7 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	if ( parent && parent->isDotEntry() && !parent->hasChildren() && parent->parent()->isFinished() )
 	{
 	    //logDebug() << "Removing empty dot entry " << parent << Qt::endl;
-	    deleteDir( parent );
+	    deleteSubtree( parent );
 	}
     }
 }

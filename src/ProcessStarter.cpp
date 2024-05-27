@@ -27,6 +27,8 @@ void ProcessStarter::start()
 
 void ProcessStarter::add( QProcess * process )
 {
+    CHECK_PTR( process );
+
     _waiting.append( process );
 
     connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),

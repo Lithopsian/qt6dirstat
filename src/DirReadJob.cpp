@@ -413,12 +413,11 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	{
 	    //logDebug() << "Clearing complete tree" << Qt::endl;
 
-	    treeLocal->clear(); // big no-no, have to do this through the model
-
 	    // Since this clears the tree and thus the job queue and thus
 	    // deletes this read job, it is important not to do anything after
 	    // this point that might access any member variables or even just
 	    // uses any virtual method.
+	    treeLocal->clear();
 	    treeLocal->sendStartingReading();
 	}
 	else
@@ -431,8 +430,6 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	    queue()->killSubtree( dirLocal, cacheReadJob );	// Will delete this job as well!
 	    // All data members of this object are invalid from here on!
 
-	    // Use the delete function that doesn't notify the model: the parent DirState ...
-	    // ... is DirReading, so the model thinks there are no children
 	    treeLocal->deleteSubtree( dirLocal );
 	}
 

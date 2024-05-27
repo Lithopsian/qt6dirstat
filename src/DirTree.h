@@ -78,13 +78,11 @@ namespace QDirStat
 	void refresh( const FileInfoSet & refreshSet );
 
 	/**
-	 * Delete a child from the tree.  A signal is emitted for this child
-	 * specifically, used by SelectionModel, but not deletingChildren()
-	 * signals for the data model.  Either the caller should notify the model
-	 * or this should only be called when the model is not yet aware it even
-	 * has children.
+	 * Delete a directory: so no check is made for an empty dot entry parent.
+	 * The model is notified with a list of the children (just one) being
+	 * deleted.
 	 **/
-	void deleteSubtree( FileInfo * child );
+	void deleteSubtree( DirInfo * subtree );
 
 	/**
 	 * Delete a list of subtrees.  These are grouped by parent, and each group
@@ -126,7 +124,7 @@ namespace QDirStat
 	/**
 	 * Sets the root item of this tree.
 	 **/
-	void setRoot( DirInfo * newRoot );
+//	void setRoot( DirInfo * newRoot );
 
 	/**
 	 * Return a special printable url for the root item of this tree.
@@ -480,11 +478,13 @@ namespace QDirStat
 	void refresh( DirInfo * subtree );
 
 	/**
-	 * Delete a directory: so no check is made for an empty dot entry parent.
-	 * The model is notified with a list of the children (just one) being
-	 * deleted.
+	 * Delete a child from the tree.  A signal is emitted for this child
+	 * specifically, used by SelectionModel, but not deletingChildren()
+	 * signals for the data model.  Either the caller should notify the model
+	 * or this should only be called when the model is not yet aware it even
+	 * has children.
 	 **/
-	void deleteDir( DirInfo * subtree );
+	void deleteChild( FileInfo * child );
 
 	/**
 	 * Recursively force a complete recalculation of all sums.
