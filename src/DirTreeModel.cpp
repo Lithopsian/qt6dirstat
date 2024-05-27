@@ -530,6 +530,7 @@ void DirTreeModel::setSlowUpdate()
 {
     _slowUpdate = true;
     _updateTimer.setInterval( _slowUpdateMillisec );
+
     logInfo() << "Display update every " << _slowUpdateMillisec << " millisec" << Qt::endl;
 }
 
@@ -566,6 +567,12 @@ void DirTreeModel::createTree()
     connect( _tree, &DirTree::childrenDeleted,
 	     this,  &DirTreeModel::endRemoveRows );
 
+    connect( _tree, &DirTree::clearing,
+	     this,  &DirTreeModel::beginResetModel );
+
+    connect( _tree, &DirTree::cleared,
+	     this,  &DirTreeModel::endResetModel );
+
     connect( _tree, &DirTree::clearingSubtree,
 	     this,  &DirTreeModel::clearingSubtree );
 
@@ -574,29 +581,8 @@ void DirTreeModel::createTree()
 }
 
 
-void DirTreeModel::clear()
-{
-    if ( _tree )
-    {
-	beginResetModel();
-	// logDebug() << "After beginResetModel()" << Qt::endl;
-	// dumpPersistentIndexList( persistentIndexList() );
-
-	_updateTimer.stop();
-	_pendingUpdates.clear(); // these are dangerous if they arrive from a dead tree
-	_tree->clear();
-
-	endResetModel();
-	// logDebug() << "After endResetModel()" << Qt::endl;
-	// dumpPersistentIndexList( persistentIndexList() );
-    }
-}
-
-
 void DirTreeModel::openUrl( const QString & url )
 {
-    CHECK_PTR( _tree );
-
     _updateTimer.start();
     _tree->startReading( url );
 }
@@ -605,7 +591,6 @@ void DirTreeModel::openUrl( const QString & url )
 void DirTreeModel::readPkg( const PkgFilter & pkgFilter )
 {
     //logDebug() << "Reading " << pkgFilter << Qt::endl;
-    CHECK_PTR( _tree );
 
     _updateTimer.start();
     _tree->readPkg( pkgFilter );
@@ -693,9 +678,6 @@ QModelIndex DirTreeModel::parent( const QModelIndex & index ) const
 
 int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 {
-    if ( !_tree )
-	return 0;
-
     FileInfo * item = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
     CHECK_MAGIC( item );
 
@@ -1168,7 +1150,6 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 
 QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
 {
-    CHECK_PTR( _tree );
     CHECK_PTR( _tree->root() );
 
     if ( checkMagicNumber( item ) && item != _tree->root() )

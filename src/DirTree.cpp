@@ -280,11 +280,11 @@ void DirTree::clear()
     {
 	emit clearing();
 	_root->clear();
+	emit cleared();
     }
 
     _isBusy           = false;
     _blocksPerCluster = -1;
-//    _device.clear();
 }
 
 
@@ -304,7 +304,7 @@ void DirTree::startReading( const QString & rawUrl )
     logInfo() << "   url: \"" << _url	 << "\"" << Qt::endl;
 
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
-//    _device = mountPoint ? mountPoint->device() : "";
+
     logInfo() << "device: " << ( mountPoint ? mountPoint->device() : "" ) << Qt::endl;
 
     sendStartingReading();
@@ -377,7 +377,7 @@ void DirTree::refresh( DirInfo * subtree )
     {
 	// Get the url to refresh before we clear the tree
 	const QString url = firstToplevel()->url();
-	emit clearing(); // for the selection model
+//	emit clearing(); // for the selection model
 	clearSubtree( _root ); // will notify the tree model
 	startReading( QDir::cleanPath( url ) );
     }
@@ -486,8 +486,8 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
     if ( _isBusy )
 	return;
 
-    if ( subtrees.contains( _root ) )
-	emit clearing();
+//    if ( subtrees.contains( _root ) )
+//	emit clearing();
 
     // Create a map to group the items by parent
     QMultiMap<DirInfo *, FileInfo *>parentMap;

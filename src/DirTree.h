@@ -413,6 +413,11 @@ namespace QDirStat
 	void clearing();
 
 	/**
+	 * Emitted after the tree has been cleared.
+	 **/
+	void cleared();
+
+	/**
 	 * Emitted when a subtree is about to be cleared, i.e. all its children
 	 * will be deleted (but not the subtree node itself).
 	 **/

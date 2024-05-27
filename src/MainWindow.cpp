@@ -63,7 +63,7 @@ MainWindow::MainWindow( bool slowUpdate ):
 {
     CHECK_NEW( _ui );
     _ui->setupUi( this );
-    _ui->menubar->setCornerWidget( new QLabel( QStringLiteral( MENUBAR_VERSION ) ) );
+    _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
 
     _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
     CHECK_NEW( _historyButtons );
@@ -330,8 +330,6 @@ void MainWindow::detailsWithTreemap( bool withTreemap )
 
 void MainWindow::busyDisplay()
 {
-    //logInfo() << Qt::endl;
-
     _historyButtons->lock();
     _ui->treemapView->disable();
     updateActions();
@@ -353,8 +351,6 @@ void MainWindow::busyDisplay()
 
 void MainWindow::idleDisplay()
 {
-    //logInfo() << Qt::endl;
-
     // Safe for the treemap to start work now
     _updateTimer.stop();
     showTreemapView( _ui->actionShowTreemap->isChecked() );
@@ -507,7 +503,7 @@ void MainWindow::openDir( const QString & url )
 
     try
     {
-	app()->dirTreeModel()->clear();
+	app()->dirTree()->clear();
 	app()->dirTreeModel()->openUrl( url );
 	const QString & dirTreeUrl = app()->dirTree()->url();
 	updateWindowTitle( dirTreeUrl );
@@ -597,7 +593,7 @@ void MainWindow::pkgQuerySetup()
     _ui->statusBar->clearMessage();
     _ui->breadcrumbNavigator->clear();
     _ui->fileDetailsView->clear();
-    app()->dirTreeModel()->clear();
+    app()->dirTree()->clear();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
     enableDirPermissionsMsg();
 }
@@ -631,8 +627,6 @@ void MainWindow::refreshAll()
 
     //logDebug() << "Refreshing " << url << Qt::endl;
 
-    app()->dirTreeModel()->clear();
-
     if ( PkgInfo::isPkgUrl( url ) )
     {
 	readPkg( url );
@@ -644,6 +638,7 @@ void MainWindow::refreshAll()
 	// This will throw if the url no longer exists or is inaccessible
 	try
 	{
+	    app()->dirTree()->clear();
 	    app()->dirTreeModel()->openUrl( url );
 	}
 	catch ( const SysCallFailedException & ex )
@@ -761,7 +756,7 @@ void MainWindow::askReadCache()
     if ( fileName.isEmpty() )
 	return;
 
-    app()->dirTreeModel()->clear();
+    app()->dirTree()->clear();
     app()->dirTree()->reset();
     _historyButtons->clear();
     readCache( fileName );

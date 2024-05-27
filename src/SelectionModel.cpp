@@ -34,6 +34,9 @@ SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
 
     connect( dirTreeModel->tree(), &DirTree::clearing,
 	     this,                 &SelectionModel::clear );
+
+    connect( dirTreeModel->tree(), &DirTree::clearingSubtree,
+	     this,                 &SelectionModel::clear );
 }
 
 

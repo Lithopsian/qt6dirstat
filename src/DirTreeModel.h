@@ -126,10 +126,6 @@ namespace QDirStat
 	 **/
 	void readPkg( const PkgFilter & pkgFilter );
 
-	/**
-	 * Clear this view's contents.
-	 **/
-	void clear();
 
 	/**
 	 * Return the setting for CrossFilesystems.  This is the value
