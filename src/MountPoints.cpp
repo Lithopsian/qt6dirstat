@@ -419,10 +419,10 @@ void MountPoints::findNtfsDevices()
 }
 
 
-QList<MountPoint *> MountPoints::normalMountPoints()
+MountPointList MountPoints::normalMountPoints()
 {
     instance()->ensurePopulated();
-    QList<MountPoint *> result;
+    MountPointList result;
 
     for ( MountPoint * mountPoint : instance()->_mountPointList )
     {

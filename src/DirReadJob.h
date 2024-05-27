@@ -353,7 +353,7 @@ namespace QDirStat
 	/**
 	 * Count the number of pending jobs in the queue.
 	 **/
-	int count() const   { return _queue.count() + _blocked.count(); }
+	int count() const { return _queue.count() + _blocked.count(); }
 
 	/**
 	 * Check if the queue is empty.

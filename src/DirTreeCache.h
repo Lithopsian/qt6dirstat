@@ -83,8 +83,8 @@ namespace QDirStat
     public:
 
 	/**
-	 * Public constructor with only a filename a tree.  The contents of
-	 * the cache file will be placed at the new root of the tree.
+	 * Public constructor with only a filename and tree.  The contents of
+	 * the cache file will be placed at the root of the tree.
 	 **/
 	CacheReader( const QString & fileName,
 		     DirTree       * tree ):
@@ -210,6 +210,8 @@ namespace QDirStat
 	 **/
 	void setReadError( DirInfo * dir ) const;
 
+
+    private:
 
 	//
 	// Data members

@@ -413,7 +413,7 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	{
 	    //logDebug() << "Clearing complete tree" << Qt::endl;
 
-	    treeLocal->clear();
+	    treeLocal->clear(); // big no-no, have to do this through the model
 
 	    // Since this clears the tree and thus the job queue and thus
 	    // deletes this read job, it is important not to do anything after
@@ -610,7 +610,16 @@ void DirReadJobQueue::abort()
     for ( const DirReadJob * job : _queue )
     {
 	if ( job->dir() )
+	{
 	    job->dir()->readJobAborted();
+	}
+	else
+	{
+	    // Might be a CacheReadJob with no dir()
+	    FileInfo * toplevel = job->tree()->firstToplevel();
+	    if ( toplevel && toplevel->isDirInfo() )
+		toplevel->toDirInfo()->readJobAborted();
+	}
     }
 
     for ( const DirReadJob * job : _blocked )

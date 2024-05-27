@@ -13,6 +13,8 @@
 #include <QListWidget>
 #include <QFileIconProvider>
 
+#include "Typedefs.h" // MountPointList
+
 
 namespace QDirStat
 {
@@ -44,7 +46,7 @@ namespace QDirStat
 	/**
 	 * Add a list of mount points with the appropriate icons.
 	 **/
-	void addMountPoints( const QList<MountPoint *> & mountPoints );
+	void addMountPoints( const MountPointList & mountPoints );
 
 	/**
 	 * Select the item representing the parent mount point of 'path'.

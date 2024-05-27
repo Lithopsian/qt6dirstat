@@ -388,7 +388,6 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	return nullptr;
 
     const QStringList lines = output.split( '\n' );
-    output.clear(); // Free all that text ASAP
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
     PkgFileListCache * cache = new PkgFileListCache( this, lookupType );

@@ -68,7 +68,7 @@ void PathSelector::addMountPoint( MountPoint * mountPoint )
 }
 
 
-void PathSelector::addMountPoints( const QList<MountPoint *> & mountPoints )
+void PathSelector::addMountPoints( const MountPointList & mountPoints )
 {
     for ( MountPoint * mountPoint : mountPoints )
 	addMountPoint( mountPoint );

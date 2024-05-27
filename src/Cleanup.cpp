@@ -22,8 +22,8 @@
 #include "Exception.h"
 
 
-#define DESKTOP_APP_TERMINAL		QLatin1String( "%terminal" )
-#define DESKTOP_APP_FILE_MANAGER	QLatin1String( "%filemanager" )
+#define DESKTOP_APP_TERMINAL     QLatin1String( "%terminal" )
+#define DESKTOP_APP_FILE_MANAGER QLatin1String( "%filemanager" )
 
 
 using namespace QDirStat;
@@ -384,8 +384,8 @@ namespace
     {
 	QString expanded = expandDesktopSpecificApps( unexpanded );
 
-	expanded.replace( QLatin1String( "%p" ), SysUtil::quoted( SysUtil::escaped( item->path() ) ) );
-	expanded.replace( QLatin1String( "%n" ), SysUtil::quoted( SysUtil::escaped( item->name() ) ) );
+	expanded.replace( QLatin1String( "%p" ), SysUtil::shellQuoted( item->path() ) );
+	expanded.replace( QLatin1String( "%n" ), SysUtil::shellQuoted( item->name() ) );
 
 	const QString dirName = [ item ]()
 	{
@@ -399,7 +399,7 @@ namespace
 	}();
 
 	if ( !dirName.isEmpty() )
-	    expanded.replace( QLatin1String( "%d" ), SysUtil::quoted( SysUtil::escaped( dirName ) ) );
+	    expanded.replace( QLatin1String( "%d" ), SysUtil::shellQuoted( dirName ) );
 
 	// logDebug() << "Expanded: \"" << expanded << "\"" << Qt::endl;
 	return expanded;

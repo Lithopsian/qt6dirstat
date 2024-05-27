@@ -15,7 +15,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include "Typedefs.h" // FileSize
+#include "Typedefs.h" // FileSize, MountPointList
 
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
@@ -29,6 +29,7 @@ typedef void * QStorageInfo;
 
 namespace QDirStat
 {
+
     /**
      * Helper class to represent one mount point of a Linux/Unix filesystem.
      **/
@@ -315,7 +316,7 @@ namespace QDirStat
 	 * The result is sorted by the order in which the filesystems were
 	 * mounted (the same as in /proc/mounts or in /etc/mtab).
 	 **/
-	static QList<MountPoint *> normalMountPoints();
+	static MountPointList normalMountPoints();
 
 	/**
 	 * Return a list of "normal" mount points, i.e. those that are not
@@ -324,7 +325,7 @@ namespace QDirStat
 	 * The result is sorted by the order in which the filesystems were
 	 * mounted (the same as in /proc/mounts or in /etc/mtab).
 	 **/
-	static const QList<MountPoint *> & allMountPoints() { return instance()->_mountPointList; }
+	static const MountPointList & allMountPoints() { return instance()->_mountPointList; }
 
 	/**
 	 * Return 'true' if size information for mount points is available.
@@ -406,12 +407,12 @@ namespace QDirStat
 	// Data members
 	//
 
-	QList<MountPoint *>          _mountPointList;
+	MountPointList                     _mountPointList;
 	QHash<QString, const MountPoint *> _mountPointMap;
-	QStringList                  _ntfsDevices;
-	bool                         _isPopulated;
-	bool                         _hasBtrfs;
-	bool                         _checkedForBtrfs;
+	QStringList                        _ntfsDevices;
+	bool                               _isPopulated;
+	bool                               _hasBtrfs;
+	bool                               _checkedForBtrfs;
 
     }; // class MountPoints
 

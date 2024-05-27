@@ -93,7 +93,7 @@ void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
 
     // logDebug() << item->debugUrl() << Qt::endl;
     int depth = item->treeLevel();
-    _breadcrumbs = QVector<Breadcrumb>( depth + 1, Breadcrumb() );
+    _breadcrumbs = BreadcrumbList( depth + 1, Breadcrumb() );
 
     QString name;
     QString basePath;

@@ -52,6 +52,8 @@ namespace QDirStat
     {
 	Q_OBJECT
 
+	typedef QVector<Breadcrumb> BreadcrumbList;
+
     public:
 
 	/**
@@ -132,7 +134,7 @@ namespace QDirStat
         // Data members
         //
 
-        QVector<Breadcrumb> _breadcrumbs;
+        BreadcrumbList _breadcrumbs;
     };
 
 } // namespace QDirStat

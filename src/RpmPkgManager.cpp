@@ -167,7 +167,10 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 {
     int exitCode = -1;
     QString output = runCommand( rpmCommand(),
-				 { "-qa", "--qf", "[%{=NAME}-%{=VERSION}-%{=RELEASE}.%{=ARCH} | %{FILENAMES}\n]" },
+				 { "-qa",
+				   "--qf",
+				   "[%{=NAME}-%{=VERSION}-%{=RELEASE}.%{=ARCH} | %{FILENAMES}\n]",
+				 },
 				 &exitCode,
 				 LONG_CMD_TIMEOUT_SEC );
 
@@ -175,8 +178,8 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 	return nullptr;
 
     const QStringList lines = output.split( '\n' );
-    output.clear(); // Free all that text ASAP
-    logDebug() << lines.size() << " output lines" << Qt::endl;
+
+    //logDebug() << lines.size() << " output lines" << Qt::endl;
 
     PkgFileListCache * cache = new PkgFileListCache( this, lookupType );
     CHECK_NEW( cache );

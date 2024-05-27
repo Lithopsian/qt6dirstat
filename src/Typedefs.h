@@ -28,7 +28,11 @@
 namespace QDirStat
 {
     using FileSize = long long;
+
     using ColorList = QList<QColor>;
+
+    class MountPoint;
+    using MountPointList = QList<MountPoint *>;
 }
 
 

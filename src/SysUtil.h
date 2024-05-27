@@ -211,24 +211,25 @@ namespace QDirStat
 	QString groupName( gid_t gid );
 
 	/**
-	 * Return a string with all occurrences of a single quote escaped.  For
-	 * shells, this means effectively closing the first part of the string
+	 * Return a string with all occurrences of a single quote escaped, for
+	 * shells.  This means effectively closing the first part of the string
 	 * with a single quote, inserting a backslash to escape the single quote,
 	 * then opening the remaining part of the string with another single quote.
 	 *
 	 * Thus, 'Don't do this' becomes 'Don'\''t do this'.
 	 *
 	 * Note that the backslash itself must be escaped inside the C++ string
-	 * or it would be interpreted as escaping the follopwing character.
+	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
 	    { return QString( unescaped ).replace( '\'', QLatin1String( "'\\''" ) ); }
 
 	/**
-	 * Return a string in single quotes.
+	 * Return a string in single quotes, with single quotes in the string
+	 * escaped.
 	 **/
-	inline QString quoted( const QString & unquoted )
-	    { return '\'' % unquoted % '\''; }
+	inline QString shellQuoted( const QString & unquoted )
+	    { return "'" % escaped( unquoted ) % "'"; }
 
     }	// namespace SysUtil
 

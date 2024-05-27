@@ -91,13 +91,13 @@ namespace QDirStat
 	 * Return the list of case-insensitive exact filename matches.
 	 **/
 	const QStringList & caseInsensitiveExactList() const
-		{ return _caseInsensitiveExactList; }
+	    { return _caseInsensitiveExactList; }
 
 	/**
 	 * Return the list of case-sensitive exact filename matches.
 	 **/
 	const QStringList & caseSensitiveExactList() const
-		{ return _caseSensitiveExactList; }
+	    { return _caseSensitiveExactList; }
 
 	/**
 	 * Return the list of case-insensitive suffixes for this category.
@@ -105,7 +105,7 @@ namespace QDirStat
 	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseInsensitiveSuffixList() const
-		{ return _caseInsensitiveSuffixList; }
+	    { return _caseInsensitiveSuffixList; }
 
 	/**
 	 * Return the list of case-sensitive suffixes for this category.
@@ -113,35 +113,35 @@ namespace QDirStat
 	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseSensitiveSuffixList() const
-		{ return _caseSensitiveSuffixList; }
+	    { return _caseSensitiveSuffixList; }
 
 	/**
 	 * Return the case-insensitive list of patterns which contain a
 	 * suffix plus other wildcards.
 	 **/
 	const QStringList & caseInsensitiveWildcardSuffixList() const
-		{ return _caseInsensitiveWildcardSuffixList; }
+	    { return _caseInsensitiveWildcardSuffixList; }
 
 	/**
 	 * Return the case-sensitive list of patterns which contain a
 	 * suffix plus other wildcards.
 	 **/
 	const QStringList & caseSensitiveWildcardSuffixList() const
-		{ return _caseSensitiveWildcardSuffixList; }
+	    { return _caseSensitiveWildcardSuffixList; }
 
 	/**
 	 * Return the list of case-insensitive patterns for this category
 	 * that have wildcards and do not have a trailing suffix.
 	 **/
 	const QStringList & caseInsensitiveWildcardList() const
-		{ return _caseInsensitiveWildcardList; }
+	    { return _caseInsensitiveWildcardList; }
 
 	/**
 	 * Return the list of case-sensitive patterns for this category
 	 * that have wildcards and do not have a trailing suffix.
 	 **/
 	const QStringList & caseSensitiveWildcardList() const
-		{ return _caseSensitiveWildcardList; }
+	    { return _caseSensitiveWildcardList; }
 
 	/**
 	 * Return a sorted list of all either case sensitive or case
