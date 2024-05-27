@@ -27,7 +27,9 @@
 #include "Trash.h"
 
 
-#define MAX_URLS_IN_CONFIRMATION_POPUP 9
+#define MAX_URLS_IN_CONFIRMATION_POPUP  9
+#define MIN_DIALOG_WIDTH               40
+#define MAX_SAFE_DIALOG_WIDTH          85
 
 
 using namespace QDirStat;
@@ -65,7 +67,7 @@ namespace
 
 	for ( const auto item : items )
 	{
-	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
+	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
 
 	    if ( ( item->isDirInfo() && dirs ) || ( !item->isDirInfo() && files ) )
 	    {
@@ -89,27 +91,33 @@ namespace
      **/
     bool confirmation( Cleanup * cleanup, const FileInfoSet & items )
     {
-	// QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
-	// "white-space: pre", but only up to about 100 characters
-	// So elide ridiculously long names and add enough spaces to the title to avoid wrapping
-	const QFont font = QGuiApplication::font();
-	const int spaceWidth = textWidth( font, " " );
-
-	const QString msg = [ cleanup, &items, &font, spaceWidth ]()
+	// Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
+	const QString msg = [ cleanup, &items ]()
 	{
+	    // QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
+	    // "white-space: pre", but only up to about 100 characters
+	    // So elide ridiculously long names and add enough spaces to the title to avoid wrapping
+	    // This is rich text and the title is styled <h3>, so don't try to be too precise and
+	    // just rely on the final styled text being wider than we assumed.
+	    const QFont font = QGuiApplication::font();
+	    const int spaceWidth = textWidth( font, " " );
+	    const QString cleanTitle = cleanup->cleanTitle();
+	    const int titleWidth = textWidth( font, cleanTitle ) / spaceWidth;
+
 	    if ( items.size() == 1 )
 	    {
 		const FileInfo * item = items.first();
-		const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), 90 );
+		const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
 
 		// Pad the title to avoid tiny dialog boxes
-		const int spaces = qMax( textWidth( font, name ) / spaceWidth, 40 );
-		const QString title = pad( cleanup->cleanTitle(), spaces );
 		const QString itemType = item->isDirInfo() ?
 					 QObject::tr( "for directory" ) :
 					 QObject::tr( "for file" );
+		const QString itemLine = itemType % ": " % name;
+		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
+		const QString title = cleanTitle + QString( itemSpaces - titleWidth, ' ' );
 
-		return QString( "<h3>%1</h3>%2: %3<br/>" ).arg( title ).arg( itemType ).arg( name );
+		return QString( "<h3>%1</h3>%2<br/>" ).arg( title ).arg( itemLine );
 	    }
 
 	    const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
@@ -117,28 +125,23 @@ namespace
 
 	    QStringList urls;
 	    if ( !dirs.isEmpty() )
-	    {
-		urls << QObject::tr( "<u>for directories:</u>" );
-		urls << dirs;
-	    }
+		urls << QObject::tr( "<u>for directories:</u>" ) << dirs;
+
 	    if ( !files.isEmpty() )
-	    {
-		urls << QObject::tr( "<u>for files:</u>" );
-		urls << files;
-	    }
+		urls << QObject::tr( "<u>for files:</u>" ) << files;
 
 	    if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
 		urls << QObject::tr( "<i>(%1 items total)</i>" ).arg( items.size() );
 
-	    // Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
-	    int spaces = 40;
+	    int longestLine = MIN_DIALOG_WIDTH * spaceWidth;
 	    for ( const QString & line : urls )
 	    {
-		const int lineSpaces = textWidth( font, line ) / spaceWidth;
-		if ( lineSpaces > spaces )
-		    spaces = lineSpaces;
+		const int lineLength = textWidth( font, line );
+		if ( lineLength > longestLine )
+		    longestLine = lineLength;
 	    }
-	    const QString title = pad( cleanup->cleanTitle(), spaces );
+	    const int spaces = longestLine / spaceWidth - titleWidth;
+	    const QString title = cleanTitle + QString( spaces, ' ' );
 
 	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( QLatin1String( "<br>" ) ) );
 	}();
