@@ -25,8 +25,6 @@ using namespace QDirStat;
 
 void MainWindow::connectMenuActions()
 {
-    _ui->actionGoUp->setShortcutContext( Qt::ApplicationShortcut );
-    _ui->actionGoToToplevel->setShortcutContext( Qt::ApplicationShortcut );
     _ui->actionWhatsNew->setStatusTip( RELEASE_URL ); // defined in Version.h
 
     // Invisible, not on any menu or toolbar
@@ -160,7 +158,6 @@ void MainWindow::connectFunctorAction( QAction * action, void( *actee )( void ) 
 void MainWindow::updateActions()
 {
     const bool       reading       = app()->dirTree()->isBusy();
-    const FileInfo * currentItem   = app()->currentItem();
     const FileInfo * firstToplevel = app()->firstToplevel();
     const bool       isTree        = firstToplevel && !reading;
     const bool       pkgView       = firstToplevel && firstToplevel->isPkgInfo();
@@ -170,26 +167,24 @@ void MainWindow::updateActions()
     _ui->actionAskReadCache->setEnabled ( !reading );
     _ui->actionAskWriteCache->setEnabled( isTree && !pkgView );
 
-    _ui->actionFindFiles->setEnabled   ( firstToplevel );
-    _ui->actionCopyPath->setEnabled    ( isTree && currentItem );
-    _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
-    _ui->actionGoToToplevel->setEnabled( firstToplevel );
+    const FileInfoSet selectedItems     = app()->selectionModel()->selectedItems();
+    const bool        sel               = selectedItems.size() > 0;
+    const FileInfo  * first             = sel ? selectedItems.first() : nullptr;
+    const bool        selSizeOne        = !reading && selectedItems.size() == 1 && !pkgView;
 
-    const FileInfoSet selectedItems  = app()->selectionModel()->selectedItems();
-    const bool        sel            = selectedItems.size() > 0;
-    const FileInfo  * first          = sel ? selectedItems.first() : nullptr;
-    const bool        selSizeOne     = !reading && selectedItems.size() == 1 && !pkgView;
     _ui->actionRefreshSelected->setEnabled( selSizeOne && !first->isMountPoint() && !first->isExcluded() );
     _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
     _ui->actionReadExcluded->setEnabled   ( selSizeOne && first->isExcluded()   );
 
-    const bool pseudoDirSelected = selectedItems.containsPseudoDir();
-    const bool pkgSelected       = selectedItems.containsPkg();
-    _ui->actionMoveToTrash->setEnabled( !reading && sel && !pseudoDirSelected && !pkgSelected );
+    const FileInfo * currentItem       = app()->currentItem();
+    const bool       pseudoDirSelected = selectedItems.containsPseudoDir();
 
-    _ui->actionFileSizeStats->setEnabled( isTree );
-    _ui->actionFileTypeStats->setEnabled( isTree );
-    _ui->actionFileAgeStats->setEnabled ( isTree );
+    _ui->actionCopyPath->setEnabled   ( isTree && currentItem );
+    _ui->actionFindFiles->setEnabled  ( firstToplevel );
+    _ui->actionMoveToTrash->setEnabled( !reading && sel && !pseudoDirSelected && !pkgView );
+
+    _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
+    _ui->actionGoToToplevel->setEnabled( firstToplevel );
 
     _ui->actionCloseAllTreeLevels->setEnabled( firstToplevel );
     _ui->menuExpandTreeToLevel->setEnabled   ( firstToplevel );
@@ -202,7 +197,10 @@ void MainWindow::updateActions()
     _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
 
     for ( QAction * action : _ui->menuDiscover->actions() )
-	action->setEnabled( isTree );
+    {
+	if ( action != _ui->actionShowFilesystems )
+	    action->setEnabled( isTree );
+    }
 
     _historyButtons->updateActions();
 }
@@ -234,7 +232,7 @@ void MainWindow::mousePressEvent( QMouseEvent * event )
 }
 
 
-// For more MainWindow:: methods, See also:
+// For more MainWindow:: methods, see also:
 //
 //   - MainWindow.cpp
 //   - MainWindowLayout.cpp

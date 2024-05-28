@@ -129,6 +129,7 @@ namespace
 	const QString sizeText = formatSize( item->rawByteSize() );
 	const QString allocText = QString( " (%1)" ).arg( formatSize( item->rawAllocatedSize() ) );
 	const QString linksText = formatLinksInline( item->links() );
+
 	return { sizeText, allocText, linksText };
     }
 
@@ -154,6 +155,7 @@ namespace
 	const FileSize size = item->size();
 	const QString sizeText = size < 1000 ? formatShortByteSize( size ) : formatSize( size );
 	const QString allocText = QObject::tr( " (%1k)" ).arg( item->allocatedSize() / 1024 );
+
 	return { sizeText, allocText };
     }
 
@@ -364,7 +366,7 @@ namespace
      * etc.) is still busy, i.e. the read job for the directory itself (not
      * any children!) is still queued or currently reading.
      **/
-    bool anyAncestorBusy( FileInfo * item )
+    bool anyAncestorBusy( const FileInfo * item )
     {
 	while ( item )
 	{
@@ -646,11 +648,7 @@ QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parent
     CHECK_MAGIC( parent );
 
     if ( parent->isDirInfo() )
-    {
-	FileInfo * child = findChild( parent->toDirInfo(), row );
-
-	return createIndex( row, column, child );
-    }
+	return createIndex( row, column, findChild( parent->toDirInfo(), row ) );
 
     return QModelIndex();
 }
@@ -919,8 +917,6 @@ void DirTreeModel::readJobFinished( DirInfo * dir )
 
     if ( !anyAncestorBusy( dir ) )
 	newChildrenNotify( dir );
-//    else if ( dir && !dir->isMountPoint() )
-//	logDebug() << "Ancestor busy - ignoring readJobFinished for " << dir << Qt::endl;
 }
 
 
@@ -1060,8 +1056,6 @@ void DirTreeModel::deletingChildren( DirInfo * parent, const FileInfoSet & child
 {
     const QModelIndex parentIndex = modelIndex( parent );
     int firstRow = rowCount( parentIndex );
-//    if ( firstRow == 0 )
-//	return;
 
     int lastRow = 0;
     for ( const FileInfo * child : children )
@@ -1074,8 +1068,6 @@ void DirTreeModel::deletingChildren( DirInfo * parent, const FileInfoSet & child
 	    if ( row < firstRow )
 		firstRow = row;
 	}
-
-//	invalidatePersistent( child, true );
     }
 
     //logDebug() << "beginRemoveRows for " << parent << ": rows " << firstRow << "-" << lastRow << Qt::endl;
@@ -1096,27 +1088,8 @@ void DirTreeModel::clearingSubtree( DirInfo * subtree )
 
 	//logDebug() << "beginRemoveRows for " << subtree << " row 0 to " << count - 1 << Qt::endl;
     }
-
-//    invalidatePersistent( subtree, false );
 }
 
-/*
-void DirTreeModel::invalidatePersistent( const FileInfo * subtree,
-					 bool             includeParent )
-{
-    const auto indexList = persistentIndexList();
-    for ( const QModelIndex & index : indexList )
-    {
-	const FileInfo * item = internalPointerCast( index );
-	if ( !item->checkMagicNumber() ||
-	     ( item->isInSubtree( subtree ) && ( item != subtree || includeParent ) ) )
-	{
-	    //logDebug() << "Invalidating " << index << Qt::endl;
-	    changePersistentIndex( index, QModelIndex() );
-	}
-    }
-}
-*/
 #if 0
 void DirTreeModel::itemClicked( const QModelIndex & index )
 {

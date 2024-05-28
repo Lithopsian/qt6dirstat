@@ -31,7 +31,7 @@ void Refresher::refresh()
 	DirTree * tree = _items.first()->tree();
 	if ( tree )
 	{
-	    // This can throw when refreshing the root and it is no longer accessible
+	    // This can throw when refreshing the root if it is no longer accessible
 	    try
 	    {
 		tree->refresh( _items );

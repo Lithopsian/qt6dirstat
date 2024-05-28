@@ -148,7 +148,7 @@ DirReadJob::~DirReadJob()
 	//
 	// https://github.com/shundhammer/qdirstat/issues/122
 
-	if ( _dir )
+	if ( _dir && _dir->checkMagicNumber() )
 	    _dir->readJobFinished( _dir );
     }
 }

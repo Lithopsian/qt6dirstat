@@ -10,11 +10,11 @@
 #ifndef Version_h
 #define Version_h
 
-#define QDIRSTAT_VERSION "0.2"
-#define MENUBAR_VERSION "V0.2 "
+#define QDIRSTAT_VERSION "0.3"
+#define MENUBAR_VERSION "V" QDIRSTAT_VERSION
 
-#define RELEASE_VERSION  "0.2"
-#define RELEASE_BASE_URL "https://github.com/shundhammer/qdirstat/releases/tag/"
+#define RELEASE_VERSION  "0.3"
+#define RELEASE_BASE_URL "https://github.com/Lithopsian/qt6dirstat/releases/tag/"
 #define RELEASE_URL      RELEASE_BASE_URL RELEASE_VERSION
 
 #endif // Version_h

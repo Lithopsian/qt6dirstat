@@ -498,7 +498,6 @@ void DirInfo::addToAttic( FileInfo * newChild )
     else
 	_totalIgnoredItems++;
 
-    CHECK_PTR( attic );
     attic->insertChild( newChild );
 }
 

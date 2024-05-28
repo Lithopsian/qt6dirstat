@@ -345,6 +345,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	    if ( item == _root || item->parent() == _root )
 	    {
 		// just try a full refresh, it will throw if even that isn't accessible any more
+		//logDebug() << item->parent() << " " << _root << Qt::endl;
 		refresh( item->toDirInfo() );
 		return;
 	    }
@@ -382,7 +383,7 @@ void DirTree::refresh( DirInfo * subtree )
 	// Get the url to refresh before we clear the tree
 	const QString url = firstToplevel()->url();
 //	emit clearing(); // for the selection model
-	clearSubtree( _root ); // will notify the tree model
+	clearSubtree( _root );
 	startReading( QDir::cleanPath( url ) );
     }
     else	// Refresh subtree

@@ -84,13 +84,12 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->treemapView->setSelectionModel( app()->selectionModel() );
 
     _futureSelection.setTree( app()->dirTree() );
-//    _futureSelection.setUseRootFallback( false );
     _futureSelection.setUseParentFallback( true );
 
     ActionManager::setActions( this, app()->selectionModel(), _ui->toolBar, _ui->menuCleanup );
 
     connectSignals();
-    connectMenuActions();               // see MainWindowActions.cpp
+    connectMenuActions(); // see MainWindowActions.cpp
     readSettings();
 
     app()->dirTreeModel()->setBaseFont( _ui->dirTreeView->font() );
@@ -323,8 +322,6 @@ void MainWindow::detailsWithTreemap( bool withTreemap )
     newParent->setVisible( _ui->actionShowDetailsPanel->isChecked() );
     newParent->setWidget( oldParent->takeWidget() );
     oldParent->hide();
-
-    updateFileDetailsView();
 }
 
 
@@ -476,7 +473,7 @@ void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
     {
 	_ui->dirTreeView->scrollToCurrent();
 
-	// Remember this order to restore after the next tree read
+	// Remember this order to restore after the next tree read ends
 	_sortCol = app()->dirTreeModel()->sortColumn();
 	_sortOrder = app()->dirTreeModel()->sortOrder();
     }
@@ -614,16 +611,15 @@ void MainWindow::setFutureSelection()
 
 void MainWindow::refreshAll()
 {
+    const QString & url = app()->dirTree()->url();
+    logDebug() << url << Qt::endl;
+    if ( url.isEmpty() )
+	// Refresh shouldn't be enabled with no tree, but can't read an empty string
+	return;
+
     enableDirPermissionsMsg();
     setFutureSelection();
     _ui->treemapView->saveTreemapRoot();
-
-    const QString & url = app()->dirTree()->url();
-    if ( url.isEmpty() )
-    {
-	askOpenDir();
-	return;
-    }
 
     //logDebug() << "Refreshing " << url << Qt::endl;
 
@@ -662,25 +658,22 @@ void MainWindow::refreshAll()
 
 void MainWindow::refreshSelected()
 {
-    // logDebug() << "Setting future selection: " << _futureSelection.subtree() << Qt::endl;
-
-    enableDirPermissionsMsg();
-    setFutureSelection();
-    _ui->treemapView->saveTreemapRoot();
-
     FileInfo * sel = app()->selectionModel()->selectedItems().first();
     while ( sel && !sel->isDir() && sel->parent() != sel->tree()->root() )
 	sel = sel->parent();
 
+    // Should always be a selected item if this action is enabled, but ...
     if ( sel )
     {
 	// logDebug() << "Refreshing " << sel << Qt::endl;
 
+	enableDirPermissionsMsg();
+	setFutureSelection();
+	_ui->treemapView->saveTreemapRoot();
+
 	_stopWatch.start();
 	FileInfoSet refreshSet;
 	refreshSet << sel;
-
-//	app()->selectionModel()->prepareForRefresh( refreshSet );
 
 	try
 	{
@@ -691,10 +684,6 @@ void MainWindow::refreshSelected()
 	    CAUGHT( ex );
 	    showOpenDirErrorPopup( ex );
 	}
-    }
-    else
-    {
-	logWarning() << "NOT refreshing " << sel << Qt::endl;
     }
 
     updateActions();
@@ -711,8 +700,9 @@ void MainWindow::applyFutureSelection()
         app()->selectionModel()->setCurrentItem( sel,
                                                  true);  // select
 
-        if ( sel->isMountPoint() || sel->isDirInfo() ) // || app()->dirTree()->isToplevel( sel ) )
-            _ui->dirTreeView->setExpanded( sel, true );
+//        // a bit annoying having directories opened all the time
+//        if ( sel->isMountPoint() || sel->isDirInfo() ) // || app()->dirTree()->isToplevel( sel ) )
+//            _ui->dirTreeView->setExpanded( sel, true );
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }
@@ -902,9 +892,8 @@ void MainWindow::copyCurrentPathToClipboard()
     const FileInfo * currentItem = app()->currentItem();
     if ( currentItem )
     {
-	QClipboard * clipboard = QApplication::clipboard();
 	const QString path = currentItem->path();
-	clipboard->setText( path );
+	QApplication::clipboard()->setText( path );
 	showProgress( tr( "Copied to system clipboard: " ) + path );
     }
 }

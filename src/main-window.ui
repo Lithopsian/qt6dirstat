@@ -162,14 +162,6 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1115</width>
-     <height>21</height>
-    </rect>
-   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
@@ -594,6 +586,9 @@
    <property name="shortcut">
     <string>Alt+Up</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionGoToToplevel">
    <property name="icon">
@@ -608,6 +603,9 @@
    </property>
    <property name="shortcut">
     <string>Alt+Home</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionAbout">
@@ -710,6 +708,9 @@
    <property name="shortcut">
     <string>F3</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionHelp">
    <property name="text">
@@ -731,6 +732,9 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionShowDetailsPanel">
@@ -856,6 +860,9 @@
    <property name="shortcut">
     <string>Ctrl+M</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionDiscoverLargestFiles">
    <property name="text">
@@ -943,6 +950,9 @@
    <property name="shortcut">
     <string>F4</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionGoBack">
    <property name="icon">
@@ -958,6 +968,9 @@
    <property name="shortcut">
     <string>Alt+Left</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionGoForward">
    <property name="icon">
@@ -972,6 +985,9 @@
    </property>
    <property name="shortcut">
     <string>Alt+Right</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionFileAgeStatsHelp">
@@ -995,6 +1011,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionTreemapHelp">

@@ -117,6 +117,7 @@ void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
     if ( detailsPanelVisible )
     {
 	detailsWithTreemap( _ui->actionDetailsWithTreemap->isChecked() );
+	updateFileDetailsView();
     }
     else
     {
@@ -189,6 +190,7 @@ void MainWindow::writeLayoutSetting( const QAction * action )
     settings.setValue( "ShowDirTree",      layoutShowDirTree     ( action ) );
     settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
 //    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
+//    settings.setValue( "DetailsWithTreemap", layoutdetailsWithTreemap( action ) );
     settings.endGroup();
 }
 
@@ -224,7 +226,9 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
                                            "actionShowDetailsPanel",
                                            "actionShowDirTree",
                                            "actionShowTreemap",
+//                                           "---",
 //                                           "actionTreemapOnSide",
+//                                           "actionDetailsWithTreemap",
                                          };
             ActionManager::addActions( &menu, actions1 );
 
