@@ -569,7 +569,11 @@ void CacheReader::addItem()
 	parent->insertChild( dir );
 
 	if ( !_toplevel )
+	{
 	    _toplevel = dir;
+	    if ( !_parent )
+		_tree->setUrl( dir->url() );
+	}
 
 	_tree->childAddedNotify( dir );
 

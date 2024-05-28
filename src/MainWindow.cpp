@@ -360,7 +360,7 @@ void MainWindow::idleDisplay()
 
     if ( _futureSelection.subtree() )
     {
-	//logDebug() << "Using future selection " << _futureSelection.subtree() << Qt::endl;
+	logDebug() << "Using future selection " << _futureSelection.subtree() << Qt::endl;
         applyFutureSelection();
     }
     else
@@ -612,7 +612,6 @@ void MainWindow::setFutureSelection()
 void MainWindow::refreshAll()
 {
     const QString & url = app()->dirTree()->url();
-    logDebug() << url << Qt::endl;
     if ( url.isEmpty() )
 	// Refresh shouldn't be enabled with no tree, but can't read an empty string
 	return;
@@ -700,9 +699,9 @@ void MainWindow::applyFutureSelection()
         app()->selectionModel()->setCurrentItem( sel,
                                                  true);  // select
 
-//        // a bit annoying having directories opened all the time
-//        if ( sel->isMountPoint() || sel->isDirInfo() ) // || app()->dirTree()->isToplevel( sel ) )
-//            _ui->dirTreeView->setExpanded( sel, true );
+	// A bit annoying to open every refreshed directory, so just the top level
+        if ( sel->parent() == app()->dirTree()->root() )
+            _ui->dirTreeView->setExpanded( sel, true );
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }

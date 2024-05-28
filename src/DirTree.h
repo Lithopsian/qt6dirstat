@@ -110,10 +110,14 @@ namespace QDirStat
 	void finalizeTree();
 
 	/**
-	 * Return the URL of this tree if it has any elements or an empty
-	 * string if it doesn't.
+	 * Return the URL of this tree.
 	 **/
 	const QString & url() const { return _url; }
+
+	/**
+	 * Set the URL of this tree.
+	 **/
+	void setUrl( const QString & url ) { _url = url; }
 
 	/**
 	 * Return the root item of this tree. Notice that this is a pseudo root
