@@ -34,8 +34,10 @@ namespace QDirStat
         /**
          * Constructor.
          **/
-        ProcessStarter( QObject * parent = nullptr ):
-            QObject( parent )
+        ProcessStarter( int maxParallel, bool autoDelete, QObject * parent = nullptr ):
+            QObject( parent ),
+            _maxParallel { maxParallel },
+            _autoDelete { autoDelete }
         {}
 
         /**
@@ -56,25 +58,25 @@ namespace QDirStat
         /**
          * Return the maximum number of processes running in parallel.
          **/
-        int maxParallel() const { return _maxParallel; }
+//        int maxParallel() const { return _maxParallel; }
 
         /**
          * Set the maximum number of processes running in parallel.
          **/
-        void setMaxParallel( int newVal ) { _maxParallel = newVal; }
+//        void setMaxParallel( int newVal ) { _maxParallel = newVal; }
 
         /**
          * Return 'true' if this object will automatically delete itself when
          * the last process is started, 'false' otherwise.
          **/
-        bool autoDelete() const { return _autoDelete; }
+//        bool autoDelete() const { return _autoDelete; }
 
         /**
          * Set the autoDelete flag: If set, this object will automatically
          * delete itself when the last process is started. The default is
          * 'false'.
          **/
-        void setAutoDelete( bool newVal ) { _autoDelete = newVal; }
+//        void setAutoDelete( bool newVal ) { _autoDelete = newVal; }
 
 
     protected slots:
@@ -97,8 +99,8 @@ namespace QDirStat
 
         // Data members
 
-        int               _maxParallel	{ 8 };
-        bool              _autoDelete	{ false };
+        int               _maxParallel;
+        bool              _autoDelete;
         bool              _started	{ false };
         QList<QProcess *> _running;
         QList<QProcess *> _waiting;

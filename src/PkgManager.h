@@ -120,7 +120,7 @@ namespace QDirStat
 	/**
 	 * Return the list of files and directories owned by a package.
 	 **/
-	virtual QStringList fileList( const PkgInfo * pkg ) const;
+	QStringList fileList( const PkgInfo * pkg ) const;
 
 	/**
 	 * Return 'true' if this package manager supports getting the file list

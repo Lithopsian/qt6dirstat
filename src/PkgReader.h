@@ -131,7 +131,7 @@ namespace QDirStat
          *
          * Reimplemented from DirReadJob.
          **/
-        void startReading() override;
+        void startReading();
 
         /**
          * Return the parent PkgInfo node.

@@ -228,10 +228,10 @@ void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
 {
     //logDebug() << Qt::endl;
 
-    ProcessStarter * processStarter = new ProcessStarter;
+    ProcessStarter * processStarter = new ProcessStarter( _maxParallelProcesses, true );
     CHECK_NEW( processStarter );
-    processStarter->setAutoDelete( true );
-    processStarter->setMaxParallel( _maxParallelProcesses );
+//    processStarter->setAutoDelete( true );
+//    processStarter->setMaxParallel( _maxParallelProcesses );
 
     for ( PkgInfo * pkg : pkgList )
     {
