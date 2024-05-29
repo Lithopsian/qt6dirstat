@@ -280,6 +280,7 @@ void DirTree::clear()
 {
     _jobQueue.clear();
 
+    _url.clear();
     if ( _root )
     {
 	emit clearing();
@@ -381,10 +382,10 @@ void DirTree::refresh( DirInfo * subtree )
     if ( subtree == _root || subtree->parent() == _root )	// Refresh all (from first toplevel)
     {
 	// Get the url to refresh before we clear the tree
-	const QString url = firstToplevel()->url();
+//	const QString url = firstToplevel()->url();
 //	emit clearing(); // for the selection model
 	clearSubtree( _root );
-	startReading( QDir::cleanPath( url ) );
+	startReading( QDir::cleanPath( _url ) );
     }
     else	// Refresh subtree
     {
@@ -582,15 +583,12 @@ void DirTree::sendReadJobFinished( DirInfo * dir )
 
 FileInfo * DirTree::locate( const QString & url, bool findPseudoDirs ) const
 {
-    if ( !_root )
-	return nullptr;
+    // Search from the top of the tree
+    if ( _root )
+	return _root->locate( url, findPseudoDirs );
 
-    FileInfo * topItem = _root->firstChild();
-
-    if ( topItem && topItem->isPkgInfo() && topItem->url() == url )
-	return topItem;
-
-    return _root->locate( url, findPseudoDirs );
+    // Should never get here, there is always _root
+    return nullptr;
 }
 
 

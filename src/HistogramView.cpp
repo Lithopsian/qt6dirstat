@@ -98,20 +98,6 @@ qreal HistogramView::bestBucketCount( int n )
 }
 
 
-qreal HistogramView::bucketStart( int index ) const
-{
-    const qreal offset = percentile( _startPercentile );
-    return offset + index * bucketWidth();
-}
-
-
-qreal HistogramView::bucketEnd( int index ) const
-{
-    const qreal offset = percentile( _startPercentile );
-    return offset + ( index + 1 ) * bucketWidth();
-}
-
-
 qreal HistogramView::percentile( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
@@ -411,7 +397,7 @@ void HistogramView::rebuild()
     if ( _stats->buckets().size() < 1 || _stats->percentileList().size() != 101 )
     {
 	scene()->addText( "No data yet" );
-	logInfo() << "No data yet" << Qt::endl;
+	logInfo() << "No data yet " << _stats->percentileList().size() << Qt::endl;
 	return;
     }
 

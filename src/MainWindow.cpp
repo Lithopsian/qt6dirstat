@@ -360,12 +360,12 @@ void MainWindow::idleDisplay()
 
     if ( _futureSelection.subtree() )
     {
-	logDebug() << "Using future selection " << _futureSelection.subtree() << Qt::endl;
+	//logDebug() << "Using future selection " << _futureSelection.subtree() << Qt::endl;
         applyFutureSelection();
     }
     else
     {
-	logDebug() << "No future selection - expanding tree to level 1" << Qt::endl;
+	//logDebug() << "No future selection - expanding tree to level 1" << Qt::endl;
 	expandTreeToLevel( 1 );
     }
 
@@ -502,7 +502,7 @@ void MainWindow::openDir( const QString & url )
     {
 	app()->dirTree()->clear();
 	app()->dirTreeModel()->openUrl( url );
-	const QString & dirTreeUrl = app()->dirTree()->url();
+	const QString & dirTreeUrl = app()->dirTree()->url(); // canonical version of url
 	updateWindowTitle( dirTreeUrl );
 	_futureSelection.setUrl( dirTreeUrl );
     }
@@ -525,8 +525,8 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     updateWindowTitle( "" );
     app()->dirTree()->sendFinished();
 
-    const QString msg = pad( tr( "Could not open directory " ) + ex.resourceName(), 50 );
-    QMessageBox errorPopup( QMessageBox::Warning, tr( "Error" ), msg );
+    QMessageBox errorPopup( QMessageBox::Warning, tr( "Error" ),
+                            pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) );
     errorPopup.setDetailedText( ex.what() );
     errorPopup.exec();
 }
@@ -611,7 +611,7 @@ void MainWindow::setFutureSelection()
 
 void MainWindow::refreshAll()
 {
-    const QString & url = app()->dirTree()->url();
+    const QString url = app()->dirTree()->url(); // don't take reference since it is about to be cleared
     if ( url.isEmpty() )
 	// Refresh shouldn't be enabled with no tree, but can't read an empty string
 	return;
@@ -748,6 +748,7 @@ void MainWindow::askReadCache()
     app()->dirTree()->clear();
     app()->dirTree()->reset();
     _historyButtons->clear();
+    _ui->breadcrumbNavigator->clear();
     readCache( fileName );
 }
 
@@ -798,8 +799,10 @@ void MainWindow::showCurrent( FileInfo * item )
 {
     if ( item )
     {
-	const QString size = formatSize( item->totalSize() );
-	QString msg = QString( "%1  (%2%3)" ).arg( item->debugUrl() ).arg( item->sizePrefix() ).arg( size );
+	QString msg = QString( "%1  (%2%3)" )
+			.arg( item->debugUrl() )
+			.arg( item->sizePrefix() )
+			.arg( formatSize( item->totalSize() ) );
 
 	if ( item->readState() == DirPermissionDenied || item->readState() == DirError )
 	    msg += "  " + _ui->fileDetailsView->readStateMsg( item->readState() );
@@ -820,8 +823,9 @@ void MainWindow::showSummary()
 
     if ( count > 1 )
     {
-	const QString size = formatSize( sel.normalized().totalSize() );
-	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" ).arg( count ).arg( size ) );
+	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" )
+	                             .arg( count )
+				     .arg( formatSize( sel.normalized().totalSize() ) ) );
     }
     else
     {

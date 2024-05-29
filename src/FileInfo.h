@@ -179,7 +179,7 @@ namespace QDirStat
 	 * more. Thus, somebody from outside must call unlinkChild() just prior
 	 * to the actual "delete".
 	 **/
-	virtual ~FileInfo() { _magic = 0; }
+	virtual ~FileInfo();
 
 	/**
 	 * Check with the magic number if this object is valid.

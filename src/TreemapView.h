@@ -520,11 +520,6 @@ namespace QDirStat
 	void clearParentsHighlight();
 
 	/**
-	 * Clear the old scene mask if there is one.
-	 **/
-	void clearSceneMask();
-
-	/**
 	 * Cancels any treemap builds.
 	 **/
 	void cancelTreemap();

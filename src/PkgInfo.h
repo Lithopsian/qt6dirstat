@@ -36,10 +36,8 @@ namespace QDirStat
                  const QString    & version,
                  const QString    & arch,
                  const PkgManager * pkgManager ):
-            DirInfo( parent,
-                     tree,
-                     name ),
-            _pkgManager ( pkgManager ),
+            DirInfo( parent, tree, name ),
+            _pkgManager { pkgManager },
             _baseName { name },
             _version { version },
             _arch { arch },
@@ -67,7 +65,7 @@ namespace QDirStat
          **/
         PkgInfo( DirTree          * tree,
                  DirInfo          * parent ):
-            PkgInfo ( tree, parent, pkgScheme(), QString(), QString(), nullptr )
+            PkgInfo ( tree, parent, pkgSummaryUrl(), QString(), QString(), nullptr )
         {}
 
         /**
@@ -143,7 +141,7 @@ namespace QDirStat
          * Reimplemented - inherited from FileInfo.
          **/
         virtual QString url() const override
-            { return pkgSummaryUrl() + ( isPkgUrl( _name ) ? "" : _name ); }
+            { return pkgScheme() + ( isPkgUrl( _name ) ? "" : _name ); }
 
         /**
          * Return 'true' if this is a package URL, i.e. it starts with "Pkg:".
@@ -159,17 +157,18 @@ namespace QDirStat
             { return isPkgUrl( path ) ? path : url() + path; }
 
         /**
-         * Locate a path that is already split up into its components within a
-         * subtree: Return the corresponding FileInfo or 0 if not found.
+         * Locate a path that within this subtree.
+         *
+         * Reimplemented from FileInfo.  The default locate() function does not
+         * understand schemes, so handle that here.
          **/
-//        FileInfo * locate( DirInfo           * subtree,
-//                           const QStringList & pathComponents );
-//        FileInfo * locate( const QString & pathComponent );
+        FileInfo * locate( const QString & locateUrl, bool findPseudoDirs ) override
+            { return locateUrl == url() ? this : FileInfo::locate( locateUrl, findPseudoDirs ); }
 
         /**
          * Returns the name of the "root" package summary item url (ie. "Pkg:/").
          **/
-        static QString pkgSummaryUrl() { return pkgScheme() + '/'; }
+        static QString pkgSummaryUrl() { return pkgScheme(); }
 
 
     protected:
@@ -191,7 +190,7 @@ namespace QDirStat
         /**
          * Returns the package scheme prefix.
          **/
-        static QLatin1String pkgScheme() { return QLatin1String( "Pkg:" ); }
+        static QLatin1String pkgScheme() { return QLatin1String( "Pkg:/" ); }
 
 
     private:

@@ -149,9 +149,9 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_17">
+      <widget class="QWidget" name="patternsTab">
        <attribute name="title">
         <string>&amp;Patterns</string>
        </attribute>
@@ -166,7 +166,7 @@
          <number>4</number>
         </property>
         <item>
-         <widget class="QSplitter" name="splitter">
+         <widget class="QSplitter" name="patternsSplitter">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -252,13 +252,13 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_18">
+      <widget class="QWidget" name="treemapTab">
        <attribute name="title">
         <string>&amp;Treemap</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QSplitter" name="splitter_2">
+         <widget class="QSplitter" name="treemapSplitter">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>

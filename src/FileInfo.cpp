@@ -134,6 +134,12 @@ FileInfo::FileInfo( DirInfo           * parent,
 }
 
 
+FileInfo::~FileInfo()
+{
+    _magic = 0;
+}
+
+
 FileSize FileInfo::size() const
 {
     const FileSize size = _isSparseFile ? _allocatedSize : _size;
@@ -258,20 +264,15 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	if ( url.length() == 0 )		// Nothing left?
 	    return this;			// Hey! That's us!
 
-	// If the next thing is a path delimiter,
 	if ( url.startsWith( '/' ) )
-	{
-	    // remove that leading delimiter.
+	    // remove leading delimiters, we're not matching on those
 	    url.remove( 0, 1 );
-	}
 	else if ( _name.right(1) != QLatin1String( "/" ) && !isDotEntry() )
-	{
-	    // If this is not the root directory or a dot entry, it can't be one of our children
+	    // not the root directory, not a dot entry, so it can't be one of our children
 	    return nullptr;
-	}
     }
 
-    // Search all children
+    // Search all children, recursively
     for ( FileInfo * child = firstChild(); child; child = child->next() )
     {
 	FileInfo * foundChild = child->locate( url, findPseudoDirs );
@@ -353,7 +354,7 @@ QString FileInfo::groupName() const
 
 QString FileInfo::symbolicPermissions() const
 {
-    return hasPerm() ? symbolicMode( _mode ) : QString(); // omitTypeForRegularFiles
+    return hasPerm() ? symbolicMode( _mode ) : QString();
 }
 
 

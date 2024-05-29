@@ -119,13 +119,13 @@ qreal PercentileStats::quantile( int order, int number ) const
     if ( number == order )
 	return last();
 
-    // Same as in median(): The integer division already cut off any non-zero
-    // decimal place, so don't subtract 1 to compensate for starting _data with
+    // The integer division already cut off any non-zero decimal places,
+    // so don't subtract 1 to compensate for starting _data with
     // index 0.
     const int pos = ( size() * number ) / order;
     const qreal result = at( pos );
 
-    // As in median: we hit between two elements, so use the average between them
+    // If we hit between two elements, use the average between them
     if ( ( size() * number ) % order == 0 )
 	return ( result + at( pos - 1 ) ) / 2.0;
 
@@ -135,14 +135,12 @@ qreal PercentileStats::quantile( int order, int number ) const
 
 void PercentileStats::calculatePercentiles()
 {
-    _percentiles.clear();
-    _percentiles.reserve( 101 );
+    _percentiles.clear(); // clear the list, but keep 101 items reserved (since Qt 5.7)
 
     for ( int i=0; i <= 100; ++i )
 	_percentiles << percentile( i );
 
-    _percentileSums.clear();
-    _percentileSums = QRealList( 101 );
+    _percentileSums = QRealList( 101 ); // new list, 101 items, all zero
 
     const qreal percentileSize = size() / 100.0;
 

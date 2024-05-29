@@ -604,7 +604,7 @@ void TreemapView::resizeEvent( QResizeEvent * event )
 
 void TreemapView::hideTreemap()
 {
-    logDebug() << "Hiding treemap view" << Qt::endl;
+    //logDebug() << "Hiding treemap view" << Qt::endl;
 
     clear();
     hide();
@@ -615,7 +615,7 @@ void TreemapView::hideTreemap()
 
 void TreemapView::showTreemap()
 {
-    logDebug() << "Showing treemap view " << Qt::endl;
+    //logDebug() << "Showing treemap view " << Qt::endl;
 
     if ( !isVisible() )
         show();
@@ -839,7 +839,8 @@ void TreemapView::clearParentsHighlight()
 {
     qDeleteAll( _parentHighlightList );
     _parentHighlightList.clear();
-    clearSceneMask();
+    delete _sceneMask;
+    _sceneMask = nullptr;
 }
 
 
@@ -849,13 +850,6 @@ void TreemapView::toggleParentsHighlight( const TreemapTile * tile )
         clearParentsHighlight();
     else
         highlightParents( tile );
-}
-
-
-void TreemapView::clearSceneMask()
-{
-    delete _sceneMask;
-    _sceneMask = nullptr;
 }
 
 

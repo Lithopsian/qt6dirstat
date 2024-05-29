@@ -31,7 +31,7 @@
 #define VERBOSE_READ			0
 #define VERBOSE_CACHE_DIRS		0
 #define VERBOSE_CACHE_FILE_INFOS	0
-#define DEBUG_LOCATE_PARENT		0
+#define VERBOSE_LOCATE_PARENT		0
 
 
 using namespace QDirStat;
@@ -166,6 +166,12 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
 {
     if ( !tree || !tree->root() )
 	return false;
+
+    if ( !tree->firstToplevel()->isDirInfo() )
+    {
+	logWarning() << "No toplevel directory, can't write a valid cache file" << Qt::endl;
+	return false;
+    }
 
     gzFile cache = gzopen( (const char *) fileName.toUtf8().constData(), "w" );
     if ( cache == 0 )
@@ -309,8 +315,6 @@ CacheReader::CacheReader( const QString & fileName,
     if ( !tree )
 	return;
 
-    CHECK_PTR( _tree->root() );
-
     if ( _cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
@@ -444,7 +448,7 @@ void CacheReader::addItem()
 	if ( strcasecmp( keyword, "blocks:" ) == 0 ) blocks_str = val_str;
 
 	// links: is used when there is more than one hard link
-	if ( strcasecmp( keyword, "links:"  ) == 0 ) links_str	= val_str;
+	if ( strcasecmp( keyword, "links:"  ) == 0 ) links_str  = val_str;
     }
 
     mode_t mode;
@@ -513,11 +517,16 @@ void CacheReader::addItem()
 	if ( _tree->root()->isEmpty() )
 	    parent = _tree->root();
 
+#if VERBOSE_LOCATE_PARENT
+	if ( parent )
+	    logDebug() << "Using empty tree root as parent" << Qt::endl;
+#endif
+
 	// Try the easy way first - the starting point of this cache
-	if ( !parent && _parent )
+	if ( _parent && !parent )
 	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path, false ) );
 
-#if DEBUG_LOCATE_PARENT
+#if VERBOSE_LOCATE_PARENT
 	if ( parent )
 	    logDebug() << "Using cache starting point as parent for " << fullPath << Qt::endl;
 #endif
@@ -527,7 +536,7 @@ void CacheReader::addItem()
 	    // Fallback: Search the entire tree
 	    parent = dynamic_cast<DirInfo *> ( _tree->locate( path ) );
 
-#if DEBUG_LOCATE_PARENT
+#if VERBOSE_LOCATE_PARENT
 	    if ( parent )
 		logDebug() << "Located parent " << path << " in tree" << Qt::endl;
 #endif
@@ -544,7 +553,7 @@ void CacheReader::addItem()
                 _ok = false;
             }
 
-#if DEBUG_LOCATE_PARENT
+#if VERBOSE_LOCATE_PARENT
 	    THROW( Exception( "Could not locate cache item parent" ) );
 #endif
 	    return;	// Ignore this cache line completely
@@ -612,7 +621,7 @@ void CacheReader::addItem()
 	    }
 	}
     }
-    else if ( parent ) // not directory
+    else if ( parent && parent != _tree->root() ) // not directory, must have a valid parent first
     {
 #if VERBOSE_CACHE_FILE_INFOS
 	logDebug() << "Creating FileInfo for " << buildPath( parent->debugUrl(), name ) << Qt::endl;
@@ -627,7 +636,7 @@ void CacheReader::addItem()
     }
     else
     {
-	logError() << "Line " << _lineNo << ": " << "No parent for item " << name << Qt::endl;
+	logError() << "Line " << _lineNo << ": " << "no parent for item " << name << Qt::endl;
     }
 }
 
@@ -700,7 +709,7 @@ void CacheReader::checkHeader()
 {
     _ok = true;
 
-    if ( !_ok || !readLine() )
+    if ( !readLine() || !_ok )
 	return;
 
     //logDebug() << "Checking cache file header" << Qt::endl;
@@ -752,14 +761,14 @@ bool CacheReader::readLine()
 	const char * buf = gzgets( _cache, _buffer, MAX_CACHE_LINE_LEN );
 	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != '\n' )
 	{
-	    _buffer[0]	= '\0';
-	    _line	= _buffer;
+	    _buffer[0] = '\0';
+	    _line      = _buffer;
 
 	    if ( !gzeof( _cache ) )
 	    {
 		_ok = false;
 		logError() << "Line " << _lineNo <<
-			( buf == Z_NULL ? ": read error" : ": line too long" ) << Qt::endl;
+		    ( buf == Z_NULL ? ": read error" : ": line too long" ) << Qt::endl;
 	    }
 
 	    return false;
@@ -771,8 +780,8 @@ bool CacheReader::readLine()
 	// logDebug() << "line[ " << _lineNo << "]: \"" << _line<< "\"" << Qt::endl;
 
     } while ( !gzeof( _cache ) &&
-	      ( *_line == '\0'   ||	// empty line
-		*_line == '#'	  ) );	// comment line
+	      ( *_line == '\0' ||	// empty line
+	        *_line == '#' ) );	// comment line
 
     return true;
 }
@@ -784,9 +793,6 @@ void CacheReader::splitLine()
 
     if ( !_ok || !_line )
 	return;
-
-    if ( *_line == '#' )	// skip comment lines
-	*_line = '\0';
 
     char * current = _line;
     const char * end = _line + strlen( _line );
@@ -852,8 +858,7 @@ void CacheReader::setReadError( DirInfo * dir ) const
 
 QString CacheReader::cleanPath( const QString & rawPath ) const
 {
-    QString clean = rawPath;
-    return clean.replace( _multiSlash, "/" );
+    return QString( rawPath ).replace( _multiSlash, "/" );
 }
 
 
@@ -861,8 +866,5 @@ QString CacheReader::unescapedPath( const QString & rawPath ) const
 {
     // Using a protocol part to avoid directory names with a colon ":"
     // being cut off because it looks like a URL protocol.
-    const QString protocol = "foo:";
-    const QString url = protocol % cleanPath( rawPath );
-
-    return QUrl( url ).path();
+    return QUrl( "foo:" % cleanPath( rawPath ) ).path();
 }

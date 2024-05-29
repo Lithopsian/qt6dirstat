@@ -121,7 +121,7 @@ protected:
      * Show unpackaged files with the specified 'unpkgSettings' parameters
      * (startingDir, excludeDirs, ignorePatterns).
      *
-     * The URL may start with "unpkg:".
+     * The URL may start with "unpkg:/".
      **/
     void showUnpkgFiles( const UnpkgSettings & unpkgSettings );
 
@@ -138,9 +138,9 @@ protected:
         { return url.startsWith( unpkgScheme(), Qt::CaseInsensitive ); }
 
     /**
-     * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:").
+     * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
      **/
-    static QLatin1String unpkgScheme() { return QLatin1String( "Unpkg:" ); }
+    static QLatin1String unpkgScheme() { return QLatin1String( "Unpkg:/" ); }
 
     /**
      * Disable the treemap, reset the permissions warning, breadcrumbs,

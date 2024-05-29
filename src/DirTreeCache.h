@@ -225,7 +225,7 @@ namespace QDirStat
 	int       _fieldsCount;
 	bool      _markFromCache;
 	bool      _ok		{ false };
-        int       _errorCount	{ 0 };
+	int       _errorCount	{ 0 };
 
 	DirTree	* _tree;
 	DirInfo * _parent; // parent directory if there is one

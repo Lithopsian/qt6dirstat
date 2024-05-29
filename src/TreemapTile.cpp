@@ -590,13 +590,13 @@ void TreemapTile::paint( QPainter                       * painter,
     {
         //logDebug() << " highlight " << _parentView->rootTile()->_stopwatch.restart() << "ms for " << rect << Qt::endl;
 
-        // Highlight this tile. This makes only sense if this is a leaf
-        // tile (i.e., if the corresponding FileInfo doesn't have any
-        // children), because otherwise the children will obscure this
-        // tile anyway. In that case, we have to rely on a
-        // HighlightRect to be created. But we can save some memory if
-        // we don't do that for every tile, so we draw that highlight
-        // frame manually if this is a leaf tile.
+        // Highlight this tile. This only makes sense if this is a leaf
+        // tile, (i.e. if the corresponding FileInfo doesn't have any
+        // children) because otherwise the children will obscure this
+        // tile anyway. In that case, we have to rely on a HighlightRect
+        // to be created. But we can save some memory if we don't do
+        // that for every tile, so we draw that highlight frame manually
+        // if this is a leaf tile.
         painter->setBrush( Qt::NoBrush );
         QRectF selectionRect = rect;
         selectionRect.setSize( rect.size() - QSize( 1.0, 1.0 ) );
@@ -897,22 +897,4 @@ void TreemapTile::hoverLeaveEvent( QGraphicsSceneHoverEvent * )
 {
     // logDebug() << "  Leaving " << this << Qt::endl;
     _parentView->sendHoverLeave( _orig );
-}
-
-//
-//---------------------------------------------------------------------------
-//
-
-void CushionSurface::addHorizontalRidge( double start, double end )
-{
-    const double reciprocal = coefficientReciprocal( start, end );
-    _xx2 -= squareCoefficient( reciprocal );
-    _xx1 += linearCoefficient( start, end, reciprocal );
-}
-
-void CushionSurface::addVerticalRidge( double start, double end )
-{
-    const double reciprocal = coefficientReciprocal( start, end );
-    _yy2 -= squareCoefficient( reciprocal );
-    _yy1 += linearCoefficient( start, end, reciprocal );
 }

@@ -94,17 +94,26 @@ namespace QDirStat
 
 	/**
 	 * Adds a ridge of the specified height in dimension 'dir' within
-	 * rectangle 'rect' to this surface. It's real voodoo magic.
+	 * rectangle 'rect' to this surface.
 	 *
-	 * Just kidding - read the paper about "cushion treemaps" by Jarke
-	 * J. van Wiik and Huub van de Wetering from the TU Eindhoven, NL for
-	 * more details.
+	 * See the paper about "cushion treemaps" by Jarke J. van Wiik and
+	 * Huub van de Wetering from the TU Eindhoven, NL for more details.
 	 *
-	 * If you don't want to get all that involved: The coefficients are
-	 * changed in some way.
+	 * If you don't want to get all that involved: the coefficients are
+	 * changed in some way for each tile.
 	 **/
-	void addHorizontalRidge( double start, double end );
-	void addVerticalRidge( double start, double end );
+	void addHorizontalRidge( double start, double end )
+	{
+	    const double reciprocal = coefficientReciprocal( start, end );
+	    _xx2 -= squareCoefficient( reciprocal );
+	    _xx1 += linearCoefficient( start, end, reciprocal );
+	}
+	void addVerticalRidge( double start, double end )
+	{
+	    const double reciprocal = coefficientReciprocal( start, end );
+	    _yy2 -= squareCoefficient( reciprocal );
+	    _yy1 += linearCoefficient( start, end, reciprocal );
+	}
 
 	/**
 	 * Returns the polynomial coefficient of the second order for X
@@ -171,7 +180,7 @@ namespace QDirStat
      *
      * @short Basic building block of a treemap
      **/
-    class TreemapTile:	public QGraphicsRectItem
+    class TreemapTile: public QGraphicsRectItem
     {
     public:
 

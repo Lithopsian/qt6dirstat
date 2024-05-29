@@ -165,12 +165,14 @@ namespace QDirStat
 	/**
 	 * Return the start value of bucket no. 'index'
 	 **/
-	qreal bucketStart( int index ) const;
+	qreal bucketStart( int index ) const
+	    { return percentile( _startPercentile ) + index * bucketWidth(); }
 
 	/**
 	 * Return the end value of bucket no. 'index'
 	 **/
-	qreal bucketEnd( int index ) const;
+	qreal bucketEnd( int index ) const
+	    { return percentile( _startPercentile ) + ( index + 1 ) * bucketWidth(); }
 
 	/**
 	 * Return the percentile sum for percentile no. 'index' (0..100),
@@ -184,41 +186,12 @@ namespace QDirStat
 	qreal percentileSum( int fromIndex, int toIndex ) const;
 
 	/**
-	 * Enable or disable showing the median (percentile 50) as an overlay
-	 * over the histogram
-	 **/
-//	void setShowMedian( bool show = true ) { _showMedian = show; }
-
-	/**
-	 * Return 'true' if the median is shown as an overlay, 'false' if not
-	 **/
-//	bool showMedian() const { return _showMedian; }
-
-	/**
-	 * Enable or disable showing the 1st and 3rd quartiles (Q1 and Q3,
-	 * percentile 25 and 75, respectively) as an overlay over the
-	 * histogram
-	 **/
-//	void setShowQuartiles( bool show = true ) { _showQuartiles = show; }
-
-	/**
-	 * Return 'true' if the 1st and 3rd quartiles are shown as an overlay,
-	 * 'false' if not
-	 **/
-//	bool showQuartiles() const { return _showQuartiles; }
-
-	/**
 	 * Enable or disable showing percentiles as an overlay over the
 	 * histogram: 'step' specifies how many of them to display; for
 	 * example, '5' will display P5, P10, P15 etc.; step = 0 disables
 	 * them completely.
 	 **/
 	void setPercentileStep( int step ) { _percentileStep = step; }
-
-	/**
-	 * Return the percentile step or 0 if no percentiles are shown.
-	 **/
-//	int percentileStep() const { return _percentileStep; }
 
 	/**
 	 * Set how many percentiles to display as an overlay at the left margin
@@ -261,17 +234,6 @@ namespace QDirStat
 //	int rightMarginPercentiles() { return _rightMarginPercentiles; }
 
 	/**
-	 * Enable or disable a logarithmic (log2) height scale.
-	 **/
-//	void setUseLogHeightScale( bool enable ) { _useLogHeightScale = enable; }
-
-	/**
-	 * Return 'true' if a logarithmic height scale is used or 'false' if
-	 * not.
-	 **/
-//	bool useLogHeightScale() const { return _useLogHeightScale; }
-
-	/**
 	 * Pens and brushes for the various elements of the histograms.
 	 **/
 	QBrush barBrush()           const { return _barBrush;           }
@@ -281,7 +243,6 @@ namespace QDirStat
 	QPen   quartilePen()        const { return _quartilePen;        }
 	QPen   percentilePen()      const { return _percentilePen;      }
 	QPen   decilePen()          const { return _decilePen;          }
-
 
 	/**
 	 * Build the histogram based on a new set of data.
@@ -347,22 +308,22 @@ namespace QDirStat
 	void addMarkers();
 	void addOverflowPanel();
 
-        /**
-         * Add a text item at 'pos' and return the bottom left of its bounding
-         * rect.
-         **/
+	/**
+	 * Add a text item at 'pos' and return the bottom left of its bounding
+	 * rect.
+	 **/
 	QGraphicsTextItem * addText( const QPointF & pos, const QString & text );
 
-        /**
-         * Add a text item at 'pos' and return the bottom left of its bounding
-         * rect.
-         **/
+	/**
+	 * Add a text item at 'pos' and return the bottom left of its bounding
+	 * rect.
+	 **/
 	QPointF addText( const QPointF & pos, const QStringList & lines );
 
-        /**
-         * Add a bold font text item at 'pos' and return the bottom left of its
-         * bounding rect.
-         **/
+	/**
+	 * Add a bold font text item at 'pos' and return the bottom left of its
+	 * bounding rect.
+	 **/
 	QPointF addBoldText( const QPointF & pos, const QString & text );
 
 	/**
@@ -374,7 +335,7 @@ namespace QDirStat
 
 	/**
 	 * Add a pie diagram with two values val1 and val2.
-         * Return the bottom left of the bounding rect.
+	 * Return the bottom left of the bounding rect.
 	 **/
 	QPointF addPie( const QRectF & rect,
 			qreal          val1,
@@ -402,7 +363,8 @@ namespace QDirStat
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.
 	 **/
-	bool needOverflowPanel() const { return _startPercentile > 0 || _endPercentile < 100; }
+	bool needOverflowPanel() const
+	    { return _startPercentile > 0 || _endPercentile < 100; }
 
 
     private:
@@ -436,9 +398,9 @@ namespace QDirStat
 	QBrush _overflowSliceBrush;
 
 	// Geometry
-	qreal  _histogramWidth;
-	qreal  _histogramHeight;
-	bool   _geometryDirty;
+	qreal _histogramWidth;
+	qreal _histogramHeight;
+	bool  _geometryDirty;
 
 	// Not static since there will only ever be one HistogramView and most of the time none
 	const qreal _leftBorder		{  40.0 };

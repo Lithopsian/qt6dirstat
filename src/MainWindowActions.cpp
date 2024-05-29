@@ -165,7 +165,7 @@ void MainWindow::updateActions()
     _ui->actionStopReading->setEnabled  ( reading );
     _ui->actionRefreshAll->setEnabled   ( isTree );
     _ui->actionAskReadCache->setEnabled ( !reading );
-    _ui->actionAskWriteCache->setEnabled( isTree && !pkgView );
+    _ui->actionAskWriteCache->setEnabled( isTree && !pkgView && firstToplevel->isDirInfo() );
 
     const FileInfoSet selectedItems     = app()->selectionModel()->selectedItems();
     const bool        sel               = selectedItems.size() > 0;
