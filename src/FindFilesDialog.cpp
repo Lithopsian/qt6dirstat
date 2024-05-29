@@ -39,8 +39,7 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
     CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    if ( app()->firstToplevel() )
-        _lastPath = app()->firstToplevel()->url();
+    _lastPath = app()->dirTree()->url();
 
     connect( this, &FindFilesDialog::accepted,
              this, &FindFilesDialog::saveValues );
