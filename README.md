@@ -125,7 +125,7 @@ in the Wiki.
 
 Make sure you have a working Qt5 or Qt6 build environment installed. This includes:
 
-- C++-compatible compiler (gcc recommended, C++17-compatible required for compiling under Qt6)
+- C++11-compatible compiler (gcc recommended, C++17-compatible required for compiling under Qt6)
 - Qt runtime environment
 - Qt header files
 - libz (compression lib) runtime and header file
