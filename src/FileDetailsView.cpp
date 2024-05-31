@@ -114,7 +114,7 @@ namespace
      **/
     QString dirColorStyle( const DirInfo * dir )
     {
-	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : "";
+	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : QString();
     }
 
 } // namespace
@@ -133,8 +133,7 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
     _ui { new Ui::FileDetailsView },
     _pkgUpdateTimer { new AdaptiveTimer( this,
 	                                 { 0.0, 0.5, 1.0, 2.0, 5.0 }, // delay stages
-					 { 3000, 1000, 500, 250, 150 } ) }, // cooldown stages
-    _labelLimit { 0 } // Unlimited - TO DO: read _labelLimit from the config file
+					 { 3000, 1000, 500, 250, 150 } ) } // cooldown stages
 {
     CHECK_NEW( _ui );
     CHECK_NEW( _pkgUpdateTimer );
@@ -223,14 +222,10 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	    _ui->fileLinkLabel->setStyleSheet( errorStyleSheet() );
 	    _ui->fileLinkLabel->setToolTip( fullTarget % tr( " (broken)" ) );
 	}
-	else if ( shortTarget != fullTarget )
-	{
-	    _ui->fileLinkLabel->setStyleSheet( QString() );
-	    _ui->fileLinkLabel->setToolTip( fullTarget );
-	}
 	else
 	{
-	    _ui->fileLinkLabel->setToolTip( QString() );
+	    _ui->fileLinkLabel->setStyleSheet( QString() );
+	    _ui->fileLinkLabel->setToolTip( shortTarget != fullTarget ? fullTarget : QString() );
 	}
     }
     else if ( isSpecial )
@@ -331,12 +326,6 @@ void FileDetailsView::showDetails( DirInfo * dir )
 {
     // logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-    if ( !dir )
-    {
-	clear();
-	return;
-    }
-
     const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
@@ -351,7 +340,6 @@ void FileDetailsView::showDetails( DirInfo * dir )
 		                                      tr( "directory" ) );
     _ui->dirTypeLabel->setStyleSheet( dir->isPseudoDir() ? QString() : "QToolTip { max-width: 0px }" );
 
-//    _ui->dirLockedIcon->setVisible   ( dir->readError() );
     _ui->dirFromCacheIcon->setVisible( dir->isFromCache() );
     _ui->dirDuplicateIcon->setVisible( isMountPoint && MountPoints::isDuplicate( dir->url() ) );
 
@@ -461,12 +449,6 @@ void FileDetailsView::setDirBlockVisibility( bool visible )
 void FileDetailsView::showDetails( PkgInfo * pkg )
 {
     // logDebug() << "Showing pkg details about " << pkg << Qt::endl;
-
-    if ( !pkg )
-    {
-	clear();
-	return;
-    }
 
     if ( pkg->url() == PkgInfo::pkgSummaryUrl() )
     {
