@@ -89,7 +89,11 @@ namespace
         return sum;
     }
 
-    /*
+#if 0
+    /**
+     * Returns a color that gives a reasonable contrast to 'col': Lighter
+     * if 'col' is dark, darker if 'col' is light.
+     **/
     QRgb contrastingColor( QRgb col )
     {
         if ( qGray( col ) < 128 )
@@ -99,6 +103,11 @@ namespace
     }
 
 
+    /**
+     * Check if the contrast of the specified image is sufficient to
+     * visually distinguish an outline at the right and bottom borders
+     * and add a grey line there, if necessary.
+     **/
     void enforceContrast( QImage & image )
     {
         if ( image.width() > 5 )
@@ -153,7 +162,7 @@ namespace
             }
         }
     }
-*/
+#endif
 
     /**
      * Draws a thin outline.  Only draw on the top and left sides to keep the outline as
@@ -185,9 +194,11 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
     QGraphicsRectItem ( rect ),
     _parentView { parentView },
     _orig { orig },
+#if PAINT_DEBUGGING
+    _firstTile { true },
+    _lastTile { false },
+#endif
     _cushionSurface { _parentView->cushionHeights() } // initial cushion surface
-//    _firstTile { true },
-//    _lastTile { false }
 {
     //logDebug() << "Creating root tile " << orig << "    " << rect << Qt::endl;
     init();
@@ -216,9 +227,11 @@ TreemapTile::TreemapTile( TreemapTile  * parentTile,
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
     _orig { orig },
+#if PAINT_DEBUGGING
+    _firstTile { false },
+    _lastTile { false },
+#endif
     _cushionSurface { parentTile->_cushionSurface, _parentView->cushionHeights() } // copy the parent cushion and scale the height
-//    _firstTile { false },
-//    _lastTile { false }
 {
 //    logDebug() << "Creating non-squarified child for " << orig << " (in " << parentTile->_orig << ")" << Qt::endl;
 
@@ -251,9 +264,11 @@ TreemapTile::TreemapTile( TreemapTile          * parentTile,
     QGraphicsRectItem ( rect, parentTile ),
     _parentView { parentTile->_parentView },
     _orig { orig },
+#if PAINT_DEBUGGING
+    _firstTile { false },
+    _lastTile { false },
+#endif
     _cushionSurface { cushionSurface } // uses the default copy constructor on a row cushion
-//    _firstTile ( false ),
-//    _lastTile { false }
 {
     //logDebug() << "Creating squarified tile for " << orig << "  " << rect << Qt::endl;
 
@@ -268,7 +283,9 @@ void TreemapTile::init()
 {
     setPen( Qt::NoPen );
 
-//    _parentView->setLastTile( this ); // only for logging
+#if PAINT_DEBUGGING
+    _parentView->setLastTile( this ); // only for logging
+#endif
 
     setFlags( ItemIsSelectable );
 
@@ -529,14 +546,13 @@ void TreemapTile::paint( QPainter                       * painter,
                          const QStyleOptionGraphicsItem * option,
                          QWidget                        * widget )
 {
-    CHECK_MAGIC( _orig );
-/*
+#if PAINT_DEBUGGING
     if ( _firstTile )
     {
         logDebug() << Qt::endl;
         _parentView->rootTile()->_stopwatch.start();
     }
-*/
+#endif
     // Don't paint tiles with children, the children will cover the parent, but double-check
     // it actually has child tiles (no tile will be created for zero-sized children)
     if ( _orig->hasChildren() && childItems().size() > 0 )
@@ -604,8 +620,10 @@ void TreemapTile::paint( QPainter                       * painter,
         painter->drawRect( selectionRect );
     }
 
-//    if (_lastTile)
-//        logDebug() << _parentView->rootTile()->_stopwatch.restart() << "ms" << Qt::endl;
+#if PAINT_DEBUGGING
+    if (_lastTile)
+        logDebug() << _parentView->rootTile()->_stopwatch.restart() << "ms" << Qt::endl;
+#endif
 }
 
 QPixmap TreemapTile::renderCushion( const QRectF & rect )
@@ -657,20 +675,6 @@ const QColor & TreemapTile::tileColor( FileInfo * file ) const
         MimeCategorizer::instance()->color( file );
 }
 
-const CushionHeightSequence * TreemapTile::calculateCushionHeights( double cushionHeight, double scaleFactor )
-{
-    // This class always constructs a list of the correct size
-    static CushionHeightSequence heights;
-
-    // Start with the configured cushion height, times 4 from the coefficients
-    double height = 4.0 * cushionHeight;
-
-    // Fill the sequence with heights calculated from the configured scale factor
-    for ( auto it = heights.begin(); it != heights.end(); ++it, height *= scaleFactor )
-        *it = height;
-
-    return &heights;
-}
 
 void TreemapTile::invalidateCushions()
 {

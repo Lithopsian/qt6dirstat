@@ -333,12 +333,6 @@ namespace QDirStat
 	const QColor & outlineColor() const { return _outlineColor; }
 
 	/**
-	 * Returns the fill color for non-directory treemap tiles when cushion
-	 * shading is not used.
-	 **/
-//	const QColor & fileFillColor() const { return _fileFillColor; }
-
-	/**
 	 * Returns the fill color for directory (or "dotentry") treemap tiles
 	 * when cushion shading is not used.
 	 **/
@@ -414,8 +408,10 @@ namespace QDirStat
 	 * constructed, so that after the build it points to the last tile to be
 	 * built, and hence the last to be painted.  This is used for logging
 	 * purposes as it is difficult to identify the end of the paint any other way.
+	 *
+	 * See PAINT_DEBUGGING in TreemapTile.h.
 	 **/
-//	void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
+	void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
 
 
     public slots:
@@ -466,7 +462,7 @@ namespace QDirStat
 	void readSettings();
 
 	/**
-	 * Calculate some values from the settings.
+	 * Calculate some cached values from the settings.
 	 **/
 	void calculateSettings();
 
@@ -622,7 +618,6 @@ namespace QDirStat
 	QColor _highlightColor;
 	QColor _cushionGridColor;
 	QColor _outlineColor;
-//	QColor _fileFillColor;
 	QColor _dirFillColor;
 	QColor _dirGradientStart;
 	QColor _dirGradientEnd;
@@ -638,7 +633,7 @@ namespace QDirStat
 	double _minTileSize;
 	double _minSquarifiedTileHeight;
 	int    _maxTileThreshold; // largest sub-tree size at which to spawn a rendering thread
-	const CushionHeightSequence * _cushionHeights;
+	const CushionHeightSequence * _cushionHeights { nullptr };
 
 	bool _disabled		{ false }; // flag to disable all treemap builds
 	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
@@ -650,7 +645,7 @@ namespace QDirStat
 
 	// just for logging
 	QElapsedTimer _stopwatch;
-//	TreemapTile * _lastTile;
+	TreemapTile * _lastTile; // see PAINT_DEBUGGING in TreemapTile.h
 
     }; // class TreemapView
 

@@ -18,6 +18,9 @@
 #include "Typedefs.h" // FileSize
 
 
+#define PAINT_DEBUGGING 0 // not completely thread-safe, do not use in release versions
+
+
 namespace QDirStat
 {
     class FileInfo;
@@ -32,19 +35,33 @@ namespace QDirStat
     };
 
     /**
-     * Lightweight class so it can be forward declared in TreemapView.
+     * Lightweight class that contains a pre-calculated list of the cushion
+     * heights for each depth in the tree.  It exposes an iterator so the
+     * heights can be used in sequence and a special constLast() so that
+     * iteration can be stopped on the last entry and can continue to be
+     * used for any cushions created at a greater depth in the tree. The
+     * list is only 10 entries long, but that is as deep as most trees and
+     * there is very little visible change in cushion shading beyond that
+     * point, if the tiles are even large enough to be visible.
      **/
     class CushionHeightSequence: public QVector<double>
     {
     public:
-	CushionHeightSequence():
+	CushionHeightSequence( double cushionHeight, double scaleFactor ):
 	    QVector<double> ( 10 ),
 	    _constLast { constEnd() - 1 }
-	{}
+	{
+	    // Start with the given cushion height, times 4 from the coefficients
+	    double height = 4.0 * cushionHeight;
+
+	    // Fill the sequence with heights calculated from the given scale factor
+	    for ( auto it = begin(); it != end(); ++it, height *= scaleFactor )
+		*it = height;
+	}
 
 	/**
-	 * Just a convenience function so we can easily stop iterating at the last
-	 * valid height.
+	 * A convenience function so we can easily stop iterating at the last
+	 * calculated height.
 	 **/
 	CushionHeightSequence::const_iterator constLast() const { return _constLast; }
 
@@ -232,16 +249,6 @@ namespace QDirStat
 	TreemapTile * parentTile() const { return static_cast<TreemapTile *>( parentItem() ); }
 
 	/**
-	 * Pre-calculates a map of cushion heights based on the configured
-	 * initial height and scale factor to avoid doing a multiplication for every
-	 * new tile.  The map key is the current height and the value is the next
-	 * height.  The heights include the 4.0 factor from the coefficient calculation
-	 * to avoid that multiplication in every ridge that gets added.
-	 **/
-	static const CushionHeightSequence * calculateCushionHeights( double cushionHeight,
-								      double scaleFactor );
-
-	/**
 	 * Removes all the cushion surface pixmaps and plain tile brushes to force
 	 * them to be re-rendered.
 	 **/
@@ -252,12 +259,13 @@ namespace QDirStat
 	 **/
 	CushionSurface & cushionSurface() { return _cushionSurface; }
 
+#if PAINT_DEBUGGING
 	/**
 	 * Sets a flag on the last tile that was constructed, for logging purposes.
 	 * The flag will be set by the view after the map has finished building.
 	 **/
-//	void setLastTile() { _lastTile = true; }
-
+	void setLastTile() { _lastTile = true; }
+#endif
 
     protected:
 
@@ -432,19 +440,6 @@ namespace QDirStat
 	inline const QColor & tileColor( FileInfo * file ) const;
 
 	/**
-	 * Check if the contrast of the specified image is sufficient to
-	 * visually distinguish an outline at the right and bottom borders
-	 * and add a grey line there, if necessary.
-	 **/
-//	static void enforceContrast( QImage & image );
-
-	/**
-	 * Returns a color that gives a reasonable contrast to 'col': Lighter
-	 * if 'col' is dark, darker if 'col' is light.
-	 **/
-//	static QRgb contrastingColor( QRgb col );
-
-	/**
 	 * Initialization common to all constructors.
 	 **/
 	void init();
@@ -457,14 +452,16 @@ namespace QDirStat
 	TreemapView             * _parentView;
 	FileInfo                * _orig;
 
+#if PAINT_DEBUGGING
+	bool _firstTile;
+	bool _lastTile;
+	QElapsedTimer _stopwatch;
+#endif
+
 	CushionSurface            _cushionSurface;
 	QPixmap                   _cushion;
 
 	SelectedTileHighlighter * _highlighter { nullptr };
-
-//	bool _firstTile;
-//	bool _lastTile;
-//	QElapsedTimer _stopwatch;
 
     }; // class TreemapTile
 
@@ -506,7 +503,7 @@ namespace QDirStat
 	VerticalTreemapTile( TreemapTile * parentTile, FileInfo * orig, const QRectF & rect );
     };
 
-    static inline QTextStream & operator<< ( QTextStream & stream, TreemapTile * tile )
+    inline QTextStream & operator<< ( QTextStream & stream, TreemapTile * tile )
     {
 	if ( tile )
 	    stream << tile->orig();

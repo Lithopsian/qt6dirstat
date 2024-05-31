@@ -92,6 +92,7 @@ TreemapView::TreemapView( QWidget * parent ):
 TreemapView::~TreemapView()
 {
     // Write settings back to file, but only if we are the real treemapView
+    delete _cushionHeights;
     if ( _selectionModel )
         writeSettings();
 }
@@ -471,7 +472,9 @@ void TreemapView::treemapFinished()
     emit treemapChanged();
 
     //logDebug() << _stopwatch.restart() << "ms" << Qt::endl;
-//    _lastTile->setLastTile();
+#if PAINT_DEBUGGING
+    _lastTile->setLastTile();
+#endif
 }
 
 
@@ -514,7 +517,9 @@ void TreemapView::configChanged( const QColor & fixedColor,
 void TreemapView::calculateSettings()
 {
     // Pre-calculate cushion heights from the configured starting height and scale factor.
-    _cushionHeights = TreemapTile::calculateCushionHeights( _cushionHeight, _heightScaleFactor );
+    delete _cushionHeights;
+    _cushionHeights = new CushionHeightSequence( _cushionHeight, _heightScaleFactor );
+    CHECK_NEW( _cushionHeights );
 
     // Calculate thresholds for tile sizes that will be submitted to a render thread
     _maxTileThreshold = ( _squarify ? 150 : 75 ) + 10 * QThread::idealThreadCount();
