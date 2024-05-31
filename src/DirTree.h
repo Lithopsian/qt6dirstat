@@ -54,7 +54,9 @@ namespace QDirStat
 	~DirTree() override;
 
 	/**
-	 * Actually start reading.
+	 * Actually start reading.  The given path is converted to a directory:
+	 * if it is a symlink then the link is followed; if that is not a
+	 * directory then the parent directory is read.
 	 *
 	 * It's not very pretty that this is required as a separate method, but
 	 * this cannot simply be done in the constructor: we need to give the

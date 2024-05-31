@@ -249,7 +249,7 @@ void DirTree::setRoot( DirInfo *newRoot )
     _root = newRoot;
 
     FileInfo * realRoot = firstToplevel();
-    _url = realRoot ? realRoot->url() : "";
+    _url = realRoot ? realRoot->url() : QString();
 }
 */
 
@@ -302,15 +302,26 @@ void DirTree::reset()
 
 void DirTree::startReading( const QString & rawUrl )
 {
-    const QFileInfo fileInfo( rawUrl );
-    const QString canonicalPath = fileInfo.canonicalFilePath();
-    _url = canonicalPath.isEmpty() ? fileInfo.absoluteFilePath() : canonicalPath;
     //logDebug() << "rawUrl: \"" << rawUrl << "\"" << Qt::endl;
-    logInfo() << "   url: \"" << _url	 << "\"" << Qt::endl;
+
+    _url = [ &rawUrl ]()
+    {
+	const QFileInfo fileInfo( rawUrl );
+
+	if ( fileInfo.isDir() ) // return the input path, just canonicalised
+	    return fileInfo.canonicalFilePath();
+
+	if ( fileInfo.exists() ) // return the parent directory for any existing non-directory
+	    return fileInfo.canonicalPath();
+
+	if ( fileInfo.isSymLink() ) // symlink target doesn't exist, return symlink parent directory
+	    return QFileInfo( fileInfo.absolutePath() ).canonicalFilePath();
+
+	return fileInfo.absoluteFilePath(); // return nonexistent input file which should throw
+    }();
 
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
-
-    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : "" ) << Qt::endl;
+    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString() ) << Qt::endl;
 
     sendStartingReading();
 
