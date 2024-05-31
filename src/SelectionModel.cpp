@@ -59,7 +59,8 @@ FileInfoSet SelectionModel::selectedItems()
 	_selectedItems.clear();
 
 	const QModelIndexList indexes = selectedIndexes();
-	for ( const QModelIndex index : indexes )
+	_selectedItems.reserve( indexes.size() );
+	for ( const QModelIndex & index : indexes )
 	{
 	    if ( index.isValid() )
 	    {
@@ -93,7 +94,7 @@ void SelectionModel::propagateCurrentChanged( const QModelIndex & newCurrentInde
 
     if ( oldCurrentIndex.isValid() )
     {
-	oldCurrentItem = static_cast<FileInfo *>( oldCurrentIndex.internalPointer() );
+	oldCurrentItem = static_cast<const FileInfo *>( oldCurrentIndex.internalPointer() );
 	CHECK_MAGIC( oldCurrentItem );
     }
 

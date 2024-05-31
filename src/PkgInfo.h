@@ -141,7 +141,7 @@ namespace QDirStat
          * Reimplemented - inherited from FileInfo.
          **/
         virtual QString url() const override
-            { return pkgScheme() + ( isPkgUrl( _name ) ? "" : _name ); }
+            { return pkgScheme() + ( isPkgUrl( _name ) ? QString() : _name ); }
 
         /**
          * Return 'true' if this is a package URL, i.e. it starts with "Pkg:".

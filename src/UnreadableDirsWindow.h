@@ -177,10 +177,17 @@ namespace QDirStat
 	 **/
 	DirInfo * dir() const { return _dir; }
 
+
+    protected:
+
 	/**
 	 * Set the text and alignment for a column.
 	 **/
-	void set( UnreadableDirectories col, const QString & text, Qt::Alignment alignment );
+	void set( UnreadableDirectories col, const QString & text, Qt::Alignment alignment )
+	{
+	    setText( col, text );
+	    setTextAlignment( col, alignment | Qt::AlignVCenter );
+	}
 
 	/**
 	 * Less-than operator for sorting.
@@ -189,6 +196,7 @@ namespace QDirStat
 	 * is not required.
 	 **/
 //	bool operator<( const QTreeWidgetItem & other ) const override;
+
 
     private:
 

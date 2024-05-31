@@ -418,13 +418,6 @@ YearListItem::YearListItem( const YearStats & stats ) :
 }
 
 
-void YearListItem::set( YearListColumns col, Qt::Alignment alignment, const QString & text )
-{
-    setText( col, text );
-    setTextAlignment( col, Qt::AlignVCenter | alignment );
-}
-
-
 bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )

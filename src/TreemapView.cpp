@@ -77,8 +77,6 @@ namespace
 TreemapView::TreemapView( QWidget * parent ):
     QGraphicsView ( parent )
 {
-    // logDebug() << Qt::endl;
-
     readSettings();
 
     // We only ever need one thread at a time, and having more just chews up memory
@@ -223,8 +221,6 @@ void TreemapView::readSettings()
 
 void TreemapView::writeSettings()
 {
-    // logDebug() << Qt::endl;
-
     Settings settings;
 
     settings.beginGroup( "Treemaps" );
@@ -353,7 +349,7 @@ void TreemapView::rebuildTreemap()
 
     if ( !_savedRootUrl.isEmpty() )
     {
-        logDebug() << "Restoring old treemap with root " << _savedRootUrl << Qt::endl;
+        //logDebug() << "Restoring old treemap with root " << _savedRootUrl << Qt::endl;
 
         root = _tree->locate( _savedRootUrl, true );        // node, findPseudoDirs
     }
@@ -387,7 +383,7 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
         return;
     }
 
-    logDebug() << rect << Qt::endl;
+    //logDebug() << rect << Qt::endl;
 
     _treemapCancel = TreemapCancelNone;
     _treemapRunning = true;
@@ -734,7 +730,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
         }
     }
 
-    //logDebug() << " map built in " << _stopwatch.restart() << "ms" << (map.isEmpty() ? " (empty) " : "") << Qt::endl;
+    //logDebug() << " map built in " << _stopwatch.restart() << "ms" << (map.isEmpty() ? " (empty) " : QString()) << Qt::endl;
 
     for ( auto it = newSelection.constBegin(); it != newSelection.constEnd(); ++it )
     {

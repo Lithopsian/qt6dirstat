@@ -262,13 +262,6 @@ LocateListItem::LocateListItem( FileInfo * item ):
 }
 
 
-void LocateListItem::set( int col, const QString & text, Qt::Alignment alignment )
-{
-    setText( col, text );
-    setTextAlignment( col, alignment | Qt::AlignVCenter );
-}
-
-
 bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )

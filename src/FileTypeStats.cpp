@@ -78,44 +78,44 @@ void FileTypeStats::collect( const FileInfo * dir )
 
 	    const MimeCategory * category = mimeCategorizer->category( item, &suffix );
 	    if ( category )
-            {
-                addCategorySum( category, item );
+	    {
+		addCategorySum( category, item );
 
 		if ( suffix.isEmpty() )
-                    addNonSuffixRuleSum( category, item );
-                else
-                    addSuffixSum( suffix, category, item );
+		    addNonSuffixRuleSum( category, item );
+		else
+		    addSuffixSum( suffix, category, item );
 	    }
-            else // !category
-            {
-                addCategorySum( _otherCategory, item );
+	    else // !category
+	    {
+		addCategorySum( _otherCategory, item );
 
-                if ( suffix.isEmpty() )
-                {
+		if ( suffix.isEmpty() )
+		{
 		    // See if there is a dot other than a leading dot
 		    if ( item->name().lastIndexOf( '.' ) > 0 )
 //                    if ( item->name().contains( '.' ) && !item->name().startsWith( '.' ) )
-                    {
-                        // Fall back to the last (i.e. the shortest) suffix if the
-                        // MIME categorizer didn't know it: Use section -1 (the
-                        // last one, ignoring any trailing '.' separator).
-                        //
-                        // The downside is that this would not find a ".tar.bz",
-                        // but just the ".bz" for a compressed tarball. But it's
-                        // much better than getting a ".eab7d88df-git.deb" rather
-                        // than a ".deb".
+		    {
+			// Fall back to the last (i.e. the shortest) suffix if the
+			// MIME categorizer didn't know it: Use section -1 (the
+			// last one, ignoring any trailing '.' separator).
+			//
+			// The downside is that this would not find a ".tar.bz",
+			// but just the ".bz" for a compressed tarball. But it's
+			// much better than getting a ".eab7d88df-git.deb" rather
+			// than a ".deb".
 
-                        suffix = item->name().section( '.', -1 );
-                    }
-                }
+			suffix = item->name().section( '.', -1 );
+		    }
+		}
 
-                suffix = suffix.toLower();
+		suffix = suffix.toLower();
 
-                if ( suffix.isEmpty() )
-                    suffix = NO_SUFFIX;
+		if ( suffix.isEmpty() )
+		    suffix = NO_SUFFIX;
 
 		addSuffixSum( suffix, _otherCategory, item );
-            }
+	    }
 
 	    // Disregard symlinks, block devices and other special files
 	}
@@ -154,7 +154,7 @@ void FileTypeStats::removeCruft()
     _suffixCount[ cruftMapCategory ] = 0;
 
     FileSize totalMergedSum   = 0LL;
-    int	     totalMergedCount = 0;
+    int      totalMergedCount = 0;
 
     QStringList cruft;
 

@@ -102,41 +102,38 @@ void PkgQuery::checkPkgManager( const PkgManager * pkgManager )
 
 QString PkgQuery::getOwningPackage( const QString & path )
 {
-    QString pkg = "";
-    QString foundBy;
-
     if ( _cache.contains( path ) )
     {
-	foundBy = "Cache";
-	pkg     = *( _cache[ path ] );
+	const QString * pkg = _cache[ path ];
+
+#if VERBOSE_PKG_QUERY
+	logDebug() << "Cache: package " << *pkg << " owns " << path << Qt::endl;
+#endif
+
+	return *pkg;
     }
 
+    QString pkg;
 
-    if ( foundBy.isEmpty() )
+    for ( const PkgManager * pkgManager : _pkgManagers )
     {
-	for ( const PkgManager * pkgManager : _pkgManagers )
+	pkg = pkgManager->owningPkg( path );
+	if ( !pkg.isEmpty() )
 	{
-	    pkg = pkgManager->owningPkg( path );
-	    if ( !pkg.isEmpty() )
-	    {
-		foundBy = pkgManager->name();
-		break;
-	    }
+#if VERBOSE_PKG_QUERY
+	    logDebug() << pkgManager->name() << ": package " << pkg << " owns " << path << Qt::endl;
+#endif
+	    break;
 	}
-
-	if ( foundBy.isEmpty() )
-	    foundBy = "all";
-
-	// Insert package name (even if empty) into the cache
-	_cache.insert( path, new QString( pkg ), CACHE_COST );
     }
 
 #if VERBOSE_PKG_QUERY
     if ( pkg.isEmpty() )
-	logDebug() << foundBy << ": No package owns " << path << Qt::endl;
-    else
-	logDebug() << foundBy << ": Package " << pkg << " owns " << path << Qt::endl;
+	logDebug() << "No package owns " << path << Qt::endl;
 #endif
+
+    // Insert package name (even if empty) into the cache
+    _cache.insert( path, new QString( pkg ), CACHE_COST );
 
     return pkg;
 }

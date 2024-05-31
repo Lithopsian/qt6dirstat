@@ -284,12 +284,10 @@ bool MountPoints::read( const QString & filename )
 //        logWarning() << "Not a single mount point in " << filename << Qt::endl;
         return false;
     }
-    else
-    {
-        // logDebug() << "Read " << _mountPointList.size() << " mount points from " << filename << Qt::endl;
-        _isPopulated = true;
-        return true;
-    }
+
+    // logDebug() << "Read " << _mountPointList.size() << " mount points from " << filename << Qt::endl;
+    _isPopulated = true;
+    return true;
 }
 
 
@@ -434,13 +432,13 @@ MountPointList MountPoints::normalMountPoints()
     return result;
 }
 
-
+/*
 void MountPoints::dump()
 {
     for ( const MountPoint * mountPoint : instance()->_mountPointList )
         logDebug() << mountPoint->path() << Qt::endl;
 }
-
+*/
 
 QString MountPoints::device( const QString & url )
 {

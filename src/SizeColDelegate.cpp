@@ -78,7 +78,7 @@ void SizeColDelegate::paint( QPainter                   * painter,
 
     const QStringList data = index.data( SizeTextRole ).toStringList();
     const bool sparseFile = data.size() == 3;
-    const QString linksText = sparseFile ? data.at( 2 ) : "";
+    const QString linksText = sparseFile ? data.at( 2 ) : QString();
 
     if ( data.size() == 2 || data.size() == 3 )
     {

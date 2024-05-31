@@ -398,7 +398,7 @@ namespace QDirStat
 	 * Dump all current mount points to the log. This does not call
 	 * ensurePopulated() first.
 	 **/
-	static void dump();
+//	static void dump();
 
 
     private:

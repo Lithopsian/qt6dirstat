@@ -242,10 +242,22 @@ namespace QDirStat
 	FileSize        totalSize()  const { return _totalSize; }
 	float           percentage() const { return _percentage; }
 
+
+    protected:
+
 	/**
 	 * Set the font to bold face for all columns.
 	 **/
 //	void setBold();
+
+	/**
+	 * Helper function to set both the column text and alignment.
+	 **/
+	void set( FileTypeColumns col, Qt::Alignment alignment, const QString & text )
+	{
+	    setText( col, text );
+	    setTextAlignment( col, Qt::AlignVCenter | alignment );
+	}
 
 	/**
 	 * Less-than operator for sorting.

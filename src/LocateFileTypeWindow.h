@@ -201,7 +201,11 @@ namespace QDirStat
 	/**
 	 * Set both the text and text alignment for a column.
 	 **/
-	void set( int col, const QString & text, Qt::Alignment alignment );
+	void set( int col, const QString & text, Qt::Alignment alignment )
+	{
+	    setText( col, text );
+	    setTextAlignment( col, alignment | Qt::AlignVCenter );
+	}
 
 	/**
 	 * Less-than operator for sorting.

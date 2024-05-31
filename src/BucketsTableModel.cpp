@@ -17,13 +17,6 @@
 using namespace QDirStat;
 
 
-void BucketsTableModel::reset()
-{
-    beginResetModel();
-    endResetModel();
-}
-
-
 int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 {
     return parent.isValid() ? 0 : _histogram->bucketCount();

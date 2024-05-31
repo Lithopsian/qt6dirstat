@@ -129,7 +129,7 @@ void ExcludeRulesConfigPage::save( void * value )
 {
     ExcludeRule * excludeRule = EXCLUDE_RULE_CAST( value );
 
-    if ( ! excludeRule || updatesLocked() )
+    if ( !excludeRule || updatesLocked() )
 	return;
 
     if ( _ui->regexpRadioButton->isChecked() )
@@ -155,7 +155,7 @@ void ExcludeRulesConfigPage::load( void * value )
     if ( updatesLocked() )
         return;
 
-    if ( ! excludeRule )
+    if ( !excludeRule )
     {
         enableEditRuleWidgets( false );
         _ui->patternLineEdit->setText( "" );

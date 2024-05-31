@@ -41,7 +41,7 @@ public:
      * Notice this text is intended for developers or admins, not for end
      * users.
      */
-    QString what() const { return _what; }
+    const QString & what() const { return _what; }
 
     /**
      * Return the class name of this exception as string.
@@ -54,19 +54,19 @@ public:
      * Return the source file name where the exception was thrown.
      * This works only if it was thrown with THROW.
      */
-    QString srcFile() const { return _srcFile; }
+//    const QString & srcFile() const { return _srcFile; }
 
     /**
      * Return the line number in the source file where the exception was
      * thrown. This works only if it was thrown with THROW.
      */
-    int srcLine() const { return _srcLine; }
+//    int srcLine() const { return _srcLine; }
 
     /**
      * Return the function name where the exception was thrown.
      * This works only if it was thrown with THROW.
      */
-    QString srcFunction() const { return _srcFunction; }
+//    const QString & srcFunction() const { return _srcFunction; }
 
     /**
      * Set the source location where the exception was thrown.
@@ -127,7 +127,7 @@ public:
 
     ~FileException() noexcept override = default;
 
-    QString filename() const { return _filename; }
+//    const QString & filename() const { return _filename; }
 
 private:
     QString _filename;
@@ -150,16 +150,15 @@ public:
      * Return the resource for which this syscall failed. This is typically a
      * file name.
      **/
-    QString resourceName() const { return _resourceName; }
+    const QString & resourceName() const { return _resourceName; }
 
-    QString sysCall() const { return _sysCall; }
+//    const QString & sysCall() const { return _sysCall; }
 
 protected:
     QString errMsg( const QString & sysCall,
 		    const QString & resourceName ) const;
 
 private:
-
     QString _sysCall;
     QString _resourceName;
 };
@@ -235,7 +234,6 @@ protected:
 		    const QString & msg = QString() ) const;
 
 private:
-
     int _invalidIndex;
     int _validMin;
     int _validMax;

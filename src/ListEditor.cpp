@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QPushButton>
-
 #include "ListEditor.h"
 #include "Logger.h"
 #include "Exception.h"
@@ -29,42 +27,42 @@ void ListEditor::setListWidget( QListWidget * listWidget )
 void ListEditor::setMoveUpButton( QAbstractButton * button )
 {
     _moveUpButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::moveUp );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::moveUp );
 }
 
 
 void ListEditor::setMoveDownButton( QAbstractButton * button )
 {
     _moveDownButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::moveDown );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::moveDown );
 }
 
 
 void ListEditor::setMoveToTopButton( QAbstractButton * button )
 {
     _moveToTopButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::moveToTop );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::moveToTop );
 }
 
 
 void ListEditor::setMoveToBottomButton( QAbstractButton * button )
 {
     _moveToBottomButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::moveToBottom );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::moveToBottom );
 }
 
 
 void ListEditor::setAddButton( QAbstractButton * button )
 {
     _addButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::add );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::add );
 }
 
 
 void ListEditor::setRemoveButton( QAbstractButton * button )
 {
     _removeButton = button;
-    connect( button, &QPushButton::clicked, this, &ListEditor::remove );
+    connect( button, &QAbstractButton::clicked, this, &ListEditor::remove );
 }
 
 
@@ -202,11 +200,4 @@ void * ListEditor::value( QListWidgetItem * item )
     CHECK_DYNAMIC_CAST( editorItem, "ListEditorItem *" );
 
     return editorItem->value();
-}
-
-
-void ListEditor::enableButton( QAbstractButton * button, bool enabled )
-{
-    if ( button )
-	button->setEnabled( enabled );
 }

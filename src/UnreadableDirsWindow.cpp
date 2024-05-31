@@ -177,13 +177,13 @@ UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
     setIcon( UD_Path, app()->dirTreeModel()->unreadableDirIcon() );
 }
 
-
+/*
 void UnreadableDirListItem::set( UnreadableDirectories col, const QString & text, Qt::Alignment alignment )
 {
     setText( col, text );
     setTextAlignment( col, alignment | Qt::AlignVCenter );
 }
-
+*/
 /*
 bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {

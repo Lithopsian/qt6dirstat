@@ -217,7 +217,7 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
 
 //    _parentView->threadPool()->waitForDone(); // destructor already waits
 
-//    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : "") << Qt::endl;
+//    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : QString()) << Qt::endl;
 }
 
 // constructor for simple (non-squarified) children
@@ -557,7 +557,7 @@ void TreemapTile::paint( QPainter                       * painter,
     // it actually has child tiles (no tile will be created for zero-sized children)
     if ( _orig->hasChildren() && childItems().size() > 0 )
     {
-//        logDebug() << this << "(" << boundingRect() << ")" << ( isObscured() ? " - obscured" : "" ) << Qt::endl;
+//        logDebug() << this << "(" << boundingRect() << ")" << ( isObscured() ? " - obscured" : QString() ) << Qt::endl;
         return;
     }
 

@@ -42,30 +42,17 @@ namespace QDirStat
 	 * Create a BusyPopup with the specified text.  This always uses
 	 * the main window as its parent.
 	 *
-	 * If 'autoPost' is 'true', automatically post it, i.e. show it and
-	 * process events for some milliseconds to makes sure it is rendered.
+	 * Show the label and process events for some milliseconds to makes
+	 * sure it is rendered.
 	 **/
-	BusyPopup( const QString & text,
-		   bool            autoPost = true );
+	BusyPopup( const QString & text );
 
 	/**
-	 * Show the BusyPopup and process events for some milliseconds to make
-	 * sure it is rendered. This is done automatically if 'autoPost' is
-	 * 'true' in the constructor.
-	 **/
-	void post();
-
-	/**
-	 * Process a show event.
+	 * Process a show event.  Positions the popup once it has been shown.
 	 *
 	 * Reimplemented from QLabel / QWidget.
 	 **/
 	void showEvent( QShowEvent * event ) override;
-
-
-    private:
-
-	bool _posted { false };
 
     };	// BusyPopup
 

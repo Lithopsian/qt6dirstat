@@ -26,40 +26,37 @@ namespace QDirStat
         Q_OBJECT
 
     public:
-        enum Column
-        {
-            StartCol,
-            EndCol,
-            ValueCol,
-            ColCount
-        };
+	enum Column
+	{
+	    StartCol,
+	    EndCol,
+	    ValueCol,
+	    ColCount
+	};
 
-        /**
-         * Constructor.
-         **/
-        BucketsTableModel( QObject * parent, const HistogramView * histogram ):
+	/**
+	 * Constructor.
+	 **/
+	BucketsTableModel( QObject * parent, const HistogramView * histogram ):
 	    QAbstractTableModel ( parent ),
 	    _histogram { histogram }
 	{}
 
-        /**
-         * Return the associated histogram view.
-         **/
-        const HistogramView * histogram() const { return _histogram; }
-
-        /**
-         * Notification that data in the histogram have been reset.
-         **/
-        void reset();
+	/**
+	 * Wrappers around beginResetModel() and endResetModel() when the
+	 * buckets contents are being replaced.
+	 **/
+	void beginReset() { beginResetModel(); }
+	void endReset() { endResetModel(); }
 
 
     protected:
 
-        //
-        // Overloaded model methods
-        //
+	//
+	// Overloaded model methods
+	//
 
-        /**
+	/**
 	 * Return the number of rows (direct tree children) for 'parent'.
 	 **/
 	int rowCount( const QModelIndex & parent ) const override;

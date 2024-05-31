@@ -455,15 +455,10 @@ FileTypeItem::FileTypeItem( const QString & name,
     _totalSize { totalSize },
     _percentage { percentage }
 {
-    setText( FT_NameCol,       name );
-    setText( FT_CountCol,      QString::number( count ) );
-    setText( FT_TotalSizeCol,  formatSize( totalSize ) );
-    setText( FT_PercentageCol, QString::number( percentage, 'f', 2 ) + "%" );
-
-    setTextAlignment( FT_NameCol,       Qt::AlignVCenter | Qt::AlignLeft  );
-    setTextAlignment( FT_CountCol,      Qt::AlignVCenter | Qt::AlignRight );
-    setTextAlignment( FT_TotalSizeCol,  Qt::AlignVCenter | Qt::AlignRight );
-    setTextAlignment( FT_PercentageCol, Qt::AlignVCenter | Qt::AlignRight );
+    set( FT_NameCol,       Qt::AlignLeft,  name );
+    set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );
+    set( FT_TotalSizeCol,  Qt::AlignRight, formatSize( totalSize ) );
+    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) + "%" );
 }
 
 

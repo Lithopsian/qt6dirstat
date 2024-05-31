@@ -248,7 +248,11 @@ namespace QDirStat
 	/**
 	 * Helper function to set both the column text and alignment.
 	 **/
-	void set( YearListColumns col, Qt::Alignment alignment, const QString & text );
+	void set( YearListColumns col, Qt::Alignment alignment, const QString & text )
+	{
+		setText( col, text );
+		setTextAlignment( col, Qt::AlignVCenter | alignment );
+	}
 
 
     private:

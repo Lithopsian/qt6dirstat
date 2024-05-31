@@ -19,7 +19,7 @@ DataColumnList DataColumns::allColumns()
     DataColumnList colList;
 
     for ( int col = firstCol(); col <= lastCol(); ++col  )
-	colList << static_cast<DataColumn>( col );
+	colList << fromViewCol( col );
 
     return colList;
 }
@@ -49,7 +49,7 @@ QLatin1String DataColumns::toString( DataColumn col )
 	// can catch unhandled enum values
     }
 
-    logError() << "Unknown DataColumn " << (int)col << Qt::endl;
+    logError() << "Unknown DataColumn " << toViewCol( col ) << Qt::endl;
     return QLatin1String();
 }
 
@@ -61,8 +61,8 @@ DataColumn DataColumns::fromString( const QString & str )
 
     for ( int col = firstCol(); col <= lastCol(); ++col )
     {
-	if ( str == toString( static_cast<DataColumn>( col ) ) )
-	    return static_cast<DataColumn>( col );
+	if ( str == toString( fromViewCol( col ) ) )
+	    return fromViewCol( col );
     }
 
     logError() << "Invalid DataColumn \"" << str << "\"" << Qt::endl;

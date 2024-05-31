@@ -69,7 +69,7 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     }
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
-	     this,                &FilesystemsWindow::normalStateChanged );
+	     this,                &FilesystemsWindow::refresh );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
 	     this,                &FilesystemsWindow::refresh );
@@ -233,12 +233,6 @@ void FilesystemsWindow::copyDeviceToClipboard()
 }
 
 
-void FilesystemsWindow::normalStateChanged( int )
-{
-    refresh();
-}
-
-
 void FilesystemsWindow::contextMenu( const QPoint & pos )
 {
     // See if the right click was actually on an item
@@ -323,13 +317,13 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
     }
 }
 
-
+/*
 void FilesystemItem::set( int col, Qt::Alignment alignment, const QString & text )
 {
     setText( col, text );
     setTextAlignment( col, alignment | Qt::AlignVCenter );
 }
-
+*/
 
 bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
 {

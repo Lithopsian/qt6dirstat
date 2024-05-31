@@ -24,12 +24,6 @@
 using namespace QDirStat;
 
 
-void ExcludeRule::setCaseSensitive( bool caseSensitive )
-{
-    setPatternOptions( makePatternOptions( caseSensitive ) );
-}
-
-
 QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
 				    const QString & pattern )
 {
@@ -243,7 +237,7 @@ namespace
 
 void ExcludeRules::readSettings()
 {
-    clear();
+//    clear();
 
     const SettingsEnumMapping mapping = patternSyntaxMapping();
 

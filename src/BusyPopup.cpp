@@ -34,26 +34,13 @@ namespace
 } // namespace
 
 
-BusyPopup::BusyPopup( const QString & text,
-		      bool            autoPost ):
+BusyPopup::BusyPopup( const QString & text ):
     QLabel ( text, app()->findMainWindow(), Qt::SplashScreen )
 {
     setMargin( 15 );
     setWindowTitle( QString() );
-
-    if ( autoPost )
-	post();
-}
-
-
-void BusyPopup::post()
-{
-    if ( _posted )
-	return;
-
     show();
     processEvents( PROCESS_EVENTS_MILLISEC );
-    _posted = true;
 }
 
 

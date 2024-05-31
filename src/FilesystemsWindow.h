@@ -96,11 +96,6 @@ namespace QDirStat
 	 **/
 	void copyDeviceToClipboard();
 
-	/**
-	 * Switch between displaying all or just normal filesystems.
-	 **/
-	void normalStateChanged( int );
-
 
     protected:
 
@@ -200,7 +195,11 @@ namespace QDirStat
 	/**
 	 * Set the text and text alignment for a column.
 	 **/
-	void set( int col, Qt::Alignment alignment, const QString & text );
+	void set( int col, Qt::Alignment alignment, const QString & text )
+	{
+	    setText( col, text );
+	    setTextAlignment( col, alignment | Qt::AlignVCenter );
+	}
 
 	/**
 	 * Less-than operator for sorting.

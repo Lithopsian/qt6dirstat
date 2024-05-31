@@ -222,7 +222,8 @@ namespace QDirStat
 	/**
 	 * Enable or disable a button if it is non-null.
 	 **/
-	void enableButton( QAbstractButton * button, bool enabled );
+	void enableButton( QAbstractButton * button, bool enabled )
+	    { if ( button ) button->setEnabled( enabled ); }
 
 
     private:

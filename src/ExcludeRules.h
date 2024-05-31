@@ -10,8 +10,8 @@
 #ifndef ExcludeRules_h
 #define ExcludeRules_h
 
-#include <QString>
 #include <QList>
+#include <QString>
 #include <QTextStream>
 
 #include "Wildcard.h"
@@ -58,9 +58,9 @@ namespace QDirStat
 	 **/
 	ExcludeRule( PatternSyntax   patternSyntax,
 	             const QString & pattern,
-		     bool            caseSensitive,
-                     bool            useFullPath,
-                     bool            checkAnyFileChild ):
+	             bool            caseSensitive,
+	             bool            useFullPath,
+	             bool            checkAnyFileChild ):
 	    QRegularExpression ( formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) ),
 	    _patternSyntax { patternSyntax },
 	    _pattern { pattern },
@@ -78,14 +78,14 @@ namespace QDirStat
 	 **/
 	bool match( const QString & fullPath, const QString & fileName ) const;
 
-        /**
-         * If this exclude rule has the 'checkAnyFileChild' flag set, check if
-         * any non-directory direct child of 'dir' (or of its dot entry if it
-         * has one) matches the rule.
-         *
-         * This returns 'false' immediately if 'checkAnyFileChild' is not set.
-         **/
-        bool matchDirectChildren( const DirInfo * dir ) const;
+	/**
+	 * If this exclude rule has the 'checkAnyFileChild' flag set, check if
+	 * any non-directory direct child of 'dir' (or of its dot entry if it
+	 * has one) matches the rule.
+	 *
+	 * This returns 'false' immediately if 'checkAnyFileChild' is not set.
+	 **/
+	bool matchDirectChildren( const DirInfo * dir ) const;
 
 	/**
 	 * Return 'true' if this exclude rule uses the full path to match
@@ -98,47 +98,48 @@ namespace QDirStat
 	 **/
 	void setUseFullPath( bool useFullPath ) { _useFullPath = useFullPath; }
 
-        /**
-         * Return 'true' if this exclude rule should be used to check against
-         * any direct non-directory child of a directory rather than just the
-         * directory name or path.
-         **/
-        bool checkAnyFileChild() const { return _checkAnyFileChild; }
+	/**
+	 * Return 'true' if this exclude rule should be used to check against
+	 * any direct non-directory child of a directory rather than just the
+	 * directory name or path.
+	 **/
+	bool checkAnyFileChild() const { return _checkAnyFileChild; }
 
-        /**
-         * Set the 'check any file child' flag.
-         **/
-        void setCheckAnyFileChild( bool check ) { _checkAnyFileChild = check; }
+	/**
+	 * Set the 'check any file child' flag.
+	 **/
+	void setCheckAnyFileChild( bool check ) { _checkAnyFileChild = check; }
 
-        /**
-         * Set the matching syntax for this rule.
-         **/
-        void setPatternSyntax( PatternSyntax patternSyntax );
+	/**
+	 * Set the matching syntax for this rule.
+	 **/
+	void setPatternSyntax( PatternSyntax patternSyntax );
 
-        /**
-         * Returns the matching syntax for this rule.
-         **/
-        PatternSyntax patternSyntax() const { return _patternSyntax; }
+	/**
+	 * Returns the matching syntax for this rule.
+	 **/
+	PatternSyntax patternSyntax() const { return _patternSyntax; }
 
-        /**
-         * Set the pattern for this rule.
-         **/
-        void setPattern( const QString & pattern );
+	/**
+	 * Set the pattern for this rule.
+	 **/
+	void setPattern( const QString & pattern );
 
-        /**
-         * Return the pattern used to construct this rule.
-         **/
-        const QString & pattern() const { return _pattern; }
+	/**
+	 * Return the pattern used to construct this rule.
+	 **/
+	const QString & pattern() const { return _pattern; }
 
-        /**
-         * Set whether this rule is case-sensitive.
-         **/
-        void setCaseSensitive( bool caseSensitive );
+	/**
+	 * Set whether this rule is case-sensitive.
+	 **/
+	void setCaseSensitive( bool caseSensitive )
+	  { setPatternOptions( makePatternOptions( caseSensitive ) ); }
 
-        /**
-         * Returns whether this rule is case-sensitive.
-         **/
-        bool caseSensitive() const { return !( patternOptions() & CaseInsensitiveOption ); }
+	/**
+	 * Returns whether this rule is case-sensitive.
+	 **/
+	bool caseSensitive() const { return !( patternOptions() & CaseInsensitiveOption ); }
 
 	/**
 	 * Comparison operator for two exclude rules.
@@ -178,7 +179,7 @@ namespace QDirStat
 	PatternSyntax _patternSyntax;
 	QString       _pattern;
 	bool          _useFullPath;
-        bool          _checkAnyFileChild;
+	bool          _checkAnyFileChild;
     };
 
 
@@ -192,10 +193,10 @@ namespace QDirStat
      *
      * Normal usage:
      *
-     *	   if ( ExcludeRules::instance()->match( filename ) )
-     *	   {
-     *	       // exclude this file
-     *	   }
+     *   if ( ExcludeRules::instance()->match( filename ) )
+     *   {
+     *       // exclude this file
+     *   }
      **/
     class ExcludeRules
     {
@@ -246,13 +247,13 @@ namespace QDirStat
 	 **/
 	bool match( const QString & fullPath, const QString & fileName ) const;
 
-        /**
-         * Check the direct non-directory children of 'dir' against any rules
-         * that have the 'checkAnyFileChild' flag set.
-         *
+	/**
+	 * Check the direct non-directory children of 'dir' against any rules
+	 * that have the 'checkAnyFileChild' flag set.
+	 *
 	 * This will return 'true' if the text matches any rule.
-         **/
-        bool matchDirectChildren( const DirInfo * dir ) const;
+	 **/
+	bool matchDirectChildren( const DirInfo * dir ) const;
 
 	/**
 	 * Clear (delete) all exclude rules.
@@ -300,10 +301,10 @@ namespace QDirStat
 	 **/
 	void readSettings();
 
-        /**
-         * Add some default rules.
-         **/
-        void addDefaultRules();
+	/**
+	 * Add some default rules.
+	 **/
+	void addDefaultRules();
 
 
     private:

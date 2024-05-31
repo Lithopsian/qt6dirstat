@@ -238,13 +238,6 @@ SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
 }
 
 
-void SuffixSearchResultItem::set( int col, const QString & text, Qt::Alignment alignment )
-{
-    setText( col, text );
-    setTextAlignment( col, alignment | Qt::AlignVCenter );
-}
-
-
 bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )

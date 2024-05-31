@@ -277,10 +277,14 @@ void FileSizeStatsWindow::fillQuantileTable( QTableWidget  * table,
 	if ( step > 1 && i > extremesMargin && i < order - extremesMargin && i % step != 0 )
 	    continue;
 
-	addItem( table, row, NumberCol, namePrefix + QString::number( i ) );
-	addItem( table, row, ValueCol, formatSize( _stats->quantile( order, i ) ) );
-	addItem( table, row, SumCol, i > 0 ? formatSize( _stats->percentileSums().at( i ) ) : "" );
-	addItem( table, row, CumulativeSumCol, i > 0 ? formatSize( _stats->cumulativeSums().at( i ) ) : "" );
+	addItem( table, row, NumberCol,
+		 namePrefix + QString::number( i ) );
+	addItem( table, row, ValueCol,
+	         formatSize( _stats->quantile( order, i ) ) );
+	addItem( table, row, SumCol,
+	         i > 0 ? formatSize( _stats->percentileSums().at( i ) ) : QString() );
+	addItem( table, row, CumulativeSumCol,
+	         i > 0 ? formatSize( _stats->cumulativeSums().at( i ) ) : QString() );
 
 	const QString text = [=]()
 	{
@@ -333,9 +337,10 @@ void FileSizeStatsWindow::loadHistogram()
     const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _ui->histogramView->bestBucketCount( dataCount );
 
+    _bucketsTableModel->beginReset();
     _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
+    _bucketsTableModel->endReset();
 
-    _bucketsTableModel->reset();
     HeaderTweaker::resizeToContents( _ui->bucketsTable->horizontalHeader() );
 
     _ui->histogramView->build();

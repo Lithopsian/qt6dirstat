@@ -156,7 +156,7 @@ namespace QDirStat
 
 	Ui::FileDetailsView * _ui;
 	AdaptiveTimer       * _pkgUpdateTimer;
-	int                   _labelLimit;
+	int                   _labelLimit { 0 };
 
     };	// class FileDetailsView
 
