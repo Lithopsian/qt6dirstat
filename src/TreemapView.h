@@ -391,11 +391,11 @@ namespace QDirStat
 	 * changed.
 	 **/
 	void configChanged( const QColor & fixedColor,
-	                    bool squarified,
-	                    bool cushionShading,
-	                    double cushionHeight,
-			    double heightScaleFactor,
-			    int minTileSize );
+	                    bool           squarified,
+	                    bool           cushionShading,
+	                    double         cushionHeight,
+			    double         heightScaleFactor,
+			    int            minTileSize );
 
 	/**
 	 * Return the tile of the deepest-level highlighted parent or 0 if no
@@ -624,9 +624,9 @@ namespace QDirStat
 	QColor _dirGradientEnd;
 	QLinearGradient _dirGradient;
 
-	static constexpr double _lightX { 0.09759 };
-	static constexpr double _lightY { 0.19518 };
-	static constexpr double _lightZ { 0.97590 };
+	const double _lightX { 0.09759 };
+	const double _lightY { 0.19518 };
+	const double _lightZ { 0.97590 };
 
 	int    _ambientLight;
 	double _heightScaleFactor;
@@ -690,7 +690,9 @@ namespace QDirStat
     class CurrentTileHighlighter: public HighlightRect
     {
     public:
-	CurrentTileHighlighter( TreemapView * treemapView, const TreemapTile * tile, bool isSelected ):
+	CurrentTileHighlighter( const TreemapView * treemapView,
+	                        const TreemapTile * tile,
+	                        bool                isSelected ):
 	    HighlightRect ( tile,
 			    treemapView->currentItemColor(),
 			    2,
@@ -713,7 +715,8 @@ namespace QDirStat
     class SelectedTileHighlighter: public HighlightRect
     {
     public:
-	SelectedTileHighlighter( TreemapView * treemapView, const TreemapTile * tile ):
+	SelectedTileHighlighter( const TreemapView * treemapView,
+	                         const TreemapTile * tile ):
 	    HighlightRect ( tile,
 			    treemapView->selectedItemsColor(),
 			    2,
@@ -734,7 +737,9 @@ namespace QDirStat
     class ParentTileHighlighter: public HighlightRect
     {
     public:
-	ParentTileHighlighter( TreemapView * treemapView, const TreemapTile * tile, const QString & tooltip ):
+	ParentTileHighlighter( const TreemapView * treemapView,
+	                       const TreemapTile * tile,
+	                       const QString     & tooltip ):
 	    HighlightRect ( tile,
 			    treemapView->highlightColor(),
 			    treemapView->highlightedParent() ? 1 : 2,

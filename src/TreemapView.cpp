@@ -475,11 +475,11 @@ void TreemapView::treemapFinished()
 
 
 void TreemapView::configChanged( const QColor & fixedColor,
-                                 bool squarified,
-                                 bool cushionShading,
-                                 double cushionHeight,
-                                 double heightScaleFactor,
-                                 int minTileSize )
+                                 bool           squarified,
+                                 bool           cushionShading,
+                                 double         cushionHeight,
+                                 double         heightScaleFactor,
+                                 int            minTileSize )
 {
     //logDebug() << fixedColor.name() << Qt::endl;
     const bool treemapChanged = squarified        != _squarify ||
@@ -885,7 +885,7 @@ QPainterPath ParentTileHighlighter::shape() const
     // mouse cursor close enough.
     //
     // Note that it's still only on the inside of the line to avoid side effects.
-    constexpr int thickness = 5;
+    const int thickness = 5;
 
     QPainterPath path;
     path.addRect( rect() );

@@ -317,13 +317,6 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
     }
 }
 
-/*
-void FilesystemItem::set( int col, Qt::Alignment alignment, const QString & text )
-{
-    setText( col, text );
-    setTextAlignment( col, alignment | Qt::AlignVCenter );
-}
-*/
 
 bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
