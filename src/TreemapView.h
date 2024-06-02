@@ -27,10 +27,11 @@
 
 namespace QDirStat
 {
-    class TreemapTile;
     class HighlightRect;
+    class ParentTileHighlighter;
     class SceneMask;
     class CushionHeightSequence;
+    class TreemapTile;
     class CleanupCollection;
     class DirTree;
     class FileInfo;
@@ -46,7 +47,7 @@ namespace QDirStat
 	TreemapCancelRestart,
     };
 
-    typedef QList<const HighlightRect *> HighlightRectList;
+    typedef QVector<const ParentTileHighlighter *> ParentHighlightList;
 
     enum TreemapLayers
     {
@@ -109,7 +110,7 @@ namespace QDirStat
 	/**
 	 * Returns this treemap view's DirTree.
 	 **/
-//	DirTree * tree() const { return _tree; }
+//	const DirTree * tree() const { return _tree; }
 
 	/**
 	 * Set the selection model. This is important to synchronize current /
@@ -598,10 +599,10 @@ namespace QDirStat
 
 	TreemapTile         * _rootTile			{ nullptr };
 	HighlightRect       * _currentTileHighlighter	{ nullptr };
-	SceneMask           * _sceneMask		{ nullptr };
+	const SceneMask     * _sceneMask		{ nullptr };
 	FileInfo            * _newRoot			{ nullptr };
-	HighlightRectList     _parentHighlightList;
-	QString	              _savedRootUrl;
+	ParentHighlightList   _parentHighlightList;
+	QString               _savedRootUrl;
 
 	bool   _colourPreviews;
 	bool   _squarify;
@@ -623,9 +624,9 @@ namespace QDirStat
 	QColor _dirGradientEnd;
 	QLinearGradient _dirGradient;
 
-	const double _lightX { 0.09759 };
-	const double _lightY { 0.19518 };
-	const double _lightZ { 0.97590 };
+	static constexpr double _lightX { 0.09759 };
+	static constexpr double _lightY { 0.19518 };
+	static constexpr double _lightZ { 0.97590 };
 
 	int    _ambientLight;
 	double _heightScaleFactor;
@@ -633,7 +634,6 @@ namespace QDirStat
 	double _minTileSize;
 	double _minSquarifiedTileHeight;
 	int    _maxTileThreshold; // largest sub-tree size at which to spawn a rendering thread
-	const CushionHeightSequence * _cushionHeights { nullptr };
 
 	bool _disabled		{ false }; // flag to disable all treemap builds
 	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
@@ -641,7 +641,7 @@ namespace QDirStat
 	std::atomic<TreemapCancel>      _treemapCancel { TreemapCancelNone }; // flag to the treemap build thread
 	QFutureWatcher<TreemapTile *>   _watcher;
 	QThreadPool                   * _threadPool { nullptr }; // dedicated thread pool for rendering
-	QThreadPool                   * _mainThreadPool { nullptr }; // dedicated thread pool for treemap build
+	const CushionHeightSequence   * _cushionHeights { nullptr };
 
 	// just for logging
 	QElapsedTimer _stopwatch;
@@ -670,77 +670,36 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	HighlightRect( QGraphicsScene    * scene,
-	               const TreemapTile * tile,
+	HighlightRect( const TreemapTile * tile,
 		       const QColor      & color,
 		       int                 lineWidth,
-		       float               zValue );
+		       Qt::PenStyle        lineStyle,
+		       qreal               zValue );
 
-	/**
-	 * Create a highlight rectangle without a specific tile.
-	 * This is most useful for the current item.
-	 **/
-	HighlightRect( QGraphicsScene * scene,
-	               const QColor   & color,
-		       int              lineWidth,
-		       float            zValue ):
-	        HighlightRect ( scene, nullptr, color, lineWidth, zValue )
-	{}
+    }; // class HighlightRect
 
-	/**
-	 * Highlight the current treemap tile: resize this selection
-	 * rectangle to match this tile and move it to this tile's
-	 * position. Show the selection rectangle if it is currently
-	 * invisible.
-	 **/
-	void highlight();
-
-	/**
-	 * Highlight the specified treemap tile: can be re-implemented by a child class.
-	 * Used by the current item highlighter to reset the current tile, choose the
-	 * correct highlight style, and then highlight it.
-	 **/
-	virtual void highlight( const TreemapTile * ) {}
-
-	/**
-	 * Return the tile that this highlights or 0 if there is none.
-	 **/
-	const TreemapTile * tile() const { return _tile; }
-
-	/**
-	 * Return the shape of this item; in this case only the outline,
-	 * leaving the inside hollow to avoid displaying the tooltip there as
-	 * well.
-	 *
-	 * Reimplemented from QGraphicsRectItem / QGraphicsItem.
-	 **/
-	QPainterPath shape() const override;
-
-
-    protected:
-
-	// Data members
-	const TreemapTile * _tile;
-
-    }; // class TreemapSelectionRect
 
 
     /**
-     * Highlighter for the treemap view's current tile.
-     * This one is shared; it moves around from tile to tile.
+     * Highlighter for the treemap view's current tile.  Only
+     * one of these is created, and positioned over the current
+     * tile.  The highlight line is dotted if the current item
+     * is not selected, solid if it is.  It is red by default.
+     *
      **/
     class CurrentTileHighlighter: public HighlightRect
     {
     public:
-	CurrentTileHighlighter( TreemapView * treemapView ):
-	    HighlightRect ( treemapView->scene(),
-	                    treemapView->currentItemColor(),
+	CurrentTileHighlighter( TreemapView * treemapView, const TreemapTile * tile, bool isSelected ):
+	    HighlightRect ( tile,
+			    treemapView->currentItemColor(),
 			    2,
+			    isSelected ? Qt::SolidLine : Qt::DotLine,
 			    CurrentHighlightLayer )
 	{}
 
-	void highlight( const TreemapTile * tile ) override;
-    };
+    }; // class CurrentTileHighlighter
+
 
 
     /**
@@ -755,19 +714,20 @@ namespace QDirStat
     {
     public:
 	SelectedTileHighlighter( TreemapView * treemapView, const TreemapTile * tile ):
-	    HighlightRect ( treemapView->scene(),
-	                    tile,
+	    HighlightRect ( tile,
 			    treemapView->selectedItemsColor(),
 			    2,
+			    Qt::SolidLine,
 			    TileHighlightLayer )
 	{}
-    };
+
+    }; // class SelectedTileHighlighter
 
 
 
     /**
      * Highlighter for the treemap view's parent tiles.  There will (sometimes) be a list
-     * of these for all the parents of the current tile.  The first tile in the list,
+     * of these for all the parents of the current tile.  For the first tile in the list,
      * the immediate parent of the current tile, the highlight is 2 pixels wide, all
      * the others just 1 pixel.
      **/
@@ -775,18 +735,36 @@ namespace QDirStat
     {
     public:
 	ParentTileHighlighter( TreemapView * treemapView, const TreemapTile * tile, const QString & tooltip ):
-	    HighlightRect ( treemapView->scene(),
-	                    tile,
+	    HighlightRect ( tile,
 			    treemapView->highlightColor(),
-			    outlineWidth( treemapView ),
-			    SceneHighlightLayer )
+			    treemapView->highlightedParent() ? 1 : 2,
+			    Qt::SolidLine,
+			    SceneHighlightLayer ),
+	    _tile { tile }
 	{
 	    setToolTip( tooltip );
 	}
 
+	/**
+	 * Return the tile that this highlights or 0 if there is none.
+	 **/
+	const TreemapTile * tile() const { return _tile; }
+
     protected:
-	static int outlineWidth( TreemapView * treemapView )
-	    { return treemapView->highlightedParent() ? 1 : 2; }
+	/**
+	 * Return the shape of this item; in this case only the outline,
+	 * leaving the inside hollow to avoid displaying the tooltip there as
+	 * well.
+	 *
+	 * Reimplemented from QGraphicsRectItem / QGraphicsItem.
+	 **/
+	QPainterPath shape() const override;
+
+    private:
+
+	// Data members
+	const TreemapTile * _tile;
+
     };
 
 
@@ -806,7 +784,8 @@ namespace QDirStat
 	 * 0.0 -> completely transparent; 1.0 -> solid.
 	 **/
 	SceneMask( const TreemapTile * tile, float opacity );
-    };
+
+    };	// class SceneMask
 
 }	// namespace QDirStat
 

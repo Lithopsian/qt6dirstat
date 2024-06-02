@@ -486,9 +486,9 @@ void TreemapView::configChanged( const QColor & fixedColor,
                                 cushionHeight     != _cushionHeight ||
                                 heightScaleFactor != _heightScaleFactor ||
                                 minTileSize       != _minTileSize;
-    const bool colorsChanged = cushionShading != _doCushionShading ||
-                               fixedColor     != _tileFixedColor;
-    if ( !treemapChanged && !colorsChanged )
+    const bool coloursChanged = cushionShading != _doCushionShading ||
+                                fixedColor     != _tileFixedColor;
+    if ( !treemapChanged && !coloursChanged )
         return;
 
     // We're about to change data used by the treemap build thread
@@ -647,30 +647,23 @@ void TreemapView::enable()
 
 void TreemapView::setCurrentTile( const TreemapTile * tile )
 {
+    if ( !tile || tile == _rootTile )
+        return;
+
     //logDebug() << tile << " " << _stopwatch.restart() << "ms" << Qt::endl;
 
-    if ( tile )
-    {
-        //logDebug() << highlightedParent() << " " << tile->parentTile() << Qt::endl;
+    //logDebug() << highlightedParent() << " " << tile->parentTile() << Qt::endl;
 
-        if ( highlightedParent() != tile->parentTile() )
-            clearParentsHighlight();
+    delete _currentTileHighlighter;
+    _currentTileHighlighter = nullptr;
+    if ( highlightedParent() != tile->parentTile() )
+        clearParentsHighlight();
 
-        if ( !_currentTileHighlighter )
-            _currentTileHighlighter = new CurrentTileHighlighter( this );
-    }
+    //logDebug() " Highlighting the current tile" << Qt::endl;
+    _currentTileHighlighter = new CurrentTileHighlighter( this, tile, tile->isSelected() );
+    CHECK_NEW( _currentTileHighlighter );
 
-    if ( _currentTileHighlighter )
-    {
-        //logDebug() " Highlighting the current tile" << Qt::endl;
-
-        if ( tile == _rootTile )
-            _currentTileHighlighter->hide(); // Don't highlight the root tile
-        else
-            _currentTileHighlighter->highlight( tile );
-    }
-
-    if ( tile && _selectionModel->currentItem() != tile->orig() && _selectionModelProxy )
+    if ( _selectionModel->currentItem() != tile->orig() && _selectionModelProxy )
     {
         //logDebug() << "Sending currentItemChanged " << tile << Qt::endl;
 
@@ -840,6 +833,7 @@ void TreemapView::clearParentsHighlight()
 {
     qDeleteAll( _parentHighlightList );
     _parentHighlightList.clear();
+
     delete _sceneMask;
     _sceneMask = nullptr;
 }
@@ -867,75 +861,38 @@ void TreemapView::saveTreemapRoot()
 }
 
 
-HighlightRect::HighlightRect( QGraphicsScene * scene,
-                              const TreemapTile * tile,
-                              const QColor & color,
-                              int lineWidth,
-                              float zValue ):
-    QGraphicsRectItem (),
-    _tile { tile }
-{
-    setPen( QPen( color, lineWidth ) );
-    setZValue( zValue );
-    highlight();
 
-    scene->addItem( this );
+HighlightRect::HighlightRect( const TreemapTile * tile,
+                              const QColor      & color,
+                              int                 lineWidth,
+                              Qt::PenStyle        lineStyle,
+                              qreal               zValue ):
+    QGraphicsRectItem ( tile->rect() )
+{
+    setPen( QPen( color, lineWidth, lineStyle ) );
+    setZValue( zValue );
+
+    tile->scene()->addItem( this );
 }
 
 
-QPainterPath HighlightRect::shape() const
-{
-    if ( !_tile )
-        return QGraphicsRectItem::shape();
 
+QPainterPath ParentTileHighlighter::shape() const
+{
     // Return just the outline as the shape so any tooltip is only displayed on
     // the outline, not inside the rectangle as well; but use more than the line
     // thickness of 1 or 2 pixels to make it humanly possible to position the
     // mouse cursor close enough.
     //
     // Note that it's still only on the inside of the line to avoid side effects.
-    const int thickness = 5;
+    constexpr int thickness = 5;
+
     QPainterPath path;
-    path.addRect( _tile->rect() );
-    path.addRect( _tile->rect().adjusted( thickness, thickness, -thickness, -thickness ) );
+    path.addRect( rect() );
+    path.addRect( rect().adjusted( thickness, thickness, -thickness, -thickness ) );
 
     return path;
 }
-
-
-void HighlightRect::highlight()
-{
-    //logDebug() << Qt::endl;
-
-    if ( _tile )
-    {
-        QRectF tileRect = _tile->rect();
-        tileRect.moveTo( mapFromScene( _tile->mapToScene( tileRect.topLeft() ) ) );
-        setRect( tileRect );
-
-        if ( !isVisible() )
-            show();
-    }
-    else
-    {
-        if ( isVisible() )
-            hide();
-    }
-}
-
-
-
-void CurrentTileHighlighter::highlight( const TreemapTile * tile )
-{
-    _tile = tile;
-
-    QPen highlightPen = pen();
-    highlightPen.setStyle( _tile && _tile->isSelected() ? Qt::SolidLine : Qt::DotLine );
-    setPen( highlightPen );
-
-    HighlightRect::highlight();
-}
-
 
 
 

@@ -695,33 +695,23 @@ QVariant TreemapTile::itemChange( GraphicsItemChange   change,
 {
     //logDebug() << this << Qt::endl;
 
-    if ( change == ItemSelectedChange && _orig->hasChildren() ) // tiles with no children are highlighted in paint()
+    if ( change == ItemSelectedChange &&
+         _orig->hasChildren() &&             // tiles with no children are highlighted in paint()
+         this != _parentView->rootTile() )   // don't highlight the root tile
     {
         const bool selected = value.toBool();
         //logDebug() << this << ( selected ? " is selected" : " is deselected" ) << Qt::endl;
 
         if ( !selected )
         {
-            if ( _highlighter )
-            {
-                //logDebug() << "Hiding highlighter for " << this << Qt::endl;
-                _highlighter->hide();
-            }
+            delete _highlighter;
+            _highlighter = nullptr;
         }
-        else if ( this != _parentView->rootTile() ) // don't highlight the root tile
+        else if ( !_highlighter )
         {
-            if ( !_highlighter )
-            {
-                //logDebug() << "Creating highlighter for " << this << Qt::endl;
-                _highlighter = new SelectedTileHighlighter( _parentView, this );
-                CHECK_NEW( _highlighter );
-            }
-
-            if ( !_highlighter->isVisible() )
-            {
-                //logDebug() << "Showing highlighter for " << this << " (style=" << _highlighter->pen().style() << ")" << Qt::endl;
-                _highlighter->show();
-            }
+            //logDebug() << "Creating highlighter for " << this << Qt::endl;
+            _highlighter = new SelectedTileHighlighter( _parentView, this );
+            CHECK_NEW( _highlighter );
         }
     }
 
