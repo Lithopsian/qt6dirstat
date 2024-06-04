@@ -102,21 +102,6 @@ public:
 };
 
 
-/**
- * Exception class for "out of memory" ('new' failed).
- * Use with CHECK_NEW().
- */
-class OutOfMemoryException: public Exception
-{
-public:
-    OutOfMemoryException():
-	Exception ( "Null pointer" )
-    {}
-
-    ~OutOfMemoryException() noexcept override = default;
-};
-
-
 class FileException: public Exception
 {
 public:
@@ -292,21 +277,6 @@ private:
  */
 #define RETHROW( EXCEPTION ) \
     _rethrow_helper( ( EXCEPTION ), 0, __FILE__, __LINE__, __func__ )
-
-/**
- * Check the result of 'new' and throw exception if it returned 0.
- *
- * The do..while() loop is used because it syntactically allows to put a
- * semicolon (without nasty side effects) after the macro when it is used.
- */
-#define CHECK_NEW( PTR )			\
-    do						\
-    {						\
-	if ( !(PTR) )				\
-	{					\
-	    THROW( OutOfMemoryException() );	\
-	}					\
-    } while( 0 )
 
 
 

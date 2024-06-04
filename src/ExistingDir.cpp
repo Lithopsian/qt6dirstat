@@ -39,8 +39,6 @@ ExistingDirCompleter::ExistingDirCompleter( QObject * parent ):
     QCompleter ( parent )
 {
     QFileSystemModel * model = new QFileSystemModel( this );
-    CHECK_NEW( model );
-
     model->setRootPath( "/" );
     model->setFilter( QDir::Dirs );
     model->setReadOnly( true );

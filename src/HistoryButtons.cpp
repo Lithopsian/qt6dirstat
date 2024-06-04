@@ -29,8 +29,6 @@ HistoryButtons::HistoryButtons( QAction * actionGoBack,
     _actionGoBack { actionGoBack },
     _actionGoForward { actionGoForward }
 {
-    CHECK_NEW( _history );
-
     initHistoryButtons();
 }
 
@@ -120,8 +118,6 @@ void HistoryButtons::initHistoryButtons()
     // Two menus - they'll always look the same, but positioning changes slightly as a visual clue
     QMenu * backMenu    = new QMenu();
     QMenu * forwardMenu = new QMenu();
-    CHECK_NEW( backMenu );
-    CHECK_NEW( forwardMenu );
 
     connect( backMenu,         &QMenu::aboutToShow,
              this,             &HistoryButtons::updateHistoryMenu );
@@ -155,15 +151,12 @@ void HistoryButtons::updateHistoryMenu()
     menu->clear();
 
     QActionGroup * actionGroup = new QActionGroup( menu );
-    CHECK_NEW( actionGroup );
 
     const QStringList & items = _history->allItems();
 
     for ( int i = items.size() - 1; i >= 0; i-- )
     {
         QAction * action = new QAction( items.at( i ), actionGroup );
-        CHECK_NEW( action );
-
         action->setCheckable( true );
         action->setChecked( i == _history->currentIndex() );
         action->setData( i );

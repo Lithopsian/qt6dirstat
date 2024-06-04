@@ -120,10 +120,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 		if ( arch == QLatin1String( "(none)" ) )
 		    arch = "";
 
-		PkgInfo * pkg = new PkgInfo( name, version, arch, this );
-		CHECK_NEW( pkg );
-
-		pkgList << pkg;
+		pkgList << new PkgInfo( name, version, arch, this );
 	    }
 	}
     }
@@ -182,7 +179,6 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
     PkgFileListCache * cache = new PkgFileListCache( this, lookupType );
-    CHECK_NEW( cache );
 
     // Sample output:
     //

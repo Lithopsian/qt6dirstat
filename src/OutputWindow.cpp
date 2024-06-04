@@ -28,7 +28,6 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     QDialog ( parent ),
     _ui { new Ui::OutputWindow }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     //logDebug() << "Creating with parent " << parent << Qt::endl;

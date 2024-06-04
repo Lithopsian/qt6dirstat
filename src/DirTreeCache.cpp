@@ -567,7 +567,6 @@ void CacheReader::addItem()
 	logDebug() << "Creating DirInfo for " << url << " with parent " << parent << Qt::endl;
 #endif
 	DirInfo * dir = new DirInfo( parent, _tree, url, mode, size, alloc, hasUidGidPerm, uid, gid, mtime );
-	CHECK_NEW( dir );
 	dir->setReadState( DirReading );
 
 	// Allow automatically-loaded cache files to be flagged up to the user
@@ -630,7 +629,6 @@ void CacheReader::addItem()
 	FileInfo * item = new FileInfo( parent, _tree, name,
 					mode, size, alloc, hasUidGidPerm, uid, gid, mtime,
 					isSparseFile, blocks, links );
-	CHECK_NEW( item );
 	parent->insertChild( item );
 	_tree->childAddedNotify( item );
     }

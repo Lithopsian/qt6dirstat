@@ -144,8 +144,6 @@ void ListEditor::add()
     void * value = createValue();
 
     ListEditorItem * item = new ListEditorItem( valueText( value ), value );
-    CHECK_NEW( item );
-
     _listWidget->addItem( item );
     _listWidget->setCurrentItem( item );
 }

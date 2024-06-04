@@ -25,15 +25,11 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     QDialog ( parent ),
     _ui { new Ui::OpenUnpkgDialog }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    QCompleter * completer = new ExistingDirCompleter( this );
-    CHECK_NEW( completer );
-    _ui->startingDirComboBox->setCompleter( completer );
+    _ui->startingDirComboBox->setCompleter( new ExistingDirCompleter( this ) );
 
     ExistingDirValidator * validator = new ExistingDirValidator( this );
-    CHECK_NEW( validator );
     _ui->startingDirComboBox->setValidator( validator );
 
     QLineEdit * lineEdit = _ui->startingDirComboBox->lineEdit();

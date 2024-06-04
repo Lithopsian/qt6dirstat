@@ -550,8 +550,6 @@ void DirTreeModel::setBaseFont( const QFont & font )
 void DirTreeModel::createTree()
 {
     _tree = new DirTree();
-    CHECK_NEW( _tree );
-
     _tree->setExcludeRules();
 
     connect( _tree, &DirTree::finished,

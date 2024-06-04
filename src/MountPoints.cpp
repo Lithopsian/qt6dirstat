@@ -82,7 +82,6 @@ QStorageInfo * MountPoint::storageInfo()
             logDebug() << "Creating QStorageInfo for " << _path << Qt::endl;
 
         _storageInfo = new QStorageInfo( _path );
-        CHECK_NEW( _storageInfo );
     }
 
     return _storageInfo;
@@ -268,8 +267,6 @@ bool MountPoints::read( const QString & filename )
         handleFuseblk( fsType, _ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint( device, path, fsType, mountOpts );
-        CHECK_NEW( mountPoint );
-
         postProcess( mountPoint );
         add( mountPoint );
 
@@ -338,8 +335,6 @@ bool MountPoints::readStorageInfo()
                                                   mount.rootPath(),
                                                   fsType,
                                                   mountOptions );
-        CHECK_NEW( mountPoint );
-
         postProcess( mountPoint );
         add( mountPoint );
     }

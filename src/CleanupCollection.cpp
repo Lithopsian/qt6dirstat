@@ -186,8 +186,6 @@ CleanupCollection::CleanupCollection( QObject        * parent,
     _selectionModel { selectionModel },
     _trash { new Trash() }
 {
-    CHECK_NEW( _trash );
-
     readSettings();
 
     // Add to the toolbar and menu, and keep these in sync with this object
@@ -381,7 +379,6 @@ void CleanupCollection::execute()
     emit startingCleanup( cleanup->cleanTitle() );
 
     OutputWindow * outputWindow = new OutputWindow( activeWindow, cleanup->outputWindowAutoClose() );
-    CHECK_NEW( outputWindow );
 
     switch ( cleanup->outputWindowPolicy() )
     {
@@ -533,7 +530,6 @@ void CleanupCollection::readSettings()
 					     static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
 					     outputWindowTimeout, outputWindowAutoClose,
 					     shell );
-	    CHECK_NEW( cleanup );
 	    add( cleanup );
 
 	    if ( !iconName.isEmpty() )
@@ -624,7 +620,6 @@ void CleanupCollection::moveToTrash()
 
     // Prepare output window
     OutputWindow * outputWindow = new OutputWindow( qApp->activeWindow(), true );
-    CHECK_NEW( outputWindow );
 
     // Prepare refresher
     createRefresher( outputWindow, selectedItems.parents() );
@@ -650,7 +645,6 @@ void CleanupCollection::createRefresher( OutputWindow * outputWindow, const File
 {
     _selectionModel->prepareForRefresh( refreshSet );
     Refresher * refresher = new Refresher( this, refreshSet );
-    CHECK_NEW( refresher );
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
 	     refresher,    &Refresher::refresh );

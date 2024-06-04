@@ -25,24 +25,12 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
-    GeneralConfigPage * generalConfigPage = new GeneralConfigPage( this );
-    CHECK_NEW( generalConfigPage );
-    _ui->pagesTabWidget->addTab( generalConfigPage, tr( "General" ) );
-
-    MimeCategoryConfigPage * mimeCategoryConfigPage = new MimeCategoryConfigPage( this );
-    CHECK_NEW( mimeCategoryConfigPage );
-    _ui->pagesTabWidget->addTab( mimeCategoryConfigPage, tr( "MIME Categories" ) );
-
-    CleanupConfigPage * cleanupConfigPage = new CleanupConfigPage( this );
-    CHECK_NEW( cleanupConfigPage );
-    _ui->pagesTabWidget->addTab( cleanupConfigPage, tr( "Cleanup Actions" ) );
-
-    ExcludeRulesConfigPage * excludeRulesConfigPage = new ExcludeRulesConfigPage( this );
-    CHECK_NEW( excludeRulesConfigPage );
-    _ui->pagesTabWidget->addTab( excludeRulesConfigPage, tr( "Exclude Rules" ) );
+    _ui->pagesTabWidget->addTab( new GeneralConfigPage( this ), tr( "General" ) );
+    _ui->pagesTabWidget->addTab( new MimeCategoryConfigPage( this ), tr( "MIME Categories" ) );
+    _ui->pagesTabWidget->addTab( new CleanupConfigPage( this ), tr( "Cleanup Actions" ) );
+    _ui->pagesTabWidget->addTab( new ExcludeRulesConfigPage( this ), tr( "Exclude Rules" ) );
 
     connect( _ui->applyButton, &QPushButton::clicked,
 	     this,             &ConfigDialog::applyChanges );
@@ -54,10 +42,7 @@ ConfigDialog * ConfigDialog::sharedInstance( QWidget * parent )
     static QPointer<ConfigDialog> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new ConfigDialog( parent );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }

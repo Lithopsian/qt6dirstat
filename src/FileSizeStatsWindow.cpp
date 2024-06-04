@@ -99,7 +99,6 @@ namespace
 				const QString & text )
     {
 	QTableWidgetItem * item = new QTableWidgetItem( text );
-	CHECK_NEW( item );
 	table->setItem( row, col, item );
 
 	return item;
@@ -117,7 +116,6 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -142,10 +140,7 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
     static QPointer<FileSizeStatsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new FileSizeStatsWindow( mainWindow );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -154,7 +149,6 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 void FileSizeStatsWindow::initWidgets()
 {
     _bucketsTableModel = new BucketsTableModel( this, _ui->histogramView );
-    CHECK_NEW( _bucketsTableModel );
     _ui->bucketsTable->setModel( _bucketsTableModel );
 
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
@@ -214,7 +208,6 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 	_stats = new FileSizeStats( fileInfo );
     else
 	_stats = new FileSizeStats( fileInfo, suffix );
-    CHECK_NEW( _stats );
     _stats->calculatePercentiles();
 
     fillHistogram();

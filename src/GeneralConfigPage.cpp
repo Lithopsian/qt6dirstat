@@ -24,7 +24,6 @@ GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
     QWidget( parent ),
     _ui( new Ui::GeneralConfigPage )
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     setup();

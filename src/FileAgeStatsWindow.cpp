@@ -56,7 +56,6 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -107,10 +106,7 @@ FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
     static QPointer<FileAgeStatsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new FileAgeStatsWindow( parent );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -212,7 +208,6 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 	{
 	    // Add a year item
 	    YearListItem * item = new YearListItem( *yearStats );
-	    CHECK_NEW( item );
 	    _ui->treeWidget->addTopLevelItem( item );
 
 	    // Add the month items if applicable
@@ -224,7 +219,6 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 		    if ( monthStats )
 		    {
 			YearListItem * monthItem = new YearListItem( *monthStats );
-			CHECK_NEW( monthItem );
 
 			if ( monthStats->filesCount == 0 )
 			    monthItem->setFlags( Qt::NoItemFlags ); // disabled
@@ -245,8 +239,6 @@ void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
     for ( short year : findGaps( stats ) )
     {
 	YearListItem * item = new YearListItem( YearStats( year ) );
-	CHECK_NEW( item );
-
 	item->setFlags( Qt::NoItemFlags ); // disabled
 	_ui->treeWidget->addTopLevelItem( item );
     }
@@ -337,7 +329,6 @@ void FileAgeStatsWindow::readSettings()
 						       percentBarWidth,
 						       percentBarBackground,
 						       filesPercentBarColors );
-    CHECK_NEW( _filesPercentBarDelegate );
     _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
 
     _sizePercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
@@ -345,7 +336,6 @@ void FileAgeStatsWindow::readSettings()
 						      percentBarWidth,
 						      percentBarBackground,
 						      sizePercentBarColors );
-    CHECK_NEW( _sizePercentBarDelegate );
     _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
 }
 

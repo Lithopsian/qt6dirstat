@@ -40,7 +40,6 @@ PathSelectorItem * PathSelector::addPath( const QString & path,
                                           const QIcon   & icon )
 {
     PathSelectorItem * item = new PathSelectorItem( path, this );
-    CHECK_NEW( item );
 
     if ( !icon.isNull() )
 	item->setIcon( icon );
@@ -61,8 +60,6 @@ void PathSelector::addMountPoint( MountPoint * mountPoint )
     CHECK_PTR( mountPoint );
 
     PathSelectorItem * item = new PathSelectorItem( mountPoint, this );
-    CHECK_NEW( item );
-
     const auto type = mountPoint->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
     item->setIcon( _iconProvider.icon( type ) );
 }

@@ -158,8 +158,6 @@ void ExcludeRules::add( ExcludeRule::PatternSyntax   patternSyntax,
                         bool                         checkAnyFileChild )
 {
     ExcludeRule * rule = new ExcludeRule( patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild );
-    CHECK_NEW( rule );
-
     _rules << rule;
 
     logInfo() << "Added " << rule << Qt::endl;
@@ -261,7 +259,6 @@ void ExcludeRules::readSettings()
 					      caseSensitive,
 					      useFullPath,
 					      checkAnyFileChild );
-	CHECK_NEW( rule );
 
 	if ( !pattern.isEmpty() && rule->isValid() )
 	{

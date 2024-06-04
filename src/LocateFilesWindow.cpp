@@ -39,7 +39,6 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -78,7 +77,6 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
     else
     {
 	_sharedInstance = new LocateFilesWindow( treeWalker, app()->findMainWindow() );
-	CHECK_NEW( _sharedInstance );
     }
 
     return _sharedInstance;
@@ -160,12 +158,7 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
     {
 	FileInfo * item = *it;
 	if ( _treeWalker->check( item ) )
-	{
-	    LocateListItem * locateListItem = new LocateListItem( item );
-	    CHECK_NEW( locateListItem );
-
-	    _ui->treeWidget->addTopLevelItem( locateListItem );
-	}
+	    _ui->treeWidget->addTopLevelItem( new LocateListItem( item ) );
 
 	if ( item->hasChildren() )
 	    populateRecursive( item );

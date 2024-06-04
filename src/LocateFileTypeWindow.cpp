@@ -35,7 +35,6 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -62,10 +61,7 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
     static QPointer<LocateFileTypeWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new LocateFileTypeWindow( app()->findMainWindow() );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -140,11 +136,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 	for ( const FileInfo * file : matches )
 	    totalSize += file->size();
 
-	SuffixSearchResultItem * searchResultItem =
-	    new SuffixSearchResultItem( dir->url(), matches.size(), totalSize );
-	CHECK_NEW( searchResultItem );
-
-	_ui->treeWidget->addTopLevelItem( searchResultItem );
+	_ui->treeWidget->addTopLevelItem( new SuffixSearchResultItem( dir->url(), matches.size(), totalSize ) );
     }
 
     // Recurse through any subdirectories

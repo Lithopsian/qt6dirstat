@@ -78,9 +78,7 @@ TreemapView::TreemapView( QWidget * parent ):
     QGraphicsView ( parent )
 {
     // Only one scene, never destroyed, create it now for simplicity
-    QGraphicsScene * newScene = new QGraphicsScene( this );
-    CHECK_NEW( newScene);
-    setScene( newScene );
+    setScene( new QGraphicsScene( this ) );
 
     readSettings();
 
@@ -174,7 +172,6 @@ void TreemapView::setSelectionModel( SelectionModel * selectionModel )
     // Use the proxy for all selection model receiving signals
     delete _selectionModelProxy;
     _selectionModelProxy = new SelectionModelProxy( selectionModel, this );
-    CHECK_NEW( _selectionModelProxy );
 
     connect( _selectionModelProxy, &SelectionModelProxy::currentItemChanged,
              this,                 &TreemapView::updateCurrentItem );
@@ -395,10 +392,8 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
 
     _watcher.setFuture( QtConcurrent::run( [ this, newRoot, rect ]()
     {
-        _threadPool = new QThreadPool();
-        CHECK_NEW( _threadPool );
-
         // By default the number of CPUs, which will sometimes block creation of render threads
+        _threadPool = new QThreadPool();
         _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
 
         TreemapTile * tile = new TreemapTile( this, newRoot, rect );
@@ -512,7 +507,6 @@ void TreemapView::calculateSettings()
     // Pre-calculate cushion heights from the configured starting height and scale factor.
     delete _cushionHeights;
     _cushionHeights = new CushionHeightSequence( _cushionHeight, _heightScaleFactor );
-    CHECK_NEW( _cushionHeights );
 
     // Calculate thresholds for tile sizes that will be submitted to a render thread
     _maxTileThreshold = ( _squarify ? 150 : 75 ) + 10 * QThread::idealThreadCount();
@@ -658,7 +652,6 @@ void TreemapView::setCurrentTile( const TreemapTile * tile )
 
     //logDebug() " Highlighting the current tile" << Qt::endl;
     _currentTileHighlighter = new CurrentTileHighlighter( this, tile, tile->isSelected() );
-    CHECK_NEW( _currentTileHighlighter );
 
     if ( _selectionModel->currentItem() != tile->orig() && _selectionModelProxy )
     {
@@ -807,19 +800,12 @@ void TreemapView::highlightParents( const TreemapTile * tile )
 
     while ( parent && parent != _rootTile )
     {
-        const ParentTileHighlighter * highlight =
-            new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
-        CHECK_NEW( highlight );
-        _parentHighlightList << highlight;
-
+        _parentHighlightList << new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
         parent = parent->parentTile();
     }
 
     if ( !_parentHighlightList.isEmpty() )
-    {
         _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 );
-        CHECK_NEW( _sceneMask );
-    }
 }
 
 

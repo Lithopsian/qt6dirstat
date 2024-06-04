@@ -313,10 +313,7 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 		if ( status == QLatin1String( "install ok installed" ) ||
 		     status == QLatin1String( "hold ok installed" ) )
 		{
-		    PkgInfo * pkg = new PkgInfo( name, version, arch, this );
-		    CHECK_NEW( pkg );
-
-		    pkgList << pkg;
+		    pkgList << new PkgInfo( name, version, arch, this );
 		}
 		else
 		{
@@ -391,7 +388,6 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
     PkgFileListCache * cache = new PkgFileListCache( this, lookupType );
-    CHECK_NEW( cache );
 
     // Sample output:
     //

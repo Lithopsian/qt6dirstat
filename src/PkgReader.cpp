@@ -125,8 +125,6 @@ namespace
     void addToTree( DirTree * tree, const PkgInfoList & pkgList )
     {
 	PkgInfo * top = new PkgInfo( tree, tree->root() );
-	CHECK_NEW( top );
-
 	tree->root()->insertChild( top );
 
 	for ( PkgInfo * pkg : pkgList )
@@ -161,7 +159,6 @@ namespace
 	env.insert( "LANG", "C" ); // Prevent output in translated languages
 
 	QProcess * process = new QProcess();
-	CHECK_NEW( process );
 	process->setProgram( program );
 	process->setArguments( args );
 	process->setProcessEnvironment( env );
@@ -216,11 +213,7 @@ void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
     }
 
     for ( PkgInfo * pkg : pkgList )
-    {
-	CachePkgReadJob * job = new CachePkgReadJob( tree, pkg, _verboseMissingPkgFiles, fileListCache );
-	CHECK_NEW( job );
-	tree->addJob( job );
-    }
+	tree->addJob( new CachePkgReadJob( tree, pkg, _verboseMissingPkgFiles, fileListCache ) );
 }
 
 
@@ -229,17 +222,13 @@ void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
     //logDebug() << Qt::endl;
 
     ProcessStarter * processStarter = new ProcessStarter( _maxParallelProcesses, true );
-    CHECK_NEW( processStarter );
 
     for ( PkgInfo * pkg : pkgList )
     {
 	QProcess * process = createReadFileListProcess( pkg );
 	if ( process )
 	{
-	    AsyncPkgReadJob * job = new AsyncPkgReadJob( tree, pkg, _verboseMissingPkgFiles, process );
-	    CHECK_NEW( job );
-	    tree->addBlockedJob( job );
-
+	    tree->addBlockedJob( new AsyncPkgReadJob( tree, pkg, _verboseMissingPkgFiles, process ) );
 	    processStarter->add( process );
 	}
     }
@@ -331,17 +320,9 @@ namespace
 	    return nullptr;
 
 	if ( S_ISDIR( statInfo.st_mode ) )	// directory
-	{
-	    FileInfo * newDir = new DirInfo( parent, tree, name, statInfo );
-	    CHECK_NEW( newDir );
-	    return newDir;
-	}
+	    return new DirInfo( parent, tree, name, statInfo );
 	else					// not directory
-	{
-	    FileInfo * newFile = new FileInfo( parent, tree, name, statInfo );
-	    CHECK_NEW( newFile );
-	    return newFile;
-	}
+	    return new FileInfo( parent, tree, name, statInfo );
     }
 
 

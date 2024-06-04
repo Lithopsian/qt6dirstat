@@ -38,7 +38,6 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
 {
     //logDebug() << "MimeCategoryConfigPage constructor" << Qt::endl;
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     setListWidget  ( _ui->listWidget   );
@@ -184,11 +183,7 @@ void MimeCategoryConfigPage::fillListWidget()
     {
 	// Make a deep copy so the config dialog can work without disturbing the real categories
 	MimeCategory * category = new MimeCategory( *mimeCategory );
-	CHECK_NEW( category );
-
-	QListWidgetItem * item = new ListEditorItem( category->name(), category );
-	CHECK_NEW( item );
-	listWidget()->addItem( item );
+	listWidget()->addItem( new ListEditorItem( category->name(), category ) );
     }
 
     listWidget()->sortItems();
@@ -456,8 +451,6 @@ void * MimeCategoryConfigPage::createValue()
 {
     // ListEditor is making a new row in the category list
     MimeCategory * category = new MimeCategory( "", Qt::white );
-    CHECK_NEW( category );
-
     _dirty = true;
 
     return category;
@@ -488,7 +481,6 @@ QString MimeCategoryConfigPage::valueText( void * value )
 void MimeCategoryConfigPage::populateTreemapView()
 {
     _dirTree = new DirTree();
-    CHECK_NEW( _dirTree );
 
     DirInfo       * root    = _dirTree->root();
     const mode_t    mode    = 0755;
@@ -505,31 +497,24 @@ void MimeCategoryConfigPage::populateTreemapView()
     //	    dir212
 
     DirInfo * dir1 = new DirInfo( root, _dirTree, "dir1", mode, dirSize );
-    CHECK_NEW( dir1 );
     root->insertChild( dir1 );
 
     DirInfo * dir11 = new DirInfo( dir1, _dirTree, "dir11", mode, dirSize );
-    CHECK_NEW( dir11 );
     dir1->insertChild( dir11 );
 
     DirInfo * dir12 = new DirInfo( dir1, _dirTree, "dir12", mode, dirSize );
-    CHECK_NEW( dir12 );
     dir1->insertChild( dir12 );
 
     DirInfo * dir2 = new DirInfo( root, _dirTree, "dir2", mode, dirSize );
-    CHECK_NEW( dir2 );
     root->insertChild( dir2 );
 
     DirInfo * dir21 = new DirInfo( dir2, _dirTree, "dir21", mode, dirSize );
-    CHECK_NEW( dir21 );
     dir2->insertChild( dir21 );
 
     DirInfo * dir211 = new DirInfo( dir21, _dirTree, "dir211", mode, dirSize );
-    CHECK_NEW( dir211 );
     dir21->insertChild( dir211 );
 
     DirInfo * dir212 = new DirInfo( dir21, _dirTree, "dir212", mode, dirSize );
-    CHECK_NEW( dir212 );
     dir21->insertChild( dir212 );
 
     const FileSize maxSize   = 100*1024*1024;	// 100 MB
@@ -545,9 +530,7 @@ void MimeCategoryConfigPage::populateTreemapView()
 	    const FileSize fileSize = random->bounded( 1, maxSize );
 
 	    // Create a FileInfo item and add it to the parent
-	    FileInfo * file = new FileInfo( parent, _dirTree, QString( "File_%1" ).arg( i ), mode, fileSize );
-	    CHECK_NEW( file );
-	    parent->insertChild( file );
+	    parent->insertChild( new FileInfo( parent, _dirTree, QString( "File_%1" ).arg( i ), mode, fileSize ) );
 	}
 
 	parent->finalizeLocal(); // moves files out of DotEntries when there are no sub-directories

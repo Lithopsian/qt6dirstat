@@ -584,8 +584,6 @@ void Cleanup::runCommand( const FileInfo * item,
     }
 
     QProcess * process = new QProcess( parent() );
-    CHECK_NEW( process );
-
     process->setProgram( shell );
     process->setArguments( { "-c", expandVariables( item, command ) } );
     process->setWorkingDirectory( itemDir( item ) );

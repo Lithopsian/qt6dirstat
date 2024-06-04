@@ -30,7 +30,6 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     _ui { new Ui::CleanupConfigPage },
     _outputWindowDefaultTimeout { OutputWindow::defaultShowTimeout() }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     setListWidget( _ui->listWidget );
@@ -110,11 +109,7 @@ void CleanupConfigPage::fillListWidget()
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	Cleanup * newCleanup = new Cleanup( cleanup );
-	CHECK_NEW( cleanup );
-
-	QListWidgetItem * item = new ListEditorItem( newCleanup->cleanTitle(), newCleanup );
-	CHECK_NEW( item );
-	listWidget()->addItem( item );
+	listWidget()->addItem( new ListEditorItem( newCleanup->cleanTitle(), newCleanup ) );
     }
 
     listWidget()->setCurrentRow( 0 );
@@ -252,10 +247,7 @@ void CleanupConfigPage::load( void * value )
 
 void * CleanupConfigPage::createValue()
 {
-    Cleanup * cleanup = new Cleanup();
-    CHECK_NEW( cleanup );
-
-    return cleanup;
+    return new Cleanup();
 }
 
 

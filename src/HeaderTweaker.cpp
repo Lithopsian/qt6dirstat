@@ -65,9 +65,7 @@ void HeaderTweaker::initHeader()
 
 void HeaderTweaker::createColumnLayout( const QString & layoutName)
 {
-    ColumnLayout * layout = new ColumnLayout( layoutName );
-    CHECK_NEW( layout );
-    _layouts[ layoutName ] = layout;
+    _layouts[ layoutName ] = new ColumnLayout( layoutName );
 }
 
 
@@ -87,7 +85,6 @@ void HeaderTweaker::createColumnLayouts()
 QAction * HeaderTweaker::createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) )
 {
     QAction * action = new QAction( title, this );
-    CHECK_NEW( action );
     menu->addAction( action );
     connect( action, &QAction::triggered, this, slot );
 
@@ -135,7 +132,6 @@ QMenu * HeaderTweaker::createHiddenColMenu( QWidget * parent )
 {
     int actionCount = 0;
     QMenu * hiddenColMenu = new QMenu( tr( "Hidden &Columns" ), parent );
-    CHECK_NEW( hiddenColMenu );
 
     for ( int section = 0; section < _header->count(); ++section )
     {

@@ -33,7 +33,6 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -57,10 +56,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
     static QPointer<UnreadableDirsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new UnreadableDirsWindow( app()->findMainWindow() );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -130,12 +126,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
     DirInfo * dir = fileInfo->toDirInfo();
     if ( dir->readError() )
-    {
-	UnreadableDirListItem * searchResultItem = new UnreadableDirListItem( dir );
-	CHECK_NEW( searchResultItem );
-
-	_ui->treeWidget->addTopLevelItem( searchResultItem );
-    }
+	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem( dir ) );
 
     // Recurse through any subdirectories
     for ( FileInfo * child = dir->firstChild(); child; child = child->next() )

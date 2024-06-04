@@ -33,8 +33,6 @@ namespace
                         const QString & headingText,
                         FileInfo      * fileInfo = nullptr )
     {
-        CHECK_NEW( treeWalker );
-
         if ( !fileInfo )
             fileInfo = app()->currentDirInfo();
 

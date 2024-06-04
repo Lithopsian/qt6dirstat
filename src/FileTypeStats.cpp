@@ -24,8 +24,6 @@ using namespace QDirStat;
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
     _otherCategory { new MimeCategory( QObject::tr( "Other" ) ) }
 {
-    CHECK_NEW( _otherCategory );
-
     if ( subtree && subtree->checkMagicNumber() )
     {
         collect( subtree );

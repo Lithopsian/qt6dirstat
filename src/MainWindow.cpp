@@ -61,12 +61,10 @@ MainWindow::MainWindow( bool slowUpdate ):
     _sortCol { QDirStat::DataColumns::toViewCol( QDirStat::SizeCol ) },
     _sortOrder { Qt::DescendingOrder }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
 
     _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
-    CHECK_NEW( _historyButtons );
 
     _updateTimer.setInterval( UPDATE_MILLISEC );
 

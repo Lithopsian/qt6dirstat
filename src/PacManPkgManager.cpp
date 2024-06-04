@@ -91,11 +91,7 @@ PkgInfoList PacManPkgManager::parsePkgList( const QString & output ) const
                 const QString name    = fields.takeFirst();
                 const QString version = fields.takeFirst();
                 const QString arch    = "";
-
-                PkgInfo * pkg = new PkgInfo( name, version, arch, this );
-                CHECK_NEW( pkg );
-
-                pkgList << pkg;
+                pkgList << new PkgInfo( name, version, arch, this );
             }
         }
     }

@@ -50,7 +50,6 @@ void MainWindow::initLayouts( const QString & currentLayoutName )
     // Qt Designer does not support QActionGroups; it was there for Qt 3, but
     // they dropped that feature for Qt 4/5.
     _layoutActionGroup = new QActionGroup( this );
-    CHECK_NEW( _layoutActionGroup );
 
     // Note that the column layouts are handled in the HeaderTweaker and its
     // ColumnLayout helper class; see also HeaderTweaker.h and .cpp.

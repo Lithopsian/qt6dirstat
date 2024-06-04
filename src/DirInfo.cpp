@@ -188,7 +188,6 @@ void DirInfo::ensureDotEntry()
 	// logDebug() << "Creating dot entry for " << this << Qt::endl;
 
 	_dotEntry = new DotEntry( _tree, this );
-	CHECK_NEW( _dotEntry );
     }
 }
 
@@ -212,7 +211,6 @@ Attic * DirInfo::ensureAttic()
 	// logDebug() << "Creating attic for " << this << Qt::endl;
 
 	_attic = new Attic( _tree, this );
-	CHECK_NEW( _attic );
     }
 
     return _attic;
@@ -808,7 +806,6 @@ const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sort
     // Clean old sorted children lists and create new ones
     dropSortCaches(); // recursive to all ancestors
     _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
-    CHECK_NEW( _sortInfo );
 
     return _sortInfo;
 }

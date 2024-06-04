@@ -44,7 +44,6 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
 
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     initWidgets();
@@ -107,10 +106,7 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
     static QPointer<FileTypeStatsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new FileTypeStatsWindow( parent );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -280,8 +276,6 @@ FileTypeItem * FileTypeStatsWindow::addCategoryItem( const QString & name,
 						     float percent )
 {
     FileTypeItem * item = new FileTypeItem( name, count, sum, percent );
-    CHECK_NEW( item );
-
     _ui->treeWidget->addTopLevelItem( item );
 
     return item;
@@ -293,10 +287,7 @@ SuffixFileTypeItem * FileTypeStatsWindow::addSuffixFileTypeItem( const QString &
                                                                  FileSize        sum,
                                                                  float           percent )
 {
-    SuffixFileTypeItem * item = new SuffixFileTypeItem( suffix, count, sum, percent );
-    CHECK_NEW( item );
-
-    return item;
+    return new SuffixFileTypeItem( suffix, count, sum, percent );
 }
 
 

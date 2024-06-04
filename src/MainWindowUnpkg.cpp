@@ -96,8 +96,6 @@ void MainWindow::setUnpkgExcludeRules( const UnpkgSettings & unpkgSettings )
                                                     true,    // case-sensitive
                                                     true,    // useFullPath
                                                     false ); // checkAnyFileChild
-    CHECK_NEW( excludeRules );
-
     app()->dirTree()->setTmpExcludeRules( excludeRules );
 }
 
@@ -106,11 +104,8 @@ void MainWindow::setUnpkgFilters( const UnpkgSettings & unpkgSettings,
                                   const PkgManager    * pkgManager )
 {
     // Filter for ignoring all files from all installed packages
-    const DirTreeFilter * filter = new DirTreePkgFilter( pkgManager );
-    CHECK_NEW( filter );
-
     app()->dirTree()->clearFilters();
-    app()->dirTree()->addFilter( filter );
+    app()->dirTree()->addFilter( new DirTreePkgFilter( pkgManager ) );
 
     // Add the filters for each file pattern the user explicitly requested to ignore
     for ( const QString & pattern : unpkgSettings.ignorePatterns() )

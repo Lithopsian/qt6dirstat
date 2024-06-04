@@ -268,11 +268,7 @@ void LocalDirReadJob::startReading()
 	    {
 		if ( S_ISDIR( statInfo.st_mode ) )	// directory child
 		{
-		    DirInfo * subDir = new DirInfo( dir(), tree(), entryName, statInfo );
-		    CHECK_NEW( subDir );
-
-		    processSubDir( entryName, subDir );
-
+		    processSubDir( entryName, new DirInfo( dir(), tree(), entryName, statInfo ) );
 		}
 		else  // non-directory child
 		{
@@ -310,7 +306,6 @@ void LocalDirReadJob::startReading()
                     }
 #endif
 		    FileInfo * child = new FileInfo( dir(), tree(), entryName, statInfo );
-		    CHECK_NEW( child );
 
 		    if ( checkIgnoreFilters( entryName ) )
 			dir()->addToAttic( child );
@@ -362,24 +357,16 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
     }
     else if ( !crossingFilesystems( dir(), subDir ) ) // normal case
     {
-	LocalDirReadJob * job = new LocalDirReadJob( tree(), subDir, true );
-	CHECK_NEW( job );
-	tree()->addJob( job );
+	tree()->addJob( new LocalDirReadJob( tree(), subDir, true ) );
     }
     else	    // The subdirectory we just found is a mount point.
     {
 	subDir->setMountPoint();
 
 	if ( tree()->crossFilesystems() && shouldCrossIntoFilesystem( subDir ) )
-	{
-	    LocalDirReadJob * job = new LocalDirReadJob( tree(), subDir, true );
-	    CHECK_NEW( job );
-	    tree()->addJob( job );
-	}
+	    tree()->addJob( new LocalDirReadJob( tree(), subDir, true ) );
 	else
-	{
 	    subDir->finishReading( DirOnRequestOnly );
-	}
     }
 }
 
@@ -400,7 +387,6 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
     DirInfo * parent = isToplevel ? nullptr : dir()->parent();
 
     CacheReadJob * cacheReadJob = new CacheReadJob( tree(), dir(), parent, cacheFullName );
-    CHECK_NEW( cacheReadJob );
 
     if ( cacheReadJob->reader() ) // Does this cache file match this directory?
     {
@@ -471,7 +457,6 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
      * least create an (almost empty) entry as a placeholder.
      */
     DirInfo * child = new DirInfo( dir(), tree(), entryName );
-    CHECK_NEW( child );
     child->finalizeLocal();
     child->setReadState( DirError );
     dir()->insertChild( child );
@@ -513,8 +498,6 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
     DirReadJob ( tree, parent ),
     _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
 {
-    CHECK_NEW( _reader );
-
     init();
 }
 
@@ -524,8 +507,6 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
     DirReadJob ( tree, nullptr ),
     _reader { new CacheReader( cacheFileName, tree ) }
 {
-    CHECK_NEW( _reader );
-
     init();
 }
 

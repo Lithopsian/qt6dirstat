@@ -135,9 +135,6 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
 	                                 { 0.0, 0.5, 1.0, 2.0, 5.0 }, // delay stages
 					 { 3000, 1000, 500, 250, 150 } ) } // cooldown stages
 {
-    CHECK_NEW( _ui );
-    CHECK_NEW( _pkgUpdateTimer );
-
     _ui->setupUi( this );
 
     clear();

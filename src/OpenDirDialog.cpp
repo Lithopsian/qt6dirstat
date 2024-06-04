@@ -34,8 +34,6 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
     _ui { new Ui::OpenDirDialog },
     _filesystemModel { new QFileSystemModel( this ) }
 {
-    CHECK_NEW( _ui );
-    CHECK_NEW( _filesystemModel );
     _ui->setupUi( this );
 
     MountPoints::reload();
@@ -73,7 +71,6 @@ void OpenDirDialog::initPathComboBox()
         lineEdit->setClearButtonEnabled( true );
 
     _validator = new ExistingDirValidator( this );
-    CHECK_NEW( _validator );
     _ui->pathComboBox->setValidator( _validator );
 }
 

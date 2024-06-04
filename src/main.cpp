@@ -150,7 +150,6 @@ int main( int argc, char * argv[] )
 //    QCoreApplication::setApplicationVersion( QDIRSTAT_VERSION );
 
     MainWindow * mainWin = new MainWindow( slowUpdate );
-    CHECK_NEW( mainWin );
     mainWin->show();
 
     if ( !argList.isEmpty() )

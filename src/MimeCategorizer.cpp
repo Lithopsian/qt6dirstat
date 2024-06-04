@@ -295,8 +295,6 @@ const MimeCategory * MimeCategorizer::findCategoryByName( const QString & catego
 MimeCategory * MimeCategorizer::create( const QString & name, const QColor & color )
 {
     MimeCategory * category = new MimeCategory( name, color );
-    CHECK_NEW( category );
-
     _categories << category;
 
     return category;

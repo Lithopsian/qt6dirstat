@@ -144,7 +144,6 @@ namespace
 	try
 	{
 	    newTrashDir = new TrashDir( trashPath, dev );
-	    CHECK_NEW( newTrashDir );
 	}
 	catch ( const FileException & ex )
 	{
@@ -175,7 +174,6 @@ Trash::Trash()
     try
     {
 	_homeTrashDir = new TrashDir( homeTrash, homeDevice );
-	CHECK_NEW( _homeTrashDir );
     }
     catch ( const FileException & ex )
     {

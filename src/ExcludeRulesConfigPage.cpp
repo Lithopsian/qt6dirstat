@@ -28,7 +28,6 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
     ListEditor { parent },
     _ui { new Ui::ExcludeRulesConfigPage }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     setListWidget( _ui->listWidget );
@@ -99,11 +98,7 @@ void ExcludeRulesConfigPage::fillListWidget()
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	ExcludeRule * rule = new ExcludeRule( *excludeRule );
-	CHECK_NEW( rule );
-
-	QListWidgetItem * item = new ListEditorItem( rule->pattern(), rule );
-	CHECK_NEW( item );
-	listWidget()->addItem( item );
+	listWidget()->addItem( new ListEditorItem( rule->pattern(), rule ) );
     }
 
     listWidget()->setCurrentRow( 0 );
@@ -199,10 +194,7 @@ void * ExcludeRulesConfigPage::createValue()
 {
     // "Empty" rule, but set the options that we want to start with:
     // wildcard, case-sensitive, and directory name without path
-    ExcludeRule * excludeRule = new ExcludeRule( ExcludeRule::Wildcard, "", true, false, false );
-    CHECK_NEW( excludeRule );
-
-    return excludeRule;
+    return new ExcludeRule( ExcludeRule::Wildcard, "", true, false, false );
 }
 
 

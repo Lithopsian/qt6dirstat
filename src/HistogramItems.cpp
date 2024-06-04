@@ -43,8 +43,6 @@ HistogramBar::HistogramBar( HistogramView * parent,
     // Filled rectangle is relative to its parent
     QRectF filledRect( rect.x(), 0, rect.width(), -fillHeight);
     QGraphicsRectItem * filledBar = new QGraphicsRectItem( filledRect.normalized(), this );
-    CHECK_NEW( filledBar );
-
     filledBar->setPen( parent->barPen() );
     filledBar->setBrush( parent->barBrush() );
 }

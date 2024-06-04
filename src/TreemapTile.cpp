@@ -319,7 +319,6 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
         {
             QRectF childRect = QRectF( rect.left() + offset, rect.top(), newOffset - offset, rect.height() );
             TreemapTile * tile = new VerticalTreemapTile( this, *it, childRect );
-            CHECK_NEW( tile );
             tile->cushionSurface().addHorizontalRidge( childRect.left(), childRect.right() );
 
             if ( ( *it )->isDirInfo() )
@@ -360,7 +359,6 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
         {
             QRectF childRect = QRectF( rect.left(), rect.top() + offset, rect.width(), newOffset - offset );
             TreemapTile * tile = new HorizontalTreemapTile( this, *it, childRect );
-            CHECK_NEW( tile );
             tile->cushionSurface().addVerticalRidge( childRect.top(), childRect.bottom() );
 
             if ( ( *it )->isDirInfo() )
@@ -476,7 +474,6 @@ void TreemapTile::layoutRow( Orientation                    dir,
                 QRectF( rectX, rectY + offset, height, newOffset - offset );
 
             TreemapTile * tile = new TreemapTile( this, *it, childRect, rowCushionSurface );
-            CHECK_NEW( tile );
 
             // Don't need to finish calculating cushions once all the leaf-level children have been created
             if ( ( *it )->isDirInfo() )
@@ -711,7 +708,6 @@ QVariant TreemapTile::itemChange( GraphicsItemChange   change,
         {
             //logDebug() << "Creating highlighter for " << this << Qt::endl;
             _highlighter = new SelectedTileHighlighter( _parentView, this );
-            CHECK_NEW( _highlighter );
         }
     }
 

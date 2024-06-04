@@ -34,7 +34,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/file-manager.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_G );
 
@@ -54,7 +53,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/terminal.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_T );
 
@@ -75,7 +73,6 @@ namespace
 					 true,
 					 false,
 					 Cleanup::ShowAlways );
-	CHECK_NEW( cleanup );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_Y );
 
 	return cleanup;
@@ -94,7 +91,6 @@ namespace
 					 true,
 					 false,
 					 false );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -112,7 +108,6 @@ namespace
 					 true,
 					 false,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -131,7 +126,6 @@ namespace
 					 false,
 					 true,
 					 Cleanup::ShowAlways );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -149,7 +143,6 @@ namespace
 					 true,
 					 false,
 					 true );
-	CHECK_NEW( cleanup );
 	cleanup->setShell( "/bin/bash" );
 
 	return cleanup;
@@ -168,7 +161,6 @@ namespace
 					 true,
 					 true,
 					 false );
-	CHECK_NEW( cleanup );
 	cleanup->setIcon( ":/icons/delete.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_Delete );
 
@@ -188,7 +180,6 @@ namespace
 					 true,
 					 false,
 					 false );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -208,7 +199,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -226,7 +216,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -244,7 +233,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -262,7 +250,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }
@@ -280,7 +267,6 @@ namespace
 					 true,
 					 true,
 					 true );
-	CHECK_NEW( cleanup );
 
 	return cleanup;
     }

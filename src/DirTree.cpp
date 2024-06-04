@@ -63,7 +63,6 @@ namespace
 	    if ( S_ISDIR( statInfo.st_mode ) )	// directory
 	    {
 		DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
-		CHECK_NEW( dir );
 
 		if ( parent )
 		{
@@ -88,7 +87,6 @@ namespace
 	    else				// not directory
 	    {
 		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
-		CHECK_NEW( file );
 
 		if ( parent )
 		    parent->insertChild( file );
@@ -205,9 +203,7 @@ namespace
      **/
     void createLocalDirReadJob( DirTree * tree, FileInfo * item )
     {
-	LocalDirReadJob * job = new LocalDirReadJob( tree, item->toDirInfo(), false );
-	CHECK_NEW( job );
-	tree->addJob( job );
+	tree->addJob( new LocalDirReadJob( tree, item->toDirInfo(), false ) );
     }
 
 } // namespace
@@ -217,8 +213,6 @@ DirTree::DirTree():
     QObject (),
     _root { new DirInfo( this ) }
 {
-    CHECK_NEW( _root );
-
     connect( &_jobQueue, &DirReadJobQueue::finished,
 	     this,       &DirTree::sendFinished );
 
@@ -613,7 +607,6 @@ bool DirTree::writeCache( const QString & cacheFileName )
 bool DirTree::readCache( const QString & cacheFileName )
 {
     CacheReadJob * readJob = new CacheReadJob( this, cacheFileName );
-    CHECK_NEW( readJob );
 
     if ( !readJob->reader() )
     {
@@ -644,7 +637,6 @@ void DirTree::setExcludeRules()
 {
     delete _excludeRules;
     _excludeRules = new ExcludeRules();
-    CHECK_NEW( _excludeRules );
 }
 
 

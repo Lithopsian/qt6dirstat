@@ -23,7 +23,6 @@ PanelMessage::PanelMessage( QWidget * parent ):
     QWidget ( parent ),
     _ui { new Ui::PanelMessage }
 {
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 }
 
@@ -34,7 +33,6 @@ PanelMessage * PanelMessage::createMsg( QWidget * parent, QVBoxLayout * vBox )
     CHECK_PTR( vBox );
 
     PanelMessage * msg = new PanelMessage( parent );
-    CHECK_NEW( msg );
     vBox->addWidget( msg );
 
     return msg;

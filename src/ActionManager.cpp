@@ -32,10 +32,7 @@ void ActionManager::setActions( QWidget        * parent,
 				QMenu          * menu )
 {
     instance()->addTree( parent );
-
-    CleanupCollection * cleanupCollection = new CleanupCollection( parent, selectionModel, toolBar, menu );
-    CHECK_NEW( cleanupCollection );
-    instance()->setCleanupCollection( cleanupCollection );
+    instance()->setCleanupCollection( new CleanupCollection( parent, selectionModel, toolBar, menu ) );
 }
 
 

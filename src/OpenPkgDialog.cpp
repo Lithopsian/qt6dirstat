@@ -23,7 +23,6 @@ OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
 {
     // logDebug() << "init" << Qt::endl;
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     _ui->pkgPatternField->setClearButtonEnabled( true );

@@ -364,9 +364,7 @@ void HistogramView::rebuild()
 	calcGeometry( viewport()->size() );
 
     delete scene();
-    QGraphicsScene * newScene = new QGraphicsScene( this );
-    CHECK_NEW( newScene);
-    setScene( newScene );
+    setScene( new QGraphicsScene( this ) );
 
     const QPalette palette = scene()->palette();
     scene()->setBackgroundBrush( palette.base() );
@@ -571,10 +569,7 @@ void HistogramView::addHistogramBars()
 
 	const QRectF rect( i * barWidth, 0, barWidth, -( _histogramHeight + _axisExtraLength ) );
 	const qreal fillHeight = maxVal == 0 ? 0.0 : val / maxVal * _histogramHeight;
-	HistogramBar * bar = new HistogramBar( this, i, rect, fillHeight );
-	CHECK_NEW( bar );
-
-	scene()->addItem( bar );
+	scene()->addItem( new HistogramBar( this, i, rect, fillHeight ) );
     }
 }
 
@@ -747,8 +742,6 @@ void HistogramView::addLine( int             percentileIndex,
 						      _markerExtraHeight,
 						      x,
 						      -( _histogramHeight + _markerExtraHeight ) );
-    CHECK_NEW( line );
-
     line->setToolTip( whitespacePre( name % "<br/>" % formatSize( value ) ) );
     line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );
     line->setPen( pen );

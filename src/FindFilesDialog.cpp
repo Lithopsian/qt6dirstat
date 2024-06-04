@@ -36,7 +36,6 @@ FindFilesDialog::FindFilesDialog( QWidget * parent ):
 {
     // logDebug() << "init" << Qt::endl;
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     _lastPath = app()->dirTree()->url();

@@ -78,8 +78,6 @@ void PkgQuery::checkPkgManagers()
 
 void PkgQuery::checkPkgManager( const PkgManager * pkgManager )
 {
-    CHECK_NEW( pkgManager );
-
     if ( pkgManager->isPrimaryPkgManager() )
     {
 	// Primaries at the start of the list

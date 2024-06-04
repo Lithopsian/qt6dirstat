@@ -54,7 +54,6 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 {
     setAttribute( Qt::WA_DeleteOnClose );
 
-    CHECK_NEW( _ui );
     _ui->setupUi( this );
 
     MountPoints::reload();
@@ -106,10 +105,7 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
     static QPointer<FilesystemsWindow> _sharedInstance = nullptr;
 
     if ( !_sharedInstance )
-    {
 	_sharedInstance = new FilesystemsWindow( parent );
-	CHECK_NEW( _sharedInstance );
-    }
 
     return _sharedInstance;
 }
@@ -184,8 +180,6 @@ void FilesystemsWindow::populate()
 	CHECK_PTR( mountPoint);
 
 	FilesystemItem * item = new FilesystemItem( mountPoint, _ui->fsTree );
-	CHECK_NEW( item );
-
 	item->setIcon( 0, QIcon( app()->dirTreeModel()->treeIconDir() + icon( mountPoint ) ) );
     }
 
