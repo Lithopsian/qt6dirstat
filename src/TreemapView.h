@@ -364,9 +364,9 @@ namespace QDirStat
 	 * smaller tiles to the bottom and right are still illuminated and the
 	 * highlight is reasonably centred.
 	 **/
-	double lightX() const { return _lightX; }
-	double lightY() const { return _lightY; }
-	double lightZ() const { return _lightZ; }
+	double lightX() const { return 0.09759; }
+	double lightY() const { return 0.19518; }
+	double lightZ() const { return 0.97590; }
 
 	/**
 	 * Returns cushion ridge height degradation factor (0 .. 1.0) for each
@@ -624,10 +624,6 @@ namespace QDirStat
 	QColor _dirGradientEnd;
 	QLinearGradient _dirGradient;
 
-	const double _lightX { 0.09759 };
-	const double _lightY { 0.19518 };
-	const double _lightZ { 0.97590 };
-
 	int    _ambientLight;
 	double _heightScaleFactor;
 	double _cushionHeight;
@@ -638,10 +634,10 @@ namespace QDirStat
 	bool _disabled		{ false }; // flag to disable all treemap builds
 	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
 
-	std::atomic<TreemapCancel>      _treemapCancel { TreemapCancelNone }; // flag to the treemap build thread
 	QFutureWatcher<TreemapTile *>   _watcher;
-	QThreadPool                   * _threadPool { nullptr }; // dedicated thread pool for rendering
-	const CushionHeightSequence   * _cushionHeights { nullptr };
+	std::atomic<TreemapCancel>      _treemapCancel	{ TreemapCancelNone }; // flag to the treemap build thread
+	QThreadPool                   * _threadPool	{ nullptr }; // dedicated thread pool for rendering
+	const CushionHeightSequence   * _cushionHeights	{ nullptr };
 
 	// just for logging
 	QElapsedTimer _stopwatch;

@@ -51,24 +51,16 @@ namespace
 }
 
 
-void HistogramView::init()
+void HistogramView::init( const FileSizeStats * stats )
 {
-    _stats = nullptr;
+    CHECK_PTR( stats );
+    _stats = stats;
 
     _geometryDirty  = true;
 
     _startPercentile   = 0;    // data min
     _endPercentile     = 100;  // data max
     _useLogHeightScale = false;
-}
-
-
-void HistogramView::clear()
-{
-    init();
-
-    if ( scene() )
-	scene()->clear();
 }
 
 
@@ -371,12 +363,7 @@ void HistogramView::rebuild()
     if ( _geometryDirty )
 	calcGeometry( viewport()->size() );
 
-    // QGraphicsScene never resets the min and max in both dimensions where it
-    // ever created QGraphicsItems, which makes its sceneRect() call pretty
-    // useless. Let's create a new one without those bad old memories.
-
     delete scene();
-
     QGraphicsScene * newScene = new QGraphicsScene( this );
     CHECK_NEW( newScene);
     setScene( newScene );

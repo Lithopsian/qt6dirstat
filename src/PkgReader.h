@@ -23,6 +23,8 @@ namespace QDirStat
     class PkgFileListCache;
     class PkgFilter;
 
+    typedef QSharedPointer<PkgFileListCache> PkgFileListCachePtr;
+
     /**
      * A class for reading information about installed packages.
      *
@@ -267,10 +269,10 @@ namespace QDirStat
          * Reading is then started from the outside with startReading() when
          * the job queue picks this job.
          **/
-        CachePkgReadJob( DirTree   * tree,
-                         PkgInfo   * pkg,
-                         bool        verboseMissingPkgFiles,
-                         QSharedPointer<PkgFileListCache> fileListCache ):
+        CachePkgReadJob( DirTree           * tree,
+                         PkgInfo           * pkg,
+                         bool                verboseMissingPkgFiles,
+                         PkgFileListCachePtr fileListCache ):
             PkgReadJob( tree, pkg, verboseMissingPkgFiles ),
             _fileListCache( fileListCache )
         {}
@@ -290,7 +292,7 @@ namespace QDirStat
 
         // Data members
 
-        QSharedPointer<PkgFileListCache> _fileListCache;
+        PkgFileListCachePtr _fileListCache;
 
     };  // class CachePkgReadJob
 

@@ -74,17 +74,12 @@ namespace QDirStat
 	 **/
 	HistogramView( QWidget * parent = nullptr ):
 	    QGraphicsView ( parent )
-	{ init(); }
+	{}
 
 	/**
-	 * Clear all data and all displayed graphics
-	 **/
-	void clear();
-
-	/**
-	 * Set the percentiles for the data points all at once. Unlike the
-	 * buckets, these have a value; in the context of QDirStat, this is the
-	 * FileSize.
+	 * Initialise the view: set the percentiles for the data points all at
+	 * once. Unlike the buckets, these have a value; in the context of
+	 * QDirStat, this is the FileSize.
 	 *
 	 * The definition of a percentile n is "the data value where n percent
 	 * of all sorted data are taken into account". The median is the 50th
@@ -93,8 +88,10 @@ namespace QDirStat
 	 *
 	 * The interval between one percentile and the next contains exactly 1%
 	 * of the data points.
+	 *
+	 * HistogramView does now take ownership of the stats object.
 	 **/
-	void setStats( const FileSizeStats * stats ) { _stats = stats; }
+	void init( const FileSizeStats * stats );
 
 	/**
 	 * Return the stored value for percentile no. 'index' (0..100).  Note
@@ -253,11 +250,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Common one-time initializations
-	 **/
-	void init();
-
-	/**
 	 * Rebuild the histogram based on the current data.
 	 **/
 	void rebuild();
@@ -374,7 +366,7 @@ namespace QDirStat
 	//
 
 	// Statistics Data
-	const FileSizeStats * _stats;
+	const FileSizeStats * _stats { nullptr };
 	int                   _startPercentile;
 	int                   _endPercentile;
 	bool                  _useLogHeightScale;

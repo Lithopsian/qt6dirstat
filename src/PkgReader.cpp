@@ -207,7 +207,7 @@ void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
 
     // The shared pointer will take care of deleting the cache when the last
     // job that uses it is destroyed.
-    QSharedPointer<PkgFileListCache> fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
+    PkgFileListCachePtr fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
     if ( !fileListCache )
     {
 	logError() << "Creating the file list cache failed" << Qt::endl;
@@ -230,8 +230,6 @@ void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
 
     ProcessStarter * processStarter = new ProcessStarter( _maxParallelProcesses, true );
     CHECK_NEW( processStarter );
-//    processStarter->setAutoDelete( true );
-//    processStarter->setMaxParallel( _maxParallelProcesses );
 
     for ( PkgInfo * pkg : pkgList )
     {
@@ -535,7 +533,7 @@ QStringList CachePkgReadJob::fileList()
 	return PkgReadJob::fileList();
 
     const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
-
+    logDebug() << pkgName << " " << pkg()->name() << Qt::endl;
     if ( _fileListCache->containsPkg( pkgName ) )
 	return _fileListCache->fileList( pkgName );
 

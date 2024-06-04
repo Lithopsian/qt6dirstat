@@ -21,7 +21,7 @@
 #include "SysUtil.h"
 
 
-#define CACHE_SIZE		5000
+#define CACHE_SIZE		1000
 #define CACHE_COST		1
 
 #define VERBOSE_PKG_QUERY	0

@@ -77,6 +77,11 @@ namespace
 TreemapView::TreemapView( QWidget * parent ):
     QGraphicsView ( parent )
 {
+    // Only one scene, never destroyed, create it now for simplicity
+    QGraphicsScene * newScene = new QGraphicsScene( this );
+    CHECK_NEW( newScene);
+    setScene( newScene );
+
     readSettings();
 
     // We only ever need one thread at a time, and having more just chews up memory
@@ -89,8 +94,9 @@ TreemapView::TreemapView( QWidget * parent ):
 
 TreemapView::~TreemapView()
 {
-    // Write settings back to file, but only if we are the real treemapView
     delete _cushionHeights;
+
+    // Write settings back to file, but only if we are the real treemapView
     if ( _selectionModel )
         writeSettings();
 }
@@ -109,14 +115,11 @@ void TreemapView::clear()
 
     if ( _rootTile )
     {
-        if ( scene() )
-        {
-            // Take out the tiles so we can delete them in the background
-            scene()->removeItem( _rootTile );
+        // Take out the tiles so we can delete them in the background
+        scene()->removeItem( _rootTile );
 
-            // Clear everything else, any highlighters and mask
-            scene()->clear();
-        }
+        // Clear everything else, any highlighters and mask
+        scene()->clear();
 
         // Deleting these can take a while, so delegate to a thread
         TreemapTile * rootTile = _rootTile;
@@ -447,14 +450,8 @@ void TreemapView::treemapFinished()
         return;
     }
 
-    // Wipe the existing scene, if anything is there
+    // Wipe the existing scene
     clear();
-    if ( !scene() )
-    {
-        QGraphicsScene * newScene = new QGraphicsScene( this );
-        CHECK_NEW( newScene);
-        setScene( newScene );
-    }
     resetTransform();
 
     // Add the new treemap to the scene
@@ -702,7 +699,7 @@ void TreemapView::setCurrentItem( FileInfo * node )
 
 void TreemapView::updateSelection( const FileInfoSet & newSelection )
 {
-    if ( !scene() || !_rootTile || ( newSelection.size() == 0 && !_selectionModel->currentItem() ) )
+    if ( !_rootTile || ( newSelection.size() == 0 && !_selectionModel->currentItem() ) )
         return;
 
     //logDebug() << newSelection.size() << " items selected (after " << _stopwatch.restart() << "ms) " << Qt::endl;
@@ -743,7 +740,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 
 void TreemapView::sendSelection( const TreemapTile * tile)
 {
-    if ( !scene() || !_selectionModel )
+    if ( !_selectionModel )
         return;
 
     SignalBlocker sigBlocker( _selectionModelProxy );
@@ -751,7 +748,7 @@ void TreemapView::sendSelection( const TreemapTile * tile)
 
     if ( selectedTiles.size() == 1 && selectedTiles.first() == tile )
     {
-        // For just one selected tile, only send one signal
+        // For just one selected tile that is the current item, only send one signal
         _selectionModel->setCurrentItem( tile->orig(),
                                          true ); // select
     }
@@ -775,9 +772,6 @@ void TreemapView::sendSelection( const TreemapTile * tile)
 void TreemapView::updateCurrentItem( FileInfo * currentItem )
 {
     //logDebug() << currentItem << " " << _stopwatch.restart() << "ms" << Qt::endl;
-
-    if ( !scene() )
-        return;
 
     SignalBlocker sigBlocker( this );
     setCurrentItem( currentItem );
@@ -912,7 +906,7 @@ SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
     setPath( path );
 
     setBrush( QColor( 0x30, 0x30, 0x30, opacity * 255 ) );
-
     setZValue( SceneMaskLayer );
+
     tile->scene()->addItem( this );
 }
