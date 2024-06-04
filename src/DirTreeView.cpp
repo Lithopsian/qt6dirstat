@@ -34,9 +34,6 @@ DirTreeView::DirTreeView( QWidget * parent ):
     _sizeColDelegate { new SizeColDelegate( this ) },
     _headerTweaker { new HeaderTweaker( header(), this ) }
 {
-    CHECK_NEW( _headerTweaker );
-
-    CHECK_NEW( _sizeColDelegate );
     setItemDelegateForColumn( SizeCol, _sizeColDelegate );
 
     readSettings();
@@ -72,7 +69,6 @@ void DirTreeView::readSettings()
 
     // Now we have all the settings for the percent bar delegate
     _percentBarDelegate  = new PercentBarDelegate( this, PercentBarCol, barWidth, barBackground, barColors );
-    CHECK_NEW( _percentBarDelegate );
     setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
 }
 
