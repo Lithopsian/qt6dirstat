@@ -23,9 +23,6 @@ QDirStatApp::QDirStatApp():
     _dirTreeModel { new DirTreeModel() },
     _selectionModel { new SelectionModel( _dirTreeModel ) }
 {
-    CHECK_NEW( _dirTreeModel );
-    CHECK_NEW( _selectionModel );
-
     // logDebug() << "Creating app" << Qt::endl;
 
     if ( qApp->styleSheet().isEmpty() )
