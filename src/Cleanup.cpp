@@ -583,7 +583,8 @@ void Cleanup::runCommand( const FileInfo * item,
 	return;
     }
 
-    QProcess * process = new QProcess( parent() );
+    // Deliberately create with no parent so they aren't destroyed untidily at shutdown
+    QProcess * process = new QProcess();
     process->setProgram( shell );
     process->setArguments( { "-c", expandVariables( item, command ) } );
     process->setWorkingDirectory( itemDir( item ) );

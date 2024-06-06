@@ -140,18 +140,6 @@ public:
     void setStderrColor( const QColor & newColor )
 	{ _stderrColor = newColor; }
 
-#if 0
-    /**
-     * Return the background color of the terminal area.
-     **/
-    const QColor & terminalBackground() const { return _terminalBackground; }
-
-    /**
-     * Set the background color of the terminal area.
-     **/
-    void setTerminalBackground( const QColor & newColor );
-#endif
-
     /**
      * Return the internal process list.
      **/
@@ -336,7 +324,8 @@ private:
     // Data members
     //
 
-    Ui::OutputWindow  * _ui;
+    std::unique_ptr<Ui::OutputWindow > _ui;
+
     QVector<QProcess *> _processList;
     bool                _showOnStderr		{ false };
     bool                _noMoreProcesses	{ false };

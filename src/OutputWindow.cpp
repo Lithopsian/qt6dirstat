@@ -58,15 +58,11 @@ OutputWindow::~OutputWindow()
 
     if ( !_processList.isEmpty() )
     {
-	logWarning() << _processList.size() << " processes left over" << Qt::endl;
+	logWarning() << _processList.size() << " entries still in process list" << Qt::endl;
 
-	for ( const QProcess * process : _processList )
-	    logWarning() << "Left over: " << process << Qt::endl;
-
-	qDeleteAll( _processList );
+	// Kill any active processes and destroy them all
+	killAll();
     }
-
-    delete _ui;
 }
 
 
@@ -76,14 +72,13 @@ void OutputWindow::addProcess( QProcess * process )
 
     if ( _killedAll )
     {
-	logInfo() << "User killed all processes - "
-                  << "no longer accepting new processes" << Qt::endl;
+	logInfo() << "User killed all processes - no longer accepting new processes" << Qt::endl;
 	process->kill();
 	process->deleteLater();
     }
 
-    _processList << process;
     // logDebug() << "Adding " << process << Qt::endl;
+    _processList << process;
 
     connect( process, &QProcess::readyReadStandardOutput,
 	     this,    &OutputWindow::readStdout );
@@ -235,7 +230,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
 	    case QProcess::ReadError:     return tr( "Error reading output from the process." );
 	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
 	    case QProcess::UnknownError:  return tr( "Unknown error." );
-	    case QProcess::Crashed: // Already reported via processFinished()
+	    case QProcess::Crashed:       return tr( "Crashed" );
 	    default:                      return QString();
 	}
     }();
@@ -250,7 +245,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
     if ( process )
 	processFinished( process );
 
-    startNextProcess(); // this also calls updateActions()
+//    startNextProcess(); // this also calls updateActions()
 
     if ( !_showOnStderr && !isVisible() )
 	closeIfDone();
@@ -275,7 +270,7 @@ void OutputWindow::closeIfDone()
 {
     if ( _processList.isEmpty() && _noMoreProcesses )
     {
-	if ( ( autoClose() || _closed || !isVisible() ) && _errorCount == 0 )
+	if ( ( autoClose()  && _errorCount == 0 ) || _closed || !isVisible() )
 	{
 	    //logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
 	    this->deleteLater(); // It is safe to call this multiple times
@@ -352,21 +347,10 @@ void OutputWindow::killAll()
     }
 
     _processList.clear();
-    _processList.squeeze();
 
     _killedAll = true;
     addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %1 processes." ).arg( killCount ) );
 }
-
-
-#if 0
-void OutputWindow::setTerminalBackground( const QColor & newColor )
-{
-    // TO DO
-    // TO DO
-    // TO DO
-}
-#endif
 
 
 bool OutputWindow::hasActiveProcess() const
@@ -487,6 +471,9 @@ void OutputWindow::readSettings()
 
     settings.endGroup();
 
+    QPalette newPalette( _ui->terminal->palette() );
+    newPalette.setBrush( QPalette::Base, _terminalBackground );
+    _ui->terminal->setPalette( newPalette );
     _ui->terminal->setFont( _terminalDefaultFont );
 }
 
