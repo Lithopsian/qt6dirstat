@@ -10,6 +10,8 @@
 #ifndef HistoryButtons_h
 #define HistoryButtons_h
 
+#include "memory"
+
 #include <QObject>
 
 
@@ -30,8 +32,9 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	HistoryButtons( QAction * actionGoBack,
-			QAction * actionGoForward );
+	HistoryButtons(	QAction * actionGoBack,
+			QAction * actionGoForward,
+			QWidget * parent );
 
 	/**
 	 * Destructor.
@@ -42,11 +45,6 @@ namespace QDirStat
 	 * Clear the complete history.
 	 **/
 	void clear();
-
-	/**
-	 * Access to the history manager.
-	 **/
-//	History * history() { return _history; }
 
 	/**
 	 * Enable or disable the browser-like "Go Back" and "Go Forward"
@@ -140,7 +138,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	History * _history;
+	std::unique_ptr<History> _history;
 	QAction * _actionGoBack;
 	QAction * _actionGoForward;
 	bool      _locked { false };

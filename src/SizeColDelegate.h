@@ -33,7 +33,7 @@ namespace QDirStat
          * Constructor.
          **/
 	SizeColDelegate( QTreeView * treeView ):
-	    QStyledItemDelegate { treeView }
+	    QStyledItemDelegate ( treeView )
 	{}
 
 	/**

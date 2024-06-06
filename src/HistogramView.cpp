@@ -256,7 +256,6 @@ void HistogramView::autoLogHeightScale()
     if ( _stats->buckets().size() > 3 )
     {
 	const QRealList & data = _stats->buckets();
-	logDebug() << &_stats->buckets() << " " << &data << Qt::endl;
 	const qreal largest = *std::max_element( data.cbegin(), data.cend() );
 
 	// We compare the largest bucket with the P85 percentile of the buckets

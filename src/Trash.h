@@ -149,6 +149,7 @@ namespace QDirStat
          **/
         void move( const QString & path, const QString & targetName );
 
+
     protected:
 
         /**
@@ -160,6 +161,7 @@ namespace QDirStat
          * Return the path of the "info" subdirectory of this trash dir.
          **/
         QString infoPath() const { return _path + "/info"; }
+
 
     private:
 

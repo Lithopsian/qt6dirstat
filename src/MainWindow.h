@@ -672,7 +672,8 @@ protected:
 
 private:
 
-    Ui::MainWindow * _ui;
+    std::unique_ptr<Ui::MainWindow> _ui;
+
     HistoryButtons * _historyButtons;
     QActionGroup   * _layoutActionGroup;
     Subtree          _futureSelection;
