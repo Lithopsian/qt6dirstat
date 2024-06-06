@@ -245,7 +245,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
     if ( process )
 	processFinished( process );
 
-//    startNextProcess(); // this also calls updateActions()
+    startNextProcess(); // this also calls updateActions()
 
     if ( !_showOnStderr && !isVisible() )
 	closeIfDone();

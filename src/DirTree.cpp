@@ -606,7 +606,6 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
 
     // logDebug() << "Reading " << pkgFilter << Qt::endl;
     PkgReader reader( this, pkgFilter );
-//    reader.read( this, pkgFilter );
 }
 
 
