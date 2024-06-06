@@ -29,7 +29,7 @@ void MainWindow::askOpenUnpkg()
 {
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
 
-    if ( ! pkgManager )
+    if ( !pkgManager )
     {
 	logError() << "No supported primary package manager" << Qt::endl;
 	return;
@@ -56,7 +56,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     unpkgSettings.dump();
 
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    if ( ! pkgManager )
+    if ( !pkgManager )
     {
 	logError() << "No supported primary package manager" << Qt::endl;
 	return;

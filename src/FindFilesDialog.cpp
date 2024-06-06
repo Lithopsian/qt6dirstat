@@ -53,8 +53,6 @@ FindFilesDialog::~FindFilesDialog()
 
     // Always save the window geometry
     writeWindowSettings( this, "FindFilesDialog" );;
-
-    delete _ui;
 }
 
 

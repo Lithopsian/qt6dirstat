@@ -107,7 +107,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::FindFilesDialog * _ui;
+	std::unique_ptr<Ui::FindFilesDialog> _ui;
 
 	static QString _lastPattern;
 	static QString _lastPath;

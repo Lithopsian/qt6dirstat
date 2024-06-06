@@ -202,8 +202,7 @@ void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     CHECK_PTR( pkgManager );
 
-    // The shared pointer will take care of deleting the cache when the last
-    // job that uses it is destroyed.
+    // The shared pointer will delete the cache when the last job that uses it is destroyed
     PkgFileListCachePtr fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
     if ( !fileListCache )
     {
@@ -219,8 +218,6 @@ void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
 
 void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList )
 {
-    //logDebug() << Qt::endl;
-
     ProcessStarter * processStarter = new ProcessStarter( _maxParallelProcesses, true );
 
     for ( PkgInfo * pkg : pkgList )

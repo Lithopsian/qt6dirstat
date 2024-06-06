@@ -52,13 +52,12 @@ LocateFileTypeWindow::~LocateFileTypeWindow()
 {
     //logDebug() << "destroying" << Qt::endl;
     writeWindowSettings( this, "LocateFileTypeWindow" );
-    delete _ui;
 }
 
 
 LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
 {
-    static QPointer<LocateFileTypeWindow> _sharedInstance = nullptr;
+    static QPointer<LocateFileTypeWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new LocateFileTypeWindow( app()->findMainWindow() );

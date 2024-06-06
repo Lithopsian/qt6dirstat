@@ -60,24 +60,17 @@ LocateFilesWindow::~LocateFilesWindow()
     //logDebug() << "destroying" << Qt::endl;
 
     writeWindowSettings( this, "LocateFilesWindow" );
-    delete _treeWalker;
-    delete _ui;
 }
 
 
 LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
 {
-    static QPointer<LocateFilesWindow> _sharedInstance = nullptr;
+    static QPointer<LocateFilesWindow> _sharedInstance;
 
     if ( _sharedInstance )
-    {
-	delete _sharedInstance->_treeWalker;
-	_sharedInstance->_treeWalker = treeWalker;
-    }
+	_sharedInstance->_treeWalker.reset( treeWalker );
     else
-    {
 	_sharedInstance = new LocateFilesWindow( treeWalker, app()->findMainWindow() );
-    }
 
     return _sharedInstance;
 }

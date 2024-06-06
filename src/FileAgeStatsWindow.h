@@ -182,11 +182,12 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::FileAgeStatsWindow * _ui;
-	PercentBarDelegate     * _filesPercentBarDelegate	{ nullptr };
-	PercentBarDelegate     * _sizePercentBarDelegate	{ nullptr };
-	Subtree                  _subtree;
-	bool                     _startGapsWithCurrentYear	{ true };
+	std::unique_ptr<Ui::FileAgeStatsWindow> _ui;
+
+	PercentBarDelegate * _filesPercentBarDelegate	{ nullptr };
+	PercentBarDelegate * _sizePercentBarDelegate	{ nullptr };
+	Subtree              _subtree;
+	bool                 _startGapsWithCurrentYear	{ true };
 
     };	// class FileAgeStatsWindow
 

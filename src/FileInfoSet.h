@@ -28,7 +28,8 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor, creates an empty QSet.
+	 * Constructor, creates an empty QSet.  This is the default constructor,
+	 * only specified here for clarity.
 	 **/
 	FileInfoSet():
 	    QSet<FileInfo *> ()

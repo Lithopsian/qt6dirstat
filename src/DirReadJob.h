@@ -10,6 +10,8 @@
 #ifndef DirReadJob_h
 #define DirReadJob_h
 
+#include "memory"
+
 #include <QTextStream>
 #include <QTimer>
 
@@ -287,11 +289,6 @@ namespace QDirStat
 		      const QString & cacheFileName );
 
 	/**
-	 * Destructor.
-	 **/
-	~CacheReadJob() override;
-
-	/**
 	 * Start reading the cache. Prior to this nothing happens.
 	 *
 	 * Inherited and reimplemented from DirReadJob.
@@ -301,7 +298,7 @@ namespace QDirStat
 	/**
 	 * Return the associated cache reader.
 	 **/
-	CacheReader * reader() const { return _reader; }
+	CacheReader * reader() const { return _reader.get(); }
 
 
     private:
@@ -312,7 +309,9 @@ namespace QDirStat
 	void init();
 
 
-	CacheReader * _reader;
+	// Data members
+
+	std::unique_ptr<CacheReader> _reader;
 
     };	// class CacheReadJob
 

@@ -160,9 +160,10 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::FileSizeStatsWindow * _ui;
-	BucketsTableModel       * _bucketsTableModel	{ nullptr };
-	FileSizeStats           * _stats		{ nullptr };
+	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
+
+	BucketsTableModel              * _bucketsTableModel	{ nullptr };
+	std::unique_ptr<FileSizeStats>   _stats;
 
     };
 

@@ -230,7 +230,7 @@ namespace QDirStat
 
 	SelectionModel          * _selectionModel;
 	CleanupList               _cleanupList;
-	Trash                   * _trash;
+	std::unique_ptr<Trash>    _trash;
 	QList<QPointer<QMenu>>    _menus;
 	QList<QPointer<QToolBar>> _toolBars;
 

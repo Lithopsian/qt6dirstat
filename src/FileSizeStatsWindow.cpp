@@ -128,8 +128,6 @@ FileSizeStatsWindow::~FileSizeStatsWindow()
     //logDebug() << "destroying" << Qt::endl;
 
     writeWindowSettings( this, "FileSizeStatsWindow" );
-    delete _stats;
-    delete _ui;
 }
 
 
@@ -137,7 +135,7 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 {
     //logDebug() << _sharedInstance << Qt::endl;
 
-    static QPointer<FileSizeStatsWindow> _sharedInstance = nullptr;
+    static QPointer<FileSizeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new FileSizeStatsWindow( mainWindow );
@@ -203,11 +201,10 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix ).arg( url ) );
     resizeEvent( nullptr );
 
-    delete _stats;
     if ( suffix.isEmpty() )
-	_stats = new FileSizeStats( fileInfo );
+	_stats.reset( new FileSizeStats( fileInfo ) );
     else
-	_stats = new FileSizeStats( fileInfo, suffix );
+	_stats.reset( new FileSizeStats( fileInfo, suffix ) );
     _stats->calculatePercentiles();
 
     fillHistogram();
@@ -343,7 +340,7 @@ void FileSizeStatsWindow::loadHistogram()
 void FileSizeStatsWindow::fillHistogram()
 {
     HistogramView * histogram = _ui->histogramView;
-    histogram->init( _stats );
+    histogram->init( _stats.get() );
     histogram->autoStartEndPercentiles();
     updateOptions();
     loadHistogram();

@@ -60,7 +60,6 @@ OpenDirDialog::~OpenDirDialog()
 {
     // Always save the window geometry, even if cancelled
     writeSettings();
-    delete _ui;
 }
 
 

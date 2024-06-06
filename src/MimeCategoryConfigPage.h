@@ -232,10 +232,10 @@ namespace QDirStat
 
 	// Data
 
-	Ui::MimeCategoryConfigPage * _ui;
-	DirTree                    * _dirTree;
+	std::unique_ptr<Ui::MimeCategoryConfigPage> _ui;
 
-	bool _dirty { false };
+	DirTree * _dirTree;
+	bool      _dirty { false };
 
     };	// class MimeCategoryConfigPage
 

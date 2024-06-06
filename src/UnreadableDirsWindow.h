@@ -128,8 +128,9 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::UnreadableDirsWindow * _ui;
-	Subtree                    _subtree;
+	std::unique_ptr<Ui::UnreadableDirsWindow> _ui;
+
+	Subtree _subtree;
 
     };
 

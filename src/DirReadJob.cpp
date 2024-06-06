@@ -514,16 +514,7 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 void CacheReadJob::init()
 {
     if ( !_reader->ok() )
-    {
-	delete _reader;
-	_reader = nullptr;
-    }
-}
-
-
-CacheReadJob::~CacheReadJob()
-{
-    delete _reader;
+	_reader.reset( nullptr );
 }
 
 

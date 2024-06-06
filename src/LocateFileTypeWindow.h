@@ -140,7 +140,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::LocateFileTypeWindow * _ui;
+	std::unique_ptr<Ui::LocateFileTypeWindow> _ui;
 
 	Subtree _subtree;
 	QString _suffix;

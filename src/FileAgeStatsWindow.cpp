@@ -96,14 +96,12 @@ FileAgeStatsWindow::~FileAgeStatsWindow()
     //logDebug() << "destroying" << Qt::endl;
 
     writeSettings();
-
-    delete _ui;
 }
 
 
 FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
 {
-    static QPointer<FileAgeStatsWindow> _sharedInstance = nullptr;
+    static QPointer<FileAgeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new FileAgeStatsWindow( parent );

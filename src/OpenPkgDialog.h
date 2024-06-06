@@ -65,7 +65,7 @@ namespace QDirStat
 
     private:
 
-	Ui::OpenPkgDialog * _ui;
+	std::unique_ptr<Ui::OpenPkgDialog> _ui;
 
     };	// class OpenPkgDialog
 

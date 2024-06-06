@@ -35,11 +35,6 @@ namespace QDirStat
 	ConfigDialog( QWidget * parent );
 
 	/**
-	 * Destructor.
-	 **/
-	~ConfigDialog() override { delete _ui; }
-
-	/**
 	 * Static method for using one shared instance of this class between
 	 * multiple parts of the application. This will create a new instance
 	 * if there is none yet (or any more).
@@ -99,7 +94,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::ConfigDialog       * _ui;
+	std::unique_ptr<Ui::ConfigDialog> _ui;
 
     };	// class ConfigDialog
 

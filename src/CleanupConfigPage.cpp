@@ -68,8 +68,6 @@ CleanupConfigPage::~CleanupConfigPage()
     // Delete the working cleanup clones
     for ( int i = 0; i < listWidget()->count(); ++i )
 	delete CLEANUP_CAST( value( listWidget()->item( i ) ) );
-
-    delete _ui;
 }
 
 

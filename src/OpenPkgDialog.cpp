@@ -37,7 +37,6 @@ OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
 
 OpenPkgDialog::~OpenPkgDialog()
 {
-    delete _ui;
     writeWindowSettings( this, "OpenPkgDialog" );
 }
 

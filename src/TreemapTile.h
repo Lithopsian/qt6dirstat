@@ -89,24 +89,25 @@ namespace QDirStat
 	 * Root tile constructor. All coefficients are set to 0 and the
 	 * height to the start of the configured sequence.
 	 **/
-	CushionSurface( const CushionHeightSequence * heights ):
+	CushionSurface( const CushionHeightSequence & heights ):
 	    _xx2 { 0.0 },
 	    _xx1 { 0.0 },
 	    _yy2 { 0.0 },
 	    _yy1 { 0.0 },
-	    _height { heights->constBegin() }
+	    _height { heights.constBegin() }
 	{}
 
 	/**
 	 * Constructor for simple tiling, or the row cushion; copies
-	 * the cushion from the parent tile and scales the height.
+	 * the cushion from the parent tile and uses the next height
+	 * in the sequence.
 	 **/
-	CushionSurface( const CushionSurface & parent, const CushionHeightSequence * heights ):
+	CushionSurface( const CushionSurface & parent, const CushionHeightSequence & heights ):
 	    _xx2 { parent._xx2 },
 	    _xx1 { parent._xx1 },
 	    _yy2 { parent._yy2 },
 	    _yy1 { parent._yy1 },
-	    _height { parent._height == heights->constLast() ? parent._height : parent._height + 1 }
+	    _height { parent._height == heights.constLast() ? parent._height : parent._height + 1 }
 	{}
 
 	/**

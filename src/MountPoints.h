@@ -10,6 +10,8 @@
 #ifndef MountPoints_h
 #define MountPoints_h
 
+#include "memory"
+
 #include <QList>
 #include <QString>
 #include <QStringList>
@@ -49,21 +51,6 @@ namespace QDirStat
 	    _filesystemType { filesystemType },
 	    _mountOptions { mountOptions.split( ',' ) }
 	{}
-
-	/**
-	 * Destructor.
-	 **/
-#if HAVE_Q_STORAGE_INFO
-	~MountPoint() { delete _storageInfo; }
-#else
-	~MountPoint() = default;
-#endif
-
-	/**
-	 * Suppress copy and assignment constructors (would need deep copies)
-	 **/
-	MountPoint( const MountPoint & ) = delete;
-	MountPoint & operator=( const MountPoint & ) = delete;
 
 	/**
 	 * Return the device that is mounted, something like "/dev/sda3",
@@ -168,58 +155,59 @@ namespace QDirStat
 	 * This returns -1 if no size information is available.
 	 **/
 	FileSize totalSize()
-	    { return storageInfo()->bytesTotal(); }
+	    { return storageInfo().bytesTotal(); }
 
 	/**
 	 * Total used size of the filesystem of this mount point.
 	 * This returns -1 if no size information is available.
 	 **/
 	FileSize usedSize()
-	    { return storageInfo()->bytesTotal() - storageInfo()->bytesFree(); }
+	    { return storageInfo().bytesTotal() - storageInfo().bytesFree(); }
 
 	/**
 	 * Reserved size for root for the filesystem of this mount point.
 	 * This returns -1 if no size information is available.
 	 **/
 	FileSize reservedSize()
-	    { return storageInfo()->bytesFree() - storageInfo()->bytesAvailable(); }
+	    { return storageInfo().bytesFree() - storageInfo().bytesAvailable(); }
 
 	/**
 	 * Available free size of this filesystem for non-privileged users.
 	 * This returns -1 if no size information is available.
 	 **/
 	FileSize freeSizeForUser()
-	    { return storageInfo()->bytesAvailable(); }
+	    { return storageInfo().bytesAvailable(); }
 
 	/**
 	 * Available free size of this filesystem for privileged users.
 	 * This returns -1 if no size information is available.
 	 **/
 	FileSize freeSizeForRoot()
-	    { return storageInfo()->bytesFree(); }
+	    { return storageInfo().bytesFree(); }
 
 #else
 	/**
 	 *  Qt before 5.4 does not have QStorageInfo, and statfs()
 	 * is Linux-specific (not POSIX).
 	 **/
-	FileSize MountPoint::totalSize()	 { return -1; }
-	FileSize MountPoint::usedSize()		 { return -1; }
-	FileSize MountPoint::reservedSize()	 { return -1; }
-	FileSize MountPoint::freeSizeForUser()	 { return -1; }
-	FileSize MountPoint::freeSizeForRoot()	 { return -1; }
+	FileSize MountPoint::totalSize()       { return -1; }
+	FileSize MountPoint::usedSize()        { return -1; }
+	FileSize MountPoint::reservedSize()    { return -1; }
+	FileSize MountPoint::freeSizeForUser() { return -1; }
+	FileSize MountPoint::freeSizeForRoot() { return -1; }
 #endif
 
     private:
 
 #if HAVE_Q_STORAGE_INFO
-        /**
-         * Lazy access to the QStorageInfo for this mount.
-         **/
-        QStorageInfo * storageInfo();
+	/**
+	 * Lazy access to the QStorageInfo for this mount.  Returns a reference to
+	 * the QStorageInfo object.
+	 **/
+	const QStorageInfo & storageInfo();
 
 
-	QStorageInfo * _storageInfo { nullptr };
+	std::unique_ptr<const QStorageInfo> _storageInfo;
 #endif
 
 	QString     _device;
@@ -236,8 +224,6 @@ namespace QDirStat
      **/
     class MountPoints
     {
-    private:
-
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
 	 **/

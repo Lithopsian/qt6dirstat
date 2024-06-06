@@ -51,17 +51,6 @@ namespace QDirStat
 	FileTypeStats( FileInfo * subtree );
 
 	/**
-	 * Destructor.
-	 **/
-	~FileTypeStats();
-
-	/**
-	 * Suppress copy and assignment constructors (would need a deep copy)
-	 **/
-	FileTypeStats( const FileTypeStats & ) = delete;
-	FileTypeStats & operator=( const FileTypeStats & ) = delete;
-
-	/**
 	 * Return the number of files in the tree with the specified suffix.
 	 **/
 	int suffixCount( const QString & suffix, const MimeCategory * category ) const
@@ -104,7 +93,7 @@ namespace QDirStat
 	/**
 	 * Return the special category for "other", i.e. unclassified files.
 	 **/
-	const MimeCategory * otherCategory() const { return _otherCategory; }
+	const MimeCategory * otherCategory() const { return _otherCategory.get(); }
 
 	/**
 	 * Return the total size of the tree.
@@ -187,16 +176,16 @@ namespace QDirStat
 	// Data members
 	//
 
-	const MimeCategory    * _otherCategory;
+	std::unique_ptr<const MimeCategory> _otherCategory;
 
-	StringFileSizeMap	_suffixSum;
-	StringIntMap		_suffixCount;
-	CategoryFileSizeMap	_categorySum;
-	CategoryIntMap		_categoryCount;
-	CategoryFileSizeMap	_categoryNonSuffixRuleSum;
-	CategoryIntMap		_categoryNonSuffixRuleCount;
+	StringFileSizeMap    _suffixSum;
+	StringIntMap         _suffixCount;
+	CategoryFileSizeMap  _categorySum;
+	CategoryIntMap       _categoryCount;
+	CategoryFileSizeMap  _categoryNonSuffixRuleSum;
+	CategoryIntMap       _categoryNonSuffixRuleCount;
 
-	FileSize                _totalSize { 0LL };
+	FileSize             _totalSize { 0LL };
 
     };
 }

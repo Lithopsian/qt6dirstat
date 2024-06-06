@@ -47,13 +47,12 @@ UnreadableDirsWindow::~UnreadableDirsWindow()
 {
     // logDebug() << "destroying" << Qt::endl;
     writeWindowSettings( this, "UnreadableDirsWindow" );
-    delete _ui;
 }
 
 
 UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 {
-    static QPointer<UnreadableDirsWindow> _sharedInstance = nullptr;
+    static QPointer<UnreadableDirsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new UnreadableDirsWindow( app()->findMainWindow() );

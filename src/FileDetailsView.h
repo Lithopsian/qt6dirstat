@@ -42,11 +42,6 @@ namespace QDirStat
 	FileDetailsView( QWidget * parent = nullptr );
 
 	/**
-	 * Destructor
-	 **/
-	~FileDetailsView() override { delete _ui; }
-
-	/**
 	 * Show an empty page.
 	 **/
 	void clear() { setCurrentPage( _ui->emptyPage ); }
@@ -154,9 +149,10 @@ namespace QDirStat
 
 	// Data members
 
-	Ui::FileDetailsView * _ui;
-	AdaptiveTimer       * _pkgUpdateTimer;
-	int                   _labelLimit { 0 };
+	std::unique_ptr<Ui::FileDetailsView> _ui;
+
+	AdaptiveTimer * _pkgUpdateTimer;
+	int             _labelLimit { 0 };
 
     };	// class FileDetailsView
 

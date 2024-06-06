@@ -35,12 +35,6 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 }
 
 
-FileTypeStats::~FileTypeStats()
-{
-    delete _otherCategory;
-}
-
-
 void FileTypeStats::collect( const FileInfo * dir )
 {
     if ( !dir )
@@ -86,7 +80,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 	    }
 	    else // !category
 	    {
-		addCategorySum( _otherCategory, item );
+		addCategorySum( otherCategory(), item );
 
 		if ( suffix.isEmpty() )
 		{
@@ -112,7 +106,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 		if ( suffix.isEmpty() )
 		    suffix = NO_SUFFIX;
 
-		addSuffixSum( suffix, _otherCategory, item );
+		addSuffixSum( suffix, otherCategory(), item );
 	    }
 
 	    // Disregard symlinks, block devices and other special files
@@ -147,7 +141,7 @@ void FileTypeStats::removeCruft()
 {
     // Make sure those two already exist to avoid confusing the iterator
     // (QHash::operator[] auto-inserts with default ctor if not already there)
-    const MapCategory cruftMapCategory = { NO_SUFFIX, _otherCategory };
+    const MapCategory cruftMapCategory = { NO_SUFFIX, otherCategory() };
     _suffixSum  [ cruftMapCategory ] = 0LL;
     _suffixCount[ cruftMapCategory ] = 0;
 
@@ -219,7 +213,7 @@ void FileTypeStats::removeEmpty()
 bool FileTypeStats::isCruft( const QString & suffix, const MimeCategory * category ) const
 {
     // Unknown categories should all have been marked in _otherCategory already
-    if ( suffix == NO_SUFFIX || category != _otherCategory )
+    if ( suffix == NO_SUFFIX || category != otherCategory() )
 	return false;
 
     if ( suffix.contains( ' ' ) )

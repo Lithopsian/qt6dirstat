@@ -23,8 +23,10 @@ namespace QDirStat
 
     public:
 
+	/**
+	 * Constructor.
+	 **/
         GeneralConfigPage( ConfigDialog * parent );
-        ~GeneralConfigPage() override { delete _ui; }
 
 
     protected slots:
@@ -50,7 +52,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::GeneralConfigPage * _ui;
+	std::unique_ptr<Ui::GeneralConfigPage> _ui;
 
     }; // class GeneralConfigPage
 }

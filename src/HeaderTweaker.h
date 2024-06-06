@@ -63,6 +63,16 @@ namespace QDirStat
 	inline static QLatin1String l2Name() { return QLatin1String( "L2" ); }
 	inline static QLatin1String l3Name() { return QLatin1String( "L3" ); }
 
+	/**
+	 * Save the current status in 'layout'.
+	 **/
+	void saveLayout() { if ( _currentLayout ) saveLayout( _currentLayout ); }
+
+	/**
+	 * Write parameters to the settings file.
+	 **/
+	void writeSettings();
+
 
     protected slots:
 
@@ -226,11 +236,6 @@ namespace QDirStat
 	void readSettings();
 
 	/**
-	 * Write parameters to the settings file.
-	 **/
-	void writeSettings();
-
-	/**
 	 * Read the settings for a layout.
 	 **/
 	void readLayoutSettings( ColumnLayout * layout );
@@ -247,11 +252,11 @@ namespace QDirStat
 	// Data members
 	//
 
-	DirTreeView                  * _treeView;
-	QHeaderView                  * _header;
-	int                            _currentSection	{ -1 };
-	QHash<QString, ColumnLayout *> _layouts;
-	ColumnLayout                 * _currentLayout	{ nullptr };
+	DirTreeView                    * _treeView;
+	QHeaderView                    * _header;
+	int                              _currentSection	{ -1 };
+	QHash<QString, ColumnLayout *>   _layouts;
+	ColumnLayout                   * _currentLayout	{ nullptr };
 
     };	// class HeaderTweaker
 

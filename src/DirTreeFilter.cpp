@@ -72,19 +72,12 @@ bool DirTreeSuffixFilter::ignore( const QString & path ) const
 
 
 
-DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager )
+DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager ):
+    DirTreeFilter (),
+    _fileListCache { pkgManager->createFileListCache( PkgFileListCache::LookupGlobal ) }
 {
-    CHECK_PTR( pkgManager );
-
     //logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;
-    _fileListCache = pkgManager->createFileListCache( PkgFileListCache::LookupGlobal );
     //logInfo() << "Done." << Qt::endl;
-}
-
-
-DirTreePkgFilter::~DirTreePkgFilter()
-{
-    delete _fileListCache;
 }
 
 

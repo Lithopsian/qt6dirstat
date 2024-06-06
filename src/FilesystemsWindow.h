@@ -145,7 +145,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::FilesystemsWindow * _ui;
+	std::unique_ptr<Ui::FilesystemsWindow> _ui;
 
     };	// class FilesystemsWindow
 

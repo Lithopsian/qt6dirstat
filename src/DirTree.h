@@ -10,6 +10,8 @@
 #ifndef DirTree_h
 #define DirTree_h
 
+#include "memory"
+
 #include "DirReadJob.h" // DirReadJobQueue
 #include "Typedefs.h"   // FileSize
 
@@ -46,7 +48,7 @@ namespace QDirStat
 	 * Remember to call startReading() after the constructor and
 	 * setting up connections.
 	 **/
-	DirTree();
+	DirTree( QObject * parent );
 
 	/**
 	 * Destructor.
@@ -125,12 +127,7 @@ namespace QDirStat
 	 * Return the root item of this tree. Notice that this is a pseudo root
 	 * that does not really correspond to a filesystem object.
 	 **/
-	DirInfo * root() const { return _root; }
-
-	/**
-	 * Sets the root item of this tree.
-	 **/
-//	void setRoot( DirInfo * newRoot );
+	DirInfo * root() const { return _root.get(); }
 
 	/**
 	 * Return a special printable url for the root item of this tree.
@@ -153,7 +150,7 @@ namespace QDirStat
 	/**
 	 * Return 'true' if 'item' is the (invisible) root item.
 	 **/
-//	bool isRoot( const DirInfo * dir ) const { return dir && dir == _root; }
+//	bool isRoot( const DirInfo * dir ) const { return dir && dir == root(); }
 
 	/**
 	 * Clear all items of this tree.  This should only be called from
@@ -275,13 +272,13 @@ namespace QDirStat
 	 * Return exclude rules specific to this tree (as opposed to the global
 	 * ones stored in the ExcludeRules singleton) or 0 if there are none.
 	 **/
-	const ExcludeRules * excludeRules() const { return _excludeRules; }
+	const ExcludeRules * excludeRules() const { return _excludeRules.get(); }
 
 	/**
 	 * Return exclude rules specific to this tree (as opposed to the global
 	 * ones stored in the ExcludeRules singleton) or 0 if there are none.
 	 **/
-//	const ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules; }
+//	const ExcludeRules * tmpExcludeRules() const { return _tmpExcludeRules.get(); }
 
 	/**
 	 * Set exclude rules from the settings file.  The tree will create its
@@ -517,12 +514,13 @@ namespace QDirStat
 
 	// Data members
 
-	DirInfo         * _root;
-	QString           _url;
-	DirReadJobQueue   _jobQueue;
+	std::unique_ptr<DirInfo> _root;
 
-	const ExcludeRules    * _excludeRules		{ nullptr };
-	const ExcludeRules    * _tmpExcludeRules	{ nullptr };
+	QString         _url;
+	DirReadJobQueue _jobQueue;
+
+	std::unique_ptr<const ExcludeRules> _excludeRules;
+	std::unique_ptr<const ExcludeRules> _tmpExcludeRules;
 
 	QList<const DirTreeFilter *> _filters;
 

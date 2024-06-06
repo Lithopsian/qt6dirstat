@@ -96,7 +96,6 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 FilesystemsWindow::~FilesystemsWindow()
 {
     writeWindowSettings( this, "FilesystemsWindow" );
-    delete _ui;
 }
 
 

@@ -114,7 +114,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::CleanupConfigPage * _ui;
+	std::unique_ptr<Ui::CleanupConfigPage> _ui;
 
 	int _outputWindowDefaultTimeout;
 

@@ -35,11 +35,6 @@ namespace QDirStat
 	 **/
 	PanelMessage( QWidget * parent );
 
-	/**
-	 * Destructor.
-	 **/
-	~PanelMessage() override { delete _ui; }
-
 
     public:
 
@@ -69,7 +64,7 @@ namespace QDirStat
 
     private:
 
-	Ui::PanelMessage * _ui;
+	std::unique_ptr<Ui::PanelMessage> _ui;
 
     };	// class PanelMessage
 

@@ -100,18 +100,11 @@ MimeCategoryConfigPage::~MimeCategoryConfigPage()
     // Delete the working categories
     for ( int i = 0; i < listWidget()->count(); ++i )
 	delete CATEGORY_CAST( value( listWidget()->item( i ) ) );
-
-    _ui->treemapView->setDirTree( nullptr );
-    delete _dirTree;
-
-    delete _ui;
 }
 
 
 void MimeCategoryConfigPage::setup()
 {
-    //logDebug() << Qt::endl;
-
     populateTreemapView();
     _ui->treemapView->setFixedColor( Qt::white );
 
@@ -148,7 +141,6 @@ void MimeCategoryConfigPage::applyChanges()
     const MainWindow * mainWindow = app()->findMainWindow();
     if ( mainWindow )
     {
-//	treemapView->setFixedColor( QColor( _ui->tileColorEdit->text() ) );
 	mainWindow->treemapView()->configChanged( QColor( _ui->tileColorEdit->text() ),
 						 _ui->squarifiedCheckBox->isChecked(),
 						 _ui->cushionShadingCheckBox->isChecked(),
@@ -480,18 +472,18 @@ QString MimeCategoryConfigPage::valueText( void * value )
 
 void MimeCategoryConfigPage::populateTreemapView()
 {
-    _dirTree = new DirTree();
+    _dirTree = new DirTree( this );
 
-    DirInfo       * root    = _dirTree->root();
-    const mode_t    mode    = 0755;
-    const FileSize  dirSize = 4096;
+    DirInfo        * root    = _dirTree->root();
+    const mode_t     mode    = 0755;
+    const FileSize   dirSize = 4096;
 
     // Create a very basic directory structure:
     //
     //	dir1
     //	  dir11
     //	  dir12
-    //	dir2
+    //	dir2populateTree
     //	  dir21
     //	    dir211
     //	    dir212

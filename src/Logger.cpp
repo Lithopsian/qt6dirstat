@@ -356,7 +356,7 @@ Logger::~Logger()
     if ( this == _defaultLogger )
     {
 	_defaultLogger = nullptr;
-	qInstallMessageHandler(0); // Restore default message handler
+	qInstallMessageHandler( nullptr ); // Restore default message handler
     }
 }
 

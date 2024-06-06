@@ -10,6 +10,8 @@
 #ifndef DirTreeFilter_h
 #define DirTreeFilter_h
 
+#include "memory"
+
 #include <QString>
 
 #include "Wildcard.h"
@@ -30,7 +32,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.  Declared explicitly only so it can be virtual.
+	 * Constructor.
 	 **/
 	DirTreeFilter() = default;
 
@@ -71,6 +73,7 @@ namespace QDirStat
 	 * filename.  Used by the create method to generate a filter.
 	 **/
 	DirTreePatternFilter( const QString & pattern ):
+	    DirTreeFilter (),
 	    _wildcard { CaseSensitiveWildcard( pattern.contains( '/' ) ? pattern : "*/" + pattern ) }
 	{}
 
@@ -118,6 +121,7 @@ namespace QDirStat
 	 * Constructor. 'suffix' should start with a dot (".").
 	 **/
 	DirTreeSuffixFilter( const QString & suffix ):
+	    DirTreeFilter (),
 	    _suffix { suffix }
 	{}
 
@@ -151,11 +155,6 @@ namespace QDirStat
 	DirTreePkgFilter( const PkgManager * pkgManager );
 
 	/**
-	 * Destructor.
-	 **/
-	~DirTreePkgFilter() override;
-
-	/**
 	 * Return 'true' if the filesystem object specified by 'path' should
 	 * be ignored, 'false' if not.
 	 *
@@ -166,7 +165,7 @@ namespace QDirStat
 
     private:
 
-	PkgFileListCache * _fileListCache;
+	std::unique_ptr<PkgFileListCache> _fileListCache;
 
     };	// class DirTreeFilter
 

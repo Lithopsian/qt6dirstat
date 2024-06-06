@@ -205,7 +205,6 @@ CleanupCollection::~CleanupCollection()
 {
 //    writeSettings( _cleanupList );
     clear();
-    delete _trash;
 }
 
 

@@ -74,8 +74,6 @@ namespace QDirStat
     {
 	Q_OBJECT
 
-    private:
-
 	/**
 	 * Constructor.
 	 * This is a singleton class; use instance() tp get a categorizer object.

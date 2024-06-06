@@ -124,7 +124,8 @@ namespace QDirStat
 
     private:
 
-	Ui::OpenDirDialog    * _ui;
+	std::unique_ptr<Ui::OpenDirDialog> _ui;
+
 	QFileSystemModel     * _filesystemModel;
 	ExistingDirValidator * _validator;
 	QString                _lastPath;

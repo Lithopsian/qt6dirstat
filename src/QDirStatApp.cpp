@@ -21,7 +21,7 @@ using namespace QDirStat;
 
 QDirStatApp::QDirStatApp():
     _dirTreeModel { new DirTreeModel() },
-    _selectionModel { new SelectionModel( _dirTreeModel ) }
+    _selectionModel { new SelectionModel( dirTreeModel() ) }
 {
     // logDebug() << "Creating app" << Qt::endl;
 
@@ -37,17 +37,6 @@ QDirStatApp::QDirStatApp():
         QTextStream in( &file );
         qApp->setStyleSheet( in.readAll() );
     }
-}
-
-
-QDirStatApp::~QDirStatApp()
-{
-    // logDebug() << "Destroying app" << Qt::endl;
-
-    delete _selectionModel;
-    delete _dirTreeModel;
-
-    // logDebug() << "App destroyed." << Qt::endl;
 }
 
 

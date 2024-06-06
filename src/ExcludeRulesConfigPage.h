@@ -113,7 +113,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::ExcludeRulesConfigPage * _ui;
+	std::unique_ptr<Ui::ExcludeRulesConfigPage> _ui;
 
     };	// class ExcludeRulesConfigPage
 

@@ -74,17 +74,17 @@ bool MountPoint::isSystemMount() const
 
 
 #if HAVE_Q_STORAGE_INFO
-QStorageInfo * MountPoint::storageInfo()
+const QStorageInfo & MountPoint::storageInfo()
 {
     if ( !_storageInfo )
     {
         if ( isNetworkMount() )
             logDebug() << "Creating QStorageInfo for " << _path << Qt::endl;
 
-        _storageInfo = new QStorageInfo( _path );
+        _storageInfo.reset( new QStorageInfo( _path ) );
     }
 
-    return _storageInfo;
+    return *_storageInfo;
 }
 #endif // !HAVE_Q_STORAGE_INFO
 

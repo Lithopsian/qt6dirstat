@@ -124,12 +124,6 @@ namespace QDirStat
 	SelectionModel * selectionModel() const { return _selectionModel; }
 
 	/**
-	 * Set the cleanup collection.  This connects signals, but does not
-	 * take ownership or even remember the CleanupCollection object.
-	 **/
-	void setCleanupCollection( const CleanupCollection * collection );
-
-	/**
 	 * Use a fixed color for all tiles. To undo this, set an invalid QColor
 	 * with the QColor default constructor.
 	 **/
@@ -380,11 +374,9 @@ namespace QDirStat
 	double cushionHeight() const { return _cushionHeight; }
 
 	/**
-	 * Returns a map of cushion heights:
-	 * key: current cushion height
-	 * value: next cushion height
+	 * Returns a list of cushion heights.
 	 **/
-	const CushionHeightSequence * cushionHeights() const { return _cushionHeights; }
+	const CushionHeightSequence & cushionHeights() const { return *_cushionHeights; }
 
 	/**
 	 * Called from the main window when settings related to the treemap may have
@@ -394,8 +386,8 @@ namespace QDirStat
 	                    bool           squarified,
 	                    bool           cushionShading,
 	                    double         cushionHeight,
-			    double         heightScaleFactor,
-			    int            minTileSize );
+	                    double         heightScaleFactor,
+	                    int            minTileSize );
 
 	/**
 	 * Return the tile of the deepest-level highlighted parent or 0 if no
@@ -631,13 +623,14 @@ namespace QDirStat
 	double _minSquarifiedTileHeight;
 	int    _maxTileThreshold; // largest sub-tree size at which to spawn a rendering thread
 
+	std::unique_ptr<const CushionHeightSequence> _cushionHeights;
+
 	bool _disabled		{ false }; // flag to disable all treemap builds
 	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
 
 	QFutureWatcher<TreemapTile *>   _watcher;
 	std::atomic<TreemapCancel>      _treemapCancel	{ TreemapCancelNone }; // flag to the treemap build thread
 	QThreadPool                   * _threadPool	{ nullptr }; // dedicated thread pool for rendering
-	const CushionHeightSequence   * _cushionHeights	{ nullptr };
 
 	// just for logging
 	QElapsedTimer _stopwatch;

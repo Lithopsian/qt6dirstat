@@ -96,14 +96,12 @@ FileTypeStatsWindow::~FileTypeStatsWindow()
     //logDebug() << "destroying" << Qt::endl;
 
     writeWindowSettings( this, "FileTypeStatsWindow" );
-
-    delete _ui;
 }
 
 
 FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
 {
-    static QPointer<FileTypeStatsWindow> _sharedInstance = nullptr;
+    static QPointer<FileTypeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new FileTypeStatsWindow( parent );

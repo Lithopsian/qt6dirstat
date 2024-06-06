@@ -48,9 +48,10 @@ DirTreeView::DirTreeView( QWidget * parent ):
 
 DirTreeView::~DirTreeView()
 {
-    delete _headerTweaker;
-    delete _percentBarDelegate;
-    delete _sizeColDelegate;
+    // Must be called here rather than the HeaderTweaker destructor
+    // QTreeView virtual methods will no longer be available
+    _headerTweaker->saveLayout();
+    _headerTweaker->writeSettings();
 }
 
 

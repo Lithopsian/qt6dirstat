@@ -149,25 +149,23 @@ int main( int argc, char * argv[] )
     QCoreApplication::setApplicationName ( "Qt6DirStat" );
 //    QCoreApplication::setApplicationVersion( QDIRSTAT_VERSION );
 
-    MainWindow * mainWin = new MainWindow( slowUpdate );
-    mainWin->show();
+    MainWindow mainWin( slowUpdate );
+    mainWin.show();
 
     if ( !argList.isEmpty() )
     {
 	const QString & arg = argList.first();
 	if ( openCache )
-	    mainWin->readCache( arg );
+	    mainWin.readCache( arg );
 	else
-	    mainWin->openUrl( arg );
+	    mainWin.openUrl( arg );
     }
     else if ( !dontAsk )
     {
-	mainWin->askOpenDir();
+	mainWin.askOpenDir();
     }
 
     qtApp.exec();
-
-    delete mainWin;
 
     // If running with 'sudo', this would leave all config files behind owned
     // by root which means that the real user can't write to those files

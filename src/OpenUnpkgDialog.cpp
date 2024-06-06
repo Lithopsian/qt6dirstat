@@ -54,7 +54,6 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 
 OpenUnpkgDialog::~OpenUnpkgDialog()
 {
-    delete _ui;
     writeWindowSettings( this, "OpenUnpkgDialog" );
 }
 

@@ -121,7 +121,7 @@ namespace QDirStat
 
 	// Data members
 
-	Ui::OpenUnpkgDialog * _ui;
+	std::unique_ptr<Ui::OpenUnpkgDialog> _ui;
 
     };	// class OpenUnpkgDialog
 

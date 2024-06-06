@@ -227,7 +227,7 @@ namespace QDirStat
 	bool      _ok		{ false };
 	int       _errorCount	{ 0 };
 
-	DirTree	* _tree;
+	DirTree * _tree;
 	DirInfo * _parent; // parent directory if there is one
 	DirInfo * _toplevel	{ nullptr }; // the parent if there is one, otherwise the top level of the cache file
 	DirInfo * _latestDir	{ nullptr }; // the latest drectory read from the cache file, parent to subsequent file children

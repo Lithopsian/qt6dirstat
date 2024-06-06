@@ -46,6 +46,7 @@ namespace QDirStat
 	 **/
 	static ActionManager * instance();
 
+
     public:
 
 	/**

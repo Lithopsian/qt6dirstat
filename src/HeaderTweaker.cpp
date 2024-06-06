@@ -43,10 +43,10 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
 
 HeaderTweaker::~HeaderTweaker()
 {
-    if ( _currentLayout )
-	saveLayout( _currentLayout );
+//    if ( _currentLayout )
+//	saveLayout( _currentLayout );
 
-    writeSettings();
+//    writeSettings();
 
     qDeleteAll( _layouts );
 }
@@ -419,10 +419,8 @@ void HeaderTweaker::saveLayout( ColumnLayout * layout )
 	const int logicalIndex = _header->logicalIndex( visualIndex );
 	if ( DataColumns::isValidCol( logicalIndex ) )
 	{
-	    const DataColumn col   = DataColumns::fromViewCol( logicalIndex );
-
 	    if ( !_header->isSectionHidden( logicalIndex ) )
-		layout->columns << col;
+		layout->columns << DataColumns::fromViewCol( logicalIndex );
 	}
     }
 }

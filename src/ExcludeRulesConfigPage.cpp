@@ -58,8 +58,6 @@ ExcludeRulesConfigPage::~ExcludeRulesConfigPage()
     // Delete the working rules
     for ( int i = 0; i < listWidget()->count(); ++i )
 	delete EXCLUDE_RULE_CAST( value( listWidget()->item( i ) ) );
-
-    delete _ui;
 }
 
 

@@ -209,8 +209,8 @@ namespace
 } // namespace
 
 
-DirTree::DirTree():
-    QObject (),
+DirTree::DirTree( QObject * parent ):
+    QObject ( parent ),
     _root { new DirInfo( this ) }
 {
     connect( &_jobQueue, &DirReadJobQueue::finished,
@@ -223,29 +223,9 @@ DirTree::DirTree():
 
 DirTree::~DirTree()
 {
-    delete _root;
-    delete _excludeRules;
-    delete _tmpExcludeRules;
-
     clearFilters();
 }
 
-/*
-void DirTree::setRoot( DirInfo *newRoot )
-{
-    if ( _root )
-    {
-	emit deletingChild( _root );
-	delete _root;
-	emit childrenDeleted();
-    }
-
-    _root = newRoot;
-
-    FileInfo * realRoot = firstToplevel();
-    _url = realRoot ? realRoot->url() : QString();
-}
-*/
 
 FileInfo * DirTree::firstToplevel() const
 {
@@ -319,7 +299,7 @@ void DirTree::startReading( const QString & rawUrl )
 
     sendStartingReading();
 
-    FileInfo * item = stat( _url, this, _root );
+    FileInfo * item = stat( _url, this, root() );
     if ( item ) // should always be an item, will throw if there is an error
     {
 	childAddedNotify( item );
@@ -329,7 +309,7 @@ void DirTree::startReading( const QString & rawUrl )
 	else
 	    sendFinished();
 
-	emit readJobFinished( _root );
+	emit readJobFinished( root() );
     }
 }
 
@@ -348,7 +328,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	struct stat statInfo;
 	while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
 	{
-	    if ( item == _root || item->parent() == _root )
+	    if ( item == root() || item->parent() == root() )
 	    {
 		// just try a full refresh, it will throw if even that isn't accessible any more
 		//logDebug() << item->parent() << " " << _root << Qt::endl;
@@ -384,12 +364,12 @@ void DirTree::refresh( DirInfo * subtree )
     if ( subtree->isPseudoDir() )
 	subtree = subtree->parent();
 
-    if ( subtree == _root || subtree->parent() == _root )	// Refresh all (from first toplevel)
+    if ( subtree == root() || subtree->parent() == root() )	// Refresh all (from first toplevel)
     {
 	// Get the url to refresh before we clear the tree
 //	const QString url = firstToplevel()->url();
 //	emit clearing(); // for the selection model
-	clearSubtree( _root );
+	clearSubtree( root() );
 	startReading( QDir::cleanPath( _url ) );
     }
     else	// Refresh subtree
@@ -436,12 +416,12 @@ void DirTree::finalizeTree()
 {
     if ( _root && hasFilters() )
     {
-	recalc( _root );
-	ignoreEmptyDirs( _root );
-	recalc( _root );
+	recalc( root() );
+	ignoreEmptyDirs( root() );
+	recalc( root() );
 	if ( _root->firstChild() )
             moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
-	recalc( _root );
+	recalc( root() );
     }
 }
 
@@ -473,9 +453,6 @@ void DirTree::deleteChild( FileInfo * child )
 	parent->unlinkChild( child );
 
     delete child;
-
-    if ( child == _root )
-	_root = nullptr;
 }
 
 
@@ -635,15 +612,12 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
 
 void DirTree::setExcludeRules()
 {
-    delete _excludeRules;
-    _excludeRules = new ExcludeRules();
+    _excludeRules.reset( new ExcludeRules() );
 }
 
 
 void DirTree::setTmpExcludeRules( const ExcludeRules * newTmpRules )
 {
-    delete _tmpExcludeRules;
-
 #if VERBOSE_EXCLUDE_RULES
     if ( newTmpRules )
     {
@@ -658,7 +632,7 @@ void DirTree::setTmpExcludeRules( const ExcludeRules * newTmpRules )
     }
 #endif
 
-    _tmpExcludeRules = newTmpRules;
+    _tmpExcludeRules.reset( newTmpRules );
 }
 
 

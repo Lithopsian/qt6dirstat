@@ -105,7 +105,7 @@ namespace QDirStat
 	/**
 	 * Return the TreeWalker of this window.
 	 **/
-//	TreeWalker * treeWalker() const { return _treeWalker; }
+//	TreeWalker * treeWalker() const { return _treeWalker.get(); }
 
 	/**
 	 * One-time initialization of the widgets in this window.
@@ -170,10 +170,10 @@ namespace QDirStat
 	// Data members
 	//
 
-	Ui::LocateFilesWindow * _ui;
+	std::unique_ptr<Ui::LocateFilesWindow> _ui;
 
-	TreeWalker * _treeWalker;
-	Subtree      _subtree;
+	std::unique_ptr<TreeWalker> _treeWalker;
+	Subtree                     _subtree;
     };
 
 

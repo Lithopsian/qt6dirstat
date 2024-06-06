@@ -64,7 +64,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
 
-    _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward );
+    _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward, this );
 
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
@@ -109,10 +109,6 @@ MainWindow::~MainWindow()
     // logDebug() << "Destroying main window" << Qt::endl;
 
     writeSettings();
-
-    delete _ui;
-    delete _historyButtons;
-    delete _layoutActionGroup;
 
     // logDebug() << "Main window destroyed" << Qt::endl;
 }
