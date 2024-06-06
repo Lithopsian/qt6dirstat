@@ -436,8 +436,8 @@ namespace
 } // namespace
 
 
-DirTreeModel::DirTreeModel( QObject * parent ):
-    QAbstractItemModel ( parent )
+DirTreeModel::DirTreeModel():
+    QAbstractItemModel ()
 {
     createTree();
     readSettings();
@@ -452,10 +452,7 @@ DirTreeModel::DirTreeModel( QObject * parent ):
 
 DirTreeModel::~DirTreeModel()
 {
-    //logDebug() << Qt::endl;
     writeSettings();
-
-    delete _tree;
 }
 
 
@@ -549,7 +546,7 @@ void DirTreeModel::setBaseFont( const QFont & font )
 
 void DirTreeModel::createTree()
 {
-    _tree = new DirTree();
+    _tree = new DirTree( this );
     _tree->setExcludeRules();
 
     connect( _tree, &DirTree::finished,
@@ -1024,6 +1021,15 @@ void DirTreeModel::updatePersistentIndexes()
 	    changePersistentIndex( oldIndex, newIndex );
 	}
     }
+}
+
+
+void DirTreeModel::beginResetModel()
+{
+    _updateTimer.stop();
+    _pendingUpdates.clear(); // these are dangerous if they arrive from a dead tree
+
+    QAbstractItemModel::beginResetModel();
 }
 
 

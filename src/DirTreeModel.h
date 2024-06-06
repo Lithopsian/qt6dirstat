@@ -52,13 +52,8 @@ namespace QDirStat
 
 	/**
 	 * Constructor.
-	 *
-	 * 'parent' is just the parent in the QObject / QWidget hierarchy that
-	 * will take of deleting this model upon shutdown. It is typically NOT
-	 * the corresponding view. As a matter of fact, there might be any
-	 * number of views connected.
 	 **/
-	DirTreeModel( QObject * parent = nullptr );
+	DirTreeModel();
 
 	/**
 	 * Destructor.
@@ -289,6 +284,12 @@ namespace QDirStat
 	 * Notification that a subtree is about to be cleared.
 	 **/
 	void clearingSubtree( DirInfo * subtree );
+
+	/**
+	 * Called when the tree is about to be cleared.  Kill the timer and
+	 * any pending updates, and propagate the signal.
+	 **/
+	void beginResetModel();
 
 	/**
 	 * End removing rows.
