@@ -653,10 +653,11 @@ namespace QDirStat
 	 *
 	 * This is always false for a base FileInfo object, but the
 	 * generic test for firstChild() resolves in all cases.  Note
-	 * that a dot entry counts as a child, but when there is a dot
-	 * entry, there will always be firstChild().
+	 * that a dot entry counts as a child.  When there is a dot
+	 * entry in a completed directory, there will always be firstChild(),
+	 * but during a read there may not be.
 	 **/
-	bool hasChildren() const { return firstChild(); }
+	bool hasChildren() const { return firstChild() || dotEntry(); }
 
 	/**
 	 * Returns true if this entry has no children.
