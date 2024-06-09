@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <sys/stat.h>
-
 #include <QDir>
 #include <QFileInfo>
 
@@ -451,6 +449,8 @@ void DirTree::deleteChild( FileInfo * child )
     // from its children list and take care of internal summary fields
     if ( parent )
 	parent->unlinkChild( child );
+
+    delete child;
 }
 
 

@@ -10,7 +10,7 @@
 #ifndef FormatUtil_h
 #define FormatUtil_h
 
-#include <sys/types.h>
+#include <sys/types.h>      // mode_t
 #include <sys/stat.h>       // ALLPERMS
 
 #include <QFontMetrics>

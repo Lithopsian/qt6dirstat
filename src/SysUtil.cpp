@@ -14,7 +14,6 @@
 #include <grp.h>	// getgrgid()
 #include <limits.h>     // PATH_MAX
 #include <sys/stat.h>   // lstat()
-#include <sys/types.h>
 
 #include "SysUtil.h"
 #include "Exception.h"

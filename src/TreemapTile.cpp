@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <math.h>
+#include <math.h> // round()
 
 #include <QElapsedTimer>
 #include <QImage>

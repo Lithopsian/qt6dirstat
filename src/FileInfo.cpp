@@ -7,10 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <time.h>       // gmtime()
-#include <unistd.h>
 
 #include <QFileInfo>
 

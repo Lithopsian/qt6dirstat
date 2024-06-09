@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <sys/stat.h>
-#include <unistd.h>
+#include <sys/stat.h> // mkdir(), struct stat, S_ISDIR(), etc.
+#include <unistd.h> // getuid()
 #include <errno.h>
 
 #include <QDir>

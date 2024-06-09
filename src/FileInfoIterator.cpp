@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm>
+#include <algorithm> // std::stable_sort
 
 #include "FileInfo.h"
 #include "FileInfoIterator.h"

@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <math.h>
-#include <algorithm>
+#include <math.h> // pow(), log2()
+#include <algorithm> // std::max_element
 
 #include <QGraphicsItem>
 #include <QResizeEvent>

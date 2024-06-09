@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <ctype.h>
+#include <ctype.h> // isspace()
 
 #include <QStringBuilder>
 #include <QUrl>

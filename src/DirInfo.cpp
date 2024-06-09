@@ -7,9 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm>
-#include <sys/stat.h>
-#include <math.h>
+#include <algorithm> // std::stable_sort
 
 #include "DirInfo.h"
 #include "Attic.h"

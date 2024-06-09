@@ -7,9 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <math.h>       // ceil()
-#include <algorithm>
-
 #include "FileMTimeStats.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"

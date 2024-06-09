@@ -10,8 +10,6 @@
 #ifndef Trash_h
 #define Trash_h
 
-#include <sys/stat.h>
-
 #include <QObject>
 
 
