@@ -51,8 +51,8 @@ namespace QDirStat
 
 	/**
 	 * Determine the first child in the sorted children list that is not
-	 * considered to be dominant and return it.  This may be the first child
-	 * in the list (ie. 0) if no children are dominant.
+	 * considered to be dominant and return its row number.  This may be
+	 * 0 (ie. the first child) if no children are dominant.
 	 **/
 	int findDominantChildren();
 
@@ -138,7 +138,9 @@ namespace QDirStat
 	~DirInfo() override { clear(); }
 
 	/**
-	 * Returns the number of hard links, always zero for DirInfo objects.
+	 * Returns the number of hard links, always zero for DirInfo and
+	 * derived objects even though the actual number of hard links
+	 * may be stored in _links.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
@@ -260,7 +262,7 @@ namespace QDirStat
 	/**
 	 * Set the 'excluded' status.
 	 **/
-	void setExcluded( bool excl = true ) override { _isExcluded = excl; }
+	void setExcluded( bool excl = true ) { _isExcluded = excl; }
 
 	/**
 	 * Returns whether or not this is a mount point.
@@ -270,15 +272,13 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	bool isMountPoint() const  override { return _isMountPoint; }
+	bool isMountPoint() const override { return _isMountPoint; }
 
 	/**
 	 * Sets the mount point state, i.e. whether or not this is a mount
 	 * point.
-	 *
-	 * Reimplemented - inherited from FileInfo.
 	 **/
-	void setMountPoint( bool isMountPoint = true ) override { _isMountPoint = isMountPoint; }
+	void setMountPoint( bool isMountPoint = true ) { _isMountPoint = isMountPoint; }
 
 	/**
 	 * Find the nearest parent that is a mount point or 0 if there is
@@ -291,15 +291,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	bool isFinished() const override { return !isBusy(); }
-
-	/**
-	 * Returns true if this subtree is busy, i.e. it is not finished
-	 * reading yet.
-	 *
-	 * Reimplemented - inherited from FileInfo.
-	 **/
-	bool isBusy() const override;
+	bool isFinished() const override;
 
 	/**
 	 * Returns the number of pending read jobs in this subtree. When this
@@ -332,10 +324,8 @@ namespace QDirStat
 	 *
 	 * The order of children in this list is absolutely undefined;
 	 * don't rely on any implementation-specific order.
-	 *
-	 * Reimplemented - inherited from FileInfo.
 	 **/
-	void insertChild( FileInfo * newChild ) override;
+	virtual void insertChild( FileInfo * newChild );
 
 	/**
 	 * Add a child to the attic. This is very much like insertChild(), but
@@ -373,8 +363,6 @@ namespace QDirStat
 
 	/**
 	 * Notification that a child has been added somewhere in the subtree.
-	 *
-	 * Reimplemented - inherited from FileInfo.
 	 **/
 	void childAdded( FileInfo * newChild );
 
@@ -444,15 +432,6 @@ namespace QDirStat
 	DirReadState readState() const override { return _readState; }
 
 	/**
-	 * Check if readState() is anything that indicates an error reading the
-	 * directory. This returns 'true' for DirError or DirPermissionDenied,
-	 * 'false' otherwise.
-	 *
-	 * Reimplemented - inherited from FileInfo.
-	 **/
-	bool readError() const override;
-
-	/**
 	 * Return a prefix for the total size (and similar accumulated fields)
 	 * of this item: ">" if there might be more, i.e. if a subdirectory
 	 * could not be read or if reading was aborted, an empty string
@@ -510,16 +489,6 @@ namespace QDirStat
 	 * Recursively delete all children, including the dot entry.
 	 **/
 	void clear();
-
-	/**
-	 * Reset to the same status like just after construction in preparation
-	 * of refreshing the tree from this point on:
-	 *
-	 * Delete all children if there are any, delete the dot entry's
-	 * children if there are any, restore the dot entry if it was removed
-	 * (e.g. in finalizeLocal()), set the read state to DirQueued.
-	 **/
-	virtual void reset();
 
 	/**
 	 * Mark this directory as 'touched'. Item models can use this to keep
@@ -606,7 +575,6 @@ namespace QDirStat
 
 	/**
 	 * Set this entry's first child.
-	 * Use this method only if you know exactly what you are doing.
 	 **/
 	void setFirstChild( FileInfo * newfirstChild )
 	    { _firstChild = newfirstChild; }

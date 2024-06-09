@@ -10,8 +10,8 @@
 #ifndef FileInfo_h
 #define FileInfo_h
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <sys/types.h> // dev_t, mode_t, nlink_t
+#include <sys/stat.h>  // struct stat, S_ISDIR(), etc.
 
 #include <QFileInfo>
 #include <QModelIndex>
@@ -286,6 +286,10 @@ namespace QDirStat
 	/**
 	 * The number of hard links to this file. Relevant for size summaries
 	 * to avoid counting one file several times.
+	 *
+	 * Derived classes will override this and return a dummy value of 0
+	 * although the actual number of hard links is stored in _links for
+	 * directories generated using statInfo.
 	 **/
 	virtual nlink_t links() const { return _links; }
 
@@ -523,8 +527,9 @@ namespace QDirStat
 	virtual time_t latestMtime() { return _mtime; }
 
 	/**
-	 * Returns the oldest modification time of any file in this subtree or
-	 * 0 if there is no file.
+	 * Returns the oldest modification time of any file in this subtree.
+	 * For regular file base FileInfo objects this is just _mtime.  For
+	 * other file types, return 0.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
@@ -553,33 +558,12 @@ namespace QDirStat
 	virtual bool isExcluded() const { return false; }
 
 	/**
-	 * Set the 'excluded' status.
-	 *
-	 * Only DirInfo objects are excluded, so the default implementation
-	 * silently ignores the value passed here and does nothing.
-	 *
-	 * Derived classes may want to overwrite this.
-	 **/
-	virtual void setExcluded( bool ) {}
-
-	/**
 	 * Returns whether or not this is a mount point.  Always false for a
 	 * file.
 	 *
 	 * Derived classes may want to overwrite this.
 	 **/
 	virtual bool isMountPoint() const  { return false; }
-
-	/**
-	 * Sets the mount point state, i.e. whether or not this is a mount
-	 * point.
-	 *
-	 * This default implementation silently ignores the value passed and
-	 * does nothing.
-	 *
-	 * Derived classes may want to overwrite this.
-	 **/
-	virtual void setMountPoint( bool ) {}
 
 	/**
 	 * Returns true if this subtree is finished reading.  Files have no
@@ -592,11 +576,8 @@ namespace QDirStat
 	/**
 	 * Returns true if this subtree is busy, i.e. it is not finished
 	 * reading yet.
-	 *
-	 * This default implementation always returns 'false';
-	 * derived classes should overwrite this.
 	 **/
-	virtual bool isBusy() const { return false; }
+	bool isBusy() const { return !isFinished(); }
 
 	/**
 	 * Returns the number of pending read jobs in this subtree. When this
@@ -668,17 +649,14 @@ namespace QDirStat
 	virtual FileInfo * firstChild() const { return nullptr; }
 
 	/**
-	 * Set this entry's first child.
-	 *
-	 * This default implementation does nothing.
-	 * Derived classes might want to overwrite this.
-	 **/
-//	virtual void setFirstChild( FileInfo * ) {}
-
-	/**
 	 * Returns true if this entry has any children.
+	 *
+	 * This is always false for a base FileInfo object, but the
+	 * generic test for firstChild() resolves in all cases.  Note
+	 * that a dot entry counts as a child, but when there is a dot
+	 * entry, there will always be firstChild().
 	 **/
-	virtual bool hasChildren() const { return firstChild() || dotEntry(); }
+	bool hasChildren() const { return firstChild(); }
 
 	/**
 	 * Returns true if this entry has no children.
@@ -708,17 +686,6 @@ namespace QDirStat
 	virtual FileInfo * locate( const QString & url, bool findPseudoDirs );
 
 	/**
-	 * Insert a child into the children list.
-	 *
-	 * The order of children in this list is absolutely undefined; don't
-	 * rely on any implementation-specific order.
-	 *
-	 * This default implementation does nothing and this should be
-	 * overridden by a derived class.
-	 **/
-	virtual void insertChild( FileInfo * ) {}
-
-	/**
 	 * Return the "Dot Entry" for this node if there is one (or 0
 	 * otherwise): This is a pseudo entry that directory nodes use to store
 	 * non-directory children separately from directories. This way the end
@@ -728,16 +695,6 @@ namespace QDirStat
 	 * This default implementation always returns 0.
 	 **/
 	virtual DotEntry * dotEntry() const { return nullptr; }
-
-	/**
-	 * Set a "Dot Entry". This makes sense for directories only.
-	 *
-	 * This default implementation does nothing and this should be
-	 * overridden by a derived class.
-	 *
-	 * Currently unused.
-	 **/
-//	virtual void setDotEntry( FileInfo * ) {}
 
 	/**
 	 * Return 'true' if this is a pseudo directory: A "dot entry" or an
@@ -791,35 +748,6 @@ namespace QDirStat
 	int treeLevel() const;
 
 	/**
-	 * Notification that a child has been added somewhere in the subtree.
-	 *
-	 * This default implementation does nothing.
-	 **/
-//	virtual void childAdded( FileInfo * ) {}
-
-	/**
-	 * Remove a child from the children list.
-	 *
-	 * IMPORTANT: This MUST be called just prior to deleting an object of
-	 * this class. Regrettably, this cannot simply be moved to the
-	 * destructor: Important parts of the object might already be destroyed
-	 * (e.g., the virtual table - no more virtual methods).
-	 *
-	 * This is currently not a virtual function and there is just a plain
-	 * function DirInfo::unlinkChild.
-	 **/
-//	virtual void unlinkChild( FileInfo * ) {}
-
-	/**
-	 * Notification that a child is about to be deleted somewhere in the
-	 * subtree.  The default implementation has no children and so this
-	 * does nothing.
-	 *
-	 * Derived classes that can handle children should overwrite this.
-	 **/
-//	virtual void deletingChild( FileInfo * ) {}
-
-	/**
 	 * Get the current state of the directory reading process.
 	 *
 	 * Files are always finsihed as soon as they are constructed, so the
@@ -831,12 +759,8 @@ namespace QDirStat
 	/**
 	 * Check if readState() is anything that indicates an error reading the
 	 * directory, i.e. DirError or DirPermissionDenied.
-	 *
-	 * Files have been read successfully if they are constructed at all, so
-	 * the default implementation always returns 'false'.
-	 * Derived classes should overwrite this.
 	 **/
-	virtual bool readError() const { return false; }
+	bool readError() const { return readState() == DirError || readState() == DirPermissionDenied; }
 
 	/**
 	 * Return a prefix for the total size (and similar accumulated fields)
@@ -1010,7 +934,7 @@ namespace QDirStat
 	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
-	int        _rowNumber { 0 };	// order of this child when the children are sorted
+	int        _rowNumber { 0 };		// order of this child when the children are sorted
 	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
 	bool       _isLocalFile   :1;	// flag: local or remote file?

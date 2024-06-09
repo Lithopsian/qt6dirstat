@@ -451,8 +451,6 @@ void DirTree::deleteChild( FileInfo * child )
     // from its children list and take care of internal summary fields
     if ( parent )
 	parent->unlinkChild( child );
-
-    delete child;
 }
 
 

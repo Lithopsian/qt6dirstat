@@ -165,22 +165,6 @@ void DirInfo::clear()
 }
 
 
-void DirInfo::reset()
-{
-    clear();
-
-    _readState       = DirQueued;
-    _pendingReadJobs = 0;
-
-    ensureDotEntry();
-    if ( tree() )
-	tree()->childAddedNotify( _dotEntry );
-
-    recalc();
-    dropSortCache();
-}
-
-
 void DirInfo::ensureDotEntry()
 {
     if ( !_dotEntry )
@@ -426,15 +410,15 @@ void DirInfo::setReadState( DirReadState newReadState )
 }
 
 
-bool DirInfo::isBusy() const
+bool DirInfo::isFinished() const
 {
     if ( _pendingReadJobs > 0 && _readState != DirAborted )
-	return true;
+	return false;
 
     if ( _readState == DirReading || _readState == DirQueued )
-	return true;
+	return false;
 
-    return false;
+    return true;
 }
 
 
@@ -481,20 +465,20 @@ void DirInfo::addToAttic( FileInfo * newChild )
 {
     CHECK_PTR( newChild );
 
-    Attic * attic = nullptr;
-
-    if ( !newChild->isDir() && _dotEntry )
-	attic = _dotEntry->ensureAttic();
-
-    if ( !attic )
-	attic = ensureAttic();
-
     newChild->setIgnored( true );
 
     if ( newChild->isDir() )
 	_totalIgnoredItems += newChild->totalIgnoredItems();
     else
 	_totalIgnoredItems++;
+
+    Attic * attic = [ this, newChild ]()
+    {
+	if ( !newChild->isDir() && _dotEntry )
+	    return _dotEntry->ensureAttic();
+
+	return ensureAttic();
+    }();
 
     attic->insertChild( newChild );
 }
@@ -653,15 +637,6 @@ void DirInfo::readJobAborted()
 
     if ( parent() )
 	parent()->readJobAborted();
-}
-
-
-bool DirInfo::readError() const
-{
-    if ( _readState == DirError || _readState == DirPermissionDenied )
-	return true;
-
-    return false;
 }
 
 

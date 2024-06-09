@@ -81,14 +81,6 @@ namespace QDirStat
 	 **/
 	DirReadState readState() const override { return parent() ? parent()->readState() : readState(); }
 
-	/**
-	 * Reset to the same status like just after construction in preparation
-	 * of refreshing the tree from this point on.
-	 *
-	 * Reimplemented - inherited from DirInfo.
-	 **/
-	void reset() override {}
-
 
     protected:
 

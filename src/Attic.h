@@ -65,15 +65,8 @@ namespace QDirStat
 	    { return parent() ? parent()->readState() : readState(); }
 
 	/**
-	 * Returns true if this entry has any children.
-	 *
-	 * Reimplemented - inherited from FileInfo.
-	 **/
-	bool hasChildren() const override { return firstChild(); }
-
-	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag
-	 * accordingly.
+	 * accordingly.  For Attic, there is nothing to do.
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/

@@ -511,7 +511,7 @@ QStringList CachePkgReadJob::fileList()
 	return PkgReadJob::fileList();
 
     const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
-    logDebug() << pkgName << " " << pkg()->name() << Qt::endl;
+
     if ( _fileListCache->containsPkg( pkgName ) )
 	return _fileListCache->fileList( pkgName );
 
