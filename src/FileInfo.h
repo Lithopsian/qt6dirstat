@@ -209,6 +209,15 @@ namespace QDirStat
 	const QString & name() const { return _name; }
 
 	/**
+	 * Set the (display) name for this object.
+	 *
+	 * This is useful if a package is installed in multiple versions or
+	 * for multiple architectures; in that case, it is advisable to use the
+	 * base name plus either the version or the architecture or both.
+	 **/
+	void setName( const QString & newName ) { _name = newName; }
+
+	/**
 	 * Returns the base name of this object, i.e. the last path component,
 	 * even if this is a toplevel item.
 	 **/
@@ -624,6 +633,11 @@ namespace QDirStat
 	DirTree * tree() const { return _tree; }
 
 	/**
+	 * Set the parent DirTree for this object.
+	 **/
+	void setTree( DirTree * tree ) { _tree = tree; }
+
+	/**
 	 * Returns a pointer to this entry's parent entry or 0 if there is
 	 * none.
 	 **/
@@ -918,51 +932,51 @@ namespace QDirStat
 	/**
 	 * Returns true if this is a directory.
 	 **/
-	bool isDir()		const { return S_ISDIR ( _mode ) ? true : false; }
+	bool isDir()         const { return S_ISDIR ( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a regular file.
 	 **/
-	bool isFile()		const { return S_ISREG ( _mode ) ? true : false; }
+	bool isFile()        const { return S_ISREG ( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a symbolic link.
 	 **/
-	bool isSymLink()	const { return S_ISLNK ( _mode ) ? true : false; }
+	bool isSymLink()     const { return S_ISLNK ( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a (block or character) device.
 	 **/
-	bool isDevice()		const { return S_ISBLK ( _mode ) || S_ISCHR( _mode ) ? true : false; }
+	bool isDevice()      const { return S_ISBLK ( _mode ) || S_ISCHR( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a block device.
 	 **/
-	bool isBlockDevice()	const { return S_ISBLK ( _mode ) ? true : false; }
+	bool isBlockDevice() const { return S_ISBLK ( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a block device.
 	 **/
-	bool isCharDevice()	const { return S_ISCHR ( _mode ) ? true : false; }
+	bool isCharDevice()  const { return S_ISCHR ( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a FIFO.
 	 **/
-	bool isFifo()		const { return S_ISFIFO( _mode ) ? true : false; }
+	bool isFifo()        const { return S_ISFIFO( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a socket.
 	 **/
-	bool isSocket()		const { return S_ISSOCK( _mode ) ? true : false; }
+	bool isSocket()      const { return S_ISSOCK( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a "special" file, i.e. a (block or character)
 	 * device, a FIFO (named pipe) or a socket.
 	 **/
-	bool isSpecial()	const { return  S_ISBLK ( _mode ) ||
-						S_ISCHR ( _mode ) ||
-						S_ISFIFO( _mode ) ||
-						S_ISSOCK( _mode ) ? true : false; }
+	bool isSpecial()     const { return  S_ISBLK ( _mode ) ||
+	                                     S_ISCHR ( _mode ) ||
+	                                     S_ISFIFO( _mode ) ||
+	                                     S_ISSOCK( _mode ) ? true : false; }
 
 	/**
 	 * Returns true if this is a symlink, but the (direct) link target does
@@ -982,7 +996,7 @@ namespace QDirStat
 	QString symLinkTarget() const;
 
 
-    protected:
+    private:
 
 	//
 	// Data members.

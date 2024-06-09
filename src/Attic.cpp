@@ -17,7 +17,7 @@ using namespace QDirStat;
 
 FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
 {
-    if ( !_tree || !_parent )
+    if ( !tree() || !parent() )
 	return nullptr;
 
     // Search all children

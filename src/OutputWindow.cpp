@@ -255,14 +255,13 @@ void OutputWindow::processError( QProcess::ProcessError error )
 void OutputWindow::processFinished( QProcess * process )
 {
     _processList.removeAll( process );
+    process->deleteLater();
 
     if ( _processList.isEmpty() && _noMoreProcesses )
     {
 	//logDebug() << "Emitting lastProcessFinished() err: " << _errorCount << Qt::endl;
 	emit lastProcessFinished( _errorCount );
     }
-
-    process->deleteLater();
 }
 
 

@@ -78,15 +78,6 @@ namespace QDirStat
         const QString & baseName() const { return _baseName; }
 
         /**
-         * Set the (display) name for this package.
-         *
-         * This is useful if this package is installed in multiple versions or
-         * for multiple architectures; in that case, it is advisable to use the
-         * base name plus either the version or the architecture or both.
-         **/
-        void setName( const QString & newName ) { _name = newName; }
-
-        /**
          * Return the version of this package.
          **/
         const QString & version() const { return _version; }
@@ -100,11 +91,6 @@ namespace QDirStat
          * Return the package manager that this package is managed by.
          **/
         const PkgManager * pkgManager() const { return _pkgManager; }
-
-        /**
-         * Set the parent DirTree for this pkg.
-         **/
-        void setTree( DirTree * tree ) { _tree = tree; }
 
         /**
          * Return 'true' if this package is installed for more than one
@@ -141,7 +127,7 @@ namespace QDirStat
          * Reimplemented - inherited from FileInfo.
          **/
         virtual QString url() const override
-            { return pkgScheme() + ( isPkgUrl( _name ) ? QString() : _name ); }
+            { return pkgScheme() + ( isPkgUrl( name() ) ? QString() : name() ); }
 
         /**
          * Return 'true' if this is a package URL, i.e. it starts with "Pkg:".

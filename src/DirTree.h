@@ -10,7 +10,7 @@
 #ifndef DirTree_h
 #define DirTree_h
 
-#include "memory"
+#include <memory>
 
 #include "DirReadJob.h" // DirReadJobQueue
 #include "Typedefs.h"   // FileSize

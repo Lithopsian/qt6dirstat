@@ -37,7 +37,7 @@ namespace QDirStat
 	 **/
 	Attic( DirTree * tree, DirInfo * parent = nullptr ):
 	    DirInfo ( parent, tree, atticName() )
-	{ _isIgnored = true; }
+	{ setIgnored( true ); }
 
 	/**
 	 * Check if this is an attic entry where ignored files and directories
@@ -62,7 +62,7 @@ namespace QDirStat
 	 * Reimplemented - inherited from DirInfo.
 	 **/
 	DirReadState readState() const override
-	    { return _parent ? _parent->readState() : readState(); }
+	    { return parent() ? parent()->readState() : readState(); }
 
 	/**
 	 * Returns true if this entry has any children.
@@ -85,8 +85,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	FileInfo * locate( const QString & url,
-			   bool            findPseudoDirs ) override;
+	FileInfo * locate( const QString & url, bool findPseudoDirs ) override;
 
     };	// class Attic
 

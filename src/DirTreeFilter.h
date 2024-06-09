@@ -10,7 +10,7 @@
 #ifndef DirTreeFilter_h
 #define DirTreeFilter_h
 
-#include "memory"
+#include <memory>
 
 #include <QString>
 

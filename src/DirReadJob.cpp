@@ -138,19 +138,8 @@ DirReadJob::DirReadJob( DirTree * tree,
 
 DirReadJob::~DirReadJob()
 {
-//    if ( !_tree->beingDestroyed() )
-    {
-	// Only do this if the tree is not in the process of being destroyed;
-	// otherwise all FileInfo / DirInfo pointers pointing into that tree
-	// may already be invalid. And even if they are not, it is now
-	// pointless to do all the housekeeping stuff to finalize the read job:
-	// We'd be beautifying the tree content that is now being destroyed.
-	//
-	// https://github.com/shundhammer/qdirstat/issues/122
-
-	if ( _dir && _dir->checkMagicNumber() )
-	    _dir->readJobFinished( _dir );
-    }
+    if ( _dir && _dir->checkMagicNumber() )
+	_dir->readJobFinished( _dir );
 }
 
 

@@ -10,7 +10,7 @@
 #ifndef DirReadJob_h
 #define DirReadJob_h
 
-#include "memory"
+#include <memory>
 
 #include <QTextStream>
 #include <QTimer>

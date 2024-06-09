@@ -18,11 +18,10 @@ namespace QDirStat
     class DirTree;
 
     /**
-     * This is a very special kind if DirInfo: the <Files> pseudo container
-     * that groups the non-directory children of a directory together. The
-     * basic idea is keep the direct file children of a directory in one
-     * container so their total size can easily be compared to any of the
-     * subdirectories.
+     * This is a special kind of DirInfo: the <Files> pseudo container that
+     * groups the non-directory children of a directory together. The basic
+     * idea is keep the direct file children of a directory in one container
+     * so their total size can easily be compared to any of the subdirectories.
      **/
     class DotEntry: public DirInfo
     {
@@ -33,34 +32,28 @@ namespace QDirStat
 	DotEntry( DirTree * tree,
 		  DirInfo * parent ) :
 	    DirInfo ( parent, tree, dotEntryName() )
-	{/*
-	    if ( parent )
-	    {
-		_device = parent->device();
-		_mode	= parent->mode();
-		_uid	= parent->uid();
-		_gid	= parent->gid();
-	    }*/
-	}
+	{}
 
 	/**
-	 * Get the "Dot Entry" for this node if there is one (or 0 otherwise).
-	 * Since this is a dot entry, this always returns 0: A dot entry does
+	 * Returns the "Dot Entry" for this node if there is one (or 0 otherwise).
+	 *
+	 * Since this is a dot entry, this always returns 0: a dot entry does
 	 * not have a dot entry itself.
 	 **/
 	DotEntry * dotEntry() const override { return nullptr; }
 
 	/**
-	 * Check if this is a dot entry.
+	 * Returns whether this is a dot entry.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	bool isDotEntry() const override { return true; }
 
 	/**
-	 * Sets a flag that this is the root directory of a cache file read.
+	 * Returns whether this was populated automatically from a cache
+	 * file read.
 	 **/
-	bool isFromCache() const override { return _parent && _parent->isFromCache(); }
+	bool isFromCache() const override { return parent() && parent()->isFromCache(); }
 
 	/**
 	 * Insert a child into the children list.
@@ -86,8 +79,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/
-	DirReadState readState() const override
-		{ return _parent ? _parent->readState() : readState(); }
+	DirReadState readState() const override { return parent() ? parent()->readState() : readState(); }
 
 	/**
 	 * Reset to the same status like just after construction in preparation

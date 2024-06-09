@@ -10,7 +10,7 @@
 #ifndef HistoryButtons_h
 #define HistoryButtons_h
 
-#include "memory"
+#include <memory>
 
 #include <QObject>
 

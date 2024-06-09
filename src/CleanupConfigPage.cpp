@@ -73,8 +73,6 @@ CleanupConfigPage::~CleanupConfigPage()
 
 void CleanupConfigPage::applyChanges()
 {
-    // logDebug() << Qt::endl;
-
     // The values for the current cleanup action might have been modified and not yet saved
     save( value( listWidget()->currentItem() ) );
 
