@@ -10,6 +10,8 @@
 #ifndef TreemapView_h
 #define TreemapView_h
 
+#include <memory>
+
 #include <QElapsedTimer>
 #include <QFuture>
 #include <QGraphicsPathItem>

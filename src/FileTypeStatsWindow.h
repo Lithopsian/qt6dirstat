@@ -10,6 +10,8 @@
 #ifndef FileTypeStatsWindow_h
 #define FileTypeStatsWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 

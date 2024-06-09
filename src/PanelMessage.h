@@ -10,6 +10,8 @@
 #ifndef PanelMessage_h
 #define PanelMessage_h
 
+#include <memory>
+
 #include <QWidget>
 
 #include "ui_panel-message.h"

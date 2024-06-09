@@ -10,6 +10,8 @@
 #ifndef CleanupCollection_h
 #define CleanupCollection_h
 
+#include <memory>
+
 #include <QList>
 #include <QObject>
 #include <QPointer>

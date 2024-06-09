@@ -10,6 +10,8 @@
 #ifndef FileTypeStats_h
 #define FileTypeStats_h
 
+#include <memory>
+
 #include "ui_file-type-stats-window.h"
 #include "Typedefs.h" // FileSize
 

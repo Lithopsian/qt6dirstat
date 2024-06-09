@@ -10,6 +10,8 @@
 #ifndef OpenPkgDialog_h
 #define OpenPkgDialog_h
 
+#include <memory>
+
 #include <QDialog>
 
 #include "ui_open-pkg-dialog.h"

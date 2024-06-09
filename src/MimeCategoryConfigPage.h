@@ -10,6 +10,8 @@
 #ifndef MimeCategoryConfigPage_h
 #define MimeCategoryConfigPage_h
 
+#include <memory>
+
 #include "ListEditor.h"
 #include "ui_mime-category-config-page.h"
 

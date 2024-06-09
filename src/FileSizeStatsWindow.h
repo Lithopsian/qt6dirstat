@@ -10,6 +10,8 @@
 #ifndef FileSizeStatsWindow_h
 #define FileSizeStatsWindow_h
 
+#include <memory>
+
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"

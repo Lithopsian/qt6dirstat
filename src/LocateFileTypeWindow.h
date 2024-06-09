@@ -10,6 +10,8 @@
 #ifndef LocateFileTypeWindow_h
 #define LocateFileTypeWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 

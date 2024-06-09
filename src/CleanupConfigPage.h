@@ -10,6 +10,8 @@
 #ifndef CleanupConfigPage_h
 #define CleanupConfigPage_h
 
+#include <memory>
+
 #include "ListEditor.h"
 #include "ui_cleanup-config-page.h"
 

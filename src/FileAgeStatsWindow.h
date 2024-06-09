@@ -10,6 +10,8 @@
 #ifndef FileAgeStatsWindow_h
 #define FileAgeStatsWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 

@@ -10,6 +10,8 @@
 #ifndef OutputWindow_h
 #define OutputWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QProcess>
 #include <QTextStream>

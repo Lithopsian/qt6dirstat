@@ -10,6 +10,8 @@
 #ifndef GeneralConfigPage_h
 #define GeneralConfigPage_h
 
+#include <memory>
+
 #include "ui_general-config-page.h"
 
 

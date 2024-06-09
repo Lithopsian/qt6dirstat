@@ -10,6 +10,8 @@
 #ifndef ConfigDialog_h
 #define ConfigDialog_h
 
+#include <memory>
+
 #include <QDialog>
 #include "ui_config-dialog.h"
 

@@ -10,6 +10,8 @@
 #ifndef FileDetailsView_h
 #define FileDetailsView_h
 
+#include <memory>
+
 #include <QStackedWidget>
 
 #include "ui_file-details-view.h"

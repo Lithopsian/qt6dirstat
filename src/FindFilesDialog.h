@@ -10,6 +10,8 @@
 #ifndef FindFilesDialog_h
 #define FindFilesDialog_h
 
+#include <memory>
+
 #include <QDialog>
 
 #include "ui_find-files-dialog.h"

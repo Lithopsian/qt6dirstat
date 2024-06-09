@@ -10,6 +10,8 @@
 #ifndef LocateFilesWindow_h
 #define LocateFilesWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 

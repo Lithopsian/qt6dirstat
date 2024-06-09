@@ -10,6 +10,8 @@
 #ifndef ExcludeRulesConfigPage_h
 #define ExcludeRulesConfigPage_h
 
+#include <memory>
+
 #include "ListEditor.h"
 #include "ui_exclude-rules-config-page.h"
 

@@ -10,6 +10,8 @@
 #ifndef UnreadableDirsWindow_h
 #define UnreadableDirsWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 

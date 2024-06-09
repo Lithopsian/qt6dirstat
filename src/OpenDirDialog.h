@@ -10,6 +10,8 @@
 #ifndef OpenDirDialog_h
 #define OpenDirDialog_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QFileSystemModel>
 

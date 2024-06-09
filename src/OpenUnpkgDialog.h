@@ -10,6 +10,8 @@
 #ifndef OpenUnpkgDialog_h
 #define OpenUnpkgDialog_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QString>
 #include <QStringList>

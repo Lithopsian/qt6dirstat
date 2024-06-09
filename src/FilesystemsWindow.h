@@ -10,6 +10,8 @@
 #ifndef FilesystemsWindow_h
 #define FilesystemsWindow_h
 
+#include <memory>
+
 #include <QDialog>
 #include <QTreeWidgetItem>
 
