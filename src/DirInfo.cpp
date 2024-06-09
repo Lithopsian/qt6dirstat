@@ -125,9 +125,9 @@ void DirInfo::initCounts()
 {
     // logDebug() << this << Qt::endl;
 
-    _totalSize           = _size;
-    _totalAllocatedSize  = _allocatedSize;
-    _totalBlocks         = _blocks;
+    _totalSize           = size();
+    _totalAllocatedSize  = allocatedSize();
+    _totalBlocks         = blocks();
     _totalItems          = 0;
     _totalSubDirs        = 0;
     _totalFiles          = 0;
@@ -135,7 +135,7 @@ void DirInfo::initCounts()
     _totalUnignoredItems = 0;
     _directChildrenCount = 0;
     _errSubDirCount      = 0;
-    _latestMtime         = _mtime;
+    _latestMtime         = mtime();
     _oldestFileMtime     = 0;
 }
 
@@ -173,8 +173,8 @@ void DirInfo::reset()
     _pendingReadJobs = 0;
 
     ensureDotEntry();
-    if ( _tree )
-	_tree->childAddedNotify( _dotEntry );
+    if ( tree() )
+	tree()->childAddedNotify( _dotEntry );
 
     recalc();
     dropSortCache();
@@ -187,7 +187,7 @@ void DirInfo::ensureDotEntry()
     {
 	// logDebug() << "Creating dot entry for " << this << Qt::endl;
 
-	_dotEntry = new DotEntry( _tree, this );
+	_dotEntry = new DotEntry( tree(), this );
     }
 }
 
@@ -210,7 +210,7 @@ Attic * DirInfo::ensureAttic()
     {
 	// logDebug() << "Creating attic for " << this << Qt::endl;
 
-	_attic = new Attic( _tree, this );
+	_attic = new Attic( tree(), this );
     }
 
     return _attic;
@@ -516,7 +516,7 @@ void DirInfo::childAdded( FileInfo * newChild )
 
     // Add ignored items to all the totals only if this directory is also
     // ignored or if this is the attic.
-    if ( !newChild->isIgnored() || _isIgnored || isAttic() )
+    if ( !newChild->isIgnored() || isIgnored() || isAttic() )
     {
 	// No point updating obsolete data
 	// - it will have to be calculated from scratch when it is needed
@@ -554,8 +554,8 @@ void DirInfo::childAdded( FileInfo * newChild )
     if ( _sortInfo && _sortInfo->_sortedCol != ReadJobsCol )
 	dropSortCache();
 
-    if ( _parent )
-	_parent->childAdded( newChild );
+    if ( parent() )
+	parent()->childAdded( newChild );
 }
 
 
@@ -563,8 +563,8 @@ void DirInfo::markAsDirty()
 {
     _summaryDirty = true;
 
-    if ( _parent )
-	_parent->markAsDirty();
+    if ( parent() )
+	parent()->markAsDirty();
 
     dropSortCache();
 }
@@ -575,8 +575,8 @@ void DirInfo::deletingChild( FileInfo * child )
     if ( child->parent() == this )
 	unlinkChild( child );
 
-    if ( _parent )
-	_parent->deletingChild( child );
+    if ( parent() )
+	parent()->deletingChild( child );
 }
 */
 
@@ -627,8 +627,8 @@ void DirInfo::readJobAdded()
     if ( _sortInfo && _sortInfo->_sortedCol == ReadJobsCol )
 	dropSortCache();
 
-    if ( _parent )
-	_parent->readJobAdded();
+    if ( parent() )
+	parent()->readJobAdded();
 }
 
 
@@ -642,8 +642,8 @@ void DirInfo::readJobFinished( DirInfo * dir )
     if ( dir && dir != this && dir->readError() )
 	_errSubDirCount++;
 
-    if ( _parent )
-	_parent->readJobFinished( dir );
+    if ( parent() )
+	parent()->readJobFinished( dir );
 }
 
 
@@ -651,8 +651,8 @@ void DirInfo::readJobAborted()
 {
     _readState = DirAborted;
 
-    if ( _parent )
-	_parent->readJobAborted();
+    if ( parent() )
+	parent()->readJobAborted();
 }
 
 
@@ -779,13 +779,13 @@ void DirInfo::checkIgnored()
     //
     // Display all directories as ignored that have any ignored items, but no
     // items that are not ignored.
-    _isIgnored = totalIgnoredItems() > 0 && totalUnignoredItems() == 0;
+    setIgnored( totalIgnoredItems() > 0 && totalUnignoredItems() == 0 );
 
-    if ( _isIgnored )
+    if ( isIgnored() )
 	ignoreEmptySubDirs();
 
-    if ( !isPseudoDir() && _parent )
-	_parent->checkIgnored();
+    if ( !isPseudoDir() && parent() )
+	parent()->checkIgnored();
 }
 
 
@@ -893,7 +893,7 @@ void DirInfo::finishReading( DirReadState readState )
     // logDebug() << this << Qt::endl;
     setReadState( readState );
     finalizeLocal();
-    _tree->sendReadJobFinished( this );
+    tree()->sendReadJobFinished( this );
 }
 
 
