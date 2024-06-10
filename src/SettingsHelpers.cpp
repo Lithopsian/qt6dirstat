@@ -26,8 +26,7 @@ namespace QDirStat
 	if ( color.isValid() )
 	    return color;
 
-	logDebug() << "Using fallback for " << entryName << ": " << fallback.name() << Qt::endl;
-	writeColorEntry( settings, entryName, fallback );
+	//logDebug() << "Using fallback for " << entryName << ": " << fallback.name() << Qt::endl;
 
 	return fallback;
     }
@@ -55,10 +54,7 @@ namespace QDirStat
 	    if ( color.isValid() )
 		colorList << color;
 	    else
-	    {
-		logError() << "ERROR in " << entryName << ": \""
-			   << rgb << "\" is not a valid color" << Qt::endl;
-	    }
+		logError() << "ERROR in " << entryName << ": \"" << rgb << "\" not a valid color" << Qt::endl;
 	}
 
 	return colorList.isEmpty() ? fallback : colorList;
@@ -91,8 +87,7 @@ namespace QDirStat
 		return font;
 	}
 
-	logDebug() << "Using fallback for " << entryName << ": " << fallback.family() << Qt::endl;
-	writeFontEntry( settings, entryName, fallback );
+	//logDebug() << "Using fallback for " << entryName << ": " << fallback.family() << Qt::endl;
 
 	return fallback;
     }

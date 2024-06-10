@@ -168,7 +168,7 @@ void TreemapView::setSelectionModel( SelectionModel * selectionModel )
              _selectionModel, &SelectionModel::updateCurrentBranch );
 
     // Use the proxy for all selection model receiving signals
-    _selectionModelProxy->deleteLater();
+    delete _selectionModelProxy; // should always be 0 here anyway
     _selectionModelProxy = new SelectionModelProxy( selectionModel, this );
 
     connect( _selectionModelProxy, &SelectionModelProxy::currentItemChanged,

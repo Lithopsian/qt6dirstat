@@ -224,8 +224,11 @@ namespace
     {
 	if ( item->isPkgInfo() && item->readState() == DirAborted )
 	{
-	    if ( col == PercentBarCol )                  return QObject::tr( "[aborted]" );
-	    if ( !item->firstChild() && col != NameCol ) return "?";
+	    if ( col == PercentBarCol )
+		return QObject::tr( "[aborted]" );
+
+	    if ( !item->firstChild() && col != NameCol )
+		return "?";
 	}
 
 	switch ( col )
@@ -305,18 +308,18 @@ namespace
 	    case OldestFileMTimeCol:
 		return QVariant( Qt::AlignVCenter | Qt::AlignHCenter );
 
-    //	case UserCol:
-    //	case GroupCol:
-    //	case PercentNumCol:
-    //	case SizeCol:
-    //	case TotalItemsCol:
-    //	case TotalFilesCol:
-    //	case TotalSubDirsCol:
-    //	case PermissionsCol:
-    //	case OctalPermissionsCol:
-    //	case LatestMTimeCol:
-    //	case OldestFileMTimeCol:
-    //	default:
+//	    case UserCol:
+//	    case GroupCol:
+//	    case PercentNumCol:
+//	    case SizeCol:
+//	    case TotalItemsCol:
+//	    case TotalFilesCol:
+//	    case TotalSubDirsCol:
+//	    case PermissionsCol:
+//	    case OctalPermissionsCol:
+//	    case LatestMTimeCol:
+//	    case OldestFileMTimeCol:
+//	    default:
 	}
 
 	return QVariant( Qt::AlignVCenter | Qt::AlignRight );
