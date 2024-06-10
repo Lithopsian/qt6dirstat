@@ -75,8 +75,9 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 
     try
     {
-	app()->dirTreeModel()->openUrl( url );
-	updateWindowTitle( app()->dirTree()->url() );
+	DirTree * tree = app()->dirTree();
+	tree->startReading( url );
+	updateWindowTitle( tree->url() );
     }
     catch ( const SysCallFailedException & ex )
     {
@@ -104,12 +105,13 @@ void MainWindow::setUnpkgFilters( const UnpkgSettings & unpkgSettings,
                                   const PkgManager    * pkgManager )
 {
     // Filter for ignoring all files from all installed packages
-    app()->dirTree()->clearFilters();
-    app()->dirTree()->addFilter( new DirTreePkgFilter( pkgManager ) );
+    DirTree * tree = app()->dirTree();
+    tree->clearFilters();
+    tree->addFilter( new DirTreePkgFilter( pkgManager ) );
 
     // Add the filters for each file pattern the user explicitly requested to ignore
     for ( const QString & pattern : unpkgSettings.ignorePatterns() )
-	app()->dirTree()->addFilter( DirTreePatternFilter::create( pattern ) );
+	tree->addFilter( DirTreePatternFilter::create( pattern ) );
 }
 
 

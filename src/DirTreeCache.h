@@ -232,7 +232,7 @@ namespace QDirStat
 	DirInfo * _toplevel	{ nullptr }; // the parent if there is one, otherwise the top level of the cache file
 	DirInfo * _latestDir	{ nullptr }; // the latest drectory read from the cache file, parent to subsequent file children
 
-        QRegularExpression	_multiSlash { "//+" };
+	QRegularExpression	_multiSlash { "//+" };
     };
 
 }	// namespace QDirStat

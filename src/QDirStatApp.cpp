@@ -71,7 +71,8 @@ MainWindow * QDirStatApp::findMainWindow() const
 
 FileInfo * QDirStatApp::firstToplevel() const
 {
-    return dirTree() ? dirTree()->firstToplevel() : nullptr;
+    const DirTree * tree = dirTree();
+    return tree ? tree->firstToplevel() : nullptr;
 }
 
 

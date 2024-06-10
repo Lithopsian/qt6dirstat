@@ -72,7 +72,8 @@ void ExcludeRulesConfigPage::applyChanges()
 	rules << EXCLUDE_RULE_CAST( value( listWidget()->item( i ) ) );
 
     // Check if anything changed before writing, just for fun
-    const ExcludeRules * excludeRules = app()->dirTree()->excludeRules();
+    DirTree * tree = app()->dirTree();
+    const ExcludeRules * excludeRules = tree->excludeRules();
     for ( ExcludeRuleListIterator itOld = excludeRules->cbegin(), itNew = rules.cbegin();
           itNew != rules.cend() || itOld != excludeRules->cend();
 	  ++itNew, ++itOld )
@@ -81,7 +82,7 @@ void ExcludeRulesConfigPage::applyChanges()
 	if ( itNew == rules.cend() || itOld == excludeRules->cend() || *itOld != *itNew )
 	{
 	    excludeRules->writeSettings( rules );
-	    app()->dirTree()->setExcludeRules();
+	    tree->setExcludeRules();
 	    return;
 	}
     }

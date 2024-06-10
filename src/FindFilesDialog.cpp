@@ -86,9 +86,10 @@ DirInfo * FindFilesDialog::currentSubtree()
         fileInfo = app()->dirTree()->locate( _lastPath, true ); // findPseudoDirs
         if ( !fileInfo ) // _lastPath outside of this tree
         {
-            if ( app()->firstToplevel() )
+            auto firstToplevel = app()->firstToplevel();
+            if ( firstToplevel )
             {
-                fileInfo  = app()->firstToplevel();
+                fileInfo  = firstToplevel;
                 _lastPath = fileInfo->url();
             }
             else

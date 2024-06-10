@@ -72,25 +72,29 @@ MainWindow::MainWindow( bool slowUpdate ):
     // - DirTreeModel
     // - DirTree (owned and managed by DirTreeModel)
     // - SelectionModel
+    DirTree        * tree           = app()->dirTree();
+    DirTreeModel   * dirTreeModel   = app()->dirTreeModel();
+    SelectionModel * selectionModel = app()->selectionModel();
+
     if ( slowUpdate )
-        app()->dirTreeModel()->setSlowUpdate();
+        dirTreeModel->setSlowUpdate();
 
-    _ui->dirTreeView->setModel( app()->dirTreeModel() );
-    _ui->dirTreeView->setSelectionModel( app()->selectionModel() );
+    _ui->dirTreeView->setModel( dirTreeModel );
+    _ui->dirTreeView->setSelectionModel( selectionModel );
 
-    _ui->treemapView->setDirTree( app()->dirTree() );
-    _ui->treemapView->setSelectionModel( app()->selectionModel() );
+    _ui->treemapView->setDirTree( tree );
+    _ui->treemapView->setSelectionModel( selectionModel );
 
-    _futureSelection.setTree( app()->dirTree() );
+    _futureSelection.setTree( tree );
     _futureSelection.setUseParentFallback( true );
 
-    ActionManager::setActions( this, app()->selectionModel(), _ui->toolBar, _ui->menuCleanup );
+    ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
 
     connectSignals();
     connectMenuActions(); // see MainWindowActions.cpp
     readSettings();
 
-    app()->dirTreeModel()->setBaseFont( _ui->dirTreeView->font() );
+    dirTreeModel->setBaseFont( _ui->dirTreeView->font() );
 
 #ifdef Q_OS_MACX
     // This makes the application look more "native" on macOS
@@ -468,8 +472,9 @@ void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
 	_ui->dirTreeView->scrollToCurrent();
 
 	// Remember this order to restore after the next tree read ends
-	_sortCol = app()->dirTreeModel()->sortColumn();
-	_sortOrder = app()->dirTreeModel()->sortOrder();
+	const DirTreeModel * dirTreeModel = app()->dirTreeModel();
+	_sortCol = dirTreeModel->sortColumn();
+	_sortOrder = dirTreeModel->sortOrder();
     }
 }
 
@@ -494,9 +499,10 @@ void MainWindow::openDir( const QString & url )
 
     try
     {
-	app()->dirTree()->clear();
-	app()->dirTreeModel()->openUrl( url );
-	const QString & dirTreeUrl = app()->dirTree()->url(); // canonical version of url
+	DirTree * tree = app()->dirTree();
+	tree->clear();
+	tree->startReading( url );
+	const QString & dirTreeUrl = tree->url(); // canonical version of url
 	updateWindowTitle( dirTreeUrl );
 	_futureSelection.setUrl( dirTreeUrl );
     }
@@ -571,7 +577,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     pkgQuerySetup();
     BusyPopup msg( tr( "Reading package database..." ) );
 
-    app()->dirTreeModel()->readPkg( pkgFilter );
+    app()->dirTree()->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
 }
 
@@ -605,7 +611,8 @@ void MainWindow::setFutureSelection()
 
 void MainWindow::refreshAll()
 {
-    const QString url = app()->dirTree()->url(); // don't take reference since it is about to be cleared
+    DirTree * tree = app()->dirTree();
+    const QString url = tree->url(); // don't take reference since it is about to be cleared
     if ( url.isEmpty() )
 	// Refresh shouldn't be enabled with no tree, but can't read an empty string
 	return;
@@ -627,8 +634,8 @@ void MainWindow::refreshAll()
 	// This will throw if the url no longer exists or is inaccessible
 	try
 	{
-	    app()->dirTree()->clear();
-	    app()->dirTreeModel()->openUrl( url );
+	    tree->clear();
+	    tree->startReading( url );
 	}
 	catch ( const SysCallFailedException & ex )
 	{
@@ -706,9 +713,10 @@ void MainWindow::applyFutureSelection()
 
 void MainWindow::stopReading()
 {
-    if ( app()->dirTree()->isBusy() )
+    DirTree * tree = app()->dirTree();
+    if ( tree->isBusy() )
     {
-	app()->dirTree()->abortReading();
+	tree->abortReading();
 	_ui->statusBar->showMessage( tr( "Reading aborted." ), _longStatusBarTimeout );
     }
 }
@@ -739,8 +747,9 @@ void MainWindow::askReadCache()
     if ( fileName.isEmpty() )
 	return;
 
-    app()->dirTree()->clear();
-    app()->dirTree()->reset();
+    DirTree * tree = app()->dirTree();
+    tree->clear();
+    tree->reset();
     _historyButtons->clear();
     _ui->breadcrumbNavigator->clear();
     readCache( fileName );

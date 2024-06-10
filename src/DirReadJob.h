@@ -113,15 +113,6 @@ namespace QDirStat
 	virtual void startReading() {}
 
 	/**
-	 * Notification that a new child has been added.
-	 *
-	 * Derived classes are required to call this whenever a new child is
-	 * added so this notification can be passed up to the DirTree which in
-	 * turn emits a corresponding signal.
-	 **/
-	void childAdded( FileInfo * newChild );
-
-	/**
 	 * Notification that a child is about to be deleted.
 	 *
 	 * Derived classes are required to call this just before a child is

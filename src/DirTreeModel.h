@@ -71,8 +71,7 @@ namespace QDirStat
 
 	/**
 	 * This is protected in the base class, but it's the only reasonable
-	 * way for the view to figure out what items are expanded: the
-	 * QTreeViewPrivate knows, but IT DOESN'T TELL that secret.
+	 * way for the view to figure out what items are expanded.
 	 **/
 	QModelIndexList persistentIndexList() const
 	    { return QAbstractItemModel::persistentIndexList(); }
@@ -103,7 +102,7 @@ namespace QDirStat
 	/**
 	 * Open a directory URL.
 	 **/
-	void openUrl( const QString & url );
+//	void openUrl( const QString & url );
 
 	/**
 	 * Open a pkg URL: Read installed packages that match the specified
@@ -119,8 +118,23 @@ namespace QDirStat
 	 * "Pkg:/=foo"                 -> PkgFilter::ExactMatch
 	 * otherwise                   -> PkgFilter::StartsWith
 	 **/
-	void readPkg( const PkgFilter & pkgFilter );
+//	void readPkg( const PkgFilter & pkgFilter );
 
+	/**
+	 * Open a pkg URL: read installed packages that match the specified
+	 * PkgFilter and their file lists from the system's package manager(s).
+	 *
+	 * Note that PkgFilter has a constructor that takes a QString and
+	 * uses PkgFilter::Auto as the default filter mode to determine the
+	 * filter mode from any special characters present in the URL, e.g.
+	 *
+	 * "Pkg:/"                     -> PkgFilter::SelectAll
+	 * contains "*" or "?"         -> PkgFilter::Wildcard
+	 * contains "^" or "$" or ".*" -> PkgFilter::RegExp
+	 * "Pkg:/=foo"                 -> PkgFilter::ExactMatch
+	 * otherwise                   -> PkgFilter::StartsWith
+	 **/
+	void refresh( const PkgFilter & pkgFilter );
 
 	/**
 	 * Return the setting for CrossFilesystems.  This is the value
@@ -251,6 +265,13 @@ namespace QDirStat
 #endif
 
     protected slots:
+
+	/**
+	 * Process notification that a tree read of some sort is
+	 * starting.  Just so we can start updating as the read
+	 * progresses.
+	 **/
+	void startingRead();
 
 	/**
 	 * Process notification that the read job for 'dir' is finished.
@@ -458,26 +479,26 @@ namespace QDirStat
 	//
 	// Data members
 	//
-	DirTree       * _tree;
 
-	bool            _crossFilesystems;
-	DirTreeItemSize _treeItemSize;
-	QSet<DirInfo *> _pendingUpdates;
-	QTimer          _updateTimer;
-	int             _updateTimerMillisec;
-	int             _slowUpdateMillisec;
-	bool            _slowUpdate		{ false };
-	DataColumn      _sortCol		{ ReadJobsCol };
-	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
-	bool            _removingRows		{ false };
-	bool            _useBoldForDominantItems;
+	DirTree        * _tree;
+
+	bool             _crossFilesystems;
+	DirTreeItemSize  _treeItemSize;
+	QList<DirInfo *> _pendingUpdates;
+	QTimer           _updateTimer;
+	int              _updateTimerMillisec;
+	int              _slowUpdateMillisec;
+	bool             _slowUpdate		{ false };
+	DataColumn       _sortCol		{ ReadJobsCol };
+	Qt::SortOrder    _sortOrder		{ Qt::DescendingOrder };
+	bool             _removingRows		{ false };
+	bool             _useBoldForDominantItems;
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;
 	QColor _subtreeReadErrLightTheme;
 	QColor _dirReadErrDarkTheme;
 	QColor _subtreeReadErrDarkTheme;
-
 	QFont  _baseFont;
 	QFont  _themeFont;
 

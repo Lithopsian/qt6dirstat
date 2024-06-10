@@ -166,14 +166,16 @@ namespace
      **/
     bool useSmallFileSizeText( FileInfo * item )
     {
-	if ( !item || !item->tree() || item->blocks() == 0 || !( item->isFile() || item->isSymLink() ) )
+	// Not a regular file or symlink doesn't count
+	if ( !item || item->blocks() == 0 || !( item->isFile() || item->isSymLink() ) )
 	    return false;
 
-	const FileSize clusterSize = item->tree()->clusterSize();
-	if ( clusterSize == 0 )
+	// If no cluster size has been determined yet, we can't say what is a small file
+	if ( !item->tree() || !item->tree()->haveClusterSize() )
 	    return false;
 
 	// More than 3 allocated clusters isn't "small"
+	const FileSize clusterSize = item->tree()->clusterSize();
 	const FileSize allocated = item->allocatedSize();
 	const int numClusters = allocated / clusterSize;
 	if ( numClusters > SMALL_FILE_CLUSTERS + 1 )
@@ -185,6 +187,7 @@ namespace
 	if ( numClusters > SMALL_FILE_CLUSTERS && unused <= clusterSize / 2 )
 	    return false;
 
+	// Mostly just a sanity-check at this point
 	return allocated < 1024 * 1024 &&     // below 1 MB
 	       allocated >= 1024 &&           // at least 1k so the (?k) makes sense
 	       allocated % 1024 == 0;         // exact number of kB
@@ -230,8 +233,14 @@ namespace
 	    case PercentBarCol:
 	    {
 		// Leave to delegate except for special cases
-		if ( item->isBusy() )     return QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
-		if ( item->isExcluded() ) return QObject::tr( "[excluded]" );
+		if ( item->isBusy() )
+		    return item->pendingReadJobs() == 1 ?
+			   QObject::tr( "[1 read job]" ) :
+			   QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
+
+		if ( item->isExcluded() )
+		    return QObject::tr( "[excluded]" );
+
 		return QVariant();
 	    }
 
@@ -549,6 +558,12 @@ void DirTreeModel::createTree()
     _tree = new DirTree( this );
     _tree->setExcludeRules();
 
+    connect( _tree, &DirTree::startingReading,
+	     this,  &DirTreeModel::startingRead );
+
+    connect( _tree, &DirTree::startingRefresh,
+	     this,  &DirTreeModel::startingRead );
+
     connect( _tree, &DirTree::finished,
 	     this,  &DirTreeModel::readingFinished );
 
@@ -577,7 +592,7 @@ void DirTreeModel::createTree()
 	     this,  &DirTreeModel::endRemoveRows );
 }
 
-
+/*
 void DirTreeModel::openUrl( const QString & url )
 {
     _updateTimer.start();
@@ -592,7 +607,7 @@ void DirTreeModel::readPkg( const PkgFilter & pkgFilter )
     _updateTimer.start();
     _tree->readPkg( pkgFilter );
 }
-
+*/
 
 void DirTreeModel::loadIcons()
 {
@@ -905,6 +920,12 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
 }
 
 
+void DirTreeModel::startingRead()
+{
+    _updateTimer.start();
+}
+
+
 void DirTreeModel::readJobFinished( DirInfo * dir )
 {
     // logDebug() << dir << Qt::endl;
@@ -956,7 +977,7 @@ void DirTreeModel::delayedUpdate( DirInfo * dir )
     while ( dir && dir != _tree->root() )
     {
 	if ( dir->isTouched() )
-	    _pendingUpdates.insert( dir );
+	    _pendingUpdates.append( dir );
 
 	dir = dir->parent();
     }

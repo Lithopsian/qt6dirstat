@@ -366,6 +366,9 @@ CacheReader::~CacheReader()
     // Only finalize if we actually created anything
     if ( _toplevel )
     {
+	// Flag this read job as finished since there is no actual read job
+	_toplevel->readJobFinished( _toplevel );
+
 	// Need to finalize the parent when replacing a subtree, as it will have been marked DirReading
 	DirInfo * toplevel = _parent ? _parent : _toplevel;
 	finalizeRecursive( toplevel );
@@ -579,6 +582,7 @@ void CacheReader::addItem()
 	if ( !_toplevel )
 	{
 	    _toplevel = dir;
+	    dir->readJobAdded(); // just to show 1 pending read job
 	    if ( !_parent )
 		_tree->setUrl( dir->url() );
 	}
@@ -599,6 +603,8 @@ void CacheReader::addItem()
 	    // that are flagged in the cache file.
 	    if ( unread_str )
 	    {
+		dir->readJobAdded(); // balances the pending read jobs count
+
 		switch ( tolower( *unread_str ) )
 		{
 		    case 'e':
@@ -616,7 +622,7 @@ void CacheReader::addItem()
 		}
 
 		dir->finalizeLocal();
-		dir->readJobFinished( dir ); // propagates the unread count
+		dir->readJobFinished( dir ); // propagates the unread count up the tree
 	    }
 	}
     }
