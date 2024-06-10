@@ -375,6 +375,7 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     if ( newItem )
     {
 	parent->insertChild( newItem );
+	tree()->childAddedNotify( newItem );
     }
     else if ( errno == EACCES )
     {

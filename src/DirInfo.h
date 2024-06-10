@@ -631,7 +631,7 @@ namespace QDirStat
 	void dropSortCaches();
 
 	/**
-	 * Drop all cached information about children sorting.
+	 * Drop all cached information about children sorting for this object.
 	 **/
 	void dropSortCache();
 

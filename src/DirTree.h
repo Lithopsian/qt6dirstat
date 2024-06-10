@@ -339,6 +339,12 @@ namespace QDirStat
 	bool hasFilters() const { return !_filters.isEmpty(); }
 
 	/**
+	 * Returns whether a valid cluster size has been determined yet
+	 * for this tree.
+	 **/
+	bool haveClusterSize() const { return _blocksPerCluster > 0; }
+
+	/**
 	 * Return the number of 512-bytes blocks per cluster.
 	 *
 	 * This may be 0 if no small file (< 512 bytes) was found in this tree
@@ -440,7 +446,8 @@ namespace QDirStat
 	void startingRefresh();
 
 	/**
-	 * Emitted when reading this directory tree is completely finished.
+	 * Emitted when reading this directory tree is completely and
+	 * successfully finished.
 	 **/
 	void finished();
 
@@ -503,11 +510,6 @@ namespace QDirStat
 	 * Clear all temporary exclude rules.
 	 **/
 	void clearTmpExcludeRules() { setTmpExcludeRules( nullptr ); }
-
-	/**
-	 * Clear all temporary exclude rules.
-	 **/
-	bool haveClusterSize() const { return _blocksPerCluster > 0; }
 
 
     private:

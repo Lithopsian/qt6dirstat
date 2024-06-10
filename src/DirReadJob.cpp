@@ -165,12 +165,6 @@ void DirReadJob::finished()
 }
 
 
-void DirReadJob::childAdded( FileInfo * newChild )
-{
-    _tree->childAddedNotify( newChild );
-}
-
-
 
 
 
@@ -301,7 +295,7 @@ void LocalDirReadJob::startReading()
 		    else
 			dir()->insertChild( child );
 
-		    childAdded( child );
+		    tree()->childAddedNotify( child );
 		}
 	    }
 	    else  // lstat() error
@@ -336,7 +330,7 @@ void LocalDirReadJob::startReading()
 void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir )
 {
     dir()->insertChild( subDir );
-    childAdded( subDir );
+    tree()->childAddedNotify( subDir );
 
     if ( tree()->matchesExcludeRule( fullName( entryName ), entryName ) )
     {
@@ -449,7 +443,7 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
     child->finalizeLocal();
     child->setReadState( DirError );
     dir()->insertChild( child );
-    childAdded( child );
+    tree()->childAddedNotify( child );
 }
 
 
@@ -481,20 +475,20 @@ bool LocalDirReadJob::checkForNtfs()
 
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
-			    DirInfo       * dir,
-			    DirInfo       * parent,
 			    const QString & cacheFileName ):
-    DirReadJob ( tree, parent ),
-    _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
+    DirReadJob ( tree, nullptr ),
+    _reader { new CacheReader( cacheFileName, tree ) }
 {
     init();
 }
 
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
+			    DirInfo       * dir,
+			    DirInfo       * parent,
 			    const QString & cacheFileName ):
-    DirReadJob ( tree, nullptr ),
-    _reader { new CacheReader( cacheFileName, tree ) }
+    DirReadJob ( tree, parent ),
+    _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
 {
     init();
 }

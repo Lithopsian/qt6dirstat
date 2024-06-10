@@ -19,7 +19,6 @@
 using namespace QDirStat;
 
 
-
 void FileInfoIterator::next()
 {
     if ( !_directChildrenProcessed )

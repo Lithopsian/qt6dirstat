@@ -35,45 +35,45 @@ namespace QDirStat
 	static QString owningPkg( const QString & path )
 	    { return instance()->getOwningPackage( path ); }
 
-        /**
-         * Return 'true' if any of the supported package managers was found.
-         **/
-        static bool foundSupportedPkgManager()
+	/**
+	 * Return 'true' if any of the supported package managers was found.
+	 **/
+	static bool foundSupportedPkgManager()
 	    { return ! instance()->_pkgManagers.isEmpty(); }
 
-        /**
-         * Return the (first) primary package manager if there is one or 0 if
-         * not.
-         **/
-        static const PkgManager * primaryPkgManager()
+	/**
+	 * Return the (first) primary package manager if there is one or 0 if
+	 * not.
+	 **/
+	static const PkgManager * primaryPkgManager()
 	    { return instance()->_pkgManagers.isEmpty() ? nullptr : instance()->_pkgManagers.first(); }
 
-        /**
-         * Return 'true' if any of the package managers has support for getting
-         * the list of installed packages.
-         **/
-        static bool haveGetInstalledPkgSupport()
+	/**
+	 * Return 'true' if any of the package managers has support for getting
+	 * the list of installed packages.
+	 **/
+	static bool haveGetInstalledPkgSupport()
 	    { return instance()->checkGetInstalledPkgSupport(); }
 
-        /**
-         * Return the list of installed packages.
-         *
-         * Ownership of the list elements is transferred to the caller.
-         **/
-        static PkgInfoList installedPkg()
+	/**
+	 * Return the list of installed packages.
+	 *
+	 * Ownership of the list elements is transferred to the caller.
+	 **/
+	static PkgInfoList installedPkg()
 	    { return instance()->getInstalledPkg(); }
 
-        /**
-         * Return 'true' if any of the package managers has support for getting
-         * the the file list for a package.
-         **/
-        static bool haveFileListSupport()
+	/**
+	 * Return 'true' if any of the package managers has support for getting
+	 * the the file list for a package.
+	 **/
+	static bool haveFileListSupport()
 	    { return instance()->checkFileListSupport(); }
 
-        /**
-         * Return the list of files and directories owned by a package.
-         **/
-        static QStringList fileList( const PkgInfo * pkg )
+	/**
+	 * Return the list of files and directories owned by a package.
+	 **/
+	static QStringList fileList( const PkgInfo * pkg )
 	    { return instance()->getFileList( pkg ); }
 
 
@@ -108,35 +108,35 @@ namespace QDirStat
 	 **/
 	QString getOwningPackage( const QString & path );
 
-        /**
-         * Return the list of installed packages.
-         *
-         * Ownership of the list elements is transferred to the caller.
-         **/
-        PkgInfoList getInstalledPkg() const;
+	/**
+	 * Return the list of installed packages.
+	 *
+	 * Ownership of the list elements is transferred to the caller.
+	 **/
+	PkgInfoList getInstalledPkg() const;
 
-        /**
-         * Return the list of files and directories owned by a package.
-         **/
-        QStringList getFileList( const PkgInfo * pkg ) const;
+	/**
+	 * Return the list of files and directories owned by a package.
+	 **/
+	QStringList getFileList( const PkgInfo * pkg ) const;
 
-        /**
-         * Return 'true' if any of the package managers has support for getting
-         * the list of installed packages.
-         **/
-        bool checkGetInstalledPkgSupport() const;
+	/**
+	 * Return 'true' if any of the package managers has support for getting
+	 * the list of installed packages.
+	 **/
+	bool checkGetInstalledPkgSupport() const;
 
-        /**
-         * Return 'true' if any of the package managers has support for getting
-         * the the file list for a package.
-         **/
-        bool checkFileListSupport() const;
+	/**
+	 * Return 'true' if any of the package managers has support for getting
+	 * the the file list for a package.
+	 **/
+	bool checkFileListSupport() const;
 
-        /**
-         * Check which supported package managers are available and add them to
-         * the internal list.
-         **/
-        void checkPkgManagers();
+	/**
+	 * Check which supported package managers are available and add them to
+	 * the internal list.
+	 **/
+	void checkPkgManagers();
 
 	/**
 	 * Check if a package manager is available; add it to one of the
@@ -149,7 +149,7 @@ namespace QDirStat
 
 	// Data members
 
-	QList<const PkgManager *> _pkgManagers;
+	QVector<const PkgManager *> _pkgManagers; // primary and secondary package managers found
 
 	QCache<QString, QString>  _cache; // mapping of paths and package names
 
