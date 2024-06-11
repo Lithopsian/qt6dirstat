@@ -26,6 +26,16 @@ using namespace QDirStat;
 
 namespace
 {
+#if VERBOSE_BREADCRUMBS
+    /**
+     * With verbose logging, record each time a breadcrumb is clicked.
+     **/
+    void logPathClicked( const QString & path )
+    {
+        logInfo() << "Clicked path " << path << Qt::endl;
+    }
+#endif
+
     /**
      * Split a path up into its base path (everything up to the last path
      * component) and its base name (the last path component).
@@ -65,7 +75,7 @@ BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
 
 #if VERBOSE_BREADCRUMBS
     connect( this, &BreadcrumbNavigator::linkActivated,
-             this, &BreadcrumbNavigator::logPathClicked );
+             this, []( const QString & path ) { logPathClicked( path); } );
 #endif
 
     connect( this, &BreadcrumbNavigator::linkActivated,
@@ -83,8 +93,8 @@ void BreadcrumbNavigator::setPath( const FileInfo * item )
 
 void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
 {
-    // Since 5.7, the list will keep its capacit, so it will slowly grow to the longest path used
-    // This is probably better than trying to squeeze it and re-allocate every time
+    // Since 5.7, the list will keep its capacity, so it will grow to the longest path used
+    // This is stillprobably better than trying to squeeze it and re-allocate every time
     _breadcrumbs.clear();
 
     while ( item && !item->isDirInfo() )
@@ -212,12 +222,6 @@ int BreadcrumbNavigator::breadcrumbsLen() const
     }
 
     return len;
-}
-
-
-void BreadcrumbNavigator::logPathClicked( const QString & path )
-{
-    logInfo() << "Clicked path " << path << Qt::endl;
 }
 
 

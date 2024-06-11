@@ -87,11 +87,6 @@ namespace QDirStat
 	void pathClicked( const QString & path );
 
 
-    protected slots:
-
-        void logPathClicked( const QString & path );
-
-
     protected:
 
         /**
