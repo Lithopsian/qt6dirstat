@@ -12,7 +12,6 @@
 
 #include <QElapsedTimer>
 #include <QList>
-#include <QObject>
 #include <QTimer>
 
 

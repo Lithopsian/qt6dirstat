@@ -269,7 +269,7 @@ void OutputWindow::closeIfDone()
 {
     if ( _processList.isEmpty() && _noMoreProcesses )
     {
-	if ( ( autoClose()  && _errorCount == 0 ) || _closed || !isVisible() )
+	if ( ( autoClose() && _errorCount == 0 ) || _closed || !isVisible() )
 	{
 	    //logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
 	    this->deleteLater(); // It is safe to call this multiple times
@@ -437,6 +437,10 @@ void OutputWindow::updateActions()
 
 void OutputWindow::showAfterTimeout( int timeoutMillisec )
 {
+    // Show immediately if there is an error
+    _showOnStderr = true;
+
+    // Shiw after the configured timeout if processes are still running
     QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
                         this,
 			&OutputWindow::timeoutShow );

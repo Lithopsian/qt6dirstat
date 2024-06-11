@@ -155,6 +155,9 @@ namespace
     }
 
 
+    /**
+     * Return a mapping from RefreshPolicy to string.
+     **/
     SettingsEnumMapping refreshPolicyMapping()
     {
 	return { { Cleanup::NoRefresh,     "NoRefresh"     },
@@ -165,6 +168,9 @@ namespace
     }
 
 
+    /**
+     * Return a mapping from OutputWindowPolicy to string.
+     **/
     SettingsEnumMapping outputWindowPolicyMapping()
     {
 	return { { Cleanup::ShowAlways,        "ShowAlways"        },

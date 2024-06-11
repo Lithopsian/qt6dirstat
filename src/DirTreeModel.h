@@ -16,7 +16,6 @@
 #include <QGuiApplication>
 #include <QIcon>
 #include <QPalette>
-#include <QSet>
 #include <QTextStream>
 #include <QTimer>
 

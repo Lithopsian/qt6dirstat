@@ -13,7 +13,6 @@
 #include <memory>
 
 #include <QList>
-#include <QObject>
 #include <QPointer>
 
 
@@ -212,16 +211,6 @@ namespace QDirStat
 	 * Create a refresher for the given refresh set.
 	 **/
 	void createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet );
-
-	/**
-	 * Return a mapping from RefreshPolicy to string.
-	 **/
-//	static SettingsEnumMapping refreshPolicyMapping();
-
-	/**
-	 * Return a mapping from OutputWindowPolicy to string.
-	 **/
-//	static SettingsEnumMapping outputWindowPolicyMapping();
 
 
     private:
