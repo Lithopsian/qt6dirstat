@@ -992,27 +992,25 @@ void DirTreeModel::sendPendingUpdates()
     //logDebug() << "Sending " << _pendingUpdates.size() << " updates" << Qt::endl;
 
     for ( DirInfo * dir : _pendingUpdates )
-	dataChangedNotify( dir );
+    {
+	// Not checking the magic numbers as they turn out to be unreliable after a tree clear
+	// as the next read may overwrite the same memory with new FileInfos -
+	// so just make sure we never get here with stale pointers
+	if ( dir && dir != _tree->root() && dir->isTouched() )
+	{
+	    const int row = rowNumber( dir );
+	    const QModelIndex topLeft     = createIndex( row, 0, dir );
+	    const QModelIndex bottomRight = createIndex( row, DataColumns::lastCol(), dir );
+	    emit dataChanged( topLeft, bottomRight, { Qt::DisplayRole } );
+
+	    //logDebug() << "Data changed for " << dir << Qt::endl;
+
+	    // If the view is still interested in this dir, it will fetch data, and touch again
+	    dir->clearTouched();
+	}
+    }
 
     _pendingUpdates.clear();
-}
-
-
-void DirTreeModel::dataChangedNotify( DirInfo * dir )
-{
-    // Could check magic number in case any pending updates survived being cleared, but turns out it
-    // is unreliable as a tree clear and re-read may overwrite the same memory with some new FileInfos
-    if ( !dir || dir == _tree->root() || !dir->isTouched() )
-	return;
-
-    const QModelIndex topLeft     = modelIndex( dir );
-    const QModelIndex bottomRight = createIndex( topLeft.row(), DataColumns::lastCol(), dir );
-    emit dataChanged( topLeft, bottomRight, { Qt::DisplayRole } );
-
-    // logDebug() << "Data changed for " << dir << Qt::endl;
-
-    // If the view is still interested in this dir, it will fetch data, and touch again
-    dir->clearTouched();
 }
 
 

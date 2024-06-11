@@ -286,8 +286,11 @@ namespace QDirStat
 	void readingFinished();
 
 	/**
-	 * Send all pending updates to the connected views.
-	 * This is triggered by the update timer.
+	 * Send all pending updates to the connected views, triggered from
+	 * the update timer.  The list of pending updates can be long and
+	 * not necessarily unique, but most entries are filtered out as
+	 * not being "touched".  The dataChanged() signal is sent for the
+	 * items that have been touched and so might be visible.
 	 **/
 	void sendPendingUpdates();
 
@@ -365,13 +368,13 @@ namespace QDirStat
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about
 	 * new children (all the children of 'dir'). This might become
 	 * recursive if any of those children in turn are already finished.
+	 *
+	 * Note that the rows have already been inserted.  Normally,
+	 * beginInsertRows() is called before the rows are inserted so it is
+	 * essential that the event loop is not allowed to run before this
+	 * notification executes.
 	 **/
 	void newChildrenNotify( DirInfo * dir );
-
-	/**
-	 * Notify the view about changed data of 'dir'.
-	 **/
-	void dataChangedNotify( DirInfo * dir );
 
 	/**
 	 * Notify the model about layout changes.
@@ -484,7 +487,7 @@ namespace QDirStat
 
 	bool             _crossFilesystems;
 	DirTreeItemSize  _treeItemSize;
-	QList<DirInfo *> _pendingUpdates;
+	QVector<DirInfo *> _pendingUpdates;
 	QTimer           _updateTimer;
 	int              _updateTimerMillisec;
 	int              _slowUpdateMillisec;
