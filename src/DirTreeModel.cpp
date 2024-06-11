@@ -448,8 +448,8 @@ namespace
 } // namespace
 
 
-DirTreeModel::DirTreeModel():
-    QAbstractItemModel ()
+DirTreeModel::DirTreeModel( QObject * parent ):
+    QAbstractItemModel ( parent )
 {
     createTree();
     readSettings();

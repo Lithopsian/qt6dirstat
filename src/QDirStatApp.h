@@ -10,8 +10,6 @@
 #ifndef QDirStatApp_h
 #define QDirStatApp_h
 
-#include "memory"
-
 class QWidget;
 class MainWindow;
 
@@ -67,7 +65,7 @@ namespace QDirStat
          * It has a DirTree that actually holds the in-memory tree of FileInfo
          * / DirInfo nodes.
          **/
-        DirTreeModel * dirTreeModel() const { return _dirTreeModel.get(); }
+        DirTreeModel * dirTreeModel() const { return _dirTreeModel; }
 
         /**
          * Return the DirTree that is owned by the DirTreeModel.
@@ -88,7 +86,7 @@ namespace QDirStat
          * as selected across the different connected views, i.e. the DirTreeView
          * and the TreemapView.
          **/
-        SelectionModel * selectionModel() const { return _selectionModel.get(); }
+        SelectionModel * selectionModel() const { return _selectionModel; }
 
         //
         // Convenience methods
@@ -133,8 +131,8 @@ namespace QDirStat
         // Data members
         //
 
-        std::unique_ptr<DirTreeModel>   _dirTreeModel;
-        std::unique_ptr<SelectionModel> _selectionModel;
+        DirTreeModel   * _dirTreeModel;
+        SelectionModel * _selectionModel;
 
     };  // class QDirStatApp
 

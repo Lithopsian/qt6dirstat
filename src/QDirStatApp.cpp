@@ -20,8 +20,8 @@ using namespace QDirStat;
 
 
 QDirStatApp::QDirStatApp():
-    _dirTreeModel { new DirTreeModel() },
-    _selectionModel { new SelectionModel( dirTreeModel() ) }
+    _dirTreeModel { new DirTreeModel( findMainWindow() ) },
+    _selectionModel { new SelectionModel( dirTreeModel(), findMainWindow() ) }
 {
     // logDebug() << "Creating app" << Qt::endl;
 

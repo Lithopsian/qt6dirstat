@@ -584,9 +584,9 @@ void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
 	delete job;
     }
 
-    // The timer will start a new job when it fires.
-    if ( _queue.isEmpty() && _blocked.isEmpty() )	// No new job available - we're done.
+    if ( _queue.isEmpty() && _blocked.isEmpty() )
     {
+	// The timer will fire again and then stop itself
 	logDebug() << "No more jobs - finishing" << Qt::endl;
 	emit finished();
     }

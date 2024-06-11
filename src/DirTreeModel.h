@@ -53,7 +53,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	DirTreeModel();
+	DirTreeModel( QObject * parent );
 
 	/**
 	 * Destructor.
@@ -483,19 +483,20 @@ namespace QDirStat
 	// Data members
 	//
 
-	DirTree        * _tree;
+	DirTree * _tree;
 
-	bool             _crossFilesystems;
-	DirTreeItemSize  _treeItemSize;
+	bool            _crossFilesystems;
+	bool            _useBoldForDominantItems;
+	DirTreeItemSize _treeItemSize;
+	DataColumn      _sortCol		{ ReadJobsCol };
+	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
+
 	QVector<DirInfo *> _pendingUpdates;
-	QTimer           _updateTimer;
-	int              _updateTimerMillisec;
-	int              _slowUpdateMillisec;
-	bool             _slowUpdate		{ false };
-	DataColumn       _sortCol		{ ReadJobsCol };
-	Qt::SortOrder    _sortOrder		{ Qt::DescendingOrder };
-	bool             _removingRows		{ false };
-	bool             _useBoldForDominantItems;
+	QTimer             _updateTimer;
+	int                _updateTimerMillisec;
+	int                _slowUpdateMillisec;
+	bool               _slowUpdate		{ false };
+	bool               _removingRows	{ false };
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;

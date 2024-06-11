@@ -19,8 +19,8 @@
 using namespace QDirStat;
 
 
-SelectionModel::SelectionModel( DirTreeModel * dirTreeModel ):
-    QItemSelectionModel ( dirTreeModel ),
+SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
+    QItemSelectionModel ( dirTreeModel, parent ),
     _dirTreeModel { dirTreeModel }
 {
     connect( this, &SelectionModel::currentChanged,
