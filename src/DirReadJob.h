@@ -307,6 +307,8 @@ namespace QDirStat
     };	// class CacheReadJob
 
 
+    typedef QVector<DirReadJob *> DirReadJobList;
+
 
     /**
      * Queue for read jobs
@@ -430,9 +432,9 @@ namespace QDirStat
 
     private:
 
-	QList<DirReadJob *> _queue;
-	QList<DirReadJob *> _blocked;
-	QTimer              _timer;
+	DirReadJobList _queue;
+	DirReadJobList _blocked;
+	QTimer         _timer;
 
     };	// class DirReadJobQueue
 

@@ -96,31 +96,19 @@ namespace
 
 
     /**
-     * Delete all jobs from the given queue, except 'exceptJob'.
+     * Delete all jobs within 'subtree' from the given queue, except 'exceptJob'.
      **/
-    int killQueue( DirInfo * subtree, QList<DirReadJob *> & queue, const DirReadJob * exceptJob )
+    void killQueue( DirInfo * subtree, DirReadJobList & queue, const DirReadJob * exceptJob )
     {
-	int count = 0;
-
-	QMutableListIterator<DirReadJob *> it( queue );
-	while ( it.hasNext() )
+	DirReadJobList newQueue;
+	for ( DirReadJob * job : queue )
 	{
-	    DirReadJob * job = it.next();
-
-	    if ( exceptJob && job == exceptJob )
-	    {
-		//logDebug() << "NOT killing " << job << Qt::endl;
-	    }
-	    else if ( job->dir() && job->dir()->isInSubtree( subtree ) )
-	    {
-		//logDebug() << "Killing " << job << Qt::endl;
-		it.remove();
+	    if ( job->dir() && job->dir()->isInSubtree( subtree ) && ( !exceptJob || job != exceptJob ) )
 		delete job;
-		++count;
-	    }
+	    else
+		newQueue << job;
 	}
-
-	return count;
+	newQueue.swap( queue );
     }
 
 } // namespace
@@ -551,9 +539,12 @@ void DirReadJobQueue::enqueue( DirReadJob * job )
 void DirReadJobQueue::clear()
 {
     qDeleteAll( _queue );
-    qDeleteAll( _blocked );
     _queue.clear();
+    _queue.squeeze();
+
+    qDeleteAll( _blocked );
     _blocked.clear();
+    _blocked.squeeze();
 }
 
 
@@ -619,9 +610,6 @@ void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJ
 
     killQueue( subtree, _queue,   exceptJob );
     killQueue( subtree, _blocked, exceptJob );
-
-    //const int count = killQueue( subtree, _queue, exceptJob ) + killQueue( subtree, _blocked, exceptJob );
-    //logDebug() << "Killed " << count << " read jobs for " << subtree << Qt::endl;
 }
 
 
