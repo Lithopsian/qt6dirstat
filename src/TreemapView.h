@@ -13,11 +13,10 @@
 #include <memory>
 
 #include <QElapsedTimer>
-#include <QFuture>
+#include <QFutureWatcher>
 #include <QGraphicsPathItem>
 #include <QGraphicsRectItem>
 #include <QGraphicsView>
-#include <QList>
 #include <QtConcurrent/QtConcurrent>
 
 

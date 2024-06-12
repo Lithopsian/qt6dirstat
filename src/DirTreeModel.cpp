@@ -595,22 +595,6 @@ void DirTreeModel::createTree()
 	     this,  &DirTreeModel::endRemoveRows );
 }
 
-/*
-void DirTreeModel::openUrl( const QString & url )
-{
-    _updateTimer.start();
-    _tree->startReading( url );
-}
-
-
-void DirTreeModel::readPkg( const PkgFilter & pkgFilter )
-{
-    //logDebug() << "Reading " << pkgFilter << Qt::endl;
-
-    _updateTimer.start();
-    _tree->readPkg( pkgFilter );
-}
-*/
 
 void DirTreeModel::loadIcons()
 {
@@ -980,7 +964,7 @@ void DirTreeModel::delayedUpdate( DirInfo * dir )
     while ( dir && dir != _tree->root() )
     {
 	if ( dir->isTouched() )
-	    _pendingUpdates.append( dir );
+	    _pendingUpdates.insert( dir );
 
 	dir = dir->parent();
     }

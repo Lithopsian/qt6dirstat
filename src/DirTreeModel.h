@@ -16,6 +16,7 @@
 #include <QGuiApplication>
 #include <QIcon>
 #include <QPalette>
+#include <QSet>
 #include <QTextStream>
 #include <QTimer>
 
@@ -267,8 +268,7 @@ namespace QDirStat
 
 	/**
 	 * Process notification that a tree read of some sort is
-	 * starting.  Just so we can start updating as the read
-	 * progresses.
+	 * starting.
 	 **/
 	void startingRead();
 
@@ -490,12 +490,12 @@ namespace QDirStat
 	DataColumn      _sortCol		{ ReadJobsCol };
 	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
 
-	QVector<DirInfo *> _pendingUpdates;
-	QTimer             _updateTimer;
-	int                _updateTimerMillisec;
-	int                _slowUpdateMillisec;
-	bool               _slowUpdate		{ false };
-	bool               _removingRows	{ false };
+	QSet<DirInfo *> _pendingUpdates;
+	QTimer          _updateTimer;
+	int             _updateTimerMillisec;
+	int             _slowUpdateMillisec;
+	bool            _slowUpdate		{ false };
+	bool            _removingRows		{ false };
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;

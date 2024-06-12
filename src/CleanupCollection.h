@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <QList>
+#include <QObject>
 #include <QPointer>
 
 
