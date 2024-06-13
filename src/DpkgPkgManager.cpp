@@ -12,10 +12,9 @@
 #include <QStringBuilder>
 
 #include "DpkgPkgManager.h"
+#include "Exception.h"
 #include "PkgFileListCache.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define LOG_COMMANDS	true

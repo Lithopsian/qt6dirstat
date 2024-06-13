@@ -12,10 +12,9 @@
 #include <QTimer>
 
 #include "OutputWindow.h"
+#include "Exception.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using QDirStat::readColorEntry;

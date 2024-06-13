@@ -15,12 +15,11 @@
 
 #include "OpenDirDialog.h"
 #include "ExistingDir.h"
+#include "Logger.h"
 #include "MountPoints.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "SignalBlocker.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define VERBOSE_SELECTION 0

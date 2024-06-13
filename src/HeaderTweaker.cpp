@@ -12,9 +12,8 @@
 
 #include "HeaderTweaker.h"
 #include "DirTreeView.h"
-#include "Settings.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;

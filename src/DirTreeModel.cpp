@@ -10,6 +10,7 @@
 #include "DirTreeModel.h"
 #include "DirInfo.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "ExcludeRules.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
@@ -18,8 +19,6 @@
 #include "PkgFilter.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 // Number of clusters up to which a file will be considered small and will also

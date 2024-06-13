@@ -10,10 +10,9 @@
 #include "ExcludeRulesConfigPage.h"
 #include "ConfigDialog.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "ExcludeRules.h"
 #include "QDirStatApp.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 // This is a mess that became necessary because Qt's moc cannot handle template

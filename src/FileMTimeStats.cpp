@@ -8,10 +8,9 @@
  */
 
 #include "FileMTimeStats.h"
+#include "DirTree.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
-#include "DirTree.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

@@ -11,11 +11,10 @@
 #include "DirTree.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
-#include "MimeCategorizer.h"
-#include "MimeCategory.h"
 #include "FormatUtil.h"
 #include "Logger.h"
-#include "Exception.h"
+#include "MimeCategorizer.h"
+#include "MimeCategory.h"
 
 
 using namespace QDirStat;

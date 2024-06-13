@@ -12,8 +12,6 @@
 #include "FileSizeStats.h"
 #include "FileMTimeStats.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define MAX_RESULTS              200

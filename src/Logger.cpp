@@ -7,8 +7,12 @@
  *              Ian Nartowicz
  */
 
-#define DONT_DEPRECATE_STRERROR
-#include "Logger.h"
+#include <errno.h>
+#include <pwd.h>	// getpwuid()
+#include <stdio.h>	// stderr, fprintf()
+#include <stdlib.h>	// abort(), mkdtemp()
+#include <sys/types.h>	// pid_t, getpwuid()
+#include <unistd.h>	// getpid()
 
 #include <QDateTime>
 #include <QDir>
@@ -16,13 +20,8 @@
 #include <QStringBuilder>
 #include <QStringList>
 
-#include <stdio.h>	// stderr, fprintf()
-#include <stdlib.h>	// abort(), mkdtemp()
-#include <unistd.h>	// getpid()
-#include <errno.h>
-#include <pwd.h>	// getpwuid()
-#include <sys/types.h>	// pid_t, getpwuid()
-
+#define DONT_DEPRECATE_STRERROR
+#include "Logger.h"
 #include "SysUtil.h"
 
 

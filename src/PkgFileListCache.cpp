@@ -9,7 +9,6 @@
 
 #include "PkgFileListCache.h"
 #include "Exception.h"
-#include "Logger.h"
 
 
 #define CHECK_LOOKUP_TYPE(wanted)					  \

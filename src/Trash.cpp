@@ -19,7 +19,6 @@
 #include <QTextStream>
 
 #include "Trash.h"
-#include "Logger.h"
 #include "Exception.h"
 
 

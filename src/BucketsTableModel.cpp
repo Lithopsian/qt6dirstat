@@ -8,10 +8,8 @@
  */
 
 #include "BucketsTableModel.h"
-#include "HistogramView.h"
 #include "FormatUtil.h"
-#include "Logger.h"
-#include "Exception.h"
+#include "HistogramView.h"
 
 
 using namespace QDirStat;

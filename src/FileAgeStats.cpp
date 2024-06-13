@@ -11,10 +11,9 @@
 #include <QDate>
 
 #include "FileAgeStats.h"
+#include "Exception.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

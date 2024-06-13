@@ -12,10 +12,9 @@
 
 #include "OpenUnpkgDialog.h"
 #include "ExistingDir.h"
+#include "Logger.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

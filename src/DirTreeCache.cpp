@@ -16,9 +16,8 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "DotEntry.h"
-#include "MountPoints.h"
 #include "Logger.h"
-#include "Exception.h"
+#include "MountPoints.h"
 
 
 #define KB 1024LL

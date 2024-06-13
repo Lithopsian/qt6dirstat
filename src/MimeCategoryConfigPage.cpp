@@ -14,13 +14,12 @@
 #include "ConfigDialog.h"
 #include "DirTree.h"
 #include "DirInfo.h"
+#include "Exception.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
 #include "MimeCategory.h"
 #include "QDirStatApp.h"
 #include "FormatUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

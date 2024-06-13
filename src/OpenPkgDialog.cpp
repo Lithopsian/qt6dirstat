@@ -8,7 +8,6 @@
  */
 
 #include "OpenPkgDialog.h"
-#include "Exception.h"
 #include "Logger.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"

@@ -8,7 +8,6 @@
  */
 
 #include "ProcessStarter.h"
-#include "Logger.h"
 #include "Exception.h"
 
 

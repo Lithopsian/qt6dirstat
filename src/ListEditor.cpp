@@ -8,7 +8,6 @@
  */
 
 #include "ListEditor.h"
-#include "Logger.h"
 #include "Exception.h"
 
 

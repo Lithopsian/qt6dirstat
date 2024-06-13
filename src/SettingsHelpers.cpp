@@ -12,7 +12,6 @@
 
 #include "SettingsHelpers.h"
 #include "Settings.h"
-#include "Exception.h"
 #include "Logger.h"
 
 

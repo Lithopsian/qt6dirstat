@@ -21,12 +21,11 @@
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "LocateFileTypeWindow.h"
+#include "Logger.h"
 #include "MimeCategory.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 // Number of suffixes in the "other" category

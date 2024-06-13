@@ -12,7 +12,6 @@
 
 #include "ExistingDir.h"
 #include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

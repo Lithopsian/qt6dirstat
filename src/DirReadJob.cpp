@@ -17,9 +17,8 @@
 #include "DirTree.h"
 #include "DirTreeCache.h"
 #include "DirInfo.h"
-#include "MountPoints.h"
-#include "Exception.h"
 #include "Logger.h"
+#include "MountPoints.h"
 
 
 #define DONT_TRUST_NTFS_HARD_LINKS      1

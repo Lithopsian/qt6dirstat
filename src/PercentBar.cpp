@@ -12,7 +12,6 @@
 
 #include "PercentBar.h"
 #include "DirTreeModel.h"
-#include "Exception.h"
 #include "Logger.h"
 
 

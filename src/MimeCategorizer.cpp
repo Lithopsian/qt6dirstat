@@ -10,11 +10,10 @@
 #include <QElapsedTimer>
 
 #include "MimeCategorizer.h"
+#include "Exception.h"
 #include "FileInfo.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

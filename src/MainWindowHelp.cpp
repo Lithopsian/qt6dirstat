@@ -11,9 +11,8 @@
 #include <QMessageBox>
 
 #include "MainWindow.h"
-#include "Version.h"
-#include "Exception.h"
 #include "Logger.h"
+#include "Version.h"
 
 
 using namespace QDirStat;

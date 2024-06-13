@@ -14,6 +14,7 @@
 
 #include "FilesystemsWindow.h"
 #include "DirTreeModel.h"
+#include "Exception.h"
 #include "FormatUtil.h"
 #include "MountPoints.h"
 #include "HeaderTweaker.h"
@@ -21,8 +22,6 @@
 #include "PanelMessage.h"
 #include "QDirStatApp.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define WARN_PERCENT 10.0

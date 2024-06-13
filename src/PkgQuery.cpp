@@ -16,7 +16,6 @@
 #include "RpmPkgManager.h"
 #include "PacManPkgManager.h"
 #include "Logger.h"
-#include "Exception.h"
 
 #include "SysUtil.h"
 

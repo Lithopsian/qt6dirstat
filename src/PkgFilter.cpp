@@ -10,10 +10,8 @@
 #include <QStringBuilder>
 
 #include "PkgFilter.h"
-#include "PkgFilter.h"
-#include "PkgInfo.h"
 #include "Logger.h"
-#include "Exception.h"
+#include "PkgInfo.h"
 
 
 using namespace QDirStat;

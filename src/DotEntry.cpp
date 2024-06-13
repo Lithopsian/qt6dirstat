@@ -10,7 +10,6 @@
 #include "DotEntry.h"
 #include "DirTree.h"
 #include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

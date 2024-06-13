@@ -18,11 +18,10 @@
 #include "ActionManager.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
+#include "Logger.h"
 #include "MimeCategorizer.h"
 #include "SelectionModel.h"
 #include "TreemapView.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

@@ -8,7 +8,6 @@
  */
 
 #include "PacManPkgManager.h"
-#include "Exception.h"
 #include "Logger.h"
 #include "SysUtil.h"
 

@@ -16,10 +16,9 @@
 #include "Cleanup.h"
 #include "DirInfo.h"
 #include "FileInfoSet.h"
+#include "Logger.h"
 #include "OutputWindow.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define DESKTOP_APP_TERMINAL     QLatin1String( "%terminal" )

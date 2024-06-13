@@ -13,13 +13,12 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DirTreeFilter.h"
+#include "Exception.h"
 #include "ExcludeRules.h"
 #include "HistoryButtons.h"
 #include "PkgManager.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

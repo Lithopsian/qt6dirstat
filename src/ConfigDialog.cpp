@@ -12,8 +12,6 @@
 #include "ExcludeRulesConfigPage.h"
 #include "GeneralConfigPage.h"
 #include "MimeCategoryConfigPage.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

@@ -11,9 +11,8 @@
 #include "DirTreeModel.h"
 #include "DirTree.h"
 #include "DirInfo.h"
-#include "SignalBlocker.h"
 #include "Exception.h"
-#include "Logger.h"
+#include "SignalBlocker.h"
 
 
 using namespace QDirStat;

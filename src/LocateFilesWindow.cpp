@@ -13,6 +13,7 @@
 #include "LocateFilesWindow.h"
 #include "ActionManager.h"
 #include "DirTreeModel.h"       // itemTypeIcon()
+#include "Exception.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
@@ -22,8 +23,6 @@
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
 #include "TreeWalker.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

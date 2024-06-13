@@ -14,8 +14,6 @@
 #include "HistogramItems.h"
 #include "HistogramView.h"
 #include "FormatUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

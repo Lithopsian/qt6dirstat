@@ -14,14 +14,13 @@
 #include "FileInfo.h"
 #include "FileInfoSet.h"
 #include "FormatUtil.h"
+#include "Logger.h"
 #include "MimeCategorizer.h"
 #include "MountPoints.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
 #include "SystemFileChecker.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define MAX_SYMLINK_TARGET_LEN 25

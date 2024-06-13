@@ -14,7 +14,6 @@
 #include "DiscoverActions.h"
 #include "FileInfo.h"
 #include "HistoryButtons.h"
-#include "Logger.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Version.h"

@@ -10,11 +10,10 @@
 #include "GeneralConfigPage.h"
 #include "ConfigDialog.h"
 #include "DirTreeModel.h"
+#include "Logger.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

@@ -13,13 +13,12 @@
 #include "TreemapTile.h"
 #include "DirInfo.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "MimeCategorizer.h"
 #include "SelectionModel.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "SignalBlocker.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

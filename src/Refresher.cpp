@@ -11,7 +11,6 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "Exception.h"
-#include "Logger.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"
 

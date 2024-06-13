@@ -13,7 +13,6 @@
 #include "PercentileStats.h"
 #include "Exception.h"
 #include "FormatUtil.h"
-#include "Logger.h"
 
 
 #define VERBOSE_SORT_THRESHOLD 50000

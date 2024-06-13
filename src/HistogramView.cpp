@@ -16,10 +16,9 @@
 
 #include "HistogramView.h"
 #include "HistogramItems.h"
+#include "Exception.h"
 #include "FileSizeStats.h"
 #include "FormatUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define VERBOSE_HISTOGRAM 0

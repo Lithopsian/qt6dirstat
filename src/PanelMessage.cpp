@@ -10,10 +10,9 @@
 #include <QPointer>
 
 #include "PanelMessage.h"
+#include "Exception.h"
 #include "MainWindow.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

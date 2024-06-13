@@ -13,12 +13,11 @@
 #include "Attic.h"
 #include "DirTree.h"
 #include "DotEntry.h"
+#include "Exception.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSorter.h"
 #include "FormatUtil.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 // How many times the standard deviation from the average is considered dominant

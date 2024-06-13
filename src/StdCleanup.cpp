@@ -7,11 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include "CleanupCollection.h"
+#include "CleanupCollection.h" // first for CleanupList
 #include "StdCleanup.h"
 #include "Cleanup.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 #define USE_DEBUG_ACTIONS 0

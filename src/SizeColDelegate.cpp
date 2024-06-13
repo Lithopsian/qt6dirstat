@@ -14,7 +14,6 @@
 
 #include "SizeColDelegate.h"
 #include "DirTreeModel.h"
-#include "Exception.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"

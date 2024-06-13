@@ -17,8 +17,8 @@
 
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "SysUtil.h"
 #include "Logger.h"
+#include "SysUtil.h"
 
 
 using namespace QDirStat;

@@ -8,11 +8,10 @@
  */
 
 #include "FileSizeStats.h"
+#include "Exception.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

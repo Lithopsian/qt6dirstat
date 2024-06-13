@@ -9,7 +9,6 @@
 
 #include "AdaptiveTimer.h"
 #include "Logger.h"
-#include "Exception.h"
 
 
 #define VERBOSE_DELAY 0

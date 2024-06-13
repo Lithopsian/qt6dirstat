@@ -8,8 +8,8 @@
  */
 
 #include "SearchFilter.h"
-#include "Wildcard.h"
 #include "Logger.h"
+#include "Wildcard.h"
 
 
 using namespace QDirStat;

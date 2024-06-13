@@ -12,10 +12,9 @@
 #include "MainWindow.h"
 #include "ActionManager.h"
 #include "HeaderTweaker.h"
+#include "Logger.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

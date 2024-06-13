@@ -12,15 +12,14 @@
 #include <QFileInfo>
 
 #include "FileInfo.h"
-#include "DirInfo.h"
-#include "DotEntry.h"
 #include "Attic.h"
+#include "DirInfo.h"
 #include "DirTree.h"
+#include "DotEntry.h"
+#include "Logger.h"
 #include "PkgInfo.h"
 #include "FormatUtil.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 // Some filesystems (NTFS seems to be among them) may handle block fragments

@@ -31,7 +31,6 @@
 #include "FileTypeStatsWindow.h"
 #include "FindFilesDialog.h"
 #include "HistoryButtons.h"
-#include "Logger.h"
 #include "OpenDirDialog.h"
 #include "OpenPkgDialog.h"
 #include "PanelMessage.h"

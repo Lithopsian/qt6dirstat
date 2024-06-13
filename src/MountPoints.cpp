@@ -12,9 +12,8 @@
 #include <QFileInfo>
 
 #include "MountPoints.h"
-#include "SysUtil.h"
 #include "Logger.h"
-#include "Exception.h"
+#include "SysUtil.h"
 
 
 #define LSBLK_TIMEOUT_SEC       10

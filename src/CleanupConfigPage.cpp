@@ -12,9 +12,8 @@
 #include "Cleanup.h"
 #include "CleanupCollection.h"
 #include "ConfigDialog.h"
-#include "OutputWindow.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "OutputWindow.h"
 
 
 // This is a mess that became necessary because Qt's moc cannot handle template

@@ -9,6 +9,7 @@
 
 #include "PkgReader.h"
 #include "DirTree.h"
+#include "Exception.h"
 #include "FileInfoIterator.h"
 #include "PkgFileListCache.h"
 #include "PkgFilter.h"
@@ -16,8 +17,6 @@
 #include "PkgQuery.h"
 #include "ProcessStarter.h"
 #include "Settings.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define DEFAULT_PARALLEL_PROCESSES	10

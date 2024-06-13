@@ -18,12 +18,11 @@
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
+#include "Logger.h"
 #include "PercentBar.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "SizeColDelegate.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

@@ -16,7 +16,6 @@
 #include <sys/stat.h>   // lstat()
 
 #include "SysUtil.h"
-#include "Exception.h"
 #include "Logger.h"
 
 

@@ -14,12 +14,11 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "HeaderTweaker.h"
+#include "Logger.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"        // dirTreeModel()
 #include "SelectionModel.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

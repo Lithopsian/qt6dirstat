@@ -15,12 +15,11 @@
 #include "DiscoverActions.h"
 #include "FileSearchFilter.h"
 #include "FormatUtil.h"
+#include "Logger.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
 #include "Subtree.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

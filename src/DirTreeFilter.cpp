@@ -10,7 +10,6 @@
 #include <QRegularExpression>
 
 #include "DirTreeFilter.h"
-#include "Exception.h"
 #include "Logger.h"
 #include "PkgManager.h"
 

@@ -15,6 +15,7 @@
 #include "DirTreeCache.h"
 #include "DirTreeFilter.h"
 #include "DotEntry.h"
+#include "Exception.h"
 #include "ExcludeRules.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
@@ -24,8 +25,6 @@
 #include "PkgFilter.h"
 #include "PkgReader.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define VERBOSE_EXCLUDE_RULES 0

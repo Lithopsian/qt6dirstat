@@ -15,14 +15,13 @@
 #include <QElapsedTimer>
 
 #include "RpmPkgManager.h"
+#include "Exception.h"
 #include "MainWindow.h"
 #include "PanelMessage.h"
 #include "PkgFileListCache.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
 #include "SysUtil.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

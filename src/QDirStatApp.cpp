@@ -11,9 +11,9 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
+#include "Logger.h"
 #include "MainWindow.h"
 #include "SelectionModel.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;

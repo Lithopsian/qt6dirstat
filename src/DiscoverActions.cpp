@@ -11,7 +11,6 @@
 #include "BusyPopup.h"
 #include "DirInfo.h"
 #include "DirTree.h"
-#include "Exception.h"
 #include "FileSearchFilter.h"
 #include "FormatUtil.h"
 #include "LocateFilesWindow.h"

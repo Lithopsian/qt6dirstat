@@ -10,10 +10,9 @@
 #include <QDir>
 
 #include "PathSelector.h"
-#include "MountPoints.h"
-#include "FormatUtil.h"
-#include "Logger.h"
 #include "Exception.h"
+#include "FormatUtil.h"
+#include "MountPoints.h"
 
 
 #define SHOW_SIZES_IN_TOOLTIP 0

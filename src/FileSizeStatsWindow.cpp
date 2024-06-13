@@ -19,10 +19,9 @@
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "HistogramView.h"
+#include "Logger.h"
 #include "MainWindow.h"
 #include "SettingsHelpers.h"
-#include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;

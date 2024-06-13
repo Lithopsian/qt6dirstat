@@ -12,10 +12,9 @@
 #include "DotEntry.h"
 #include "FileInfo.h"
 #include "FileInfoIterator.h"
+#include "Logger.h"
 #include "Settings.h"
 #include "SettingsHelpers.h"
-#include "Logger.h"
-#include "Exception.h"
 
 
 #define VERBOSE_EXCLUDE_MATCHES 0

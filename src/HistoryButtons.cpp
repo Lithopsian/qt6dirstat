@@ -16,7 +16,6 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "Logger.h"
-#include "Exception.h"
 
 
 using namespace QDirStat;
