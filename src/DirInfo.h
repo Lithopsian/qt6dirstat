@@ -337,12 +337,6 @@ namespace QDirStat
 	void addToAttic( FileInfo * newChild );
 
 	/**
-	 * Move a child to the attic, i.e. remove it from the normal children
-	 * and move it to the attic instead.
-	 **/
-	void moveToAttic( FileInfo * newChild );
-
-	/**
 	 * Get the "Dot Entry" for this node if there is one (or 0 otherwise):
 	 * This is a pseudo entry that directory nodes use to store
 	 * non-directory children separately from directories. This way the end

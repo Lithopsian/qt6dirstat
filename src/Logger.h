@@ -34,14 +34,6 @@ enum LogSeverity
 };
 
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-namespace Qt
-{
-    const static auto endl = ::endl;
-    const static auto SkipEmptyParts = QString::SkipEmptyParts;
-}
-#endif
-
 // Log macros for stream (QTextStream) output.
 //
 // Unlike qDebug() etc., they also record the location in the source code that

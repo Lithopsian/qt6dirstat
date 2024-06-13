@@ -65,26 +65,26 @@ namespace QDirStat
 	 **/
 	~UnreadableDirsWindow() override;
 
-        /**
-         * Static method for using one shared instance of this class between
-         * multiple parts of the application. This will create a new instance
-         * if there is none yet (or anymore).
-         *
-         * Do not hold on to this pointer; the instance destroys itself when
-         * the user closes the window, and then the pointer becomes invalid.
-         *
-         * After getting this shared instance, call populate() and show().
-         **/
-        static UnreadableDirsWindow * sharedInstance();
+	/**
+	 * Static method for using one shared instance of this class between
+	 * multiple parts of the application. This will create a new instance
+	 * if there is none yet (or anymore).
+	 *
+	 * Do not hold on to this pointer; the instance destroys itself when
+	 * the user closes the window, and then the pointer becomes invalid.
+	 *
+	 * After getting this shared instance, call populate() and show().
+	 **/
+	static UnreadableDirsWindow * sharedInstance();
 
 
     public:
 
-        /**
-         * Convenience function for creating, populating and showing the shared
-         * instance.
-         **/
-        static void populateSharedInstance( FileInfo * fileInfo );
+	/**
+	 * Convenience function for creating, populating and showing the shared
+	 * instance.
+	 **/
+	static void populateSharedInstance( FileInfo * fileInfo );
 
 	/**
 	 * Obtain the subtree from the last used URL or 0 if none was found.

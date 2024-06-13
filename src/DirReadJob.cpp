@@ -101,7 +101,7 @@ namespace
     void killQueue( DirInfo * subtree, DirReadJobList & queue, const DirReadJob * exceptJob )
     {
 	DirReadJobList newQueue;
-	for ( DirReadJob * job : queue )
+	for ( DirReadJob * job : asConst( queue ) )
 	{
 	    if ( job->dir() && job->dir()->isInSubtree( subtree ) && ( !exceptJob || job != exceptJob ) )
 		delete job;
@@ -232,7 +232,7 @@ void LocalDirReadJob::startReading()
 #else
 	const int flags = AT_SYMLINK_NOFOLLOW;
 #endif
-	for ( const QString & entryName : entryMap )
+	for ( const QString & entryName : asConst( entryMap ) )
 	{
 	    struct stat statInfo;
 	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 )	// OK
@@ -550,13 +550,13 @@ void DirReadJobQueue::clear()
 
 void DirReadJobQueue::abort()
 {
-    for ( const DirReadJob * job : _queue )
+    for ( const DirReadJob * job : asConst( _queue ) )
     {
 	if ( job->dir() )
 	    job->dir()->readJobAborted();
     }
 
-    for ( const DirReadJob * job : _blocked )
+    for ( const DirReadJob * job : asConst( _blocked ) )
     {
 	if ( job->dir() )
 	    job->dir()->readJobAborted();

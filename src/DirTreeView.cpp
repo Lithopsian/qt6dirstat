@@ -177,7 +177,7 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
     if ( branchesToClose.size() < 10 )
     {
 	// Smoothest transition, but very slow for multiple branches
-	for ( const QModelIndex & index : branchesToClose )
+	for ( const QModelIndex & index : asConst( branchesToClose ) )
 	    collapse( index );
     }
     else

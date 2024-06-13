@@ -337,7 +337,7 @@ void OutputWindow::killAll()
 {
     int killCount = 0;
 
-    for ( QProcess * process : _processList )
+    for ( QProcess * process : asConst( _processList ) )
     {
 	//logInfo() << "Killing process " << process << Qt::endl;
 	process->kill();
@@ -354,7 +354,7 @@ void OutputWindow::killAll()
 
 bool OutputWindow::hasActiveProcess() const
 {
-    for ( const QProcess * process : _processList )
+    for ( const QProcess * process : asConst( _processList ) )
     {
 	if ( process->state() == QProcess::Starting || process->state() == QProcess::Running )
 	    return true;
@@ -366,7 +366,7 @@ bool OutputWindow::hasActiveProcess() const
 
 QProcess * OutputWindow::pickQueuedProcess()
 {
-    for ( QProcess * process : _processList )
+    for ( QProcess * process : asConst( _processList ) )
     {
 	if ( process->state() == QProcess::NotRunning )
 	    return process;

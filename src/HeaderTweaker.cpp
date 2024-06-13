@@ -268,7 +268,7 @@ void HeaderTweaker::setColumnOrder( const DataColumnList & columns )
 
     int visualIndex = 0;
 
-    for ( DataColumn col : colOrderList )
+    for ( DataColumn col : asConst( colOrderList ) )
     {
 	if ( visualIndex < _header->count() )
 	{
@@ -310,7 +310,7 @@ void HeaderTweaker::readSettings()
 
     settings.endGroup();
 
-    for ( ColumnLayout * layout : _layouts )
+    for ( ColumnLayout * layout : asConst( _layouts ) )
 	readLayoutSettings( layout );
 }
 
@@ -357,7 +357,7 @@ void HeaderTweaker::writeSettings()
     settings.endGroup();
 
     // Write column layouts to settings
-    for ( const ColumnLayout * layout : _layouts )
+    for ( const ColumnLayout * layout : asConst( _layouts ) )
 	writeLayoutSettings( layout );
 }
 
@@ -382,7 +382,8 @@ void HeaderTweaker::setColumnVisibility( const DataColumnList & columns )
 
 void HeaderTweaker::addMissingColumns( DataColumnList & colList )
 {
-    for ( const DataColumn col : DataColumns::defaultColumns() )
+    const auto defaultColumns = DataColumns::defaultColumns();
+    for ( const DataColumn col : defaultColumns )
     {
 	if ( !colList.contains( col ) )
 	     colList << col;

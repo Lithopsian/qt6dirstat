@@ -46,7 +46,8 @@ namespace
 	if ( !widget )
 	    return;
 
-	for ( QAction * action : widget->actions() )
+	const auto actions = widget->actions();
+	for ( QAction * action : actions )
 	{
 	    Cleanup * cleanup = qobject_cast<Cleanup *>( action );
 	    if ( cleanup )
@@ -134,7 +135,7 @@ namespace
 		urls << QObject::tr( "<i>(%1 items total)</i>" ).arg( items.size() );
 
 	    int longestLine = MIN_DIALOG_WIDTH * spaceWidth;
-	    for ( const QString & line : urls )
+	    for ( const QString & line : asConst( urls ) )
 	    {
 		const int lineLength = textWidth( font, line );
 		if ( lineLength > longestLine )
@@ -245,7 +246,8 @@ void CleanupCollection::remove( Cleanup * cleanup )
 
 void CleanupCollection::addStdCleanups()
 {
-    for ( Cleanup * cleanup : StdCleanup::stdCleanups( this ) )
+    const auto stdCleanups = StdCleanup::stdCleanups( this );
+    for ( Cleanup * cleanup : stdCleanups )
 	add( cleanup );
 
     writeSettings( _cleanupList );
@@ -313,7 +315,7 @@ void CleanupCollection::updateActions()
 	return firstToplevel && firstToplevel->isPkgInfo();
     }();
 
-    for ( Cleanup * cleanup : _cleanupList )
+    for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	const bool enable = canCleanup && cleanup->isActive() &&
 			    ( !treeBusy         || cleanup->refreshPolicy() == Cleanup::NoRefresh ) &&
@@ -330,7 +332,7 @@ void CleanupCollection::updateMenus()
 {
     _menus.removeAll( nullptr ); // Remove QPointers that have become invalid
 
-    for ( QMenu * menu : _menus )
+    for ( QMenu * menu : asConst( _menus ) )
     {
 	// Remove all Cleanups from this menu
 	removeAllFromWidget( menu );
@@ -345,7 +347,7 @@ void CleanupCollection::updateToolBars()
 {
     _toolBars.removeAll( nullptr ); // Remove QPointers that have become invalid
 
-    for ( QToolBar * toolBar : _toolBars )
+    for ( QToolBar * toolBar : asConst( _toolBars ) )
     {
 	// Remove all Cleanups from this tool bar
 	removeAllFromWidget( toolBar );
@@ -416,7 +418,8 @@ void CleanupCollection::execute()
     // directories (including the parents of any file items or pseudo-
     // directories).  Note that the set is not normalised so that the Cleanup
     // can be performed on both an item and one of its ancestors.
-    for ( FileInfo * item : cleanup->deDuplicateParents( selection ) )
+    const auto parents = cleanup->deDuplicateParents( selection );
+    for ( FileInfo * item : parents )
 	cleanup->execute( item, outputWindow );
 
     if ( cleanup->refreshPolicy() == Cleanup::AssumeDeleted )
@@ -447,7 +450,7 @@ void CleanupCollection::addActive( QWidget * widget ) const
 {
     CHECK_PTR( widget );
 
-    for ( Cleanup * cleanup : _cleanupList )
+    for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	if ( cleanup->isActive() )
 	    widget->addAction( cleanup );
@@ -459,7 +462,7 @@ void CleanupCollection::addEnabled( QWidget * widget ) const
 {
     CHECK_PTR( widget );
 
-    for ( Cleanup * cleanup : _cleanupList )
+    for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	if ( cleanup->isEnabled() )
 	    widget->addAction( cleanup );
@@ -471,7 +474,7 @@ void CleanupCollection::addToToolBar( QToolBar * toolBar )
 {
     CHECK_PTR( toolBar );
 
-    for ( Cleanup * cleanup : _cleanupList )
+    for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	// Add only cleanups that have an icon to avoid overcrowding the
 	// toolbar with actions that only have a text.
@@ -494,7 +497,8 @@ void CleanupCollection::readSettings()
     CleanupSettings settings;
 
     // Read all settings groups [Cleanup_xx] that were found
-    for ( const QString & groupName : settings.findGroups( settings.groupPrefix() ) )
+    const auto groups = settings.findGroups( settings.groupPrefix() );
+    for ( const QString & groupName : groups )
     {
 	// Read one cleanup
 	settings.beginGroup( groupName );

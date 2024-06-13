@@ -151,7 +151,6 @@ void HistoryButtons::updateHistoryMenu()
     QActionGroup * actionGroup = new QActionGroup( menu );
 
     const QStringList & items = _history->allItems();
-
     for ( int i = items.size() - 1; i >= 0; i-- )
     {
         QAction * action = new QAction( items.at( i ), actionGroup );

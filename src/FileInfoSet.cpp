@@ -49,27 +49,6 @@ FileInfoSet FileInfoSet::normalized() const
 }
 
 
-FileInfoSet FileInfoSet::invalidRemoved() const
-{
-    FileInfoSet result;
-
-    for ( FileInfo * item : *this )
-    {
-	if ( item && item->checkMagicNumber() )
-	{
-	    // logDebug() << "Keeping " << item << Qt::endl;
-	    result << item;
-	}
-	else
-	{
-	    logWarning() << "Removing invalid item" << Qt::endl;
-	}
-    }
-
-    return result;
-}
-
-
 bool FileInfoSet::containsPseudoDir() const
 {
     for ( const FileInfo * item : *this )

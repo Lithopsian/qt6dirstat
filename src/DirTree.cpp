@@ -102,7 +102,9 @@ namespace
 
 
     /**
-     * Move all items from the attic to the normal children list.
+     * Move all items from any attics below a directory into the attic parent and
+     * remove the emptied attics.  This is done when a directory has been moved
+     * into an attic, so any attics within it are redundant.
      **/
     void unatticAll( DirInfo * dir )
     {
@@ -150,7 +152,8 @@ namespace
 	for ( FileInfo * child : ignoredChildren )
 	{
 	    //logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
-	    dir->moveToAttic( child );
+	    dir->unlinkChild( child );
+	    dir->addToAttic( child );
 
 	    if ( child->isDirInfo() )
 		unatticAll( child->toDirInfo() );
@@ -319,34 +322,39 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 
     // Make a list of items that are still accessible in the real world
     FileInfoSet items;
-    for ( FileInfo * item : refreshSet.invalidRemoved() )
+    for ( FileInfo * item : refreshSet )
     {
-	// Check the item is still accessible on disk
-	// Pseudo-dirs (shouldn't be here) will implicitly fail the check
-	struct stat statInfo;
-	while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
+	// During a refresh, some items may already have been deleted
+	if ( item && item->checkMagicNumber() )
 	{
-	    if ( item == root() || item->parent() == root() )
+	    // Check the item is still accessible on disk
+	    // Pseudo-dirs (shouldn't be here) will implicitly fail the check
+	    struct stat statInfo;
+	    while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
 	    {
-		// just try a full refresh, it will throw if even that isn't accessible any more
-		//logDebug() << item->parent() << " " << _root << Qt::endl;
-		refresh( item->toDirInfo() );
-		return;
+		if ( item == root() || item->parent() == root() )
+		{
+		    // just try a full refresh, it will throw if even that isn't accessible any more
+		    //logDebug() << item->parent() << " " << _root << Qt::endl;
+		    refresh( item->toDirInfo() );
+		    return;
+		}
+
+		item = item->parent();
 	    }
 
-	    item = item->parent();
+	    // Add an item that we have full access to
+	    items << item;
 	}
-
-	// Add an item that we have full access to
-	items << item;
     }
 
     // Refresh the subtrees that we have left
-    for ( FileInfo * item : items.normalized() )
+    const auto normalizedItems = items.normalized();
+    for ( FileInfo * item : normalizedItems )
     {
 	// Need to check the magic number here again because a previous
 	// iteration step might have made the item invalid already
-	if ( item && item->checkMagicNumber() )
+	if ( item->checkMagicNumber() )
 	{
 	    if ( item->isDirInfo() )
 		refresh( item->toDirInfo() );
@@ -364,10 +372,7 @@ void DirTree::refresh( DirInfo * subtree )
 
     if ( subtree == root() || subtree->parent() == root() )	// Refresh all (from first toplevel)
     {
-	// Get the url to refresh before we clear the tree
-//	const QString url = firstToplevel()->url();
-//	emit clearing(); // for the selection model
-	clearSubtree( root() );
+	clearSubtree( root() ); // clears the contents, but not _url, filters, etc.
 	startReading( QDir::cleanPath( _url ) );
     }
     else	// Refresh subtree
@@ -488,21 +493,23 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	}
     }
 
-    // Loop over the parents, deleting the children of each in one group
-    const auto & constMap = parentMap;
-    const auto parents = constMap.uniqueKeys();
+    // Loop over the parents
+    const auto parents = parentMap.uniqueKeys();
     for ( DirInfo * parent : parents )
     {
-	FileInfoSet children;
-	const auto range = constMap.equal_range( parent );
-	for ( auto it = range.first; it != range.second; ++it )
-	    children << it.value();
+	// Collect all the children of this parent and delete them together
+	const FileInfoSet childrenOfOneParent = [ parent, &parentMap ]()
+	{
+	    FileInfoSet children;
+	    const auto range = asConst( parentMap ).equal_range( parent );
+	    for ( auto it = range.first; it != range.second; ++it )
+		children << it.value();
+	    return children;
+	}();
 
-	emit deletingChildren( parent, children );
-
-	for ( FileInfo * child : children )
+	emit deletingChildren( parent, childrenOfOneParent );
+	for ( FileInfo * child : childrenOfOneParent )
 	    deleteChild( child );
-
 	emit childrenDeleted();
 
 	// If that was the last child of a dot entry
@@ -663,7 +670,7 @@ void DirTree::clearFilters()
 
 bool DirTree::checkIgnoreFilters( const QString & path ) const
 {
-    for ( const DirTreeFilter * filter : _filters )
+    for ( const DirTreeFilter * filter : asConst( _filters ) )
     {
 	if ( filter->ignore( path ) )
 	    return true;

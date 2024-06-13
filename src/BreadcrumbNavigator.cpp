@@ -149,7 +149,7 @@ QString BreadcrumbNavigator::html() const
 {
     QString html;
 
-    for ( const Breadcrumb & crumb : _breadcrumbs )
+    for ( const Breadcrumb & crumb : asConst( _breadcrumbs ) )
     {
         QString name = crumb.displayName;
         if ( name.isEmpty() )
@@ -211,7 +211,7 @@ int BreadcrumbNavigator::breadcrumbsLen() const
 {
     int len = 0;
 
-    for ( const Breadcrumb & crumb : _breadcrumbs )
+    for ( const Breadcrumb & crumb : asConst( _breadcrumbs ) )
     {
         const QString & name = crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName;
 

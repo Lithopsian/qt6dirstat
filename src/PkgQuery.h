@@ -26,6 +26,28 @@ namespace QDirStat
      **/
     class PkgQuery
     {
+	/**
+	 * Constructor. For internal use only; use the static methods instead.
+	 **/
+	PkgQuery();
+
+	/**
+	 * Destructor.
+	 **/
+	~PkgQuery();
+
+	/**
+	 * Suppress copy and assignment constructors (this is a singleton)
+	 **/
+	PkgQuery( const PkgQuery & ) = delete;
+	PkgQuery & operator=( const PkgQuery & ) = delete;
+
+	/**
+	 * Return the singleton instance of this class.
+	 **/
+	static PkgQuery * instance();
+
+
     public:
 
 	/**
@@ -78,27 +100,6 @@ namespace QDirStat
 
 
     protected:
-
-	/**
-	 * Constructor. For internal use only; use the static methods instead.
-	 **/
-	PkgQuery();
-
-	/**
-	 * Destructor.
-	 **/
-	~PkgQuery();
-
-	/**
-	 * Suppress copy and assignment constructors (this is a singleton)
-	 **/
-	PkgQuery( const PkgQuery & ) = delete;
-	PkgQuery & operator=( const PkgQuery & ) = delete;
-
-	/**
-	 * Return the singleton instance of this class.
-	 **/
-	static PkgQuery * instance();
 
 	/**
 	 * Return the owning package of a file or directory with full path

@@ -246,7 +246,7 @@ void FileTypeStats::sanityCheck()
 {
     FileSize categoryTotal = 0LL;
 
-    for ( const FileSize sum : _categorySum )
+    for ( const FileSize sum : asConst( _categorySum ) )
 	categoryTotal += sum;
 
     const FileSize missing = totalSize() - categoryTotal;

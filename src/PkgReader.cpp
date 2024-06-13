@@ -91,7 +91,8 @@ namespace
 	for ( PkgInfo * pkg : pkgList )
 	    multiPkg.insert( pkg->baseName(), pkg );
 
-	for ( const QString & pkgName : multiPkg.uniqueKeys() )
+	const auto uniqueKeys = multiPkg.uniqueKeys();
+	for ( const QString & pkgName : uniqueKeys )
 	    createDisplayName( pkgName, multiPkg.values( pkgName ) );
     }
 

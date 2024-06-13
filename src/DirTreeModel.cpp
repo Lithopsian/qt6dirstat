@@ -79,11 +79,11 @@ namespace
     }
 
 
-    [[gnu::unused]] void dumpPersistentIndexList( QModelIndexList persistentList )
+    [[gnu::unused]] void dumpPersistentIndexList( const QModelIndexList & persistentList )
     {
 	logDebug() << persistentList.size() << " persistent indexes" << Qt::endl;
 
-	for ( const QModelIndex & index : persistentList)
+	for ( const QModelIndex & index : persistentList )
 	    logDebug() << index << Qt::endl;
     }
 
@@ -451,6 +451,8 @@ namespace
 DirTreeModel::DirTreeModel( QObject * parent ):
     QAbstractItemModel ( parent )
 {
+    CHECK_PTR( parent ); // no MainWindow!
+
     createTree();
     readSettings();
     loadIcons();
@@ -525,6 +527,10 @@ void DirTreeModel::updateSettings( bool crossFilesystems,
 				   DirTreeItemSize dirTreeItemSize,
 				   int updateTimerMillisec )
 {
+    // layoutChanged() is used just to refresh the display, the indexes and order don't change
+    // a matching layoutAboutToBechanged() is supposed to be sent, but nobody is actually listening for it
+    emit layoutAboutToBeChanged();
+
     _crossFilesystems = crossFilesystems;
     _useBoldForDominantItems = useBoldForDominant;
     _treeItemSize = dirTreeItemSize;
@@ -533,6 +539,7 @@ void DirTreeModel::updateSettings( bool crossFilesystems,
 
     loadIcons();
     setBaseFont( _themeFont );
+
     emit layoutChanged();
 }
 
@@ -617,7 +624,7 @@ void DirTreeModel::loadIcons()
 
 FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 {
-    CHECK_PTR( parent );
+    CHECK_MAGIC( parent );
 
     const FileInfoList & sortedChildren = parent->sortedChildren( _sortCol, _sortOrder );
     if ( childNo >= 0 && childNo < sortedChildren.size() )
@@ -850,10 +857,6 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     if ( column == _sortCol && order == _sortOrder )
         return;
 
-    logDebug() << "Sorting by " << DataColumns::fromViewCol( column )
-	       << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
-	       << Qt::endl;
-
     // logDebug() << "Before layoutAboutToBeChanged()" << Qt::endl;
     //dumpPersistentIndexList( persistentIndexList() );
 
@@ -863,8 +866,12 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     updatePersistentIndexes();
     emit layoutChanged( QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint );
 
+    logDebug() << "Sorting by " << _sortCol
+	       << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
+	       << Qt::endl;
+
     //logDebug() << "After layoutChanged()" << Qt::endl;
-    // dumpPersistentIndexList( persistentIndexList() );
+    //dumpPersistentIndexList( persistentIndexList() );
 }
 
 
@@ -975,7 +982,7 @@ void DirTreeModel::sendPendingUpdates()
 {
     //logDebug() << "Sending " << _pendingUpdates.size() << " updates" << Qt::endl;
 
-    for ( DirInfo * dir : _pendingUpdates )
+    for ( DirInfo * dir : asConst( _pendingUpdates ) )
     {
 	// Not checking the magic numbers as they turn out to be unreliable after a tree clear
 	// as the next read may overwrite the same memory with new FileInfos -
@@ -985,7 +992,7 @@ void DirTreeModel::sendPendingUpdates()
 	    const int row = rowNumber( dir );
 	    const QModelIndex topLeft     = createIndex( row, 0, dir );
 	    const QModelIndex bottomRight = createIndex( row, DataColumns::lastCol(), dir );
-	    emit dataChanged( topLeft, bottomRight, { Qt::DisplayRole } );
+	    emit dataChanged( topLeft, bottomRight );
 
 	    //logDebug() << "Data changed for " << dir << Qt::endl;
 
@@ -1000,8 +1007,10 @@ void DirTreeModel::sendPendingUpdates()
 
 void DirTreeModel::readingFinished()
 {
+    // Just abandon any remaining updates
+    // The whole display is going to get refreshed when it is sorted
     _updateTimer.stop();
-    sendPendingUpdates();
+    _pendingUpdates.clear();
 
     // dumpPersistentIndexList( persistentIndexList() );
     // dumpDirectChildren( _tree->root(), "root" );
@@ -1011,7 +1020,7 @@ void DirTreeModel::readingFinished()
 void DirTreeModel::updatePersistentIndexes()
 {
     const QModelIndexList persistentList = persistentIndexList();
-    for ( const QModelIndex oldIndex : persistentList )
+    for ( const QModelIndex & oldIndex : persistentList )
     {
 	if ( oldIndex.isValid() )
 	{

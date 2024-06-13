@@ -452,13 +452,6 @@ void DirInfo::insertChild( FileInfo * newChild )
 }
 
 
-void DirInfo::moveToAttic( FileInfo * child )
-{
-    unlinkChild( child );
-    addToAttic( child );
-}
-
-
 void DirInfo::addToAttic( FileInfo * newChild )
 {
     CHECK_PTR( newChild );
@@ -916,7 +909,7 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
 
     // Store the sort order number for each item directly on the FileInfo object
     int childNumber = 0;
-    for ( FileInfo * item : _sortedChildren )
+    for ( FileInfo * item : asConst( _sortedChildren ) )
 	item->setRowNumber( childNumber++ );
 }
 
@@ -958,7 +951,7 @@ int DirSortInfo::findDominantChildren()
 #endif
 
 	// Return the child number of the first child after the dominance threshold
-	for ( FileInfo * child : _sortedChildren )
+	for ( FileInfo * child : asConst( _sortedChildren ) )
 	{
 	    if ( child->subtreeAllocatedPercent() < dominanceThreshold )
 		return child->rowNumber();

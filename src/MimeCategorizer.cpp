@@ -270,7 +270,7 @@ const MimeCategory * MimeCategorizer::matchWildcardSuffix( const QMultiHash<QStr
 
 const MimeCategory * MimeCategorizer::matchWildcard( const QString & filename ) const
 {
-    for ( const WildcardPair & pair : _wildcards )
+    for ( const WildcardPair & pair : asConst( _wildcards ) )
     {
 	if ( pair.first.isMatch( filename ) )
 	    return pair.second;
@@ -282,7 +282,7 @@ const MimeCategory * MimeCategorizer::matchWildcard( const QString & filename ) 
 
 const MimeCategory * MimeCategorizer::findCategoryByName( const QString & categoryName ) const
 {
-    for ( const MimeCategory * category : _categories )
+    for ( const MimeCategory * category : asConst( _categories ) )
     {
 	if ( category && category->name() == categoryName )
 	    return category;
@@ -314,7 +314,7 @@ void MimeCategorizer::buildMaps()
     _caseInsensitiveLengths.clear();
     _caseSensitiveLengths.clear();
 
-    for ( const MimeCategory * category : _categories )
+    for ( const MimeCategory * category : asConst( _categories ) )
     {
 	addExactKeys( category );
 	addSuffixKeys( category );

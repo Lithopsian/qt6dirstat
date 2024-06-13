@@ -151,7 +151,7 @@ void Settings::fixFileOwners()
 {
     if ( SysUtil::runningWithSudo() )
     {
-        for ( const QString & filename : _usedConfigFiles )
+        for ( const QString & filename : asConst( _usedConfigFiles ) )
             fixFileOwner( filename );
     }
 }

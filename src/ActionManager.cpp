@@ -46,9 +46,9 @@ void ActionManager::addTree( const QWidget * tree )
 
 QAction * ActionManager::action( const QString & actionName ) const
 {
-    for ( const QPointer<const QWidget> & tree : _widgetTrees )
+    for ( const auto & tree : _widgetTrees )
     {
-	if ( tree ) // might be destroyed in the meantime
+	if ( tree ) // might have been destroyed
 	{
 	    QAction * action = tree->findChild<QAction *>( actionName );
 	    if ( action )

@@ -40,7 +40,7 @@ namespace QDirStat
 	 * Create a SelectionModel that uses the DirTree in 'dirTreeModel'.
 	 * This object does not take ownership of 'dirTreeModel'.
 	 **/
-	SelectionModel( DirTreeModel * dirTreeModel, QObject * parents );
+	SelectionModel( DirTreeModel * dirTreeModel, QObject * parent );
 
 	/**
 	 * Return all currently selected items as a set.
@@ -248,7 +248,7 @@ namespace QDirStat
 	 * 'parent' is the QObject tree parent for automatic deletion
 	 * of this object when the parent is deleted.
 	 **/
-	SelectionModelProxy( SelectionModel * master, QObject * parent = nullptr );
+	SelectionModelProxy( SelectionModel * master, QObject * parent );
 
     signals:
 

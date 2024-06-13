@@ -29,7 +29,8 @@ namespace
     // Verbose logging, all callers might be commented out
     [[gnu::unused]] void dumpNormalMountPoints()
     {
-        for ( const MountPoint * mountPoint : MountPoints::normalMountPoints() )
+        const auto normalMountPoints = MountPoints::normalMountPoints();
+        for ( const MountPoint * mountPoint : normalMountPoints )
             logDebug() << mountPoint->path() << Qt::endl;
     }
 
@@ -359,7 +360,7 @@ bool MountPoints::checkForBtrfs()
 {
     ensurePopulated();
 
-    for ( const MountPoint * mountPoint : _mountPointMap )
+    for ( const MountPoint * mountPoint : asConst( _mountPointMap ) )
     {
         if ( mountPoint && mountPoint->isBtrfs() )
             return true;

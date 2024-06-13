@@ -354,6 +354,7 @@ void MainWindow::idleDisplay()
     ActionManager::swapActions( _ui->toolBar, _ui->actionStopReading, _ui->actionRefreshAll );
 
     // Go back to the sort order before the read
+    // This also triggers a refresh of the tree display now it is no longer busy
     _ui->dirTreeView->sortByColumn( _sortCol, _sortOrder );
 
     if ( _futureSelection.subtree() )

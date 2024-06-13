@@ -234,7 +234,8 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 
 void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
 {
-    for ( short year : findGaps( stats ) )
+    const auto gaps = findGaps( stats );
+    for ( short year : gaps )
     {
 	YearListItem * item = new YearListItem( YearStats( year ) );
 	item->setFlags( Qt::NoItemFlags ); // disabled

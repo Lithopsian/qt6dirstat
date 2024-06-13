@@ -200,17 +200,17 @@ public:
     /**
      * Return the offending index value.
      **/
-    int invalidIndex() const	{ return _invalidIndex; }
+    int invalidIndex() const { return _invalidIndex; }
 
     /**
      * Return the valid minimum index.
      **/
-    int validMin() const	{ return _validMin; }
+    int validMin() const { return _validMin; }
 
     /**
      * Return the valid maximum index.
      **/
-    int validMax() const	{ return _validMax; }
+    int validMax() const { return _validMax; }
 
 protected:
     QString errMsg( int             invalidIndex,
@@ -353,7 +353,7 @@ template<class EX_t>
 void _throw_helper( const EX_t    & exception,
 		    Logger        * logger,
 		    const QString & srcFile,
-		    int	            srcLine,
+		    int             srcLine,
 		    const QString & srcFunction )
 {
     exception.setSrcLocation( srcFile, srcLine, srcFunction );
@@ -367,7 +367,7 @@ void _throw_helper( const EX_t    & exception,
 
 template<class EX_t>
 void _caught_helper( const EX_t    & exception,
-		    Logger         * logger,
+		     Logger        * logger,
 		     const QString & srcFile,
 		     int             srcLine,
 		     const QString & srcFunction )

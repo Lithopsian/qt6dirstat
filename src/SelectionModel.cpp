@@ -23,6 +23,8 @@ SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
     QItemSelectionModel ( dirTreeModel, parent ),
     _dirTreeModel { dirTreeModel }
 {
+    CHECK_PTR( parent ); // no MainWindow!
+
     connect( this, &SelectionModel::currentChanged,
 	     this, &SelectionModel::propagateCurrentChanged );
 

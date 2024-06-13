@@ -57,7 +57,8 @@ namespace
 	    return rootTile;
 
 	// loop recursively through the children of each tile
-	for ( QGraphicsItem * graphicsItem : rootTile->childItems() )
+	const auto childItems = rootTile->childItems();
+	for ( QGraphicsItem * graphicsItem : childItems )
 	{
 	    TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
 	    if ( tile )

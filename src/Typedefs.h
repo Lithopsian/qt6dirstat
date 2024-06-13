@@ -24,6 +24,11 @@
 #define FileSizeMax   LLONG_MAX
 // 0x7FFFFFFFFFFFFFFFLL == 9223372036854775807LL
 
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+#define asConst(OBJECT) const_cast<std::add_const<decltype( OBJECT )>::type &>( OBJECT )
+#else
+#define asConst std::as_const
+#endif
 
 namespace QDirStat
 {
@@ -33,6 +38,12 @@ namespace QDirStat
 
     class MountPoint;
     using MountPointList = QList<MountPoint *>;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    const static auto endl = ::endl;
+    const static auto SkipEmptyParts = QString::SkipEmptyParts;
+#endif
+
 }
 
 

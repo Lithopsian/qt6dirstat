@@ -485,7 +485,8 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	if ( pathname.isEmpty() || pathname == QLatin1String( "/." ) )
 	    continue;
 
-	for ( const QString & pkgName : packages.split( ", " ) )
+	const auto splitPackages = packages.split( ", " );
+	for ( const QString & pkgName : splitPackages )
 	    if ( !pkgName.isEmpty() )
 		cache->add( pkgName, pathname );
     }

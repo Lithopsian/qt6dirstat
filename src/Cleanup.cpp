@@ -224,7 +224,8 @@ namespace
 	}
 
 	// Now just try any terminal emulator
-	for ( const QString & app : terminalApps() )
+	const auto apps = terminalApps();
+	for ( const QString & app : apps )
 	{
 	    if ( haveApp( app ) )
 		return app;
@@ -278,7 +279,8 @@ namespace
 	}
 
 	// Now just try any file manager
-	for ( const QString & app : fileManagerApps() )
+	const auto apps = fileManagerApps();
+	for ( const QString & app : apps )
 	{
 	    if ( haveApp( app ) )
 		return app;

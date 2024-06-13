@@ -169,7 +169,7 @@ bool ExcludeRules::match( const QString & fullPath, const QString & fileName ) c
     if ( fullPath.isEmpty() || fileName.isEmpty() )
 	return false;
 
-    for ( const ExcludeRule * rule : _rules )
+    for ( const ExcludeRule * rule : asConst( _rules ) )
     {
 	if ( rule->match( fullPath, fileName ) )
 	{
@@ -189,7 +189,7 @@ bool ExcludeRules::matchDirectChildren( const DirInfo * dir ) const
     if ( !dir )
 	return false;
 
-    for ( const ExcludeRule * rule : _rules )
+    for ( const ExcludeRule * rule : asConst( _rules ) )
     {
 	if ( rule->matchDirectChildren( dir ) )
 	{
@@ -242,7 +242,8 @@ void ExcludeRules::readSettings()
     ExcludeRuleSettings settings;
 
     // Read all settings groups [ExcludeRule_xx] that were found
-    for ( const QString & groupName : settings.findGroups( settings.groupPrefix() ) )
+    const auto groups = settings.findGroups( settings.groupPrefix() );
+    for ( const QString & groupName : groups )
     {
 	settings.beginGroup( groupName );
 
