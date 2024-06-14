@@ -80,6 +80,6 @@ void PanelMessage::deletePermissionsMsg( const QWidget * parent )
     for ( PanelMessage * msg : children )
     {
 	if ( msg->_ui->stackedWidget->currentWidget() == msg->_ui->permissionsPage )
-	    msg->deleteLater();
+	    delete msg;
     }
 }
