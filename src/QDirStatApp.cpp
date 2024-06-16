@@ -56,16 +56,17 @@ DirTree * QDirStatApp::dirTree() const
 
 MainWindow * QDirStatApp::findMainWindow() const
 {
-    MainWindow * mainWin = nullptr;
     const QWidgetList toplevel = QApplication::topLevelWidgets();
+    for ( QWidget * widget : toplevel )
+    {
+        MainWindow * mainWindow = qobject_cast<MainWindow *>( widget );
+        if ( mainWindow )
+            return mainWindow;
+    }
 
-    for ( QWidgetList::const_iterator it = toplevel.cbegin(); it != toplevel.cend() && !mainWin; ++it )
-        mainWin = qobject_cast<MainWindow *>( *it );
+    logError() << "No MainWindow widget found" << Qt::endl;
 
-    if ( !mainWin )
-        logWarning() << "NULL mainWin for shared instance" << Qt::endl;
-
-    return mainWin;
+    return nullptr;
 }
 
 

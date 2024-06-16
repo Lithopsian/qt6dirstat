@@ -54,9 +54,7 @@ namespace
 	const QStringList lines = msg.split( '\n' );
 	for ( QString line : lines )
 	{
-	    // Remove utterly misleading message that will just dump a ton of bug
-	    // reports on the application maintainers just because some clueless
-	    // moron put this message into the Qt libs
+	    // Remove utterly misleading message
 	    line.remove( QLatin1String( "Reinstalling the application may fix this problem." ) );
 
 	    if ( !line.trimmed().isEmpty() )
@@ -73,7 +71,7 @@ namespace
 	    {
 		if ( msg.contains( QLatin1String( "Reinstalling the application may fix this problem" ) ) )
 		{
-		    // Suppress this new message which is complete and utter garbage:
+		    // Suppress this new message:
 		    //
 		    // "This application failed to start because no Qt platform
 		    // plugin could be initialized. Reinstalling the application

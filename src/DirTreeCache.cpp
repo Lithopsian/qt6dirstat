@@ -153,7 +153,7 @@ namespace
 	    writeTree( cache, item->dotEntry() );
 
 	// Recurse through subdirectories
-	for ( FileInfo * child = item->firstChild(); child; child = child->next() )
+	for ( const FileInfo * child = item->firstChild(); child; child = child->next() )
 	    writeTree( cache, child );
     }
 

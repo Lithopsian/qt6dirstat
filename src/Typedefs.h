@@ -12,6 +12,7 @@
 #include "limits.h" // LLONG_MAX
 
 #include <QColor>
+#include <QTextStream>
 
 
 // The size of a standard disk block.
@@ -38,13 +39,14 @@ namespace QDirStat
 
     class MountPoint;
     using MountPointList = QList<MountPoint *>;
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    const static auto endl = ::endl;
-    const static auto SkipEmptyParts = QString::SkipEmptyParts;
-#endif
-
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+namespace Qt
+{
+    const static auto endl1 = ::endl;
+    const static auto SkipEmptyParts1 = QString::SkipEmptyParts;
+}
+#endif
 
 #endif  // Typedefs_h

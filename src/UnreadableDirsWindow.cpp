@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QPointer>
-
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
 #include "DirTree.h"

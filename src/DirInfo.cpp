@@ -118,6 +118,12 @@ DirInfo::DirInfo( DirInfo       * parent,
 }
 
 
+DirInfo::~DirInfo()
+{
+    clear();
+}
+
+
 void DirInfo::initCounts()
 {
     // logDebug() << this << Qt::endl;
@@ -378,7 +384,7 @@ int DirInfo::countDirectChildren()
 
     _directChildrenCount = 0;
 
-    for ( FileInfo * child = _firstChild; child; child = child->next() )
+    for ( const FileInfo * child = _firstChild; child; child = child->next() )
 	++_directChildrenCount;
 
     if ( _dotEntry )
@@ -778,9 +784,6 @@ const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sort
 
 void DirInfo::dropSortCache()
 {
-    if ( !_sortInfo )
-	return;
-
     delete _sortInfo;
     _sortInfo = nullptr;
 }

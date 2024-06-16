@@ -65,7 +65,7 @@ namespace
     {
 	QStringList urls;
 
-	for ( const auto item : items )
+	for ( const FileInfo * item : items )
 	{
 	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
 

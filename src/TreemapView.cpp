@@ -712,9 +712,9 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 
     //logDebug() << " map built in " << _stopwatch.restart() << "ms" << (map.isEmpty() ? " (empty) " : QString()) << Qt::endl;
 
-    for ( auto it = newSelection.constBegin(); it != newSelection.constEnd(); ++it )
+    for ( const FileInfo * item : newSelection )
     {
-        TreemapTile * tile = map.isEmpty() ? findTile( _rootTile, *it ) : map.value( *it, nullptr );
+        TreemapTile * tile = map.isEmpty() ? findTile( _rootTile, item ) : map.value( item, nullptr );
         if ( tile )
             tile->setSelected( true );
     }

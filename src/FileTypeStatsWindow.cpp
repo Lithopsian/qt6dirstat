@@ -307,7 +307,7 @@ void FileTypeStatsWindow::addTopXOtherItems( FileTypeItem          * otherCatego
 #if 0
         QStringList suffixes;
 
-        for ( FileTypeItem * item : otherItems )
+        for ( const FileTypeItem * item : otherItems )
             suffixes << item->text(0);
 
         logDebug() << "Discarding " << (int)otherItems.size()

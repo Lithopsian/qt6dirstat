@@ -113,6 +113,12 @@ namespace
 } // namespace
 
 
+MimeCategorizer::~MimeCategorizer()
+{
+    clear();
+}
+
+
 MimeCategorizer * MimeCategorizer::instance()
 {
     static MimeCategorizer _instance;

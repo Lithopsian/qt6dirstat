@@ -37,7 +37,7 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
 
 ConfigDialog * ConfigDialog::sharedInstance( QWidget * parent )
 {
-    static QPointer<ConfigDialog> _sharedInstance = nullptr;
+    static QPointer<ConfigDialog> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new ConfigDialog( parent );
@@ -50,7 +50,6 @@ void ConfigDialog::showSharedInstance( QWidget * parent )
 {
     // Get the shared instance, creating it if necessary
     ConfigDialog * instance = sharedInstance( parent );
-
     instance->show();
     instance->raise();
 }

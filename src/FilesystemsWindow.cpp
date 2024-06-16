@@ -10,7 +10,6 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QMenu>
-#include <QPointer>
 
 #include "FilesystemsWindow.h"
 #include "DirTreeModel.h"
@@ -100,7 +99,7 @@ FilesystemsWindow::~FilesystemsWindow()
 
 FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 {
-    static QPointer<FilesystemsWindow> _sharedInstance = nullptr;
+    static QPointer<FilesystemsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
 	_sharedInstance = new FilesystemsWindow( parent );

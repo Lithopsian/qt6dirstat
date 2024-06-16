@@ -58,7 +58,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~DirTreeModel() override;
+	~DirTreeModel() override { writeSettings(); }
 
 	/**
 	 * Returns the internal DirTree this view works on.

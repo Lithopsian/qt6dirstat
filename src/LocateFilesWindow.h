@@ -49,7 +49,7 @@ namespace QDirStat
 	 * when appropriate.
 	 **/
 	LocateFilesWindow( TreeWalker * treeWalker,
-                           QWidget    * parent = nullptr );
+                                    QWidget    * parent = nullptr );
 
 	/**
 	 * Destructor.

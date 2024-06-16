@@ -21,14 +21,14 @@ namespace QDirStat
 
     class GeneralConfigPage: public QWidget
     {
-        Q_OBJECT
+	Q_OBJECT
 
     public:
 
 	/**
 	 * Constructor.
 	 **/
-        GeneralConfigPage( ConfigDialog * parent );
+	GeneralConfigPage( ConfigDialog * parent );
 
 
     protected slots:

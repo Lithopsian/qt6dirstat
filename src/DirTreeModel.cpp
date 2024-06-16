@@ -462,12 +462,12 @@ DirTreeModel::DirTreeModel( QObject * parent ):
 	     this,          &DirTreeModel::sendPendingUpdates );
 }
 
-
+/*
 DirTreeModel::~DirTreeModel()
 {
     writeSettings();
 }
-
+*/
 
 void DirTreeModel::readSettings()
 {

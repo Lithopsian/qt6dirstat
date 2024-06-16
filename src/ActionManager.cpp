@@ -12,7 +12,6 @@
 #include "ActionManager.h"
 #include "CleanupCollection.h"
 #include "Exception.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -40,7 +39,7 @@ void ActionManager::addTree( const QWidget * tree )
 {
     CHECK_PTR( tree );
 
-    _widgetTrees << QPointer<const QWidget>( tree );
+    _widgetTrees << tree;
 }
 
 

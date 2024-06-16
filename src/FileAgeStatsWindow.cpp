@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <QPointer>
 #include <QKeyEvent>
+#include <QPointer>
 
 #include "FileAgeStatsWindow.h"
 #include "FileAgeStats.h"

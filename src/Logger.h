@@ -16,6 +16,9 @@
 #include <QStringList>
 #include <QTextStream>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+#include "Typedefs.h" // Qt::endl
+#endif
 
 // Intentionally not using LogDebug, LogMilestone etc. to avoid confusion
 // because of simple typos: logDebug() vs. LogDebug()

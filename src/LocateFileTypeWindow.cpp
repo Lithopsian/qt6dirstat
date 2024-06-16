@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QPointer>
 #include <QResizeEvent>
 
 #include "LocateFileTypeWindow.h"

@@ -42,11 +42,6 @@ namespace QDirStat
 	{}
 
 	/**
-	 * Destructor.
-	 **/
-//	virtual ~FileSizeLabel() {}
-
-	/**
 	 * Set the text of a file size label including special handling for
 	 * sparse files and files with multiple hard links.
 	 **/

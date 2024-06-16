@@ -38,7 +38,7 @@ namespace QDirStat
 	/**
 	 * Constructor. Protected because this is a singleton class.
 	 **/
-	ActionManager() {}
+	ActionManager() = default;
 
 	/**
 	 * Return the singleton instance of this class.  Private, use
@@ -81,6 +81,9 @@ namespace QDirStat
 
 	/**
 	 * Returns a pointer to the CleanupCollection.
+	 *
+	 * Note that the CleanupCollection is not created in the constructor,
+	 * and 0 will be returned until setActions() has been called.
 	 **/
 	static CleanupCollection * cleanupCollection()
 	    { return instance()->_cleanupCollection; }

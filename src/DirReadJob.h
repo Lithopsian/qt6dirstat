@@ -14,6 +14,7 @@
 
 #include <QTextStream>
 #include <QTimer>
+#include <QVector>
 
 
 namespace QDirStat

@@ -76,14 +76,15 @@ namespace QDirStat
 
 	/**
 	 * Constructor.
-	 * This is a singleton class; use instance() tp get a categorizer object.
+	 *
+	 * This is a singleton class; use instance() to get the categorizer object.
 	 **/
 	MimeCategorizer() { readSettings(); }
 
 	/**
 	 * Destructor.
 	 **/
-	~MimeCategorizer() override { clear(); }
+	~MimeCategorizer() override;
 
 	/**
 	 * Suppress copy and assignment constructors (this is a singleton)
@@ -95,8 +96,8 @@ namespace QDirStat
     public:
 
 	/**
-	 * Get the singleton for this class. The first call to this will create
-	 * it.
+	 * Get the singleton for this class. The first call to this function will
+	 * create the singleton.
 	 **/
 	static MimeCategorizer * instance();
 
