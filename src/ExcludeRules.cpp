@@ -234,14 +234,14 @@ namespace
 
 void ExcludeRules::readSettings()
 {
-//    clear();
+//    clear(); // a new object is always used
 
     const SettingsEnumMapping mapping = patternSyntaxMapping();
 
     ExcludeRuleSettings settings;
 
     // Read all settings groups [ExcludeRule_xx] that were found
-    const auto groups = settings.findGroups( settings.groupPrefix() );
+    const auto groups = settings.findListGroups();
     for ( const QString & groupName : groups )
     {
 	settings.beginGroup( groupName );
@@ -283,7 +283,7 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
     ExcludeRuleSettings settings;
 
     // Remove all leftover exclude rule descriptions
-    settings.removeGroups( settings.groupPrefix() );
+    settings.removeListGroups();
 
     SettingsEnumMapping mapping = patternSyntaxMapping();
 
@@ -294,7 +294,7 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
 	const ExcludeRule * rule = newRules.at(i);
 	if ( rule && !rule->pattern().isEmpty() )
 	{
-	    settings.beginGroup( "ExcludeRule", i+1 );
+	    settings.beginListGroup( i+1 );
 
 	    settings.setValue( "Pattern",           rule->pattern()           );
 	    settings.setValue( "CaseSensitive",     rule->caseSensitive()     );
@@ -303,7 +303,7 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
 
 	    writeEnumEntry( settings, "Syntax", rule->patternSyntax(), mapping );
 
-	    settings.endGroup(); // [ExcludeRule_01], [ExcludeRule_02], ...
+	    settings.endListGroup(); // [ExcludeRule_01], [ExcludeRule_02], ...
 	}
     }
 }

@@ -198,9 +198,6 @@ CleanupCollection::CleanupCollection( QObject        * parent,
     addToToolBar( toolBar );
     addToMenu( menu );
 
-    // Initialize to show the current status in the log; the map will be cached
-//    (void)Cleanup::desktopSpecificApps();
-
     // Available Cleanups depend on the currently-selected items
     connect( selectionModel, QOverload<>::of( &SelectionModel::selectionChanged ),
 	     this,           &CleanupCollection::updateActions );
@@ -209,7 +206,6 @@ CleanupCollection::CleanupCollection( QObject        * parent,
 
 CleanupCollection::~CleanupCollection()
 {
-//    writeSettings( _cleanupList );
     clear();
 }
 
@@ -496,7 +492,7 @@ void CleanupCollection::readSettings()
     CleanupSettings settings;
 
     // Read all settings groups [Cleanup_xx] that were found
-    const auto groups = settings.findGroups( settings.groupPrefix() );
+    const auto groups = settings.findListGroups();
     for ( const QString & groupName : groups )
     {
 	// Read one cleanup
@@ -517,11 +513,13 @@ void CleanupCollection::readSettings()
 	const bool outputWindowAutoClose = settings.value( "OutputWindowAutoClose", false ).toBool();
 	const int  outputWindowTimeout   = settings.value( "OutputWindowTimeout",   0     ).toInt();
 
-	const int refreshPolicy	 = readEnumEntry( settings, "RefreshPolicy",
+	const int refreshPolicy	 = readEnumEntry( settings,
+						  "RefreshPolicy",
 						  Cleanup::NoRefresh,
 						  refreshMapping );
 
-	const int outputWindowPolicy = readEnumEntry( settings, "OutputWindowPolicy",
+	const int outputWindowPolicy = readEnumEntry( settings,
+						      "OutputWindowPolicy",
 						      Cleanup::ShowAfterTimeout,
 						      outputWindowMapping );
 
@@ -562,7 +560,7 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
     CleanupSettings settings;
 
     // Remove all leftover cleanup descriptions
-    settings.removeGroups( settings.groupPrefix() );
+    settings.removeListGroups();
 
     const SettingsEnumMapping refreshMapping = refreshPolicyMapping();
     const SettingsEnumMapping outputWindowMapping  = outputWindowPolicyMapping();
@@ -582,7 +580,7 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 
     for ( int i=0; i < newCleanups.size(); ++i )
     {
-	settings.beginGroup( "Cleanup", i+1 );
+	settings.beginListGroup( i+1 );
 
 	const Cleanup * cleanup = newCleanups.at(i);
 	if ( !cleanup || cleanup->command().isEmpty() || cleanup->title().isEmpty() )
@@ -614,7 +612,7 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 	if ( !cleanup->shortcut().isEmpty() )
 	    settings.setValue( "Hotkey", cleanup->shortcut().toString() );
 
-	settings.endGroup(); // [Cleanup_01], [Cleanup_02], ...
+	settings.endListGroup(); // [Cleanup_01], [Cleanup_02], ...
     }
 
     // Load the new settings into the real cleanup collection

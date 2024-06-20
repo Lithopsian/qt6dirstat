@@ -7,10 +7,7 @@
  *              Ian Nartowicz
  */
 
-#define DONT_DEPRECATE_STRERROR // for Logger,h
-
 #include <unistd.h> // chown()
-#include <errno.h>
 
 #include <QCoreApplication>
 #include <QProcessEnvironment>
@@ -21,38 +18,99 @@
 #include "SysUtil.h"
 
 
+#define VERBOSE_MIGRATE 0
+
+
 using namespace QDirStat;
 
 
-QSet<QString> Settings::_usedConfigFiles;
+UsedFileList Settings::_usedConfigFiles;
 
 
 namespace
 {
     /**
+     * Return true if the settings object has any settings group that
+     * starts with 'groupPrefix'.
+     **/
+    bool hasGroup( const QStringList & groups, QLatin1String groupPrefix )
+    {
+	for ( const QString & group : groups )
+	{
+	    if ( group.startsWith( groupPrefix ) )
+		return true;
+	}
+
+	return false;
+    }
+
+
+    QStringList findGroups( const QStringList & groups, QLatin1String groupPrefix )
+    {
+	QStringList result;
+
+	for ( const QString & group : groups )
+	{
+	    if ( group.startsWith( groupPrefix ) )
+		result << group;
+	}
+
+	return result;
+    }
+
+
+    void removeGroups( QSettings * settings, QLatin1String groupPrefix )
+    {
+	const auto groups = settings->childGroups();
+	for ( const QString & group : groups )
+	{
+	    if ( group.startsWith( groupPrefix ) )
+	    {
+#if VERBOSE_MIGRATE
+		logVerbose() << "	Removing " << group << Qt::endl;
+#endif
+		settings->remove( group );
+	    }
+	}
+    }
+
+
+    /**
      * Move all settings groups starting with 'groupPrefix' from settings
      * object 'from' to settings object 'to'.
      **/
-    void moveGroups( const QString & groupPrefix,
-		     Settings      * from,
-		     Settings      * to )
+    void moveGroups( Settings * from, Settings * to )
     {
-	if ( !to->hasGroup( groupPrefix ) )
+	if ( hasGroup( to->childGroups(), to->listGroupPrefix() ) )
 	{
-	    logInfo() << "Migrating " << groupPrefix << "* to " << to->name() << Qt::endl;
+#if VERBOSE_MIGRATE
+	    logVerbose() << "Target settings " << to->applicationName()
+	                 << " have group starting with \"" << to->listGroupPrefix()
+	                 << "\" - not migrating"
+	                 << Qt::endl;
+#endif
+	}
+	else
+	{
+	    logInfo() << "Migrating " << to->listGroupPrefix()
+	              << "* to " << to->applicationName()
+	              << Qt::endl;
 
-	    const QStringList groups = from->findGroups( groupPrefix );
+	    const auto groups = findGroups( from->childGroups(), to->listGroupPrefix() );
 	    for ( const QString & group : groups )
 	    {
-		// logVerbose() << "  Migrating " << group << Qt::endl;
-
+#if VERBOSE_MIGRATE
+		logVerbose() << "	Migrating " << group << Qt::endl;
+#endif
 		from->beginGroup( group );
 		to->beginGroup( group );
 
-		const QStringList keys = from->allKeys();
+		const auto keys = from->allKeys();
 		for ( const QString & key : keys )
 		{
-		    // logVerbose() << "	Copying " << key << Qt::endl;
+#if VERBOSE_MIGRATE
+		    logVerbose() << "		Copying " << key << Qt::endl;
+#endif
 		    to->setValue( key, from->value( key ) );
 		}
 
@@ -60,17 +118,8 @@ namespace
 		from->endGroup();
 	    }
 	}
-	else
-	{
-#if 0
-	    logVerbose() << "Target settings " << to->name()
-			 << " have group " << groupPrefix
-			 << " - nothing to migrate"
-			 << Qt::endl;
-#endif
-	}
 
-	from->removeGroups( groupPrefix );
+	removeGroups( from, to->listGroupPrefix() );
     }
 
 
@@ -78,32 +127,38 @@ namespace
      * Change the owner of the config file to the user in the $SUDO_UID /
      * $SUDO_GID environment variables (if set).
      **/
-    void fixFileOwner( const QString & filename )
+    inline void fixFileOwner( const UsedFileList & filenames )
     {
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 	const QString sudoUid = env.value( "SUDO_UID", QString() );
 	const QString sudoGid = env.value( "SUDO_GID", QString() );
 
-	if ( !sudoUid.isEmpty() && !sudoGid.isEmpty() )
+	if ( sudoUid.isEmpty() || sudoGid.isEmpty() )
 	{
-	    const uid_t   uid     = sudoUid.toInt();
-	    const gid_t   gid     = sudoGid.toInt();
-	    const QString homeDir = SysUtil::homeDir( uid );
-	    if ( homeDir.isEmpty() )
-	    {
-		logWarning() << "Can't get home directory for UID " << uid << Qt::endl;
-		return;
-	    }
+	    logWarning() << "$SUDO_UID / $SUDO_GID not set" << Qt::endl;
+	    return;
+	}
 
+	const uid_t   uid     = sudoUid.toInt();
+	const QString homeDir = SysUtil::homeDir( uid );
+	if ( homeDir.isEmpty() )
+	{
+	    logWarning() << "Can't get home directory for UID " << uid << Qt::endl;
+	    return;
+	}
+
+	for ( const QString & filename : filenames )
+	{
 	    if ( filename.startsWith( homeDir ) )
 	    {
-		const int result = ::chown( filename.toUtf8(), uid, gid );
-		if ( result != 0 )
+		const gid_t gid = sudoGid.toInt();
+
+		if ( ::chown( filename.toUtf8(), uid, gid ) != 0 )
 		{
 		    logError() << "Can't chown " << filename
 			       << " to UID "  << uid
 			       << " and GID " << gid
-			       << ": " << strerror( errno )
+			       << ": " << formatErrno()
 			       << Qt::endl;
 		}
 		else
@@ -118,42 +173,25 @@ namespace
 	    }
 	    else
 	    {
-		// logInfo() << "Not touching " << filename << Qt::endl;
+		logInfo() << "Don't chown " << filename << Qt::endl;
 	    }
-	}
-	else
-	{
-	    logWarning() << "$SUDO_UID / $SUDO_GID not set" << Qt::endl;
 	}
     }
 
 } // namespace
 
 
-Settings::Settings( const QString & name ):
-    QSettings ( QCoreApplication::organizationName(),
-		name.isEmpty()? QCoreApplication::applicationName() : name ),
-    _name { name }
+Settings::Settings( const char * suffix ):
+    QSettings ( QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix )
 {
     _usedConfigFiles << fileName();
-}
-
-
-void Settings::beginGroup( const QString & prefix, int no )
-{
-    _groupPrefix = prefix;
-
-    QSettings::beginGroup( prefix + QString( "_%1" ).arg( no, 2, 10, QLatin1Char( '0' ) ) );
 }
 
 
 void Settings::fixFileOwners()
 {
     if ( SysUtil::runningWithSudo() )
-    {
-        for ( const QString & filename : asConst( _usedConfigFiles ) )
-            fixFileOwner( filename );
-    }
+	fixFileOwner( _usedConfigFiles );
 }
 
 
@@ -164,104 +202,64 @@ void Settings::ensureToplevel()
 }
 
 
-QStringList Settings::findGroups( const QString & groupPrefix )
+QStringList Settings::findListGroups()
 {
     ensureToplevel();
 
-    QStringList result;
-
-    const auto groups = childGroups();
-    for ( const QString & group : groups )
-    {
-	if ( group.startsWith( groupPrefix ) )
-	    result << group;
-    }
-
-    return result;
+    return findGroups( childGroups(), listGroupPrefix() );
 }
 
 
-bool Settings::hasGroup( const QString & groupPrefix )
+void Settings::removeListGroups()
 {
     ensureToplevel();
 
-    const auto groups = childGroups();
-    for ( const QString & group : groups )
-    {
-	if ( group.startsWith( groupPrefix ) )
-	    return true;
-    }
-
-    return false;
-}
-
-
-void Settings::removeGroups( const QString & groupPrefix )
-{
-    ensureToplevel();
-
-    const auto groups = childGroups();
-    for ( const QString & group : groups )
-    {
-	if ( group.startsWith( groupPrefix ) )
-	    remove( group );
-    }
+    removeGroups( this, listGroupPrefix() );
 }
 
 
 QString Settings::primaryFileName()
 {
     QSettings settings;
+
     return settings.fileName();
+}
+
+
+void Settings::migrate()
+{
+    Settings commonSettings;
+
+    // Silently skip this if there are no legacy groups in the common settings
+    if ( hasGroup( commonSettings.childGroups(), listGroupPrefix() ) )
+	moveGroups( &commonSettings, this );
 }
 
 
 
 
 CleanupSettings::CleanupSettings():
-    Settings( QCoreApplication::applicationName() + "-cleanup" )
+    Settings( "-cleanup" )
 {
-    setGroupPrefix( "Cleanup_" );
     migrate();
-}
-
-
-void CleanupSettings::migrate()
-{
-    Settings commonSettings;
-    moveGroups( groupPrefix(), &commonSettings, this );
-}
-
-
-
-
-MimeCategorySettings::MimeCategorySettings():
-    Settings( QCoreApplication::applicationName() + "-mime" )
-{
-    setGroupPrefix( "MimeCategory_" );
-    migrate();
-}
-
-
-void MimeCategorySettings::migrate()
-{
-    Settings commonSettings;
-    moveGroups( groupPrefix(), &commonSettings, this );
 }
 
 
 
 
 ExcludeRuleSettings::ExcludeRuleSettings():
-    Settings( QCoreApplication::applicationName() + "-exclude" )
+    Settings( "-exclude" )
 {
-    setGroupPrefix( "ExcludeRule_" );
     migrate();
 }
 
 
-void ExcludeRuleSettings::migrate()
+
+
+MimeCategorySettings::MimeCategorySettings():
+    Settings( "-mime" )
 {
-    Settings commonSettings;
-    moveGroups( groupPrefix(), &commonSettings, this );
+    migrate();
 }
+
+

@@ -80,11 +80,11 @@ namespace
 	MimeCategorySettings settings;
 
 	// Remove all leftover cleanup descriptions
-	settings.removeGroups( settings.groupPrefix() );
+	settings.removeListGroups();
 
 	for ( int i=0; i < categoryList.size(); ++i )
 	{
-	    settings.beginGroup( "MimeCategory", i+1 );
+	    settings.beginListGroup( i+1 );
 
 	    const MimeCategory * category = categoryList.at(i);
 
@@ -106,7 +106,7 @@ namespace
 
 	    settings.setValue( "PatternsCaseSensitive", patterns );
 
-	    settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
+	    settings.endListGroup(); // [MimeCategory_01], [MimeCategory_02], ...
 	}
     }
 
@@ -122,6 +122,7 @@ MimeCategorizer::~MimeCategorizer()
 MimeCategorizer * MimeCategorizer::instance()
 {
     static MimeCategorizer _instance;
+
     return &_instance;
 }
 
@@ -410,34 +411,25 @@ void MimeCategorizer::buildWildcardLists( const MimeCategory * category )
 
 void MimeCategorizer::readSettings()
 {
-    //logDebug() << Qt::endl;
-
-    Settings generalSettings;
-    generalSettings.beginGroup( "MimeCategorizer" );
-    generalSettings.endGroup();
-
-    MimeCategorySettings settings;
-    const QStringList mimeCategoryGroups = settings.findGroups( settings.groupPrefix() );
-
     clear();
 
-    // Read all settings groups [MimeCategory_xx] that were found
+    MimeCategorySettings settings;
 
+    // Read all settings groups [MimeCategory_xx] that were found
+    const QStringList mimeCategoryGroups = settings.findListGroups();
     for ( const QString & groupName : mimeCategoryGroups )
     {
 	settings.beginGroup( groupName );
-
 	QString name  = settings.value( "Name", groupName ).toString();
-	QColor	color = readColorEntry( settings, "Color", "#b0b0b0" );
+	QColor  color = readColorEntry( settings, "Color", "#b0b0b0" );
 	QStringList patternsCaseInsensitive = settings.value( "PatternsCaseInsensitive" ).toStringList();
 	QStringList patternsCaseSensitive   = settings.value( "PatternsCaseSensitive"   ).toStringList();
+	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
 
 	//logDebug() << name << Qt::endl;
 	MimeCategory * category = create( name, color );
 	category->addPatterns( patternsCaseInsensitive, Qt::CaseInsensitive );
 	category->addPatterns( patternsCaseSensitive,   Qt::CaseSensitive   );
-
-	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
     }
 
     if ( _categories.isEmpty() )

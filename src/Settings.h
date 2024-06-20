@@ -10,6 +10,7 @@
 #ifndef Settings_h
 #define Settings_h
 
+#include <QCoreApplication>
 #include <QSettings>
 #include <QStringList>
 #include <QSet>
@@ -17,6 +18,8 @@
 
 namespace QDirStat
 {
+    typedef QSet<QString> UsedFileList;
+
     /**
      * Specialized QSettings subclass for generic settings, i.e. the main
      * config file ~/.config/QDirStat/QDirStat.conf
@@ -30,47 +33,49 @@ namespace QDirStat
     {
 	Q_OBJECT
 
+    protected:
+
+	/**
+	 * Protected constructor: only used as a delegating
+	 * constructor by the default constructor and derived
+	 * classes The application (ie. config filename) is set
+	 * to QCoreApplication::applicationName() + 'suffix'.
+	 **/
+	Settings( const char * suffix );
+
+
     public:
 
 	/**
-	 * Create a settings object with the specified name. If 'name' is
-	 * empty, the application name is used, i.e. the settings are stored in
-	 * the main config file.
+	 * Default constructor.  This is the public Settings constructor
+	 * and it does not use a suffix, so the base config filename is
+	 * used for all groups.
 	 **/
-	Settings( const QString & name = QString() );
+	Settings():
+	    Settings ( "" )
+	{}
 
 	/**
-	 * Name of this settings object. This returns an empty string for the
-	 * generic settings, i.e. the main config file.
+	 * Prefix used to construct section names such as Cleanup_01.
+	 * Not normally used in the base class.
 	 **/
-	const QString & name() const { return _name; }
+	virtual const QLatin1String listGroupPrefix() const
+	    { return QLatin1String(); }
 
 	/**
-	 * Name of the group prefix of this settings object, e.g. "Cleanup_"
-	 * for a derived class that uses settings groups [Cleanup_01],
-	 * [Cleanup_02] etc.
+	 * Begin a group (section) by using a prefix and number, for
+	 * example Cleanup_01.  This is only used normally by derived
+	 * classes which  will provide a suitable prefix.
 	 **/
-	const QString & groupPrefix() const { return _groupPrefix; }
+	void beginListGroup( int num )
+	    { QSettings::beginGroup( listGroupPrefix() + QString( "_%1" ).arg( num, 2, 10, QLatin1Char( '0' ) ) ); }
 
 	/**
-	 * The
+	 * Provided to pair with beginListGroup(), although it just calls
+	 * QSettings::endGroup().
 	 **/
-	void setGroupPrefix( const QString & prefix ) { _groupPrefix = prefix; }
-
-	/**
-	 * Overwritten version of beginGroup( const QString & groupName ):
-	 *
-	 * Begin a settings group with a name with a prefix and a numeric part,
-	 * e.g. "Cleanup_01". This also sets the group prefix.
-	 * End this with endGroup().
-	 **/
-	void beginGroup( const QString & groupPrefix, int no );
-
-	/**
-	 * Original inherited version of beginGroup
-	 **/
-	void beginGroup( const QString & groupName )
-	    { QSettings::beginGroup( groupName ); }
+	void endListGroup()
+	    { QSettings::endGroup(); }
 
 	/**
 	 * Set a value, but only if that key is not already in the settings.
@@ -83,25 +88,16 @@ namespace QDirStat
 	    { if ( !contains( key ) ) setValue( key, value ); }
 
 	/**
-	 * Find all settings groups that start with 'groupPrefix'.
+	 * Find all settings groups that start with the group prefix
+	 * for this object.
 	 **/
-	QStringList findGroups( const QString & groupPrefix );
+	QStringList findListGroups();
 
 	/**
-	 * Return true if this settings object has any settings group that
-	 * starts with 'groupPrefix'.
+	 * Remove all settings groups that start with the group prefix
+	 * for this object.
 	 **/
-	bool hasGroup( const QString & groupPrefix );
-
-	/**
-	 * Remove all settings groups that start with 'groupPrefix'.
-	 **/
-	void removeGroups( const QString & groupPrefix );
-
-	/**
-	 * Go to the settings top level
-	 **/
-	void ensureToplevel();
+	void removeListGroups();
 
 	/**
 	 * Return the filename of the main settings file
@@ -115,22 +111,34 @@ namespace QDirStat
 	static void fixFileOwners();
 
 
+    protected:
+
+	/**
+	 * Go to the settings top level
+	 **/
+	void ensureToplevel();
+
+	/**
+	 * Migrate settings of the common settings (the main config file) to
+	 * this one.  The config file format changed nearly ten years ago, so
+	 * this is more or less redundant.
+	 **/
+	void migrate();
+
+
     private:
 
 	// Data members
 
-	QString _name;
-	QString _groupPrefix;
-
-	static QSet<QString> _usedConfigFiles;
+	static UsedFileList _usedConfigFiles;
     };
 
 
     /**
      * Specialized settings class for cleanup actions.
      *
-     * The general idea is that those settings are stored in a separate file so
-     * that entire file can easily replaced by a site administrator.
+     * Those settings are stored in a separate file so that the entire file
+     * can easily be replaced by a site administrator.
      **/
     class CleanupSettings: public Settings
     {
@@ -143,21 +151,19 @@ namespace QDirStat
 	 **/
 	CleanupSettings();
 
-
-    protected:
 	/**
-	 * Migrate settings of the common settings (the main config file) to
-	 * this one.
+	 * Prefix used to construct section names such as Cleanup_01.
 	 **/
-	void migrate();
+	const QLatin1String listGroupPrefix() const override { return QLatin1String( "Cleanup" ); }
+
     };
 
 
     /**
      * Specialized settings class for exclude rules.
      *
-     * The general idea is that those settings are stored in a separate file so
-     * that entire file can easily replaced by a site administrator.
+     * Those settings are stored in a separate file so that the entire file
+     * can easily be replaced by a site administrator.
      **/
     class ExcludeRuleSettings: public Settings
     {
@@ -170,21 +176,19 @@ namespace QDirStat
 	 **/
 	ExcludeRuleSettings();
 
-
-    protected:
 	/**
-	 * Migrate settings of the common settings (the main config file) to
-	 * this one.
+	 * Prefix used to construct section names such as ExcludeRule_01.
 	 **/
-	void migrate();
+	const QLatin1String listGroupPrefix() const override { return QLatin1String( "ExcludeRule" ); }
+
     };
 
 
     /**
      * Specialized settings class for MIME categories.
      *
-     * The general idea is that those settings are stored in a separate file so
-     * that entire file can easily replaced by a site administrator.
+     * Those settings are stored in a separate file so that the entire file
+     * can easily be replaced by a site administrator.
      **/
     class MimeCategorySettings: public Settings
     {
@@ -197,13 +201,11 @@ namespace QDirStat
 	 **/
 	MimeCategorySettings();
 
-
-    protected:
 	/**
-	 * Migrate settings of the common settings (the main config file) to
-	 * this one.
+	 * Prefix used to construct section names such as MimeCategory_01.
 	 **/
-	void migrate();
+	const QLatin1String listGroupPrefix() const override { return QLatin1String( "MimeCategory" ); }
+
     };
 
 }	// namespace QDirStat
