@@ -9,11 +9,10 @@
 #ifndef Typedefs_h
 #define Typedefs_h
 
-#include "limits.h" // LLONG_MAX
+#include <limits> // LLONG_MAX
 
 #include <QColor>
-#include <QTextStream>
-
+#include <QList>
 
 // The size of a standard disk block.
 //
@@ -41,12 +40,26 @@ namespace QDirStat
     using MountPointList = QList<MountPoint *>;
 }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
 namespace Qt
 {
-    const static auto endl1 = ::endl;
-    const static auto SkipEmptyParts1 = QString::SkipEmptyParts;
-}
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    const static auto endl = ::endl;
+    const static auto SkipEmptyParts = QString::SkipEmptyParts;
 #endif
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 4, 0)
+    inline namespace Literals
+    {
+        inline namespace StringLiterals
+        {
+            constexpr inline QLatin1String operator""_L1( const char * str, size_t size ) noexcept
+                { return QLatin1String( str, qsizetype( size ) ); }
+        }
+    }
+#endif
+}
+
+// So everyone gets _L1 automatically
+using namespace Qt::Literals::StringLiterals;
 
 #endif  // Typedefs_h
