@@ -19,8 +19,6 @@ MOC_DIR		 = .moc
 OBJECTS_DIR	 = .obj
 LIBS		+= -lz
 
-major_is_less_5 = $$find(QT_MAJOR_VERSION, [234])
-!isEmpty(major_is_less_5):DEFINES += 'Q_DECL_OVERRIDE=""'
 isEmpty(INSTALL_PREFIX):INSTALL_PREFIX = /usr
 
 TARGET		 = qdirstat
@@ -35,7 +33,7 @@ INSTALLS	+= TARGET desktop icons
 # QMAKE_LDDFLAGS	+=  -flto=auto
 
 
-SOURCES	  = main.cpp			\
+SOURCES =   main.cpp			\
             QDirStatApp.cpp             \
 	    ActionManager.cpp		\
 	    AdaptiveTimer.cpp		\
@@ -117,7 +115,6 @@ SOURCES	  = main.cpp			\
 	    SearchFilter.cpp		\
 	    SelectionModel.cpp		\
 	    Settings.cpp		\
-	    SettingsHelpers.cpp		\
 	    SizeColDelegate.cpp		\
 	    StdCleanup.cpp		\
 	    Subtree.cpp			\
@@ -132,8 +129,7 @@ SOURCES	  = main.cpp			\
 	    Wildcard.cpp
 
 
-HEADERS	  =				\
-            QDirStatApp.h		\
+HEADERS =   QDirStatApp.h		\
 	    ActionManager.h		\
 	    AdaptiveTimer.h		\
 	    Attic.h			\
@@ -206,7 +202,6 @@ HEADERS	  =				\
 	    SearchFilter.h		\
 	    SelectionModel.h		\
 	    Settings.h			\
-	    SettingsHelpers.h		\
 	    SignalBlocker.h		\
 	    SizeColDelegate.h		\
 	    StdCleanup.h		\
@@ -230,7 +225,7 @@ HEADERS	  =				\
 	    Wildcard.h
 
 
-FORMS	  = main-window.ui		   \
+FORMS =	    main-window.ui		   \
 	    cleanup-config-page.ui	   \
 	    config-dialog.ui		   \
 	    exclude-rules-config-page.ui   \
@@ -252,7 +247,6 @@ FORMS	  = main-window.ui		   \
 	    unreadable-dirs-window.ui
 
 
-
 RESOURCES = icons.qrc
 
 desktop.files	= *.desktop
@@ -260,7 +254,6 @@ desktop.path	= $$INSTALL_PREFIX/share/applications
 
 icons.files	= icons/qdirstat.svg
 icons.path	= $$INSTALL_PREFIX/share/icons/hicolor/scalable/apps
-
 
 mac:ICON	= icons/qdirstat.icns
 
