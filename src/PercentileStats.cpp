@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <math.h>	// ceil()
+#include <cmath>	// ceil()
 #include <algorithm>    // std::sort()
 
 #include "PercentileStats.h"

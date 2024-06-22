@@ -11,7 +11,6 @@
 #define DataColumns_h
 
 #include <QList>
-#include <QString>
 #include <QStringList>
 #include <QTextStream>
 

@@ -10,9 +10,6 @@
 #ifndef Trash_h
 #define Trash_h
 
-#include <QObject>
-
-
 namespace QDirStat
 {
     class TrashDir;

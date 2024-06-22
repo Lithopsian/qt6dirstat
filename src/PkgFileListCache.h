@@ -10,7 +10,6 @@
 #ifndef PkgFileListCache_h
 #define PkgFileListCache_h
 
-#include <QString>
 #include <QSet>
 
 

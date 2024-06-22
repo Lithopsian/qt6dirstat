@@ -9,7 +9,6 @@
 
 #include <QPainter>
 #include <QPalette>
-#include <QTreeView>
 #include <QApplication>
 
 #include "SizeColDelegate.h"

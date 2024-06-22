@@ -243,12 +243,7 @@ bool FileTypeStats::isCruft( const QString & suffix, const MimeCategory * catego
 
 void FileTypeStats::sanityCheck()
 {
-    FileSize categoryTotal = 0LL;
-
-    for ( const FileSize sum : asConst( _categorySum ) )
-	categoryTotal += sum;
-
-    const FileSize missing = totalSize() - categoryTotal;
+    const FileSize missing = totalSize() - std::accumulate( _categorySum.cbegin(), _categorySum.cend(), 0LL );
 
     logDebug() << "Unaccounted in categories: " << formatSize( missing )
 	       << " of " << formatSize( totalSize() )

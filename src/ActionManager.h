@@ -10,11 +10,13 @@
 #ifndef ActionManager_h
 #define ActionManager_h
 
-#include <QAction>
 #include <QList>
-#include <QMenu>
 #include <QPointer>
-#include <QToolBar>
+
+
+class QAction;
+class QMenu;
+class QToolBar;
 
 
 namespace QDirStat

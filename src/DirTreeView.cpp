@@ -21,7 +21,6 @@
 #include "Logger.h"
 #include "PercentBar.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "SizeColDelegate.h"
 
 
@@ -59,12 +58,15 @@ void DirTreeView::readSettings()
     Settings settings;
 
     settings.beginGroup( "DirTreeView" );
-    const int barWidth = settings.value( "PercentBarWidth", 150 ).toInt();
-    settings.setDefaultValue( "PercentBarWidth", barWidth );
-    const QColor barBackground = readColorEntry( settings, "PercentBarBackground", QColor( 160, 160, 160 ) );
-    setDefaultValue( settings, "PercentBarBackground", barBackground );
-    const ColorList barColors = readColorListEntry( settings, "PercentBarColors", percentBarDefaultColors() );
-    setDefaultValue( settings, "PercentBarColors", barColors );
+
+    const int barWidth         = settings.value         ( "PercentBarWidth",      150 ).toInt();
+    const QColor barBackground = settings.colorValue    ( "PercentBarBackground", QColor( 160, 160, 160 ) );
+    const ColorList barColors  = settings.colorListValue( "PercentBarColors",     percentBarDefaultColors() );
+
+    settings.setDefaultValue( "PercentBarWidth",      barWidth );
+    settings.setDefaultValue( "PercentBarBackground", barBackground );
+    settings.setDefaultValue( "PercentBarColors",     barColors );
+
     settings.endGroup();
 
     // Now we have all the settings for the percent bar delegate

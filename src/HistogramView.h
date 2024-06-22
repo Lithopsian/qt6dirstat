@@ -10,7 +10,6 @@
 #ifndef HistogramView_h
 #define HistogramView_h
 
-#include <QFont>
 #include <QGraphicsView>
 
 
@@ -304,19 +303,19 @@ namespace QDirStat
 	 * Add a text item at 'pos' and return the bottom left of its bounding
 	 * rect.
 	 **/
-	QGraphicsTextItem * addText( const QPointF & pos, const QString & text );
+	QGraphicsTextItem * addText( QPointF pos, const QString & text );
 
 	/**
 	 * Add a text item at 'pos' and return the bottom left of its bounding
 	 * rect.
 	 **/
-	QPointF addText( const QPointF & pos, const QStringList & lines );
+	QPointF addText( QPointF pos, const QStringList & lines );
 
 	/**
 	 * Add a bold font text item at 'pos' and return the bottom left of its
 	 * bounding rect.
 	 **/
-	QPointF addBoldText( const QPointF & pos, const QString & text );
+	QPointF addBoldText( QPointF pos, const QString & text );
 
 	/**
 	 * Add a line.
@@ -350,7 +349,7 @@ namespace QDirStat
 	/**
 	 * Calculate the content geometry to fit into 'newSize'.
 	 **/
-	void calcGeometry( const QSize & newSize );
+	void calcGeometry( QSize newSize );
 
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.

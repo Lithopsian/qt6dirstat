@@ -7,12 +7,14 @@
  *              Ian Nartowicz
  */
 
-#include <math.h> // round()
+#include <cmath> // round()
 
 #include <QElapsedTimer>
+#include <QGraphicsSceneMouseEvent>
 #include <QImage>
 #include <QMenu>
 #include <QPainter>
+#include <QtConcurrent/QtConcurrent>
 
 #include "TreemapTile.h"
 #include "ActionManager.h"

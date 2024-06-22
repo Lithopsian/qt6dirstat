@@ -13,10 +13,8 @@
 #include <unistd.h>	// access(), getuid(), geteduid(), readlink()
 #include <sys/types.h>	// uid_t
 
-#include <QProcess>
-#include <QString>
+#include <QProcessEnvironment>
 #include <QStringBuilder>
-#include <QRegularExpression>
 
 
 // Override these before #include

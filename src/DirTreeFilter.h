@@ -12,8 +12,6 @@
 
 #include <memory>
 
-#include <QString>
-
 #include "Wildcard.h"
 
 

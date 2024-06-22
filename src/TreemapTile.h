@@ -11,7 +11,6 @@
 #define TreemapTile_h
 
 #include <QGraphicsRectItem>
-#include <QGraphicsSceneMouseEvent>
 #include <QTextStream>
 #include <QVector>
 
@@ -19,6 +18,9 @@
 
 
 #define PAINT_DEBUGGING 0 // not completely thread-safe, do not use in release versions
+
+
+class QGraphicsSceneMouseEvent;
 
 
 namespace QDirStat
@@ -182,8 +184,10 @@ namespace QDirStat
 
 	// Data members
 
-	double _xx2, _xx1;
-	double _yy2, _yy1;
+	double _xx2;
+	double _xx1;
+	double _yy2;
+	double _yy1;
 
 	CushionHeightSequence::const_iterator _height;
 

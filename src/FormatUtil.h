@@ -14,9 +14,7 @@
 #include <sys/stat.h>       // ALLPERMS
 
 #include <QFontMetrics>
-#include <QLabel>
 #include <QStringBuilder>
-#include <QTextStream>
 
 #include "Typedefs.h" // FileSize
 
@@ -40,6 +38,9 @@
 // If they also use a different bit pattern for those permissions, that's their
 // problem.
 #endif
+
+
+class QLabel;
 
 
 namespace QDirStat

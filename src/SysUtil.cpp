@@ -7,13 +7,11 @@
  *              Ian Nartowicz
  */
 
-#define DONT_DEPRECATE_STRERROR // for Logger.h
-
-#include <errno.h>
 #include <pwd.h>	// getpwuid()
 #include <grp.h>	// getgrgid()
-#include <limits.h>     // PATH_MAX
 #include <sys/stat.h>   // lstat()
+
+#include <QRegularExpression>
 
 #include "SysUtil.h"
 #include "Logger.h"
@@ -188,7 +186,7 @@ bool SysUtil::isBrokenSymLink( const QString & path )
         else
         {
             logWarning() << "Broken symlink " << path
-                         << " errno: " << strerror( errno )
+                         << " errno: " << formatErrno()
                          << Qt::endl;
             return true;
         }

@@ -10,7 +10,6 @@
 #ifndef PkgFilter_h
 #define PkgFilter_h
 
-#include <QString>
 #include <QTextStream>
 
 #include "SearchFilter.h"
@@ -54,7 +53,7 @@ namespace QDirStat
          * - If it's empty (i.e. just "Pkg:/"), it uses "SelectAll".
          **/
         PkgFilter( const QString & pattern,
-                            FilterMode      filterMode = Auto ):
+                   FilterMode      filterMode = Auto ):
             SearchFilter ( normalizedPattern( pattern ),
                            filterMode,
                            StartsWith, // defaultFilterMode

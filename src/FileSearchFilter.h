@@ -10,7 +10,6 @@
 #ifndef FileSearchFilter_h
 #define FileSearchFilter_h
 
-#include <QString>
 #include <QTextStream>
 
 #include "SearchFilter.h"

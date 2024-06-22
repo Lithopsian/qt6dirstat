@@ -10,8 +10,6 @@
 #ifndef DiscoverActions_h
 #define DiscoverActions_h
 
-#include <QString>
-
 
 namespace QDirStat
 {

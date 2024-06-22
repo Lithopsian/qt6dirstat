@@ -10,8 +10,6 @@
 #ifndef PacManPkgManager_h
 #define PacManPkgManager_h
 
-#include <QString>
-
 #include "PkgManager.h"
 
 

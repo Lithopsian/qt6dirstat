@@ -9,7 +9,8 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <QTextStream>
+#include <QLabel>
+#include <QLocale>
 
 #include "FormatUtil.h"
 

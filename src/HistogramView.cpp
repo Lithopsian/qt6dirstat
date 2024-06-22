@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <math.h> // pow(), log2()
+#include <cmath> // cbrt(), log2()
 #include <algorithm> // std::max_element
 
 #include <QGraphicsItem>
@@ -70,7 +70,7 @@ qreal HistogramView::bestBucketCount( int n )
 
     // Using the "Rice Rule" which gives more reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
-    const qreal result = 2 * pow( n, 1.0/3.0 );
+    const qreal result = 2 * std::cbrt( n );
 
     // Enforce an upper limit so each histogram bar remains wide enough
     // for tooltips and to be seen
@@ -188,12 +188,7 @@ qreal HistogramView::bucketWidth() const
 
 qreal HistogramView::bucketsTotalSum() const
 {
-    qreal sum = 0;
-
-    for ( const qreal bucket : _stats->buckets() )
-	sum += bucket;
-
-    return sum;
+    return std::accumulate( _stats->buckets().cbegin(), _stats->buckets().cend(), 0.0 );
 }
 
 
@@ -274,7 +269,7 @@ void HistogramView::autoLogHeightScale()
 }
 
 
-void HistogramView::calcGeometry( const QSize & newSize )
+void HistogramView::calcGeometry( QSize newSize )
 {
     _histogramWidth  = newSize.width();
     _histogramWidth -= _leftBorder + _rightBorder + 2 * _viewMargin;
@@ -555,7 +550,7 @@ void HistogramView::addHistogramBars()
 {
     const qreal barWidth     = _histogramWidth / _stats->buckets().size();
     const qreal bucketMaxVal = *std::max_element( _stats->buckets().cbegin(), _stats->buckets().cend() );
-    const qreal maxVal       = _useLogHeightScale ? log2( bucketMaxVal ) : bucketMaxVal;
+    const qreal maxVal       = _useLogHeightScale ? std::log2( bucketMaxVal ) : bucketMaxVal;
 
     for ( int i=0; i < _stats->buckets().size(); ++i )
     {
@@ -563,7 +558,7 @@ void HistogramView::addHistogramBars()
 
 	qreal val = _stats->buckets()[i];
 	if ( _useLogHeightScale && val > 1.0 )
-	    val = log2( val );
+	    val = std::log2( val );
 
 	const QRectF rect( i * barWidth, 0, barWidth, -( _histogramHeight + _axisExtraLength ) );
 	const qreal fillHeight = maxVal == 0 ? 0.0 : val / maxVal * _histogramHeight;
@@ -616,7 +611,7 @@ void HistogramView::addMarkers()
 }
 
 
-QGraphicsTextItem * HistogramView::addText( const QPointF & pos, const QString & text )
+QGraphicsTextItem * HistogramView::addText( QPointF pos, const QString & text )
 {
     QGraphicsTextItem * textItem = scene()->addText( text );
     textItem->setPos( pos );
@@ -625,7 +620,7 @@ QGraphicsTextItem * HistogramView::addText( const QPointF & pos, const QString &
     return textItem;
 }
 
-QPointF HistogramView::addText( const QPointF & pos, const QStringList & lines )
+QPointF HistogramView::addText( QPointF pos, const QStringList & lines )
 {
     const QGraphicsTextItem * textItem = addText( pos, lines.join( '\n' ) );
 
@@ -633,7 +628,7 @@ QPointF HistogramView::addText( const QPointF & pos, const QStringList & lines )
 }
 
 
-QPointF HistogramView::addBoldText( const QPointF & pos, const QString & text )
+QPointF HistogramView::addBoldText( QPointF pos, const QString & text )
 {
     QGraphicsTextItem * textItem = addText( pos, text );
     setBold( textItem );

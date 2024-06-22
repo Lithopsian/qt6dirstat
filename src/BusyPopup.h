@@ -11,7 +11,6 @@
 #define BusyPopup_h
 
 #include <QLabel>
-#include <QString>
 
 
 namespace QDirStat

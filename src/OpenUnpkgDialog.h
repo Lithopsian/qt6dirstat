@@ -13,7 +13,6 @@
 #include <memory>
 
 #include <QDialog>
-#include <QString>
 #include <QStringList>
 
 #include "ui_open-unpkg-dialog.h"

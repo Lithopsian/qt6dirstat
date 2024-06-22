@@ -10,9 +10,7 @@
 #ifndef UnpkgSettings_h
 #define UnpkgSettings_h
 
-#include <QString>
 #include <QStringList>
-#include <QTextStream>
 
 
 namespace QDirStat

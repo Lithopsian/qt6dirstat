@@ -11,7 +11,6 @@
 #define ExcludeRules_h
 
 #include <QList>
-#include <QString>
 #include <QTextStream>
 
 #include "Wildcard.h"
@@ -219,10 +218,10 @@ namespace QDirStat
 	 * create its own temporary set of rules.
 	 */
 	ExcludeRules( const QStringList & paths,
-		      ExcludeRule::PatternSyntax patternSyntax,
-		      bool caseSensitive,
-		      bool useFullPath,
-		      bool checkAnyFileChild );
+	              ExcludeRule::PatternSyntax patternSyntax,
+	              bool caseSensitive,
+	              bool useFullPath,
+	              bool checkAnyFileChild );
 
 	/**
 	 * Destructor.

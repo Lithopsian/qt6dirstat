@@ -10,10 +10,9 @@
 #ifndef MountPoints_h
 #define MountPoints_h
 
-#include "memory"
+#include <memory>
 
 #include <QList>
-#include <QString>
 #include <QStringList>
 #include <QTextStream>
 

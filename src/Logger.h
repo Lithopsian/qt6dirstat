@@ -10,6 +10,8 @@
 #ifndef Logger_h
 #define Logger_h
 
+#include <cerrno>
+
 #include <QFile>
 #include <QRectF>
 #include <QSizeF>
@@ -235,23 +237,28 @@ inline QTextStream & operator<<( QTextStream & str, const QRectF & rect )
     { return str << "QRectF( x: " << rect.x() << " y: " << rect.y()
                  << " width: " << rect.width() << " height: " << rect.height() << " )"; }
 
-inline QTextStream & operator<<( QTextStream & str, const QPointF & point )
+inline QTextStream & operator<<( QTextStream & str, QPointF point )
     { return str << "QPointF( x: " << point.x() << " y: " << point.y() << " )"; }
 
-inline QTextStream & operator<<( QTextStream & str, const QSizeF & size )
+inline QTextStream & operator<<( QTextStream & str, QSizeF size )
     { return str << "QSizeF( width: " << size.width() << " height: " << size.height() << " )"; }
 
-inline QTextStream & operator<<( QTextStream & str, const QSize & size )
+inline QTextStream & operator<<( QTextStream & str, QSize size )
     { return str << "QSize( width: " << size.width() << " height: " << size.height() << " )"; }
 
 
 /**
- * Format errno as a QString.
- * This is a replacement for strerror() that handles UTF-8 well:
- * In Qt 5.x, const char * is automatically converted to UTF-8 for QString.
- * In Qt 4.x, however, it uses simply fromAscii() which is almost never correct.
+ * Format errno as text.  In Qt5, const char * is treated as Latin1 in,
+ * for example, QTextstream::operator<<, so convert it to QString.  The
+ * text is explicitly converted, although this should happen by default
+ * in Qt5 and Qt6.  In Qt6, QTextStream treats const char * as UTF-8, so
+ * this can just return the plain const char * text.
  **/
-QString formatErrno();
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+    QString formatErrno();
+#else
+    inline const char * formatErrno() { return strerror( errno ); }
+#endif
 
 #ifndef DONT_DEPRECATE_STRERROR
     // Use formatErrno() instead which deals with UTF-8 issues

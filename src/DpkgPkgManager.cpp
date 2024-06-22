@@ -486,8 +486,10 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 
 	const auto splitPackages = packages.split( ", " );
 	for ( const QString & pkgName : splitPackages )
+	{
 	    if ( !pkgName.isEmpty() )
 		cache->add( pkgName, pathname );
+	}
     }
 
     logDebug() << "file list cache finished." << Qt::endl;

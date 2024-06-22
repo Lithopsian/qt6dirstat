@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QRegularExpression>
+
 #include "PacManPkgManager.h"
 #include "Logger.h"
 #include "SysUtil.h"

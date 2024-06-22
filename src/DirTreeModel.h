@@ -17,10 +17,12 @@
 #include <QIcon>
 #include <QPalette>
 #include <QSet>
-#include <QTextStream>
 #include <QTimer>
 
 #include "DataColumns.h"
+
+
+class QTreeWidget;
 
 
 namespace QDirStat
@@ -58,7 +60,7 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 **/
-	~DirTreeModel() override { writeSettings(); }
+	~DirTreeModel() override;
 
 	/**
 	 * Returns the internal DirTree this view works on.
@@ -253,6 +255,12 @@ namespace QDirStat
 	 * Return the resource path of the network mount point icon.
 	 **/
 	const QIcon & networkIcon() const { return _networkIcon; }
+
+	/**
+	 * Set the icon and font size of a QTreeWidget's items based on
+	 * the configured DirTree item size.
+	 **/
+	void setTreeWidgetSizes( QTreeWidget * widget ) const;
 
 
     public slots:

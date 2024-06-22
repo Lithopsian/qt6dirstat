@@ -15,7 +15,6 @@
 #include "DataColumns.h"
 
 
-class QHeaderView;
 class QAction;
 class QMenu;
 

@@ -10,24 +10,39 @@
 #ifndef Settings_h
 #define Settings_h
 
+#include <QColor>
 #include <QCoreApplication>
+#include <QFont>
+#include <QSet>
 #include <QSettings>
 #include <QStringList>
-#include <QSet>
+
+#include "Typedefs.h" // ColorList
 
 
 namespace QDirStat
 {
     typedef QSet<QString> UsedFileList;
+    typedef QMap<int, QLatin1String> SettingsEnumMapping;
 
     /**
      * Specialized QSettings subclass for generic settings, i.e. the main
      * config file ~/.config/QDirStat/QDirStat.conf
      *
-     * This class takes care of cleaning up leftovers of previous config file
-     * formats, for example when certain settings groups (cleanups, mime
-     * categories) were moved out from the main config file to specialized
+     * There are wrappers for reading and writing colours, colour lists,
+     * and fonts, as well as managing window geometry settings.  Note that
+     * thhe keys and groups are passed through as raw const char * to get
+     * the benefit of using QAnyStringView in Qt6.  This does restrict
+     * callers of the API pretty much to hard-coded string literals for
+     * the settings keys.
+     *
+     * Three sub-classes handle the Cleanup, ExcludeRules, and MimeCategory
      * config files.
+     *
+     * This class also automatically takes care of cleaning up leftovers of
+     * previous config file formats, when certain settings groups
+     * (cleanups, mime categories) were moved out from the main config
+     * file to specialized config files.
      **/
     class Settings: public QSettings
     {
@@ -41,7 +56,9 @@ namespace QDirStat
 	 * classes The application (ie. config filename) is set
 	 * to QCoreApplication::applicationName() + 'suffix'.
 	 **/
-	Settings( const char * suffix );
+	Settings( const char * suffix ):
+	    QSettings ( QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix )
+	{ _usedConfigFiles << fileName(); }
 
 
     public:
@@ -68,24 +85,100 @@ namespace QDirStat
 	 * classes which  will provide a suitable prefix.
 	 **/
 	void beginListGroup( int num )
-	    { QSettings::beginGroup( listGroupPrefix() + QString( "_%1" ).arg( num, 2, 10, QLatin1Char( '0' ) ) ); }
+	    { QSettings::beginGroup( listGroupPrefix() + QString( "_%1" ).arg( num, 2, 10, QChar( u'0' ) ) ); }
 
 	/**
 	 * Provided to pair with beginListGroup(), although it just calls
-	 * QSettings::endGroup().
+	 * endGroup() in the base class.
 	 **/
 	void endListGroup()
 	    { QSettings::endGroup(); }
 
 	/**
-	 * Set a value, but only if that key is not already in the settings.
+	 * Read a color in RGB format (#RRGGBB) from the settings.
 	 **/
-	void setDefaultValue( const QString & key, bool value )
+	QColor colorValue( const char * key, const QColor & fallback );
+
+	/**
+	 * Write a color in RGB format (#RRGGBB) to the settings.
+	 **/
+	void setColorValue( const char * key, const QColor & color );
+
+	/**
+	 * Read a font in string format  from the settings.
+	 * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
+	 **/
+	QFont fontValue( const char * key, const QFont & fallback );
+
+	/**
+	 * Write a font in string format to the settings.
+	 * Example: "DejaVu Sans Mono,10,-1,5,50,0,0,0,0,0"
+	 *
+	 * Note that this is inlined mainly because it isn't used anywhere.
+	 * The only font settings is handled using fontValue() and
+	 * setDefaultValue().
+	 **/
+	void setFontValue( const char * key, const QFont & font )
+	    { setValue( key, font.toString() ); }
+
+	/**
+	 * Read a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) from the
+	 * settings.
+	 **/
+	ColorList colorListValue( const char * key, const ColorList & fallback );
+
+	/**
+	 * Write a list of colors in RGB format (#RRGGBB, #RRGGBB, ...) to the
+	 * settings.
+	 **/
+	void setColorListValue( const char * key, const ColorList & colors );
+
+	/**
+	 * Read an enum value in string format from the settings.
+	 * 'enumMapping' maps each valid enum value to the corresponding string.
+	 **/
+	int enumValue( const char                * key,
+		       int                         fallback,
+		       const SettingsEnumMapping & enumMapping );
+
+	/**
+	 * Write an enum value in string format to the settings.
+	 * 'enumMapping' maps each valid enum value to the corresponding string.
+	 **/
+	void setEnumValue( const char                * key,
+			   int                         enumValue,
+			   const SettingsEnumMapping & enumMapping );
+
+	/**
+	 * Set a value, but only if that key is not already in the settings.
+	 * There are overloads for bool, int, QString, QColor, QFont, and
+	 * QColorList.
+	 **/
+	void setDefaultValue( const char * key, bool value )
 	    { if ( !contains( key ) ) setValue( key, value ); }
-	void setDefaultValue( const QString & key, int value )
+	void setDefaultValue( const char * key, int  value )
 	    { if ( !contains( key ) ) setValue( key, value ); }
-	void setDefaultValue( const QString & key, const QString & value )
+	void setDefaultValue( const char * key, const QString   & value )
 	    { if ( !contains( key ) ) setValue( key, value ); }
+	void setDefaultValue( const char * key, const QColor    & value )
+	    { if ( !contains( key ) ) setColorValue( key, value ); }
+	void setDefaultValue( const char * key, const QFont     & value )
+	    { if ( !contains( key ) ) setFontValue( key, value ); }
+	void setDefaultValue( const char * key, const ColorList & value )
+	    { if ( !contains( key ) ) setColorListValue( key, value ); }
+
+	/**
+	 * Read window settings (size and position) from the settings and apply
+	 * them.
+	 **/
+	static void readWindowSettings( QWidget    * widget,
+	                                const char * settingsGroup );
+
+	/**
+	 * Write window settings (size and position) to the settings.
+	 **/
+	static void writeWindowSettings( QWidget    * widget,
+	                                 const char * settingsGroup );
 
 	/**
 	 * Find all settings groups that start with the group prefix
@@ -119,9 +212,10 @@ namespace QDirStat
 	void ensureToplevel();
 
 	/**
-	 * Migrate settings of the common settings (the main config file) to
+	 * Migrate settings from the common settings (the main config file) to
 	 * this one.  The config file format changed nearly ten years ago, so
-	 * this is more or less redundant.
+	 * this is more or less redundant.  The brute-force search for possible
+	 * settings to migrate takes a little under 1ms for all three.
 	 **/
 	void migrate();
 
@@ -137,7 +231,7 @@ namespace QDirStat
     /**
      * Specialized settings class for cleanup actions.
      *
-     * Those settings are stored in a separate file so that the entire file
+     * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
     class CleanupSettings: public Settings
@@ -162,7 +256,7 @@ namespace QDirStat
     /**
      * Specialized settings class for exclude rules.
      *
-     * Those settings are stored in a separate file so that the entire file
+     * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
     class ExcludeRuleSettings: public Settings
@@ -187,7 +281,7 @@ namespace QDirStat
     /**
      * Specialized settings class for MIME categories.
      *
-     * Those settings are stored in a separate file so that the entire file
+     * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
     class MimeCategorySettings: public Settings

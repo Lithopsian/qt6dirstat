@@ -10,7 +10,6 @@
 #ifndef PkgQuery_h
 #define PkgQuery_h
 
-#include <QString>
 #include <QCache>
 
 #include "PkgInfo.h"

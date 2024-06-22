@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QString>
+
 #include "DiscoverActions.h"
 #include "BusyPopup.h"
 #include "DirInfo.h"

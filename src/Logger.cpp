@@ -7,10 +7,12 @@
  *              Ian Nartowicz
  */
 
-#include <errno.h>
+// We obviously need to use strerror
+#define DONT_DEPRECATE_STRERROR
+
+#include <cstdio>	// stderr, fprintf()
+#include <cstdlib>	// abort(), mkdtemp()
 #include <pwd.h>	// getpwuid()
-#include <stdio.h>	// stderr, fprintf()
-#include <stdlib.h>	// abort(), mkdtemp()
 #include <sys/types.h>	// pid_t, getpwuid()
 #include <unistd.h>	// getpid()
 
@@ -20,7 +22,6 @@
 #include <QStringBuilder>
 #include <QStringList>
 
-#define DONT_DEPRECATE_STRERROR
 #include "Logger.h"
 #include "SysUtil.h"
 
@@ -504,15 +505,9 @@ void Logger::setLogLevel( Logger * logger, LogSeverity newLevel )
 	logger->setLogLevel( newLevel );
 }
 
-
-
-
-// Un-deprecate strerror() just for this one call.
-#ifdef strerror
-#    undef strerror
-#endif
-
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
 QString formatErrno()
 {
     return QString::fromUtf8( strerror( errno ) );
 }
+#endif
