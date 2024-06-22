@@ -42,11 +42,6 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
 
 HeaderTweaker::~HeaderTweaker()
 {
-//    if ( _currentLayout )
-//	saveLayout( _currentLayout );
-
-//    writeSettings();
-
     qDeleteAll( _layouts );
 }
 
@@ -319,13 +314,12 @@ void HeaderTweaker::readLayoutSettings( ColumnLayout * layout )
     CHECK_PTR( layout );
 
     Settings settings;
-    settings.beginGroup( "TreeViewLayout_" + layout->name );
 
+    settings.beginGroup( "TreeViewLayout_" + layout->name );
     layout->columns = DataColumns::fromStringList( settings.value( "Columns" ).toStringList() );
+    settings.endGroup();
 
     fixupLayout( layout );
-
-    settings.endGroup();
 }
 
 

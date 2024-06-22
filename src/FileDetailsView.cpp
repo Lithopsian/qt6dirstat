@@ -19,6 +19,7 @@
 #include "MountPoints.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
+#include "SelectionModel.h"
 #include "SystemFileChecker.h"
 #include "SysUtil.h"
 
@@ -593,7 +594,7 @@ void FileDetailsView::categoriesChanged()
     if ( currentWidget() != _ui->fileDetailsPage )
 	return;
 
-    const FileInfo * fileInfo = app()->currentItem();
+    const FileInfo * fileInfo = app()->selectionModel()->currentItem();
     if ( !fileInfo || fileInfo->isSymLink() || fileInfo->baseName() != _ui->fileNameLabel->text() )
 	return;
 

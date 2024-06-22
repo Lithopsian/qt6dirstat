@@ -36,16 +36,13 @@ void GeneralConfigPage::setup()
 {
     // All the values on this page are held in variables in MainWindow and
     // DirTreeModel (or DirTree).
-    const MainWindow * mainWindow = app()->findMainWindow();
-    if ( !mainWindow ) // yikes!
-        return;
-
     const DirTreeModel * dirTreeModel = app()->dirTreeModel();
     _ui->crossFilesystemsCheckBox->setChecked  ( dirTreeModel->crossFilesystems() );
     _ui->useBoldForDominantCheckBox->setChecked( dirTreeModel->useBoldForDominantItems() );
     _ui->treeUpdateIntervalSpinBox->setValue   ( dirTreeModel->updateTimerMillisec() );
     _ui->treeIconThemeComboBox->setCurrentIndex( dirTreeModel->dirTreeItemSize() );
 
+    const MainWindow * mainWindow = app()->mainWindow();
     _ui->urlInWindowTitleCheckBox->setChecked  ( mainWindow->urlInWindowTitle() );
     _ui->dirReadWarningCheckBox->setChecked    ( mainWindow->showDirPermissionsMsg() );
     _ui->useTreemapHoverCheckBox->setChecked   ( mainWindow->treemapView()->useTreemapHover() );
@@ -63,16 +60,13 @@ void GeneralConfigPage::applyChanges()
 {
     //logDebug() << Qt::endl;
 
-    MainWindow * mainWindow = app()->findMainWindow();
-    if ( !mainWindow )
-        return;
-
     DirTreeModel * dirTreeModel = app()->dirTreeModel();
     dirTreeModel->updateSettings( _ui->crossFilesystemsCheckBox->isChecked(),
                                   _ui->useBoldForDominantCheckBox->isChecked(),
                                   static_cast<DirTreeItemSize>( _ui->treeIconThemeComboBox->currentIndex() ),
                                   _ui->treeUpdateIntervalSpinBox->value() );
 
+    MainWindow * mainWindow = app()->mainWindow();
     mainWindow->setUrlInWindowTitle              ( _ui->urlInWindowTitleCheckBox->isChecked() );
     mainWindow->setShowDirPermissionsMsg         ( _ui->dirReadWarningCheckBox->isChecked() );
     mainWindow->treemapView()->setUseTreemapHover( _ui->useTreemapHoverCheckBox->isChecked() );

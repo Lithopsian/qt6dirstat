@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QPointer>
+
 #include "PanelMessage.h"
 #include "Exception.h"
 #include "MainWindow.h"

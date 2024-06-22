@@ -9,6 +9,8 @@
 
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QStringBuilder>
+#include <QUrl>
 
 #include "MainWindow.h"
 #include "Logger.h"

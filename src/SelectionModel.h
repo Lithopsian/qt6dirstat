@@ -54,11 +54,6 @@ namespace QDirStat
 	FileInfo * currentItem() const { return _currentItem; }
 
 	/**
-	 * Return the DirTreeModel of this object.
-	 **/
-//	DirTreeModel * dirTreeModel() const { return _dirTreeModel; }
-
-	/**
 	 * Set 'verbose' mode: Log each selection change.
 	 **/
 	void setVerbose( bool verbose ) { _verbose = verbose; }

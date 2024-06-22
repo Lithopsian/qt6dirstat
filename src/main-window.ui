@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1115</width>
-    <height>687</height>
+    <width>628</width>
+    <height>501</height>
    </rect>
   </property>
   <property name="windowIcon">
@@ -121,7 +121,7 @@
            <x>0</x>
            <y>0</y>
            <width>79</width>
-           <height>280</height>
+           <height>187</height>
           </rect>
          </property>
         </widget>
@@ -162,6 +162,14 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>628</width>
+     <height>21</height>
+    </rect>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
@@ -1109,5 +1117,22 @@
  <resources>
   <include location="icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>313</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>250</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

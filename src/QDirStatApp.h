@@ -10,8 +10,7 @@
 #ifndef QDirStatApp_h
 #define QDirStatApp_h
 
-class QWidget;
-class MainWindow;
+#include <QApplication>
 
 
 namespace QDirStat
@@ -19,43 +18,73 @@ namespace QDirStat
     class DirTree;
     class DirTreeModel;
     class FileInfo;
+    class MainWindow;
     class SelectionModel;
 
     /**
-     * This is the application object for the QDirStat application with a
-     * similar approach to Qt's QCoreApplication. It does not create any window
-     * or widget, so it is meant to be instantiated before any widgets or
-     * anything GUI related.
+     * This is the QApplication object for the QDirStat application. It
+     * does not create any windows or widgets and is intended to be
+     * instantiated before any windows or widgets.
      *
-     * This class holds key objects and initializes them in the correct order,
-     * and it allows access to those key objects from other classes without
-     * having to pass every single one of them to each of the other classes
-     * that needs them.
+     * This class holds key objects and gives access to those key objects
+     * from other classes without having to pass every single one of them
+     * to each of the other classes that needs them.
      *
-     * This is a singleton class.
+     * Although not strictly a singleton class, there will only ever be one
+     * instance.  QApplication prevents additional objects being created.
+     * Access will normally be through the global app() function which
+     * provides completely inline access to the instance of this class and
+     * the objects that it holds.
+     *
+     * Note that the instance guarantees to return object pointers for
+     * MainWindow, DirTreeModel, SelectionModel, and DirTree (ownded by
+     * DirTreeModel), but it will only do so after they have been set using
+     * setModels().  They will become invalid once MainWindow and its
+     * children are destroyed and should not be accessed.
      **/
-    class QDirStatApp
+    class QDirStatApp: public QApplication
     {
-        /**
-         * Constructor
-         **/
-        QDirStatApp();
-
-
     public:
 
         /**
-         * Access the singleton instance of the QDirStatApp class. If no
-         * instance exists yet, this will create it and also the key objects
-         * that it manages.
+         * Constructor.  This is created on the stack by main.
+         **/
+        QDirStatApp( int &argc, char **argv );
+
+        /**
+         * Store pointers to the main window and models.  Access to
+         * the getters through app() before this is called will return 0.
+         * Ownership of these objects is not transferred to QDirStatApp.
+         **/
+        static void setModels( MainWindow     * mainWindow,
+                               DirTreeModel   * dirTreeModel,
+                               SelectionModel * selectionModel );
+
+        /**
+         * Reset the internal pointers to null.  This happens when the main
+         * window is destroyed and it is generally unsafe to use app()
+         * after this.
+         **/
+        static void resetModels();
+
+        /**
+         * Access the only instance of the QDirStatApp class, through the Qt
+         * global define aApp.
          *
          * Typically, you will want to use the global app() function instead.
+         * This function provides non-const access.
          **/
-        static QDirStatApp * instance();
+        static QDirStatApp * instance() { return static_cast<QDirStatApp *>( qApp ); }
 
         //
         // Access to key objects
         //
+
+        /**
+         * Return the MainWindow instance given to it, or 0 if it has not yet
+         * been given one.
+         **/
+        MainWindow * mainWindow() const { return _mainWindow; }
 
         /**
          * Return the directory tree model. This is the model part of Qt
@@ -88,41 +117,17 @@ namespace QDirStat
          **/
         SelectionModel * selectionModel() const { return _selectionModel; }
 
-        //
-        // Convenience methods
-        //
-
         /**
-         * Return the (first) MainWindow instance of the running program that
-         * is suitable as a widget parent for subwindows to maintain the
-         * correct window stacking order (and avoid having subwindows disappear
-         * behind the main window). Return 0 if there is no MainWindow (yet).
-         **/
-        MainWindow * findMainWindow() const;
-
-        /**
-         * Return the DirTree's root directory (the first real toplevel
-         * directory, not the invisible pseudo root) or 0 if the tree is
-         * completely empty.
+         * Return the DirTree's top level directory (the first child of the
+         * tree root) or 0 if the tree is completely empty.
          **/
         FileInfo * firstToplevel() const;
 
         /**
-         * Return the current item in the selection model.
-         **/
-        FileInfo * currentItem() const;
-
-        /**
-         * Return the first selected directory from the SelectionModel or 0 if
-         * no directory is selected.
+         * Return the current selected directory, or the parent of the current
+         * selected file, or 0 if there is no current item.
          **/
         FileInfo * currentDirInfo() const;
-
-        /**
-         * Set the font size of a widget (expected to be a tree widget) based on
-         * the configured DirTree item size.
-         **/
-        void setWidgetFontSize( QWidget * widget );
 
 
     private:
@@ -131,17 +136,17 @@ namespace QDirStat
         // Data members
         //
 
-        DirTreeModel   * _dirTreeModel;
-        SelectionModel * _selectionModel;
+        MainWindow     * _mainWindow     { nullptr };
+        DirTreeModel   * _dirTreeModel   { nullptr };
+        SelectionModel * _selectionModel { nullptr };
 
     };  // class QDirStatApp
 
+
     /**
-     * Access the singleton instance of the QDirStatApp class. If no instance
-     * exists yet, this will create it and also the key objects that it manages
-     * (see below).
+     * Access the QDirStatApp instance (just a cast of qApp).
      **/
-    inline QDirStatApp * app() { return QDirStatApp::instance(); }
+    inline const QDirStatApp * app() { return QDirStatApp::instance(); }
 
 }       // namespace QDirStat
 

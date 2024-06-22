@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QPointer>
+
 #include "ConfigDialog.h"
 #include "CleanupConfigPage.h"
 #include "ExcludeRulesConfigPage.h"

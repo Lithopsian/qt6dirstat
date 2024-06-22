@@ -7,44 +7,59 @@
  *              Ian Nartowicz
  */
 
+#include <QStandardPaths>
+
 #include "QDirStatApp.h"
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
-#include "Logger.h"
-#include "MainWindow.h"
+#include "Exception.h"
 #include "SelectionModel.h"
 
 
 using namespace QDirStat;
 
 
-QDirStatApp::QDirStatApp():
-    _dirTreeModel { new DirTreeModel( findMainWindow() ) },
-    _selectionModel { new SelectionModel( dirTreeModel(), findMainWindow() ) }
+QDirStatApp::QDirStatApp( int &argc, char **argv ):
+    QApplication ( argc, argv )
 {
     // logDebug() << "Creating app" << Qt::endl;
 
-    if ( qApp->styleSheet().isEmpty() )
+    if ( styleSheet().isEmpty() )
     {
         const QString cssFile = QString( "%1/%2/%2.css" )
                                 .arg( QStandardPaths::writableLocation( QStandardPaths::ConfigLocation ) )
-                                .arg( qApp->applicationName() );
+                                .arg( applicationName() );
         QFile file ( cssFile );
-        if ( !file.open( QFile::ReadOnly | QFile::Text) )
+        if ( !file.open( QFile::ReadOnly | QFile::Text ) )
             return;
 
         QTextStream in( &file );
-        qApp->setStyleSheet( in.readAll() );
+        setStyleSheet( in.readAll() );
     }
 }
 
 
-QDirStatApp * QDirStatApp::instance()
+void QDirStatApp::setModels( MainWindow     * mainWindow,
+                             DirTreeModel   * dirTreeModel,
+                             SelectionModel * selectionModel )
 {
-    static QDirStatApp _instance;
+    CHECK_PTR( mainWindow );
+    instance()->_mainWindow = mainWindow;
 
-    return &_instance;
+    CHECK_PTR( dirTreeModel );
+    instance()->_dirTreeModel = dirTreeModel;
+
+    CHECK_PTR( selectionModel );
+    instance()->_selectionModel = selectionModel;
+}
+
+
+void QDirStatApp::resetModels()
+{
+    instance()->_mainWindow = nullptr;
+    instance()->_dirTreeModel = nullptr;
+    instance()->_selectionModel = nullptr;
 }
 
 
@@ -54,50 +69,15 @@ DirTree * QDirStatApp::dirTree() const
 }
 
 
-MainWindow * QDirStatApp::findMainWindow() const
-{
-    const QWidgetList toplevel = QApplication::topLevelWidgets();
-    for ( QWidget * widget : toplevel )
-    {
-        MainWindow * mainWindow = qobject_cast<MainWindow *>( widget );
-        if ( mainWindow )
-            return mainWindow;
-    }
-
-    logError() << "No MainWindow widget found" << Qt::endl;
-
-    return nullptr;
-}
-
-
 FileInfo * QDirStatApp::firstToplevel() const
 {
-    const DirTree * tree = dirTree();
+    DirTree * tree = dirTree();
     return tree ? tree->firstToplevel() : nullptr;
-}
-
-
-FileInfo * QDirStatApp::currentItem() const
-{
-    return _selectionModel->currentItem();
 }
 
 
 FileInfo * QDirStatApp::currentDirInfo() const
 {
-    FileInfo * sel = currentItem();
-
+    FileInfo * sel = _selectionModel->currentItem();
     return !sel || sel->isDirInfo() ? sel : sel->parent();
-}
-
-
-void QDirStatApp::setWidgetFontSize( QWidget * widget )
-{
-    if ( _dirTreeModel->dirTreeItemSize() == DTIS_Medium )
-    {
-        QFont biggerFont = widget->font();
-        biggerFont.setPointSizeF( biggerFont.pointSizeF() * 1.1 );
-        widget->setFont( biggerFont );
-	//setStyleSheet( QString( "QTreeView { font-size: %1pt; }" ).arg( pointSize ) );
-    }
 }

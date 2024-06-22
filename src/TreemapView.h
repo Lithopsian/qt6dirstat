@@ -17,7 +17,6 @@
 #include <QGraphicsPathItem>
 #include <QGraphicsRectItem>
 #include <QGraphicsView>
-#include <QtConcurrent/QtConcurrent>
 
 
 #define DefaultAmbientLight       40

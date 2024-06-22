@@ -48,7 +48,7 @@ void MainWindow::connectMenuActions()
     connectAction( _ui->actionStopReading,        &MainWindow::stopReading );
     connectAction( _ui->actionAskReadCache,       &MainWindow::askReadCache );
     connectAction( _ui->actionAskWriteCache,      &MainWindow::askWriteCache );
-    connectAction( _ui->actionQuit,               &MainWindow::quit );
+    // actionQuit, see .ui file
 
     // Edit menu
     connectAction( _ui->actionCopyPath,           &MainWindow::copyCurrentPathToClipboard );
@@ -64,6 +64,7 @@ void MainWindow::connectMenuActions()
     // Go menu
     connectAction( _ui->actionGoUp,               &MainWindow::navigateUp );
     connectAction( _ui->actionGoToToplevel,       &MainWindow::navigateToToplevel );
+    // actionGoBack and actionGoForward, see HistoryButtons.cpp
 
     // Discover menu
     connectAction( _ui->actionFileSizeStats,      &MainWindow::showFileSizeStats );
@@ -175,7 +176,7 @@ void MainWindow::updateActions()
     _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
     _ui->actionReadExcluded->setEnabled   ( selSizeOne && first->isExcluded()   );
 
-    const FileInfo * currentItem       = app()->currentItem();
+    const FileInfo * currentItem       = app()->selectionModel()->currentItem();
     const bool       pseudoDirSelected = selectedItems.containsPseudoDir();
 
     _ui->actionCopyPath->setEnabled   ( isTree && currentItem );

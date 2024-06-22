@@ -38,9 +38,7 @@ void Refresher::refresh()
 	    catch ( const SysCallFailedException & ex )
 	    {
 		CAUGHT( ex );
-		MainWindow * mainWindow = app()->findMainWindow();
-		if ( mainWindow )
-		    mainWindow->showOpenDirErrorPopup( ex );
+		app()->mainWindow()->showOpenDirErrorPopup( ex );
 	    }
 	}
     }

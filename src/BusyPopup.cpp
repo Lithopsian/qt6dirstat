@@ -35,7 +35,7 @@ namespace
 
 
 BusyPopup::BusyPopup( const QString & text ):
-    QLabel ( text, app()->findMainWindow(), Qt::SplashScreen )
+    QLabel ( text, app()->mainWindow(), Qt::SplashScreen )
 {
     setMargin( 15 );
     setWindowTitle( QString() );

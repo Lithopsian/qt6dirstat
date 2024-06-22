@@ -9,7 +9,6 @@
 
 #include <sys/stat.h> // mkdir(), struct stat, S_ISDIR(), etc.
 #include <unistd.h> // getuid()
-#include <errno.h>
 
 #include <QDir>
 #include <QDateTime>

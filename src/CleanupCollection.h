@@ -20,13 +20,12 @@
 class QMenu;
 class QToolBar;
 
-class OutputWindow;
-
 
 namespace QDirStat
 {
     class Cleanup;
     class FileInfoSet;
+    class OutputWindow;
     class SelectionModel;
     class Trash;
 
@@ -46,9 +45,9 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	CleanupCollection( QObject        * parent,
-			   SelectionModel * selectionModel,
-			   QToolBar       * toolBar,
-			   QMenu          * menu );
+	                   SelectionModel * selectionModel,
+	                   QToolBar       * toolBar,
+	                   QMenu          * menu );
 
 	/**
 	 * Destructor

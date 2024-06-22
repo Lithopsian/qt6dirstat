@@ -14,12 +14,11 @@
 #include <QTextStream>
 
 
-class OutputWindow;
-
 namespace QDirStat
 {
     class FileInfo;
     class FileInfoSet;
+    class OutputWindow;
 
     /**
      * Cleanup action to be performed for DirTree items.
