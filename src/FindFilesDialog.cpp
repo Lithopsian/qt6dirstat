@@ -18,7 +18,6 @@
 #include "Logger.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "Subtree.h"
 
 
@@ -51,7 +50,7 @@ FindFilesDialog::~FindFilesDialog()
     //logDebug() << " destructor called" << Qt::endl;
 
     // Always save the window geometry
-    writeWindowSettings( this, "FindFilesDialog" );;
+    Settings::writeWindowSettings( this, "FindFilesDialog" );;
 }
 
 
@@ -165,7 +164,7 @@ void FindFilesDialog::readSettings()
 
     settings.endGroup();
 
-    readWindowSettings( this, "FindFilesDialog" );
+    Settings::readWindowSettings( this, "FindFilesDialog" );
 }
 
 

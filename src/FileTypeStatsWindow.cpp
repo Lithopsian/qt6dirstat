@@ -16,6 +16,7 @@
 #include "FileTypeStatsWindow.h"
 #include "FileTypeStats.h"
 #include "DirTree.h"
+#include "DirTreeModel.h"
 #include "FileInfo.h"
 #include "FileSizeStatsWindow.h"
 #include "FormatUtil.h"
@@ -25,7 +26,7 @@
 #include "MimeCategory.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 
 
 // Number of suffixes in the "other" category
@@ -46,7 +47,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initWidgets();
-    readWindowSettings( this, "FileTypeStatsWindow" );
+    Settings::readWindowSettings( this, "FileTypeStatsWindow" );
 
     // Add actions to this window to get the hotkeys
     addAction( _ui->actionLocate );
@@ -94,7 +95,7 @@ FileTypeStatsWindow::~FileTypeStatsWindow()
 {
     //logDebug() << "destroying" << Qt::endl;
 
-    writeWindowSettings( this, "FileTypeStatsWindow" );
+    Settings::writeWindowSettings( this, "FileTypeStatsWindow" );
 }
 
 
@@ -111,11 +112,10 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
 
 void FileTypeStatsWindow::initWidgets()
 {
-    app()->setWidgetFontSize( _ui->treeWidget );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
     _ui->treeWidget->setColumnCount( FT_ColumnCount );
     _ui->treeWidget->setHeaderLabels( { tr( "Name" ), tr( "Number" ), tr( "Total Size" ), tr( "Percentage" ) } );
-
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
     _ui->treeWidget->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );

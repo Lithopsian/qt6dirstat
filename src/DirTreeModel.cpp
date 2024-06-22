@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QTreeWidget>
+
 #include "DirTreeModel.h"
 #include "DirInfo.h"
 #include "DirTree.h"
@@ -18,7 +20,6 @@
 #include "FormatUtil.h"
 #include "PkgFilter.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
 // Number of clusters up to which a file will be considered small and will also
@@ -462,12 +463,12 @@ DirTreeModel::DirTreeModel( QObject * parent ):
 	     this,          &DirTreeModel::sendPendingUpdates );
 }
 
-/*
+
 DirTreeModel::~DirTreeModel()
 {
     writeSettings();
 }
-*/
+
 
 void DirTreeModel::readSettings()
 {
@@ -483,13 +484,13 @@ void DirTreeModel::readSettings()
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
-    _dirReadErrLightTheme     = readColorEntry( settings, "DirReadErrColor",     QColor( 0xdd, 0x00, 0x00 ) );
-    _subtreeReadErrLightTheme = readColorEntry( settings, "SubtreeReadErrColor", QColor( 0xaa, 0x44, 0x44 ) );
+    _dirReadErrLightTheme     = settings.colorValue( "DirReadErrColor",     QColor( 0xdd, 0x00, 0x00 ) );
+    _subtreeReadErrLightTheme = settings.colorValue( "SubtreeReadErrColor", QColor( 0xaa, 0x44, 0x44 ) );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-dark" );
-    _dirReadErrDarkTheme     = readColorEntry( settings, "DirReadErrColor",     QColor( 0xff, 0x44, 0xcc ) );
-    _subtreeReadErrDarkTheme = readColorEntry( settings, "SubtreeReadErrColor", QColor( 0xff, 0xaa, 0xdd ) );
+    _dirReadErrDarkTheme     = settings.colorValue( "DirReadErrColor",     QColor( 0xff, 0x44, 0xcc ) );
+    _subtreeReadErrDarkTheme = settings.colorValue( "SubtreeReadErrColor", QColor( 0xff, 0xaa, 0xdd ) );
     settings.endGroup();
 
     _tree->setCrossFilesystems( _crossFilesystems );
@@ -510,13 +511,13 @@ void DirTreeModel::writeSettings()
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
-    writeColorEntry( settings, "DirReadErrColor",     _dirReadErrLightTheme     );
-    writeColorEntry( settings, "SubtreeReadErrColor", _subtreeReadErrLightTheme );
+    settings.setColorValue( "DirReadErrColor",     _dirReadErrLightTheme     );
+    settings.setColorValue( "SubtreeReadErrColor", _subtreeReadErrLightTheme );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-dark" );
-    writeColorEntry( settings, "DirReadErrColor",     _dirReadErrDarkTheme     );
-    writeColorEntry( settings, "SubtreeReadErrColor", _subtreeReadErrDarkTheme );
+    settings.setColorValue( "DirReadErrColor",     _dirReadErrDarkTheme     );
+    settings.setColorValue( "SubtreeReadErrColor", _subtreeReadErrDarkTheme );
     settings.endGroup();
 }
 
@@ -871,6 +872,20 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
 
     //logDebug() << "After layoutChanged()" << Qt::endl;
     //dumpPersistentIndexList( persistentIndexList() );
+}
+
+
+void DirTreeModel::setTreeWidgetSizes( QTreeWidget * treeWidget ) const
+{
+    if ( dirTreeItemSize() == DTIS_Medium )
+    {
+        QFont biggerFont = treeWidget->font();
+        biggerFont.setPointSizeF( biggerFont.pointSizeF() * 1.1 );
+        treeWidget->setFont( biggerFont );
+	//setStyleSheet( QString( "QTreeView { font-size: %1pt; }" ).arg( pointSize ) );
+    }
+
+    treeWidget->setIconSize( dirTreeIconSize() );
 }
 
 

@@ -10,6 +10,7 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QPointer>
 
 #include "FilesystemsWindow.h"
 #include "DirTreeModel.h"
@@ -20,7 +21,7 @@
 #include "MainWindow.h"
 #include "PanelMessage.h"
 #include "QDirStatApp.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 
 
 #define WARN_PERCENT 10.0
@@ -56,14 +57,10 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 
     MountPoints::reload();
     initWidgets();
-    readWindowSettings( this, "FilesystemsWindow" );
+    Settings::readWindowSettings( this, "FilesystemsWindow" );
 
-    MainWindow * mainWindow = app()->findMainWindow();
-    if ( mainWindow )
-    {
-	connect( this,       &FilesystemsWindow::readFilesystem,
-		 mainWindow, &MainWindow::readFilesystem );
-    }
+    connect( this,                &FilesystemsWindow::readFilesystem,
+	     app()->mainWindow(), &MainWindow::readFilesystem );
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
 	     this,                &FilesystemsWindow::refresh );
@@ -93,7 +90,7 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 
 FilesystemsWindow::~FilesystemsWindow()
 {
-    writeWindowSettings( this, "FilesystemsWindow" );
+    Settings::writeWindowSettings( this, "FilesystemsWindow" );
 }
 
 
@@ -135,8 +132,7 @@ void FilesystemsWindow::initWidgets()
 	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
 
     _ui->fsTree->setHeaderLabels( headers );
-    _ui->fsTree->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
-    app()->setWidgetFontSize( _ui->fsTree );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->fsTree );
 
     // Center the column headers except the first two
     _ui->fsTree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );

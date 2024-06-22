@@ -10,13 +10,11 @@
 #ifndef Exception_h
 #define Exception_h
 
-#include <QString>
-
 #include "Logger.h"
 
 
 /**
- * Generic exception.
+ * Generic exception class
  *
  * Unlike std::exception, this class uses QString rather than const char *
  */
@@ -33,7 +31,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~Exception() noexcept {}
+    virtual ~Exception() noexcept = default;
 
     /**
      * Return a text description of what was wrong.
@@ -112,8 +110,6 @@ public:
 
     ~FileException() noexcept override = default;
 
-//    const QString & filename() const { return _filename; }
-
 private:
     QString _filename;
 };
@@ -136,8 +132,6 @@ public:
      * file name.
      **/
     const QString & resourceName() const { return _resourceName; }
-
-//    const QString & sysCall() const { return _sysCall; }
 
 protected:
     QString errMsg( const QString & sysCall,

@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <errno.h>
-
 #include "Exception.h"
 
 
@@ -29,16 +27,20 @@ void Exception::setSrcLocation( const QString & srcFile,
 }
 
 
+
+
 QString SysCallFailedException::errMsg( const QString & sysCall,
 					const QString & resourceName ) const
 {
     QString msg = QString( "%1( \"%2\" ) failed" ).arg( sysCall ).arg( resourceName );
 
     if ( errno != 0 )
-	msg += ": " + formatErrno();
+	msg += ": " + QString( formatErrno() );
 
     return msg;
 }
+
+
 
 
 QString IndexOutOfRangeException::errMsg( int             invalidIndex,

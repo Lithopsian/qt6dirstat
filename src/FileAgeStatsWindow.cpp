@@ -23,7 +23,6 @@
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
 // Remember to adapt the tooltip text for the "Locate" button in the .ui file
@@ -112,7 +111,7 @@ FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
 void FileAgeStatsWindow::initWidgets()
 {
     // Set the row height based on the configured DirTree icon height
-    app()->setWidgetFontSize( _ui->treeWidget );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
     const QStringList headers = { tr( "Year"    ),
                                   tr( "Files"   ),
@@ -123,10 +122,7 @@ void FileAgeStatsWindow::initWidgets()
                                   tr( "%"       ),  // percent value
                                 };
     _ui->treeWidget->setHeaderLabels( headers );
-
-    // Center the column headers
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignCenter );
-
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 
@@ -304,22 +300,21 @@ void FileAgeStatsWindow::readSettings()
     int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
 
     const QColor percentBarBackground =
-	readColorEntry    ( settings, "PercentBarBackground",  QColor( 160, 160, 160 ) );
+	settings.colorValue    ( "PercentBarBackground",  QColor( 160, 160, 160 ) );
     const ColorList filesPercentBarColors =
-	readColorListEntry( settings, "FilesPercentBarColors", { 0xbb0000, 0x00aa00 } );
+	settings.colorListValue( "FilesPercentBarColors", { 0xbb0000, 0x00aa00 } );
     const ColorList sizePercentBarColors =
-	readColorListEntry( settings, "SizePercentBarColors",  { 0xee0000, 0x00cc00 } );
+	settings.colorListValue( "SizePercentBarColors",  { 0xee0000, 0x00cc00 } );
 
     settings.setDefaultValue( "StartGapsWithCurrentYear", _startGapsWithCurrentYear );
     settings.setDefaultValue( "PercentBarWidth",          percentBarWidth           );
-
-    setDefaultValue( settings, "PercentBarBackground",  percentBarBackground  );
-    setDefaultValue( settings, "FilesPercentBarColors", filesPercentBarColors );
-    setDefaultValue( settings, "SizePercentBarColors",  sizePercentBarColors  );
+    settings.setDefaultValue( "PercentBarBackground",     percentBarBackground  );
+    settings.setDefaultValue( "FilesPercentBarColors",    filesPercentBarColors );
+    settings.setDefaultValue( "SizePercentBarColors",     sizePercentBarColors  );
 
     settings.endGroup();
 
-    readWindowSettings( this, "FileAgeStatsWindow" );
+    Settings::readWindowSettings( this, "FileAgeStatsWindow" );
 
     // Delegates for the two percent bars
     _filesPercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
@@ -346,7 +341,7 @@ void FileAgeStatsWindow::writeSettings()
     settings.setValue( "SyncWithMainWindow", _ui->syncCheckBox->isChecked() );
     settings.endGroup();
 
-    writeWindowSettings( this, "FileAgeStatsWindow" );
+    Settings::writeWindowSettings( this, "FileAgeStatsWindow" );
 }
 
 

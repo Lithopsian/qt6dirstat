@@ -8,6 +8,7 @@
  */
 
 #include <QDesktopServices>
+#include <QPointer>
 #include <QResizeEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -21,7 +22,7 @@
 #include "HistogramView.h"
 #include "Logger.h"
 #include "MainWindow.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;
@@ -118,7 +119,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initWidgets();
-    readWindowSettings( this, "FileSizeStatsWindow" );
+    Settings::readWindowSettings( this, "FileSizeStatsWindow" );
 }
 
 
@@ -126,7 +127,7 @@ FileSizeStatsWindow::~FileSizeStatsWindow()
 {
     //logDebug() << "destroying" << Qt::endl;
 
-    writeWindowSettings( this, "FileSizeStatsWindow" );
+    Settings::writeWindowSettings( this, "FileSizeStatsWindow" );
 }
 
 

@@ -14,7 +14,6 @@
 #include "ExistingDir.h"
 #include "Logger.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
 using namespace QDirStat;
@@ -53,7 +52,7 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 
 OpenUnpkgDialog::~OpenUnpkgDialog()
 {
-    writeWindowSettings( this, "OpenUnpkgDialog" );
+    Settings::writeWindowSettings( this, "OpenUnpkgDialog" );
 }
 
 
@@ -109,7 +108,7 @@ void OpenUnpkgDialog::readSettings()
 {
     setValues( UnpkgSettings() );
 
-    readWindowSettings( this, "OpenUnpkgDialog" );
+    Settings::readWindowSettings( this, "OpenUnpkgDialog" );
 }
 
 

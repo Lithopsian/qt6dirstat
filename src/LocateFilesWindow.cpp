@@ -8,6 +8,7 @@
  */
 
 #include <QMenu>
+#include <QPointer>
 #include <QResizeEvent>
 
 #include "LocateFilesWindow.h"
@@ -19,9 +20,9 @@
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"        // SelectionModel, DirTreeModel, findMainWindow()
+#include "QDirStatApp.h"        // SelectionModel, DirTreeModel, mainWindow()
 #include "SelectionModel.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 #include "TreeWalker.h"
 
 
@@ -41,7 +42,7 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
     _ui->setupUi( this );
 
     initWidgets();
-    readWindowSettings( this, "LocateFilesWindow" );
+    Settings::readWindowSettings( this, "LocateFilesWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
 	     this,               &LocateFilesWindow::refresh );
@@ -58,7 +59,7 @@ LocateFilesWindow::~LocateFilesWindow()
 {
     //logDebug() << "destroying" << Qt::endl;
 
-    writeWindowSettings( this, "LocateFilesWindow" );
+    Settings::writeWindowSettings( this, "LocateFilesWindow" );
 }
 
 
@@ -69,7 +70,7 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
     if ( _sharedInstance )
 	_sharedInstance->_treeWalker.reset( treeWalker );
     else
-	_sharedInstance = new LocateFilesWindow( treeWalker, app()->findMainWindow() );
+	_sharedInstance = new LocateFilesWindow( treeWalker, app()->mainWindow() );
 
     return _sharedInstance;
 }
@@ -84,14 +85,13 @@ void LocateFilesWindow::refresh()
 
 void LocateFilesWindow::initWidgets()
 {
-    app()->setWidgetFontSize( _ui->treeWidget );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
     _ui->treeWidget->setColumnCount( LocateListColumnCount );
     _ui->treeWidget->setHeaderLabels( { tr( "Size" ), tr( "Last Modified" ), tr( "Path" ) } );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
     _ui->treeWidget->headerItem()->setTextAlignment( LocateListPathCol, Qt::AlignLeft | Qt::AlignVCenter);
 
-    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
     _ui->resultsLabel->setText( "" );
 
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );

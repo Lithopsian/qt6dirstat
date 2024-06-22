@@ -21,7 +21,6 @@
 #include "Refresher.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "StdCleanup.h"
 #include "Trash.h"
 
@@ -160,10 +159,10 @@ namespace
      **/
     SettingsEnumMapping refreshPolicyMapping()
     {
-	return { { Cleanup::NoRefresh,     "NoRefresh"     },
-		 { Cleanup::RefreshThis,   "RefreshThis"   },
-		 { Cleanup::RefreshParent, "RefreshParent" },
-		 { Cleanup::AssumeDeleted, "AssumeDeleted" },
+	return { { Cleanup::NoRefresh,     "NoRefresh"_L1     },
+		 { Cleanup::RefreshThis,   "RefreshThis"_L1   },
+		 { Cleanup::RefreshParent, "RefreshParent"_L1 },
+		 { Cleanup::AssumeDeleted, "AssumeDeleted"_L1 },
 	       };
     }
 
@@ -173,10 +172,10 @@ namespace
      **/
     SettingsEnumMapping outputWindowPolicyMapping()
     {
-	return { { Cleanup::ShowAlways,        "ShowAlways"        },
-		 { Cleanup::ShowIfErrorOutput, "ShowIfErrorOutput" },
-		 { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"  },
-		 { Cleanup::ShowNever,         "ShowNever"         },
+	return { { Cleanup::ShowAlways,        "ShowAlways"_L1        },
+		 { Cleanup::ShowIfErrorOutput, "ShowIfErrorOutput"_L1 },
+		 { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"_L1  },
+		 { Cleanup::ShowNever,         "ShowNever"_L1         },
 	       };
     }
 
@@ -513,15 +512,13 @@ void CleanupCollection::readSettings()
 	const bool outputWindowAutoClose = settings.value( "OutputWindowAutoClose", false ).toBool();
 	const int  outputWindowTimeout   = settings.value( "OutputWindowTimeout",   0     ).toInt();
 
-	const int refreshPolicy	 = readEnumEntry( settings,
-						  "RefreshPolicy",
-						  Cleanup::NoRefresh,
-						  refreshMapping );
+	const int refreshPolicy = settings.enumValue( "RefreshPolicy",
+						      Cleanup::NoRefresh,
+						      refreshMapping );
 
-	const int outputWindowPolicy = readEnumEntry( settings,
-						      "OutputWindowPolicy",
-						      Cleanup::ShowAfterTimeout,
-						      outputWindowMapping );
+	const int outputWindowPolicy = settings.enumValue( "OutputWindowPolicy",
+							   Cleanup::ShowAfterTimeout,
+							   outputWindowMapping );
 
 	if ( command.isEmpty() || title.isEmpty() )
 	{
@@ -600,8 +597,8 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 	if ( cleanup->outputWindowTimeout() > 0 )
 	    settings.setValue( "OutputWindowTimeout", cleanup->outputWindowTimeout() );
 
-	writeEnumEntry( settings, "RefreshPolicy",      cleanup->refreshPolicy(),      refreshMapping );
-	writeEnumEntry( settings, "OutputWindowPolicy", cleanup->outputWindowPolicy(), outputWindowMapping );
+	settings.setEnumValue( "RefreshPolicy",      cleanup->refreshPolicy(),      refreshMapping );
+	settings.setEnumValue( "OutputWindowPolicy", cleanup->outputWindowPolicy(), outputWindowMapping );
 
 	if ( !cleanup->shell().isEmpty() )
 	     settings.setValue( "Shell", cleanup->shell() );

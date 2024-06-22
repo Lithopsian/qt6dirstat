@@ -18,7 +18,6 @@
 #include "Logger.h"
 #include "MountPoints.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "SignalBlocker.h"
 
 
@@ -216,9 +215,10 @@ void OpenDirDialog::goUp()
 
 void OpenDirDialog::readSettings()
 {
-    readWindowSettings( this, "OpenDirDialog" );
+    Settings::readWindowSettings( this, "OpenDirDialog" );
 
     Settings settings;
+
     settings.beginGroup( "OpenDirDialog" );
     const QByteArray mainSplitterState = settings.value( "MainSplitter" , QByteArray() ).toByteArray();
     settings.endGroup();
@@ -234,9 +234,9 @@ void OpenDirDialog::writeSettings()
     // from the config dialog. The value in this dialog is just temporary for
     // the current program run.
 
-    Settings settings;
+    Settings::writeWindowSettings( this, "OpenDirDialog" );
 
-    writeWindowSettings( this, "OpenDirDialog" );
+    Settings settings;
 
     settings.beginGroup( "OpenDirDialog" );
     settings.setValue( "MainSplitter", _ui->mainSplitter->saveState()  );

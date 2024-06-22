@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QPointer>
+
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
 #include "DirTree.h"
@@ -14,9 +16,9 @@
 #include "HeaderTweaker.h"
 #include "Logger.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"        // dirTreeModel()
+#include "QDirStatApp.h"
 #include "SelectionModel.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;
@@ -33,7 +35,7 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initWidgets();
-    readWindowSettings( this, "UnreadableDirsWindow" );
+    Settings::readWindowSettings( this, "UnreadableDirsWindow" );
 
     connect( _ui->treeWidget, &QTreeWidget::currentItemChanged,
              this,            &UnreadableDirsWindow::selectResult );
@@ -43,7 +45,7 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
 UnreadableDirsWindow::~UnreadableDirsWindow()
 {
     // logDebug() << "destroying" << Qt::endl;
-    writeWindowSettings( this, "UnreadableDirsWindow" );
+    Settings::writeWindowSettings( this, "UnreadableDirsWindow" );
 }
 
 
@@ -52,7 +54,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
     static QPointer<UnreadableDirsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new UnreadableDirsWindow( app()->findMainWindow() );
+	_sharedInstance = new UnreadableDirsWindow( app()->mainWindow() );
 
     return _sharedInstance;
 }
@@ -60,8 +62,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 
 void UnreadableDirsWindow::initWidgets()
 {
-    app()->setWidgetFontSize( _ui->treeWidget );
-    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
     const QStringList headerLabels = { tr( "Directory" ),
 				       tr( "User" ),
@@ -71,11 +72,8 @@ void UnreadableDirsWindow::initWidgets()
 				     };
     _ui->treeWidget->setColumnCount( headerLabels.size() );
     _ui->treeWidget->setHeaderLabels( headerLabels );
-
-    // Center the column headers except the first (Directory).
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
     _ui->treeWidget->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
-
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 

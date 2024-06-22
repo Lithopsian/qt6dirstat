@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -39,41 +38,37 @@
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 #include "SignalBlocker.h"
 #include "SysUtil.h"
 #include "UnreadableDirsWindow.h"
 #include "Version.h"
 
-
 #define UPDATE_MILLISEC 200
 
 #define USE_CUSTOM_OPEN_DIR_DIALOG 1
 
+#include "TreemapTile.h"
 
 using namespace QDirStat;
 
 
 MainWindow::MainWindow( bool slowUpdate ):
-    QMainWindow(),
+    QMainWindow (),
     _ui { new Ui::MainWindow },
-    _sortCol { QDirStat::DataColumns::toViewCol( QDirStat::SizeCol ) },
+    _sortCol { DataColumns::toViewCol( SizeCol ) },
     _sortOrder { Qt::DescendingOrder }
 {
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
-
-    _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward, this );
-
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
-    // The first call to app() creates the QDirStatApp and with it
-    // - DirTreeModel
-    // - DirTree (owned and managed by DirTreeModel)
-    // - SelectionModel
-    DirTree        * tree           = app()->dirTree();
-    DirTreeModel   * dirTreeModel   = app()->dirTreeModel();
-    SelectionModel * selectionModel = app()->selectionModel();
+    // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
+    // Before this, the app() getters will return 0
+    // After this (ie. once MainWindow is constructed), they will always return a non-zero pointer
+    DirTreeModel   * dirTreeModel   = new DirTreeModel( this );
+    SelectionModel * selectionModel = new SelectionModel( dirTreeModel, this );
+    QDirStatApp::setModels( this, dirTreeModel, selectionModel );
 
     if ( slowUpdate )
         dirTreeModel->setSlowUpdate();
@@ -81,15 +76,17 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->dirTreeView->setModel( dirTreeModel );
     _ui->dirTreeView->setSelectionModel( selectionModel );
 
-    _ui->treemapView->setDirTree( tree );
+    _ui->treemapView->setDirTree( dirTreeModel->tree() );
     _ui->treemapView->setSelectionModel( selectionModel );
 
-    _futureSelection.setTree( tree );
+    _futureSelection.setTree( dirTreeModel->tree() );
     _futureSelection.setUseParentFallback( true );
+
+    _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward, this );
 
     ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
 
-    connectSignals();
+    connectSignals( dirTreeModel->tree(), dirTreeModel, selectionModel );
     connectMenuActions(); // see MainWindowActions.cpp
     readSettings();
 
@@ -109,11 +106,14 @@ MainWindow::MainWindow( bool slowUpdate ):
 
 MainWindow::~MainWindow()
 {
-    // logDebug() << "Destroying main window" << Qt::endl;
+    //logDebug() << "Destroying main window" << Qt::endl;
 
     writeSettings();
 
-    // logDebug() << "Main window destroyed" << Qt::endl;
+    // Reset the model pointers
+    QDirStatApp::resetModels();
+
+    //logDebug() << "Main window destroyed" << Qt::endl;
 }
 
 
@@ -136,11 +136,10 @@ void MainWindow::checkPkgManagerSupport()
 }
 
 
-void MainWindow::connectSignals()
+void MainWindow::connectSignals( DirTree        * dirTree,
+                                 DirTreeModel   * dirTreeModel,
+                                 SelectionModel * selectionModel )
 {
-    const DirTree           * dirTree           = app()->dirTree();
-    const DirTreeModel      * dirTreeModel      = app()->dirTreeModel();
-    const SelectionModel    * selectionModel    = app()->selectionModel();
     const CleanupCollection * cleanupCollection = ActionManager::cleanupCollection();
 
     connect( dirTree,                  &DirTree::startingReading,
@@ -204,7 +203,7 @@ void MainWindow::connectSignals()
 
 void MainWindow::readSettings()
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "MainWindow" );
 
@@ -232,7 +231,7 @@ void MainWindow::readSettings()
 
     showBars();
 
-    readWindowSettings( this, "MainWindow" );
+    Settings::readWindowSettings( this, "MainWindow" );
 
     if ( !mainSplitterState.isEmpty() )
 	_ui->mainWinSplitter->restoreState( mainSplitterState );
@@ -256,7 +255,7 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "MainWindow" );
     settings.setValue( "VerboseSelection",         verboseSelection()                         );
@@ -273,7 +272,7 @@ void MainWindow::writeSettings()
     settings.setValue( "State",                    saveState()                                );
     settings.endGroup();
 
-    writeWindowSettings( this, "MainWindow" );
+    Settings::writeWindowSettings( this, "MainWindow" );
 
     const QSplitter * visibleSplitter =
 	_ui->actionDetailsWithTreemap->isChecked() ? _ui->bottomViewsSplitter : _ui->topViewsSplitter;
@@ -338,7 +337,7 @@ void MainWindow::busyDisplay()
 
     // Sort by ReadJobsCol (aka PercentBarCol) during the read
     SignalBlocker signalBlocker( app()->dirTreeModel() );
-    const int sortCol = QDirStat::DataColumns::toViewCol( QDirStat::ReadJobsCol );
+    const int sortCol = DataColumns::toViewCol( ReadJobsCol );
     _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
 }
 
@@ -383,7 +382,7 @@ void MainWindow::updateFileDetailsView()
     else if ( !sel.isEmpty() )
 	_ui->fileDetailsView->showDetails( sel.first() );
     else
-	_ui->fileDetailsView->showDetails( app()->currentItem() );
+	_ui->fileDetailsView->showDetails( app()->selectionModel()->currentItem() );
 }
 
 
@@ -447,7 +446,8 @@ void MainWindow::readingFinished()
     _ui->statusBar->showMessage( tr( "Finished. Elapsed time: " ) + elapsedTime, _longStatusBarTimeout );
     logInfo() << "Reading finished after " << elapsedTime << Qt::endl;
 
-    if ( app()->firstToplevel() && app()->firstToplevel()->errSubDirCount() > 0 )
+    const auto firstToplevel = app()->firstToplevel();
+    if ( firstToplevel && firstToplevel->errSubDirCount() > 0 )
 	showDirPermissionsWarning();
 
     //dumpModelTree( app()->dirTreeModel(), QModelIndex(), "" );
@@ -472,9 +472,8 @@ void MainWindow::layoutChanged( const QList<QPersistentModelIndex> &,
 	_ui->dirTreeView->scrollToCurrent();
 
 	// Remember this order to restore after the next tree read ends
-	const DirTreeModel * dirTreeModel = app()->dirTreeModel();
-	_sortCol = dirTreeModel->sortColumn();
-	_sortOrder = dirTreeModel->sortOrder();
+	_sortCol = app()->dirTreeModel()->sortColumn();
+	_sortOrder = app()->dirTreeModel()->sortOrder();
     }
 }
 
@@ -539,7 +538,7 @@ void MainWindow::askOpenDir()
     bool crossFilesystems = tree->crossFilesystems();
 
 #if USE_CUSTOM_OPEN_DIR_DIALOG
-    const QString path = QDirStat::OpenDirDialog::askOpenDir( this, crossFilesystems );
+    const QString path = OpenDirDialog::askOpenDir( this, crossFilesystems );
 #else
     const QString path = QFileDialog::getExistingDirectory( this, tr("Select directory to scan") );
 #endif
@@ -605,7 +604,7 @@ void MainWindow::askFindFiles()
 void MainWindow::setFutureSelection()
 {
     const FileInfoSet sel = app()->selectionModel()->selectedItems();
-    _futureSelection.set( sel.isEmpty() ? app()->currentItem() : sel.first() );
+    _futureSelection.set( sel.isEmpty() ? app()->selectionModel()->currentItem() : sel.first() );
 }
 
 
@@ -832,7 +831,7 @@ void MainWindow::showSummary()
     }
     else
     {
-	showCurrent( app()->currentItem() );
+	showCurrent( app()->selectionModel()->currentItem() );
     }
 }
 
@@ -873,11 +872,12 @@ void MainWindow::cleanupFinished( int errorCount )
 
 void MainWindow::assumedDeleted()
 {
-    if ( app()->firstToplevel() )
+    const auto firstToplevel = app()->firstToplevel();
+    if ( firstToplevel )
     {
 	// There won't be a selected item now, so select the current item and bring it into view
-	FileInfo * currentItem = app()->currentItem();
-	app()->selectionModel()->setCurrentItem( currentItem ? currentItem : app()->firstToplevel(), true );
+	FileInfo * currentItem = app()->selectionModel()->currentItem();
+	app()->selectionModel()->setCurrentItem( currentItem ? currentItem : firstToplevel, true );
 	_ui->dirTreeView->scrollToCurrent();
 	_historyButtons->unlock( currentItem );
     }
@@ -895,7 +895,7 @@ void MainWindow::assumedDeleted()
 
 void MainWindow::copyCurrentPathToClipboard()
 {
-    const FileInfo * currentItem = app()->currentItem();
+    const FileInfo * currentItem = app()->selectionModel()->currentItem();
     if ( currentItem )
     {
 	const QString path = currentItem->path();
@@ -918,7 +918,7 @@ void MainWindow::expandTreeToLevel( int level )
 
 void MainWindow::navigateUp()
 {
-    const FileInfo * currentItem = app()->currentItem();
+    const FileInfo * currentItem = app()->selectionModel()->currentItem();
     if ( currentItem )
     {
 	FileInfo * parent = currentItem->parent();
@@ -1074,21 +1074,19 @@ void MainWindow::changeEvent( QEvent * event )
     if ( event->type() == QEvent::PaletteChange )
 	updateFileDetailsView();
 
-    QWidget::changeEvent( event );
+    event->ignore();
 }
 
 
-void MainWindow::quit()
+void MainWindow::closeEvent( QCloseEvent * )
 {
     // Stop in-progress reads cleanly
     stopReading();
-
-    QCoreApplication::quit();
 }
 
 
 //---------------------------------------------------------------------------
-//			       Debugging Helpers
+//			       Debugging helpers
 //---------------------------------------------------------------------------
 
 

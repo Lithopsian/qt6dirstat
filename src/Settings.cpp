@@ -8,12 +8,12 @@
  */
 
 #include <unistd.h> // chown()
+#include <algorithm>
 
-#include <QCoreApplication>
 #include <QProcessEnvironment>
+#include <QWidget>
 
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "Logger.h"
 #include "SysUtil.h"
 
@@ -181,10 +181,126 @@ namespace
 } // namespace
 
 
-Settings::Settings( const char * suffix ):
-    QSettings ( QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix )
+QColor Settings::colorValue( const char * key, const QColor & fallback )
 {
-    _usedConfigFiles << fileName();
+    const QColor color( value( key ).toString() );
+    if ( color.isValid() )
+	return color;
+
+    //logDebug() << "Using fallback for " << key << ": " << fallback.name() << Qt::endl;
+
+    return fallback;
+}
+
+
+void Settings::setColorValue( const char * key, const QColor  & color )
+{
+    setValue( key, color.name() );
+}
+
+
+QFont Settings::fontValue( const char * key, const QFont & fallback )
+{
+    if ( contains( key ) )
+    {
+	QFont font;
+	if ( font.fromString( value( key ).toString() ) )
+	    return font;
+    }
+
+    //logDebug() << "Using fallback for " << key << ": " << fallback.family() << Qt::endl;
+
+    return fallback;
+}
+
+
+ColorList Settings::colorListValue( const char * key, const ColorList & fallback )
+{
+    ColorList valueList;
+
+    const QStringList colorList = value( key ).toStringList();
+    for ( const QString & rgb : colorList )
+    {
+	const QColor color( rgb );
+
+	if ( color.isValid() )
+	    valueList << color;
+	else
+	    logError() << "ERROR in " << key << ": \"" << rgb << "\" not a valid color" << Qt::endl;
+    }
+
+    return colorList.isEmpty() ? fallback : valueList;
+}
+
+
+void Settings::setColorListValue( const char * key, const ColorList & colors )
+{
+    QStringList valueList;
+
+    for ( const QColor & color : colors )
+	valueList << color.name();
+
+    setValue( key, valueList );
+}
+
+
+int Settings::enumValue( const char                * key,
+                         int                         fallback,
+                         const SettingsEnumMapping & enumMapping )
+{
+    if ( !contains( key ) )
+	return fallback;
+
+    const QLatin1String str = QLatin1String( value( key ).toByteArray() );
+    const int enumKey = enumMapping.key( str, -1 );
+    if ( enumKey >= 0 )
+	return enumKey;
+
+    logError() << "Invalid value for " << key << ": \"" << str << "\"" << Qt::endl;
+
+    return fallback;
+}
+
+
+void Settings::setEnumValue( const char                * key,
+                             int                         enumValue,
+                             const SettingsEnumMapping & enumMapping )
+{
+    if ( !enumMapping.contains( enumValue ) )
+    {
+	logError() << "No string for enum value " << enumValue << Qt::endl;
+	return;
+    }
+
+    setValue( key, enumMapping.value( enumValue ) );
+}
+
+
+void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup )
+{
+    QDirStat::Settings settings;
+
+    settings.beginGroup( settingsGroup );
+    const QPoint winPos  = settings.value( "WindowPos",  QPoint( -99, -99 ) ).toPoint();
+    const QSize  winSize = settings.value( "WindowSize", QSize (   0,   0 ) ).toSize();
+    settings.endGroup();
+
+    if ( winSize.height() > 100 && winSize.width() > 100 )
+	widget->resize( winSize );
+
+    if ( winPos.x() != -99 && winPos.y() != -99 )
+	widget->move( winPos );
+}
+
+
+void Settings::writeWindowSettings( QWidget * widget, const char * settingsGroup )
+{
+    QDirStat::Settings settings;
+
+    settings.beginGroup( settingsGroup );
+    settings.setValue( "WindowPos",  widget->pos()  );
+    settings.setValue( "WindowSize", widget->size() );
+    settings.endGroup();
 }
 
 

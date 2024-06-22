@@ -14,13 +14,9 @@
 #include "OutputWindow.h"
 #include "Exception.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
-using QDirStat::readColorEntry;
-using QDirStat::writeColorEntry;
-using QDirStat::readFontEntry;
-using QDirStat::writeFontEntry;
+using namespace QDirStat;
 
 
 OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
@@ -53,7 +49,7 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
 
 OutputWindow::~OutputWindow()
 {
-    //logDebug() << "Destructor" << Qt::endl;
+    logDebug() << "Destructor" << Qt::endl;
 
     if ( !_processList.isEmpty() )
     {
@@ -416,15 +412,13 @@ QString OutputWindow::command( QProcess * process )
 }
 
 
-void OutputWindow::closeEvent( QCloseEvent * event )
+void OutputWindow::closeEvent( QCloseEvent * )
 {
     _closed = true;
 
     // Wait until the last process is finished and then delete this window
     if ( _processList.isEmpty() && _noMoreProcesses )
 	this->deleteLater();
-
-    event->accept();
 }
 
 
@@ -459,17 +453,17 @@ void OutputWindow::readSettings()
 
     settings.beginGroup( "OutputWindow" );
 
-    _terminalBackground  = readColorEntry( settings, "TerminalBackground", QColor( Qt::black        ) );
-    _commandTextColor    = readColorEntry( settings, "CommandTextColor",   QColor( Qt::white        ) );
-    _stdoutColor         = readColorEntry( settings, "StdoutTextColor",    QColor( 0xff, 0xaa, 0x00 ) );
-    _stderrColor         = readColorEntry( settings, "StdErrTextColor",    QColor( Qt::red          ) );
-    _terminalDefaultFont = readFontEntry ( settings, "TerminalFont",       _ui->terminal->font()      );
+    _terminalBackground  = settings.colorValue( "TerminalBackground", QColor( Qt::black        ) );
+    _commandTextColor    = settings.colorValue( "CommandTextColor",   QColor( Qt::white        ) );
+    _stdoutColor         = settings.colorValue( "StdoutTextColor",    QColor( 0xff, 0xaa, 0x00 ) );
+    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor( Qt::red          ) );
+    _terminalDefaultFont = settings.fontValue ( "TerminalFont",       _ui->terminal->font()      );
 
-    setDefaultValue( settings, "TerminalBackground", _terminalBackground  );
-    setDefaultValue( settings, "CommandTextColor",   _commandTextColor    );
-    setDefaultValue( settings, "StdoutTextColor",    _stdoutColor         );
-    setDefaultValue( settings, "StdErrTextColor",    _stderrColor         );
-    setDefaultValue( settings, "TerminalFont",       _terminalDefaultFont );
+    settings.setDefaultValue( "TerminalBackground", _terminalBackground  );
+    settings.setDefaultValue( "CommandTextColor",   _commandTextColor    );
+    settings.setDefaultValue( "StdoutTextColor",    _stdoutColor         );
+    settings.setDefaultValue( "StdErrTextColor",    _stderrColor         );
+    settings.setDefaultValue( "TerminalFont",       _terminalDefaultFont );
 
     settings.endGroup();
 

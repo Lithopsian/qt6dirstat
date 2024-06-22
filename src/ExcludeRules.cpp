@@ -14,7 +14,6 @@
 #include "FileInfoIterator.h"
 #include "Logger.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
 #define VERBOSE_EXCLUDE_MATCHES 0
@@ -223,9 +222,9 @@ namespace
      **/
     SettingsEnumMapping patternSyntaxMapping()
     {
-	return { { ExcludeRule::RegExp,      "RegExp"      },
-		 { ExcludeRule::Wildcard,    "Wildcard"    },
-		 { ExcludeRule::FixedString, "FixedString" },
+	return { { ExcludeRule::RegExp,      "RegExp"_L1      },
+		 { ExcludeRule::Wildcard,    "Wildcard"_L1    },
+		 { ExcludeRule::FixedString, "FixedString"_L1 },
 	       };
     }
 
@@ -252,7 +251,7 @@ void ExcludeRules::readSettings()
 	const bool useFullPath       = settings.value( "UseFullPath",       false ).toBool();
 	const bool checkAnyFileChild = settings.value( "CheckAnyFileChild", false ).toBool();
 
-	const int syntax = readEnumEntry( settings, "Syntax", ExcludeRule::RegExp, mapping );
+	const int syntax = settings.enumValue( "Syntax", ExcludeRule::RegExp, mapping );
 
 	ExcludeRule * rule = new ExcludeRule( ( ExcludeRule::PatternSyntax )syntax,
 					      pattern,
@@ -301,7 +300,7 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
 	    settings.setValue( "UseFullPath",       rule->useFullPath()       );
 	    settings.setValue( "CheckAnyFileChild", rule->checkAnyFileChild() );
 
-	    writeEnumEntry( settings, "Syntax", rule->patternSyntax(), mapping );
+	    settings.setEnumValue( "Syntax", rule->patternSyntax(), mapping );
 
 	    settings.endListGroup(); // [ExcludeRule_01], [ExcludeRule_02], ...
 	}

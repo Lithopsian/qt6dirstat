@@ -7,6 +7,7 @@
  *              Ian Nartowicz
  */
 
+#include <QPointer>
 #include <QResizeEvent>
 
 #include "LocateFileTypeWindow.h"
@@ -17,9 +18,9 @@
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"        // SelectionModel, findMainWindow()
+#include "QDirStatApp.h"        // SelectionModel, mainWindow()
 #include "SelectionModel.h"
-#include "SettingsHelpers.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;
@@ -36,7 +37,7 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initWidgets();
-    readWindowSettings( this, "LocateFileTypeWindow" );
+    Settings::readWindowSettings( this, "LocateFileTypeWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
 	     this,               &LocateFileTypeWindow::refresh );
@@ -49,7 +50,7 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 LocateFileTypeWindow::~LocateFileTypeWindow()
 {
     //logDebug() << "destroying" << Qt::endl;
-    writeWindowSettings( this, "LocateFileTypeWindow" );
+    Settings::writeWindowSettings( this, "LocateFileTypeWindow" );
 }
 
 
@@ -58,7 +59,7 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
     static QPointer<LocateFileTypeWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new LocateFileTypeWindow( app()->findMainWindow() );
+	_sharedInstance = new LocateFileTypeWindow( app()->mainWindow() );
 
     return _sharedInstance;
 }
@@ -66,14 +67,12 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
 
 void LocateFileTypeWindow::initWidgets()
 {
-    app()->setWidgetFontSize( _ui->treeWidget );
+    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
     _ui->treeWidget->setColumnCount( SSR_ColumnCount );
     _ui->treeWidget->setHeaderLabels( { tr( "Number" ), tr( "Total Size" ), tr( "Directory" ) } );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
     _ui->treeWidget->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
-
-    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }

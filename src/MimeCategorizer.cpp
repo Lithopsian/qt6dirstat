@@ -13,7 +13,6 @@
 #include "Exception.h"
 #include "FileInfo.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 
 
 using namespace QDirStat;
@@ -87,10 +86,10 @@ namespace
 	    settings.beginListGroup( i+1 );
 
 	    const MimeCategory * category = categoryList.at(i);
-
-	    settings.setValue( "Name", category->name() );
 	    //logDebug() << "Adding " << category->name() << Qt::endl;
-	    writeColorEntry( settings, "Color", category->color() );
+
+	    settings.setValue     ( "Name",  category->name()  );
+	    settings.setColorValue( "Color", category->color() );
 
 	    QStringList patterns = category->humanReadablePatternList( Qt::CaseInsensitive );
 
@@ -421,7 +420,7 @@ void MimeCategorizer::readSettings()
     {
 	settings.beginGroup( groupName );
 	QString name  = settings.value( "Name", groupName ).toString();
-	QColor  color = readColorEntry( settings, "Color", "#b0b0b0" );
+	QColor  color = settings.colorValue( "Color", "#b0b0b0" );
 	QStringList patternsCaseInsensitive = settings.value( "PatternsCaseInsensitive" ).toStringList();
 	QStringList patternsCaseSensitive   = settings.value( "PatternsCaseSensitive"   ).toStringList();
 	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...

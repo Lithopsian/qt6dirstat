@@ -8,6 +8,7 @@
  */
 
 #include <QResizeEvent>
+#include <QtConcurrent/QtConcurrent>
 
 #include "TreemapView.h"
 #include "TreemapTile.h"
@@ -17,7 +18,6 @@
 #include "MimeCategorizer.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "SettingsHelpers.h"
 #include "SignalBlocker.h"
 
 
@@ -30,12 +30,12 @@ namespace
      * Writes a colour to the settings file.  If the color is invalid, it
      * will write an entry with an empty string.
      **/
-    void writeOptionalColorEntry( Settings & settings, const QString & setting, const QColor & color )
+    void writeOptionalColorEntry( Settings & settings, const char * setting, const QColor & color )
     {
         if ( color.isValid() )
-            writeColorEntry( settings, setting, color );
+            settings.colorValue( setting, color );
         else
-            settings.setValue( setting, "" );
+            settings.setValue( setting, QString() );
     }
 
 
@@ -201,15 +201,15 @@ void TreemapView::readSettings()
     _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight     ).toDouble();
     _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize       ).toInt();
 
-    _tileFixedColor     = readColorEntry( settings, "TileFixedColor",     QColor()                   );
-    _currentItemColor   = readColorEntry( settings, "CurrentItemColor",   Qt::red                    );
-    _selectedItemsColor = readColorEntry( settings, "SelectedItemsColor", Qt::yellow                 );
-    _highlightColor     = readColorEntry( settings, "HighlightColor",     Qt::white                  );
-    _cushionGridColor   = readColorEntry( settings, "CushionGridColor",   Qt::darkGray               );
-    _outlineColor       = readColorEntry( settings, "OutlineColor",       Qt::black                  );
-    _dirFillColor       = readColorEntry( settings, "DirFillColor",       QColor( 0x60, 0x60, 0x60 ) );
-    _dirGradientStart   = readColorEntry( settings, "DirGradientStart",   QColor( 0x60, 0x60, 0x70 ) );
-    _dirGradientEnd     = readColorEntry( settings, "DirGradientEnd",     QColor( 0x70, 0x70, 0x80 ) );
+    _tileFixedColor     = settings.colorValue( "TileFixedColor",     QColor()                   );
+    _currentItemColor   = settings.colorValue( "CurrentItemColor",   Qt::red                    );
+    _selectedItemsColor = settings.colorValue( "SelectedItemsColor", Qt::yellow                 );
+    _highlightColor     = settings.colorValue( "HighlightColor",     Qt::white                  );
+    _cushionGridColor   = settings.colorValue( "CushionGridColor",   Qt::darkGray               );
+    _outlineColor       = settings.colorValue( "OutlineColor",       Qt::black                  );
+    _dirFillColor       = settings.colorValue( "DirFillColor",       QColor( 0x60, 0x60, 0x60 ) );
+    _dirGradientStart   = settings.colorValue( "DirGradientStart",   QColor( 0x60, 0x60, 0x70 ) );
+    _dirGradientEnd     = settings.colorValue( "DirGradientEnd",     QColor( 0x70, 0x70, 0x80 ) );
 
     settings.endGroup();
 
@@ -236,14 +236,14 @@ void TreemapView::writeSettings()
 
     writeOptionalColorEntry( settings, "TileFixedColor", _tileFixedColor );
 
-    writeColorEntry( settings, "CurrentItemColor",   _currentItemColor   );
-    writeColorEntry( settings, "SelectedItemsColor", _selectedItemsColor );
-    writeColorEntry( settings, "HighlightColor",     _highlightColor     );
-    writeColorEntry( settings, "CushionGridColor",   _cushionGridColor   );
-    writeColorEntry( settings, "OutlineColor",       _outlineColor       );
-    writeColorEntry( settings, "DirFillColor",       _dirFillColor       );
-    writeColorEntry( settings, "DirGradientStart",   _dirGradientStart   );
-    writeColorEntry( settings, "DirGradientEnd",     _dirGradientEnd     );
+    settings.setColorValue( "CurrentItemColor",   _currentItemColor   );
+    settings.setColorValue( "SelectedItemsColor", _selectedItemsColor );
+    settings.setColorValue( "HighlightColor",     _highlightColor     );
+    settings.setColorValue( "CushionGridColor",   _cushionGridColor   );
+    settings.setColorValue( "OutlineColor",       _outlineColor       );
+    settings.setColorValue( "DirFillColor",       _dirFillColor       );
+    settings.setColorValue( "DirGradientStart",   _dirGradientStart   );
+    settings.setColorValue( "DirGradientEnd",     _dirGradientEnd     );
 
     settings.endGroup();
 }
