@@ -12,14 +12,10 @@
 
 #include <memory>
 
+#include <QHash>
+
 #include "ui_file-type-stats-window.h"
 #include "Typedefs.h" // FileSize
-
-
-// Using a suffix that can never occur: A slash is illegal in Linux/Unix
-// filenames.
-#define NO_SUFFIX        QLatin1String( "//<No Suffix>" )
-#define NON_SUFFIX_RULE  QLatin1String( "//<Other>" )
 
 
 namespace QDirStat
@@ -27,20 +23,56 @@ namespace QDirStat
     class FileInfo;
     class MimeCategory;
 
-    typedef QPair<QString, const MimeCategory *>  MapCategory;
+    /**
+     * SuffixCategory and CountSum are defined instead of using
+     * QPair for the hash keys and values.  This just means that
+     * the pair members can be referred to by name rather than
+     * simply 'first' and 'second'.
+     **/
+    struct SuffixCategory
+    {
+	QString suffix;
+	const MimeCategory * category;
+    };
 
-    typedef QHash<MapCategory, FileSize>          StringFileSizeMap;
-    typedef QHash<MapCategory, int>               StringIntMap;
-    typedef QHash<const MimeCategory *, FileSize> CategoryFileSizeMap;
-    typedef QHash<const MimeCategory *, int>      CategoryIntMap;
+    struct CountSum
+    {
+	int count;
+	FileSize sum;
+    };
 
-    typedef StringFileSizeMap::const_iterator     StringFileSizeMapIterator;
-    typedef CategoryFileSizeMap::const_iterator   CategoryFileSizeMapIterator;
+    /**
+     * Define operator== and qHash for SuffixCategory so that it
+     * can be used as a QHash key.  The suffix hash is almost unique,
+     * so simply XOR it with the category pointer.
+     **/
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+    inline uint qHash( const SuffixCategory & key, uint seed )
+#else
+    inline size_t qHash( const SuffixCategory & key, size_t seed )
+#endif
+	{ return ::qHash( key.suffix, seed ) ^ reinterpret_cast<quintptr>( key.category ); }
+    inline bool operator==( const SuffixCategory & cat1, const SuffixCategory & cat2 )
+	{ return cat1.suffix == cat2.suffix && cat1.category == cat2.category; }
+
+    /**
+     * Two types of hash maps: CategoryMap is used for satistics
+     * aggregated at the category level; SuffixMap is used for
+     * statistics aggregated by suffix per category.
+     **/
+    typedef QHash<const MimeCategory *, CountSum> CategoryMap;
+    typedef QHash<SuffixCategory, CountSum>       SuffixMap;
+
 
     /**
      * Class to calculate file type statistics for a subtree, such as how much
      * disk space is used for each kind of filename extension (*.jpg, *.mp4
-     * etc.).
+     * etc.) and how many files.  Only regular files are analyzed because other
+     * file-like entities are tiny or don't have a meaningful size.  Specifically,
+     * symlinks and directories are ignored.
+     *
+     * This class exists only to support FileTypeStatsWindow.  Access to the
+     * completed statistics is through the iterators.
      **/
     class FileTypeStats
     {
@@ -48,81 +80,30 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor.  Constructing an instance will analyse the given subtree
+	 * and populate the three statistics maps.
 	 **/
 	FileTypeStats( FileInfo * subtree );
 
 	/**
-	 * Return the number of files in the tree with the specified suffix.
+	 * Iterators for the two maps.
 	 **/
-	int suffixCount( const QString & suffix, const MimeCategory * category ) const
-	    { return _suffixCount.value( { suffix, category }, 0 ); }
-
-	/**
-	 * Return the total file size of files in the tree with the specified
-	 * suffix.
-	 **/
-	FileSize suffixSum( const QString & suffix, const MimeCategory * category ) const
-	    { return _suffixSum.value( { suffix, category }, 0LL ); }
-
-	/**
-	 * Return the number of files in the tree with the specified category.
-	 **/
-	int categoryCount( const MimeCategory * category ) const
-	    { return _categoryCount.value( category, 0 ); }
-
-	/**
-	 * Return the total file size of files in the tree with the specified
-	 * category.
-	 **/
-	FileSize categorySum( const MimeCategory * category ) const
-	    { return _categorySum.value( category, 0LL ); }
-
-	/**
-	 * Return the number of files in the tree matched by a non-suffix rule
-	 * with the specified category.
-	 **/
-	int categoryNonSuffixRuleCount( const MimeCategory * category ) const
-	    { return _categoryNonSuffixRuleCount.value( category, 0 ); }
-
-	/**
-	 * Return the total file size of files in the tree matched by a
-	 * non-suffix rule with the specified category.
-	 **/
-	FileSize categoryNonSuffixRuleSum( const MimeCategory * category ) const
-	    { return _categoryNonSuffixRuleSum.value( category, 0LL ); }
+	SuffixMap::const_iterator suffixesBegin()     const { return _suffixes.cbegin();   }
+	SuffixMap::const_iterator suffixesEnd()       const { return _suffixes.cend();     }
+	CategoryMap::const_iterator categoriesBegin() const { return _categories.cbegin(); }
+	CategoryMap::const_iterator categoriesEnd()   const { return _categories.cend();   }
 
 	/**
 	 * Return the special category for "other", i.e. unclassified files.
+	 * This category is created and owned by the FileTypeStats object.
 	 **/
 	const MimeCategory * otherCategory() const { return _otherCategory.get(); }
 
 	/**
-	 * Return the total size of the tree.
-	 **/
-	FileSize totalSize() const { return _totalSize; }
-
-	/**
-	 * Return the percentage of 'size' of the tree total size.
+	 * Return the percentage of 'size' relative to the tree total size.
 	 **/
 	float percentage( FileSize size ) const
-	    { return totalSize() == 0LL ? 0.0 : 100.0 * size / totalSize(); }
-
-	//
-	// Iterators
-	//
-
-	StringFileSizeMapIterator suffixSumBegin() const
-	    { return _suffixSum.constBegin(); }
-
-	StringFileSizeMapIterator suffixSumEnd() const
-	    { return _suffixSum.constEnd(); }
-
-	CategoryFileSizeMapIterator categorySumBegin() const
-	    { return _categorySum.constBegin(); }
-
-	CategoryFileSizeMapIterator categorySumEnd() const
-	    { return _categorySum.constEnd(); }
+	    { return _totalSize == 0LL ? 0.0f : 100.0f * size / _totalSize; }
 
 
     protected:
@@ -131,43 +112,31 @@ namespace QDirStat
 	 * Collect information from the associated widget tree:
 	 *
 	 * Recursively go through the tree and collect sizes for each file type
-	 * (filename extension).
+	 * (filename extension) into the two maps.
 	 **/
 	void collect( const FileInfo * dir );
 
 	/**
-	 * Add the various sums.
+	 * Aaggregate entries to each of the maps.
 	 **/
-        void addCategorySum     ( const MimeCategory * category, const FileInfo * item );
-        void addNonSuffixRuleSum( const MimeCategory * category, const FileInfo * item );
-        void addSuffixSum       ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
+	void addCategorySum     ( const MimeCategory * category, const FileInfo * item );
+	void addSuffixSum       ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
 
-   	/**
-	 * Remove useless content from the maps. On a Linux system, there tend
-	 * to be a lot of files that have a '.' in the name, but it's not a
-	 * meaningful suffix but a general-purpose separator for dates, SHAs,
-	 * version numbers or whatever. All that stuff accumulates in the maps,
-	 * and it's typically just a single file with that non-suffix. This
-	 * function tries a best effort to get rid of that stuff.
+	/**
+	 * Move entries that have a '.' in the name but do not have
+	 * meaningful extensions into the "no extension" category map
+	 * for the "Other" category". This includes extremely long
+	 * extensions, those with no letters, uncommon extensions with
+	 * a low proportion of letters, and anything at all with a
+	 * space in it.
 	 **/
 	void removeCruft();
 
 	/**
-	 * Remove empty suffix entries from the internal maps.
-	 **/
-	void removeEmpty();
-
-	/**
-	 * Check if a suffix is cruft, i.e. a nonstandard suffix that is not
-	 * useful for display.
-	 *
-	 * Notice that this is a highly heuristical algorithm that might give
-	 * false positives.
-	 **/
-	bool isCruft( const QString & suffix, const MimeCategory * category ) const;
-
-	/**
 	 * Check if the sums add up and how much is unaccounted for.
+	 *
+	 * Note that this will never match exactly, because the map sizes don't
+	 * include directories.
 	 **/
 	void sanityCheck();
 
@@ -180,14 +149,10 @@ namespace QDirStat
 
 	std::unique_ptr<const MimeCategory> _otherCategory;
 
-	StringFileSizeMap    _suffixSum;
-	StringIntMap         _suffixCount;
-	CategoryFileSizeMap  _categorySum;
-	CategoryIntMap       _categoryCount;
-	CategoryFileSizeMap  _categoryNonSuffixRuleSum;
-	CategoryIntMap       _categoryNonSuffixRuleCount;
+	SuffixMap   _suffixes;
+	CategoryMap _categories;
 
-	FileSize             _totalSize { 0LL };
+	FileSize    _totalSize { 0LL };
 
     };
 }

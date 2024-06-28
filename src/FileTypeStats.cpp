@@ -17,7 +17,79 @@
 #include "MimeCategory.h"
 
 
+#define VERBOSE_STATS 0
+
+
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+    * See if a filename has an extension; that is, a section
+    * of the name following a '.' character.  Ignore a
+    * leading dot which indicates a hidden file, not an
+    * extension.
+    *
+    * Use the last (i.e. the shortest) suffix if the MIME
+    * categorizer didn't know it: use section -1 (the last
+    * one, ignoring any trailing '.' separator).
+    *
+    * The downside is that this would not find a ".tar.bz",
+    * but just the ".bz" for a compressed tarball. But it's
+    * much better than getting a ".eab7d88df-git.deb" rather
+    * than a ".deb".
+    **/
+    QString filenameExtension( const QString & filename )
+    {
+	// See if there is a dot other than a leading dot
+	if ( filename.lastIndexOf( u'.' ) > 0 )
+	    // Use the shortest extension
+	    return filename.section( u'.', -1 );
+
+	return QString();
+    }
+
+    /**
+     * Check if a suffix is cruft, i.e. a nonstandard suffix that is not
+     * useful for display.
+     *
+     * The criteria are deliberately extreme, so only really odd
+     * extensions are treated as "non-extensions".  Most of the mass
+     * of uncommon extensions are hidden by the topX limit.
+     **/
+    bool isCruft( const QString & suffix, int suffixCount, int categoryCount )
+    {
+	const int letters = suffix.count( QRegularExpression( "[a-zA-Z]" ) );
+	if ( letters == 0 )
+	    return true;
+
+	// The most common case: 3-letter suffix
+	const int len = suffix.size();
+	if ( len == 3 && letters == 3 )
+	    return false;
+
+	// Spaces in suffixes are just weird
+	if ( suffix.contains( u' ' ) )
+	    return true;
+
+	// Only apply the next two tests to suffixes that are both absolutely and relatively uncommon
+	if ( suffixCount == 1 || ( suffixCount < 10 && suffixCount * 1000 < categoryCount ) )
+	{
+	    // Arbitrary exclusion of very long uncommon suffixes
+	    if ( len > 16 )
+		return true;
+
+	    // Forget uncommon suffixes with too many non-letters
+	    const float lettersPercent = len > 0 ? 100.0f * letters / len : 0.0f;
+	    if ( lettersPercent < 75.0f )
+		return true;
+	}
+
+	return false;
+    }
+
+}
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
@@ -28,9 +100,12 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
         collect( subtree );
         _totalSize = subtree->totalSize();
         removeCruft();
-        removeEmpty();
+#if VERBOSE_STATS
         sanityCheck();
+#endif
     }
+
+    logDebug() << _suffixes.size() << " suffixes in " << _categories.size() << " categories" << Qt::endl;
 }
 
 
@@ -39,7 +114,7 @@ void FileTypeStats::collect( const FileInfo * dir )
     if ( !dir )
 	return;
 
-    MimeCategorizer * mimeCategorizer = MimeCategorizer::instance();
+    MimeCategorizer * categorizer = MimeCategorizer::instance();
 
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
@@ -51,61 +126,25 @@ void FileTypeStats::collect( const FileInfo * dir )
 	}
 	else if ( item->isFile() )
 	{
+	    // First attempt: try the MIME categorizer.
 	    QString suffix;
+	    const MimeCategory * category = categorizer->category( item, &suffix );
 
-	    // First attempt: Try the MIME categorizer.
-	    //
-	    // If it knows the file's suffix, it can much easier find the
-	    // correct one in case there are multiple to choose from, for
-	    // example ".tar.bz2", not ".bz2" for a bzipped tarball. But on
-	    // Linux systems, having multiple dots in filenames is very common,
-	    // e.g. in .deb or .rpm packages, so the longest possible suffix is
-	    // not always the useful one (because it might contain version
-	    // numbers and all kinds of irrelevant information).
-	    //
-	    // The suffixes the MIME categorizer knows are carefully
-	    // hand-crafted, so if it knows anything about a suffix, it's the
-	    // best choice.
-
-	    const MimeCategory * category = mimeCategorizer->category( item, &suffix );
 	    if ( category )
 	    {
+		// The suffixes the MIME categorizer returns are the exact ones
+		// used to match a category.  That could be one of multiple
+		// possible suffixies.  When the category is matched using a
+		// non-suffix rule, there may be no suffix even though the file
+		// has a suffix.
 		addCategorySum( category, item );
-
-		if ( suffix.isEmpty() )
-		    addNonSuffixRuleSum( category, item );
-		else
-		    addSuffixSum( suffix, category, item );
+		addSuffixSum( suffix, category, item );
 	    }
 	    else // !category
 	    {
+		// Use the "Other" category with any filename extension as the suffix
 		addCategorySum( otherCategory(), item );
-
-		if ( suffix.isEmpty() )
-		{
-		    // See if there is a dot other than a leading dot
-		    if ( item->name().lastIndexOf( '.' ) > 0 )
-//                    if ( item->name().contains( '.' ) && !item->name().startsWith( '.' ) )
-		    {
-			// Fall back to the last (i.e. the shortest) suffix if the
-			// MIME categorizer didn't know it: Use section -1 (the
-			// last one, ignoring any trailing '.' separator).
-			//
-			// The downside is that this would not find a ".tar.bz",
-			// but just the ".bz" for a compressed tarball. But it's
-			// much better than getting a ".eab7d88df-git.deb" rather
-			// than a ".deb".
-
-			suffix = item->name().section( '.', -1 );
-		    }
-		}
-
-		suffix = suffix.toLower();
-
-		if ( suffix.isEmpty() )
-		    suffix = NO_SUFFIX;
-
-		addSuffixSum( suffix, otherCategory(), item );
+		addSuffixSum( filenameExtension( item->name() ), otherCategory(), item );
 	    }
 
 	    // Disregard symlinks, block devices and other special files
@@ -116,137 +155,101 @@ void FileTypeStats::collect( const FileInfo * dir )
 
 void FileTypeStats::addCategorySum( const MimeCategory * category, const FileInfo * item )
 {
-    _categorySum[ category ] += item->size();
-    ++_categoryCount[ category ];
-}
-
-
-void FileTypeStats::addNonSuffixRuleSum( const MimeCategory * category, const FileInfo * item )
-{
-    _categoryNonSuffixRuleSum[ category ] += item->size();
-    ++_categoryNonSuffixRuleCount[ category ];
+    // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
+    CountSum & countSum = _categories[ category ];
+    ++countSum.count;
+    countSum.sum += item->size();
 }
 
 
 void FileTypeStats::addSuffixSum( const QString & suffix, const MimeCategory * category, const FileInfo * item )
 {
-    const MapCategory mapCategory = { suffix, category };
-    _suffixSum[ mapCategory ] += item->size();
-    ++_suffixCount[ mapCategory ];
+    // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
+    const SuffixCategory suffixCategory { suffix, category };
+    CountSum & countSum = _suffixes[ suffixCategory ];
+    ++countSum.count;
+    countSum.sum += item->size();
 }
 
 
 void FileTypeStats::removeCruft()
 {
-    // Make sure those two already exist to avoid confusing the iterator
-    // (QHash::operator[] auto-inserts with default ctor if not already there)
-    const MapCategory cruftMapCategory = { NO_SUFFIX, otherCategory() };
-    _suffixSum  [ cruftMapCategory ] = 0LL;
-    _suffixCount[ cruftMapCategory ] = 0;
+    // Might be nothing at all in "Other"
+    if ( !_categories.contains( otherCategory() ) )
+	return;
 
+    // Just get this once, isCruft needs it each time
+    const int otherCategoryCount = _categories[ otherCategory() ].count;
+
+    // QHash will default-construct (ie. zeroes) the entry if it don't exist yet
+    CountSum & noExtension = _suffixes[ { QString(), otherCategory() } ];
+
+#if VERBOSE_STATS
     FileSize totalMergedSum   = 0LL;
     int      totalMergedCount = 0;
-
-    QStringList cruft;
-
-    StringIntMap::iterator it = _suffixCount.begin();
-    while ( it != _suffixCount.end() )
-    {
-	const QString      & suffix   = it.key().first;
-	const MimeCategory * category = it.key().second;
-
-	if ( isCruft( suffix, category ) )
-	{
-	    cruft << "*." + suffix;
-
-	    const MapCategory mapCategory = { suffix, category };
-
-	    _suffixSum  [ cruftMapCategory ] += _suffixSum  [ mapCategory ];
-	    _suffixCount[ cruftMapCategory ] += _suffixCount[ mapCategory ];
-
-	    totalMergedSum   += _suffixSum  [ mapCategory ];
-	    totalMergedCount += _suffixCount[ mapCategory ];
-
-	    _suffixSum.remove( { suffix, category } );
-	    it = _suffixCount.erase( it );
-	}
-	else
-	{
-	    ++it;
-	}
-    }
-
-#if 0
-    logDebug() << "Merged " << (int)cruft.size() << " suffixes to <no extension>: "
-	       << cruft.join( QLatin1String( ", " ) ) << Qt::endl;
 #endif
-    logDebug() << "Merged to NO_SUFFIX " << totalMergedCount << " files "
-	       << "(" << formatSize( totalMergedSum ) << ")"
-	       << Qt::endl;
-}
 
-
-void FileTypeStats::removeEmpty()
-{
-    StringIntMap::iterator it = _suffixCount.begin();
-    while ( it != _suffixCount.end() )
+    QStringList cruftSuffixes;
+    for ( auto it = _suffixes.cbegin(); it != _suffixes.cend(); ++it )
     {
-	if ( it.value() == 0 )
-	{
-	    const QString      & suffix   = it.key().first;
-	    const MimeCategory * category = it.key().second;
+	const QString      & suffix   = it.key().suffix;
+	const MimeCategory * category = it.key().category;
 
-	    logDebug() << "Removing empty suffix *." << suffix << Qt::endl;
-
-	    _suffixSum.remove( { suffix, category } );
-	    it = _suffixCount.erase( it );
-	}
-	else
+	// Identify apparent suffixes with no category that are not sensible file extensions
+	if ( category == otherCategory() && !suffix.isEmpty() )
 	{
-	    ++it;
+	    const int suffixCount = it.value().count;
+
+	    if ( isCruft( suffix, suffixCount, otherCategoryCount ) )
+	    {
+		// copy the cruft values to the "no extension" entry in the "Other" category
+		const FileSize suffixSum = it.value().sum;
+		noExtension.count += suffixCount;
+		noExtension.sum   += suffixSum;
+		cruftSuffixes << suffix;
+
+#if VERBOSE_STATS
+		totalMergedCount += suffixCount;
+		totalMergedSum   += suffixSum ;
+#endif
+	    }
 	}
     }
+
+    // Remove the merged suffixes
+    for ( const QString & cruftSuffix : cruftSuffixes )
+	_suffixes.remove( { cruftSuffix, otherCategory() } );
+
+#if VERBOSE_STATS
+    if ( cruftSuffixes.size() > 0 )
+    {
+	logDebug() << "Merged " << cruftSuffixes.size() << " suffixes to <no extension>: "
+		   << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
+
+	logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
+		   << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
+    }
+#endif
+
+    // The price of finding the cruft entry just once is having to delete it ...
+    // ... if it was default-constructed and is still empty
+    if ( noExtension.count == 0 )
+	_suffixes.remove( { QString(), otherCategory() } );
 }
 
 
-bool FileTypeStats::isCruft( const QString & suffix, const MimeCategory * category ) const
-{
-    // Unknown categories should all have been marked in _otherCategory already
-    if ( suffix == NO_SUFFIX || category != otherCategory() )
-	return false;
-
-    if ( suffix.contains( ' ' ) )
-	return true;
-
-    const int letters = suffix.count( QRegularExpression( "[a-zA-Z]" ) );
-    if ( letters == 0 )
-	return true;
-
-    // The most common case: 3-letter suffix
-    const int len = suffix.size();
-    if ( len == 3 && letters == 3 )
-	return false;
-
-    // Arbitrary exclusion of long uncommon suffixes
-    const int count = _suffixCount[ { suffix, category } ];
-    if ( len > 6 && count < len )
-	return true;
-
-    // Forget long suffixes with mostly non-letters
-    const float lettersPercent = len > 0 ? (100.0 * letters) / len : 0.0;
-    if ( lettersPercent < 70.0 && count < len )
-	return true;
-
-    return false;
-}
-
-
+#if VERBOSE_STATS
 void FileTypeStats::sanityCheck()
 {
-    const FileSize missing = totalSize() - std::accumulate( _categorySum.cbegin(), _categorySum.cend(), 0LL );
+    const FileSize diff = std::accumulate( _categories.cbegin(),
+                                           _categories.cend(),
+                                           _totalSize,
+                                           []( FileSize sum, const CountSum & cat )
+                                               { return sum - cat.sum; } );
 
-    logDebug() << "Unaccounted in categories: " << formatSize( missing )
-	       << " of " << formatSize( totalSize() )
-	       << " (" << QString::number( percentage( missing ), 'f', 2 ) << "%)"
-	       << Qt::endl;
+    logDebug() << "Unaccounted in categories: "
+               << formatSize( diff ) << " of " << formatSize( _totalSize )
+               << " (" << QString::number( percentage( diff ), 'f', 2 ) << "%)"
+               << Qt::endl;
 }
+#endif
