@@ -117,7 +117,7 @@ bool SparseFilesTreeWalker::check( FileInfo * item )
 
 bool FilesFromYearTreeWalker::check( FileInfo * item )
 {
-    return item && item->isFile() && item->yearAndMonth().first == _year;
+    return item && item->isFile() && item->yearAndMonth().year == _year;
 }
 
 
@@ -127,7 +127,7 @@ bool FilesFromMonthTreeWalker::check( FileInfo * item )
         return false;
 
     const auto yearAndMonth = item->yearAndMonth();
-    return yearAndMonth.first  == _year && yearAndMonth.second == _month;
+    return yearAndMonth.year == _year && yearAndMonth.month == _month;
 }
 
 

@@ -59,7 +59,7 @@ namespace
 	if ( suffixes.contains( suffix ) )
 	{
 	    logError() << "Duplicate suffix: " << suffix << " for "
-		       << suffixes.value( suffix ).first.pattern() << " and " << category
+		       << suffixes.value( suffix ).wildcard.pattern() << " and " << category
 		       << Qt::endl;
 	}
 	else
@@ -158,7 +158,14 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item, QString *
 
     const QReadLocker locker( &_lock );
 
-    return category( item->name(), suffix_ret );
+    const MimeCategory * matchedCategory = category( item->name(), suffix_ret );
+    if ( matchedCategory )
+	return matchedCategory;
+
+    if ( ( item->mode() & S_IXUSR ) == S_IXUSR )
+	return _executableCategory;
+
+    return nullptr;
 }
 
 
@@ -169,14 +176,12 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item ) const
 
     if ( item->isFile() )
     {
-	const MimeCategory * matchedCategory = category( item->name(), 0 );
+	const MimeCategory * matchedCategory = category( item->name(), nullptr );
 	if ( matchedCategory )
 	    return matchedCategory;
 
 	if ( ( item->mode() & S_IXUSR ) == S_IXUSR )
 	    return _executableCategory;
-	else
-	    return &_emptyCategory;
     }
 
     return &_emptyCategory;
@@ -184,7 +189,7 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item ) const
 
 
 const MimeCategory * MimeCategorizer::category( const QString & filename,
-						QString	* suffix_ret ) const
+                                                QString       * suffix_ret ) const
 {
     if ( suffix_ret )
 	*suffix_ret = QString();
@@ -217,7 +222,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 
     // Find the filename suffix, ignoring any leading '.' separator
     // Ignore an initial dot and treat repeated dots as a single separator
-    QString suffix = filename.section( '.', 1, -1, QString::SectionSkipEmpty );
+    QString suffix = filename.section( u'.', 1, -1, QString::SectionSkipEmpty );
 
     while ( !suffix.isEmpty() )
     {
@@ -242,7 +247,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	// than one, e.g., "tar.bz2" - if there is no match for "tar.bz2",
 	// there might be one for just "bz2".
 
-	suffix = suffix.section( '.', 1, -1, QString::SectionSkipEmpty );
+	suffix = suffix.section( u'.', 1, -1, QString::SectionSkipEmpty );
     }
 
     // Go through all the plain regular expressions one by one
@@ -257,16 +262,16 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 }
 
 
-const MimeCategory * MimeCategorizer::matchWildcardSuffix( const QMultiHash<QString, WildcardPair> & map,
-							   const QString & filename,
-							   const QString & suffix ) const
+const MimeCategory * MimeCategorizer::matchWildcardSuffix( const SuffixMatches & map,
+							   const QString       & filename,
+							   const QString       & suffix ) const
 {
     const auto rangeIts = map.equal_range( suffix );
     for ( auto it = rangeIts.first; it != rangeIts.second && it.key() == suffix; ++it )
     {
 	WildcardPair pair = it.value();
-	if ( pair.first.isEmpty() || pair.first.isMatch( filename ) )
-	    return pair.second;
+	if ( pair.wildcard.isEmpty() || pair.wildcard.isMatch( filename ) )
+	    return pair.category;
     }
 
     return nullptr;
@@ -277,8 +282,8 @@ const MimeCategory * MimeCategorizer::matchWildcard( const QString & filename ) 
 {
     for ( const WildcardPair & pair : asConst( _wildcards ) )
     {
-	if ( pair.first.isMatch( filename ) )
-	    return pair.second;
+	if ( pair.wildcard.isMatch( filename ) )
+	    return pair.category;
     }
 
     return nullptr; // No match
@@ -359,8 +364,8 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
     // Add any case-insensitive regular expression, plus a case-sensitive lowercased version
     for ( const QString & pattern : category->caseInsensitiveWildcardSuffixList() )
     {
-	const QString suffix = pattern.section( "*.", -1 ).toLower();
-	const auto pair = WildcardPair( CaseInsensitiveWildcard( pattern ), category );
+	const QString suffix = pattern.section( "*."_L1, -1 ).toLower();
+	const auto pair = WildcardPair { CaseInsensitiveWildcard( pattern ), category };
 	_caseInsensitiveSuffixes.insert( suffix, pair );
 	_caseSensitiveSuffixes.insert( suffix, pair );
     }
@@ -368,7 +373,7 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
     // Add any case-sensitive regular expressions last so they are retrieved first
     for ( const QString & pattern : category->caseSensitiveWildcardSuffixList() )
     {
-	const QString suffix = pattern.section( "*.", -1 );
+	const QString suffix = pattern.section( "*."_L1, -1 );
 	_caseSensitiveSuffixes.insert( suffix, { CaseSensitiveWildcard( pattern ), category } );
     }
 }
@@ -401,10 +406,10 @@ void MimeCategorizer::buildWildcardLists( const MimeCategory * category )
 {
     //logDebug() << "adding " << keyList << " to " << category << Qt::endl;
     for ( const QString & pattern : category->caseSensitiveWildcardList() )
-	_wildcards << WildcardPair( { CaseSensitiveWildcard( pattern ), category } );
+	_wildcards << WildcardPair { CaseSensitiveWildcard( pattern ), category };
 
     for ( const QString & pattern : category->caseInsensitiveWildcardList() )
-	_wildcards << WildcardPair( { CaseInsensitiveWildcard( pattern ), category } );
+	_wildcards << WildcardPair { CaseInsensitiveWildcard( pattern ), category };
 }
 
 
@@ -480,8 +485,8 @@ void MimeCategorizer::addDefaultCategory( const QString & name,
 					  const QString & caseSensitivePatterns )
 {
     MimeCategory * category = create( name, color);
-    category->addPatterns( caseInsensitivePatterns.split( ',' ), Qt::CaseInsensitive );
-    category->addPatterns( caseSensitivePatterns.split  ( ',' ), Qt::CaseSensitive   );
+    category->addPatterns( caseInsensitivePatterns.split( u',' ), Qt::CaseInsensitive );
+    category->addPatterns( caseSensitivePatterns.split  ( u',' ), Qt::CaseSensitive   );
 }
 
 void MimeCategorizer::addDefaultCategories()

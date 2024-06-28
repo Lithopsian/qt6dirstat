@@ -20,18 +20,28 @@
 
 namespace QDirStat
 {
-    /* Suffixes matches return a list (possibly with only one entry) of pairs.
+    class FileInfo;
+
+    /**
+     * Simple replacement for QPair so that the members can be accessed by
+     * meaningful names rather than just 'first' and 'second'.
+     **/
+    struct WildcardPair
+    {
+	Wildcard wildcard;
+	const MimeCategory * category;
+    };
+
+    /**
+     * Suffix matches return a list (possibly with only one entry) of pairs.
      * Each pair contains a regular expression and the category it matches to.
      * The regular expression may be empty, indicating a plain suffix that matches
      * any file with that suffix.  Pairs with an empty regular expression will
      * always be the last pair in a list.
      **/
-    typedef QPair<Wildcard, const MimeCategory *> WildcardPair;
-    typedef QList<const MimeCategory *>           MimeCategoryList;
     typedef QHash<QString, const MimeCategory *>  ExactMatches;
     typedef QMultiHash<QString, WildcardPair>     SuffixMatches;
-
-    class FileInfo;
+    typedef QList<const MimeCategory *>           MimeCategoryList;
 
     /**
      * Class to determine the MimeCategory of filenames.
@@ -229,8 +239,8 @@ namespace QDirStat
 	 * plain suffix pattern.
 	 **/
 	const MimeCategory * matchWildcardSuffix( const SuffixMatches & map,
-						  const QString & filename,
-						  const QString & suffix ) const;
+						  const QString       & filename,
+						  const QString       & suffix ) const;
 
 	/**
 	 * Iterate over the regular expression list trying each until the first
@@ -248,7 +258,7 @@ namespace QDirStat
 	 * Add default categories in case none were read from the settings.
 	 **/
 	void addDefaultCategory( const QString & name,
-				 const QColor & color,
+				 const QColor  & color,
 				 const QString & caseSensitivePatterns,
 				 const QString & caseInsensitivePatterns );
 	void addDefaultCategories();
@@ -272,7 +282,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	MimeCategoryList _categories;
+	MimeCategoryList     _categories;
 
 	const MimeCategory * _executableCategory;
 	const MimeCategory * _symlinkCategory;
