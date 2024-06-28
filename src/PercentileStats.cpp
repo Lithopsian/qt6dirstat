@@ -7,8 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include <cmath>	// ceil()
 #include <algorithm>    // std::sort()
+
+#include <QtMath> // qCeil()
 
 #include "PercentileStats.h"
 #include "Exception.h"
@@ -145,7 +146,7 @@ void PercentileStats::calculatePercentiles()
 
     for ( int i=0; i < size(); ++i )
     {
-	const int percentile = qMax( 1.0, ceil( i / percentileSize ) );
+	const int percentile = qMax( 1, qCeil( i / percentileSize ) );
 	_percentileSums[ percentile ] += at(i);
     }
 

@@ -20,7 +20,7 @@ using namespace QDirStat;
 
 
 OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::OpenUnpkgDialog }
 {
     _ui->setupUi( this );
@@ -64,7 +64,7 @@ QString OpenUnpkgDialog::startingDir() const
 
 QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget )
 {
-    QStringList lines = widget->toPlainText().split( '\n', Qt::SkipEmptyParts );
+    QStringList lines = widget->toPlainText().split( u'\n', Qt::SkipEmptyParts );
 
     QMutableListIterator<QString> it( lines );
     while ( it.hasNext() )
@@ -98,8 +98,8 @@ void OpenUnpkgDialog::setValues( const UnpkgSettings & settings )
 {
     settings.dump();
     _ui->startingDirComboBox->setCurrentText( settings.startingDir() );
-    _ui->excludeDirsTextEdit->setPlainText( settings.excludeDirs().join( '\n' ) );
-    _ui->ignorePatternsTextEdit->setPlainText( settings.ignorePatterns().join( '\n' ) );
+    _ui->excludeDirsTextEdit->setPlainText( settings.excludeDirs().join( u'\n' ) );
+    _ui->ignorePatternsTextEdit->setPlainText( settings.ignorePatterns().join( u'\n' ) );
     _ui->crossFilesystemsCheckBox->setChecked( settings.crossFilesystems() );
 }
 

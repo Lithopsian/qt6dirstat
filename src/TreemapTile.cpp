@@ -174,8 +174,8 @@ namespace
     void drawOutline( QPainter * painter, const QRectF & rect, const QColor & color, int penScale )
     {
         // Draw the outline as thin as practical
-        const float sizeForPen = qMin( rect.width(), rect.height() );
-        const float penSize = sizeForPen < penScale ? sizeForPen / penScale : 1.0;
+        const qreal sizeForPen = qMin( rect.width(), rect.height() );
+        const qreal penSize = sizeForPen < penScale ? sizeForPen / penScale : 1.0;
         painter->setPen( QPen( color, penSize ) );
 
         // Draw along only the top and left edges to avoid doubling the line thickness
@@ -192,7 +192,7 @@ namespace
 TreemapTile::TreemapTile( TreemapView  * parentView,
                           FileInfo     * orig,
                           const QRectF & rect ):
-    QGraphicsRectItem ( rect ),
+    QGraphicsRectItem { rect },
     _parentView { parentView },
     _orig { orig },
 #if PAINT_DEBUGGING
@@ -225,7 +225,7 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
 TreemapTile::TreemapTile( TreemapTile  * parentTile,
                           FileInfo     * orig,
                           const QRectF & rect ):
-    QGraphicsRectItem ( rect, parentTile ),
+    QGraphicsRectItem { rect, parentTile },
     _parentView { parentTile->_parentView },
     _orig { orig },
 #if PAINT_DEBUGGING
@@ -242,7 +242,7 @@ TreemapTile::TreemapTile( TreemapTile  * parentTile,
 HorizontalTreemapTile::HorizontalTreemapTile( TreemapTile  * parentTile,
                                               FileInfo     * orig,
                                               const QRectF & rect ) :
-    TreemapTile ( parentTile, orig, rect )
+    TreemapTile { parentTile, orig, rect }
 {
     if ( orig->isDirInfo() )
         createChildrenHorizontal( rect );
@@ -251,7 +251,7 @@ HorizontalTreemapTile::HorizontalTreemapTile( TreemapTile  * parentTile,
 VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
                                           FileInfo     * orig,
                                           const QRectF & rect ) :
-    TreemapTile ( parentTile, orig, rect )
+    TreemapTile { parentTile, orig, rect }
 {
     if ( orig->isDirInfo() )
         createChildrenVertical( rect );
@@ -262,7 +262,7 @@ TreemapTile::TreemapTile( TreemapTile          * parentTile,
                           FileInfo             * orig,
                           const QRectF         & rect,
                           const CushionSurface & cushionSurface ):
-    QGraphicsRectItem ( rect, parentTile ),
+    QGraphicsRectItem { rect, parentTile },
     _parentView { parentTile->_parentView },
     _orig { orig },
 #if PAINT_DEBUGGING
@@ -613,7 +613,7 @@ void TreemapTile::paint( QPainter                       * painter,
         // if this is a leaf tile.
         painter->setBrush( Qt::NoBrush );
         QRectF selectionRect = rect;
-        selectionRect.setSize( rect.size() - QSize( 1.0, 1.0 ) );
+        selectionRect.setSize( rect.size() - QSizeF( 1.0, 1.0 ) );
         painter->setPen( QPen( _parentView->selectedItemsColor(), 1 ) );
         painter->drawRect( selectionRect );
     }
@@ -861,15 +861,15 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
-    const QStringList actions = { "actionTreemapZoomTo",
-                                  "actionTreemapZoomIn",
-                                  "actionTreemapZoomOut",
-                                  "actionResetTreemapZoom",
-                                  "---",
-                                  "actionCopyPath",
-                                  "actionMoveToTrash",
-                                  "---"
-                                };
+    const QStringList actions { "actionTreemapZoomTo",
+                                "actionTreemapZoomIn",
+                                "actionTreemapZoomOut",
+                                "actionResetTreemapZoom",
+                                "---",
+                                "actionCopyPath",
+                                "actionMoveToTrash",
+                                "---"
+                              };
     ActionManager::addActions( &menu, actions );
 
     // User-defined cleanups

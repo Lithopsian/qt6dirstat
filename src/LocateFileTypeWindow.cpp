@@ -27,7 +27,7 @@ using namespace QDirStat;
 
 
 LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::LocateFileTypeWindow }
 {
     // logDebug() << "init" << Qt::endl;
@@ -213,7 +213,7 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
 						int             count,
 						FileSize        totalSize ):
-    QTreeWidgetItem ( QTreeWidgetItem::UserType ),
+    QTreeWidgetItem { QTreeWidgetItem::UserType },
     _path { path },
     _count { count },
     _totalSize { totalSize }

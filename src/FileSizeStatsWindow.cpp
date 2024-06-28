@@ -109,7 +109,7 @@ namespace
 
 
 FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::FileSizeStatsWindow }
 {
     //logDebug() << "init" << Qt::endl;

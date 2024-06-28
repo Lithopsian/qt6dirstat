@@ -7,17 +7,12 @@
  *              Ian Nartowicz
  */
 
-#define LOG_COMMANDS	true	// for SysUtil.h
-#define LOG_OUTPUT	false	// for SysUtil.h
-
 #include "PkgQuery.h"
 #include "PkgManager.h"
 #include "DpkgPkgManager.h"
 #include "RpmPkgManager.h"
 #include "PacManPkgManager.h"
 #include "Logger.h"
-
-#include "SysUtil.h"
 
 
 #define CACHE_SIZE		1000
@@ -69,7 +64,7 @@ void PkgQuery::checkPkgManagers()
         for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
             available << pkgManager->name();
 
-        logInfo() << "Found " << available.join( QLatin1String( ", " ) )  << Qt::endl;
+        logInfo() << "Found " << available.join( ", "_L1 )  << Qt::endl;
     }
 #endif
 }

@@ -20,12 +20,12 @@ using namespace QDirStat;
 QString PkgFilter::normalizedPattern( const QString & pattern )
 {
     QString normalizedPattern = pattern;
-    const QString pkgPrefix = '^' % PkgInfo::pkgSummaryUrl() % '*';
+    const QString pkgPrefix = u'^' % PkgInfo::pkgSummaryUrl() % u'*';
     normalizedPattern.remove( QRegularExpression( pkgPrefix, QRegularExpression::CaseInsensitiveOption ) );
     normalizedPattern.remove( QRegularExpression( "/.*$" ) );
 
     if ( normalizedPattern != pattern )
-        logInfo() << "Normalizing pkg pattern to \"" << normalizedPattern << "\"" << Qt::endl;
+        logInfo() << "Normalizing pkg pattern to \"" << normalizedPattern << '"' << Qt::endl;
 
     return normalizedPattern;
 }

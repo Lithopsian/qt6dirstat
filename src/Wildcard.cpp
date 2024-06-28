@@ -8,7 +8,6 @@
 
 #include "Wildcard.h"
 
-
 using namespace QDirStat;
 
 
@@ -34,14 +33,14 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
         {
             // using [\d\D] to mean "match everything";
             // dot doesn't match newlines, unless in /s mode
-            return GlobSettings{ u'\0', QLatin1String( "[\\d\\D]*" ), QLatin1String( "[\\d\\D]" ) };
+            return GlobSettings{ u'\0', "[\\d\\D]*"_L1, "[\\d\\D]"_L1 };
         }
         else
         {
 #ifdef Q_OS_WIN
-            return GlobSettings{ u'\\', QLatin1String( "[^/\\\\]*" ), QLatin1String( "[^/\\\\]" ) };
+            return GlobSettings{ u'\\', "[^/\\\\]*"_L1, "[^/\\\\]"_L1 };
 #else
-            return GlobSettings{ u'/', QLatin1String( "[^/]*" ), QLatin1String( "[^/]" ) };
+            return GlobSettings{ u'/', "[^/]*"_L1, "[^/]"_L1 };
 #endif
         }
     }();
@@ -66,15 +65,15 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
             case '\\':
 #ifdef Q_OS_WIN
                 if ( options.testFlag( NonPathWildcardConversion ) )
-                    rx += QLatin1String( "\\\\" );
+                    rx += "\\\\"_L1;
                 else
-                    rx += QLatin1String( "[/\\\\]" );
+                    rx += "[/\\\\]"_L1;
                 break;
             case '/':
                 if ( options.testFlag( NonPathWildcardConversion ) )
                     rx += u'/';
                 else
-                    rx += QLatin1String( "[/\\\\]" );
+                    rx += "[/\\\\]"_L1;
                 break;
 #endif
 

@@ -48,27 +48,27 @@ void SearchFilter::guessFilterMode()
     {
         _filterMode = SelectAll;
     }
-    else if ( _pattern.startsWith( '=' ) )
+    else if ( _pattern.startsWith( u'=' ) )
     {
         _filterMode = ExactMatch;
         _pattern.remove( 0, 1 );
     }
-    else if ( _pattern.startsWith( '*' ) ||
-              _pattern.contains( QLatin1String( "*.*" ) ) )
+    else if ( _pattern.startsWith( u'*'   ) ||
+              _pattern.contains( "*.*"_L1 ) )
     {
         _filterMode = Wildcard;
     }
-    else if ( _pattern.contains( QLatin1String( ".*" ) ) ||
-              _pattern.contains( '^' ) ||
-              _pattern.contains( '$' ) ||
-              _pattern.contains( '(' ) ||
-              _pattern.contains( '|' ) ||
-              _pattern.contains( '[' ) )
+    else if ( _pattern.contains( ".*"_L1 ) ||
+              _pattern.contains( u'^'    ) ||
+              _pattern.contains( u'$'    ) ||
+              _pattern.contains( u'('    ) ||
+              _pattern.contains( u'|'    ) ||
+              _pattern.contains( u'['    ) )
     {
         _filterMode = RegExp;
     }
-    else if ( _pattern.contains( '*' ) ||
-              _pattern.contains( '?' ) )
+    else if ( _pattern.contains( u'*' ) ||
+              _pattern.contains( u'?' ) )
     {
         _filterMode = Wildcard;
     }

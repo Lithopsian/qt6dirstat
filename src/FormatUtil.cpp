@@ -20,16 +20,16 @@ using namespace QDirStat;
 
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
-    static QStringList units = { QObject::tr( " bytes" ),
-                                 QObject::tr( " kB" ),
-                                 QObject::tr( " MB" ),
-                                 QObject::tr( " GB" ),
-                                 QObject::tr( " TB" ),
-                                 QObject::tr( " PB" ),
-                                 QObject::tr( " EB" ),
-                                 QObject::tr( " ZB" ),
-                                 QObject::tr( " YB" ),
-                               };
+    static QStringList units { QObject::tr( " bytes" ),
+                               QObject::tr( " kB" ),
+                               QObject::tr( " MB" ),
+                               QObject::tr( " GB" ),
+                               QObject::tr( " TB" ),
+                               QObject::tr( " PB" ),
+                               QObject::tr( " EB" ),
+                               QObject::tr( " ZB" ),
+                               QObject::tr( " YB" ),
+                             };
 
     if ( lSize < 1000 )
     {
@@ -112,15 +112,15 @@ QString QDirStat::formatMillisec( qint64 millisec )
 	// .arg doesn't offer enough control over decimal places and significant figures
 	// so do it manually, 3 decimal places up to 1 sec, then 1 up to 10 secs, then none
 	const int   precision = millisec > 9999 ? 0 : millisec < 1000 ? 3 : 1;
-	const float sec       = millisec / 1000.0;
+	const float sec       = millisec / 1000.0f;
 	return QString::number( sec, 'f', precision) % QObject::tr( " sec" );
     }
     else
     {
 	const int sec = millisec / 1000L;
-	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QLatin1Char( '0' ) )
-				    .arg( min,   2, 10, QLatin1Char( '0' ) )
-				    .arg( sec,   2, 10, QLatin1Char( '0' ) );
+	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QChar( u'0' ) )
+				    .arg( min,   2, 10, QChar( u'0' ) )
+				    .arg( sec,   2, 10, QChar( u'0' ) );
     }
 }
 
@@ -151,7 +151,7 @@ QString QDirStat::elideMiddle( const QString & text, int maxLen )
     if ( maxLen < 4 || text.size() < maxLen )
         return text;
 
-    return text.left( maxLen / 2 ) % "…" % text.right( maxLen / 2 - 1 );
+    return text.left( maxLen / 2 ) % u'…' % text.right( maxLen / 2 - 1 );
 }
 
 

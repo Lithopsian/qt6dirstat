@@ -22,7 +22,7 @@ using namespace QDirStat;
 
 
 PathSelector::PathSelector( QWidget * parent ):
-    QListWidget ( parent )
+    QListWidget { parent }
 {
     connect( this, &PathSelector::currentItemChanged,
 	     this, &PathSelector::slotItemSelected );
@@ -121,13 +121,13 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
 
 PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 				    PathSelector * parent ):
-    QListWidgetItem ( parent ),
+    QListWidgetItem { parent },
     _path { mountPoint->path() }
 {
-    QString text = _path + "\n";
+    QString text = _path + u'\n';
 
     if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
-	text += formatSize( mountPoint->totalSize() ) + "  ";
+	text += formatSize( mountPoint->totalSize() ) + "  "_L1;
 
     text += mountPoint->filesystemType();
     setText( text );
@@ -137,12 +137,11 @@ PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
 #if SHOW_SIZES_IN_TOOLTIP
     if ( mountPoint->hasSizeInfo() )
     {
-        tooltip += QObject::tr( "<br/><tr><td>Used:</td><td align='right'>%1</td></tr>" )
-		.arg( formatSize( mountPoint->usedSize() ) );
-        tooltip += QObject::tr( "<tr><td>Free for users: </td><td align='right'>%1</td></tr>" )
-		.arg( formatSize( mountPoint->freeSizeForUser() ) );
-        tooltip += QObject::tr( "<tr><td>Free for root:</td><td align='right'>%1</td></tr>" )
-		.arg( formatSize( mountPoint->freeSizeForRoot() ) );
+	const QString boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>";
+	tooltip += "<br/>" %
+	    boilerplate.arg( QObject::tr( "Used" ) ).arg( formatSize( mountPoint->usedSize() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for users" ) ).arg( formatSize( mountPoint->freeSizeForUser() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for root" ) ).arg( formatSize( mountPoint->freeSizeForRoot() ) );
     }
 #endif
 

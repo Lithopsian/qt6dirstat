@@ -20,7 +20,7 @@ using namespace QDirStat;
 
 
 ConfigDialog::ConfigDialog( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::ConfigDialog }
 {
     setAttribute(Qt::WA_DeleteOnClose);

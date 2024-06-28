@@ -37,7 +37,7 @@ namespace
      **/
     void setLabel( QLabel        * label,
 		   int             number,
-		   const QString & prefix = "" )
+		   QLatin1String   prefix = QLatin1String() )
     {
 	label->setText( prefix % QString( "%L1" ).arg( number ) );
     }
@@ -48,7 +48,7 @@ namespace
      **/
     void setLabel( FileSizeLabel * label,
 		   FileSize        size,
-		   const QString & prefix = "" )
+		   QLatin1String   prefix = QLatin1String() )
     {
 	label->setValue( size, prefix );
     }
@@ -129,11 +129,11 @@ namespace
 // of files and then quickly drop to a shorter delay when the repeated requests stop
 // or slow down.
 FileDetailsView::FileDetailsView( QWidget * parent ):
-    QStackedWidget ( parent ),
+    QStackedWidget { parent },
     _ui { new Ui::FileDetailsView },
     _pkgUpdateTimer { new AdaptiveTimer( this,
-	                                 { 0.0, 0.5, 1.0, 2.0, 5.0 }, // delay stages
-					 { 3000, 1000, 500, 250, 150 } ) } // cooldown stages
+                                         { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
+                                         { 3000, 1000, 500, 250, 150 } ) } // cooldown stages
 {
     _ui->setupUi( this );
 
@@ -210,8 +210,8 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     {
 	const QString fullTarget  = file->symLinkTarget();
 	QString shortTarget = fullTarget;
-	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( '/' ) )
-	    shortTarget = ".../" % SysUtil::baseName( fullTarget );
+	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' ) )
+	    shortTarget = ".../"_L1 % SysUtil::baseName( fullTarget );
 	_ui->fileLinkLabel->setText( shortTarget );
 
 	if ( file->isBrokenSymLink() )
@@ -278,8 +278,8 @@ void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 	else if ( isSystemFile )
 	{
 	    // Submit a timed query to find the owning package, if any
-	    const QString delayHint = QString( _pkgUpdateTimer->delayStage(), '.' )
-	                              .replace( '.', QLatin1String( ". " ) );
+	    const QString delayHint = QString( _pkgUpdateTimer->delayStage(), u'.' )
+	                              .replace( u'.', ". "_L1 );
 	    _ui->filePackageLabel->setText( delayHint );
 
 	    // Caspture url by value because the FileInfo may be gone by the time the timer expires
@@ -323,7 +323,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
 {
     // logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
+    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % u'/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();
@@ -378,7 +378,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
     {
 	// No special msg -> show summary fields
 
-	const QString prefix = dir->sizePrefix();
+	const QLatin1String prefix = dir->sizePrefix();
 	setLabel( _ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
 	setLabel( _ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
 	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
@@ -461,7 +461,7 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
     if ( msg.isEmpty() )
     {
 	// No special msg -> show summary fields
-	const QString prefix = pkg->sizePrefix();
+	const QLatin1String prefix = pkg->sizePrefix();
 	setLabel( _ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
 	setLabel( _ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
 	setLabel( _ui->pkgItemCountLabel,   pkg->totalItems(),         prefix );
@@ -501,7 +501,7 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
     const QString msg = subtreeMsg( pkg );
     if ( msg.isEmpty() )
     {
-	const QString prefix = pkg->sizePrefix();
+	const QLatin1String prefix = pkg->sizePrefix();
 	setLabel( _ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
 	setLabel( _ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
 	setLabel( _ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );

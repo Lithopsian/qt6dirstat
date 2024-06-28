@@ -11,7 +11,6 @@
 #include <QPointer>
 
 #include "FileAgeStatsWindow.h"
-#include "FileAgeStats.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DiscoverActions.h"
@@ -47,7 +46,7 @@ namespace
 
 
 FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::FileAgeStatsWindow }
 {
     // logDebug() << "init" << Qt::endl;
@@ -113,14 +112,14 @@ void FileAgeStatsWindow::initWidgets()
     // Set the row height based on the configured DirTree icon height
     app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
-    const QStringList headers = { tr( "Year"    ),
-                                  tr( "Files"   ),
-                                  tr( "Files %" ),  // percent bar
-                                  tr( "%"       ),  // percent value
-                                  tr( "Size"    ),
-                                  tr( "Size %"  ),  // percent bar
-                                  tr( "%"       ),  // percent value
-                                };
+    const QStringList headers { tr( "Year"    ),
+                                tr( "Files"   ),
+                                tr( "Files %" ),  // percent bar
+                                tr( "%"       ),  // percent value
+                                tr( "Size"    ),
+                                tr( "Size %"  ),  // percent bar
+                                tr( "%"       ),  // percent value
+                              };
     _ui->treeWidget->setHeaderLabels( headers );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignCenter );
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
@@ -212,11 +211,10 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 		    if ( monthStats )
 		    {
 			YearListItem * monthItem = new YearListItem( *monthStats );
+			item->addChild( monthItem );
 
 			if ( monthStats->filesCount == 0 )
 			    monthItem->setFlags( Qt::NoItemFlags ); // disabled
-
-			item->addChild( monthItem );
 		    }
 		}
 	    }
@@ -372,7 +370,7 @@ void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 
 
 YearListItem::YearListItem( const YearStats & stats ) :
-    QTreeWidgetItem ( QTreeWidgetItem::UserType ),
+    QTreeWidgetItem { QTreeWidgetItem::UserType },
     _year { stats.year },
     _month { stats.month },
     _filesCount { stats.filesCount },

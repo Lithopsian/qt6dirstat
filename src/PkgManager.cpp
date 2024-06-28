@@ -23,10 +23,7 @@ QStringList PkgManager::fileList( const PkgInfo * pkg ) const
     if ( !command.isEmpty() )
     {
         int exitCode = -1;
-        const QString output = SysUtil::runCommand( command,
-                                                    &exitCode,
-                                                    true,          // logCommand
-                                                    false );       // logOutput
+        const QString output = SysUtil::runCommand( command, &exitCode );
         if ( exitCode == 0 )
             return parseFileList( output );
     }

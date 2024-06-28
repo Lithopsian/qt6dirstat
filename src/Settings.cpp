@@ -256,7 +256,7 @@ int Settings::enumValue( const char                * key,
     if ( enumKey >= 0 )
 	return enumKey;
 
-    logError() << "Invalid value for " << key << ": \"" << str << "\"" << Qt::endl;
+    logError() << "Invalid value for " << key << ": \"" << str << '"' << Qt::endl;
 
     return fallback;
 }
@@ -355,7 +355,7 @@ void Settings::migrate()
 
 
 CleanupSettings::CleanupSettings():
-    Settings( "-cleanup" )
+    Settings { "-cleanup" }
 {
     migrate();
 }
@@ -364,7 +364,7 @@ CleanupSettings::CleanupSettings():
 
 
 ExcludeRuleSettings::ExcludeRuleSettings():
-    Settings( "-exclude" )
+    Settings { "-exclude" }
 {
     migrate();
 }
@@ -373,7 +373,7 @@ ExcludeRuleSettings::ExcludeRuleSettings():
 
 
 MimeCategorySettings::MimeCategorySettings():
-    Settings( "-mime" )
+    Settings { "-mime" }
 {
     migrate();
 }

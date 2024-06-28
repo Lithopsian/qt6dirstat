@@ -21,7 +21,7 @@ namespace
      **/
     bool isWildcard( const QString & pattern )
     {
-	return pattern.contains( '*' ) || pattern.contains( '?' ) || pattern.contains( '[' );
+	return pattern.contains( u'*' ) || pattern.contains( u'?' ) || pattern.contains( u'[' );
     }
 
 
@@ -31,7 +31,7 @@ namespace
      **/
     bool isSuffixPattern( const QString & pattern )
     {
-	if ( !pattern.startsWith( QLatin1String( "*." ) ) )
+	if ( !pattern.startsWith( "*."_L1 ) )
 	    return false;
 
 	const QString rest = pattern.mid( 2, -1 ); // Without leading "*."
@@ -46,7 +46,7 @@ namespace
      **/
     bool isWildcardWithSuffix( const QString & pattern )
     {
-	const QStringList list = pattern.split( "*.", Qt::SkipEmptyParts );
+	const QStringList list = pattern.split( "*."_L1, Qt::SkipEmptyParts );
 
 	return list.size() > 1 && !isWildcard( list.last() );
     }
@@ -57,7 +57,7 @@ namespace
 	QStringList result;
 
 	for ( const QString & suffix : suffixList )
-	    result << ( "*." + suffix );
+	    result << ( "*."_L1 + suffix );
 
 	return result;
     }
@@ -90,9 +90,9 @@ void MimeCategory::addSuffix( const QString       & rawSuffix,
     // Normalize suffix: Remove leading "*." or "."
     QString suffix = rawSuffix.trimmed();
 
-    if ( suffix.startsWith( QLatin1String( "*." ) ) )
+    if ( suffix.startsWith( "*."_L1 ) )
 	suffix.remove( 0, 2 );
-    else if ( suffix.startsWith( '.' ) )
+    else if ( suffix.startsWith( u'.' ) )
 	suffix.remove( 0, 1 );
 
     if ( caseSensitivity == Qt::CaseInsensitive )

@@ -48,7 +48,7 @@ namespace
 		     DirInfo       * parent )
     {
 	struct stat statInfo;
-	// logDebug() << "url: \"" << url << "\"" << Qt::endl;
+	// logDebug() << "url: \"" << url << '"' << Qt::endl;
 
 	if ( lstat( url.toUtf8(), &statInfo ) == 0 ) // lstat() OK
 	{
@@ -210,7 +210,7 @@ namespace
 
 
 DirTree::DirTree( QObject * parent ):
-    QObject ( parent ),
+    QObject { parent },
     _root { new DirInfo( this ) }
 {
     connect( &_jobQueue, &DirReadJobQueue::finished,
@@ -276,7 +276,7 @@ void DirTree::reset()
 
 void DirTree::startReading( const QString & rawUrl )
 {
-    //logDebug() << "rawUrl: \"" << rawUrl << "\"" << Qt::endl;
+    //logDebug() << "rawUrl: \"" << rawUrl << '"' << Qt::endl;
 
     _url = [ &rawUrl ]()
     {

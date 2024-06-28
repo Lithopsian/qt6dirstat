@@ -48,7 +48,7 @@ namespace
 
 
 FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::FilesystemsWindow }
 {
     setAttribute( Qt::WA_DeleteOnClose );
@@ -126,7 +126,7 @@ void FilesystemsWindow::clear()
 
 void FilesystemsWindow::initWidgets()
 {
-    QStringList headers = { tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
+    QStringList headers { tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
 
     if ( MountPoints::hasSizeInfo() )
 	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
@@ -246,9 +246,8 @@ void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 
 
 
-FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
-				QTreeWidget * parent ):
-    QTreeWidgetItem ( parent ),
+FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
+    QTreeWidgetItem { parent },
     _device         { mountPoint->device()          },
     _mountPath      { mountPoint->path()            },
     _fsType         { mountPoint->filesystemType()  },
@@ -291,7 +290,7 @@ FilesystemItem::FilesystemItem( MountPoint  * mountPoint,
 
 	    if ( _totalSize > 0 )
 	    {
-		const float freePercent = 100.0 * _freeSize / _totalSize;
+		const float freePercent = 100.0f * _freeSize / _totalSize;
 		set( FS_FreePercentCol, Qt::AlignRight, formatPercent( freePercent ) );
 
 		if ( freePercent < WARN_PERCENT )

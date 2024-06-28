@@ -62,13 +62,13 @@ namespace
 
 	    if ( !sameVersion )
 	    {
-		name += '-' + pkg->version();
+		name += u'-' + pkg->version();
 		pkg->setMultiVersion( true );
 	    }
 
 	    if ( !sameArch )
 	    {
-		name += ':' + pkg->arch();
+		name += u':' + pkg->arch();
 		pkg->setMultiArch( true );
 	    }
 
@@ -310,7 +310,7 @@ namespace
 			   DirTree       * tree,
 			   DirInfo       * parent )
     {
-	// logDebug() << "path: \"" << path << "\"" << Qt::endl;
+	// logDebug() << "path: \"" << path << '"' << Qt::endl;
 
 	struct stat statInfo;
 	if ( !lstat( statInfo, path ) ) // lstat() failed
@@ -403,7 +403,7 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 void PkgReadJob::addFiles( const QStringList & fileList )
 {
     DirInfo * lastDir = _pkg;
-    QString lastDirPath( '/' );
+    QString lastDirPath( u'/' );
 
     for ( const QString & fileListPath : fileList )
     {
@@ -416,7 +416,7 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 	if ( fileListPath.startsWith( lastDirPath ) )
 	{
 	    // Probably just created the directory for this file
-	    const QString fileName = fileListPath.section( '/', -1 );
+	    const QString fileName = fileListPath.section( u'/', -1 );
 	    if ( fileListPath.size() == lastDirPath.size() + fileName.size() + 1 )
 	    {
 		// Definitely just created the directory for this file, so it exists
@@ -429,10 +429,10 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 	QString currentPath;
 	DirInfo * parent = _pkg;
 
-	const QStringList components = fileListPath.split( '/', Qt::SkipEmptyParts );
+	const QStringList components = fileListPath.split( u'/', Qt::SkipEmptyParts );
 	for ( const QString & currentComponent : components )
 	{
-	    currentPath += '/' + currentComponent;
+	    currentPath += u'/' + currentComponent;
 
 	    FileInfo * newParent = locateChild( parent, currentComponent );
 	    if ( !newParent )
@@ -462,7 +462,7 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 				  PkgInfo   * pkg,
 				  bool        verboseMissingPkgFiles,
 				  QProcess  * readFileListProcess ):
-    PkgReadJob ( tree, pkg, verboseMissingPkgFiles ),
+    PkgReadJob { tree, pkg, verboseMissingPkgFiles },
     _readFileListProcess { readFileListProcess }
 {
     CHECK_PTR( _readFileListProcess );

@@ -28,7 +28,7 @@ using namespace QDirStat;
 
 
 DirTreeView::DirTreeView( QWidget * parent ):
-    QTreeView ( parent ),
+    QTreeView { parent },
     _sizeColDelegate { new SizeColDelegate( this ) },
     _headerTweaker { new HeaderTweaker( header(), this ) }
 {
@@ -89,22 +89,22 @@ void DirTreeView::contextMenu( const QPoint & pos )
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
-    const QStringList actions1 = { "actionGoUp",
-                                   "actionGoToToplevel",
-                                 };
+    const QStringList actions1 { "actionGoUp",
+                                 "actionGoToToplevel",
+                               };
     ActionManager::addActions( &menu, actions1 );
 
-    const QStringList actions2 = { "actionStopReading",
-                                   "actionRefreshAll",
-                                   "---",
-                                   "actionRefreshSelected",
-                                   "actionReadExcluded",
-                                   "actionContinueReading",
-                                   "---",
-                                   "actionCopyPath",
-                                   "actionMoveToTrash",
-                                   "---",
-                                 };
+    const QStringList actions2 { "actionStopReading",
+                                 "actionRefreshAll",
+                                 "---",
+                                 "actionRefreshSelected",
+                                 "actionReadExcluded",
+                                 "actionContinueReading",
+                                 "---",
+                                 "actionCopyPath",
+                                 "actionMoveToTrash",
+                                 "---",
+                               };
     ActionManager::addEnabledActions( &menu, actions2 );
 
     // User-defined cleanups

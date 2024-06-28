@@ -90,7 +90,7 @@ namespace
     {
 	QStringList argList = QCoreApplication::arguments();
 	argList.removeFirst(); // Remove program name
-	std::cerr << "FATAL: Bad command line args: " << qPrintable( argList.join( ' ' ) ) << std::endl;
+	std::cerr << "FATAL: Bad command line args: " << qPrintable( argList.join( u' ' ) ) << std::endl;
 	usage();
     }
 
@@ -145,7 +145,7 @@ int main( int argc, char * argv[] )
     else if ( openCache )
     {
 	// --cache must be the only (remaining) argument and must have one value
-	if ( argList.size() != 1 || argList.first().startsWith( '-' ) )
+	if ( argList.size() != 1 || argList.first().startsWith( u'-' ) )
 	{
 	    reportFatalError();
 	    return 1;
@@ -156,7 +156,7 @@ int main( int argc, char * argv[] )
 	// Any option other than -d, -c, -h, or -s is invalid,
 	// -d can only be combined with -s and nothing else
 	// More than one non-option argument is invalid
-	if ( dontAsk || argList.first().startsWith( '-' ) || argList.size() > 1 )
+	if ( dontAsk || argList.first().startsWith( u'-' ) || argList.size() > 1 )
 	{
 	    reportFatalError();
 	    return 1;

@@ -127,7 +127,7 @@ namespace
     QStringList sparseSizeText( FileInfo * item )
     {
 	const QString sizeText = formatSize( item->rawByteSize() );
-	const QString allocText = QString( " (%1)" ).arg( formatSize( item->rawAllocatedSize() ) );
+	const QString allocText = " ("_L1 % formatSize( item->rawAllocatedSize() ) % ')';
 	const QString linksText = formatLinksInline( item->links() );
 
 	return { sizeText, allocText, linksText };
@@ -228,7 +228,7 @@ namespace
 		return QObject::tr( "[aborted]" );
 
 	    if ( !item->firstChild() && col != NameCol )
-		return "?";
+		return QString( u'?' );
 	}
 
 	switch ( col )
@@ -276,7 +276,7 @@ namespace
 		    case TotalItemsCol:
 		    case TotalFilesCol:
 		    case TotalSubDirsCol:
-			return "?";
+			return QString( u'?' );
 		}
 	    }
 
@@ -449,7 +449,7 @@ namespace
 
 
 DirTreeModel::DirTreeModel( QObject * parent ):
-    QAbstractItemModel ( parent )
+    QAbstractItemModel { parent }
 {
     CHECK_PTR( parent ); // no MainWindow!
 
@@ -480,7 +480,8 @@ void DirTreeModel::readSettings()
     _updateTimerMillisec     = settings.value( "UpdateTimerMillisec", 250  ).toInt();
     _slowUpdateMillisec      = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
     _tree->setIgnoreHardLinks( settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool() );
-    _treeItemSize = dirTreeItemSize( settings.value( "TreeIconDir",   DirTreeModel::treeIconDir( DTIS_Small ) ).toString() );
+    _treeItemSize =
+	dirTreeItemSize( settings.value( "TreeIconDir", DirTreeModel::treeIconDir( DTIS_Small ) ).toString() );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
@@ -607,18 +608,18 @@ void DirTreeModel::loadIcons()
 {
     const QString iconDir = treeIconDir();
 
-    _dirIcon           = QIcon( iconDir % "dir.png"            );
-    _dotEntryIcon      = QIcon( iconDir % "dot-entry.png"      );
-    _fileIcon          = QIcon( iconDir % "file.png"           );
-    _symlinkIcon       = QIcon( iconDir % "symlink.png"        );
-    _unreadableDirIcon = QIcon( iconDir % "unreadable-dir.png" );
-    _mountPointIcon    = QIcon( iconDir % "mount-point.png"    );
-    _stopIcon          = QIcon( iconDir % "stop.png"           );
-    _excludedIcon      = QIcon( iconDir % "excluded.png"       );
-    _blockDeviceIcon   = QIcon( iconDir % "block-device.png"   );
-    _charDeviceIcon    = QIcon( iconDir % "char-device.png"    );
-    _specialIcon       = QIcon( iconDir % "special.png"        );
-    _pkgIcon           = QIcon( iconDir % "folder-pkg.png"     );
+    _dirIcon           = QIcon( iconDir % "dir.png"_L1            );
+    _dotEntryIcon      = QIcon( iconDir % "dot-entry.png"_L1      );
+    _fileIcon          = QIcon( iconDir % "file.png"_L1           );
+    _symlinkIcon       = QIcon( iconDir % "symlink.png"_L1        );
+    _unreadableDirIcon = QIcon( iconDir % "unreadable-dir.png"_L1 );
+    _mountPointIcon    = QIcon( iconDir % "mount-point.png"_L1    );
+    _stopIcon          = QIcon( iconDir % "stop.png"_L1           );
+    _excludedIcon      = QIcon( iconDir % "excluded.png"_L1       );
+    _blockDeviceIcon   = QIcon( iconDir % "block-device.png"_L1   );
+    _charDeviceIcon    = QIcon( iconDir % "char-device.png"_L1    );
+    _specialIcon       = QIcon( iconDir % "special.png"_L1        );
+    _pkgIcon           = QIcon( iconDir % "folder-pkg.png"_L1     );
 }
 
 
@@ -867,8 +868,8 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     emit layoutChanged( QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint );
 
     logDebug() << "Sorting by " << _sortCol
-	       << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
-	       << Qt::endl;
+               << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
+               << Qt::endl;
 
     //logDebug() << "After layoutChanged()" << Qt::endl;
     //dumpPersistentIndexList( persistentIndexList() );
@@ -1027,7 +1028,7 @@ void DirTreeModel::readingFinished()
     _pendingUpdates.clear();
 
     // dumpPersistentIndexList( persistentIndexList() );
-    // dumpDirectChildren( _tree->root(), "root" );
+    // dumpDirectChildren( _tree->root() );
 }
 
 
@@ -1133,10 +1134,10 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 	logDebug() << "Clicked row " << index.row()
 		   << " col " << index.column()
 		   << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
-		   << "\t" << item
+		   << '\t' << item
 	 	   << " data(0): " << index.model()->data( index, 0 ).toString()
 		   << Qt::endl;
-	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( QLatin1String( " -> " ) ) << Qt::endl;
+	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( " -> "_L1 ) << Qt::endl;
     }
     else
     {

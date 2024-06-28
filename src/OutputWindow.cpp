@@ -20,7 +20,7 @@ using namespace QDirStat;
 
 
 OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::OutputWindow }
 {
     _ui->setupUi( this );
@@ -112,7 +112,7 @@ void OutputWindow::addStderr( const QString & output )
 {
     _errorCount++;
     addText( output, _stderrColor );
-    logWarning() << output << ( output.endsWith( '\n' ) ? "" : "\n" );
+    logWarning() << output << ( output.endsWith( u'\n' ) ? "" : "\n" );
 
     if ( _showOnStderr && !isVisible() && !_closed )
 	show();
@@ -130,7 +130,7 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     QTextCharFormat format;
     format.setForeground( QBrush( textColor ) );
     cursor.setCharFormat( format );
-    cursor.insertText( rawText.endsWith( '\n' ) ? rawText : rawText + "\n" );
+    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText + u'\n' );
 }
 
 
@@ -317,7 +317,7 @@ void OutputWindow::zoomIn()
 
 void OutputWindow::zoomOut()
 {
-    zoom( 1.0/1.1 );
+    zoom( 1.0 / 1.1 );
 }
 
 
@@ -408,7 +408,7 @@ QString OutputWindow::command( QProcess * process )
     if ( args.isEmpty() )		// Nothing left?
 	return process->program();	// Ok, use the program name
     else
-	return args.join( ' ' );	// output only the real command and its args
+	return args.join( u' ' );	// output only the real command and its args
 }
 
 

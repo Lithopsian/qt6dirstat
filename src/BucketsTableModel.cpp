@@ -77,9 +77,9 @@ QVariant BucketsTableModel::headerData( int             section,
 
         case Qt::TextAlignmentRole:
             if ( orientation == Qt::Horizontal )
-                return (QVariant)( Qt::AlignVCenter | Qt::AlignHCenter );
+                return QVariant( Qt::AlignVCenter | Qt::AlignHCenter );
             else
-                return (QVariant)( Qt::AlignVCenter | Qt::AlignRight );
+                return QVariant( Qt::AlignVCenter | Qt::AlignRight );
 
         default:
             return QVariant();

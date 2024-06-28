@@ -25,7 +25,7 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
     if ( pattern.isEmpty() )
 	return nullptr;
 
-    if ( pattern.startsWith( QLatin1String( "*." ) ) )
+    if ( pattern.startsWith( "*."_L1 ) )
     {
 	// Remove the leading "*"
 	const QString suffix = QString( pattern ).remove( 0, 1 );
@@ -72,7 +72,7 @@ bool DirTreeSuffixFilter::ignore( const QString & path ) const
 
 
 DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager ):
-    DirTreeFilter (),
+    DirTreeFilter {},
     _fileListCache { pkgManager->createFileListCache( PkgFileListCache::LookupGlobal ) }
 {
     //logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;

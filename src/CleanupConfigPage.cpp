@@ -25,7 +25,7 @@ using namespace QDirStat;
 
 
 CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
-    ListEditor ( parent ),
+    ListEditor { parent },
     _ui { new Ui::CleanupConfigPage },
     _outputWindowDefaultTimeout { OutputWindow::defaultShowTimeout() }
 {
@@ -156,7 +156,7 @@ void CleanupConfigPage::save( void * value )
     cleanup->setTitle  ( _ui->titleLineEdit->text()       );
     cleanup->setCommand( _ui->commandLineEdit->text()     );
 
-    if ( _ui->shellComboBox->currentText().startsWith( QLatin1String( "$SHELL" ) ) )
+    if ( _ui->shellComboBox->currentText().startsWith( "$SHELL"_L1 ) )
 	cleanup->setShell( "" );
     else
 	cleanup->setShell( _ui->shellComboBox->currentText() );

@@ -20,7 +20,7 @@ using namespace QDirStat;
 
 
 HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
-    QObject ( parent ),
+    QObject { parent },
     _treeView { parent },
     _header { header }
 {
@@ -168,7 +168,7 @@ void HeaderTweaker::hideCurrentCol()
 {
     if ( _currentSection >= 0 )
     {
-	//logDebug() << "Hiding column \"" << colName( _currentSection ) << "\"" << Qt::endl;
+	//logDebug() << "Hiding column \"" << colName( _currentSection ) << '"' << Qt::endl;
 	_header->setSectionHidden( _currentSection, true );
     }
 
@@ -223,7 +223,7 @@ void HeaderTweaker::showHiddenCol()
 	const int section = action->data().toInt();
 	if ( section >= 0 && section < _header->count() )
 	{
-	    //logDebug() << "Showing column \"" << colName( section ) << "\"" << Qt::endl;
+	    //logDebug() << "Showing column \"" << colName( section ) << '"' << Qt::endl;
 	    _header->setSectionHidden( section, false );
 	}
 	else

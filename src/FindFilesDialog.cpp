@@ -29,7 +29,7 @@ QString FindFilesDialog::_lastPath;
 
 
 FindFilesDialog::FindFilesDialog( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::FindFilesDialog }
 {
     // logDebug() << "init" << Qt::endl;
@@ -145,8 +145,6 @@ void FindFilesDialog::saveValues()
 
 void FindFilesDialog::readSettings()
 {
-    // logDebug() << Qt::endl;
-
     QDirStat::Settings settings;
 
     settings.beginGroup( "FindFilesDialog" );
