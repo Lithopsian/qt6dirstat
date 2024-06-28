@@ -27,7 +27,7 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	QString name() const override { return "pacman"; }
+	QLatin1String name() const override { return "pacman"_L1; }
 
 	/**
 	 * Check if RPM is active on the currently running system.
@@ -103,7 +103,7 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
          **/
         QStringList parseFileList( const QString & output ) const override
-	    { return output.split( '\n' ); }
+	    { return output.split( u'\n' ); }
 
 
     protected:

@@ -53,7 +53,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	ListEditor( QWidget * parent ):
-	    QWidget ( parent )
+	    QWidget { parent }
 	{}
 
 	/**
@@ -256,7 +256,7 @@ namespace QDirStat
 	 * Create a new item with the specified text and store the value.
 	 **/
 	ListEditorItem( const QString & text, void * value ):
-	    QListWidgetItem ( text ),
+	    QListWidgetItem { text },
 	    _value { value }
 	{}
 

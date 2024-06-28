@@ -38,7 +38,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	BucketsTableModel( QObject * parent, const HistogramView * histogram ):
-	    QAbstractTableModel ( parent ),
+	    QAbstractTableModel { parent },
 	    _histogram { histogram }
 	{}
 

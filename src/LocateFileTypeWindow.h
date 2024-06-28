@@ -89,7 +89,7 @@ namespace QDirStat
 	/**
 	 * Return the current search suffix with leading '*'.
 	 **/
-	QString displaySuffix() const { return "*" + _suffix; }
+	QString displaySuffix() const { return '*' + _suffix; }
 
 	/**
 	 * One-time initialization of the widgets in this window.

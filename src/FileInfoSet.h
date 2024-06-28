@@ -32,7 +32,7 @@ namespace QDirStat
 	 * only specified here for clarity.
 	 **/
 	FileInfoSet():
-	    QSet<FileInfo *> ()
+	    QSet<FileInfo *> {}
 	{}
 
 	/**

@@ -682,11 +682,11 @@ namespace QDirStat
 	CurrentTileHighlighter( const TreemapView * treemapView,
 	                        const TreemapTile * tile,
 	                        bool                isSelected ):
-	    HighlightRect ( tile,
+	    HighlightRect { tile,
 			    treemapView->currentItemColor(),
 			    2,
 			    isSelected ? Qt::SolidLine : Qt::DotLine,
-			    CurrentHighlightLayer )
+			    CurrentHighlightLayer }
 	{}
 
     }; // class CurrentTileHighlighter
@@ -706,11 +706,11 @@ namespace QDirStat
     public:
 	SelectedTileHighlighter( const TreemapView * treemapView,
 	                         const TreemapTile * tile ):
-	    HighlightRect ( tile,
+	    HighlightRect { tile,
 			    treemapView->selectedItemsColor(),
 			    2,
 			    Qt::SolidLine,
-			    TileHighlightLayer )
+			    TileHighlightLayer }
 	{}
 
     }; // class SelectedTileHighlighter
@@ -729,11 +729,11 @@ namespace QDirStat
 	ParentTileHighlighter( const TreemapView * treemapView,
 	                       const TreemapTile * tile,
 	                       const QString     & tooltip ):
-	    HighlightRect ( tile,
+	    HighlightRect { tile,
 			    treemapView->highlightColor(),
 			    treemapView->highlightedParent() ? 1 : 2,
 			    Qt::SolidLine,
-			    SceneHighlightLayer ),
+			    SceneHighlightLayer },
 	    _tile { tile }
 	{
 	    setToolTip( tooltip );

@@ -13,6 +13,7 @@
 #include <QList>
 
 #include "DirInfo.h"
+#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -36,7 +37,7 @@ namespace QDirStat
                  const QString    & version,
                  const QString    & arch,
                  const PkgManager * pkgManager ):
-            DirInfo( parent, tree, name ),
+            DirInfo { parent, tree, name },
             _pkgManager { pkgManager },
             _baseName { name },
             _version { version },
@@ -56,7 +57,7 @@ namespace QDirStat
                  const QString    & version,
                  const QString    & arch,
                  const PkgManager * pkgManager ):
-            PkgInfo ( nullptr, nullptr, name, version, arch, pkgManager )
+            PkgInfo { nullptr, nullptr, name, version, arch, pkgManager }
         {}
 
         /**
@@ -65,7 +66,7 @@ namespace QDirStat
          **/
         PkgInfo( DirTree          * tree,
                  DirInfo          * parent ):
-            PkgInfo ( tree, parent, pkgSummaryUrl(), QString(), QString(), nullptr )
+            PkgInfo { tree, parent, pkgSummaryUrl(), QString(), QString(), nullptr }
         {}
 
         /**
@@ -176,7 +177,7 @@ namespace QDirStat
         /**
          * Returns the package scheme prefix.
          **/
-        static QLatin1String pkgScheme() { return QLatin1String( "Pkg:/" ); }
+        static QLatin1String pkgScheme() { return "Pkg:/"_L1; }
 
 
     private:

@@ -16,6 +16,8 @@
 #include <QProcessEnvironment>
 #include <QStringBuilder>
 
+#include "Typedefs.h" // _L1
+
 
 // Override these before #include
 
@@ -74,11 +76,11 @@ namespace QDirStat
 	 * the command into "/bin/sh -c".
 	 **/
 	QString runCommand( const QString & commandLine,
-			    int           * exitCode_ret  = 0,
-			    int             timeout_sec   = COMMAND_TIMEOUT_SEC,
-			    bool            logCommand    = LOG_COMMANDS,
-			    bool            logOutput     = LOG_OUTPUT,
-			    bool            ignoreErrCode = false );
+	                    int           * exitCode_ret = 0,
+	                    int             timeout_sec  = COMMAND_TIMEOUT_SEC,
+	                    bool            logCommand   = LOG_COMMANDS,
+	                    bool            logOutput    = LOG_OUTPUT,
+	                    bool            logError     = true );
 
 	/**
 	 * Run a command with arguments 'args' and return its output. If
@@ -101,12 +103,12 @@ namespace QDirStat
 	 * line to be executed as the second. Beware of shell quoting quirks!
 	 **/
 	QString runCommand( const QString     & command,
-			    const QStringList & args,
-			    int               * exitCode_ret  = 0,
-			    int                 timeout_sec   = COMMAND_TIMEOUT_SEC,
-			    bool                logCommand    = LOG_COMMANDS,
-			    bool                logOutput     = LOG_OUTPUT,
-			    bool                ignoreErrCode = false );
+	                    const QStringList & args,
+	                    int               * exitCode_ret = 0,
+	                    int                 timeout_sec  = COMMAND_TIMEOUT_SEC,
+	                    bool                logCommand   = LOG_COMMANDS,
+	                    bool                logOutput    = LOG_OUTPUT,
+	                    bool                logError     = true );
 
 	/**
 	 * Return 'true' if the specified command is available and executable.
@@ -220,14 +222,14 @@ namespace QDirStat
 	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
-	    { return QString( unescaped ).replace( '\'', QLatin1String( "'\\''" ) ); }
+	    { return QString( unescaped ).replace( u'\'', "'\\''"_L1 ); }
 
 	/**
 	 * Return a string in single quotes, with single quotes in the string
 	 * escaped.
 	 **/
 	inline QString shellQuoted( const QString & unquoted )
-	    { return "'" % escaped( unquoted ) % "'"; }
+	    { return '\'' % escaped( unquoted ) % '\''; }
 
     }	// namespace SysUtil
 

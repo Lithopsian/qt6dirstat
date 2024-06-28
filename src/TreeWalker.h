@@ -193,7 +193,7 @@ namespace QDirStat
     public:
 
         FilesFromYearTreeWalker( short year ):
-            TreeWalker (),
+            TreeWalker {},
             _year { year }
         {}
 
@@ -213,7 +213,7 @@ namespace QDirStat
     public:
 
         FilesFromMonthTreeWalker( short year, short month ):
-            TreeWalker (),
+            TreeWalker {},
             _year { year },
             _month { month }
         {}
@@ -234,7 +234,7 @@ namespace QDirStat
     {
     public:
         FindFilesTreeWalker( const FileSearchFilter & filter ):
-            TreeWalker (),
+            TreeWalker {},
             _filter { filter }
         {}
 

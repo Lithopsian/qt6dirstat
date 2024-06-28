@@ -50,8 +50,8 @@ namespace QDirStat
     {
     public:
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
-	    QVector<double> ( 10 ),
-	    _constLast { constEnd() - 1 }
+	    QVector<double> ( 10 ), // ten elements, not onex10.0
+	    _constLast { cend() - 1 }
 	{
 	    // Start with the given cushion height, times 4 from the coefficients
 	    double height = 4.0 * cushionHeight;
@@ -96,7 +96,7 @@ namespace QDirStat
 	    _xx1 { 0.0 },
 	    _yy2 { 0.0 },
 	    _yy1 { 0.0 },
-	    _height { heights.constBegin() }
+	    _height { heights.cbegin() }
 	{}
 
 	/**

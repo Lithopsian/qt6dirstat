@@ -13,6 +13,7 @@
 #include <QTextStream>
 
 #include "SearchFilter.h"
+#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -25,13 +26,6 @@ namespace QDirStat
     class FileSearchFilter: public SearchFilter
     {
     public:
-
-        /** Default constructor, constructs a filter with no tree and an
-         * empty search pattern.
-         **/
-        FileSearchFilter():
-	    FileSearchFilter { nullptr, "", Auto, true, true, true, true, true }
-	{}
 
         /**
          * Constructor: Create a search filter with the specified pattern and
@@ -52,48 +46,46 @@ namespace QDirStat
                           const QString & pattern,
                           FilterMode      filterMode,
                           bool            caseSensitive,
-			  bool            findFiles,
-			  bool            findDirs,
-			  bool            findSymLinks,
-			  bool            findPkgs ):
-	    SearchFilter( pattern,
-			  filterMode,
-			  Contains,         // defaultFilterMode
-			  caseSensitive ),  // case-insensitive
-	    _dir { dir },
-	    _findFiles { findFiles },
-	    _findDirs { findDirs },
-	    _findSymLinks { findSymLinks },
-	    _findPkgs { findPkgs }
-	{}
+                          bool            findFiles,
+                          bool            findDirs,
+                          bool            findSymLinks,
+                          bool            findPkgs ):
+            SearchFilter { pattern, filterMode, Contains, caseSensitive },
+            _dir { dir },
+            _findFiles { findFiles },
+            _findDirs { findDirs },
+            _findSymLinks { findSymLinks },
+            _findPkgs { findPkgs }
+        {}
+
+        /** Default constructor, constructs a filter with no tree and an
+         * empty search pattern.
+         **/
+        FileSearchFilter():
+            FileSearchFilter { nullptr, "", Auto, true, true, true, true, true }
+        {}
 
         /**
-         * Flags which node types to find
+         * Flags for which node types to find
          **/
         bool findFiles()    const { return _findFiles;    }
         bool findDirs()     const { return _findDirs;     }
         bool findSymLinks() const { return _findSymLinks; }
         bool findPkgs()     const { return _findPkgs;     }
-/*
-        void setFindFiles   ( bool value ) { _findFiles    = value; }
-        void setFindDirs    ( bool value ) { _findDirs     = value; }
-        void setFindSymLinks( bool value ) { _findSymLinks = value; }
-        void setFindPkgs    ( bool value ) { _findPkgs     = value; }
-*/
+
         /**
          * Directory to start the search from
          **/
         DirInfo * dir() const { return _dir; }
-        void setDir( DirInfo * dir ) { _dir = dir; }
 
 
     private:
 
         DirInfo * _dir;
-        bool      _findFiles	{ true };
-        bool      _findDirs	{ true };
-        bool      _findSymLinks	{ true };
-        bool      _findPkgs	{ true };
+        bool      _findFiles    { true };
+        bool      _findDirs     { true };
+        bool      _findSymLinks { true };
+        bool      _findPkgs     { true };
 
     };  // class FileSearchFilter
 
@@ -120,9 +112,8 @@ namespace QDirStat
                << "\" mode \""
                << SearchFilter::toString( filter.filterMode() )
                << "\" for "
-               << findTypes.join( QLatin1String( " + " ) )
-               <<( filter.isCaseSensitive()? " case sensitive" : "" )
-               << ">";
+               << findTypes.join( " + "_L1 )
+               << ( filter.isCaseSensitive() ? " case sensitive>" : ">" );
 
         return stream;
     }

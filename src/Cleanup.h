@@ -72,7 +72,7 @@ namespace QDirStat
 		 int                  outputWindowTimeout = 500,
 		 bool                 outputWindowAutoClose = false,
 		 QString              shell = "" ):
-	    QAction ( title, parent ),
+	    QAction { title, parent },
 	    _active { active },
 	    _title { title },
 	    _command { command },
@@ -123,7 +123,7 @@ namespace QDirStat
 	 * Uses the ID as fallback if the name is empty.
 	 **/
 	QString cleanTitle() const
-	    { return _title.isEmpty() ? _command : QString( _title ).remove( '&' ); }
+	    { return _title.isEmpty() ? _command : QString( _title ).remove( u'&' ); }
 
 	/**
 	 * Return the icon name of this cleanup action.

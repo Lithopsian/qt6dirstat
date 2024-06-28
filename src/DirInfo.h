@@ -111,7 +111,7 @@ namespace QDirStat
 		 const QString & name,
 		 mode_t          mode,
 		 FileSize        size ):
-	    DirInfo ( parent, tree, name, mode, size, size, false, 0, 0, 0 )
+	    DirInfo { parent, tree, name, mode, size, size, false, 0, 0, 0 }
 	{}
 
 	/**
@@ -129,7 +129,7 @@ namespace QDirStat
 	 * is created.
 	 **/
 	DirInfo( DirTree * tree ):
-	    DirInfo ( nullptr, tree, "" )
+	    DirInfo { nullptr, tree, "" }
 	{}
 
 	/**
@@ -438,7 +438,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from FileInfo.
 	 **/
-	QString sizePrefix() const override;
+	QLatin1String sizePrefix() const override;
 
 	/**
 	 * Set the state of the directory reading process.

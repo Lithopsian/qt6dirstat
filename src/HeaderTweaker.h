@@ -13,6 +13,7 @@
 #include <QHeaderView>
 
 #include "DataColumns.h"
+#include "Typedefs.h"
 
 
 class QAction;
@@ -58,9 +59,9 @@ namespace QDirStat
 	/**
 	 * Return the names of the three layouts.
 	 **/
-	inline static QLatin1String l1Name() { return QLatin1String( "L1" ); }
-	inline static QLatin1String l2Name() { return QLatin1String( "L2" ); }
-	inline static QLatin1String l3Name() { return QLatin1String( "L3" ); }
+	inline static QLatin1String l1Name() { return "L1"_L1; }
+	inline static QLatin1String l2Name() { return "L2"_L1; }
+	inline static QLatin1String l3Name() { return "L3"_L1; }
 
 	/**
 	 * Save the current status in 'layout'.

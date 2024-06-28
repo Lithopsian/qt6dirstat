@@ -88,7 +88,7 @@ namespace QDirStat
 	 **/
 	CacheReader( const QString & fileName,
 		     DirTree       * tree ):
-	    CacheReader ( fileName, tree, nullptr, false )
+	    CacheReader { fileName, tree, nullptr, false }
 	{}
 
 	/**

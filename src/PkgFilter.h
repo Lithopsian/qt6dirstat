@@ -29,7 +29,7 @@ namespace QDirStat
          * and SelectAll filter mode.
          **/
         PkgFilter():
-            PkgFilter ( "", SelectAll )
+            PkgFilter { "", SelectAll }
         {}
 
         /**
@@ -54,10 +54,10 @@ namespace QDirStat
          **/
         PkgFilter( const QString & pattern,
                    FilterMode      filterMode = Auto ):
-            SearchFilter ( normalizedPattern( pattern ),
+            SearchFilter { normalizedPattern( pattern ),
                            filterMode,
                            StartsWith, // defaultFilterMode
-                           true )      // case-sensitive
+                           true }      // case-sensitive
         {}
 
         /**

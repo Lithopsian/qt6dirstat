@@ -18,9 +18,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-#include "Typedefs.h" // Qt::endl
-#endif
+#include "Typedefs.h" // Qt::endl, _L1
 
 // Intentionally not using LogDebug, LogMilestone etc. to avoid confusion
 // because of simple typos: logDebug() vs. LogDebug()
@@ -231,7 +229,7 @@ inline QTextStream & operator<<( QTextStream & str, bool val )
     { return str << ( val ? "true" : "false" ); }
 
 inline QTextStream & operator<<( QTextStream & str, const QStringList & stringList )
-    { return str << stringList.join( QLatin1String( ", " ) ); }
+    { return str << stringList.join( ", "_L1 ); }
 
 inline QTextStream & operator<<( QTextStream & str, const QRectF & rect )
     { return str << "QRectF( x: " << rect.x() << " y: " << rect.y()
@@ -262,7 +260,7 @@ inline QTextStream & operator<<( QTextStream & str, QSize size )
 
 #ifndef DONT_DEPRECATE_STRERROR
     // Use formatErrno() instead which deals with UTF-8 issues
-    char * strerror(int) __attribute__ ((deprecated));
+    char * strerror( int ) __attribute__ ((deprecated));
 #endif
 
 

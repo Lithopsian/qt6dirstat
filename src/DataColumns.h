@@ -14,6 +14,7 @@
 #include <QStringList>
 #include <QTextStream>
 
+#include "Typedefs.h" // _L1
 
 // For use in loops
 #define DataColumnBegin NameCol
@@ -52,14 +53,16 @@ namespace QDirStat
     namespace DataColumns
     {
 	/**
-	 * Map a view column to the corresponding model column
+	 * Map a view column to the corresponding model column;
+	 * just cast to the enum type.
 	 **/
 	inline DataColumn fromViewCol( int viewCol ) { return static_cast<DataColumn>( viewCol ); }
 
 	/**
-	 * Map a model column to the corresponding view column
+	 * Map a model column to the corresponding view column,
+	 * just an implicit conversion.
 	 **/
-	inline int toViewCol( DataColumn modelCol ) { return static_cast<int>( modelCol ); }
+	inline int toViewCol( DataColumn modelCol ) { return modelCol; }
 
         /**
          * Return all model columns in default order
@@ -138,7 +141,7 @@ namespace QDirStat
                                       const DataColumnList & colList )
     {
 	stream << "[ "
-               << DataColumns::toStringList( colList ).join( QLatin1String( ", " ) )
+               << DataColumns::toStringList( colList ).join( ", "_L1 )
                << " ]";
 
 	return stream;
