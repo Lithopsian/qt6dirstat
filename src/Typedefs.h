@@ -13,6 +13,7 @@
 
 #include <QColor>
 #include <QList>
+#include <QTextStream>
 
 // The size of a standard disk block.
 //
