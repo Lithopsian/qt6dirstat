@@ -19,7 +19,7 @@ using namespace QDirStat;
 
 
 SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
-    QItemSelectionModel ( dirTreeModel, parent ),
+    QItemSelectionModel { dirTreeModel, parent },
     _dirTreeModel { dirTreeModel }
 {
     CHECK_PTR( parent ); // no MainWindow!
@@ -272,7 +272,7 @@ void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
 
 
 SelectionModelProxy::SelectionModelProxy( SelectionModel * master, QObject * parent ):
-    QObject ( parent )
+    QObject { parent }
 {
     connect( master, &SelectionModel::selectionChangedItems,
 	     this,   &SelectionModelProxy::selectionChangedItems );

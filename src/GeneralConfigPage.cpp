@@ -20,8 +20,8 @@ using namespace QDirStat;
 
 
 GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
-    QWidget( parent ),
-    _ui( new Ui::GeneralConfigPage )
+    QWidget { parent },
+    _ui { new Ui::GeneralConfigPage }
 {
     _ui->setupUi( this );
 
@@ -50,7 +50,7 @@ void GeneralConfigPage::setup()
     _ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
 
     // add word-joiner character to stop unwanted line breaks
-    const QString joinedFileName = Settings::primaryFileName().replace( '/', "/⁠" );
+    const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠"_L1 );
     _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) + joinedFileName );
 
 }

@@ -48,7 +48,7 @@ namespace QDirStat
 	 * startingDir is then overwritten.
 	 **/
 	UnpkgSettings( const QString & startingDir ):
-	    UnpkgSettings ()
+	    UnpkgSettings {}
 	{ _startingDir = startingDir; }
 
 	/**

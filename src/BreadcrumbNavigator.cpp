@@ -51,25 +51,25 @@ namespace
         basePath_ret = "";
         name_ret = path;
 
-        if ( path != QLatin1String( "/" ) && path.contains( '/' ) )
+        if ( path != "/"_L1 && path.contains( u'/' ) )
         {
-            QStringList components = path.split( '/', Qt::SkipEmptyParts );
+            QStringList components = path.split( u'/', Qt::SkipEmptyParts );
 
             if ( !components.empty() )
                 name_ret = components.takeLast();
 
             if ( !components.empty() )
-                basePath_ret = components.join( '/' ) % '/';
+                basePath_ret = components.join( u'/' ) % '/';
 
-            if ( path.startsWith( '/' ) )
-                basePath_ret.prepend( '/' );
+            if ( path.startsWith( u'/' ) )
+                basePath_ret.prepend( u'/' );
         }
     }
 } // namespace
 
 
 BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
-    QLabel ( parent )
+    QLabel { parent }
 {
     clear();
 
@@ -88,6 +88,10 @@ void BreadcrumbNavigator::setPath( const FileInfo * item )
     fillBreadcrumbs( item );
     shortenBreadcrumbs();
     setText( html() );
+
+#if VERBOSE_BREADCRUMBS
+    logBreadcrumbs();
+#endif
 }
 
 
@@ -138,10 +142,6 @@ void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
 
     if ( _breadcrumbs.first().pathComponent.isEmpty() )
         _breadcrumbs.removeFirst();
-
-#if VERBOSE_BREADCRUMBS
-    logBreadcrumbs();
-#endif
 }
 
 
@@ -160,10 +160,10 @@ QString BreadcrumbNavigator::html() const
             if ( crumb.url.isEmpty() )
                 html += name.toHtmlEscaped();
             else
-                html += "<a href=\"" % crumb.url % "\">" % name.toHtmlEscaped() % "</a>";
+                html += "<a href=\""_L1 % crumb.url % "\">"_L1 % name.toHtmlEscaped() % "</a>"_L1;
 
-            if ( !name.endsWith( '/' ) )
-                html += '/';
+            if ( !name.endsWith( u'/' ) )
+                html += u'/';
         }
     }
 
@@ -183,7 +183,7 @@ void BreadcrumbNavigator::shortenBreadcrumbs()
 #if VERBOSE_BREADCRUMBS
         logDebug() << "Shortened from " << longestCrumb->pathComponent.length()
                    << " to " << longestCrumb->displayName.length()
-                   << ": " << longestCrumb->pathComponent << Qt::endl;
+                   << ": " << longestCrumb->displayName << Qt::endl;
 #endif
     }
 }
@@ -217,7 +217,7 @@ int BreadcrumbNavigator::breadcrumbsLen() const
 
         len += name.length();
 
-        if ( !name.endsWith( '/' ) )
+        if ( !name.endsWith( u'/' ) )
             ++len;      // For the "/" delimiter
     }
 
@@ -237,7 +237,7 @@ void BreadcrumbNavigator::logBreadcrumbs() const
         logDebug() << "_breadcrumb[ " << i << " ]: "
                    << " pathComponent: \"" << crumb.pathComponent
                    << "\" displayName: \"" << crumb.displayName
-                   << "\" url: " << crumb.url << "\""
+                   << "\" url: \"" << crumb.url << '"'
                    << Qt::endl;
     }
 

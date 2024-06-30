@@ -44,9 +44,9 @@ public:
     /**
      * Return the class name of this exception as string.
      *
-     * Derived classes should reimplement this and return their own name.
+     * Derived classes could reimplement this and return their own name.
      */
-    QString className() const { return "Exception"; }
+    QLatin1String className() const { return "Exception"_L1; }
 
     /**
      * Return the source file name where the exception was thrown.
@@ -93,7 +93,7 @@ class NullPointerException: public Exception
 {
 public:
     NullPointerException():
-	Exception ( "Null pointer" )
+	Exception { "Null pointer" }
     {}
 
     ~NullPointerException() noexcept override = default;
@@ -104,7 +104,7 @@ class FileException: public Exception
 {
 public:
     FileException( const QString & filename, const QString & msg ):
-	Exception ( msg ),
+	Exception { msg },
 	_filename { filename }
     {}
 
@@ -120,7 +120,7 @@ class SysCallFailedException: public Exception
 public:
     SysCallFailedException( const QString & sysCall,
 			    const QString & resourceName ):
-	Exception ( errMsg( sysCall, resourceName ) ),
+	Exception { errMsg( sysCall, resourceName ) },
 	_sysCall { sysCall },
 	_resourceName { resourceName }
     {}
@@ -147,7 +147,7 @@ class DynamicCastException: public Exception
 {
 public:
     DynamicCastException( const QString & expectedType ):
-	Exception ( "dynamic_cast failed; expected: " + expectedType )
+	Exception { "dynamic_cast failed; expected: " + expectedType }
     {}
 
     ~DynamicCastException() noexcept override = default;
@@ -158,7 +158,8 @@ class BadMagicNumberException: public Exception
 {
 public:
     BadMagicNumberException( const void * badPointer ):
-	Exception ( QString( "Magic number check failed for address 0x%1" ).arg( (qulonglong)badPointer, 0, 16 ) )
+	Exception { QString( "Magic number check failed for address 0x%1" )
+	            .arg( reinterpret_cast<quintptr>( badPointer ), 0, 16 ) }
     {}
 
     ~BadMagicNumberException() noexcept override = default;
@@ -183,7 +184,7 @@ public:
 			      int             validMin,
 			      int             validMax,
 			      const QString & msg = QString() ):
-	Exception ( errMsg( invalidIndex, validMin, validMax, msg ) ),
+	Exception { errMsg( invalidIndex, validMin, validMax, msg ) },
 	_invalidIndex { invalidIndex },
 	_validMin { validMin },
 	_validMax { validMax }

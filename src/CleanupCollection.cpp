@@ -112,9 +112,9 @@ namespace
 		const QString itemType = item->isDirInfo() ?
 					 QObject::tr( "for directory" ) :
 					 QObject::tr( "for file" );
-		const QString itemLine = itemType % ": " % name;
+		const QString itemLine = itemType % ": "_L1 % name;
 		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
-		const QString title = cleanTitle + QString( itemSpaces - titleWidth, ' ' );
+		const QString title = cleanTitle + QString( itemSpaces - titleWidth, u' ' );
 
 		return QString( "<h3>%1</h3>%2<br/>" ).arg( title ).arg( itemLine );
 	    }
@@ -140,9 +140,9 @@ namespace
 		    longestLine = lineLength;
 	    }
 	    const int spaces = longestLine / spaceWidth - titleWidth;
-	    const QString title = cleanTitle + QString( spaces, ' ' );
+	    const QString title = cleanTitle + QString( spaces, u' ' );
 
-	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( QLatin1String( "<br>" ) ) );
+	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>"_L1 ) );
 	}();
 
 	const int ret = QMessageBox::question( qApp->activeWindow(),
@@ -187,7 +187,7 @@ CleanupCollection::CleanupCollection( QObject        * parent,
 				      SelectionModel * selectionModel,
 				      QToolBar       * toolBar,
 				      QMenu          * menu ):
-    QObject ( parent ),
+    QObject { parent },
     _selectionModel { selectionModel },
     _trash { new Trash() }
 {

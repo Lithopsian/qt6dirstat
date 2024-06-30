@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include "Typedefs.h" // FileSize, MountPointList
+#include "Typedefs.h" // FileSize, MountPointList, _L1
 
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
@@ -76,23 +76,23 @@ namespace QDirStat
 	/**
 	 * Return the mount options as one comma-separated string.
 	 **/
-	QString mountOptionsStr() const { return _mountOptions.join( ',' ); }
+	QString mountOptionsStr() const { return _mountOptions.join( u',' ); }
 
 	/**
 	 * Return 'true' if the filesystem is mounted read-only.
 	 **/
-	bool isReadOnly() const { return _mountOptions.contains( QLatin1String( "ro" ) ); }
+	bool isReadOnly() const { return _mountOptions.contains( "ro"_L1 ); }
 
 	/**
 	 * Return 'true' if the filesystem type of this mount point is "btrfs".
 	 **/
-	bool isBtrfs() const { return _filesystemType.toLower() == QLatin1String( "btrfs" ); }
+	bool isBtrfs() const { return _filesystemType.toLower() == "btrfs"_L1; }
 
 	/**
 	 * Return 'true' if the filesystem type of this mount point starts with
 	 * "ntfs".
 	 **/
-        bool isNtfs() const { return _filesystemType.toLower().startsWith( QLatin1String( "ntfs" ) ); }
+	bool isNtfs() const { return _filesystemType.toLower().startsWith( "ntfs"_L1 ); }
 
 	/**
 	 * Return 'true' if this is a network filesystem like NFS or Samba
@@ -107,16 +107,16 @@ namespace QDirStat
 	 **/
 	bool isSystemMount() const;
 
-        /**
-         * Return 'true' if this is an autofs, i.e. a filesystem managed by the
-         * automounter.
-         **/
-        bool isAutofs() const { return _filesystemType.toLower() == QLatin1String( "autofs" ); }
+	/**
+	 * Return 'true' if this is an autofs, i.e. a filesystem managed by the
+	 * automounter.
+	 **/
+	bool isAutofs() const { return _filesystemType.toLower() == "autofs"_L1; }
 
-        /**
-         * Return 'true' if this is an autofs that is not currently mounted.
-         **/
-        bool isUnmountedAutofs() { return isAutofs() && totalSize() == 0; }
+	/**
+	 * Return 'true' if this is an autofs that is not currently mounted.
+	 **/
+	bool isUnmountedAutofs() { return isAutofs() && totalSize() == 0; }
 
 	/**
 	 * Return 'true' if this is a duplicate mount, i.e. either a bind mount
@@ -124,13 +124,12 @@ namespace QDirStat
 	 **/
 	bool isDuplicate() const { return _isDuplicate; }
 
-        /**
-         * Return 'true' if this is a snap package, i.e. it is a squashfs
-         * mounted below /snap.
-         **/
-        bool isSnapPackage() const
-	    { return _path.startsWith( QLatin1String( "/snap" ) ) &&
-		     _filesystemType.toLower() == QLatin1String( "squashfs" ); }
+	/**
+	 * Return 'true' if this is a snap package, i.e. it is a squashfs
+	 * mounted below /snap.
+	 **/
+	bool isSnapPackage() const
+	    { return _path.startsWith( "/snap"_L1 ) && _filesystemType.toLower() == "squashfs"_L1; }
 
 	/**
 	 * Set the 'duplicate' flag. This should only be set while /proc/mounts

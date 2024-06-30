@@ -28,7 +28,6 @@
 
 #define MinHistogramWidth	 500.0
 #define MinHistogramHeight	 300.0
-#define UnicodeMathSigma	0x2211 // 'n-ary summation'
 
 #define MAX_BUCKET_COUNT 100
 
@@ -534,7 +533,7 @@ void HistogramView::addQuartileText()
     setBold( nTextItem );
 
     const QFontMetrics metrics( nTextItem->font() );
-    const QChar sigma( UnicodeMathSigma );
+    const QChar sigma( 0x2211 );
     if ( metrics.inFont( sigma ) )
 	nTextItem->setPlainText( QString( "%1n: %L2" ).arg( sigma ).arg( n ) );
 
@@ -622,7 +621,7 @@ QGraphicsTextItem * HistogramView::addText( QPointF pos, const QString & text )
 
 QPointF HistogramView::addText( QPointF pos, const QStringList & lines )
 {
-    const QGraphicsTextItem * textItem = addText( pos, lines.join( '\n' ) );
+    const QGraphicsTextItem * textItem = addText( pos, lines.join( u'\n' ) );
 
     return QPoint( pos.x(), pos.y() + textItem->boundingRect().height() );
 }
@@ -662,12 +661,12 @@ void HistogramView::addOverflowPanel()
 	{ tr( "Min (P0) ... P%1" ).arg( _startPercentile ),
 	  _startPercentile == 0 ?
 		tr( "no files cut off" ) :
-		formatSize( percentile( 0 ) ) % "..." % formatSize( percentile( _startPercentile ) ),
+		formatSize( percentile( 0 ) ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
 	  "",
 	  tr( "P%1 ... Max (P100)" ).arg( _endPercentile ),
 	  _endPercentile == 100 ?
 		tr( "no files cut off" ) :
-		formatSize( percentile( _endPercentile ) ) % "..." % formatSize( percentile( 100 ) ),
+		formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( percentile( 100 ) ),
 	  "",
 	};
     nextPos = addText( nextPos, lines );
@@ -682,12 +681,10 @@ void HistogramView::addOverflowPanel()
 		      _barBrush, _overflowSliceBrush );
 
     // Caption for the upper pie chart
-    const QStringList pieCaption = { missingFiles == 1 ?
-					tr( "1 file cut off" ) :
-					tr( "%L1 files cut off" ).arg( missingFiles ),
-				     tr( "%1% of all files" ).arg( cutoff ),
-                                     ""
-                                   };
+    const QString cutOffCaption = missingFiles == 1 ?
+                                  tr( "1 file cut off" ) :
+                                  tr( "%L1 files cut off" ).arg( missingFiles );
+    const QStringList pieCaption { cutOffCaption, tr( "%1% of all files" ).arg( cutoff ), "" };
     nextPos = addText( nextPos, pieCaption );
 
     // Lower pie chart: disk space disregarded
@@ -707,12 +704,11 @@ void HistogramView::addOverflowPanel()
     else
 	nextPos = addPie( pieRect, histogramDiskSpace, cutoffDiskSpace, _barBrush, _overflowSliceBrush );
 
-
     // Caption for the lower pie chart
-    const QStringList pieCaption2 = { formatSize( cutoffDiskSpace ) % " cut off",
-				      tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
-                                      ""
-                                    };
+    const QStringList pieCaption2 { formatSize( cutoffDiskSpace ) % " cut off"_L1,
+                                    tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
+                                    ""
+                                  };
     nextPos = addText( nextPos, pieCaption2 );
 
     // Make sure the panel is tall enough to fit everything in
@@ -735,7 +731,7 @@ void HistogramView::addLine( int             percentileIndex,
 						      _markerExtraHeight,
 						      x,
 						      -( _histogramHeight + _markerExtraHeight ) );
-    line->setToolTip( whitespacePre( name % "<br/>" % formatSize( value ) ) );
+    line->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( value ) ) );
     line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );
     line->setPen( pen );
     line->setFlags( QGraphicsLineItem::ItemIsSelectable );

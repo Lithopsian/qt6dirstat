@@ -72,7 +72,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	HistogramView( QWidget * parent = nullptr ):
-	    QGraphicsView ( parent )
+	    QGraphicsView { parent }
 	{}
 
 	/**

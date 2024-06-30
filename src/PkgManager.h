@@ -48,7 +48,7 @@ namespace QDirStat
 	 *
 	 * Derived classes are required to implement this.
 	 **/
-	virtual QString name() const = 0;
+	virtual QLatin1String name() const = 0;
 
 	/**
 	 * Check if this package manager is active as a primary package manager

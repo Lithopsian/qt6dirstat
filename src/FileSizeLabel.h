@@ -38,7 +38,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	FileSizeLabel( QWidget * parent = nullptr ):
-	    QLabel ( parent )
+	    QLabel { parent }
 	{}
 
 	/**
@@ -68,7 +68,7 @@ namespace QDirStat
 	 * If the value is more than 1024, the label is given a tooltip containing
 	 * the exact value in bytes.
 	 **/
-	void setValue( FileSize value, const QString & prefix );
+	void setValue( FileSize value, QLatin1String prefix );
 
 	/**
 	 * Set the label text and tooltip.  The label string is formatted in a
@@ -84,7 +84,7 @@ namespace QDirStat
 	 * are already visible.  The tooltip may have a prefix (eg. ">") or it may
 	 * have jard links, but it should never have both.
 	 **/
-	void setToolTip( FileSize size, const QString & prefix, nlink_t numLinks );
+	void setToolTip( FileSize size, QLatin1String prefix, nlink_t numLinks );
 
 	/**
 	 * Set a custom text. This text may or may not contain the value.  The

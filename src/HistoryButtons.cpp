@@ -24,7 +24,7 @@ using namespace QDirStat;
 HistoryButtons::HistoryButtons( QAction * actionGoBack,
                                 QAction * actionGoForward,
                                 QWidget * parent ):
-    QObject ( parent ),
+    QObject { parent },
     _history { new History() },
     _actionGoBack { actionGoBack },
     _actionGoForward { actionGoForward }

@@ -18,6 +18,7 @@
 
 #include "ui_main-window.h"
 #include "Subtree.h"
+#include "Typedefs.h" // _L1
 
 
 class QActionGroup;
@@ -135,7 +136,7 @@ namespace QDirStat
         /**
          * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
          **/
-        static QLatin1String unpkgScheme() { return QLatin1String( "Unpkg:/" ); }
+        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
 
         /**
          * Disable the treemap, reset the permissions warning, breadcrumbs,

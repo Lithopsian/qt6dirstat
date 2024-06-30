@@ -48,13 +48,11 @@
 
 #define USE_CUSTOM_OPEN_DIR_DIALOG 1
 
-#include "TreemapTile.h"
-
 using namespace QDirStat;
 
 
 MainWindow::MainWindow( bool slowUpdate ):
-    QMainWindow (),
+    QMainWindow {},
     _ui { new Ui::MainWindow },
     _sortCol { DataColumns::toViewCol( SizeCol ) },
     _sortOrder { Qt::DescendingOrder }
@@ -779,7 +777,7 @@ void MainWindow::updateWindowTitle( const QString & url )
 	windowTitle += " [root]";
 
     if ( _urlInWindowTitle )
-	windowTitle += ' ' + url;
+	windowTitle += u' ' + url;
 
     setWindowTitle( windowTitle );
 }

@@ -19,7 +19,7 @@ using namespace QDirStat;
 
 
 PanelMessage::PanelMessage( QWidget * parent ):
-    QWidget ( parent ),
+    QWidget { parent },
     _ui { new Ui::PanelMessage }
 {
     _ui->setupUi( this );

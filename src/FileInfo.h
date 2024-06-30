@@ -10,13 +10,13 @@
 #ifndef FileInfo_h
 #define FileInfo_h
 
+#include <cmath>       // ceil()
 #include <sys/types.h> // dev_t, mode_t, nlink_t
 #include <sys/stat.h>  // struct stat, S_ISDIR(), etc.
 
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QTextStream>
-#include <QtMath> // qCeil()
 
 #include "Typedefs.h" // FileSize
 
@@ -31,6 +31,16 @@ namespace QDirStat
     class DirTree;
     class DotEntry;
     class PkgInfo;
+
+    /**
+     * An alternative to using a QPair for passing both the year and
+     * month for a FileInfo object.
+     * */
+    struct YearAndMonth
+    {
+	short year;
+	short month;
+    };
 
     /**
      * Status of a directory read job.
@@ -110,7 +120,18 @@ namespace QDirStat
 		  const QString & filename,
 		  mode_t          mode,
 		  FileSize        size ):
-	    FileInfo ( parent, tree, filename, mode, size, size, false, 0, 0, 0, false, blocksFromSize( size ), 1 )
+	    FileInfo { parent,
+		       tree,
+		       filename,
+		       mode,
+		       size,
+		       size,
+		       false,
+		       0,
+		       0,
+		       0,
+		       false,
+		       blocksFromSize( size ), 1 }
 	{}
 
 	/**
@@ -128,7 +149,7 @@ namespace QDirStat
 		  uid_t           uid,
 		  gid_t           gid,
 		  time_t          mtime ):
-	    FileInfo ( parent,
+	    FileInfo { parent,
 		       tree,
 		       filename,
 		       mode,
@@ -140,7 +161,7 @@ namespace QDirStat
 		       mtime,
 		       false,
 		       blocksFromSize( size ),
-		       1 )
+		       1 }
 	{}
 
 	/**
@@ -370,7 +391,7 @@ namespace QDirStat
 	 *
 	 **/
 	static int blocksFromSize( FileSize allocatedSize )
-	    { return qCeil( (float)allocatedSize / STD_BLOCK_SIZE ); }
+	    { return ceil( static_cast<double>( allocatedSize ) / STD_BLOCK_SIZE ); }
 
 	/**
 	 * The file size in bytes without taking multiple hard links into
@@ -425,7 +446,7 @@ namespace QDirStat
 	/**
 	 * Returns the year and month derived from the file mtime.
 	 **/
-	 QPair<short, short> yearAndMonth() const;
+	 YearAndMonth yearAndMonth() const;
 
 	//
 	// Directory-related methods that should be implemented by
@@ -772,7 +793,7 @@ namespace QDirStat
 	 * This default implementation returns an empty string. Derived classes
 	 * that can handle child items should reimplement this.
 	 **/
-	virtual QString sizePrefix() const { return ""; }
+	virtual QLatin1String sizePrefix() const { return QLatin1String(); }
 
 	/**
 	 * Returns true if this is a DirInfo object.

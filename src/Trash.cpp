@@ -75,14 +75,14 @@ namespace
     {
 	const QFileInfo fileInfo( rawPath );
 	QString path = fileInfo.canonicalPath();
-	QStringList components = path.split( '/', Qt::SkipEmptyParts );
+	QStringList components = path.split( u'/', Qt::SkipEmptyParts );
 
 	// Work up the directory tree
 	while ( !components.isEmpty() )
 	{
 	    // See if we are the top level on this device
 	    components.removeLast();
-	    const QString nextPath = '/' % components.join( '/' );
+	    const QString nextPath = '/' % components.join( u'/' );
 	    if ( device( nextPath ) != dev )
 		return path;
 
@@ -98,7 +98,7 @@ namespace
 	const QString topDir = toplevel( path, dev );
 
 	// Check if there is $TOPDIR/.Trash
-	QString trashPath = topDir % "/.Trash";
+	QString trashPath = topDir % "/.Trash"_L1;
 
 	struct stat statBuf;
 	const int result = stat( trashPath.toUtf8(), &statBuf );
@@ -165,8 +165,8 @@ Trash::Trash()
     const QString homeTrash = [ &homePath ]()
     {
 	const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString() );
-	return xdgHome.isEmpty() ? homePath % "/.local/share" : xdgHome;
-    }() % "/Trash";
+	return xdgHome.isEmpty() ? homePath % "/.local/share"_L1 : xdgHome;
+    }() % "/Trash"_L1;
 
     // new TrashDir can throw, although very unlikely for the home device
     try
@@ -288,10 +288,10 @@ QString TrashDir::uniqueName( const QString & path )
 void TrashDir::createTrashInfo( const QString & path,
 				const QString & targetName )
 {
-    QFile trashInfo( infoPath() % '/' % targetName % ".trashinfo" );
+    QFile trashInfo( infoPath() % '/' % targetName % ".trashinfo"_L1 );
 
     if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
-	THROW( FileException( trashInfo.fileName(), "Can't open " % trashInfo.fileName() ) );
+	THROW( FileException( trashInfo.fileName(), "Can't open "_L1 % trashInfo.fileName() ) );
 
     QTextStream str( &trashInfo );
     str << "[Trash Info]" << Qt::endl;

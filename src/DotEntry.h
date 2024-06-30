@@ -31,7 +31,7 @@ namespace QDirStat
 	 **/
 	DotEntry( DirTree * tree,
 		  DirInfo * parent ) :
-	    DirInfo ( parent, tree, dotEntryName() )
+	    DirInfo { parent, tree, dotEntryName() }
 	{}
 
 	/**

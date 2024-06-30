@@ -63,8 +63,8 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
         if ( item && item->isFile() )
         {
             const auto  yearAndMonth = item->yearAndMonth();
-            const short year         = yearAndMonth.first;
-            const short month        = yearAndMonth.second;
+            const short year         = yearAndMonth.year;
+            const short month        = yearAndMonth.month;
 
             YearStats & yearStats = _yearStats[ year ];
             yearStats.year = year;
@@ -100,10 +100,10 @@ void FileAgeStats::calcPercentages()
     for ( YearStats & stats : _yearStats )
     {
         if ( totalFilesCount > 0 )
-            stats.filesPercent = ( 100.0 * stats.filesCount ) / totalFilesCount;
+            stats.filesPercent = ( 100.0f * stats.filesCount ) / totalFilesCount;
 
         if ( totalFilesSize > 0 )
-            stats.sizePercent = ( 100.0 * stats.size ) / totalFilesSize;
+            stats.sizePercent = ( 100.0f * stats.size ) / totalFilesSize;
     }
 
     calcMonthPercentages( thisYear() );
@@ -123,10 +123,10 @@ void FileAgeStats::calcMonthPercentages( short year )
         if ( stats )
         {
             if ( thisYearStats->filesCount > 0 )
-                stats->filesPercent = ( 100.0 * stats->filesCount ) / thisYearStats->filesCount;
+                stats->filesPercent = ( 100.0f * stats->filesCount ) / thisYearStats->filesCount;
 
             if ( thisYearStats->size > 0 )
-                stats->sizePercent = ( 100.0 * stats->size ) / thisYearStats->size;
+                stats->sizePercent = ( 100.0f * stats->size ) / thisYearStats->size;
         }
     }
 }

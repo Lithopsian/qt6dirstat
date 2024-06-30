@@ -20,6 +20,7 @@
 #include <QTimer>
 
 #include "DataColumns.h"
+#include "Typedefs.h" // _L1
 
 
 class QTreeWidget;
@@ -359,17 +360,13 @@ namespace QDirStat
 	 * Returns the tree icon directory for the given enum value.
 	 **/
 	static QLatin1String treeIconDir( DirTreeItemSize treeItemSize )
-	{
-	    return treeItemSize == DTIS_Medium ?
-		                   QLatin1String( ":/icons/tree-medium/" ) :
-		                   QLatin1String( ":/icons/tree-small/" );
-	}
+	    { return treeItemSize == DTIS_Medium ? ":/icons/tree-medium/"_L1 : ":/icons/tree-small/"_L1; }
 
 	/**
 	 * Returns the tree item size setting for a given icon directory string.
 	 **/
 	static DirTreeItemSize dirTreeItemSize( const QString & treeIconDir )
-	    { return treeIconDir.contains( QLatin1String( "medium" ) ) ? DTIS_Medium : DTIS_Small; }
+	    { return treeIconDir.contains( "medium"_L1 ) ? DTIS_Medium : DTIS_Small; }
 
 	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about

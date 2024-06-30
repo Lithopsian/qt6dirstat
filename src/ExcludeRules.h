@@ -49,18 +49,18 @@ namespace QDirStat
 	 *
 	 * 'useFullPath' indicates if this exclude rule uses the full path
 	 * ('true') or only the file name without path ('false') for matching.
-         *
-         * 'checkAnyFileChild' specifies whether the non-directory children of
-         * the directory should be used for matching rather than the path or
-         * name of the directory itself. That makes it possible to exclude a
-         * directory that contains a file ".nobackup".
+	 *
+	 * 'checkAnyFileChild' specifies whether the non-directory children of
+	 * the directory should be used for matching rather than the path or
+	 * name of the directory itself. That makes it possible to exclude a
+	 * directory that contains a file ".nobackup".
 	 **/
 	ExcludeRule( PatternSyntax   patternSyntax,
 	             const QString & pattern,
 	             bool            caseSensitive,
 	             bool            useFullPath,
 	             bool            checkAnyFileChild ):
-	    QRegularExpression ( formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) ),
+	    QRegularExpression { formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) },
 	    _patternSyntax { patternSyntax },
 	    _pattern { pattern },
 	    _useFullPath { useFullPath },
@@ -175,6 +175,8 @@ namespace QDirStat
 				      const QString & pattern );
 
 
+    private:
+
 	PatternSyntax _patternSyntax;
 	QString       _pattern;
 	bool          _useFullPath;
@@ -269,13 +271,13 @@ namespace QDirStat
 	 * Return a const iterator for the first exclude rule.
 	 **/
 	ExcludeRuleListIterator begin() const { return cbegin(); }
-	ExcludeRuleListIterator cbegin() const { return _rules.constBegin(); }
+	ExcludeRuleListIterator cbegin() const { return _rules.cbegin(); }
 
 	/**
 	 * Return a const iterator for past the last exclude rule.
 	 **/
 	ExcludeRuleListIterator end() const { return cend(); }
-	ExcludeRuleListIterator cend() const { return _rules.constEnd(); }
+	ExcludeRuleListIterator cend() const { return _rules.cend(); }
 
 	/**
 	 * Write all exclude rules to the settings file.
@@ -289,10 +291,10 @@ namespace QDirStat
 	 * Create an exclude rule and add it to this rule set.
 	 **/
 	void add( ExcludeRule::PatternSyntax   patternSyntax,
-		  const QString              & pattern,
-		  bool                         caseSensitive,
-                  bool                         useFullPath,
-                  bool                         checkAnyFileChild );
+	          const QString              & pattern,
+	          bool                         caseSensitive,
+	          bool                         useFullPath,
+	          bool                         checkAnyFileChild );
 
 	/**
 	 * Clear all existing exclude rules and read exclude rules from the
@@ -319,8 +321,8 @@ namespace QDirStat
     {
 	if ( rule )
 	    stream << "<ExcludeRule \"" << rule->pattern() << "\""
-                   << ( rule->useFullPath() ? " (full path)" : "" )
-                   << ">";
+	           << ( rule->useFullPath() ? " (full path)" : "" )
+	           << ">";
 	else
 	    stream << "<NULL ExcludeRule *>";
 

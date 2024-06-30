@@ -31,7 +31,7 @@ using namespace QDirStat;
 
 LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
                                       QWidget    * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::LocateFilesWindow },
     _treeWalker { treeWalker }
 {
@@ -199,7 +199,7 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 
     QMenu menu;
 
-    const QStringList actions = { "actionCopyPath", "actionMoveToTrash", "---" };
+    const QStringList actions { "actionCopyPath", "actionMoveToTrash", "---" };
     ActionManager::addEnabledActions( &menu, actions );
 
     ActionManager::addEnabledCleanups( &menu );
@@ -231,7 +231,7 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 
 
 LocateListItem::LocateListItem( FileInfo * item ):
-    QTreeWidgetItem ( QTreeWidgetItem::UserType )
+    QTreeWidgetItem { QTreeWidgetItem::UserType }
 {
     CHECK_PTR( item );
 

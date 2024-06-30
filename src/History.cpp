@@ -113,9 +113,9 @@ void History::dump() const
 
     for ( int i = 0; i < _items.size(); ++i )
     {
-        logDebug() << ( i == _current ? " ---> " : QString( 6, ' ' ) )
+        logDebug() << ( i == _current ? " ---> " : QString( 6, u' ' ) )
                    << "#" << i
-                   << ": \"" << _items.at( i ) << "\"" << Qt::endl;
+                   << ": \"" << _items.at( i ) << '"' << Qt::endl;
     }
 
     logNewline();

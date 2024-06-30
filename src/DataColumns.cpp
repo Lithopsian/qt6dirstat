@@ -29,21 +29,21 @@ QLatin1String DataColumns::toString( DataColumn col )
 {
     switch ( col )
     {
-	case NameCol:             return QLatin1String( "NameCol" );
-	case PercentBarCol:       return QLatin1String( "PercentBarCol" );
-	case PercentNumCol:       return QLatin1String( "PercentNumCol" );
-	case SizeCol:             return QLatin1String( "SizeCol" );
-	case TotalItemsCol:       return QLatin1String( "TotalItemsCol" );
-	case TotalFilesCol:       return QLatin1String( "TotalFilesCol" );
-	case TotalSubDirsCol:     return QLatin1String( "TotalSubDirsCol" );
-	case LatestMTimeCol:      return QLatin1String( "LatestMTimeCol" );
-        case OldestFileMTimeCol:  return QLatin1String( "OldestFileMTimeCol" );
-	case UserCol:             return QLatin1String( "UserCol" );
-	case GroupCol:            return QLatin1String( "GroupCol" );
-	case PermissionsCol:      return QLatin1String( "PermissionsCol" );
-	case OctalPermissionsCol: return QLatin1String( "OctalPermissionsCol" );
-	case UndefinedCol:        return QLatin1String( "UndefinedCol" );
-	case ReadJobsCol:         return QLatin1String( "ReadJobsCol" );
+	case NameCol:             return "NameCol"_L1;
+	case PercentBarCol:       return "PercentBarCol"_L1;
+	case PercentNumCol:       return "PercentNumCol"_L1;
+	case SizeCol:             return "SizeCol"_L1;
+	case TotalItemsCol:       return "TotalItemsCol"_L1;
+	case TotalFilesCol:       return "TotalFilesCol"_L1;
+	case TotalSubDirsCol:     return "TotalSubDirsCol"_L1;
+	case LatestMTimeCol:      return "LatestMTimeCol"_L1;
+        case OldestFileMTimeCol:  return "OldestFileMTimeCol"_L1;
+	case UserCol:             return "UserCol"_L1;
+	case GroupCol:            return "GroupCol"_L1;
+	case PermissionsCol:      return "PermissionsCol"_L1;
+	case OctalPermissionsCol: return "OctalPermissionsCol"_L1;
+	case UndefinedCol:        return "UndefinedCol"_L1;
+	case ReadJobsCol:         return "ReadJobsCol"_L1;
 
 	// Intentionally omitting 'default' so the compiler
 	// can catch unhandled enum values
@@ -56,7 +56,7 @@ QLatin1String DataColumns::toString( DataColumn col )
 
 DataColumn DataColumns::fromString( const QString & str )
 {
-    if ( str == QLatin1String( "TotalSizeCol" ) ) // Backwards compatibility
+    if ( str == "TotalSizeCol"_L1 ) // Backwards compatibility
         return SizeCol;
 
     for ( int col = firstCol(); col <= lastCol(); ++col )
@@ -65,7 +65,7 @@ DataColumn DataColumns::fromString( const QString & str )
 	    return fromViewCol( col );
     }
 
-    logError() << "Invalid DataColumn \"" << str << "\"" << Qt::endl;
+    logError() << "Invalid DataColumn \"" << str << '"' << Qt::endl;
     return UndefinedCol;
 }
 

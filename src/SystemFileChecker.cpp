@@ -29,22 +29,22 @@ namespace
 
     bool isSystemPath( const QString & path )
     {
-        if ( path.startsWith( QLatin1String( "/boot/"  ) ) ||
-             path.startsWith( QLatin1String( "/bin/"   ) ) ||
-             path.startsWith( QLatin1String( "/dev/"   ) ) ||
-             path.startsWith( QLatin1String( "/etc/"   ) ) ||
-             path.startsWith( QLatin1String( "/lib/"   ) ) ||
-             path.startsWith( QLatin1String( "/lib32/" ) ) ||
-             path.startsWith( QLatin1String( "/lib64/" ) ) ||
-             path.startsWith( QLatin1String( "/opt/"   ) ) ||
-             path.startsWith( QLatin1String( "/proc/"  ) ) ||
-             path.startsWith( QLatin1String( "/sbin/"  ) ) ||
-             path.startsWith( QLatin1String( "/sys/"   ) ) )
+        if ( path.startsWith( "/boot/"_L1  ) ||
+             path.startsWith( "/bin/"_L1   ) ||
+             path.startsWith( "/dev/"_L1   ) ||
+             path.startsWith( "/etc/"_L1   ) ||
+             path.startsWith( "/lib/"_L1   ) ||
+             path.startsWith( "/lib32/"_L1 ) ||
+             path.startsWith( "/lib64/"_L1 ) ||
+             path.startsWith( "/opt/"_L1   ) ||
+             path.startsWith( "/proc/"_L1  ) ||
+             path.startsWith( "/sbin/"_L1  ) ||
+             path.startsWith( "/sys/"_L1   ) )
         {
             return true;
         }
 
-        if ( path.startsWith( QLatin1String( "/usr/" ) ) && !path.startsWith( QLatin1String( "/usr/local/" ) ) )
+        if ( path.startsWith( "/usr/"_L1 ) && !path.startsWith( "/usr/local/"_L1 ) )
             return true;
 
         /**
@@ -79,10 +79,10 @@ namespace
 
     bool mightBeSystemPath( const QString & path )
     {
-        if ( path.contains  ( QLatin1String( "/lost+found/" ) ) ||   // Also on other mounted filesystems!
-             path.startsWith( QLatin1String( "/run/"        ) ) ||
-             path.startsWith( QLatin1String( "/srv/"        ) ) ||
-             path.startsWith( QLatin1String( "/var/"        ) ) )
+        if ( path.contains  ( "/lost+found/"_L1 ) ||   // Also on other mounted filesystems!
+             path.startsWith( "/run/"_L1        ) ||
+             path.startsWith( "/srv/"_L1        ) ||
+             path.startsWith( "/var/"_L1        ) )
         {
             return true;
         }
@@ -102,12 +102,12 @@ bool SystemFileChecker::isSystemFile( const FileInfo * file )
     if ( file->isPseudoDir() && file->parent() )
         file = file->parent();
 
-    if ( file->parent() && file->parent()->url() == QLatin1String( "/" ) )
+    if ( file->parent() && file->parent()->url() == "/"_L1 )
         return true;
 
     QString path = file->url();
     if ( file->isDir() )
-        path += '/';
+        path += u'/';
     if ( isSystemPath( path ) )
         return true;
 

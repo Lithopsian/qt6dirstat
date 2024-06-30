@@ -11,6 +11,7 @@
 #define DpkgPkgManager_h
 
 #include "PkgManager.h"
+#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -119,7 +120,7 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	QString name() const override { return "dpkg"; }
+	QLatin1String name() const override { return "dpkg"_L1; }
 
 	/**
 	 * Check if dpkg is active on the currently running system.
@@ -151,7 +152,6 @@ namespace QDirStat
 	 * are symlinks in the direct path.
 	 **/
 	QString owningPkg( const QString & path ) const override;
-
 
 	//-----------------------------------------------------------------
 	//		       Optional Features
@@ -245,19 +245,17 @@ namespace QDirStat
 	 * or "diverted by".
 	*/
 	bool isDiversion( const QString & line ) const
-	    { return line.startsWith( QLatin1String( "diversion by" ) ) ||
-		     line.startsWith( QLatin1String( "local diversion" ) ); }
+	    { return line.startsWith( "diversion by"_L1 ) || line.startsWith( "local diversion"_L1 ); }
 	bool isLocalDiversion( const QString & line ) const
-	    { return line.startsWith( QLatin1String( "local diversion" ) ); }
+	    { return line.startsWith( "local diversion"_L1 ); }
 	bool isDiversionFrom( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( QLatin1String( "from: " ) ); }
+	    { return isDiversion( line ) && line.contains( "from: "_L1 ); }
 	bool isDiversionTo( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( QLatin1String( "to: " ) ); }
+	    { return isDiversion( line ) && line.contains( "to: "_L1 ); }
 	bool isDivertedBy( const QString & line ) const
-	    { return line.startsWith( QLatin1String( "diverted by" ) ) ||
-		     line.startsWith( QLatin1String( "locally diverted" ) ); }
+	    { return line.startsWith( "diverted by"_L1 ) || line.startsWith( "locally diverted"_L1 ); }
 	bool isPackageDivert( const QString & line ) const
-	    { return line.startsWith( QLatin1String( "package diverts" ) ); }
+	    { return line.startsWith( "package diverts"_L1 ); }
 
 	/**
 	 * This searches the lines produced by a dpkg -S query.

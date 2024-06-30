@@ -7,7 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <ctype.h> // isspace()
+#include <cmath>  // ceil()
+#include <cctype> // isspace()
 
 #include <QStringBuilder>
 #include <QUrl>
@@ -16,7 +17,7 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "DotEntry.h"
-#include "Logger.h"
+#include "Exception.h"
 #include "MountPoints.h"
 
 
@@ -46,7 +47,7 @@ namespace
     QString formatSize( FileSize size )
     {
 	// Multiples of 1024 are common, any larger multiple freakishly rare
-	return size >= KB && size % KB == 0 ? QString::number( size / KB ) % "K" : QString::number( size );
+	return size >= KB && size % KB == 0 ? QString::number( size / KB ) % 'K' : QString::number( size );
     }
 
 
@@ -131,7 +132,7 @@ namespace
 	    gzprintf( cache, "\tlinks: %u", (unsigned)item->links() );
 
 	// One item per line
-	gzputc( cache, '\n' );
+	gzputc( cache, u'\n' );
     }
 
 
@@ -184,7 +185,8 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
 	     "#Generated file - do not edit!\n"
 	     "#\n"
 	     "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
-	     "\n", CACHE_FORMAT_VERSION );
+	     "\n",
+	     CACHE_FORMAT_VERSION );
 
     writeTree( cache, tree->firstToplevel() );
     gzclose( cache );
@@ -206,7 +208,7 @@ namespace
 	if ( cptr == nullptr )
 	    return nullptr;
 
-	while ( *cptr != '\0' && isspace( *cptr ) )
+	while ( *cptr != u'\0' && isspace( *cptr ) )
 	    cptr++;
 
 	return cptr;
@@ -224,10 +226,10 @@ namespace
 	if ( cptr == nullptr )
 	    return nullptr;
 
-	while ( *cptr != '\0' && !isspace( *cptr ) )
+	while ( *cptr != u'\0' && !isspace( *cptr ) )
 	    cptr++;
 
-	return *cptr == '\0' ? nullptr : cptr;
+	return *cptr == u'\0' ? nullptr : cptr;
     }
 
 
@@ -246,7 +248,7 @@ namespace
 	cptr += strlen( start ) - 1;
 
 	while ( cptr >= start && isspace( *cptr ) )
-	    *cptr-- = '\0';
+	    *cptr-- = u'\0';
     }
 
 
@@ -258,44 +260,18 @@ namespace
      *     "/some/dir/somewhere/myfile.obj"
      * ->  "/some/dir/somewhere", "myfile.obj"
      **/
-    void splitPath( const QString & fileNameWithPath,
-		    QString       & path_ret,
-		    QString       & name_ret )
+    void splitPath( const QString & fileNameWithPath, QString & pathRet, QString & nameRet )
     {
-	const bool  absolutePath = fileNameWithPath.startsWith( '/' );
-	QStringList components   = fileNameWithPath.split( '/', Qt::SkipEmptyParts );
-
-	if ( components.isEmpty() )
+	QStringList components   = fileNameWithPath.split( u'/', Qt::SkipEmptyParts );
+	if ( !components.isEmpty() )
 	{
-	    path_ret = "";
-	    name_ret = absolutePath ? "/" : "";
+	    nameRet = components.takeLast();
+	    pathRet = components.join( u'/' );
 	}
-	else
-	{
-	    name_ret = components.takeLast();
-	    path_ret = components.join( '/' );
 
-	    if ( absolutePath )
-		path_ret.prepend( '/' );
-	}
-    }
-
-
-    /**
-     * Build a full path from path + file name (without path).
-     **/
-    QString buildPath( const QString & path, const QString & name )
-    {
-	if ( path.isEmpty() )
-	    return name;
-
-	if ( name.isEmpty() )
-	    return path;
-
-	if ( path == QLatin1String( "/" ) )
-	    return path % name;
-
-	return path % '/' % name;
+	// adjust absolute paths
+	if ( fileNameWithPath.startsWith( u'/' ) )
+	    pathRet.prepend( u'/' );
     }
 
 } // namespace
@@ -329,7 +305,7 @@ CacheReader::CacheReader( const QString & fileName,
 			  DirTree       * tree,
 			  DirInfo       * dir,
 			  DirInfo       * parent ):
-    CacheReader ( fileName, tree, parent, true )
+    CacheReader { fileName, tree, parent, true }
 {
     if ( dir && !isDir( dir->url() ) ) // Does this cache file match this directory?
     {
@@ -422,7 +398,7 @@ void CacheReader::addItem()
 
     // Adjust for the current file version with uid, gid, and mode before mtime
     bool hasUidGidPerm = false;
-    if ( *mtime_str && !( *mtime_str == '0' && *mtime_str+1 == 'x' ) )
+    if ( *mtime_str && !( *mtime_str == u'0' && *mtime_str+1 == u'x' ) )
     {
 	hasUidGidPerm = true;
 	uid_str   = mtime_str;
@@ -467,25 +443,28 @@ void CacheReader::addItem()
 	    switch ( toupper( *type ) )
 	    {
 		// 'F' is ambiguous unfortunately
-		case 'F': return *(mode_str+1) == '\0' ? S_IFREG : S_IFIFO;
-		case 'D': return S_IFDIR;
-		case 'L': return S_IFLNK;
-		case 'B': return S_IFBLK;
-		case 'C': return S_IFCHR;
-		case 'S': return S_IFSOCK;
+		case u'F': return *(mode_str+1) == u'\0' ? S_IFREG : S_IFIFO;
+		case u'D': return S_IFDIR;
+		case u'L': return S_IFLNK;
+		case u'B': return S_IFBLK;
+		case u'C': return S_IFCHR;
+		case u'S': return S_IFSOCK;
 		default:  return S_IFREG;
 	    }
 	}();
     }
 
     // Path
-    if ( *raw_path == '/' )
+    if ( *raw_path == u'/' )
 	_latestDir = nullptr;
 
     const QString fullPath = unescapedPath( raw_path );
-    QString path;
-    QString name;
-    splitPath( fullPath, path, name );
+
+    QString pathRet;
+    QString nameRet;
+    splitPath( fullPath, pathRet, nameRet );
+    const QString & path = pathRet;
+    const QString & name = nameRet;
 
     // Size
     FileSize size = readSize( size_str );
@@ -504,7 +483,9 @@ void CacheReader::addItem()
     FileSize alloc = readSize( alloc_str );
 
     // Blocks: only stored for sparse files, otherwise just guess from the file size
-    const FileSize blocks = blocks_str ? strtoll( blocks_str, 0, 10 ) : qCeil( (float)alloc / STD_BLOCK_SIZE );
+    const FileSize blocks = blocks_str ?
+                            strtoll( blocks_str, 0, 10 ) :
+                            ceil( static_cast<double>( alloc ) / STD_BLOCK_SIZE );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
@@ -564,7 +545,7 @@ void CacheReader::addItem()
 
     if ( S_ISDIR( mode ) ) // directory
     {
-	QString url = ( parent == _tree->root() ) ? buildPath( path, name ) : name;
+	QString url = ( parent == _tree->root() ) ? fullPath : name;
 #if VERBOSE_CACHE_DIRS
 	logDebug() << "Creating DirInfo for " << url << " with parent " << parent << Qt::endl;
 #endif
@@ -606,16 +587,16 @@ void CacheReader::addItem()
 
 		switch ( tolower( *unread_str ) )
 		{
-		    case 'e':
+		    case u'e':
 			dir->setExcluded();
 			dir->setReadState( DirOnRequestOnly );
 			break;
 
-		    case 'p':
+		    case u'p':
 			dir->setReadState( DirPermissionDenied );
 			break;
 
-		    case 'm':
+		    case u'm':
 			dir->setReadState( DirOnRequestOnly );
 			break;
 		}
@@ -628,7 +609,22 @@ void CacheReader::addItem()
     else if ( parent && parent != _tree->root() ) // not directory, must have a valid parent first
     {
 #if VERBOSE_CACHE_FILE_INFOS
-	logDebug() << "Creating FileInfo for " << buildPath( parent->debugUrl(), name ) << Qt::endl;
+	const QString parentUrl = parent->debugUrl();
+	const QString debugPath = [ &parentUrl, &name ]() -> QString
+	{
+	    if ( parentUrl.isEmpty() )
+		return name;
+
+	    if ( name.isEmpty() )
+		return parentUrl;
+
+	    if ( parentUrl == "/"_L1 )
+		return parentUrl % name;
+
+	    return parentUrl % u'/' % name;
+	}();
+
+	logDebug() << "Creating FileInfo for " << debugPath << Qt::endl;
 #endif
 
 	FileInfo * item = new FileInfo( parent, _tree, name,
@@ -762,9 +758,9 @@ bool CacheReader::readLine()
 	_lineNo++;
 
 	const char * buf = gzgets( _cache, _buffer, MAX_CACHE_LINE_LEN );
-	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != '\n' )
+	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != u'\n' )
 	{
-	    _buffer[0] = '\0';
+	    _buffer[0] = u'\0';
 	    _line      = _buffer;
 
 	    if ( !gzeof( _cache ) )
@@ -780,11 +776,11 @@ bool CacheReader::readLine()
 	_line = skipWhiteSpace( _buffer );
 	killTrailingWhiteSpace( _line );
 
-	// logDebug() << "line[ " << _lineNo << "]: \"" << _line<< "\"" << Qt::endl;
+	// logDebug() << "line[ " << _lineNo << "]: \"" << _line << '"' << Qt::endl;
 
     } while ( !gzeof( _cache ) &&
-	      ( *_line == '\0' ||	// empty line
-	        *_line == '#' ) );	// comment line
+	      ( *_line == u'\0' ||	// empty line
+	        *_line == u'#' ) );	// comment line
 
     return true;
 }
@@ -807,7 +803,7 @@ void CacheReader::splitLine()
 
 	if ( current && current < end )
 	{
-	    *current++ = '\0';
+	    *current++ = u'\0';
 	    current = skipWhiteSpace( current );
 	}
     }
@@ -869,5 +865,5 @@ QString CacheReader::unescapedPath( const QString & rawPath ) const
 {
     // Using a protocol part to avoid directory names with a colon ":"
     // being cut off because it looks like a URL protocol.
-    return QUrl( "foo:" % cleanPath( rawPath ) ).path();
+    return QUrl( "foo:"_L1 % cleanPath( rawPath ) ).path();
 }

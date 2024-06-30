@@ -49,7 +49,7 @@ namespace
 DirInfo::DirInfo( DirInfo       * parent,
 		  DirTree       * tree,
 		  const QString & name ):
-    FileInfo ( parent, tree, name ),
+    FileInfo { parent, tree, name },
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
@@ -66,10 +66,7 @@ DirInfo::DirInfo( DirInfo           * parent,
 		  DirTree           * tree,
 		  const QString     & name,
 		  const struct stat & statInfo ):
-    FileInfo ( parent,
-		 tree,
-		 name,
-		 statInfo ),
+    FileInfo { parent, tree, name, statInfo },
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
@@ -94,7 +91,7 @@ DirInfo::DirInfo( DirInfo       * parent,
 		  uid_t           uid,
 		  gid_t           gid,
 		  time_t          mtime ):
-    FileInfo ( parent,
+    FileInfo { parent,
 	       tree,
 	       name,
 	       mode,
@@ -103,7 +100,7 @@ DirInfo::DirInfo( DirInfo       * parent,
 	       withUidGidPerm,
 	       uid,
 	       gid,
-	       mtime ),
+	       mtime },
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
@@ -636,19 +633,19 @@ void DirInfo::readJobAborted()
 }
 
 
-QString DirInfo::sizePrefix() const
+QLatin1String DirInfo::sizePrefix() const
 {
     switch ( _readState )
     {
 	case DirError:
 	case DirAborted:
 	case DirPermissionDenied:
-	    return "> ";
+	    return "> "_L1;
 
 	case DirFinished:
 //	case DirCached:
 	    if ( _errSubDirCount > 0 )
-		return "> ";
+		return "> "_L1;
 
 	case DirQueued:
 	case DirReading:
@@ -657,7 +654,7 @@ QString DirInfo::sizePrefix() const
 	// No 'default' branch so the compiler can catch unhandled enum values
     }
 
-    return "";
+    return QLatin1String();
 }
 
 

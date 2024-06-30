@@ -27,12 +27,14 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 {
     int exitCode = -1;
     QString output = runCommand( commandLine, &exitCode,
-				 COMMAND_TIMEOUT_SEC, logCommand, logOutput,
-				 true ); // ignoreErrCode
+                                    COMMAND_TIMEOUT_SEC,
+                                    logCommand,
+                                    logOutput,
+                                    true ); // ignoreErrCode
 
     if ( exitCode != 0 )
     {
-	//logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << "\"" << Qt::endl;
+	//logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << '"' << Qt::endl;
 	return false;
     }
 
@@ -43,11 +45,11 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 
 
 QString SysUtil::runCommand( const QString & commandLine,
-			     int           * exitCode_ret,
-			     int             timeout_sec,
-			     bool            logCommand,
-			     bool            logOutput,
-			     bool            ignoreErrCode )
+                             int           * exitCode_ret,
+                             int             timeout_sec,
+                             bool            logCommand,
+                             bool            logOutput,
+                             bool            logError )
 {
     if ( exitCode_ret )
 	*exitCode_ret = -1;
@@ -56,24 +58,23 @@ QString SysUtil::runCommand( const QString & commandLine,
 
     if ( args.size() < 1 )
     {
-	logError() << "Bad command line: \"" << commandLine << "\"" << Qt::endl;
+	logError() << "Bad command line: \"" << commandLine << '"' << Qt::endl;
 	return "ERROR: Bad command line";
     }
 
     const QString command = args.takeFirst();
 
-    return runCommand( command, args, exitCode_ret,
-		       timeout_sec, logCommand, logOutput, ignoreErrCode );
+    return runCommand( command, args, exitCode_ret, timeout_sec, logCommand, logOutput, logError );
 }
 
 
 QString SysUtil::runCommand( const QString     & command,
-			     const QStringList & args,
-			     int               * exitCode_ret,
-			     int                 timeout_sec,
-			     bool                logCommand,
-			     bool                logOutput,
-			     bool                ignoreErrCode )
+                             const QStringList & args,
+                             int               * exitCode_ret,
+                             int                 timeout_sec,
+                             bool                logCommand,
+                             bool                logOutput,
+                             bool                logError )
 {
     if ( exitCode_ret )
 	*exitCode_ret = -1;
@@ -94,11 +95,11 @@ QString SysUtil::runCommand( const QString     & command,
     process.setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
 
     if ( logCommand )
-	logDebug() << command << " " << args.join( ' ' ) << Qt::endl;
+	logDebug() << command << " " << args.join( u' ' ) << Qt::endl;
 
     process.start();
     const bool success = process.waitForFinished( timeout_sec * 1000 );
-    QString output = QString::fromUtf8( process.readAll() );
+    QByteArray output = process.readAll();
 
     if ( success )
     {
@@ -107,32 +108,30 @@ QString SysUtil::runCommand( const QString     & command,
 	    if ( exitCode_ret )
 		*exitCode_ret = process.exitCode();
 
-	    if ( !ignoreErrCode && process.exitCode() )
+	    if ( logError && process.exitCode() )
 	    {
-		logError() << "Command exited with exit code "
-			   << process.exitCode() << ": "
-			   << command << "\" args: " << args
-			   << Qt::endl;
+		logError() << "Command exited with exit code " << process.exitCode() << ": "
+			   << command << "\" args: " << args << Qt::endl;
 	    }
 	}
 	else
 	{
 	    logError() << "Command crashed: \"" << command << "\" args: " << args << Qt::endl;
-	    output = "ERROR: Command crashed\n\n" + output;
+	    output.prepend( "ERROR: Command crashed\n\n" );
 	}
     }
     else
     {
 	logError() << "Timeout or crash: \"" << command << "\" args: " << args << Qt::endl;
-	output = "ERROR: Timeout or crash\n\n" + output;
+	output.prepend( "ERROR: Timeout or crash\n\n" );
     }
 
-    if ( logOutput || ( process.exitCode() != 0 && !ignoreErrCode ) )
+    if ( logOutput || ( process.exitCode() != 0 && logError ) )
     {
-        if ( output.contains( '\n' ) )
+        if ( output.contains( u'\n' ) )
             logDebug() << "Output: \n" << output << Qt::endl;
         else
-            logDebug() << "Output: \"" << output.trimmed() << "\"" << Qt::endl;
+            logDebug() << "Output: \"" << output.trimmed() << '"' << Qt::endl;
     }
 
     return output;
@@ -157,9 +156,9 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 
     // Start from the symlink's parent directory
 
-    QStringList pathSegments = path.split( '/', Qt::SkipEmptyParts );
+    QStringList pathSegments = path.split( u'/', Qt::SkipEmptyParts );
     pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString( path.startsWith( '/' ) ? '/' : QString() ) + pathSegments.join( '/' );
+    const QString parentPath = QString( path.startsWith( u'/' ) ? u'/' : QString() ) + pathSegments.join( u'/' );
     const DirSaver dir( parentPath );
 
     // We can't use access() here since that would follow symlinks.
@@ -228,7 +227,7 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 QString SysUtil::baseName( const QString & fileName )
 {
     //logDebug() << fileName << Qt::endl;
-    const QStringList segments = fileName.split( '/', Qt::SkipEmptyParts );
+    const QStringList segments = fileName.split( u'/', Qt::SkipEmptyParts );
     if ( !segments.isEmpty() )
 	return segments.last();
 

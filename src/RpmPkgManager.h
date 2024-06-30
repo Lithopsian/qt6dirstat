@@ -35,7 +35,7 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	QString name() const override { return "rpm"; }
+	QLatin1String name() const override { return "rpm"_L1; }
 
 	/**
 	 * Check if RPM is active on the currently running system.

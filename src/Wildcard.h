@@ -11,6 +11,8 @@
 
 #include <QRegularExpression>
 
+#include "Typedefs.h" // _L1
+
 
 namespace QDirStat
 {
@@ -92,7 +94,7 @@ namespace QDirStat
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
 	static QString anchoredPattern( const QString & expression )
-	    { return "\\A(?:" + expression + ")\\z"; }
+	    { return "\\A(?:"_L1 + expression + ")\\z"_L1; }
 #endif
 
 	/**

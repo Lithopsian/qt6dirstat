@@ -21,7 +21,7 @@ using namespace QDirStat;
 
 
 QDirStatApp::QDirStatApp( int &argc, char **argv ):
-    QApplication ( argc, argv )
+    QApplication { argc, argv }
 {
     // logDebug() << "Creating app" << Qt::endl;
 

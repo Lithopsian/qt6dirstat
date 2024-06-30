@@ -52,11 +52,11 @@ namespace
 		    const QMessageLogContext & context,
 		    const QString            & msg )
     {
-	const QStringList lines = msg.split( '\n' );
+	const QStringList lines = msg.split( u'\n' );
 	for ( QString line : lines )
 	{
 	    // Remove utterly misleading message
-	    line.remove( QLatin1String( "Reinstalling the application may fix this problem." ) );
+	    line.remove( "Reinstalling the application may fix this problem."_L1 );
 
 	    if ( !line.trimmed().isEmpty() )
 	    {
@@ -67,10 +67,10 @@ namespace
 
 	if ( msgType == QtFatalMsg )
 	{
-	    if ( msg.contains( QLatin1String( "Could not connect to display" ) ) ||
-		 msg.contains( QLatin1String( "failed to start because no Qt platform plugin" ) ) )
+	    if ( msg.contains( "Could not connect to display"_L1 ) ||
+		 msg.contains( "failed to start because no Qt platform plugin"_L1 ) )
 	    {
-		if ( msg.contains( QLatin1String( "Reinstalling the application may fix this problem" ) ) )
+		if ( msg.contains( "Reinstalling the application may fix this problem"_L1 ) )
 		{
 		    // Suppress this new message:
 		    //
@@ -114,31 +114,32 @@ namespace
 	return QDateTime::currentDateTime().toString( "yyyy-MM-dd hh:mm:ss.zzz" );
     }
 
-
+#if 0
     /**
      * Prefix each line of a multi-line text with 'prefix'.
      */
-/*    QString prefixLines( const QString & prefix,
+    QString prefixLines( const QString & prefix,
 			 const QString & multiLineText )
     {
-	const QStringList lines = multiLineText.split( '\n' );
+	const QStringList lines = multiLineText.split( u'\n' );
 	QString result = lines.isEmpty() ? QString() : prefix;
-	result += lines.join( QString( "\n" ) % prefix );
+	result += lines.join( '\n' % prefix );
 
 	return result;
     }
-*/
+
+
     /**
      * Indent each line of a multi-line text with 'indentWith' blanks.
      */
-/*    QString indentLines( int             indentWidth,
+    QString indentLines( int             indentWidth,
 			 const QString & multiLineText )
     {
-	const QString prefix( indentWidth, ' ' );
+	const QString prefix( indentWidth, u' ' );
 
 	return prefixLines( prefix, multiLineText );
     }
-*/
+#endif
 
     /**
      * Return the user name (the login name) of the user owning this process.
@@ -215,7 +216,7 @@ namespace
     {
 	QString oldName = filename;
 	oldName.remove( QRegularExpression( "\\.log$" ) );
-	oldName += QString( "-%1.old" ).arg( no, 2, 10, QLatin1Char( '0' ) );
+	oldName += QString( "-%1.old" ).arg( no, 2, 10, QChar( u'0' ) );
 
 	return oldName;
     }
@@ -300,8 +301,8 @@ namespace
     QString expandVariables( const QString & unexpanded )
     {
 	QString expanded = unexpanded;
-	expanded.replace( QLatin1String( "$USER" ), userName() );
-	expanded.replace( QLatin1String( "$UID" ) , QString::number( getuid() ) );
+	expanded.replace( "$USER"_L1, userName() );
+	expanded.replace( "$UID"_L1 , QString::number( getuid() ) );
 
 	return expanded;
     }
@@ -339,7 +340,7 @@ Logger::Logger( const QString & rawLogDir,
     if ( doRotate )
 	logRotate( logDir, filename, logRotateCount );
 
-    openLogFile( logDir % '/' % filename );
+    openLogFile( logDir % u'/' % filename );
 }
 
 
@@ -455,7 +456,7 @@ QTextStream & Logger::log( const QString & srcFile,
 	return "";
     }();
 
-    _logStream << timeStamp() << " " << "[" << (int)getpid() << "] " << sev << " ";
+    _logStream << timeStamp() << " " << "[" << getpid() << "] " << sev << " ";
 
     if ( !srcFile.isEmpty() )
     {
@@ -467,7 +468,7 @@ QTextStream & Logger::log( const QString & srcFile,
 	_logStream << " ";
 
 	if ( !srcFunction.isEmpty() )
-	_logStream << srcFunction << "():  ";
+	    _logStream << srcFunction << "():  ";
     }
 
     return _logStream;

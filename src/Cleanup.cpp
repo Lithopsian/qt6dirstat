@@ -21,28 +21,11 @@
 #include "SysUtil.h"
 
 
-#define DESKTOP_APP_TERMINAL     QLatin1String( "%terminal" )
-#define DESKTOP_APP_FILE_MANAGER QLatin1String( "%filemanager" )
-
-
 using namespace QDirStat;
 
 
 namespace
 {
-    /**
-     * Return 'true' if programName is non-empty and executable.
-     **/
-/*    bool isExecutable( const QString & programName )
-    {
-	if ( programName.isEmpty() )
-	    return false;
-
-	const QFileInfo fileInfo( programName );
-	return fileInfo.isExecutable();
-    }
-*/
-
     /**
      * Return the full path name to the user's login shell.
      * The $SHELL environment variable is used to obtain this value.
@@ -78,7 +61,7 @@ namespace
 
 	for ( const QString & appPath : paths )
 	{
-	    if ( SysUtil::haveCommand( appPath % '/' % app.section( ' ', 0, 0 ) ) )
+	    if ( SysUtil::haveCommand( appPath % '/' % app.section( u' ', 0, 0 ) ) )
 		return true;
 	}
 
@@ -192,7 +175,7 @@ namespace
 	const QString desktop = envDesktop();
 	if ( !desktop.isEmpty() )
 	{
-	    logInfo() << "Detected desktop \"" << desktop << "\"" << Qt::endl;
+	    logInfo() << "Detected desktop \"" << desktop << '"' << Qt::endl;
 
 		// KDE konsole misbehaves in every way possible:
 		//
@@ -203,16 +186,16 @@ namespace
 		// the background, but konsole not.
 	    const QString desktopApp = [ &desktop ]()
 	    {
-		if ( desktop == QLatin1String( "gnome" ) ||
-		     desktop == QLatin1String( "unity" ) ||
-		     desktop == QLatin1String( "cinnamon"      ) ) return "gnome-terminal";
-		if ( desktop == QLatin1String( "xfce"          ) ) return "xfce4-terminal";
-		if ( desktop == QLatin1String( "lxde"          ) ) return "lxterminal";
-		if ( desktop == QLatin1String( "enlightenment" ) ) return "terminology";
-		if ( desktop == QLatin1String( "mate"          ) ) return "mate-terminal";
-		if ( desktop == QLatin1String( "budgie"        ) ) return "tilix";
-		if ( desktop == QLatin1String( "lxqt"          ) ) return "qterminal";
-		if ( desktop == QLatin1String( "kde"           ) ) return "konsole --workdir %d";
+		if ( desktop == "gnome"_L1 ||
+		     desktop == "unity"_L1 ||
+		     desktop == "cinnamon"_L1      ) return "gnome-terminal";
+		if ( desktop == "xfce"_L1          ) return "xfce4-terminal";
+		if ( desktop == "lxde"_L1          ) return "lxterminal";
+		if ( desktop == "enlightenment"_L1 ) return "terminology";
+		if ( desktop == "mate"_L1          ) return "mate-terminal";
+		if ( desktop == "budgie"_L1        ) return "tilix";
+		if ( desktop == "lxqt"_L1          ) return "qterminal";
+		if ( desktop == "kde"_L1           ) return "konsole --workdir %d";
 
 		return "";
 	    }();
@@ -254,20 +237,20 @@ namespace
 	const QString desktop = envDesktop();
 	if ( !desktop.isEmpty() )
 	{
-	    logInfo() << "Detected desktop \"" << desktop << "\"" << Qt::endl;
+	    logInfo() << "Detected desktop \"" << desktop << '"' << Qt::endl;
 
 	    const QString desktopApp = [ &desktop ]()
 	    {
-		if ( desktop == QLatin1String( "gnome" ) ||
-		     desktop == QLatin1String( "unity"         ) ) return "nautilus";
-		if ( desktop == QLatin1String( "xfce"          ) ) return "thunar";
-		if ( desktop == QLatin1String( "lxde"          ) ) return "pcmanfm";
-		if ( desktop == QLatin1String( "enlightenment" ) ) return "enlightenment-open";
-		if ( desktop == QLatin1String( "mate"          ) ) return "caja";
-		if ( desktop == QLatin1String( "cinnamon" ) ||
-		     desktop == QLatin1String( "budgie"        ) ) return "nemo";
-		if ( desktop == QLatin1String( "lxqt"          ) ) return "pcmanfm-qt";
-		if ( desktop == QLatin1String( "kde"           ) ) return "dolphin";
+		if ( desktop == "gnome"_L1 ||
+		     desktop == "unity"_L1         ) return "nautilus";
+		if ( desktop == "xfce"_L1          ) return "thunar";
+		if ( desktop == "lxde"_L1          ) return "pcmanfm";
+		if ( desktop == "enlightenment"_L1 ) return "enlightenment-open";
+		if ( desktop == "mate"_L1          ) return "caja";
+		if ( desktop == "cinnamon"_L1 ||
+		     desktop == "budgie"_L1        ) return "nemo";
+		if ( desktop == "lxqt"_L1          ) return "pcmanfm-qt";
+		if ( desktop == "kde"_L1           ) return "dolphin";
 
 		return "";
 	    }();
@@ -336,8 +319,8 @@ namespace
     QString expandDesktopSpecificApps( const QString & unexpanded )
     {
 	QString expanded = unexpanded;
-	expanded.replace( DESKTOP_APP_TERMINAL, terminalApp() );
-	expanded.replace( DESKTOP_APP_FILE_MANAGER, fileManagerApp() );
+	expanded.replace( "%terminal"_L1, terminalApp() );
+	expanded.replace( "%filemanager"_L1, fileManagerApp() );
 
 	return expanded;
     }
@@ -385,8 +368,8 @@ namespace
     {
 	QString expanded = expandDesktopSpecificApps( unexpanded );
 
-	expanded.replace( QLatin1String( "%p" ), SysUtil::shellQuoted( item->path() ) );
-	expanded.replace( QLatin1String( "%n" ), SysUtil::shellQuoted( item->name() ) );
+	expanded.replace( "%p"_L1, SysUtil::shellQuoted( item->path() ) );
+	expanded.replace( "%n"_L1, SysUtil::shellQuoted( item->name() ) );
 
 	const QString dirName = [ item ]()
 	{
@@ -400,9 +383,9 @@ namespace
 	}();
 
 	if ( !dirName.isEmpty() )
-	    expanded.replace( QLatin1String( "%d" ), SysUtil::shellQuoted( dirName ) );
+	    expanded.replace( "%d"_L1, SysUtil::shellQuoted( dirName ) );
 
-	// logDebug() << "Expanded: \"" << expanded << "\"" << Qt::endl;
+	// logDebug() << "Expanded: \"" << expanded << '"' << Qt::endl;
 	return expanded;
     }
 
@@ -411,11 +394,11 @@ namespace
 
 
 Cleanup::Cleanup( const Cleanup * other ):
-    Cleanup ( nullptr, other->_active, other->_title, other->_command,
+    Cleanup { nullptr, other->_active, other->_title, other->_command,
 	      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
 	      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
 	      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
-	      other->_shell )
+	      other->_shell }
 {
     setIcon( other->iconName() );     // carried on both the Cleanup and QAction (as a pixmap)
     setShortcut( other->shortcut() ); // only carried on the underlying QAction
@@ -492,7 +475,7 @@ const QStringList & Cleanup::defaultShells()
     static const QStringList shells = []()
     {
 	QStringList shells;
-	const QStringList candidates = { loginShell(), "/bin/bash", "/bin/sh" };
+	const QStringList candidates { loginShell(), "/bin/bash", "/bin/sh" };
 	for ( const QString & shell : candidates )
 	{
 	    if ( SysUtil::haveCommand( shell ) )
@@ -552,7 +535,7 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
 {
     // Only change the list when the command doesn't act on individual files
-    if ( _command.contains( QLatin1String( "%n" ) ) || _command.contains( QLatin1String( "%p" ) ) )
+    if ( _command.contains( "%n"_L1 ) || _command.contains( "%p"_L1 ) )
 	return sel;
 
     FileInfoSet parents;

@@ -75,7 +75,7 @@ namespace
 
 
 TreemapView::TreemapView( QWidget * parent ):
-    QGraphicsView ( parent )
+    QGraphicsView { parent }
 {
     // Only one scene, never destroyed, create it now for simplicity
     setScene( new QGraphicsScene( this ) );
@@ -577,10 +577,10 @@ void TreemapView::resizeEvent( QResizeEvent * event )
         //logDebug() << "Auto-resizing treemap" << Qt::endl;
         rebuildTreemap( _rootTile->orig() );
 
-        const QSize & newSize = event->size();
-        const QSize & oldSize = event->oldSize();
+        const QSizeF & newSize = event->size();
+        const QSizeF & oldSize = event->oldSize();
         if ( !newSize.isEmpty() && !oldSize.isEmpty() )
-            scale( ( qreal )newSize.width() / oldSize.width(), ( qreal )newSize.height() / oldSize.height() );
+            scale( newSize.width() / oldSize.width(), newSize.height() / oldSize.height() );
     }
     else if ( _tree )
     {
@@ -844,7 +844,7 @@ HighlightRect::HighlightRect( const TreemapTile * tile,
                               int                 lineWidth,
                               Qt::PenStyle        lineStyle,
                               qreal               zValue ):
-    QGraphicsRectItem ( tile->rect() )
+    QGraphicsRectItem { tile->rect() }
 {
     setPen( QPen( color, lineWidth, lineStyle ) );
     setZValue( zValue );
@@ -874,7 +874,7 @@ QPainterPath ParentTileHighlighter::shape() const
 
 
 SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
-    QGraphicsPathItem ()
+    QGraphicsPathItem {}
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
     CHECK_PTR( tile );

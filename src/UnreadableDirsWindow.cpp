@@ -25,7 +25,7 @@ using namespace QDirStat;
 
 
 UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::UnreadableDirsWindow }
 {
     // logDebug() << "init" << Qt::endl;
@@ -64,12 +64,12 @@ void UnreadableDirsWindow::initWidgets()
 {
     app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
-    const QStringList headerLabels = { tr( "Directory" ),
-				       tr( "User" ),
-				       tr( "Group" ),
-				       tr( "Permissions" ),
-				       tr( "Perm." ),
-				     };
+    const QStringList headerLabels { tr( "Directory" ),
+                                     tr( "User" ),
+                                     tr( "Group" ),
+                                     tr( "Permissions" ),
+                                     tr( "Perm." ),
+                                   };
     _ui->treeWidget->setColumnCount( headerLabels.size() );
     _ui->treeWidget->setHeaderLabels( headerLabels );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
@@ -143,8 +143,6 @@ void UnreadableDirsWindow::selectResult( QTreeWidgetItem * widgetItem )
     if ( item )
 	app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
 }
-
-
 
 
 

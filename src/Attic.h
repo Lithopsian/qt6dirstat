@@ -36,7 +36,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	Attic( DirTree * tree, DirInfo * parent = nullptr ):
-	    DirInfo ( parent, tree, atticName() )
+	    DirInfo { parent, tree, atticName() }
 	{ setIgnored( true ); }
 
 	/**

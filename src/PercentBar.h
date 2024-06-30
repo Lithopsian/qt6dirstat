@@ -58,7 +58,7 @@ namespace QDirStat
 			    int         barWidth,
 			    QColor      barBackground,
 			    ColorList   fillColors ):
-	    QStyledItemDelegate ( treeView ),
+	    QStyledItemDelegate { treeView },
 	    _percentBarCol { percentBarCol },
 	    _sizeHintWidth { barWidth },
 	    _barBackground { barBackground },

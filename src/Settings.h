@@ -57,7 +57,7 @@ namespace QDirStat
 	 * to QCoreApplication::applicationName() + 'suffix'.
 	 **/
 	Settings( const char * suffix ):
-	    QSettings ( QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix )
+	    QSettings { QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix }
 	{ _usedConfigFiles << fileName(); }
 
 
@@ -69,7 +69,7 @@ namespace QDirStat
 	 * used for all groups.
 	 **/
 	Settings():
-	    Settings ( "" )
+	    Settings { "" }
 	{}
 
 	/**
@@ -248,7 +248,7 @@ namespace QDirStat
 	/**
 	 * Prefix used to construct section names such as Cleanup_01.
 	 **/
-	const QLatin1String listGroupPrefix() const override { return QLatin1String( "Cleanup" ); }
+	const QLatin1String listGroupPrefix() const override { return "Cleanup"_L1; }
 
     };
 
@@ -273,7 +273,7 @@ namespace QDirStat
 	/**
 	 * Prefix used to construct section names such as ExcludeRule_01.
 	 **/
-	const QLatin1String listGroupPrefix() const override { return QLatin1String( "ExcludeRule" ); }
+	const QLatin1String listGroupPrefix() const override { return "ExcludeRule"_L1; }
 
     };
 
@@ -298,7 +298,7 @@ namespace QDirStat
 	/**
 	 * Prefix used to construct section names such as MimeCategory_01.
 	 **/
-	const QLatin1String listGroupPrefix() const override { return QLatin1String( "MimeCategory" ); }
+	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
 
     };
 

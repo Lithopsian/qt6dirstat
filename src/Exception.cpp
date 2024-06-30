@@ -35,7 +35,7 @@ QString SysCallFailedException::errMsg( const QString & sysCall,
     QString msg = QString( "%1( \"%2\" ) failed" ).arg( sysCall ).arg( resourceName );
 
     if ( errno != 0 )
-	msg += ": " + QString( formatErrno() );
+	msg += ": "_L1 + QString( formatErrno() );
 
     return msg;
 }

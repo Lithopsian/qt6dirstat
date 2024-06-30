@@ -96,7 +96,7 @@ namespace QDirStat
      * newlines and break tags.
      **/
     inline QString whitespacePre( const QString & text )
-	{ return "<p style='white-space:pre'>" % text % "</p>"; }
+	{ return "<p style='white-space:pre'>"_L1 % text % "</p>"_L1; }
 
     /**
      * Format a timestamp (like the latestMTime()) human-readable.
@@ -112,7 +112,7 @@ namespace QDirStat
      * Format a percentage.
      **/
     inline QString formatPercent( float percent )
-	{ return percent < 0.0 ? QString() : QString::number( percent, 'f', 1 ) % '%'; }
+	{ return percent < 0.0f ? QString() : QString::number( percent, 'f', 1 ) % '%'; }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the
@@ -140,7 +140,7 @@ namespace QDirStat
      *	   drwxr-xr-x  0755
      **/
     inline QString formatPermissions( mode_t mode )
-	{ return symbolicMode( mode ) % "  " % formatOctal( ALLPERMS & mode ); }
+	{ return symbolicMode( mode ) % "  "_L1 % formatOctal( ALLPERMS & mode ); }
 
     /**
      * Returns the string resized to the given width and padded with

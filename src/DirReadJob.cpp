@@ -158,7 +158,7 @@ void DirReadJob::finished()
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
 				  DirInfo * dir,
 				  bool      applyFileChildExcludeRules ):
-    DirReadJob ( tree, dir ),
+    DirReadJob { tree, dir },
     _applyFileChildExcludeRules { applyFileChildExcludeRules }
 {
     if ( dir )
@@ -222,7 +222,7 @@ void LocalDirReadJob::startReading()
 	while ( ( entry = readdir( diskDir ) ) )
 	{
 	    const QString entryName = QString::fromUtf8( entry->d_name );
-	    if ( entryName != QLatin1String( "." ) && entryName != QLatin1String( ".." )   )
+	    if ( entryName != "."_L1 && entryName != ".."_L1 )
 		entryMap.insert( entry->d_ino, entryName );
 	}
 
@@ -437,9 +437,9 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
 QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
     // Avoid leading // when in root dir
-    const QString dirName = _dirName == QLatin1String( "/" ) ? QString() : _dirName;
+    const QString dirName = _dirName == "/"_L1 ? QString() : _dirName;
 
-    return dirName % '/' % entryName;
+    return dirName % u'/' % entryName;
 }
 
 
@@ -463,7 +463,7 @@ bool LocalDirReadJob::checkForNtfs()
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
 			    const QString & cacheFileName ):
-    DirReadJob ( tree, nullptr ),
+    DirReadJob { tree, nullptr },
     _reader { new CacheReader( cacheFileName, tree ) }
 {
     init();
@@ -474,7 +474,7 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 			    DirInfo       * dir,
 			    DirInfo       * parent,
 			    const QString & cacheFileName ):
-    DirReadJob ( tree, parent ),
+    DirReadJob { tree, parent },
     _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
 {
     init();
@@ -506,7 +506,7 @@ void CacheReadJob::read()
 
 
 DirReadJobQueue::DirReadJobQueue():
-    QObject ()
+    QObject {}
 {
     connect( &_timer, &QTimer::timeout,
 	     this,    &DirReadJobQueue::timeSlicedRead );

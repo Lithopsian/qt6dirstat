@@ -36,12 +36,9 @@ bool PacManPkgManager::isAvailable() const
 QString PacManPkgManager::owningPkg( const QString & path ) const
 {
     int exitCode = -1;
-    QString output = runCommand( "/usr/bin/pacman",
-                                 { "-Qo", path },
-                                 &exitCode );
-
-    if ( exitCode != 0 || output.contains( QLatin1String( "No package owns" ) ) )
-	return "";
+    QString output = runCommand( "/usr/bin/pacman", { "-Qo", path }, &exitCode );
+    if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
+	return QString();
 
     // Sample output:
     //
@@ -52,7 +49,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     // name.
 
     output.remove( QRegularExpression( "^.*is owned by " ) );
-    const QString pkg = output.section( ' ', 0, 0 );
+    const QString pkg = output.section( u' ', 0, 0 );
 
     return pkg;
 }
@@ -60,13 +57,10 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
 
 PkgInfoList PacManPkgManager::installedPkg() const
 {
-    int exitCode = -1;
-    const QString output = runCommand( "/usr/bin/pacman",
-                                       { "-Qn" },
-                                       &exitCode );
-
     PkgInfoList pkgList;
 
+    int exitCode = -1;
+    const QString output = runCommand( "/usr/bin/pacman", { "-Qn" }, &exitCode );
     if ( exitCode == 0 )
         pkgList = parsePkgList( output );
 
@@ -78,15 +72,15 @@ PkgInfoList PacManPkgManager::parsePkgList( const QString & output ) const
 {
     PkgInfoList pkgList;
 
-    const QStringList splitOutput = output.split( '\n' );
+    const QStringList splitOutput = output.split( u'\n' );
     for ( const QString & line : splitOutput )
     {
-        if ( ! line.isEmpty() )
+        if ( !line.isEmpty() )
         {
-            QStringList fields = line.split( ' ' );
+            QStringList fields = line.split( u' ' );
 
             if ( fields.size() != 2 )
-                logError() << "Invalid pacman -Qn output: \"" << line << "\n" << Qt::endl;
+                logError() << "Invalid pacman -Qn output: \"" << line << '\n' << Qt::endl;
             else
             {
                 const QString name    = fields.takeFirst();

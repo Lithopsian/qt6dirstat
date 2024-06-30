@@ -41,7 +41,7 @@ void FileSizeLabel::setAllocated( const FileInfo * file )
 }
 
 
-void FileSizeLabel::setValue( FileSize value, const QString & prefix )
+void FileSizeLabel::setValue( FileSize value, QLatin1String prefix )
 {
     QLabel::setText( prefix % formatSize( value ) );
     setToolTip( value, prefix, 0 );
@@ -52,11 +52,11 @@ void FileSizeLabel::setValueWithLinks( FileSize size, nlink_t numLinks )
 {
     const QString & text = formatSize( size );
     QLabel::setText( text % formatLinksInline( numLinks ) );
-    setToolTip( size, "", numLinks );
+    setToolTip( size, QLatin1String(), numLinks );
 }
 
 
-void FileSizeLabel::setToolTip( FileSize size, const QString & prefix, nlink_t numLinks )
+void FileSizeLabel::setToolTip( FileSize size, QLatin1String prefix, nlink_t numLinks )
 {
     if ( size < 1000 ) // not useful below (rounded) 1 kB
 	QLabel::setToolTip( QString() );

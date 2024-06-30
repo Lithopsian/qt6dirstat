@@ -32,7 +32,7 @@ using namespace QDirStat;
 
 
 MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
-    ListEditor ( parent ),
+    ListEditor { parent },
     _ui { new Ui::MimeCategoryConfigPage }
 {
     //logDebug() << "MimeCategoryConfigPage constructor" << Qt::endl;
@@ -372,10 +372,10 @@ void MimeCategoryConfigPage::save( void * value )
 	return;
 
     // Make a list of the patterns, one per line, and remove the empty entry caused by the trailing newline
-    QStringList caseSensitivePatterns = _ui->caseSensitivePatternsTextEdit->toPlainText().split( '\n' );
+    QStringList caseSensitivePatterns = _ui->caseSensitivePatternsTextEdit->toPlainText().split( u'\n' );
     if ( !caseSensitivePatterns.isEmpty() && caseSensitivePatterns.last().isEmpty() )
 	caseSensitivePatterns.removeLast();
-    QStringList caseInsensitivePatterns = _ui->caseInsensitivePatternsTextEdit->toPlainText().split( '\n' );
+    QStringList caseInsensitivePatterns = _ui->caseInsensitivePatternsTextEdit->toPlainText().split( u'\n' );
     if ( !caseInsensitivePatterns.isEmpty() && caseInsensitivePatterns.last().isEmpty() )
 	caseInsensitivePatterns.removeLast();
 
@@ -418,10 +418,10 @@ void MimeCategoryConfigPage::load( void * value )
 void MimeCategoryConfigPage::setPatternList( QPlainTextEdit    * textEdit,
 					     const QStringList & patternList )
 {
-    QString text = patternList.join( '\n' );
+    QString text = patternList.join( u'\n' );
 
     if ( !text.isEmpty() )
-	text += '\n';	   // Let the user begin writing on a new line
+	text += u'\n';	   // Let the user begin writing on a new line
 
     textEdit->setPlainText( text );
 }
@@ -514,7 +514,7 @@ void MimeCategoryConfigPage::populateTreemapView()
 	}
 
 	parent->finalizeLocal(); // moves files out of DotEntries when there are no sub-directories
-	//logDebug() << parent->name() << " " << (long)parent->totalAllocatedSize() << Qt::endl;
+	//logDebug() << parent->name() << " " << parent->totalAllocatedSize() << Qt::endl;
     }
 
     _ui->treemapView->setDirTree( _dirTree );

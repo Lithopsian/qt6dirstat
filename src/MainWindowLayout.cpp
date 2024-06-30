@@ -174,7 +174,7 @@ void MainWindow::readLayoutSetting( const QString & layoutName )
 //    const bool detailsWithTreemap = settings.value( "DetailsWithTreemap", false ).toBool();
     settings.endGroup();
 
-    const QList<QVariant> data = { showBreadcrumbs, showDetailsPanel, showDirTree, showTreemap };
+    const QList<QVariant> data { showBreadcrumbs, showDetailsPanel, showDirTree, showTreemap };
     layoutAction( layoutName )->setData( data );
 }
 
@@ -217,18 +217,18 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
         if ( widget == _ui->centralWidget )
         {
             QMenu menu;
-            const QStringList actions1 = { "actionLayout1",
-                                           "actionLayout2",
-                                           "actionLayout3",
-                                           "---",
-                                           "actionShowBreadcrumbs",
-                                           "actionShowDetailsPanel",
-                                           "actionShowDirTree",
-                                           "actionShowTreemap",
-//                                           "---",
-//                                           "actionTreemapOnSide",
-//                                           "actionDetailsWithTreemap",
-                                         };
+            const QStringList actions1 { "actionLayout1",
+                                         "actionLayout2",
+                                         "actionLayout3",
+                                         "---",
+                                         "actionShowBreadcrumbs",
+                                         "actionShowDetailsPanel",
+                                         "actionShowDirTree",
+                                         "actionShowTreemap",
+//                                         "---",
+//                                         "actionTreemapOnSide",
+//                                         "actionDetailsWithTreemap",
+                                       };
             ActionManager::addActions( &menu, actions1 );
 
             menu.exec( event->globalPos() );

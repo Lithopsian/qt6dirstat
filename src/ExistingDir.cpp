@@ -35,7 +35,7 @@ QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 
 
 ExistingDirCompleter::ExistingDirCompleter( QObject * parent ):
-    QCompleter ( parent )
+    QCompleter { parent }
 {
     QFileSystemModel * model = new QFileSystemModel( this );
     model->setRootPath( "/" );

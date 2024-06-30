@@ -7,9 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <time.h>       // gmtime()
-
-#include <QFileInfo>
+#include <ctime>       // gmtime()
 
 #include "FileInfo.h"
 #include "Attic.h"
@@ -60,7 +58,7 @@ namespace
      **/
     float percent( FileSize size, FileSize parentSize)
     {
-	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
+	return parentSize == 0 ? 0.0f : 100.0f * size / parentSize;
     }
 
 }
@@ -118,7 +116,7 @@ FileInfo::FileInfo( DirInfo           * parent,
 	    logDebug() << "Found sparse file: " << this
 		       << "    Byte size: "     << formatSize( _size )
 		       << "  Allocated: "       << formatSize( _allocatedSize )
-		       << " (" << (int)_blocks << " blocks)"
+		       << " (" << _blocks << " blocks)"
 		       << Qt::endl;
 #endif
 
@@ -168,8 +166,8 @@ QString FileInfo::url() const
     if ( isPseudoDir() ) // don't append "/." for dot entries and attics
 	return parentUrl;
 
-    if ( !parentUrl.endsWith( '/' ) && !_name.startsWith( '/' ) )
-	parentUrl += '/';
+    if ( !parentUrl.endsWith( u'/' ) && !_name.startsWith( u'/' ) )
+	parentUrl += u'/';
 
     return parentUrl % _name;
 }
@@ -188,8 +186,8 @@ QString FileInfo::path() const
     if ( isPseudoDir() )
 	return parentPath;
 
-    if ( !parentPath.endsWith( '/' ) && !_name.startsWith( '/' ) )
-	parentPath += '/';
+    if ( !parentPath.endsWith( u'/' ) && !_name.startsWith( u'/' ) )
+	parentPath += u'/';
 
     return parentPath % _name;
 }
@@ -217,7 +215,7 @@ QString FileInfo::debugUrl() const
             result += '/' % atticName();
     }
 
-    result.replace( QLatin1String( "//" ), QLatin1String( "/" ) );
+    result.replace( "//"_L1, "/"_L1 );
 
     return result;
 }
@@ -260,10 +258,10 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	if ( url.length() == 0 )		// Nothing left?
 	    return this;			// Hey! That's us!
 
-	if ( url.startsWith( '/' ) )
+	if ( url.startsWith( u'/' ) )
 	    // remove leading delimiters, we're not matching on those
 	    url.remove( 0, 1 );
-	else if ( _name.right(1) != QLatin1String( "/" ) && !isDotEntry() )
+	else if ( _name.right(1) != "/"_L1 && !isDotEntry() )
 	    // not the root directory, not a dot entry, so it can't be one of our children
 	    return nullptr;
     }
@@ -295,7 +293,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
     // have children. This check is not strictly necessary, but it may
     // speed up things a bit if we don't search the non-directory children
     // if the rest of the URL consists of several pathname components.
-    if ( dotEntry() && !url.contains( '/' ) )  // No (more) "/" in this URL
+    if ( dotEntry() && !url.contains( u'/' ) )  // No (more) "/" in this URL
     {
 	// logDebug() << "Searching DotEntry for " << url << " in " << this << Qt::endl;
 
@@ -417,7 +415,7 @@ bool FileInfo::filesystemCanReportBlocks() const
 	    return false;
     }
 
-    // logDebug() << "Checking block size of " << dir << ": " << (int)dir->blocks() << Qt::endl;
+    //logDebug() << "Checking block size of " << dir << ": " << dir->blocks() << Qt::endl;
 
     // A real directory never has a size == 0, so we can skip this check.
     return dir->blocks() > 0;
@@ -430,7 +428,7 @@ QString FileInfo::symLinkTarget() const
 }
 
 
-QPair<short, short> FileInfo::yearAndMonth() const
+YearAndMonth FileInfo::yearAndMonth() const
 {
     if ( isPseudoDir() || isPkgInfo() )
         return { 0, 0 };

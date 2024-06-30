@@ -28,7 +28,7 @@ using namespace QDirStat;
 
 
 OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
-    QDialog ( parent ),
+    QDialog { parent },
     _ui { new Ui::OpenDirDialog },
     _filesystemModel { new QFileSystemModel( this ) }
 {

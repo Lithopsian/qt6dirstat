@@ -133,7 +133,7 @@ namespace QDirStat
 	 **/
 	PathSelectorItem( const QString & path,
 			  PathSelector  * parent = nullptr ):
-	    QListWidgetItem ( path, parent ),
+	    QListWidgetItem { path, parent },
 	    _path { path }
 	{}
 

@@ -36,8 +36,8 @@ namespace
 
     void handleFuseblk( QString & fsType, const QStringList & ntfsDevices, const QString & device )
     {
-        if ( fsType == QLatin1String( "fuseblk" ) && ntfsDevices.contains( device ) )
-            fsType = "ntfs";
+        if ( fsType == "fuseblk"_L1 && ntfsDevices.contains( device ) )
+            fsType = "ntfs"_L1;
     }
 
 } // namespace
@@ -47,8 +47,8 @@ bool MountPoint::isNetworkMount() const
 {
     const QString fsType = _filesystemType.toLower();
 
-    if ( fsType.startsWith( QLatin1String( "nfs"  ) ) ) return true;
-    if ( fsType.startsWith( QLatin1String( "cifs" ) ) ) return true;
+    if ( fsType.startsWith( "nfs"_L1  ) ) return true;
+    if ( fsType.startsWith( "cifs"_L1 ) ) return true;
 
     return false;
 }
@@ -63,11 +63,11 @@ bool MountPoint::isSystemMount() const
     // This check filters out system devices like "cgroup", "tmpfs", "sysfs"
     // and all those other kernel-table devices.
 
-    if ( !_device.contains( '/' ) ) return true;
+    if ( !_device.contains( u'/' ) ) return true;
 
-    if ( _path.startsWith( QLatin1String( "/dev"  ) ) ) return true;
-    if ( _path.startsWith( QLatin1String( "/proc" ) ) ) return true;
-    if ( _path.startsWith( QLatin1String( "/sys"  ) ) ) return true;
+    if ( _path.startsWith( "/dev"_L1  ) ) return true;
+    if ( _path.startsWith( "/proc"_L1 ) ) return true;
+    if ( _path.startsWith( "/sys"_L1  ) ) return true;
 
     return false;
 }
@@ -148,13 +148,13 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 
     if ( !mountPoint )
     {
-        QStringList pathComponents = startPath.split( '/', Qt::SkipEmptyParts );
+        QStringList pathComponents = startPath.split( u'/', Qt::SkipEmptyParts );
 
         while ( !mountPoint && !pathComponents.isEmpty() )
         {
             // Try one level upwards
             pathComponents.removeLast();
-            path = '/' + pathComponents.join( '/' );
+            path = u'/' + pathComponents.join( u'/' );
 
             mountPoint = instance()->_mountPointMap.value( path, nullptr );
         }
@@ -257,14 +257,16 @@ bool MountPoints::read( const QString & filename )
         //   /dev/sda7 /work ext4 rw,relatime,data=ordered 0 0
         //   nas:/share/work /nas/work nfs rw,local_lock=none 0 0
 
-        const QString & device    = fields[0];
-        QString path              = fields[1];
-        QString fsType            = fields[2];
+        const QString & device = fields[0];
+
+        QString path = fields[1];
+        path.replace( "\\040"_L1, " "_L1 );
+
+        QString fsType = fields[2];
+        handleFuseblk( fsType, _ntfsDevices, device );
+
         const QString & mountOpts = fields[3];
         // ignoring fsck and dump order (0 0)
-
-        path.replace( QLatin1String( "\\040" ), QLatin1String( " " ) );
-        handleFuseblk( fsType, _ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint( device, path, fsType, mountOpts );
         postProcess( mountPoint );
@@ -278,7 +280,7 @@ bool MountPoints::read( const QString & filename )
 
     if ( count < 1 )
     {
-//        logWarning() << "Not a single mount point in " << filename << Qt::endl;
+        logWarning() << "No mountpoints in " << filename << Qt::endl;
         return false;
     }
 
@@ -303,7 +305,7 @@ void MountPoints::postProcess( MountPoint * mountPoint )
 
     if ( mountPoint->isSnapPackage() )
     {
-        const QString pkgName = mountPoint->path().section( "/", 1, 1, QString::SectionSkipEmpty );
+        const QString pkgName = mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty );
         logInfo() << "Found snap package \"" << pkgName << "\" at " << mountPoint->path() << Qt::endl;
     }
 }
@@ -326,7 +328,7 @@ bool MountPoints::readStorageInfo()
     for ( const QStorageInfo & mount : mountedVolumes )
     {
         const QString device( QString::fromUtf8( mount.device() ) );
-        const QString mountOptions = mount.isReadOnly() ? "ro" : QString();
+        const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String();
 
         QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
         handleFuseblk( fsType, _ntfsDevices, device );
@@ -341,7 +343,7 @@ bool MountPoints::readStorageInfo()
 
     if ( _mountPointList.isEmpty() )
     {
-        logWarning() << "Not a single mount point found with QStorageInfo" << Qt::endl;
+        logWarning() << "No mountpoints found with QStorageInfo" << Qt::endl;
         return false;
     }
     else
@@ -373,9 +375,9 @@ void MountPoints::findNtfsDevices()
 {
     _ntfsDevices.clear();
 
-    QString lsblkCommand = "/bin/lsblk";
+    QLatin1String lsblkCommand = "/bin/lsblk"_L1;
     if ( !SysUtil::haveCommand( lsblkCommand ) )
-        lsblkCommand = "/usr/bin/lsblk";
+        lsblkCommand = "/usr/bin/lsblk"_L1;
     if ( !SysUtil::haveCommand( lsblkCommand ) )
     {
         logInfo() << "No lsblk command available" << Qt::endl;
@@ -389,10 +391,10 @@ void MountPoints::findNtfsDevices()
                                                 LSBLK_TIMEOUT_SEC,
                                                 false,        // logCommand
                                                 false,        // logOutput
-                                                false );      // ignoreErrCode
+                                                true );       // logError
     if ( exitCode == 0 )
     {
-        const QStringList lines = output.split( '\n' )
+        const QStringList lines = output.split( u'\n' )
             .filter( QRegularExpression( "\\s+ntfs", QRegularExpression::CaseInsensitiveOption ) );
 
         for ( const QString & line : lines )
@@ -402,9 +404,6 @@ void MountPoints::findNtfsDevices()
             _ntfsDevices << device;
         }
     }
-
-//    if ( _ntfsDevices.isEmpty() )
-//        logDebug() << "No NTFS devices found" << Qt::endl;
 }
 
 

@@ -70,7 +70,7 @@ bool ActionManager::addActions( QWidget *           widget,
 
     for ( const QString & actionName : actionNames )
     {
-	if ( actionName.startsWith( QLatin1String( "---" ) ) )
+	if ( actionName.startsWith( "---"_L1 ) )
 	{
 	    if ( menu )
 		menu->addSeparator();

@@ -23,7 +23,7 @@ HistogramBar::HistogramBar( HistogramView * parent,
 			    int             number,
 			    const QRectF  & rect,
 			    qreal           fillHeight ):
-    QGraphicsRectItem ( rect.normalized() )
+    QGraphicsRectItem { rect.normalized() }
 {
     setFlags( ItemHasNoContents );
     setAcceptHoverEvents( true );
@@ -60,13 +60,13 @@ void HistogramBar::adjustBar( qreal adjustment )
 
 void HistogramBar::hoverEnterEvent( QGraphicsSceneHoverEvent * )
 {
-    adjustBar( -2.0 );
+    adjustBar( -2 );
     setZValue( HistogramView::HoverBarLayer );
 }
 
 
 void HistogramBar::hoverLeaveEvent( QGraphicsSceneHoverEvent * )
 {
-    adjustBar( 2.0 );
+    adjustBar( 2 );
     setZValue( HistogramView::BarLayer );
 }

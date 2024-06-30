@@ -101,7 +101,7 @@ namespace QDirStat
                 case Auto:       return "Auto";
             }
 
-            return QString( "<Unknown FilterMode %1" ).arg( ( int )filterMode );
+            return QString( "<Unknown FilterMode %1" ).arg( filterMode );
         }
 
 
@@ -132,9 +132,9 @@ namespace QDirStat
         stream << "<SearchFilter \""
                << filter.pattern()
                << "\" mode \""
-               << SearchFilter::toString( filter.filterMode() ) << "\" "
-               <<( filter.isCaseSensitive()? " case sensitive" : "" )
-               << ">";
+               << SearchFilter::toString( filter.filterMode() )
+               << "\" "
+               <<( filter.isCaseSensitive()? " case sensitive>" : ">" );
 
         return stream;
     }
