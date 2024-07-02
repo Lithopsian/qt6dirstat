@@ -464,7 +464,7 @@ void MimeCategoryConfigPage::populateTreemapView()
 
     DirInfo        * root    = _dirTree->root();
     const mode_t     mode    = 0755;
-    const FileSize   dirSize = 4096;
+    const FileSize   dirSize = 4096LL;
 
     // Create a very basic directory structure:
     //
@@ -497,10 +497,10 @@ void MimeCategoryConfigPage::populateTreemapView()
     DirInfo * dir212 = new DirInfo( dir21, _dirTree, "dir212", mode, dirSize );
     dir21->insertChild( dir212 );
 
-    const FileSize maxSize   = 100*1024*1024;	// 100 MB
 
     // Generate a random number of files with random sizes
     QRandomGenerator * random = QRandomGenerator::global();
+    const FileSize maxSize = 100LL*1024*1024; // 100 MB
     for ( DirInfo * parent : { dir1, dir11, dir11, dir11, dir12, dir2, dir21, dir211, dir211, dir212 } )
     {
 	const int fileCount = random->bounded( 1, 100 );

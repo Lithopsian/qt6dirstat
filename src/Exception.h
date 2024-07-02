@@ -100,6 +100,9 @@ public:
 };
 
 
+/**
+ * Exception class for file handling exception
+ **/
 class FileException: public Exception
 {
 public:
@@ -115,6 +118,9 @@ private:
 };
 
 
+/**
+ * Exception class for system call failed
+ **/
 class SysCallFailedException: public Exception
 {
 public:
@@ -143,6 +149,10 @@ private:
 };
 
 
+/**
+ * Exception class for "index out of range"
+ * Use with CHECK_DYNAMIC_CAST().
+ **/
 class DynamicCastException: public Exception
 {
 public:
@@ -154,6 +164,10 @@ public:
 };
 
 
+/**
+ * Exception class for magic number check failed
+ * Use with CHECK_MAGIC().
+ **/
 class BadMagicNumberException: public Exception
 {
 public:
@@ -168,6 +182,7 @@ public:
 
 /**
  * Exception class for "index out of range"
+ * Use with CHECK_INDEX() and CHECK_PERCENTILE_INDEX()
  **/
 class IndexOutOfRangeException : public Exception
 {
@@ -338,6 +353,9 @@ private:
 
 #define CHECK_INDEX( INDEX, VALID_MIN, VALID_MAX )		\
     CHECK_INDEX_MSG( (INDEX), (VALID_MIN), (VALID_MAX), "")
+
+#define CHECK_PERCENTILE_INDEX( INDEX ) \
+    CHECK_INDEX_MSG( (INDEX), 0, 100, "Percentile index out of range" );
 
 
 //

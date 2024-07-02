@@ -7,9 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include <dirent.h>     // opendir(), etc
-#include <fcntl.h>      // AT_ constants (fstatat() flags)
-#include <unistd.h>     // access(), R_OK, X_OK
+#include <dirent.h> // opendir(), etc
+#include <fcntl.h>  // AT_ constants (fstatat() flags)
+#include <unistd.h> // access(), R_OK, X_OK
 
 #include <QStringBuilder>
 

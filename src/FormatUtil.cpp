@@ -20,8 +20,7 @@ using namespace QDirStat;
 
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
-    static QStringList units { QObject::tr( " bytes" ),
-                               QObject::tr( " kB" ),
+    static QStringList units { QObject::tr( " kB" ),
                                QObject::tr( " MB" ),
                                QObject::tr( " GB" ),
                                QObject::tr( " TB" ),
@@ -34,11 +33,11 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
     if ( lSize < 1000 )
     {
 	// Exact number of bytes, no decimals
-	return QString::number( lSize ) % units.at( 0 );
+	return QString::number( lSize ) % ( lSize == 1 ? QObject::tr( " byte" ) : QObject::tr( " bytes" ) );
     }
     else
     {
-	int    unitIndex = 1;
+	int    unitIndex = 0;
 	double size = lSize / 1024.0;
 
 	// Restrict to three digits before the decimal point
@@ -101,7 +100,7 @@ QString QDirStat::symbolicMode( mode_t mode )
 
 QString QDirStat::formatMillisec( qint64 millisec )
 {
-    const int hours = millisec / 3600000L;	// 60*60*1000
+    const int hours = millisec / 3600000L; // 60*60*1000
     millisec %= 3600000L;
 
     const int min = millisec / 60000L;	// 60*1000

@@ -13,7 +13,7 @@
 
 #include <QColor>
 #include <QList>
-#include <QTextStream>
+#include <QTextStream> // endl
 
 // The size of a standard disk block.
 //
@@ -39,6 +39,13 @@ namespace QDirStat
 
     class MountPoint;
     using MountPointList = QList<MountPoint *>;
+
+    /**
+     * Provide a qreal literal suffix.  qreal is not always
+     * a double (although it almost always is).
+     **/
+    constexpr qreal operator""_qr( long double x )
+        { return qreal( x ); }
 }
 
 namespace Qt
@@ -54,7 +61,7 @@ namespace Qt
         inline namespace StringLiterals
         {
             constexpr inline QLatin1String operator""_L1( const char * str, size_t size ) noexcept
-                { return QLatin1String( str, qsizetype( size ) ); }
+                { return QLatin1String( str, int( size ) ); }
         }
     }
 #endif
