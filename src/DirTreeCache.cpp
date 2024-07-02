@@ -432,7 +432,7 @@ void CacheReader::addItem()
     mode_t mode;
     if ( mode_str )
     {
-	mode = strtoll( mode_str, 0, 8 );
+	mode = strtoul( mode_str, 0, 8 );
     }
     else
     {
@@ -470,8 +470,8 @@ void CacheReader::addItem()
     FileSize size = readSize( size_str );
 
     // uid/gid
-    const uid_t uid = uid_str ? strtol( uid_str, 0, 10 ) : 0;
-    const gid_t gid = gid_str ? strtol( gid_str, 0, 10 ) : 0;
+    const uid_t uid = uid_str ? strtoul( uid_str, 0, 10 ) : 0;
+    const gid_t gid = gid_str ? strtoul( gid_str, 0, 10 ) : 0;
 
     // MTime
     const time_t mtime = strtol( mtime_str, 0, 0 );

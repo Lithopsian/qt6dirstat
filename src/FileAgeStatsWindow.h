@@ -236,7 +236,7 @@ namespace QDirStat
 	/**
 	 * Return the files count for this item.
 	 **/
-	short filesCount() const { return _filesCount; }
+	int filesCount() const { return _filesCount; }
 
 
     protected:

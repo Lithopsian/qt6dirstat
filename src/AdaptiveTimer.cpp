@@ -66,7 +66,7 @@ int AdaptiveTimer::currentDelay() const
     if ( _delays.isEmpty() )
         return _defaultDelay;
 
-    return _payloadTime * _delays[ _delayStage ];
+    return _payloadTime * _delays[ _delayStage ]; // hope this is less than 596 hours!
 }
 
 

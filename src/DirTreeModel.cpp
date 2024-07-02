@@ -177,7 +177,7 @@ namespace
 	// More than 3 allocated clusters isn't "small"
 	const FileSize clusterSize = item->tree()->clusterSize();
 	const FileSize allocated = item->allocatedSize();
-	const int numClusters = allocated / clusterSize;
+	const FileSize numClusters = allocated / clusterSize;
 	if ( numClusters > SMALL_FILE_CLUSTERS + 1 )
 	    return false;
 

@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QTimer>
+#include <QtMath> // qFloor()
 
 #include "OutputWindow.h"
 #include "Exception.h"
@@ -292,7 +293,7 @@ void OutputWindow::zoom( qreal factor )
     QFont font = _ui->terminal->font();
     if ( font.pixelSize() != -1 )
     {
-	int pixelSize = font.pixelSize() * factor;
+	int pixelSize = qFloor( font.pixelSize() * factor );
 	if ( pixelSize == font.pixelSize() ) // rounding (always down) to the same value
 	    ++pixelSize;
 	font.setPixelSize( pixelSize );
@@ -311,13 +312,13 @@ void OutputWindow::zoom( qreal factor )
 
 void OutputWindow::zoomIn()
 {
-    zoom( 1.1 );
+    zoom( 1.1_qr );
 }
 
 
 void OutputWindow::zoomOut()
 {
-    zoom( 1.0 / 1.1 );
+    zoom( 1.0_qr / 1.1_qr );
 }
 
 

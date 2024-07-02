@@ -516,8 +516,8 @@ void TreemapView::calculateSettings()
     {
         _dirGradient = QLinearGradient();
         _dirGradient.setCoordinateMode( QGradient::ObjectMode );
-        _dirGradient.setColorAt( 0.0, _dirGradientStart );
-        _dirGradient.setColorAt( 1.0, _dirGradientEnd   );
+        _dirGradient.setColorAt( 0, _dirGradientStart );
+        _dirGradient.setColorAt( 1, _dirGradientEnd   );
     }
 }
 
@@ -802,7 +802,7 @@ void TreemapView::highlightParents( const TreemapTile * tile )
     }
 
     if ( !_parentHighlightList.isEmpty() )
-        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 );
+        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6f );
 }
 
 

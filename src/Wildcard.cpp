@@ -15,7 +15,7 @@ using namespace QDirStat;
 QString Wildcard::wildcardToRegularExpression( const QString & pattern,
                                                QDirStat::WildcardConversionOptions options)
 {
-    const qsizetype wclen = pattern.size();
+    const int wclen = pattern.size();
     QString rx;
     rx.reserve( wclen + wclen / 16 );
     qsizetype i = 0;

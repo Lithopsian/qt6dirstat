@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QTextStream>
+#include <QtMath> // qCeil()
 
 #include "Typedefs.h" // FileSize
 
@@ -390,7 +391,7 @@ namespace QDirStat
 	 * allocation.
 	 *
 	 **/
-	static int blocksFromSize( FileSize allocatedSize )
+	static FileSize blocksFromSize( FileSize allocatedSize )
 	    { return ceil( static_cast<double>( allocatedSize ) / STD_BLOCK_SIZE ); }
 
 	/**

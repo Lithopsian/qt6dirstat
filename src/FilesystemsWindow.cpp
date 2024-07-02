@@ -290,10 +290,10 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
 
 	    if ( _totalSize > 0 )
 	    {
-		const float freePercent = 100.0f * _freeSize / _totalSize;
-		set( FS_FreePercentCol, Qt::AlignRight, formatPercent( freePercent ) );
+		const float percent = freePercent();
+		set( FS_FreePercentCol, Qt::AlignRight, formatPercent( percent ) );
 
-		if ( freePercent < WARN_PERCENT )
+		if ( percent < WARN_PERCENT )
 		{
 		    setForeground( FS_FreeSizeCol,    Qt::red );
 		    setForeground( FS_FreePercentCol, Qt::red );
