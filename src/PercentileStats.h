@@ -102,15 +102,10 @@ namespace QDirStat
 	void calculatePercentiles();
 
 	/**
-	 * Returns the size of the percentiles list (ie. this).
-	 **/
-//	int percentileListCount() const { return _percentileList.size(); }
-
-	/**
-	 * Returns the size of the three percentiles lists.
+	 * Returns whether the given list is empty.
 	 **/
 	bool percentileListEmpty() const { return _percentileList.isEmpty(); }
-	bool percentileSumsEmpty() const { return _percentileSums.isEmpty(); }
+//	bool percentileSumsEmpty() const { return _percentileSums.isEmpty(); }
 //	bool cumulativeSumsEmpty() const { return _cumulativeSums.isEmpty(); }
 
 	/**
@@ -122,18 +117,16 @@ namespace QDirStat
 	 * Functions returning values for floating point datasets have
 	 * a Qt-style different name, but are not currently used.
 	 **/
-	PercentileValue percentileList( int index ) const { return _percentileList.at( index ); }
-	PercentileValue percentileSums( int index ) const { return _percentileSums.at( index ); }
-	PercentileValue cumulativeSums( int index ) const { return _cumulativeSums.at( index ); }
+	PercentileValue percentileList( int index ) const;
+	PercentileValue percentileSums( int index ) const;
+	PercentileValue cumulativeSums( int index ) const;
 
 	/**
 	 * Fill 'bucketCount' buckets of equal width (data value range)
 	 * from 'startPercentile' to 'endPercentile'. Each bucket
 	 * contains the number of data points (not their value!).
 	 **/
-	void fillBuckets( int bucketCount,
-	                  int startPercentile,
-	                  int endPercentile );
+	void fillBuckets( int bucketCount, int startPercentile, int endPercentile );
 
 	/**
 	 * Calculate the best bucket count according to the Rice Rule for n
@@ -149,6 +142,18 @@ namespace QDirStat
 	int bucketCount() const { return _buckets.size(); }
 
 	/**
+	 * Return the start value of bucket no. 'index'
+	 **/
+	PercentileValue bucketStart( int index ) const
+	    { return _bucketsStart + index * bucketWidth(); }
+
+	/**
+	 * Return the end value of bucket no. 'index'
+	 **/
+	PercentileValue bucketEnd( int index ) const
+	    { return bucketStart( index ) + bucketWidth(); }
+
+	/**
 	 * Return the total sum of all buckets in the list.
 	 **/
 	int bucketsTotalSum() const
@@ -157,7 +162,7 @@ namespace QDirStat
 	/**
 	 * Return the number of data points in bucket 'index'.
 	 **/
-	int bucket( int index ) const { return _buckets.at( index ); }
+	int bucket( int index ) const;
 
 	/**
 	 * Iterators for the buckets list.
@@ -186,13 +191,31 @@ namespace QDirStat
 	 **/
 	PercentileValue quantile( int order, int number ) const;
 
+	/**
+	 * Return whether the calculated lists have been populated.
+	 **/
+	bool listsPopulated() const
+	    { return !_buckets.isEmpty() && !_percentileList.isEmpty(); }
+
+	/**
+	 * Return the width of a bucket. All buckets have the same width.
+	 *
+	 * Note that this value can only be obtained after all relevant data
+	 * are set: buckets, percentiles, startPercentile, endPercentile.
+	 **/
+	PercentileValue bucketWidth() const
+	    { return listsPopulated() ? ( _bucketsEnd - _bucketsStart ) / _buckets.size() : 0; }
+
 
     private:
 
 	PercentileList _percentileList;
 	PercentileList _percentileSums;
 	PercentileList _cumulativeSums;
-	BucketList     _buckets;
+
+	PercentileValue _bucketsStart { 0 };
+	PercentileValue _bucketsEnd { 0 };
+	BucketList      _buckets;
 
     };	// class PercentileStats
 

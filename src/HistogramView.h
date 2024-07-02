@@ -12,7 +12,7 @@
 
 #include <QGraphicsView>
 
-#include "Typedefs.h" // _qr, asReal()
+#include "Typedefs.h" // _qr
 
 
 namespace QDirStat
@@ -135,29 +135,6 @@ namespace QDirStat
 	void autoStartEndPercentiles();
 
 	/**
-	 * Return the current number of data buckets (eg. number of
-	 * histogram bars).
-	 **/
-	int bucketCount() const;
-
-	/**
-	 * Return the number of data points in bucket no. 'index'
-	 **/
-	int bucket( int index ) const;
-
-	/**
-	 * Return the start value of bucket no. 'index'
-	 **/
-	FileSize bucketStart( int index ) const
-	    { return percentile( _startPercentile ) + index * bucketWidth(); }
-
-	/**
-	 * Return the end value of bucket no. 'index'
-	 **/
-	FileSize bucketEnd( int index ) const
-	    { return percentile( _startPercentile ) + ( index + 1 ) * bucketWidth(); }
-
-	/**
 	 * Enable or disable showing percentiles as an overlay over the
 	 * histogram: 'step' specifies how many of them to display; for
 	 * example, '5' will display P5, P10, P15 etc.; step = 0 disables
@@ -206,15 +183,10 @@ namespace QDirStat
 //	int rightMarginPercentiles() { return _rightMarginPercentiles; }
 
 	/**
-	 * Pens and brushes for the various elements of the histograms.
+	 * Pen and brush for HistogramBar.
 	 **/
-	QBrush barBrush()           const { return _barBrush;           }
-	QBrush overflowSliceBrush() const { return _overflowSliceBrush; }
-	QPen   barPen()	            const { return _barPen;             }
-	QPen   medianPen()          const { return _medianPen;          }
-	QPen   quartilePen()        const { return _quartilePen;        }
-	QPen   percentilePen()      const { return _percentilePen;      }
-	QPen   decilePen()          const { return _decilePen;          }
+	QBrush barBrush() const { return _barBrush; }
+	QPen   barPen()   const { return _barPen;   }
 
 	/**
 	 * Build the histogram based on a new set of data.
@@ -244,22 +216,15 @@ namespace QDirStat
 	    { return index >= _startPercentile && index <= _endPercentile; }
 
 	/**
-	 * Return the width of a bucket. All buckets have the same width.
-	 *
-	 * Notice that this value can only be obtained after all relevant data
-	 * are set: buckets, percentiles, startPercentile, endPercentile.
-	 **/
-	double bucketWidth() const;
-
-	/**
 	 * Automatically determine if a logarithmic height scale should be
 	 * used. Set the internal _useLogHeightScale variable accordingly and
 	 * return it.
 	 **/
 	void autoLogHeightScale();
 
-
-	// Graphical Elements
+	/**
+	 * Functions to create the graphical elements.
+	 **/
 	void addHistogramBackground();
 	void addAxes();
 	void addYAxisLabel();
@@ -300,8 +265,8 @@ namespace QDirStat
 	 * Return the bottom left of the bounding rect.
 	 **/
 	QPointF addPie( const QRectF & rect,
-	                FileSize         val1,
-	                FileSize         val2,
+	                FileSize       val1,
+	                FileSize       val2,
 	                const QBrush & brush1,
 	                const QBrush & brush2 );
 

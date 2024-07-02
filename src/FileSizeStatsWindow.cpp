@@ -220,6 +220,8 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
+    _ui->bucketsTable->setModel( new BucketsTableModel( this ) );
+
     initWidgets();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
@@ -249,9 +251,6 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 
 void FileSizeStatsWindow::initWidgets()
 {
-    _bucketsTableModel = new BucketsTableModel( this, _ui->histogramView );
-    _ui->bucketsTable->setModel( _bucketsTableModel );
-
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
@@ -297,6 +296,12 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
 }
 
 
+BucketsTableModel * FileSizeStatsWindow::bucketsTableModel() const
+{
+    return qobject_cast<BucketsTableModel *>( _ui->bucketsTable->model() );
+}
+
+
 void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
     const Subtree subtree( fileInfo );
@@ -309,6 +314,8 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     else
 	_stats.reset( new FileSizeStats( fileInfo, suffix ) );
     _stats->calculatePercentiles();
+
+    bucketsTableModel()->setStats( _stats.get() );
 
     fillHistogram();
     fillPercentileTable();
@@ -330,9 +337,9 @@ void FileSizeStatsWindow::loadHistogram()
     const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
 
-    _bucketsTableModel->beginReset();
+    bucketsTableModel()->beginReset();
     _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
-    _bucketsTableModel->endReset();
+    bucketsTableModel()->endReset();
 
     HeaderTweaker::resizeToContents( _ui->bucketsTable->horizontalHeader() );
 

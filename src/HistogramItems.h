@@ -15,6 +15,7 @@
 
 namespace QDirStat
 {
+    class FileSizeStats;
     class HistogramView;
 
     /**
@@ -32,10 +33,11 @@ namespace QDirStat
 	 * Constructor: 'number' is the number of the bar (0 being the
 	 * leftmost) in the histogram
 	 **/
-	HistogramBar( HistogramView * parent,
-		      int             number,
-		      const QRectF  & rect,
-		      qreal           fillHeight );
+	HistogramBar( HistogramView       * parent,
+		      const FileSizeStats * stats,
+		      int                   number,
+		      const QRectF        & rect,
+		      qreal                 fillHeight );
 
 
     protected:

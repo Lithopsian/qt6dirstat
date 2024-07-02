@@ -113,9 +113,31 @@ void PercentileStats::calculatePercentiles()
 }
 
 
-void PercentileStats::fillBuckets( int bucketCount,
-                                   int startPercentile,
-                                   int endPercentile )
+PercentileValue PercentileStats::percentileList( int index ) const
+{
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _percentileList.isEmpty() ? 0 : _percentileList[ index ];
+}
+
+
+PercentileValue PercentileStats::percentileSums( int index ) const
+{
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
+}
+
+
+PercentileValue PercentileStats::cumulativeSums( int index ) const
+{
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _cumulativeSums.isEmpty() ? 0 : _cumulativeSums[ index ];
+}
+
+
+void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
 {
     CHECK_PERCENTILE_INDEX( startPercentile );
     CHECK_PERCENTILE_INDEX( endPercentile   );
@@ -129,31 +151,33 @@ void PercentileStats::fillBuckets( int bucketCount,
     // Create a new list for bucketCount, filled with zeroes
     _buckets = BucketList( bucketCount );
 
-    if ( isEmpty() )
+    if ( isEmpty() || _percentileList.isEmpty() )
         return;
 
-    const PercentileValue startVal    = _percentileList[ startPercentile ];
-    const PercentileValue endVal      = _percentileList[ endPercentile   ];
-    const PercentileValue bucketWidth = ( endVal - startVal ) / bucketCount;
+    // Remember the validated start and end percentiles that match this bucket list
+    _bucketsStart = _percentileList[ startPercentile ];
+    _bucketsEnd   = _percentileList[ endPercentile   ];
+
+    const PercentileValue bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
 
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << formatSize( startVal )
-               << " endVal: " << formatSize( endVal )
+               << " startVal: " << formatSize( _bucketsStart )
+               << " endVal: " << formatSize( _bucketsEnd )
                << " bucketWidth: " << formatSize( bucketWidth )
                << Qt::endl;
 #endif
 
     // Skip to the first percentile that we're using
     auto it = cbegin();
-    while ( it != cend() && *it < startVal )
+    while ( it != cend() && *it < _bucketsStart )
 	++it;
 
     // Fill buckets up to the last requested percentile
     int index = 0;
-    PercentileValue nextBucket = startVal + bucketWidth;
-    while ( it != cend() && *it <= endVal )
+    PercentileValue nextBucket = _bucketsStart + bucketWidth;
+    while ( it != cend() && *it <= _bucketsEnd )
     {
 	// Increment the bucket index when we hit the next bucket boundary
 	while ( *it > nextBucket )
@@ -192,4 +216,12 @@ int PercentileStats::bestBucketCount( int n, int max )
     }
 
     return result;
+}
+
+
+int PercentileStats::bucket( int index ) const
+{
+    CHECK_INDEX( index, 0, _buckets.size() - 1 );
+
+    return _buckets[ index ];
 }

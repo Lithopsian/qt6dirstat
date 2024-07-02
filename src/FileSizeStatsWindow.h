@@ -109,6 +109,12 @@ namespace QDirStat
 	void initWidgets();
 
 	/**
+	 * Return the abstract model (cast as BucketsTableModel) for
+	 * the QTableView.
+	 **/
+	BucketsTableModel * bucketsTableModel() const;
+
+	/**
 	 * Populate with new content.
 	 **/
 	void populate( FileInfo * fileInfo, const QString & suffix );
@@ -148,9 +154,7 @@ namespace QDirStat
 	//
 
 	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
-
-	BucketsTableModel              * _bucketsTableModel	{ nullptr };
-	std::unique_ptr<FileSizeStats>   _stats;
+	std::unique_ptr<FileSizeStats>           _stats;
 
     };
 

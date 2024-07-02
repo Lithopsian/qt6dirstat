@@ -60,8 +60,6 @@ void HistogramView::init( const FileSizeStats * stats )
 
 FileSize HistogramView::percentile( int index ) const
 {
-    CHECK_PERCENTILE_INDEX( index );
-
     return _stats->percentileList( index );
 }
 
@@ -100,12 +98,6 @@ void HistogramView::setEndPercentile( int index )
 
 FileSize HistogramView::percentileSum( int fromIndex, int toIndex ) const
 {
-    CHECK_PERCENTILE_INDEX( fromIndex );
-    CHECK_PERCENTILE_INDEX( toIndex );
-
-    if ( _stats->percentileSumsEmpty() )
-	return 0LL;
-
     FileSize sum = 0LL;
 
     for ( int i = fromIndex; i <= toIndex; ++i )
@@ -114,7 +106,7 @@ FileSize HistogramView::percentileSum( int fromIndex, int toIndex ) const
     return sum;
 }
 
-
+/*
 int HistogramView::bucketCount() const
 {
     return _stats ? _stats->bucketCount() : 0;
@@ -123,35 +115,12 @@ int HistogramView::bucketCount() const
 
 int HistogramView::bucket( int index ) const
 {
-    CHECK_INDEX( index, 0, _stats->bucketCount() - 1 );
-
     return _stats->bucket( index );
 }
-
-
-double HistogramView::bucketWidth() const
-{
-    if ( _stats->bucketCount() == 0 || _stats->percentileListEmpty() )
-	return 0;
-
-    const double startVal = percentile( _startPercentile );
-    const double endVal   = percentile( _endPercentile   );
-
-    if ( startVal > endVal )
-	THROW( Exception( "Invalid percentile data" ) );
-
-    return ( endVal - startVal ) / _stats->bucketCount();
-}
-
+*/
 
 void HistogramView::autoStartEndPercentiles()
 {
-    if ( _stats->percentileListEmpty() )
-    {
-	logError() << "No percentiles set" << Qt::endl;
-	return;
-    }
-
     const FileSize q1    = percentile( 25 );
     const FileSize q3    = percentile( 75 );
     const FileSize qDist = q3 - q1;
@@ -192,12 +161,6 @@ void HistogramView::autoStartEndPercentiles()
 void HistogramView::autoLogHeightScale()
 {
     _useLogHeightScale = false;
-
-    if ( _stats->bucketCount() == 0 )
-    {
-	logError() << "No buckets set" << Qt::endl;
-	return;
-    }
 
     if ( _stats->bucketCount() > 3 )
     {
@@ -323,13 +286,6 @@ void HistogramView::rebuild()
     _decilePen          = palette.buttonText().color();
     _piePen             = palette.text().color();
     _overflowSliceBrush = QColor( 0xD0, 0x40, 0x20 );
-
-    if ( _stats->bucketCount() < 1 || _stats->percentileListEmpty() )
-    {
-	scene()->addText( "No data yet" );
-	logInfo() << "No data yet " << Qt::endl;
-	return;
-    }
 
     addHistogramBackground();
     addAxes();
@@ -502,7 +458,7 @@ void HistogramView::addHistogramBars()
 	const double val = applyLogHeight( _stats->bucket( i ) );
 	const QRectF rect( i * barWidth, topBorder() + viewMargin(), barWidth, -( _histogramHeight + axisExtraLength() ) );
 	const qreal fillHeight = maxVal == 0 ? 0 : _histogramHeight * val / maxVal;
-	scene()->addItem( new HistogramBar( this, i, rect, fillHeight ) );
+	scene()->addItem( new HistogramBar( this, _stats, i, rect, fillHeight ) );
     }
 }
 
@@ -534,7 +490,7 @@ void HistogramView::addMarkers()
 	    continue;
         }
 
-	addLine( i, QObject::tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? _decilePen : _percentilePen );
+	addLine( i, tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? _decilePen : _percentilePen );
     }
 
     if ( _showQuartiles )
