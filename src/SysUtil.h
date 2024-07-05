@@ -63,17 +63,17 @@ namespace QDirStat
 	 * If the command exits with a non-zero exit code, both the command and
 	 * the output are logged anyway unless 'ignoreErrCode' is 'true'.
 	 *
-	 * NOTICE 1: This uses a very basic command line parser; it simply
+	 * This function uses a very basic command line parser; it simply
 	 * splits the command up wherever whitespace might occur. If any of
 	 * the arguments (no matter how sophisticated they might be quoted)
 	 * possibly contains any whitespace, this is unsafe; in that case, use
 	 * the overloaded version instead that accepts a QStringList as
 	 * arguments.
 	 *
-	 * NOTICE 2: This does not start a shell with that command, it runs the
-	 * command directly, so only binaries can be executed, no shell scripts
-	 * or scripts of other interpreted languages. If that is desired, wrap
-	 * the command into "/bin/sh -c".
+	 * The command is not executed in a shell; the command is run directly
+	 * so only binaries can be executed, no shell scripts or scripts of
+	 * other interpreted languages. If that is desired, wrap the command
+	 * into "/bin/sh -c".
 	 **/
 	QString runCommand( const QString & commandLine,
 	                    int           * exitCode_ret = 0,
@@ -96,11 +96,10 @@ namespace QDirStat
 	 * If the command exits with a non-zero exit code, both the command and
 	 * the output are logged anyway unless 'ignoreErrCode' is 'true'.
 	 *
-	 * NOTICE: This does not start a shell with that command, it runs the
-	 * command directly, so only binaries can be executed, no shell scripts
-	 * or scripts of other interpreted languages. If that is desired, use
-	 * "/bin/sh" as the command, "-c" as the first argument and the command
-	 * line to be executed as the second. Beware of shell quoting quirks!
+	 * The command is not executed in a shell; the command is run directly
+	 * so only binaries can be executed, no shell scripts or scripts of
+	 * other interpreted languages. If that is desired, wrap the command
+	 * into "/bin/sh -c".
 	 **/
 	QString runCommand( const QString     & command,
 	                    const QStringList & args,
@@ -196,7 +195,8 @@ namespace QDirStat
 	 *	   "/usr/bin"		-> "bin"
 	 *	   "/usr/bin/"		-> "bin"
 	 *
-	 * Notice that FileInfo also has a member function baseName().
+	 * Note that FileInfo also has a member function baseName() which is
+	 * a lightweight wrapper for this function.
 	 **/
 	QString baseName( const QString & fileName );
 

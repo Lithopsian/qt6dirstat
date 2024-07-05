@@ -230,7 +230,7 @@ namespace QDirStat
 	 * commands, the output of those shell commands might be important,
 	 * especially if they report an error. In addition to that, if a
 	 * cleanup action takes a while, it might be a good idea to show the
-	 * user what is going on. Notice that there will always be only one
+	 * user what is going on. Note that there will always be only one
 	 * output window for all cleanup tasks that are to be started in one
 	 * user action; if multiple items are selected, the corresponding
 	 * command will be started for each of the selected items individually

@@ -43,7 +43,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 *
-	 * Notice that this widget will destroy itself upon window close.
+	 * This widget will destroy itself upon window close.
 	 *
 	 **/
 	FilesystemsWindow( QWidget * parent );
@@ -187,7 +187,7 @@ namespace QDirStat
 	FileSize        totalSize()      const { return _totalSize; }
 	FileSize        usedSize()       const { return _usedSize; }
 	FileSize        reservedSize()   const { return _reservedSize; }
-	FileSize        freePercent()    const { return 100.0 * _freeSize / _totalSize; }
+	float           freePercent()    const { return 100.0 * _freeSize / _totalSize; }
 	FileSize        freeSize()       const { return _freeSize; }
 	bool            isNetworkMount() const { return _isNetworkMount; }
 	bool            isReadOnly()     const { return _isReadOnly; }

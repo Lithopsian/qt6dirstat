@@ -12,12 +12,14 @@
 
 #include <QVector>
 
+#include "Typedefs.h" // FileCount
+
 
 namespace QDirStat
 {
     typedef long double PercentileValue;
     typedef QVector<PercentileValue> PercentileList;
-    typedef QVector<int> BucketList;
+    typedef QVector<FileCount> BucketList;
 
     /**
      * Base class for percentile-related statistics calculation.
@@ -134,7 +136,7 @@ namespace QDirStat
 	 *
 	 * See also https://en.wikipedia.org/wiki/Histogram
 	 **/
-	static int bestBucketCount( int n, int max );
+	static int bestBucketCount( FileCount n, int max );
 
 	/**
 	 * Return the number of buckets for the current buckets list.
@@ -156,13 +158,13 @@ namespace QDirStat
 	/**
 	 * Return the total sum of all buckets in the list.
 	 **/
-	int bucketsTotalSum() const
+	FileCount bucketsTotalSum() const
 	    { return std::accumulate( _buckets.cbegin(), _buckets.cend(), 0 ); }
 
 	/**
 	 * Return the number of data points in bucket 'index'.
 	 **/
-	int bucket( int index ) const;
+	FileCount bucket( int index ) const;
 
 	/**
 	 * Iterators for the buckets list.

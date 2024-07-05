@@ -138,7 +138,7 @@ namespace QDirStat
 	 * If an action name in actionNames starts with "---", a separator is
 	 * added to the menu instead of an action.
 	 *
-	 * Notice that this class already logs an error for action names that
+	 * Note that this class already logs an error for action names that
 	 * were not found.
 	 **/
 	bool addActions( QWidget           * widget,

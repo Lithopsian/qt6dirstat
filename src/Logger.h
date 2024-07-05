@@ -158,8 +158,8 @@ public:
      * Return the current log level, i.e. the severity that will actually be
      * logged. Any lower severity will be suppressed.
      *
-     * Notice that due to the way C++ evaluates expressions, the runtime cost
-     * will not change significantly, only the log file size:
+     * Due to the way C++ evaluates expressions, the runtime cost will not
+     * change significantly, only the log file size:
      *
      *	   logDebug() << "Result: " << myObj->result() << Qt::endl;
      *

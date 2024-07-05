@@ -46,7 +46,7 @@ namespace QDirStat
 	 * Return a pointer to the dominant children list, creating it if
 	 * necessary.
 	 **/
-	int firstNonDominantChild()
+	DirSize firstNonDominantChild()
 	    { return _firstNonDominantChild < 0 ? findDominantChildren() : _firstNonDominantChild; }
 
 	/**
@@ -54,7 +54,7 @@ namespace QDirStat
 	 * considered to be dominant and return its row number.  This may be
 	 * 0 (ie. the first child) if no children are dominant.
 	 **/
-	int findDominantChildren();
+	DirSize findDominantChildren();
 
 
 	// Data members
@@ -62,7 +62,7 @@ namespace QDirStat
 	DataColumn    _sortedCol;
 	Qt::SortOrder _sortedOrder;
 	FileInfoList  _sortedChildren;
-	int           _firstNonDominantChild { -1 };
+	DirSize       _firstNonDominantChild { -1 };
 
     };	// class DirSortInfo
 
@@ -115,8 +115,7 @@ namespace QDirStat
 	{}
 
 	/**
-	 * This constructor does not initially create a dot entry.  If that
-	 * is desired, you can always use ensureDotEntry() later.  This is
+	 * This constructor does not initially create a dot entry.  This is
 	 * used for pseudo-directories.
 	 **/
 	DirInfo( DirInfo       * parent,
@@ -173,7 +172,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int totalItems() override;
+	FileCount totalItems() override;
 
 	/**
 	 * Returns the total number of subdirectories in this subtree,
@@ -181,7 +180,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int totalSubDirs() override;
+	FileCount totalSubDirs() override;
 
 	/**
 	 * Returns the total number of plain file children in this subtree,
@@ -189,7 +188,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int totalFiles() override;
+	FileCount totalFiles() override;
 
 	/**
 	 * Returns the total number of non-directory items in this subtree,
@@ -197,7 +196,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-//	int totalNonDirItems() override { return totalItems() - totalSubDirs(); }
+//	FileCount totalNonDirItems() override { return totalItems() - totalSubDirs(); }
 
 	/**
 	 * Returns the total number of ignored (non-directory!) items in this
@@ -205,7 +204,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int totalIgnoredItems() override;
+	FileCount totalIgnoredItems() override;
 
 	/**
 	 * Returns the total number of not ignored (non-directory!) items in
@@ -213,7 +212,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int totalUnignoredItems() override;
+	FileCount totalUnignoredItems() override;
 
 	/**
 	 * Returns the total number of direct children of this directory.
@@ -227,18 +226,18 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int directChildrenCount() override;
+	DirSize directChildrenCount() override;
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
 	 * be read (typically due to insufficient permissions).
 	 *
-	 * Notice that this does NOT include this item if it is a directory
+	 * Note that this count does NOT include this item if it is a directory
 	 * that could not be read.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	int errSubDirCount() override;
+	FileCount errSubDirCount() override;
 
 	/**
 	 * Returns the latest modification time of this subtree.
@@ -357,6 +356,21 @@ namespace QDirStat
 
 	/**
 	 * Notification that a child has been added somewhere in the subtree.
+	 *
+	 * This function attempts to keep the summary totals up to date while
+	 * children are being added.  This is useful for showing progrsss
+	 * during reads and for knowing whether a directory should be
+	 * considered to be ignored.  This approach breaks down if children
+	 * are deleted or re-parented, and the summaries are simply marked as
+	 * dirty; recalc() will be called (or not) at some stage when the data
+	 * is needed and it will be calculated from scratch.
+	 *
+	 * Checks are made here for any of the totals overflowing storage limits.
+	 * Total sizes and total item counts are tested at the tree root to see
+	 * if they will exceed the maximum possible at this update. All other
+	 * items should have smaller totals.  It is assumed that ignored item
+	 * counts cannot exceed the number of available packaged files which is
+	 * far short of two billion.
 	 **/
 	void childAdded( FileInfo * newChild );
 
@@ -459,7 +473,7 @@ namespace QDirStat
 	 * is valid for the requested sort order, also inline unless a new
 	 * sort is required.
 	 **/
-	int childNumber( DataColumn sortCol, Qt::SortOrder sortOrder, const FileInfo * child )
+	DirSize childNumber( DataColumn sortCol, Qt::SortOrder sortOrder, const FileInfo * child )
 	    { sortInfo( sortCol, sortOrder );  return child->rowNumber(); }
 
 	/**
@@ -531,10 +545,15 @@ namespace QDirStat
 	void takeAllChildren( DirInfo * oldParent );
 
 	/**
-	 * Recursively recalculate the summary fields when they are dirty.
+	 * Recalculate the summary fields when they are dirty.  This may
+	 * trigger recalculations of its children. This can be a very
+	 * expensive operation since the entire subtree may recursively be
+	 * traversed.
 	 *
-	 * This is a _very_ expensive operation since the entire subtree may
-	 * recursively be traversed.
+	 * Note that the total counts and sizes are not checked for overflow
+	 * during this operation.  Overall totals will not normally increase
+	 * during the recalculation as it is triggered when items are moved
+	 * from one parent to another or completely deleted.
 	 **/
 	void recalc();
 
@@ -574,9 +593,9 @@ namespace QDirStat
 	    { _firstChild = newfirstChild; }
 
 	/**
-	 * If this directory doesn't have a dot entry, create one.
+	 * Creates a dot entry for this directory.
 	 **/
-	void ensureDotEntry();
+	void addDotEntry();
 
 	/**
 	 * Return the attic for this node. If it doesn't have one yet, create
@@ -633,19 +652,13 @@ namespace QDirStat
 	 * Count the direct children unconditionally and update
 	 * _directChildrenCount.
 	 **/
-	int countDirectChildren();
+//	DirSize countDirectChildren();
 
 	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag
 	 * accordingly.
 	 **/
 	virtual void checkIgnored();
-
-	/**
-	 * Set any empty subdir children to ignored. This affects only direct
-	 * children.
-	 **/
-	void ignoreEmptySubDirs();
 
 	/**
 	 * Clean up unneeded / undesired dot entries:
@@ -691,13 +704,13 @@ namespace QDirStat
 
 	// Summary data, not always current as indicated by the _summaryDirty flag
 	DirReadState   _readState;
-	int            _totalItems;
-	int            _totalSubDirs;
-	int            _totalFiles;
-	int            _totalIgnoredItems;
-	int            _totalUnignoredItems;
-	int            _directChildrenCount;
-	int            _errSubDirCount;
+	DirSize        _directChildrenCount;
+	FileCount      _totalItems;
+	FileCount      _totalSubDirs;
+	FileCount      _totalFiles;
+	FileCount      _totalIgnoredItems;
+	FileCount      _totalUnignoredItems;
+	FileCount      _errSubDirCount;
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
 	FileSize       _totalBlocks;

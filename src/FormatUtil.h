@@ -61,9 +61,9 @@ namespace QDirStat
      *
      *	   logDebug() << "Size: " << x->totalSize() << Qt::endl;
      **/
-    inline QString formatSize( FileSize size ) { return formatSize( size, 1 ); }
-    inline QString formatSize( double size ) { return formatSize( llround( size ), 1 ); }
-    inline QString formatSize( long double size ) { return formatSize( llround( size ), 1 ); }
+    inline QString formatSize( FileSize size )    { return formatSize( size, 1 ); }
+    inline QString formatSize( double size )      { return formatSize( std::llround( size ), 1 ); }
+    inline QString formatSize( long double size ) { return formatSize( std::llround( size ), 1 ); }
 
     /**
      * Format a file / subtree size as bytes, but still human readable with a

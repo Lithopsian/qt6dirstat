@@ -124,7 +124,7 @@ namespace QDirStat
 	void setUrl( const QString & url ) { _url = url; }
 
 	/**
-	 * Return the root item of this tree. Notice that this is a pseudo root
+	 * Return the root item of this tree. Note that this is a pseudo root
 	 * that does not really correspond to a filesystem object.
 	 **/
 	DirInfo * root() const { return _root.get(); }
@@ -497,11 +497,6 @@ namespace QDirStat
 	void deleteChild( FileInfo * child );
 
 	/**
-	 * Recursively force a complete recalculation of all sums.
-	 **/
-	void recalc( DirInfo * dir );
-
-	/**
 	 * Try to derive the cluster size from 'item'.
 	 **/
 	void detectClusterSize( const FileInfo * item );
@@ -516,14 +511,12 @@ namespace QDirStat
 
 	// Data members
 
-	std::unique_ptr<DirInfo> _root;
-
-	QString         _url;
-	DirReadJobQueue _jobQueue;
-
+	std::unique_ptr<DirInfo>            _root;
 	std::unique_ptr<const ExcludeRules> _excludeRules;
 	std::unique_ptr<const ExcludeRules> _tmpExcludeRules;
 
+	QString                      _url;
+	DirReadJobQueue              _jobQueue;
 	QList<const DirTreeFilter *> _filters;
 
 	bool _crossFilesystems	{ false };

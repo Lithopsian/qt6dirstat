@@ -98,10 +98,10 @@ namespace QDirStat
          * Return the index (from 0 on) of the current history item or -1 if
          * the history is empty.
          *
-         * Notice that the current index may change or remain the same when
-         * items are added: As long as the history stack is not full, it will
-         * change; once it is full, it will remain the same (but the oldest
-         * item(s) are discarded).
+         * The current index may change or remain the same when items are
+         * added: as long as the history stack is not full, it will change;
+         * once it is full, it will remain the same (but the oldest item(s)
+         * are discarded).
          **/
         int currentIndex() const { return _current; }
 

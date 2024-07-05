@@ -195,12 +195,12 @@ namespace QDirStat
      * Item class for the locate list (which is really a tree widget),
      * representing one file with its path.
      *
-     * Notice that this item intentionally does not store a FileInfo pointer
+     * This item intentionally does not store a FileInfo or DirInfo pointer
      * for each search result, but its path. This is more expensive to store,
      * and the corresponding DirInfo * has to be fetched again with
      * DirTree::locate() (which is an expensive operation), but it is a lot
      * safer in case the tree is modified, i.e. if the user starts cleanup
-     * operations or refreshes the tree from disk: not only are no pointers
+     * operations or refreshes the tree from disk: Not only are no pointers
      * stored that might become invalid, but the search result remains valid
      * even after such an operation since the strings (the paths) will still
      * match an object in the tree in most cases.

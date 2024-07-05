@@ -51,8 +51,8 @@ namespace QDirStat
 	 * Set the text of an allocated size label including special handling
 	 * for sparse files and files with multiple hard links.
 	 *
-	 * Notice that this is only useful for plain files, not for
-	 * directories, packages or multiple selected files.
+	 * Note that this is only useful for plain files, not for directories,
+	 * packages or multiple selected files.
 	 **/
 	void setAllocated( const FileInfo * file );
 

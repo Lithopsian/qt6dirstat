@@ -185,14 +185,14 @@ namespace QDirStat
 
 #else
 	/**
-	 *  Qt before 5.4 does not have QStorageInfo, and statfs()
+	 * Qt before 5.4 does not have QStorageInfo, and statfs()
 	 * is Linux-specific (not POSIX).
 	 **/
-	FileSize MountPoint::totalSize()       { return -1; }
-	FileSize MountPoint::usedSize()        { return -1; }
-	FileSize MountPoint::reservedSize()    { return -1; }
-	FileSize MountPoint::freeSizeForUser() { return -1; }
-	FileSize MountPoint::freeSizeForRoot() { return -1; }
+	FileSize MountPoint::totalSize()       { return -1LL; }
+	FileSize MountPoint::usedSize()        { return -1LL; }
+	FileSize MountPoint::reservedSize()    { return -1LL; }
+	FileSize MountPoint::freeSizeForUser() { return -1LL; }
+	FileSize MountPoint::freeSizeForRoot() { return -1LL; }
 #endif
 
     private:
@@ -323,7 +323,8 @@ namespace QDirStat
 
 	/**
 	 * Clear all information and reload it from disk.
-	 * NOTICE: This invalidates ALL MountPoint pointers!
+	 *
+	 * This invalidates ALL MountPoint pointers!
 	 **/
 	static void reload() { instance()->init(); instance()->ensurePopulated(); }
 
