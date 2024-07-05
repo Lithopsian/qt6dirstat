@@ -52,7 +52,7 @@ QString History::goForward()
         return "";
     }
 
-    _current++;
+    ++_current;
     // dump();
 
     return currentItem();
@@ -94,7 +94,7 @@ void History::add( const QString & item )
 
     // Add the new item
     _items << item;
-    _current++;
+    ++_current;
 
     // logDebug() << "After add():" << Qt::endl;
     // dump();

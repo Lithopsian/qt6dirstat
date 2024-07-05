@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <cmath> // cbrt(), log2()
+#include <cmath> // log2()
 #include <algorithm> // std::max_element
 
 #include <QGraphicsItem>
@@ -106,18 +106,6 @@ FileSize HistogramView::percentileSum( int fromIndex, int toIndex ) const
     return sum;
 }
 
-/*
-int HistogramView::bucketCount() const
-{
-    return _stats ? _stats->bucketCount() : 0;
-}
-
-
-int HistogramView::bucket( int index ) const
-{
-    return _stats->bucket( index );
-}
-*/
 
 void HistogramView::autoStartEndPercentiles()
 {
@@ -465,7 +453,7 @@ void HistogramView::addHistogramBars()
 
 void HistogramView::addMarkers()
 {
-    const double totalWidth = percentile( _endPercentile ) - percentile( _startPercentile );
+    const FileSize totalWidth = percentile( _endPercentile ) - percentile( _startPercentile );
     if ( totalWidth < 1 )
 	return;
 
@@ -574,9 +562,9 @@ void HistogramView::addOverflowPanel()
     nextPos = addPie( pieRect, 100 - cutoff, cutoff, _barBrush, _overflowSliceBrush );
 
     // Caption for the upper pie chart
-    const int histogramFiles = _stats->bucketsTotalSum();
-    const int totalFiles     = qRound64( histogramFiles * 100.0 / ( _endPercentile - _startPercentile ) );
-    const int missingFiles   = totalFiles - histogramFiles;
+    const FileCount histogramFiles = _stats->bucketsTotalSum();
+    const FileCount totalFiles     = std::round( histogramFiles * 100.0 / ( _endPercentile - _startPercentile ) );
+    const FileCount missingFiles   = totalFiles - histogramFiles;
     const QString cutoffCaption = missingFiles == 1 ?
                                   tr( "1 file cut off" ) :
                                   tr( "%L1 files cut off" ).arg( missingFiles );
@@ -623,7 +611,7 @@ void HistogramView::addLine( int             percentileIndex,
     const FileSize axisStartVal = percentile( _startPercentile );
     const FileSize axisEndVal   = percentile( _endPercentile   );
     const FileSize totalWidth   = axisEndVal - axisStartVal;
-    const qreal    x            = 1.0 * ( xValue - axisStartVal ) / totalWidth * _histogramWidth;
+    const qreal    x            = _histogramWidth * ( xValue - axisStartVal ) / totalWidth;
 
     QGraphicsLineItem * line =
 	new QGraphicsLineItem( x, markerExtraHeight(), x, -( _histogramHeight + markerExtraHeight() ) );
@@ -645,7 +633,7 @@ QPointF HistogramView::addPie( const QRectF & rect,
     if ( val1 == 0 && val2 == 0 )
 	return rect.topLeft();
 
-    const int fullCircle = 360.0 * 16.0; // Qt uses 1/16 degrees
+    const int fullCircle = 360 * 16; // Qt uses 1/16 degrees
     const int angle1     = qRound( 1.0 * val1 / ( val1 + val2 ) * fullCircle );
     const int angle2     = fullCircle - angle1;
 

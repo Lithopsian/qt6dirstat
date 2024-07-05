@@ -68,13 +68,13 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
 
             YearStats & yearStats = _yearStats[ year ];
             yearStats.year = year;
-            yearStats.filesCount++;
+            ++yearStats.filesCount;
             yearStats.size += item->size();
 
             YearStats * thisMonthStats = monthStats( year, month );
             if ( thisMonthStats )
             {
-                thisMonthStats->filesCount++;
+                ++thisMonthStats->filesCount;
                 thisMonthStats->size += item->size();
             }
         }

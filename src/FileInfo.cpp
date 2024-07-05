@@ -58,7 +58,7 @@ namespace
      **/
     float percent( FileSize size, FileSize parentSize)
     {
-	return parentSize == 0 ? 0.0f : 100.0 * size / parentSize;
+	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
     }
 
 }
@@ -226,7 +226,7 @@ int FileInfo::treeLevel() const
     int level = 0;
 
     for ( const DirInfo * parent = _parent; parent; parent = parent->parent() )
-	level++;
+	++level;
 
     return level;
 }

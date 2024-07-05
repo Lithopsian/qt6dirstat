@@ -111,7 +111,7 @@ void OutputWindow::addStdout( const QString & output )
 
 void OutputWindow::addStderr( const QString & output )
 {
-    _errorCount++;
+    ++_errorCount;
     addText( output, _stderrColor );
     logWarning() << output << ( output.endsWith( u'\n' ) ? "" : "\n" );
 

@@ -802,7 +802,7 @@ void TreemapView::highlightParents( const TreemapTile * tile )
     }
 
     if ( !_parentHighlightList.isEmpty() )
-        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6f );
+        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 * 255 );
 }
 
 
@@ -873,7 +873,7 @@ QPainterPath ParentTileHighlighter::shape() const
 
 
 
-SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
+SceneMask::SceneMask( const TreemapTile * tile, int opacity ):
     QGraphicsPathItem {}
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
@@ -888,7 +888,7 @@ SceneMask::SceneMask( const TreemapTile * tile, float opacity ):
     path.addRect( tile->rect() );
     setPath( path );
 
-    setBrush( QColor( 0x30, 0x30, 0x30, opacity * 255 ) );
+    setBrush( QColor( 0x30, 0x30, 0x30, opacity ) );
     setZValue( SceneMaskLayer );
 
     tile->scene()->addItem( this );

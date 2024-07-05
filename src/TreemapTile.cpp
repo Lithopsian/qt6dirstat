@@ -129,7 +129,7 @@ namespace
             for ( int y = interval; y < image.height(); y+= interval )
             {
                 if ( image.pixel( x1, y ) == image.pixel( x2, y ) )
-                sameColorCount++;
+                    ++sameColorCount;
             }
 
             if ( sameColorCount * 10 > image.height() )
@@ -153,7 +153,7 @@ namespace
             for ( int x = interval; x < image.width(); x += interval )
             {
                 if ( image.pixel( x, y1 ) == image.pixel( x, y2 ) )
-                sameColorCount++;
+                    ++sameColorCount;
             }
 
             if ( sameColorCount * 10 > image.height() )
@@ -318,7 +318,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
     while ( *it && offset < width )
     {
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( scale * cumulativeSize );
+        const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left() + offset, rect.top(), newOffset - offset, rect.height() );
@@ -359,7 +359,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
     while ( *it && offset < height )
     {
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( scale * cumulativeSize );
+        const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left(), rect.top() + offset, rect.width(), newOffset - offset );
@@ -422,7 +422,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         rowEnd = *it;
 
         it.setPos( rowStartIt );
-        layoutRow( dir, childrenRect, it, rowEnd, rowTotal, primary, round( height ) );
+        layoutRow( dir, childrenRect, it, rowEnd, rowTotal, primary, std::round( height ) );
 
         remainingTotal -= rowTotal;
     }
@@ -469,7 +469,7 @@ void TreemapTile::layoutRow( Orientation                    dir,
         // Position tiles relative to the row start based on the cumulative size of tiles
         //logDebug() << rect << *it << Qt::endl;
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( cumulativeSize * rowScale );
+        const double newOffset = std::round( cumulativeSize * rowScale );
 
         // Drop tiles that don't reach to the minimum pixel size or fill the row
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
@@ -657,9 +657,9 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
             double cosa  = ( lightZ + ny*lightY + nx*lightX ) / sqrt( nx*nx + ny*ny + 1.0 );
             cosa = ambientIntensity + qMax( 0.0, cosa );
 
-            const int red = cosa * color.red() + 0.5;
-            const int green = cosa * color.green() + 0.5;
-            const int blue = cosa * color.blue() + 0.5;
+            const int red   = 0.5 + cosa * color.red();
+            const int green = 0.5 + cosa * color.green();
+            const int blue  = 0.5 + cosa * color.blue();
             *data = qRgb( red, green, blue );
         }
     }

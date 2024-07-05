@@ -8,6 +8,7 @@
  */
 
 #include <algorithm> // std::sort()
+#include <cmath>     // cbrt()
 
 #include <QtMath> // qFloor
 
@@ -193,7 +194,7 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 }
 
 
-int PercentileStats::bestBucketCount( int n, int max )
+int PercentileStats::bestBucketCount( FileCount n, int max )
 {
     if ( n < 2 )
 	return 1;
@@ -219,7 +220,7 @@ int PercentileStats::bestBucketCount( int n, int max )
 }
 
 
-int PercentileStats::bucket( int index ) const
+FileCount PercentileStats::bucket( int index ) const
 {
     CHECK_INDEX( index, 0, _buckets.size() - 1 );
 

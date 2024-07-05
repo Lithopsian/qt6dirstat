@@ -57,7 +57,7 @@ namespace
 	    if ( parent && parent != tree->root() )
 		name = SysUtil::baseName( url );
 
-	    if ( S_ISDIR( statInfo.st_mode ) )	// directory
+	    if ( S_ISDIR( statInfo.st_mode ) ) // directory
 	    {
 		DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
 
@@ -81,7 +81,7 @@ namespace
 
 		return dir;
 	    }
-	    else				// not directory
+	    else // not directory
 	    {
 		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
 
@@ -97,6 +97,31 @@ namespace
 	}
 
 	return nullptr;
+    }
+
+
+    /**
+     * Recursively force a complete recalculation of all sums.
+     **/
+    void recalc( DirInfo * dir )
+    {
+	FileInfo * child = dir->firstChild();
+
+	while ( child )
+	{
+	    if ( child->isDirInfo() )
+		recalc( child->toDirInfo() );
+
+	    child = child->next();
+	}
+
+	if ( dir->dotEntry() )
+	    recalc( dir->dotEntry() );
+
+	if ( dir->attic() )
+	    recalc( dir->attic() );
+
+	dir->recalc();
     }
 
 
@@ -126,6 +151,9 @@ namespace
     /**
      * Recurse through the tree from 'dir' on and move any ignored items to
      * the attic on the same level.
+     *
+     * Note that the ignored items get counted again when they are moved,
+     * but nobody really cares and recalc() will be called at the end.
      **/
     void moveIgnoredToAttic( DirInfo * dir )
     {
@@ -160,10 +188,11 @@ namespace
 
 	if ( !ignoredChildren.isEmpty() )
 	{
-	    dir->recalc();
-
+	    // Recalc the attic before its parent
 	    if ( dir->attic() )
 		dir->attic()->recalc();
+
+	    dir->recalc();
 	}
     }
 
@@ -423,7 +452,7 @@ void DirTree::finalizeTree()
 	recalc( root() );
 	if ( _root->firstChild() )
             moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
-	recalc( root() );
+//	recalc( root() );
     }
 }
 
@@ -676,28 +705,6 @@ bool DirTree::checkIgnoreFilters( const QString & path ) const
     }
 
     return false;
-}
-
-
-void DirTree::recalc( DirInfo * dir )
-{
-    FileInfo * child = dir->firstChild();
-
-    while ( child )
-    {
-	if ( child->isDirInfo() )
-	    recalc( child->toDirInfo() );
-
-	child = child->next();
-    }
-
-    if ( dir->dotEntry() )
-	recalc( dir->dotEntry() );
-
-    if ( dir->attic() )
-	recalc( dir->attic() );
-
-    dir->recalc();
 }
 
 

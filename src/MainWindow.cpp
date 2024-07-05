@@ -57,7 +57,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     _sortCol { DataColumns::toViewCol( SizeCol ) },
     _sortOrder { Qt::DescendingOrder }
 {
-    logDebug() << sizeof( FileInfo ) << " " << sizeof( DirInfo ) << Qt::endl;
+//    logDebug() << sizeof( FileInfo ) << " " << sizeof( DirInfo ) << Qt::endl;
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
     _updateTimer.setInterval( UPDATE_MILLISEC );
