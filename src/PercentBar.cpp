@@ -109,7 +109,7 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 	 **/
 
 	// Fill the percentage
-	const int fillWidth = ( w - 2 * penWidth ) * percent / 100;
+	const int fillWidth = qRound( ( w - 2 * penWidth ) * percent / 100 );
 	painter->fillRect( x + penWidth, y + penWidth,
 			   fillWidth + 1, h - 2 * penWidth + 1,
 			   _fillColors.at( qMin( depth, _fillColors.size()-1 ) ) );

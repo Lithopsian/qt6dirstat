@@ -24,7 +24,7 @@ public:
     /**
      * Constructor.
      */
-    Exception( const QString & msg = QString() ):
+    Exception( const QString & msg ):
 	_what { msg }
     {}
 
@@ -36,52 +36,21 @@ public:
     /**
      * Return a text description of what was wrong.
      *
-     * Notice this text is intended for developers or admins, not for end
-     * users.
+     * This text is intended for developers or admins, not for end users.
      */
     const QString & what() const { return _what; }
 
     /**
-     * Return the class name of this exception as string.
+     * Return the class name of this exception as string.  This is used
+     * in the log message.
      *
      * Derived classes could reimplement this and return their own name.
      */
-    QLatin1String className() const { return "Exception"_L1; }
-
-    /**
-     * Return the source file name where the exception was thrown.
-     * This works only if it was thrown with THROW.
-     */
-//    const QString & srcFile() const { return _srcFile; }
-
-    /**
-     * Return the line number in the source file where the exception was
-     * thrown. This works only if it was thrown with THROW.
-     */
-//    int srcLine() const { return _srcLine; }
-
-    /**
-     * Return the function name where the exception was thrown.
-     * This works only if it was thrown with THROW.
-     */
-//    const QString & srcFunction() const { return _srcFunction; }
-
-    /**
-     * Set the source location where the exception was thrown.
-     * This is used in the THROW and RETHROW macros.
-     */
-    void setSrcLocation( const QString & srcFile,
-			 int             srcLine,
-			 const QString & srcFunction ) const;
-
+    virtual QLatin1String className() const { return "Exception"_L1; }
 
 private:
 
     QString _what;
-
-    mutable QString _srcFile;
-    mutable int     _srcLine { 0 };
-    mutable QString _srcFunction;
 };
 
 
@@ -100,6 +69,9 @@ public:
 };
 
 
+/**
+ * Exception class for file handling exception
+ **/
 class FileException: public Exception
 {
 public:
@@ -115,13 +87,15 @@ private:
 };
 
 
+/**
+ * Exception class for system call failed
+ **/
 class SysCallFailedException: public Exception
 {
 public:
     SysCallFailedException( const QString & sysCall,
 			    const QString & resourceName ):
 	Exception { errMsg( sysCall, resourceName ) },
-	_sysCall { sysCall },
 	_resourceName { resourceName }
     {}
 
@@ -134,15 +108,17 @@ public:
     const QString & resourceName() const { return _resourceName; }
 
 protected:
-    QString errMsg( const QString & sysCall,
-		    const QString & resourceName ) const;
+    QString errMsg( const QString & sysCall, const QString & resourceName ) const;
 
 private:
-    QString _sysCall;
     QString _resourceName;
 };
 
 
+/**
+ * Exception class for "index out of range"
+ * Use with CHECK_DYNAMIC_CAST().
+ **/
 class DynamicCastException: public Exception
 {
 public:
@@ -154,6 +130,10 @@ public:
 };
 
 
+/**
+ * Exception class for magic number check failed
+ * Use with CHECK_MAGIC().
+ **/
 class BadMagicNumberException: public Exception
 {
 public:
@@ -168,6 +148,7 @@ public:
 
 /**
  * Exception class for "index out of range"
+ * Use with CHECK_INDEX() and CHECK_PERCENTILE_INDEX()
  **/
 class IndexOutOfRangeException : public Exception
 {
@@ -183,40 +164,63 @@ public:
     IndexOutOfRangeException( int             invalidIndex,
 			      int             validMin,
 			      int             validMax,
-			      const QString & msg = QString() ):
-	Exception { errMsg( invalidIndex, validMin, validMax, msg ) },
-	_invalidIndex { invalidIndex },
-	_validMin { validMin },
-	_validMax { validMax }
+			      const QString & prefix ):
+	Exception { QString( "%1: %2 valid: %3...%4" )
+	            .arg( prefix )
+	            .arg( invalidIndex )
+	            .arg( validMin )
+	            .arg( validMax ) }
     {}
 
     ~IndexOutOfRangeException() noexcept override = default;
+};
 
-    /**
-     * Return the offending index value.
-     **/
-    int invalidIndex() const { return _invalidIndex; }
 
-    /**
-     * Return the valid minimum index.
-     **/
-    int validMin() const { return _validMin; }
 
+/**
+ * Exception class for "too many files"
+ **/
+class TooManyFilesException : public Exception
+{
+public:
     /**
-     * Return the valid maximum index.
+     * Constructor.
+     *
+     * 'invalidIndex' is the offending index value. It should be between
+     *'validMin' and 'validMax':
+     *
+     *	   validMin <= index <= validMax
      **/
-    int validMax() const { return _validMax; }
+    TooManyFilesException():
+	Exception { QString( "more than %1 files" ).arg( FileCountMax ) }
+    {}
+
+    ~TooManyFilesException() noexcept override = default;
+};
+
+
+/**
+ * Exception class for "filesystem too big"
+ **/
+class FilesystemTooBigException : public Exception
+{
+public:
+    /**
+     * Constructor.
+     *
+     * 'invalidIndex' is the offending index value. It should be between
+     *'validMin' and 'validMax':
+     *
+     *	   validMin <= index <= validMax
+     **/
+    FilesystemTooBigException():
+	Exception { errMsg() }
+    {}
+
+    ~FilesystemTooBigException() noexcept override = default;
 
 protected:
-    QString errMsg( int             invalidIndex,
-		    int             validMin,
-		    int             validMax,
-		    const QString & msg = QString() ) const;
-
-private:
-    int _invalidIndex;
-    int _validMin;
-    int _validMax;
+    QString errMsg() const;
 };
 
 
@@ -337,7 +341,10 @@ private:
 
 
 #define CHECK_INDEX( INDEX, VALID_MIN, VALID_MAX )		\
-    CHECK_INDEX_MSG( (INDEX), (VALID_MIN), (VALID_MAX), "")
+    CHECK_INDEX_MSG( (INDEX), (VALID_MIN), (VALID_MAX), "Index out of range" )
+
+#define CHECK_PERCENTILE_INDEX( INDEX ) \
+    CHECK_INDEX_MSG( (INDEX), 0, 100, "Percentile index out of range" );
 
 
 //
@@ -351,8 +358,6 @@ void _throw_helper( const EX_t    & exception,
 		    int             srcLine,
 		    const QString & srcFunction )
 {
-    exception.setSrcLocation( srcFile, srcLine, srcFunction );
-
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "THROW " << exception.className() << ": " << exception.what() << Qt::endl;
 
@@ -379,14 +384,11 @@ void _rethrow_helper( const EX_t    & exception,
 		      int             srcLine,
 		      const QString & srcFunction )
 {
-    exception.setSrcLocation( srcFile, srcLine, srcFunction );
-
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "RETHROW " << exception.className() << ": " << exception.what() << Qt::endl;
 
     throw;
 }
-
 
 
 #endif // Exception_h

@@ -77,7 +77,7 @@ namespace
 	if ( dir->totalAllocatedSize() <= 0 || dir->totalSize() <= 0 )
 	    return 100;
 
-	return qRound( ( 100.0 * dir->totalSize() ) / dir->totalAllocatedSize() );
+	return qRound( 100.0 * dir->totalSize() / dir->totalAllocatedSize() );
     }
 
 

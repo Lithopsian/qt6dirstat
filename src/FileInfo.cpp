@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <ctime>       // gmtime()
+#include <ctime> // gmtime()
 
 #include "FileInfo.h"
 #include "Attic.h"
@@ -58,7 +58,7 @@ namespace
      **/
     float percent( FileSize size, FileSize parentSize)
     {
-	return parentSize == 0 ? 0.0f : 100.0f * size / parentSize;
+	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
     }
 
 }
@@ -226,7 +226,7 @@ int FileInfo::treeLevel() const
     int level = 0;
 
     for ( const DirInfo * parent = _parent; parent; parent = parent->parent() )
-	level++;
+	++level;
 
     return level;
 }
@@ -321,7 +321,7 @@ float FileInfo::subtreePercent()
     if ( hasPercent( this ) )
 	return percent( totalSize(), parent()->totalSize() );
 
-    return -1.0;
+    return -1.0f;
 }
 
 
@@ -330,7 +330,7 @@ float FileInfo::subtreeAllocatedPercent()
     if ( hasPercent( this ) )
 	return percent( totalAllocatedSize(), parent()->totalAllocatedSize() );
 
-    return -1.0;
+    return -1.0f;
 }
 
 
@@ -437,7 +437,7 @@ YearAndMonth FileInfo::yearAndMonth() const
     // unlike gmtime_r() which is not
     const struct tm * mtime_tm = gmtime( &_mtime );
 
-    const short year  = mtime_tm->tm_year + 1900;
+    const short year  = mtime_tm->tm_year + 1900; // works up to year 34668
     const short month = mtime_tm->tm_mon  + 1;
 
     return { year, month };

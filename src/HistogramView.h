@@ -12,6 +12,8 @@
 
 #include <QGraphicsView>
 
+#include "Typedefs.h" // _qr
+
 
 namespace QDirStat
 {
@@ -95,9 +97,9 @@ namespace QDirStat
 	/**
 	 * Return the stored value for percentile no. 'index' (0..100).  Note
 	 * that this directly accesses the percentile list with the assumption
-	 * that it is already sorted.
+	 * that it is already populated with 101 entries.
 	 **/
-	qreal percentile( int index ) const;
+	FileSize percentile( int index ) const;
 
 	/**
 	 * Set the percentile (0..100) from which on to display data, i.e. set
@@ -121,7 +123,7 @@ namespace QDirStat
 	void setEndPercentile( int index );
 
 	/**
-	 * Return the percentile until which on to display data, i.e. the right
+	 * Return the percentile until which to display data, i.e. the right
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
@@ -131,55 +133,6 @@ namespace QDirStat
 	 * Automatically determine the best start and end percentile
 	 **/
 	void autoStartEndPercentiles();
-
-	/**
-	 * Calculate the best bucket count according to the "Rice Rule" for n
-	 * data points, but limited to MAX_BUCKET_COUNT.
-	 *
-	 * See also https://en.wikipedia.org/wiki/Histogram
-	 **/
-	static qreal bestBucketCount( int n );
-
-	/**
-	 * Calculate the bucket width from min to max for 'bucketCount'
-	 * buckets.
-	 **/
-//	static qreal bucketWidth( qreal min, qreal max, int bucketCount )
-//	    { return bucketCount < 1 ? 0 : ( max - min ) / bucketCount; }
-
-	/**
-	 * Return the current number of data buckets (eg. number of
-	 * histogram bars).
-	 **/
-	int bucketCount() const;
-
-	/**
-	 * Return the number of data points in bucket no. 'index'
-	 **/
-	qreal bucket( int index ) const;
-
-	/**
-	 * Return the start value of bucket no. 'index'
-	 **/
-	qreal bucketStart( int index ) const
-	    { return percentile( _startPercentile ) + index * bucketWidth(); }
-
-	/**
-	 * Return the end value of bucket no. 'index'
-	 **/
-	qreal bucketEnd( int index ) const
-	    { return percentile( _startPercentile ) + ( index + 1 ) * bucketWidth(); }
-
-	/**
-	 * Return the percentile sum for percentile no. 'index' (0..100),
-	 * i.e. the accumulated values between percentile index-1 and index.
-	 **/
-	qreal percentileSum( int index ) const;
-
-	/**
-	 * Return the percentile sums from 'fromIndex' including to 'toIndex'
-	 **/
-	qreal percentileSum( int fromIndex, int toIndex ) const;
 
 	/**
 	 * Enable or disable showing percentiles as an overlay over the
@@ -230,15 +183,10 @@ namespace QDirStat
 //	int rightMarginPercentiles() { return _rightMarginPercentiles; }
 
 	/**
-	 * Pens and brushes for the various elements of the histograms.
+	 * Pen and brush for HistogramBar.
 	 **/
-	QBrush barBrush()           const { return _barBrush;           }
-	QBrush overflowSliceBrush() const { return _overflowSliceBrush; }
-	QPen   barPen()	            const { return _barPen;             }
-	QPen   medianPen()          const { return _medianPen;          }
-	QPen   quartilePen()        const { return _quartilePen;        }
-	QPen   percentilePen()      const { return _percentilePen;      }
-	QPen   decilePen()          const { return _decilePen;          }
+	QBrush barBrush() const { return _barBrush; }
+	QPen   barPen()   const { return _barPen;   }
 
 	/**
 	 * Build the histogram based on a new set of data.
@@ -254,25 +202,18 @@ namespace QDirStat
 	void rebuild();
 
 	/**
+	 * Return the percentile sums from 'fromIndex' to 'toIndex'
+	 * inclusive.
+	 **/
+	FileSize percentileSum( int fromIndex, int toIndex ) const;
+
+	/**
 	 * Return 'true' if percentile no. 'index' is in range for being
 	 * displayed, i.e. if it is between _startPercentile and
 	 * _endPercentile.
 	 **/
 	bool percentileDisplayed( int index ) const
 	    { return index >= _startPercentile && index <= _endPercentile; }
-
-	/**
-	 * Return the width of a bucket. All buckets have the same width.
-	 *
-	 * Notice that this value can only be obtained after all relevant data
-	 * are set: buckets, percentiles, startPercentile, endPercentile.
-	 **/
-	qreal bucketWidth() const;
-
-	/**
-	 * Return the total sum of all buckets
-	 **/
-	qreal bucketsTotalSum() const;
 
 	/**
 	 * Automatically determine if a logarithmic height scale should be
@@ -282,13 +223,8 @@ namespace QDirStat
 	void autoLogHeightScale();
 
 	/**
-	 * Convert a data value to the corresponding X axis point in the
-	 * histogram.
+	 * Functions to create the graphical elements.
 	 **/
-	qreal scaleValue( qreal value ) const;
-
-
-	// Graphical Elements
 	void addHistogramBackground();
 	void addAxes();
 	void addYAxisLabel();
@@ -321,18 +257,18 @@ namespace QDirStat
 	 * Add a line.
 	 **/
 	void addLine( int             percentileIndex,
-		      const QString & name,
-		      const QPen    & pen );
+	              const QString & name,
+	              const QPen    & pen );
 
 	/**
 	 * Add a pie diagram with two values val1 and val2.
 	 * Return the bottom left of the bounding rect.
 	 **/
 	QPointF addPie( const QRectF & rect,
-			qreal          val1,
-			qreal          val2,
-			const QBrush & brush1,
-			const QBrush & brush2 );
+	                FileSize       val1,
+	                FileSize       val2,
+	                const QBrush & brush1,
+	                const QBrush & brush2 );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -357,6 +293,27 @@ namespace QDirStat
 	bool needOverflowPanel() const
 	    { return _startPercentile > 0 || _endPercentile < 100; }
 
+	/**
+	 * A whole bunch of fixed values describing the geometry of
+	 * the histogram window. Not static since there will only ever
+	 * be one HistogramView and most of the time none.
+	 **/
+	qreal leftBorder()        const { return  40.0_qr; }
+	qreal rightBorder()       const { return  10.0_qr; }
+	qreal topBorder()         const { return  30.0_qr; }
+	qreal bottomBorder()      const { return  50.0_qr; }
+	qreal viewMargin()        const { return  10.0_qr; };
+	qreal textBorder()        const { return  10.0_qr; };
+	qreal textSpacing()       const { return  30.0_qr; };
+	qreal topTextHeight()     const { return  34.0_qr; };
+	qreal axisExtraLength()   const { return   5.0_qr; };
+	qreal markerExtraHeight() const { return  15.0_qr; };
+	qreal overflowWidth()     const { return 140.0_qr; };
+	qreal overflowBorder()    const { return  10.0_qr; };
+	qreal overflowSpacing()   const { return  15.0_qr; }; // between histogram and overflow area
+	qreal pieDiameter()       const { return  60.0_qr; };
+	qreal pieSliceOffset()    const { return  10.0_qr; };
+
 
     private:
 
@@ -364,20 +321,22 @@ namespace QDirStat
 	// Data Members
 	//
 
-	// Statistics Data
+	// Collected statistics data
 	const FileSizeStats * _stats { nullptr };
-	int                   _startPercentile;
-	int                   _endPercentile;
-	bool                  _useLogHeightScale;
 
-	// Flags and settings
+	// Flags not currently configurable
 	const bool _showMedian			{ true };
 	const bool _showQuartiles		{ true };
 	const int  _leftMarginPercentiles	{ 0 };
 	const int  _rightMarginPercentiles	{ 5 };
-	int        _percentileStep		{ 0 };
 
-	// Brushes and Pens
+	// Configurable settings
+	int  _startPercentile;
+	int  _endPercentile;
+	bool _useLogHeightScale;
+	int  _percentileStep { 0 };
+
+	// Brushes and pens
 	QBrush _panelBackground;
 	QBrush _barBrush;
 	QPen   _barPen;
@@ -392,22 +351,6 @@ namespace QDirStat
 	qreal _histogramWidth;
 	qreal _histogramHeight;
 	bool  _geometryDirty;
-
-	// Not static since there will only ever be one HistogramView and most of the time none
-	const qreal _leftBorder		{  40.0 };
-	const qreal _rightBorder	{  10.0 };
-	const qreal _topBorder		{  30.0 };
-	const qreal _bottomBorder	{  50.0 };
-	const qreal _viewMargin		{  10.0 };
-
-	const qreal _axisExtraLength	{   5.0 };
-	const qreal _markerExtraHeight	{  15.0 };
-	const qreal _overflowWidth	{ 140.0 };
-	const qreal _overflowLeftBorder	{  10.0 };
-	const qreal _overflowRightBorder{  10.0 };
-	const qreal _overflowSpacing	{  15.0 }; // between histogram and overflow area
-	const qreal _pieDiameter	{  60.0 };
-	const qreal _pieSliceOffset	{  10.0 };
 
     };
 

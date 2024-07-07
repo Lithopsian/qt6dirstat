@@ -209,7 +209,7 @@ namespace
 	    return nullptr;
 
 	while ( *cptr != u'\0' && isspace( *cptr ) )
-	    cptr++;
+	    ++cptr;
 
 	return cptr;
     }
@@ -227,7 +227,7 @@ namespace
 	    return nullptr;
 
 	while ( *cptr != u'\0' && !isspace( *cptr ) )
-	    cptr++;
+	    ++cptr;
 
 	return *cptr == u'\0' ? nullptr : cptr;
     }
@@ -432,7 +432,7 @@ void CacheReader::addItem()
     mode_t mode;
     if ( mode_str )
     {
-	mode = strtoll( mode_str, 0, 8 );
+	mode = strtoul( mode_str, 0, 8 );
     }
     else
     {
@@ -470,8 +470,8 @@ void CacheReader::addItem()
     FileSize size = readSize( size_str );
 
     // uid/gid
-    const uid_t uid = uid_str ? strtol( uid_str, 0, 10 ) : 0;
-    const gid_t gid = gid_str ? strtol( gid_str, 0, 10 ) : 0;
+    const uid_t uid = uid_str ? strtoul( uid_str, 0, 10 ) : 0;
+    const gid_t gid = gid_str ? strtoul( gid_str, 0, 10 ) : 0;
 
     // MTime
     const time_t mtime = strtol( mtime_str, 0, 0 );
@@ -485,7 +485,7 @@ void CacheReader::addItem()
     // Blocks: only stored for sparse files, otherwise just guess from the file size
     const FileSize blocks = blocks_str ?
                             strtoll( blocks_str, 0, 10 ) :
-                            ceil( static_cast<double>( alloc ) / STD_BLOCK_SIZE );
+                            static_cast<FileSize>( std::ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
@@ -755,7 +755,7 @@ bool CacheReader::readLine()
 
     do
     {
-	_lineNo++;
+	++_lineNo;
 
 	const char * buf = gzgets( _cache, _buffer, MAX_CACHE_LINE_LEN );
 	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != u'\n' )

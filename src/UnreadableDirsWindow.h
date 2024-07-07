@@ -142,8 +142,8 @@ namespace QDirStat
      * Item class for the directory list (which is really a tree widget),
      * representing one directory that could not be read.
      *
-     * Notice that this item intentionally does not store a FileInfo or DirInfo
-     * pointer for each search result, but its path. This is more expensive to
+     * This item intentionally does not store a FileInfo or DirInfo pointer
+     * for each search result, but its path. This is more expensive to
      * store, and the corresponding DirInfo * has to be fetched again with
      * DirTree::locate() (which is an expensive operation), but it is a lot
      * safer in case the tree is modified, i.e. if the user starts cleanup

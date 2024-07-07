@@ -7,16 +7,16 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm>    // std::sort()
+#include <algorithm> // std::sort()
+#include <cmath>     // cbrt()
 
-#include <QtMath> // qCeil()
+#include <QtMath> // qFloor
 
 #include "PercentileStats.h"
 #include "Exception.h"
 #include "FormatUtil.h"
 
 
-#define VERBOSE_SORT_THRESHOLD 50000
 #define VERBOSE_LOGGING 0
 
 
@@ -25,93 +25,28 @@ using namespace QDirStat;
 
 void PercentileStats::sort()
 {
-    if ( size() > VERBOSE_SORT_THRESHOLD )
-	logDebug() << "Sorting " << size() << " elements" << Qt::endl;
+#if VERBOSE_LOGGING
+    logDebug() << "Sorting " << size() << " elements" << Qt::endl;
+#endif
 
     std::sort( begin(), end() );
 
-    if ( size() > VERBOSE_SORT_THRESHOLD )
-	logDebug() << "Sorting done." << Qt::endl;
-}
-
-/*
-qreal PercentileStats::median()
-{
-    if ( isEmpty() )
-	return 0;
-
-    if ( !_sorted )
-	sort();
-
-    const int centerPos = size() / 2;
-
-    // Since we are doing integer division, the center is already rounded down
-    // if there is an odd number of data items, so don't use the usual -1 to
-    // compensate for the index of the first data element being 0, not 1: if
-    // size() is 5, we get _data[2] which is the center of
-    // [0, 1, 2, 3, 4].
-    const qreal result = at( centerPos );
-
-    if ( size() % 2 == 0 ) // Even number of items
-    {
-	// Use the average of the two center items. We already accounted for
-	// the upper one with the above integer division, so now we need to
-	// account for the lower one: If size() is 6, we already got
-	// _data[3], and now we need to average this with _data[2] of
-	// [0, 1, 2, 3, 4, 5].
-	return ( result + at( centerPos - 1 ) ) / 2.0;
-    }
-
-    return result;
+#if VERBOSE_LOGGING
+    logDebug() << "Sorting done." << Qt::endl;
+#endif
 }
 
 
-qreal PercentileStats::average()
+PercentileValue PercentileStats::quantile( int order, int number ) const
 {
     if ( isEmpty() )
-	return 0.0;
+	return 0.0l;
 
-    const qreal sum = std::accumulate( cbegin(), cend(), 0.0 );
-    const int count = size();
-
-    return sum / count;
-}
-
-
-qreal PercentileStats::min()
-{
-    if ( isEmpty() )
-	return 0.0;
-
-    if ( !_sorted )
-	sort();
-
-    return first();
-}
-
-
-qreal PercentileStats::max()
-{
-    if ( isEmpty() )
-	return 0.0;
-
-    if ( !_sorted )
-	sort();
-
-    return last();
-}
-*/
-
-qreal PercentileStats::quantile( int order, int number ) const
-{
-    if ( isEmpty() )
-	return 0.0;
+    if ( order < 2 || order > 100 )
+	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
 
     if ( number > order )
-	THROW( Exception( QString( "Cannot determine quantile #%1 for %2-quantile" ).arg( number ).arg( order ) ) );
-
-    if ( order < 2 )
-	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
+	THROW( Exception( QString( "Invalid quantile #%1 for %2-quantile" ).arg( number ).arg( order ) ) );
 
     if ( number == 0 )
 	return first();
@@ -119,64 +54,94 @@ qreal PercentileStats::quantile( int order, int number ) const
     if ( number == order )
 	return last();
 
-    // The integer division already cut off any non-zero decimal places,
-    // so don't subtract 1 to compensate for starting _data with
-    // index 0.
-    const int pos = ( size() * number ) / order;
-    const qreal result = at( pos );
+    // Calculate the data point position for the number and order
+    const double          pos    = 1.0 * size() * number / order;
+    const int             index  = qFloor( pos ); // floor because pos 1 is list index 0
+    const PercentileValue result = at( index );
 
-    // If we hit between two elements, use the average between them
-    if ( ( size() * number ) % order == 0 )
-	return ( result + at( pos - 1 ) ) / 2.0;
+    // If the boundary is on an element, return its value
+    if ( pos != index )
+	return result;
 
-    return result;
+    // The boundary is between two elements, return the average of their values
+    return ( result + at( index - 1 ) ) / 2.0l;
+
 }
 
 
 void PercentileStats::calculatePercentiles()
 {
-    _percentiles.clear(); // clear the list, but keep 101 items reserved (since Qt 5.7)
+    _percentileList.clear(); // just in case anyone calls this more than once
 
+    // Store all the percentile boundaries
     for ( int i=0; i <= 100; ++i )
-	_percentiles << percentile( i );
+	_percentileList.append( percentile( i ) );
 
-    _percentileSums = QRealList( 101 ); // new list, 101 items, all zero
+    _percentileSums = PercentileList( 101 ); // new list, 101 items, all zero
 
-    const qreal percentileSize = size() / 100.0;
-
-    for ( int i=0; i < size(); ++i )
+    // Iterate all the data points - should be in order, so add to each percentile in turn
+    int currentPercentile = 1;
+    auto it = _percentileList.cbegin() + 1;
+    for ( PercentileValue value : *this )
     {
-	const int percentile = qMax( 1, qCeil( i / percentileSize ) );
-	_percentileSums[ percentile ] += at(i);
+	// Have we gone past this percentile upper boundary?
+	while ( value > *it && currentPercentile < 100 )
+	{
+	    ++currentPercentile;
+	    ++it;
+	}
+
+	_percentileSums[ currentPercentile ] += value;
     }
 
-    _cumulativeSums.clear();
-    _cumulativeSums.reserve( _percentileSums.size() );
+    _cumulativeSums.clear(); // just in case anyone calls this more than once
 
-    qreal runningTotal = 0.0;
-
-    for ( int i=0; i < _percentileSums.size(); i++ )
+    // Cumulative totals calculated in a separate iteration for clarity
+    PercentileValue runningTotal = 0.0l;
+    for ( PercentileValue percentileSum : asConst( _percentileSums ) )
     {
-	runningTotal += _percentileSums.at(i);
+	runningTotal += percentileSum;
 	_cumulativeSums.append( runningTotal );
     }
 
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[i] ) << Qt::endl;
-	logDebug() << "cum_sum[ " << i << " ] : " << formatSize( _cumulativeSums[i] ) << Qt::endl;
+	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[ i ] ) << Qt::endl;
+	logDebug() << "cum_sum[ " << i << " ] : " << formatSize( _cumulativeSums[ i ] ) << Qt::endl;
     }
 #endif
 }
 
 
-void PercentileStats::fillBuckets( int bucketCount,
-                                   int startPercentile,
-                                   int endPercentile )
+PercentileValue PercentileStats::percentileList( int index ) const
 {
-    CHECK_INDEX( startPercentile, 0, 100 );
-    CHECK_INDEX( endPercentile,   0, 100 );
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _percentileList.isEmpty() ? 0 : _percentileList[ index ];
+}
+
+
+PercentileValue PercentileStats::percentileSums( int index ) const
+{
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
+}
+
+
+PercentileValue PercentileStats::cumulativeSums( int index ) const
+{
+    CHECK_PERCENTILE_INDEX( index );
+
+    return _cumulativeSums.isEmpty() ? 0 : _cumulativeSums[ index ];
+}
+
+
+void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+{
+    CHECK_PERCENTILE_INDEX( startPercentile );
+    CHECK_PERCENTILE_INDEX( endPercentile   );
 
     if ( startPercentile >= endPercentile )
         THROW( Exception( "startPercentile must be less than endPercentile" ) );
@@ -184,33 +149,36 @@ void PercentileStats::fillBuckets( int bucketCount,
     if ( bucketCount < 1 )
         THROW( Exception( QString( "Invalid bucket count %1" ).arg( bucketCount ) ) );
 
-    _buckets = QRealList( bucketCount );
+    // Create a new list for bucketCount, filled with zeroes
+    _buckets = BucketList( bucketCount );
 
-    if ( isEmpty() )
+    if ( isEmpty() || _percentileList.isEmpty() )
         return;
 
-    const qreal startVal    = _percentiles[ startPercentile ];
-    const qreal endVal      = _percentiles[ endPercentile   ];
-    const qreal bucketWidth = ( endVal - startVal ) / bucketCount;
+    // Remember the validated start and end percentiles that match this bucket list
+    _bucketsStart = _percentileList[ startPercentile ];
+    _bucketsEnd   = _percentileList[ endPercentile   ];
+
+    const PercentileValue bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
 
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << formatSize( startVal )
-               << " endVal: " << formatSize( endVal )
+               << " startVal: " << formatSize( _bucketsStart )
+               << " endVal: " << formatSize( _bucketsEnd )
                << " bucketWidth: " << formatSize( bucketWidth )
                << Qt::endl;
 #endif
 
     // Skip to the first percentile that we're using
     auto it = cbegin();
-    while ( it != cend() && *it < startVal )
+    while ( it != cend() && *it < _bucketsStart )
 	++it;
 
     // Fill buckets up to the last requested percentile
     int index = 0;
-    qreal nextBucket = startVal + bucketWidth;
-    while ( it != cend() && *it <= endVal )
+    PercentileValue nextBucket = _bucketsStart + bucketWidth;
+    while ( it != cend() && *it <= _bucketsEnd )
     {
 	// Increment the bucket index when we hit the next bucket boundary
 	while ( *it > nextBucket )
@@ -223,4 +191,38 @@ void PercentileStats::fillBuckets( int bucketCount,
 
 	++it;
     }
+}
+
+
+int PercentileStats::bestBucketCount( FileCount n, int max )
+{
+    if ( n < 2 )
+	return 1;
+
+    // Using the "Rice Rule" which gives more reasonable values for the numbers
+    // we are likely to encounter in the context of filesystems
+    const int result = qRound( 2 * std::cbrt( n ) );
+
+    // Enforce an upper limit so each histogram bar remains wide enough
+    // for tooltips and to be seen
+    if ( result > max )
+    {
+#if VERBOSE_LOGGING
+	logInfo() << "Limiting bucket count to " << max
+		  << " instead of " << result
+		  << Qt::endl;
+#endif
+
+	return max;
+    }
+
+    return result;
+}
+
+
+FileCount PercentileStats::bucket( int index ) const
+{
+    CHECK_INDEX( index, 0, _buckets.size() - 1 );
+
+    return _buckets[ index ];
 }

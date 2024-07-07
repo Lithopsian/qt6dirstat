@@ -72,7 +72,7 @@ namespace QDirStat
 	int labelLimit() const { return _labelLimit; }
 
 	/**
-	 * Set the label limit. Notice that if a label needs to be limited, it
+	 * Set the label limit. Note that if a label needs to be limited, it
 	 * will get three characters less than this value to compensate for the
 	 * "..." ellipsis that indicates that it was cut off.
 	 **/

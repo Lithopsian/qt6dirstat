@@ -55,12 +55,14 @@ namespace
         // We only care about ratios, so scale everything for speed of calculation
         // rowHeightScale = rowHeight / remainingTotal, scale this to 1
         // rowWidthScale = rowWidth, scaled to rowWidth / rowHeight * remainingTotal
-        const double rowRatio = rect.width() < rect.height() ? rect.width() / rect.height() : rect.height() / rect.width();
+        const double width    = rect.width();
+        const double height   = rect.height();
+        const double rowRatio = width < height ? width / height : height / width;
         const double rowWidthScale = rowRatio * remainingTotal; // really rectWidth
 
         const FileSize firstSize = itemTotalSize( *it );
-        FileSize sum = 0;
-        double bestAspectRatio = 0;
+        FileSize sum = 0LL;
+        double bestAspectRatio = 0.0;
         while ( *it )
         {
             FileSize size = itemTotalSize( *it );
@@ -69,7 +71,7 @@ namespace
                 sum += size;
 
                 // Again, only ratios matter, so avoid the size / sum division by multiplying both by sum
-                const double rowHeight = (double)sum * sum; // * really sum * rowHeight / remainingTotal
+                const double rowHeight = 1.0 * sum * sum; // * really sum * rowHeight / remainingTotal
                 const double rowScale = rowWidthScale; // really rowWidth * size / sum
                 const double aspectRatio = qMin( rowHeight / (rowScale * firstSize), rowScale * size / rowHeight );
                 if ( aspectRatio < bestAspectRatio )
@@ -127,7 +129,7 @@ namespace
             for ( int y = interval; y < image.height(); y+= interval )
             {
                 if ( image.pixel( x1, y ) == image.pixel( x2, y ) )
-                sameColorCount++;
+                    ++sameColorCount;
             }
 
             if ( sameColorCount * 10 > image.height() )
@@ -151,7 +153,7 @@ namespace
             for ( int x = interval; x < image.width(); x += interval )
             {
                 if ( image.pixel( x, y1 ) == image.pixel( x, y2 ) )
-                sameColorCount++;
+                    ++sameColorCount;
             }
 
             if ( sameColorCount * 10 > image.height() )
@@ -175,7 +177,7 @@ namespace
     {
         // Draw the outline as thin as practical
         const qreal sizeForPen = qMin( rect.width(), rect.height() );
-        const qreal penSize = sizeForPen < penScale ? sizeForPen / penScale : 1.0;
+        const qreal penSize = sizeForPen < penScale ? sizeForPen / penScale : 1;
         painter->setPen( QPen( color, penSize ) );
 
         // Draw along only the top and left edges to avoid doubling the line thickness
@@ -305,17 +307,18 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
     _cushionSurface.addVerticalRidge( rect.top(), rect.bottom() );
 
     // All stripes are scaled by the same amount
-    const double scale = rect.width() / totalSize;
+    const double width = rect.width();
+    const double scale = width / totalSize;
 
     // To avoid rounding errors accumulating, every tile is positioned relative to the parent
     // Items that don't reach a pixel from the previous item are silently dropped
-    FileSize cumulativeSize = 0;
-    double offset = 0;
-    double nextOffset = qMin( rect.width(), _parentView->minTileSize() );
-    while ( *it && offset < rect.width() )
+    FileSize cumulativeSize = 0LL;
+    double offset = 0.0;
+    double nextOffset = qMin( width, _parentView->minTileSize() );
+    while ( *it && offset < width )
     {
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( scale * cumulativeSize );
+        const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left() + offset, rect.top(), newOffset - offset, rect.height() );
@@ -327,7 +330,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 //                tile->_cushion = tile->renderCushion( childRect );
 
             offset = newOffset;
-            nextOffset = qMin( rect.width(), newOffset + _parentView->minTileSize() );
+            nextOffset = qMin( static_cast<double>( rect.width() ), newOffset + _parentView->minTileSize() );
         }
 
         ++it;
@@ -345,17 +348,18 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
     _cushionSurface.addHorizontalRidge( rect.left(), rect.right() );
 
     // All stripes are scaled by the same amount
-    const double scale = rect.height() / totalSize;
+    const double height = rect.height();
+    const double scale = height / totalSize;
 
     // To avoid rounding errors accumulating, every tile is positioned relative to the parent
     // Items that don't reach a pixel from the previous item are silently dropped
-    FileSize cumulativeSize = 0;
-    double offset = 0;
-    double nextOffset = qMin( rect.height(), _parentView->minTileSize() );
-    while ( *it && offset < rect.height() )
+    FileSize cumulativeSize = 0LL;
+    double offset = 0.0;
+    double nextOffset = qMin( height, _parentView->minTileSize() );
+    while ( *it && offset < height )
     {
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( scale * cumulativeSize );
+        const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = QRectF( rect.left(), rect.top() + offset, rect.width(), newOffset - offset );
@@ -367,7 +371,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
 //                tile->_cushion = tile->renderCushion( childRect );
 
             offset = newOffset;
-            nextOffset = qMin( rect.height(), newOffset + _parentView->minTileSize() );
+            nextOffset = qMin( static_cast<double>( rect.height() ), newOffset + _parentView->minTileSize() );
         }
 
         ++it;
@@ -418,7 +422,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         rowEnd = *it;
 
         it.setPos( rowStartIt );
-        layoutRow( dir, childrenRect, it, rowEnd, rowTotal, primary, round( height ) );
+        layoutRow( dir, childrenRect, it, rowEnd, rowTotal, primary, std::round( height ) );
 
         remainingTotal -= rowTotal;
     }
@@ -465,7 +469,7 @@ void TreemapTile::layoutRow( Orientation                    dir,
         // Position tiles relative to the row start based on the cumulative size of tiles
         //logDebug() << rect << *it << Qt::endl;
         cumulativeSize += itemTotalSize( *it );
-        const double newOffset = round( cumulativeSize * rowScale );
+        const double newOffset = std::round( cumulativeSize * rowScale );
 
         // Drop tiles that don't reach to the minimum pixel size or fill the row
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
@@ -628,7 +632,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 {
     //logDebug() << rect << Qt::endl;
 
-    static const double ambientIntensity = (double)_parentView->ambientLight() / 255;
+    static const double ambientIntensity = 1.0 * _parentView->ambientLight() / 255;
     static const double intensityScaling = 1.0 - ambientIntensity;
     static const double lightX = _parentView->lightX() * intensityScaling;
     static const double lightY = _parentView->lightY() * intensityScaling;
@@ -653,9 +657,9 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
             double cosa  = ( lightZ + ny*lightY + nx*lightX ) / sqrt( nx*nx + ny*ny + 1.0 );
             cosa = ambientIntensity + qMax( 0.0, cosa );
 
-            const int red = cosa * color.red() + 0.5;
-            const int green = cosa * color.green() + 0.5;
-            const int blue = cosa * color.blue() + 0.5;
+            const int red   = 0.5 + cosa * color.red();
+            const int green = 0.5 + cosa * color.green();
+            const int blue  = 0.5 + cosa * color.blue();
             *data = qRgb( red, green, blue );
         }
     }

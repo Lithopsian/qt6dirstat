@@ -33,8 +33,8 @@ namespace QDirStat
      * This will output the URL (path+name) and the total size of each (direct)
      * subdirectory child and each (direct) file child of 'node'.
      *
-     * Notice: This does not recurse into subdirectories, and the dot entry is
-     * treated just like a subdirectory!
+     * This does not recurse into subdirectories, and the dot entry is treated
+     * just like a subdirectory!
      *
      * @short (unsorted) iterator for FileInfo children.
      **/
@@ -140,7 +140,7 @@ namespace QDirStat
 
 	FileInfoList     _sortedChildren;
 	FileInfoListPos  _currentIt;
-	FileSize         _totalSize { 0 };
+	FileSize         _totalSize { 0LL };
     };
 
 } // namespace QDirStat

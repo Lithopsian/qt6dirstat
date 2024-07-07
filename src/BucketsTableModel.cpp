@@ -8,8 +8,8 @@
  */
 
 #include "BucketsTableModel.h"
+#include "FileSizeStats.h"
 #include "FormatUtil.h"
-#include "HistogramView.h"
 
 
 using namespace QDirStat;
@@ -17,7 +17,7 @@ using namespace QDirStat;
 
 int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 {
-    return parent.isValid() ? 0 : _histogram->bucketCount();
+    return parent.isValid() || !_stats ? 0 : _stats->bucketCount();
 }
 
 
@@ -31,14 +31,14 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
         case Qt::DisplayRole:
             {
                 const int row = index.row();
-                if ( row < 0 || row >= _histogram->bucketCount() )
+                if ( row < 0 || row >= _stats->bucketCount() )
                     return QVariant();
 
                 switch ( index.column() )
                 {
-                    case StartCol:  return formatSize( _histogram->bucketStart( row ) );
-                    case EndCol:    return formatSize( _histogram->bucketEnd  ( row ) );
-                    case ValueCol:  return QString::number( _histogram->bucket( row ) );
+                    case StartCol:  return formatSize( _stats->bucketStart( row ) );
+                    case EndCol:    return formatSize( _stats->bucketEnd  ( row ) );
+                    case ValueCol:  return QString::number( _stats->bucket( row ) );
                     default:        return QVariant();
                 }
             }
@@ -52,9 +52,7 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
 }
 
 
-QVariant BucketsTableModel::headerData( int             section,
-                                        Qt::Orientation orientation,
-                                        int             role ) const
+QVariant BucketsTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
 {
     switch ( role )
     {
@@ -70,7 +68,7 @@ QVariant BucketsTableModel::headerData( int             section,
                 }
             }
 
-            if ( section < _histogram->bucketCount() )
+            if ( section < _stats->bucketCount() )
                 return QString::number( section + 1 );
 
             return QVariant();

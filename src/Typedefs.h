@@ -13,17 +13,16 @@
 
 #include <QColor>
 #include <QList>
-#include <QTextStream>
+#include <QTextStream> // endl
 
-// The size of a standard disk block.
-//
-// Notice that this is different from st_blksize in the struct that the stat()
-// syscall returns, yet it is the reference unit for st_blocks in that same
-// struct.
+// The size of a standard disk block. This may be different from st_blksize
+// in the stat struct, even though st_blocks is normally calculated based
+// a 512-byte block.
 #define STD_BLOCK_SIZE 512L
 
-#define FileSizeMax   LLONG_MAX
-// 0x7FFFFFFFFFFFFFFFLL == 9223372036854775807LL
+#define FileSizeMax  std::numeric_limits<qint64>::max() // ~1 billion TB!
+#define DirSizeMax   std::numeric_limits<qint32>::max() // QAbstractItemModel limit
+#define FileCountMax std::numeric_limits<qint32>::max() // ~2 billion
 
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
 #define asConst(OBJECT) const_cast<std::add_const<decltype( OBJECT )>::type &>( OBJECT )
@@ -33,12 +32,21 @@
 
 namespace QDirStat
 {
-    using FileSize = long long;
+    using FileSize  = qint64;
+    using DirSize   = qint32;
+    using FileCount = qint32;
 
     using ColorList = QList<QColor>;
 
     class MountPoint;
     using MountPointList = QList<MountPoint *>;
+
+    /**
+     * Provide a qreal literal suffix.  qreal is not always
+     * a double (although it almost always is).
+     **/
+    constexpr qreal operator""_qr( long double x )
+        { return qreal( x ); }
 }
 
 namespace Qt
@@ -54,7 +62,7 @@ namespace Qt
         inline namespace StringLiterals
         {
             constexpr inline QLatin1String operator""_L1( const char * str, size_t size ) noexcept
-                { return QLatin1String( str, qsizetype( size ) ); }
+                { return QLatin1String( str, int( size ) ); }
         }
     }
 #endif

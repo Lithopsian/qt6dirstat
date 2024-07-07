@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QTextStream>
+#include <QtMath> // qCeil()
 
 #include "Typedefs.h" // FileSize
 
@@ -206,8 +207,8 @@ namespace QDirStat
 	 * Check with the magic number if this object is valid.
 	 * Return 'true' if it is valid, 'false' if invalid.
 	 *
-	 * Notice that this is intentionally not a virtual function to avoid
-	 * a segfault via the vptr if it is not valid.
+	 * This is intentionally not a virtual function to avoid a segfault
+	 * via the vptr if it is not valid.
 	 **/
 	bool checkMagicNumber() const { return _magic == FileInfoMagic; }
 
@@ -224,7 +225,7 @@ namespace QDirStat
 	 * If a directory scan doesn't begin at the root directory and this is
 	 * the top entry of this directory scan, it will also contain the base
 	 * path, i.e. "/usr/share/man" rather than just "man" if a scan was
-	 * requested for "/usr/share/man". Notice, however, that the entry for
+	 * requested for "/usr/share/man". Note that the entry for
 	 * "/usr/share/man/man1" will only return "man1" in this example.
 	 **/
 	const QString & name() const { return _name; }
@@ -286,14 +287,14 @@ namespace QDirStat
 	 * children.  Note that it may not be valid if the children haven't
 	 * been sorted yet or if the sort order is obsolete.
 	 **/
-	int rowNumber() const { return _rowNumber; }
+	DirSize rowNumber() const { return _rowNumber; }
 
 	/**
 	 * Return the row number for this item within its parent's sorted
 	 * children.  Note that it may not be valid if the children haven't
 	 * been sorted yet or if the sort order is obsolete.
 	 **/
-	void setRowNumber( int rowNumber ) { _rowNumber = rowNumber; }
+	void setRowNumber( DirSize rowNumber ) { _rowNumber = rowNumber; }
 
 	/**
 	 * The file permissions and object type as returned by lstat().
@@ -317,9 +318,9 @@ namespace QDirStat
 	/**
 	 * User ID of the owner.
 	 *
-	 * Notice that this might be undefined (zero will be stored, but it
-	 * it doesn't mean 'root') if this tree branch was read
-	 * from an old-format cache file. Check that with hasUid().
+	 * This might be undefined (zero will be stored, but it it doesn't
+	 * mean 'root') if this tree branch was read from an old-format
+	 * cache file. Check that with hasUid().
 	 **/
 	uid_t uid() const { return _uid; }
 
@@ -339,9 +340,9 @@ namespace QDirStat
 	/**
 	 * Group ID of the owner.
 	 *
-	 * Notice that this might be undefined (zero will be stored, but it
-	 * it doesn't mean 'root') if this tree branch was read
-	 * from an old-format cache file. Check that with hasGid().
+	 * This might be undefined (zero will be stored, but it it doesn't
+	 * mean 'root') if this tree branch was read from an old-format
+	 * cache file. Check that with hasGid().
 	 **/
 	gid_t gid() const { return _gid; }
 
@@ -390,8 +391,8 @@ namespace QDirStat
 	 * allocation.
 	 *
 	 **/
-	static int blocksFromSize( FileSize allocatedSize )
-	    { return ceil( static_cast<double>( allocatedSize ) / STD_BLOCK_SIZE ); }
+	static FileSize blocksFromSize( FileSize allocatedSize )
+	    { return std::ceil( 1.0 * allocatedSize / STD_BLOCK_SIZE ); }
 
 	/**
 	 * The file size in bytes without taking multiple hard links into
@@ -480,7 +481,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int totalItems() { return 0; }
+	virtual FileCount totalItems() { return 0; }
 
 	/**
 	 * Returns the total number of subdirectories in this subtree,
@@ -488,7 +489,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int totalSubDirs() { return 0; }
+	virtual FileCount totalSubDirs() { return 0; }
 
 	/**
 	 * Returns the total number of plain file children in this subtree,
@@ -496,7 +497,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int totalFiles() { return 0; }
+	virtual FileCount totalFiles() { return 0; }
 
 	/**
 	 * Returns the total number of non-directory items in this subtree,
@@ -504,7 +505,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-//	virtual int totalNonDirItems() { return 0; }
+//	virtual FileCount totalNonDirItems() { return 0; }
 
 	/**
 	 * Returns the total number of ignored (non-directory!) items in this
@@ -512,7 +513,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int totalIgnoredItems() { return 0; }
+	virtual FileCount totalIgnoredItems() { return 0; }
 
 	/**
 	 * Returns the total number of not ignored (non-directory!) items in
@@ -520,25 +521,25 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int totalUnignoredItems() { return 0; }
+	virtual FileCount totalUnignoredItems() { return 0; }
 
 	/**
 	 * Returns the total number of direct children of this item.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int directChildrenCount() { return 0; }
+	virtual FileCount directChildrenCount() { return 0; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
 	 * be read (typically due to insufficient permissions).
 	 *
-	 * Notice that this does NOT include this item if it is a directory
-	 * that could not be read.
+	 * This count does NOT include this item if it is a directory that
+	 * could not be read.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual int errSubDirCount() { return 0; }
+	virtual FileCount errSubDirCount() { return 0; }
 
 	/**
 	 * Returns the latest modification time of this subtree.
@@ -859,7 +860,7 @@ namespace QDirStat
 	bool isIgnored() const { return _isIgnored; }
 
 	/**
-	 * Set the "ignored" flag. Notice that this only sets the flag; it does
+	 * Set the "ignored" flag. Note that this only sets the flag; it does
 	 * not reparent the FileInfo or anything like that.
 	 **/
 	void setIgnored( bool ignored ) { _isIgnored = ignored; }
@@ -956,7 +957,7 @@ namespace QDirStat
 	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
-	int        _rowNumber { 0 };		// order of this child when the children are sorted
+	DirSize    _rowNumber { 0 };		// order of this child when the children are sorted
 	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
 
 	bool       _isLocalFile   :1;	// flag: local or remote file?

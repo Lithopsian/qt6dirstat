@@ -15,7 +15,7 @@
 
 namespace QDirStat
 {
-    class HistogramView;
+    class FileSizeStats;
 
     /**
      * Data model for the buckets table in the file size statistics window.
@@ -37,10 +37,16 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	BucketsTableModel( QObject * parent, const HistogramView * histogram ):
-	    QAbstractTableModel { parent },
-	    _histogram { histogram }
+	BucketsTableModel( QObject * parent ):
+	    QAbstractTableModel { parent }
 	{}
+
+	/**
+	 * Provide a pointer to the statistics to be used by
+	 * the model.
+	 **/
+	void setStats( const FileSizeStats * stats )
+	    { _stats = stats; }
 
 	/**
 	 * Wrappers around beginResetModel() and endResetModel() when the
@@ -74,9 +80,7 @@ namespace QDirStat
 	/**
 	 * Return header data for the specified section.
 	 **/
-	QVariant headerData( int             section,
-			     Qt::Orientation orientation,
-			     int             role ) const override;
+	QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if
@@ -88,7 +92,7 @@ namespace QDirStat
 
     private:
 
-        const HistogramView * _histogram;
+        const FileSizeStats * _stats { nullptr };
     };
 }
 

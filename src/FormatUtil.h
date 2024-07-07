@@ -10,8 +10,9 @@
 #ifndef FormatUtil_h
 #define FormatUtil_h
 
-#include <sys/types.h>      // mode_t
-#include <sys/stat.h>       // ALLPERMS
+#include <cmath>       // llround()
+#include <sys/types.h> // mode_t
+#include <sys/stat.h>  // ALLPERMS
 
 #include <QFontMetrics>
 #include <QStringBuilder>
@@ -47,7 +48,7 @@ namespace QDirStat
 {
     /**
      * Can't use a default argument when using this as a function pointer,
-     * so we really need the above overloaded version.
+     * so we really need the overloaded version.
      **/
     QString formatSize( FileSize size, int precision );
 
@@ -60,14 +61,16 @@ namespace QDirStat
      *
      *	   logDebug() << "Size: " << x->totalSize() << Qt::endl;
      **/
-    inline QString formatSize( FileSize size ) { return formatSize( size, 1 ); }
+    inline QString formatSize( FileSize size )    { return formatSize( size, 1 ); }
+    inline QString formatSize( double size )      { return formatSize( std::llround( size ), 1 ); }
+    inline QString formatSize( long double size ) { return formatSize( std::llround( size ), 1 ); }
 
     /**
      * Format a file / subtree size as bytes, but still human readable with a
      * thousands separator.
      **/
     inline QString formatByteSize( FileSize size )
-	{ return QObject::tr( "%L1 bytes" ).arg( size ); }
+	{ return size == 1 ? QObject::tr( "1 byte" ) : QObject::tr( "%L1 bytes" ).arg( size ); }
 
     /**
      * Format a file size string with no thousands separators and "B" for the units.

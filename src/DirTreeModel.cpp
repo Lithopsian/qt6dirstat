@@ -177,7 +177,7 @@ namespace
 	// More than 3 allocated clusters isn't "small"
 	const FileSize clusterSize = item->tree()->clusterSize();
 	const FileSize allocated = item->allocatedSize();
-	const int numClusters = allocated / clusterSize;
+	const FileSize numClusters = allocated / clusterSize;
 	if ( numClusters > SMALL_FILE_CLUSTERS + 1 )
 	    return false;
 
@@ -363,7 +363,7 @@ namespace
      * Return the number of direct children (plus the attic if there is
      * one) of a subtree.
      **/
-    int directChildrenCount( FileInfo * subtree )
+    int childrenCount( FileInfo * subtree )
     {
 	if ( !subtree )
 	    return 0;
@@ -701,14 +701,14 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 	    // or may not be finished at this time. For a local dir, it most
 	    // likely is; for a cache reader, there might be more to come.
 	    if ( !_tree->isBusy() )
-		return directChildrenCount( item );
+		return childrenCount( item );
 	    break;
 
 	case DirFinished:
 	case DirOnRequestOnly:
 //	case DirCached:
 	case DirAborted:
-	    return directChildrenCount( item );
+	    return childrenCount( item );
 
 	// intentionally omitting 'default' case so the compiler can report
 	// missing enum values
@@ -960,7 +960,7 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
     }
 
     // dumpDirectChildren( dir );
-    const int count = directChildrenCount( dir );
+    const int count = childrenCount( dir );
     if ( count > 0 )
     {
 	// logDebug() << "Notifying view about " << count << " new children of " << dir << Qt::endl;
@@ -1116,7 +1116,7 @@ void DirTreeModel::clearingSubtree( DirInfo * subtree )
 
     if ( subtree == _tree->root() || subtree->isTouched() )
     {
-	const int count = directChildrenCount( subtree );
+	const int count = childrenCount( subtree );
 	if ( count > 0 )
 	    beginRemoveRows( modelIndex( subtree ), 0, count - 1 );
 

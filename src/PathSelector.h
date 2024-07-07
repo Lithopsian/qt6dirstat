@@ -106,7 +106,8 @@ namespace QDirStat
 
 	/**
 	 * Add a mount point with the specified icon.
-	 * Notice that you can also specify QIcon() to suppress any icon.
+	 *
+	 * Note that you can also specify QIcon() to suppress any icon.
 	 **/
 //	PathSelectorItem * addMountPoint( MountPoint  * mountPoint,
 //					  const QIcon & icon );

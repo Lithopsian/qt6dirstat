@@ -109,6 +109,12 @@ namespace QDirStat
 	void initWidgets();
 
 	/**
+	 * Return the abstract model (cast as BucketsTableModel) for
+	 * the QTableView.
+	 **/
+	BucketsTableModel * bucketsTableModel() const;
+
+	/**
 	 * Populate with new content.
 	 **/
 	void populate( FileInfo * fileInfo, const QString & suffix );
@@ -118,21 +124,6 @@ namespace QDirStat
 	 * the histogram
 	 **/
 	void updateOptions();
-
-	/**
-	 * Fill a quantile table for 'order' quantiles with content
-	 *
-	 * 'sums' (if non-empty) is a list of accumulated sums between one
-	 * quantile and its previous one.
-	 *
-	 * 'step' is the step width; 'extremesMargin' specifies how far from
-	 * the extremes (min, max) the step width should be 1 instead.
-	 **/
-	void fillQuantileTable( QTableWidget  * table,
-				int             order,
-				const QString & namePrefix,
-				int             step,
-				int             extremesMargin );
 
 	/**
 	 * Fill the buckets and histogram, and build the tables.
@@ -163,9 +154,7 @@ namespace QDirStat
 	//
 
 	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
-
-	BucketsTableModel              * _bucketsTableModel	{ nullptr };
-	std::unique_ptr<FileSizeStats>   _stats;
+	std::unique_ptr<FileSizeStats>           _stats;
 
     };
 

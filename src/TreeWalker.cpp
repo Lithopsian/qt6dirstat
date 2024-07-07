@@ -27,7 +27,7 @@ namespace
      * Calculate a data value threshold from a set of PercentileStats from
      * an upper percentile up to the maximum value (P100).
      **/
-    qreal upperPercentileThreshold( PercentileStats & stats )
+    FileSize upperPercentileThreshold( PercentileStats & stats )
     {
         if ( stats.size() <= 100               ) return stats.percentile( 80 );
         if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 90 );
@@ -40,9 +40,9 @@ namespace
 
     /**
      * Calculate a data value threshold from a set of PercentileStats from
-     * an the minimum value (P0) to a lower percentile.
+     * the minimum value (P0) to a lower percentile.
      **/
-    qreal lowerPercentileThreshold( PercentileStats & stats )
+    FileSize lowerPercentileThreshold( PercentileStats & stats )
     {
         if ( stats.size() <= 100               ) return stats.percentile( 20 );
         if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 10 );
@@ -59,7 +59,9 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 {
     TreeWalker::prepare( subtree );
     FileSizeStats stats( subtree );
-    _threshold = ( FileSize )upperPercentileThreshold( stats );
+
+    // Implicit conversion from double, only valid up to 2^53
+    _threshold = upperPercentileThreshold( stats );
 }
 
 
@@ -73,7 +75,9 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 {
     TreeWalker::prepare( subtree );
     FileMTimeStats stats( subtree );
-    _threshold = ( time_t )upperPercentileThreshold( stats );
+
+    // Implicit conversion from double, only valid up to 2^53
+    _threshold = upperPercentileThreshold( stats );
 }
 
 
@@ -87,7 +91,9 @@ void OldFilesTreeWalker::prepare( FileInfo * subtree )
 {
     TreeWalker::prepare( subtree );
     FileMTimeStats stats( subtree );
-    _threshold = ( time_t )lowerPercentileThreshold( stats );
+
+    // Implicit conversion from double, only valid up to 2^53
+    _threshold = lowerPercentileThreshold( stats );
 }
 
 

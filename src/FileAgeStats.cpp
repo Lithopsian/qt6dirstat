@@ -68,13 +68,13 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
 
             YearStats & yearStats = _yearStats[ year ];
             yearStats.year = year;
-            yearStats.filesCount++;
+            ++yearStats.filesCount;
             yearStats.size += item->size();
 
             YearStats * thisMonthStats = monthStats( year, month );
             if ( thisMonthStats )
             {
-                thisMonthStats->filesCount++;
+                ++thisMonthStats->filesCount;
                 thisMonthStats->size += item->size();
             }
         }
@@ -88,7 +88,7 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
 void FileAgeStats::calcPercentages()
 {
     // Sum up the totals over all years
-    int totalFilesCount      = 0;
+    int      totalFilesCount = 0;
     FileSize totalFilesSize  = 0LL;
 
     for ( const YearStats & stats : asConst( _yearStats ) )
@@ -100,10 +100,10 @@ void FileAgeStats::calcPercentages()
     for ( YearStats & stats : _yearStats )
     {
         if ( totalFilesCount > 0 )
-            stats.filesPercent = ( 100.0f * stats.filesCount ) / totalFilesCount;
+            stats.filesPercent = 100.0f * stats.filesCount / totalFilesCount;
 
         if ( totalFilesSize > 0 )
-            stats.sizePercent = ( 100.0f * stats.size ) / totalFilesSize;
+            stats.sizePercent = 100.0f * stats.size / totalFilesSize;
     }
 
     calcMonthPercentages( thisYear() );
@@ -123,10 +123,10 @@ void FileAgeStats::calcMonthPercentages( short year )
         if ( stats )
         {
             if ( thisYearStats->filesCount > 0 )
-                stats->filesPercent = ( 100.0f * stats->filesCount ) / thisYearStats->filesCount;
+                stats->filesPercent = 100.0f * stats->filesCount / thisYearStats->filesCount;
 
             if ( thisYearStats->size > 0 )
-                stats->sizePercent = ( 100.0f * stats->size ) / thisYearStats->size;
+                stats->sizePercent = 100.0f * stats->size / thisYearStats->size;
         }
     }
 }

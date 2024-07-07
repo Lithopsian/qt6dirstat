@@ -391,8 +391,8 @@ namespace QDirStat
 
 	/**
 	 * Return the tile of the deepest-level highlighted parent or 0 if no
-	 * parent is currently highlighted. Notice that this returns the real
-	 * tile corresponding to a directory, not the HighlightRect.
+	 * parent is currently highlighted. This returns the underlying tile
+	 * corresponding to a directory, not the HighlightRect.
 	 **/
 	const TreemapTile * highlightedParent() const;
 
@@ -777,7 +777,7 @@ namespace QDirStat
 	 * 'opacity' (0.0 .. 1.0) indicates how transparent the mask is:
 	 * 0.0 -> completely transparent; 1.0 -> solid.
 	 **/
-	SceneMask( const TreemapTile * tile, float opacity );
+	SceneMask( const TreemapTile * tile, int opacity );
 
     };	// class SceneMask
 
