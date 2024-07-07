@@ -369,6 +369,10 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
     if ( _disabled || !newRoot || !isVisible() )
         return;
 
+    // Prevent division by zero in TreemapTile - also cleans all the summaries for this subtree
+    if ( newRoot->totalAllocatedSize() == 0 )
+        return;
+
     const QRectF rect = viewport()->rect();
     if ( rect.isEmpty() )
         return;

@@ -10,7 +10,6 @@
 #include "PkgReader.h"
 #include "DirTree.h"
 #include "Exception.h"
-#include "FileInfoIterator.h"
 #include "PkgFileListCache.h"
 #include "PkgFilter.h"
 #include "PkgManager.h"
@@ -324,17 +323,18 @@ namespace
 
 
     /**
-     * Locate a direct child of a DirInfo by name.
+     * Locate a direct child of a DirInfo by name.  Ignore dot-entries
+     * since they will never match a real pathname.
      **/
     FileInfo * locateChild( DirInfo * parent, const QString & pathComponent )
     {
 	if ( pathComponent.isEmpty() )
 	    return nullptr;
 
-	for ( FileInfoIterator it( parent ); *it; ++it )
+	for ( FileInfo * item = parent->firstChild(); item; item = item->next() )
 	{
-	    if ( (*it)->name() == pathComponent )
-		return *it;
+	    if ( item->name() == pathComponent )
+		return item;
 	}
 
 	return nullptr;

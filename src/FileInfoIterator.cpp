@@ -18,47 +18,39 @@
 using namespace QDirStat;
 
 
-void FileInfoIterator::next()
+FileInfoIterator::FileInfoIterator( const FileInfo * parent ):
+    _parent { parent },
+    _current { parent->firstChild() ? parent->firstChild() : parent->dotEntry() }
+{}
+
+
+FileInfo * FileInfoIterator::next()
 {
-    if ( !_directChildrenProcessed )
-    {
-	// Process direct children
-	_current = _current ? _current->next() : _parent->firstChild();
-	if ( !_current )
-	{
-	    _directChildrenProcessed = true;
-	    next();
-	}
-    }
-    else if ( !_dotEntryProcessed )
-    {
-	// Process dot entry
-	_current = _parent->dotEntry();
-	_dotEntryProcessed = true;
-    }
-    else // Direct children and dot entry processed
-    {
-	_current = nullptr;
-    }
+    if ( !_current )
+	return nullptr;
+
+    if ( _current->next() )
+	return _current->next();
+
+    return _current == _parent->dotEntry() ? nullptr : _parent->dotEntry();
 }
 
 
-FileInfoSortedBySizeIterator::FileInfoSortedBySizeIterator( FileInfo      * parent,
-							    FileSize      ( *itemTotalSize )( FileInfo * ),
-							    Qt::SortOrder   sortOrder )
+
+
+FileInfoBySizeIterator::FileInfoBySizeIterator( const FileInfo * parent )
 {
-    _sortedChildren.reserve( parent->directChildrenCount() );
+    _sortedChildren.reserve( parent->directChildrenCountConst() );
+
     for ( FileInfoIterator it( parent ); *it; ++it )
     {
 	_sortedChildren << *it;
-
-	if ( itemTotalSize )
-	    _totalSize += ( *itemTotalSize )( *it );
+	_totalSize += ( *it )->itemTotalSize();
     }
 
     std::stable_sort( _sortedChildren.begin(),
-		      _sortedChildren.end(),
-		      FileInfoSorter( SizeCol, sortOrder ) );
+                      _sortedChildren.end(),
+                      FileInfoSorter( SizeCol, Qt::DescendingOrder ) );
 
     _currentIt = _sortedChildren.cbegin();
 }

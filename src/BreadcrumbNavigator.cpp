@@ -98,10 +98,10 @@ void BreadcrumbNavigator::setPath( const FileInfo * item )
 void BreadcrumbNavigator::fillBreadcrumbs( const FileInfo * item )
 {
     // Since 5.7, the list will keep its capacity, so it will grow to the longest path used
-    // This is stillprobably better than trying to squeeze it and re-allocate every time
+    // This is still probably better than trying to squeeze it and re-allocate every time
     _breadcrumbs.clear();
 
-    while ( item && !item->isDirInfo() )
+    if ( item && !item->isDirInfo() )
         item = item->parent();
 
     if ( !item || !item->tree() )

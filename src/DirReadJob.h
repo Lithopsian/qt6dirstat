@@ -42,8 +42,6 @@ namespace QDirStat
      * This class is not intended to be used directly.  Derive your own class from
      * it or use one of LocalDirReadJob or CacheReadJob.  Derived classes should
      * implement at least one of read() or startReading().
-     *
-     * @short Abstract base class for directory reading.
      **/
     class DirReadJob
     {
@@ -152,8 +150,6 @@ namespace QDirStat
      * resides on. This is important if you wish to limit directory scans to
      * one filesystem - which is desirable when that one filesystem runs
      * out of space.
-     *
-     * @short Directory reader that reads one local directory.
      **/
     class LocalDirReadJob: public DirReadJob
     {

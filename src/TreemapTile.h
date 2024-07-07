@@ -26,7 +26,7 @@ class QGraphicsSceneMouseEvent;
 namespace QDirStat
 {
     class FileInfo;
-    class FileInfoSortedBySizeIterator;
+    class FileInfoBySizeIterator;
     class SelectedTileHighlighter;
     class TreemapView;
 
@@ -199,8 +199,6 @@ namespace QDirStat
      * treemap. If it corresponds to a leaf in the tree, it will be visible as
      * one tile (one rectangle) of the treemap. If it has children, it will be
      * subdivided again.
-     *
-     * @short Basic building block of a treemap
      **/
     class TreemapTile: public QGraphicsRectItem
     {
@@ -343,13 +341,13 @@ namespace QDirStat
 	 * Lay out all members of 'row' within 'rect' along its longer side.
 	 * Returns the new rectangle with the layouted area subtracted.
 	 **/
-	void layoutRow( Orientation                    dir,
-			QRectF                       & rect,
-			FileInfoSortedBySizeIterator & it,
-			const FileInfo               * rowEnd,
-			FileSize                       rowTotal,
-			double                         primary,
-			double                         secondary );
+	void layoutRow( Orientation              dir,
+			QRectF                 & rect,
+			FileInfoBySizeIterator & it,
+			const FileInfo         * rowEnd,
+			FileSize                 rowTotal,
+			double                   primary,
+			double                   secondary );
 
 	/**
 	 * Paint this tile.
@@ -442,7 +440,7 @@ namespace QDirStat
 	 * Returns a suitable color for 'file' based on a set of internal rules
 	 * (according to filename extension, MIME type or permissions).
 	 **/
-	inline const QColor & tileColor( FileInfo * file ) const;
+	inline const QColor & tileColor( const FileInfo * file ) const;
 
 	/**
 	 * Initialization common to all constructors.

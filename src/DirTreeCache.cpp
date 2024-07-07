@@ -102,7 +102,7 @@ namespace
 	gzprintf( cache, fileType( item ) );
 
 	// Write name
-	if ( item->isDirInfo() && !item->isDotEntry() )
+	if ( item->isDirInfo() )
 	    gzprintf( cache, " %-40s", urlEncoded( item->url() ).data() ); // absolute path
 	else
 	    gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).data() ); // relative path
@@ -153,7 +153,7 @@ namespace
 	if ( item->dotEntry() )
 	    writeTree( cache, item->dotEntry() );
 
-	// Recurse through subdirectories
+	// Recurse through subdirectories, but not the dot entry
 	for ( const FileInfo * child = item->firstChild(); child; child = child->next() )
 	    writeTree( cache, child );
     }

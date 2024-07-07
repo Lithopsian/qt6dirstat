@@ -11,7 +11,6 @@
 #include "DirInfo.h"
 #include "DotEntry.h"
 #include "FileInfo.h"
-#include "FileInfoIterator.h"
 #include "Logger.h"
 #include "Settings.h"
 
@@ -73,9 +72,11 @@ bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
     if ( _pattern.isEmpty() )
         return false;
 
-    for ( FileInfoIterator it( dir->dotEntry() ? dir->dotEntry() : dir ); *it; ++it)
+    // Search through FileInfo children to see if any match
+    const DirInfo * parent = dir->dotEntry() ? dir->dotEntry() : dir;
+    for ( const FileInfo * fileInfo = parent->firstChild(); fileInfo; fileInfo = fileInfo->next() )
     {
-        if ( !(*it)->isDir() && isMatch( (*it)->name() ) )
+        if ( !fileInfo->isDir() && isMatch( fileInfo->name() ) )
 	    return true;
     }
 

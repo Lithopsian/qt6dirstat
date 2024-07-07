@@ -18,82 +18,69 @@ namespace QDirStat
     /**
      * Iterator class for children of a FileInfo object. For optimum
      * performance, this iterator class does NOT return children in any
-     * specific sort order.
+     * specific sort order.  When there are no more children, operator*
+     * will return 0.  Unlike many C++ iterators it is safe to call
+     * operator++ or operator* even on an iterator past the end of the
+     * children.
      *
      * Sample usage:
      *
-     *	  FileInfoIterator it( node );
-     *
-     *	  while ( *it )
-     *	  {
+     *	  for ( FileInfoIterator it { node }; *it; ++it )
      *	     logDebug() << *it << ":\t" << (*it)->totalSize() << Qt::endl;
-     *	     ++it;
-     *	  }
      *
      * This will output the URL (path+name) and the total size of each (direct)
      * subdirectory child and each (direct) file child of 'node'.
      *
      * This does not recurse into subdirectories, and the dot entry is treated
-     * just like a subdirectory!
-     *
-     * @short (unsorted) iterator for FileInfo children.
+     * just like a subdirectory.  Note that the iterator may return 0 when it
+     * is first created if there are no children.
      **/
     class FileInfoIterator
     {
     public:
 	/**
-	 * Constructor: Initialize an iterator object to iterate over the
-	 * children of 'parent' (unsorted!). The dot entry is treated as a
-	 * subdirectory.
+	 * Constructor: initialize an object to iterate over the children
+	 * of 'parent', including any dot entry.  The children will be
+	 * returned in no particular order although the dot entry will
+	 * always be last.
 	 **/
-	FileInfoIterator( const FileInfo * parent ):
-	    _parent { parent }
-	{ next(); }
+	FileInfoIterator( const FileInfo * parent );
 
 	/**
-	 * Return the current child object or 0 if there is no more.
-	 * Same as operator*() .
+	 * Return the current child pointer or 0 if there are none.
 	 **/
-	FileInfo * current() const { return _current; }
+	FileInfo * operator*() const { return _current; }
 
 	/**
-	 * Return the current child object or 0 if there is no more.
-	 * Same as current().
+	 * Advance to the next child.
 	 **/
-	FileInfo * operator*() const { return current(); }
+	void operator++() { _current = next(); }
+
+
+    protected:
 
 	/**
-	 * Advance to the next child. Same as operator++().
+	 * Return the next child of this parent, or 0 if there are none.
 	 **/
-	void next();
-
-	/**
-	 * Advance to the next child. Same as next().
-	 **/
-	void operator++() { next(); }
+	FileInfo * next();
 
 
     private:
 
 	const FileInfo * _parent;
-	FileInfo       * _current			{ nullptr };
-	bool             _directChildrenProcessed	{ false };
-	bool             _dotEntryProcessed		{ false };
+	FileInfo       * _current;
 
     };	// class FileInfoIterator
 
 
-    class FileInfoSortedBySizeIterator
+    class FileInfoBySizeIterator
     {
     public:
 
 	/**
-	 * Constructor. Children below 'minSize' will be ignored by this
-	 * iterator.
+	 * Constructor.
 	 **/
-	FileInfoSortedBySizeIterator( FileInfo      * parent,
-				      FileSize      ( *itemTotalSize )( FileInfo * ) = nullptr,
-				      Qt::SortOrder   sortOrder = Qt::DescendingOrder );
+	FileInfoBySizeIterator( const FileInfo * parent );
 
 	/**
 	 * Return the current child object or 0 if there is no more.

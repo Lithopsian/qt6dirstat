@@ -109,9 +109,8 @@ namespace
 		const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
 
 		// Pad the title to avoid tiny dialog boxes
-		const QString itemType = item->isDirInfo() ?
-					 QObject::tr( "for directory" ) :
-					 QObject::tr( "for file" );
+		const QString itemType =
+		    item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
 		const QString itemLine = itemType % ": "_L1 % name;
 		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
 		const QString title = cleanTitle + QString( itemSpaces - titleWidth, u' ' );

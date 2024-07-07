@@ -32,23 +32,14 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Just a helper for an unwieldy common term
-     **/
-    FileSize itemTotalSize( FileInfo * it )
-    {
-        return it->totalAllocatedSize() ? it->totalAllocatedSize() : it->totalSize();
-    }
-
-
-    /**
      * Try to include members referred to by 'it' into 'rect' so that they achieve
      * the most "square" appearance.  Items are added until the aspect ratio of the
      * first and last items doesn't get better any more.  Returns the total size of
      * the items for the row.
      **/
-    FileSize squarify( const QRectF                 & rect,
-                       FileInfoSortedBySizeIterator & it,
-                       FileSize                       remainingTotal )
+    FileSize squarify( const QRectF           & rect,
+                       FileInfoBySizeIterator & it,
+                       FileSize                 remainingTotal )
     {
         //logDebug() << "squarify() " << this << " " << rect << Qt::endl;
 
@@ -60,12 +51,12 @@ namespace
         const double rowRatio = width < height ? width / height : height / width;
         const double rowWidthScale = rowRatio * remainingTotal; // really rectWidth
 
-        const FileSize firstSize = itemTotalSize( *it );
+        const FileSize firstSize = (*it)->itemTotalSize();
         FileSize sum = 0LL;
         double bestAspectRatio = 0.0;
-        while ( *it )
+        while (*it)
         {
-            FileSize size = itemTotalSize( *it );
+            const FileSize size = (*it)->itemTotalSize();
             if ( size > 0 )
             {
                 sum += size;
@@ -206,9 +197,6 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
     //logDebug() << "Creating root tile " << orig << "    " << rect << Qt::endl;
     init();
 
-    if ( itemTotalSize( _orig ) == 0 )    // Prevent division by zero
-        return;
-
     if ( _parentView->squarify() )
         createSquarifiedChildren(rect);
     else if ( rect.width() > rect.height() )
@@ -292,13 +280,13 @@ void TreemapTile::init()
 
     setFlags( ItemIsSelectable );
 
-    if ( (  _orig->isDir() && _orig->totalSubDirs() == 0 ) || _orig->isDotEntry() )
+    if ( ( _orig->isDir() && _orig->totalSubDirsConst() == 0 ) || _orig->isDotEntry() )
         setAcceptHoverEvents( true );
 }
 
 void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 {
-    FileInfoSortedBySizeIterator it( _orig, itemTotalSize );
+    FileInfoBySizeIterator it { _orig };
     FileSize totalSize = it.totalSize();
 
     if ( totalSize == 0 )
@@ -317,7 +305,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
     double nextOffset = qMin( width, _parentView->minTileSize() );
     while ( *it && offset < width )
     {
-        cumulativeSize += itemTotalSize( *it );
+        cumulativeSize += (*it)->itemTotalSize();
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
@@ -325,7 +313,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
             TreemapTile * tile = new VerticalTreemapTile( this, *it, childRect );
             tile->cushionSurface().addHorizontalRidge( childRect.left(), childRect.right() );
 
-            if ( ( *it )->isDirInfo() )
+            if ( (*it)->isDirInfo() )
                 addRenderThread( tile, 4 );
 //                tile->_cushion = tile->renderCushion( childRect );
 
@@ -339,7 +327,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 
 void TreemapTile::createChildrenVertical( const QRectF & rect )
 {
-    FileInfoSortedBySizeIterator it( _orig, itemTotalSize );
+    FileInfoBySizeIterator it { _orig };
     FileSize totalSize = it.totalSize();
 
     if (totalSize == 0)
@@ -358,7 +346,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
     double nextOffset = qMin( height, _parentView->minTileSize() );
     while ( *it && offset < height )
     {
-        cumulativeSize += itemTotalSize( *it );
+        cumulativeSize += (*it)->itemTotalSize();
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
@@ -366,7 +354,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
             TreemapTile * tile = new HorizontalTreemapTile( this, *it, childRect );
             tile->cushionSurface().addVerticalRidge( childRect.top(), childRect.bottom() );
 
-            if ( ( *it )->isDirInfo() )
+            if ( (*it)->isDirInfo() )
                 addRenderThread( tile, 4 );
 //                tile->_cushion = tile->renderCushion( childRect );
 
@@ -381,7 +369,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
 void TreemapTile::createSquarifiedChildren( const QRectF & rect )
 {
     // Get all the children of this tile and total them up
-    FileInfoSortedBySizeIterator it( _orig, itemTotalSize );
+    FileInfoBySizeIterator it { _orig };
     FileSize remainingTotal = it.totalSize();
 
     // Don't show completely empty directories in the treemap, avoids divide by zero issues
@@ -389,7 +377,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         return;
 
     QRectF childrenRect = rect;
-    FileInfo * rowEnd = *it;
+    const FileInfo * rowEnd = *it;
     while ( rowEnd && childrenRect.height() >= 0 && childrenRect.width() >= 0 )
     {
         // Square treemaps always layout the next row of tiles along the shortest dimension
@@ -408,9 +396,9 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         {
             // Aspect ratio hardly matters any more, so fast forward enough items to make half a pixel
             // (many of these tiny items will be dropped while laying out a row of tiles)
-            if ( *it )
+            if (*it)
             {
-                rowTotal += itemTotalSize( *it );
+                rowTotal += (*it)->itemTotalSize();
                 ++it;
             }
             else
@@ -428,13 +416,13 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
     }
 }
 
-void TreemapTile::layoutRow( Orientation                    dir,
-                             QRectF                       & rect,
-                             FileInfoSortedBySizeIterator & it,
-                             const FileInfo               * rowEnd,
-                             FileSize                       rowTotal,
-                             double                         primary,
-                             double                         height )
+void TreemapTile::layoutRow( Orientation              dir,
+                             QRectF                 & rect,
+                             FileInfoBySizeIterator & it,
+                             const FileInfo         * rowEnd,
+                             FileSize                 rowTotal,
+                             double                   primary,
+                             double                   height )
 {
 
     //logDebug() << this << " - " << rect << " - height= " << height << Qt::endl;
@@ -468,7 +456,7 @@ void TreemapTile::layoutRow( Orientation                    dir,
     {
         // Position tiles relative to the row start based on the cumulative size of tiles
         //logDebug() << rect << *it << Qt::endl;
-        cumulativeSize += itemTotalSize( *it );
+        cumulativeSize += (*it)->itemTotalSize();
         const double newOffset = std::round( cumulativeSize * rowScale );
 
         // Drop tiles that don't reach to the minimum pixel size or fill the row
@@ -481,7 +469,7 @@ void TreemapTile::layoutRow( Orientation                    dir,
             TreemapTile * tile = new TreemapTile( this, *it, childRect, rowCushionSurface );
 
             // Don't need to finish calculating cushions once all the leaf-level children have been created
-            if ( ( *it )->isDirInfo() )
+            if ( (*it)->isDirInfo() )
 //                tile->_cushion = tile->renderCushion( childRect );
                 addRenderThread( tile, 6 );
             else if ( dir == TreemapHorizontal )
@@ -670,7 +658,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
     return QPixmap::fromImage( image );
 }
 
-const QColor & TreemapTile::tileColor( FileInfo * file ) const
+const QColor & TreemapTile::tileColor( const FileInfo * file ) const
 {
     return _parentView->fixedColor().isValid() ?
         _parentView->fixedColor() :

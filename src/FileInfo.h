@@ -449,24 +449,46 @@ namespace QDirStat
 	 **/
 	 YearAndMonth yearAndMonth() const;
 
+	/**
+	 * Returns the total size in bytes of this subtree.
+	 *
+	 * This is a specialised const (read-only) getter that
+	 * returns the total allocated size if it is non-zero,
+	 * otherwise the total size.  This "size" is suitable for
+	 * callers such as TreemapTile that always want a non-zero
+	 * size and are are working on a subtree that has clean
+	 * summaries and cannot become dirty (or will be abandoned
+	 * if it does).
+	 *
+	 **/
+	FileSize itemTotalSize() const
+	{
+		const FileSize alloc = totalAllocatedSizeConst();
+		return alloc ? alloc : totalSizeConst();
+	}
+
 	//
 	// Directory-related methods that should be implemented by
 	// derived classes.
 	//
 
 	/**
-	 * Returns the total size in bytes of this subtree.
+	 * Returns the total size in bytes of this subtree.  It also
+	 * has a const overload.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileSize totalSize() { return size(); }
+	virtual FileSize totalSizeConst() const { return size(); }
 
 	/**
 	 * Returns the total allocated size in bytes of this subtree.
+	 * It also has a const overload.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileSize totalAllocatedSize() { return allocatedSize(); }
+	virtual FileSize totalAllocatedSizeConst() const { return allocatedSize(); }
 
 	/**
 	 * Returns the total size in blocks of this subtree.
@@ -486,10 +508,12 @@ namespace QDirStat
 	/**
 	 * Returns the total number of subdirectories in this subtree,
 	 * excluding this item. Dot entries and "." or ".." are not counted.
+	 * It also has a const overload.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileCount totalSubDirs() { return 0; }
+	virtual FileCount totalSubDirsConst() const { return 0; }
 
 	/**
 	 * Returns the total number of plain file children in this subtree,
@@ -524,11 +548,13 @@ namespace QDirStat
 	virtual FileCount totalUnignoredItems() { return 0; }
 
 	/**
-	 * Returns the total number of direct children of this item.
+	 * Returns the total number of direct children of this item.  It
+	 * also has a const overload.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
 	virtual FileCount directChildrenCount() { return 0; }
+	virtual FileCount directChildrenCountConst() const { return 0; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
@@ -539,7 +565,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual FileCount errSubDirCount() { return 0; }
+	virtual FileCount errSubDirs() { return 0; }
 
 	/**
 	 * Returns the latest modification time of this subtree.

@@ -402,23 +402,15 @@ PkgInfo * FileInfo::pkgInfoParent() const
 
 bool FileInfo::filesystemCanReportBlocks() const
 {
-    const FileInfo * dir = this;
-
-    // Find the nearest real directory from here;
-    // do not use a DotEntry or an Attic because they always have 0 blocks.
-
-    while ( !dir->isDirInfo() || dir->isPseudoDir() )
+    // Find the nearest ancestor that is a real directory
+    for ( const FileInfo * dir = this; dir; dir = dir->parent() )
     {
-	dir = dir->parent();
-
-	if ( !dir )
-	    return false;
+	// Do not use a DotEntry or an Attic because they always have 0 blocks
+	if ( dir->isDirInfo() && !dir->isPseudoDir() )
+	    return dir->blocks() > 0; // real directories should never have blocks == 0
     }
 
-    //logDebug() << "Checking block size of " << dir << ": " << dir->blocks() << Qt::endl;
-
-    // A real directory never has a size == 0, so we can skip this check.
-    return dir->blocks() > 0;
+    return false;
 }
 
 
