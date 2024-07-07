@@ -742,7 +742,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    if ( item->readError() )
 		return dirReadErrColor();
 
-	    if ( item->errSubDirCount() > 0 )
+	    if ( item->errSubDirs() > 0 )
 		return subtreeReadErrColor();
 
 	    return QVariant();

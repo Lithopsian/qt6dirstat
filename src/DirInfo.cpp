@@ -131,7 +131,7 @@ void DirInfo::initCounts()
     _totalIgnoredItems   = 0;
     _totalUnignoredItems = 0;
     _directChildrenCount = 0;
-    _errSubDirCount      = 0;
+    _errSubDirs          = 0;
     _latestMtime         = mtime();
     _oldestFileMtime     = 0;
 }
@@ -183,8 +183,10 @@ void DirInfo::deleteEmptyDotEntry()
 
 //	countDirectChildren();
 	--_directChildrenCount;
+//	markAsDirty();
     }
 }
+
 
 
 Attic * DirInfo::ensureAttic()
@@ -224,31 +226,39 @@ void DirInfo::recalc()
 
     for ( FileInfoIterator it( this ); *it; ++it )
     {
+	// Count the child and add all its sub-totals
 	++_directChildrenCount;
 	_totalSize           += (*it)->totalSize();
 	_totalAllocatedSize  += (*it)->totalAllocatedSize();
 	_totalBlocks         += (*it)->totalBlocks();
-	_totalItems          += (*it)->totalItems() + 1;
+	_totalItems          += (*it)->totalItems();
 	_totalSubDirs        += (*it)->totalSubDirs();
-	_errSubDirCount      += (*it)->errSubDirCount();
+	_errSubDirs          += (*it)->errSubDirs();
 	_totalFiles          += (*it)->totalFiles();
 	_totalIgnoredItems   += (*it)->totalIgnoredItems();
 	_totalUnignoredItems += (*it)->totalUnignoredItems();
 
+	// Dot entries are iterated but don't count the dot entry itself
+	if ( !(*it)->isDotEntry() )
+	    ++_totalItems;
+
 	if ( (*it)->isDir() )
 	{
+	    // Count this as a sub-directory
 	    ++_totalSubDirs;
 
 	    if ( (*it)->readError() )
-		++_errSubDirCount;
+		++_errSubDirs;
 	}
 	else
 	{
+	    // Only add non-directories to the un/ignored counts
 	    if ( (*it)->isIgnored() )
 		++_totalIgnoredItems;
 	    else
 		++_totalUnignoredItems;
 
+	    // Only count regular files in _totalFiles
 	    if ( (*it)->isFile() )
 		++_totalFiles;
 	}
@@ -265,13 +275,18 @@ void DirInfo::recalc()
 	}
     }
 
+    // Just copy ignored and error counts from ignored items to non-ignored items
     if ( _attic )
     {
 	_totalIgnoredItems += _attic->totalIgnoredItems();
-	_errSubDirCount	   += _attic->errSubDirCount();
+	_errSubDirs        += _attic->errSubDirs();
     }
 
     _summaryDirty = false;
+#if 0
+    if ( parent() && parent() == tree()->root() )
+	logDebug() << _attic << " " << _totalIgnoredItems << " " << _totalUnignoredItems << " " << _totalItems << " " << _totalSubDirs << Qt::endl;
+#endif
 }
 
 
@@ -390,12 +405,12 @@ DirSize DirInfo::countDirectChildren()
 }
 */
 
-FileCount DirInfo::errSubDirCount()
+FileCount DirInfo::errSubDirs()
 {
     if ( _summaryDirty )
 	recalc();
 
-    return _errSubDirCount;
+    return _errSubDirs;
 }
 
 
@@ -478,7 +493,7 @@ void DirInfo::childAdded( FileInfo * newChild )
     {
 	const bool isDir = newChild->isDir();
 
-	// Ideally, un/ignored items would always be counted, but they are wrong already if the summary's dirty
+	// Ideally, un/ignored items would always be counted, but they might be already if the summary's dirty
 	if ( newChild->isIgnored() )
 	    _totalIgnoredItems += isDir ? newChild->totalIgnoredItems() : 1;
 	else if ( !isDir ) // unignored "items" doesn't include directories
@@ -542,7 +557,7 @@ void DirInfo::childAdded( FileInfo * newChild )
 	parent()->childAdded( newChild );
 #if 0
     if ( parent() && parent() == tree()->root() )
-	logDebug() << _summaryDirty << " " << _totalIgnoredItems << " " << _totalUnignoredItems << " " << _totalItems << " " << _totalSubDirs << " " << newChild << Qt::endl;
+	logDebug() << _summaryDirty << " " << _errSubDirs << " " << _totalIgnoredItems << " " << _totalUnignoredItems << " " << _totalItems << " " << _totalSubDirs << " " << newChild << Qt::endl;
 #endif
 }
 
@@ -627,7 +642,7 @@ void DirInfo::readJobFinished( DirInfo * dir )
 	dropSortCache();
 
     if ( dir && dir != this && dir->readError() )
-	++_errSubDirCount;
+	++_errSubDirs;
 
     if ( parent() )
 	parent()->readJobFinished( dir );
@@ -654,7 +669,7 @@ QLatin1String DirInfo::sizePrefix() const
 
 	case DirFinished:
 //	case DirCached:
-	    if ( _errSubDirCount > 0 )
+	    if ( _errSubDirs > 0 )
 		return "> "_L1;
 
 	case DirQueued:
@@ -680,7 +695,7 @@ void DirInfo::finalizeAll()
 {
     for ( FileInfo * child = firstChild(); child; child = child->next() )
     {
-	if ( child->isDirInfo() && !child->isDotEntry() )
+	if ( child->isDirInfo() )
 	    child->toDirInfo()->finalizeAll();
     }
 
@@ -755,10 +770,15 @@ void DirInfo::checkIgnored()
 
     // Display all directories as ignored that have any ignored items, but no
     // items that are not ignored.
-    setIgnored( totalIgnoredItems() > 0 && totalUnignoredItems() == 0 );
+    const bool wasIgnored = isIgnored();
+    const bool newIgnored = totalIgnoredItems() > 0 && totalUnignoredItems() == 0;
+    setIgnored( newIgnored );
+
+    if ( wasIgnored != newIgnored)
+	_summaryDirty = true;
 
     // Empty directories have no ignored items so haven't been set to ignored yet
-    if ( isIgnored() )
+    if ( newIgnored )
     {
 	// Any children must have totalUnignoredItems == 0, so ignore them all
 	for ( FileInfoIterator it( this ); *it; ++it )
@@ -858,7 +878,6 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
 
 void DirInfo::finishReading( DirReadState readState )
 {
-    // logDebug() << this << Qt::endl;
     setReadState( readState );
     finalizeLocal();
     tree()->sendReadJobFinished( this );
@@ -876,7 +895,7 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
     // Generate the unsorted children list, including a dot entry
     _sortedChildren.reserve( parent->directChildrenCount() + 1 );
     for ( FileInfoIterator it( parent ); *it; ++it )
-	_sortedChildren.append( *it );
+	_sortedChildren.append(*it);
 
     // logDebug() << "Sorting children of " << this << " by " << sortCol << Qt::endl;
 

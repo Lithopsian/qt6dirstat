@@ -34,8 +34,6 @@ namespace QDirStat
      * Note that this class uses a "pseudo root" to better conform with Qt's
      * notion of tree views and the corresponding data models: they use an
      * invisible root item to support multiple toplevel items.
-     *
-     * @short Directory tree global data and infrastructure
      **/
     class DirTree: public QObject
     {

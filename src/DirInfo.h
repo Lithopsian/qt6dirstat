@@ -72,8 +72,6 @@ namespace QDirStat
      * children. The base class (FileInfo) has only stubs for the respective
      * methods to integrate seamlessly with the abstraction of a file /
      * directory tree; this class fills those stubs with life.
-     *
-     * @short directory item within a DirTree.
      **/
     class DirInfo: public FileInfo
     {
@@ -146,18 +144,22 @@ namespace QDirStat
 	nlink_t links() const override { return 0; }
 
 	/**
-	 * Returns the total size in bytes of this subtree.
+	 * Returns the total size in bytes of this subtree.  The const
+	 * overload does not check _summaryDirty.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	FileSize totalSize() override;
+	FileSize totalSizeConst() const override { return _totalSize; }
 
 	/**
-	 * Returns the total allocated size in bytes of this subtree.
+	 * Returns the total allocated size in bytes of this subtree.  The
+	 * const overload does not check _summaryDirty.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	FileSize totalAllocatedSize() override;
+	FileSize totalAllocatedSizeConst() const override { return _totalAllocatedSize; }
 
 	/**
 	 * Returns the total size in blocks of this subtree.
@@ -177,10 +179,12 @@ namespace QDirStat
 	/**
 	 * Returns the total number of subdirectories in this subtree,
 	 * excluding this item. Dot entries and "." or ".." are not counted.
+	 * The const overload does not check _summaryDirty.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	FileCount totalSubDirs() override;
+	FileCount totalSubDirsConst() const override { return _totalSubDirs; }
 
 	/**
 	 * Returns the total number of plain file children in this subtree,
@@ -207,7 +211,7 @@ namespace QDirStat
 	FileCount totalIgnoredItems() override;
 
 	/**
-	 * Returns the total number of not ignored (non-directory!) items in
+	 * Returns the total number of not-ignored (non-directory!) items in
 	 * this subtree, excluding this item.
 	 *
 	 * Reimplemented - inherited from FileInfo.
@@ -222,11 +226,13 @@ namespace QDirStat
 	 *
 	 * This method uses a cached value whenever possible, so it is
 	 * considerably faster than the unconditional countDirectChildren()
-	 * method.
+	 * method.  The const overload does not check _summaryDirty and
+	 * always returns the cached value.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	DirSize directChildrenCount() override;
+	DirSize directChildrenCountConst() const override { return _directChildrenCount; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
@@ -237,7 +243,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	FileCount errSubDirCount() override;
+	FileCount errSubDirs() override;
 
 	/**
 	 * Returns the latest modification time of this subtree.
@@ -461,10 +467,19 @@ namespace QDirStat
 	void setReadState( DirReadState newReadState );
 
 	/**
+	 * Return whether the current sort data, if any, matches the given
+	 * sort column and order.
+	 **/
+	bool sorted( DataColumn sortCol, Qt::SortOrder sortOrder ) const
+	    { return _sortInfo && sortCol == _sortInfo->_sortedCol && sortOrder == _sortInfo->_sortedOrder; }
+
+	/**
 	 * Return the sorted list of children from the sort info structure.
 	 **/
 	const FileInfoList & sortedChildren( DataColumn sortCol, Qt::SortOrder sortOrder )
 	    { return sortInfo( sortCol, sortOrder )->_sortedChildren; }
+	const FileInfoList & sortedChildrenConst() const
+	    { return _sortInfo->_sortedChildren; }
 
 	/**
 	 * Return the numeric position of the given child pointer in the
@@ -631,13 +646,6 @@ namespace QDirStat
 	const DirSortInfo * newSortInfo( DataColumn sortCol, Qt::SortOrder sortOrder );
 
 	/**
-	 * Return whether the current sort data, if any, matches the given
-	 * sort column and order.
-	 **/
-	bool sorted( DataColumn sortCol, Qt::SortOrder sortOrder ) const
-	    { return _sortInfo && sortCol == _sortInfo->_sortedCol && sortOrder == _sortInfo->_sortedOrder; }
-
-	/**
 	 * Drop all cached information about children sorting for this object and
 	 * all its descendants.
 	 **/
@@ -710,7 +718,7 @@ namespace QDirStat
 	FileCount      _totalFiles;
 	FileCount      _totalIgnoredItems;
 	FileCount      _totalUnignoredItems;
-	FileCount      _errSubDirCount;
+	FileCount      _errSubDirs;
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
 	FileSize       _totalBlocks;

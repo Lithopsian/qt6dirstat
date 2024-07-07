@@ -446,7 +446,7 @@ void MainWindow::readingFinished()
     logInfo() << "Reading finished after " << elapsedTime << Qt::endl;
 
     const auto firstToplevel = app()->firstToplevel();
-    if ( firstToplevel && firstToplevel->errSubDirCount() > 0 )
+    if ( firstToplevel && firstToplevel->errSubDirs() > 0 )
 	showDirPermissionsWarning();
 
     //dumpModelTree( app()->dirTreeModel(), QModelIndex(), "" );

@@ -99,9 +99,11 @@ namespace
 	return nullptr;
     }
 
-
+#if 0
     /**
      * Recursively force a complete recalculation of all sums.
+     *
+     * Redundant now, fingers crossed.
      **/
     void recalc( DirInfo * dir )
     {
@@ -123,7 +125,7 @@ namespace
 
 	dir->recalc();
     }
-
+#endif
 
     /**
      * Move all items from any attics below a directory into the attic parent and
@@ -137,7 +139,7 @@ namespace
 	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
 	    dir->takeAllChildren( dir->attic() );
 	    dir->deleteEmptyAttic();
-	    dir->recalc();
+//	    dir->recalc();
 	}
 
 	for ( FileInfoIterator it( dir ); *it; ++it )
@@ -151,9 +153,6 @@ namespace
     /**
      * Recurse through the tree from 'dir' on and move any ignored items to
      * the attic on the same level.
-     *
-     * Note that the ignored items get counted again when they are moved,
-     * but nobody really cares and recalc() will be called at the end.
      **/
     void moveIgnoredToAttic( DirInfo * dir )
     {
@@ -188,11 +187,12 @@ namespace
 
 	if ( !ignoredChildren.isEmpty() )
 	{
-	    // Recalc the attic before its parent
+	    // Recalc the attic to catch error counts in the moved children
+	    // childAdded() doesn't expect the child to already have error counts
 	    if ( dir->attic() )
 		dir->attic()->recalc();
 
-	    dir->recalc();
+//	    dir->recalc();
 	}
     }
 
@@ -204,10 +204,7 @@ namespace
      **/
     void ignoreEmptyDirs( DirInfo * dir )
     {
-	FileInfo * child = dir->firstChild();
-	FileInfoList ignoredChildren;
-
-	while ( child )
+	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
 	{
 	    if ( !child->isIgnored() && child->isDirInfo() )
 	    {
@@ -221,8 +218,6 @@ namespace
 
 		ignoreEmptyDirs( subDir );
 	    }
-
-	    child = child->next();
 	}
     }
 
@@ -324,6 +319,7 @@ void DirTree::startReading( const QString & rawUrl )
     }();
 
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
+    logInfo() << "url:    " << _url << Qt::endl;
     logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString() ) << Qt::endl;
 
     sendStartingReading();
@@ -368,6 +364,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 		    return;
 		}
 
+		// Desperately try the parent of items that no longer exist
 		item = item->parent();
 	    }
 
@@ -447,9 +444,9 @@ void DirTree::finalizeTree()
 {
     if ( _root && hasFilters() )
     {
-	recalc( root() );
+//	recalc( root() );
 	ignoreEmptyDirs( root() );
-	recalc( root() );
+//	recalc( root() );
 	if ( _root->firstChild() )
             moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
 //	recalc( root() );
