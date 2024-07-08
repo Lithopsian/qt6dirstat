@@ -86,7 +86,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
 {
     // Try first with the full (possibly symlinked) path
     int exitCode = -1;
-    const QString fullPathOutput = runDpkg( path, exitCode, true ); // error code likely, ignore
+    const QString fullPathOutput = runDpkg( path, exitCode, false ); // error code likely, ignore
     if ( exitCode == 0 )
     {
 	const QString package = searchOwningPkg( path, fullPathOutput );
@@ -97,7 +97,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
     // Search again just by filename in case part of the directory path is symlinked
     // (this may produce a lot of rows)
     const QFileInfo fileInfo( path );
-    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, true ); // error code likely, ignore
+    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false ); // error code likely, ignore
     if ( exitCode != 0 )
 	return QString();
 
@@ -234,7 +234,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
     const QString pathResolved = resolvePath( path );
 
     int exitCode = -1;
-    const QString output = runDpkg( path, exitCode, false ); // don't ignore error codes
+    const QString output = runDpkg( path, exitCode, true ); // don't ignore error codes
     if ( exitCode != 0 )
 	return QString();
 
@@ -377,7 +377,7 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
 {
     int exitCode = -1;
-    QString output = runDpkg( "*", exitCode, false ); // don't ignore error codes
+    QString output = runDpkg( "*", exitCode, true ); // don't ignore error codes
     if ( exitCode != 0 )
 	return nullptr;
 
