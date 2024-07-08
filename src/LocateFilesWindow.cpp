@@ -116,7 +116,9 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
     instance->populate( fileInfo );
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
     instance->show();
-    instance->selectFirstItem();
+
+    // Select the first row after a delay so it doesn't slow down displaying the list
+    QTimer::singleShot( 50, instance, &LocateFilesWindow::selectFirstItem );
 }
 
 

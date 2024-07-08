@@ -88,9 +88,11 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
 
     instance->populate( suffix, fileInfo );
     instance->_ui->treeWidget->sortByColumn( SSR_PathCol, Qt::AscendingOrder );
-    instance->selectFirstItem();
     instance->show();
     instance->raise();
+
+    // Select the first row after a delay so it doesn't slow down displaying the list
+    QTimer::singleShot( 50, instance, &LocateFileTypeWindow::selectFirstItem );
 }
 
 

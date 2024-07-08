@@ -793,7 +793,7 @@ void DirInfo::checkIgnored()
 
 const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sortOrder )
 {
-    // Clean old sorted children lists and create new ones
+    // Clea old sorted children lists and create new ones
     dropSortCaches(); // recursive to all ancestors
     _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
 
