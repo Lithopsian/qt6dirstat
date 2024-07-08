@@ -139,7 +139,6 @@ namespace
 	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
 	    dir->takeAllChildren( dir->attic() );
 	    dir->deleteEmptyAttic();
-//	    dir->recalc();
 	}
 
 	for ( FileInfoIterator it( dir ); *it; ++it )
@@ -187,12 +186,11 @@ namespace
 
 	if ( !ignoredChildren.isEmpty() )
 	{
-	    // Recalc the attic to catch error counts in the moved children
+	    // Recalc the attic to capture error counts in the moved children
 	    // childAdded() doesn't expect the child to already have error counts
-	    if ( dir->attic() )
-		dir->attic()->recalc();
+	    dir->attic()->recalc();
 
-//	    dir->recalc();
+	    // unlinkChild() has already marked dir and all its ancestors as dirty
 	}
     }
 
@@ -444,9 +442,7 @@ void DirTree::finalizeTree()
 {
     if ( _root && hasFilters() )
     {
-//	recalc( root() );
 	ignoreEmptyDirs( root() );
-//	recalc( root() );
 	if ( _root->firstChild() )
             moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
 //	recalc( root() );

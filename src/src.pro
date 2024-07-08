@@ -29,6 +29,7 @@ INSTALLS	+= TARGET desktop icons
 
 # QMAKE_CXXFLAGS	+=  -Wno-deprecated -Wno-deprecated-declarations
 # QMAKE_CXXFLAGS	+=  -std=c++11
+# QMAKE_CXXFLAGS	+=  -Wconversion
 # QMAKE_CXXFLAGS	+=  -flto=auto
 # QMAKE_LDDFLAGS	+=  -flto=auto
 
@@ -54,7 +55,6 @@ SOURCES =   main.cpp			\
 	    DirTreeFilter.cpp		\
 	    DirTreeView.cpp		\
 	    DiscoverActions.cpp		\
-	    DotEntry.cpp		\
 	    DpkgPkgManager.cpp		\
 	    Exception.cpp		\
 	    ExcludeRules.cpp		\

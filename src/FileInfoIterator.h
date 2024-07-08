@@ -67,8 +67,8 @@ namespace QDirStat
 
     private:
 
-	const FileInfo * _parent;
-	FileInfo       * _current;
+	FileInfo * _dotEntry;
+	FileInfo * _current;
 
     };	// class FileInfoIterator
 

@@ -277,7 +277,7 @@ void LocalDirReadJob::startReading()
 #endif
 		    FileInfo * child = new FileInfo( dir(), tree(), entryName, statInfo );
 
-		    if ( checkIgnoreFilters( entryName ) )
+		    if ( tree()->checkIgnoreFilters( fullName( entryName ) ) )
 			dir()->addToAttic( child );
 		    else
 			dir()->insertChild( child );
@@ -338,15 +338,6 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
 	else
 	    subDir->finishReading( DirOnRequestOnly );
     }
-}
-
-
-bool LocalDirReadJob::checkIgnoreFilters( const QString & entryName ) const
-{
-    if ( !tree()->hasFilters() )
-	return false;
-
-    return tree()->checkIgnoreFilters( fullName( entryName ) );
 }
 
 
@@ -437,15 +428,15 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
 QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
     // Avoid leading // when in root dir
-    const QString dirName = _dirName == "/"_L1 ? QString() : _dirName;
+    if ( _dirName == "/"_L1 )
+	return u'/' % entryName;
 
-    return dirName % u'/' % entryName;
+    return _dirName % u'/' % entryName;
 }
 
 
 bool LocalDirReadJob::checkForNtfs()
 {
-    _isNtfs         = false;
     _checkedForNtfs = true;
 
     if ( !_dirName.isEmpty() )
@@ -456,7 +447,6 @@ bool LocalDirReadJob::checkForNtfs()
 
     return _isNtfs;
 }
-
 
 
 
@@ -500,7 +490,6 @@ void CacheReadJob::read()
 
     finished();
 }
-
 
 
 

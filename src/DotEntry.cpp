@@ -14,7 +14,7 @@
 
 using namespace QDirStat;
 
-
+/*
 void DotEntry::insertChild( FileInfo * newChild )
 {
     CHECK_PTR( newChild );
@@ -28,3 +28,4 @@ void DotEntry::insertChild( FileInfo * newChild )
     childAdded( newChild );		// update summaries
 }
 
+*/

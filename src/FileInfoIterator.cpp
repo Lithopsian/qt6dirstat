@@ -19,9 +19,10 @@ using namespace QDirStat;
 
 
 FileInfoIterator::FileInfoIterator( const FileInfo * parent ):
-    _parent { parent },
-    _current { parent->firstChild() ? parent->firstChild() : parent->dotEntry() }
-{}
+    _dotEntry { parent->dotEntry() },
+    _current { parent->firstChild() ? parent->firstChild() : _dotEntry }
+{
+}
 
 
 FileInfo * FileInfoIterator::next()
@@ -32,7 +33,7 @@ FileInfo * FileInfoIterator::next()
     if ( _current->next() )
 	return _current->next();
 
-    return _current == _parent->dotEntry() ? nullptr : _parent->dotEntry();
+    return _current == _dotEntry ? nullptr : _dotEntry;
 }
 
 

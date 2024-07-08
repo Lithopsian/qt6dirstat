@@ -120,14 +120,14 @@ namespace QDirStat
          *
          * Reimplemented - inherited from FileInfo.
          **/
-        virtual bool isPkgInfo() const override { return true; }
+        bool isPkgInfo() const override { return true; }
 
         /**
          * Returns the full URL of this object with full path.
          *
          * Reimplemented - inherited from FileInfo.
          **/
-        virtual QString url() const override
+        QString url() const override
             { return pkgScheme() + ( isPkgUrl( name() ) ? QString() : name() ); }
 
         /**

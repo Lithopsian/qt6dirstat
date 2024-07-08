@@ -187,11 +187,6 @@ namespace QDirStat
 			    DirInfo       * subDir );
 
 	/**
-	 * Return 'true' if 'entryName' should be ignored.
-	 **/
-	bool checkIgnoreFilters( const QString & entryName ) const;
-
-	/**
 	 * Read a cache file that was picked up along the way:
 	 *
 	 * If one of the non-directory entries of this directory was
