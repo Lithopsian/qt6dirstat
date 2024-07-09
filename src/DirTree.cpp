@@ -132,8 +132,12 @@ namespace
      * remove the emptied attics.  This is done when a directory has been moved
      * into an attic, so any attics within it are redundant.
      **/
-    void unatticAll( DirInfo * dir )
+    void unatticAll( FileInfo * item )
     {
+	if ( !item->isDirInfo() )
+	    return;
+
+	DirInfo * dir = item->toDirInfo();
 	if ( dir->attic() )
 	{
 	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
@@ -142,10 +146,7 @@ namespace
 	}
 
 	for ( FileInfoIterator it( dir ); *it; ++it )
-	{
-	    if ( (*it)->isDirInfo() )
-		unatticAll( (*it)->toDirInfo() );
-	}
+	    unatticAll( *it );
     }
 
 
@@ -179,9 +180,7 @@ namespace
 	    //logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
 	    dir->unlinkChild( child );
 	    dir->addToAttic( child );
-
-	    if ( child->isDirInfo() )
-		unatticAll( child->toDirInfo() );
+	    unatticAll( child );
 	}
 
 	if ( !ignoredChildren.isEmpty() )

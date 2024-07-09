@@ -112,11 +112,6 @@ namespace QDirStat
 	void populateRecursive( FileInfo * dir );
 
 	/**
-	 * Return all direct file children matching the current search suffix.
-	 **/
-	FileInfoSet matchingFiles( FileInfo * dir ) const;
-
-	/**
 	 * Select the first item in the list. This will also select it in the
 	 * main window, open the branch where this item is in and scroll the
 	 * main window's tree so that item is visible tere.

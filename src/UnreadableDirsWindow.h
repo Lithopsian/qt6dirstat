@@ -92,15 +92,6 @@ namespace QDirStat
 //	const Subtree & subtree() const { return _subtree; }
 
 
-    protected slots:
-
-	/**
-	 * Select one of the search results in the main window's tree and
-	 * treemap widgets via their SelectionModel.
-	 **/
-	void selectResult( QTreeWidgetItem * item );
-
-
     protected:
 
 	/**

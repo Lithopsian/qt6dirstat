@@ -26,6 +26,34 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Return all direct file children matching the given suffix.
+     **/
+    FileInfoSet matchingFiles( FileInfo * item, const QString & suffix )
+    {
+	FileInfoSet result;
+
+	if ( !item || !item->isDirInfo() )
+	    return result;
+
+	const DirInfo * dir = item->toDirInfo();
+	if ( dir->dotEntry() )
+	    dir = dir->dotEntry();
+
+	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
+	{
+	    if ( child->isFile() && child->name().endsWith( suffix, Qt::CaseInsensitive ) )
+		result << child;
+	}
+
+	return result;
+    }
+
+}
+
+
 LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
     QDialog { parent },
     _ui { new Ui::LocateFileTypeWindow }
@@ -92,7 +120,7 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
     instance->raise();
 
     // Select the first row after a delay so it doesn't slow down displaying the list
-    QTimer::singleShot( 50, instance, &LocateFileTypeWindow::selectFirstItem );
+    QTimer::singleShot( 25, instance, &LocateFileTypeWindow::selectFirstItem );
 }
 
 
@@ -126,7 +154,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
     if ( !dir )
 	return;
 
-    const FileInfoSet matches = matchingFiles( dir );
+    const FileInfoSet matches = matchingFiles( dir, _suffix );
     if ( !matches.isEmpty() )
     {
 	// Create a search result for this path
@@ -146,27 +174,6 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 
     // Unlike in FileTypeStats, there is no need to recurse through
     // any dot entries: They are handled in matchingFiles() already.
-}
-
-
-FileInfoSet LocateFileTypeWindow::matchingFiles( FileInfo * item ) const
-{
-    FileInfoSet result;
-
-    if ( !item || !item->isDirInfo() )
-	return result;
-
-    const DirInfo * dir = item->toDirInfo();
-    if ( dir->dotEntry() )
-	dir = dir->dotEntry();
-
-    for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
-    {
-	if ( child->isFile() && child->name().endsWith( _suffix, Qt::CaseInsensitive ) )
-	    result << child;
-    }
-
-    return result;
 }
 
 
@@ -190,7 +197,7 @@ void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
     {
 	FileInfo * dir = _subtree.tree()->locate( searchResult->path() );
 
-	const FileInfoSet matches = matchingFiles( dir );
+	const FileInfoSet matches = matchingFiles( dir, _suffix );
 	if ( !matches.isEmpty() )
 	    app()->selectionModel()->setCurrentItem( matches.first(), true );
 

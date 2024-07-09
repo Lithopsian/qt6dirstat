@@ -27,14 +27,14 @@ namespace
      * Calculate a data value threshold from a set of PercentileStats from
      * an upper percentile up to the maximum value (P100).
      **/
-    FileSize upperPercentileThreshold( PercentileStats & stats )
+    PercentileBoundary upperPercentileThreshold( PercentileStats & stats )
     {
         if ( stats.size() <= 100               ) return stats.percentile( 80 );
         if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 90 );
         if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile( 95 );
         if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile( 99 );
 
-        return stats.at( stats.size() - MAX_RESULTS );
+        return stats.at( stats.size() - MAX_RESULTS - 1 ); // check() is for > this value
     }
 
 
@@ -42,14 +42,14 @@ namespace
      * Calculate a data value threshold from a set of PercentileStats from
      * the minimum value (P0) to a lower percentile.
      **/
-    FileSize lowerPercentileThreshold( PercentileStats & stats )
+    PercentileBoundary lowerPercentileThreshold( PercentileStats & stats )
     {
         if ( stats.size() <= 100               ) return stats.percentile( 20 );
         if ( stats.size() <= MAX_RESULTS * 10  ) return stats.percentile( 10 );
         if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile(  5 );
         if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile(  1 );
 
-        return stats.at( MAX_RESULTS );
+        return stats.at( MAX_RESULTS ); // check() is for <= this value
     }
 
 } // namespace
@@ -57,77 +57,86 @@ namespace
 
 void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 {
-    TreeWalker::prepare( subtree );
     FileSizeStats stats( subtree );
 
     // Implicit conversion from double, only valid up to 2^53
-    _threshold = upperPercentileThreshold( stats );
+    _threshold = std::floor( upperPercentileThreshold( stats ) );
 }
 
 
-bool LargestFilesTreeWalker::check( FileInfo * item )
+bool LargestFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->size() >= _threshold;
+    return item && item->isFile() && item->size() > _threshold;
 }
+
+
 
 
 void NewFilesTreeWalker::prepare( FileInfo * subtree )
 {
-    TreeWalker::prepare( subtree );
     FileMTimeStats stats( subtree );
 
     // Implicit conversion from double, only valid up to 2^53
-    _threshold = upperPercentileThreshold( stats );
+    _threshold = std::floor( upperPercentileThreshold( stats ) );
 }
 
 
-bool NewFilesTreeWalker::check( FileInfo * item )
+bool NewFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->mtime() >= _threshold;
+    return item && item->isFile() && item->mtime() > _threshold;
 }
+
+
 
 
 void OldFilesTreeWalker::prepare( FileInfo * subtree )
 {
-    TreeWalker::prepare( subtree );
     FileMTimeStats stats( subtree );
 
     // Implicit conversion from double, only valid up to 2^53
-    _threshold = lowerPercentileThreshold( stats );
+    _threshold = std::ceil( lowerPercentileThreshold( stats ) );
 }
 
 
-bool OldFilesTreeWalker::check( FileInfo * item )
+bool OldFilesTreeWalker::check( const FileInfo * item )
 {
     return item && item->isFile() && item->mtime() <= _threshold;
 }
 
 
-bool HardLinkedFilesTreeWalker::check( FileInfo * item )
+
+
+bool HardLinkedFilesTreeWalker::check( const FileInfo * item )
 {
     return item && item->isFile() && item->links() > 1;
 }
 
 
-bool BrokenSymLinksTreeWalker::check( FileInfo * item )
+bool BrokenSymLinksTreeWalker::check( const FileInfo * item )
 {
     return item && item->isSymLink() && item->isBrokenSymLink();
 }
 
 
-bool SparseFilesTreeWalker::check( FileInfo * item )
+
+
+bool SparseFilesTreeWalker::check( const FileInfo * item )
 {
     return item && item->isFile() && item->isSparseFile();
 }
 
 
-bool FilesFromYearTreeWalker::check( FileInfo * item )
+
+
+bool FilesFromYearTreeWalker::check( const FileInfo * item )
 {
     return item && item->isFile() && item->yearAndMonth().year == _year;
 }
 
 
-bool FilesFromMonthTreeWalker::check( FileInfo * item )
+
+
+bool FilesFromMonthTreeWalker::check( const FileInfo * item )
 {
     if ( !item || !item->isFile() )
         return false;
@@ -137,18 +146,20 @@ bool FilesFromMonthTreeWalker::check( FileInfo * item )
 }
 
 
-void FindFilesTreeWalker::prepare( FileInfo * subtree )
+
+
+void FindFilesTreeWalker::prepare( FileInfo * )
 {
-    TreeWalker::prepare( subtree );
     _count = 0;
+    _overflow = false;
 }
 
 
-bool FindFilesTreeWalker::check( FileInfo * item )
+bool FindFilesTreeWalker::check( const FileInfo * item )
 {
     if ( _count >= MAX_FIND_FILES_RESULTS )
     {
-        setOverflow();
+        _overflow = true;
         return false;
     }
 
@@ -163,9 +174,10 @@ bool FindFilesTreeWalker::check( FileInfo * item )
         return false;
     }
 
-    const bool match = _filter.matches( item->name() );
-    if ( match )
-        ++_count;
+    if ( !_filter.matches( item->name() ) )
+        return false;
 
-    return match;
+    ++_count;
+
+    return true;
 }

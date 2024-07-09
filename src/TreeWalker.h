@@ -47,17 +47,13 @@ namespace QDirStat
         TreeWalker & operator=( const TreeWalker & ) = delete;
 
         /**
-         * General preparations before items are checked. This can be used to
-         * calculate thresholds for later checks, e.g. up to which value an
-         * item is considered to belong to the category. This may involve
-         * traversing the tree a first time to calculate that value, e.g. by
-         * adding all appropriate items to an internal list that is sorted so
-         * the value of the nth first or last element is used.
+         * General preparations before items are checked.  The base
+         * implementation does nothing.
          *
-         * Derived classes can reimplement this, but the new implementation
-         * should call this base class method in the new implementation.
+         * Derived classes can reimplement this to collect statistics,
+         * calculate thresholds. or initialise variables.
          **/
-        virtual void prepare( FileInfo * /* subtree */ ) { _overflow = false; }
+        virtual void prepare( FileInfo * /* subtree */ ) {}
 
         /**
          * Check if 'item' fits into the category (largest / newest / oldest
@@ -65,29 +61,17 @@ namespace QDirStat
          *
          * Derived classes are required to implement this.
          **/
-        virtual bool check( FileInfo * item ) = 0;
+        virtual bool check( const FileInfo * item ) = 0;
 
         /**
-         * Flag: Results overflow while walking the tree?
+         * Flag: results overflow while walking the tree?  The base class
+         * always returns false indicating that there has been no overflow.
          *
          * Derived classes can use this to indicate that the number of results
          * was limited.
          **/
-        bool overflow() const { return _overflow; }
+        virtual bool overflow() const { return false; }
 
-        /**
-         * Flag that an overflow has occurred.
-         **/
-        void setOverflow() { _overflow = true; }
-
-
-    private:
-
-        //
-        // Data members
-        //
-
-        bool _overflow { false };
 
     };  // class TreeWalker
 
@@ -101,10 +85,15 @@ namespace QDirStat
 
         /**
          * Find the threshold for what is considered a "large file".
+         *
+         * Note that the percentile boundary is rounded down to an
+         * integer and the check is for values greater than, but not
+         * including, that integer value.  This is consistent with the
+         * definition of the percentile boundaries.
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
 
     private:
 
@@ -121,10 +110,15 @@ namespace QDirStat
 
         /**
          * Find the threshold for what is considered a "new file".
+         *
+         * Note that the percentile boundary is rounded down to an
+         * integer and the check is for values greater than, but not
+         * including, that integer value.  This is consistent with the
+         * definition of the percentile boundaries.
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
 
     private:
 
@@ -141,10 +135,15 @@ namespace QDirStat
 
         /**
          * Find the threshold for what is considered an "old file".
+         *
+         * Note that the percentile boundary is rounded up to an
+         * integer and the check is for values less than, or equal to,
+         * that integer value.  This is consistent with the definition
+         * of the percentile boundaries.
          **/
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
 
     private:
 
@@ -159,7 +158,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
     };
 
 
@@ -170,7 +169,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
     };
 
 
@@ -181,7 +180,7 @@ namespace QDirStat
     {
     public:
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
     };
 
 
@@ -197,7 +196,7 @@ namespace QDirStat
             _year { year }
         {}
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
 
     private:
 
@@ -218,7 +217,7 @@ namespace QDirStat
             _month { month }
         {}
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
 
     private:
 
@@ -240,12 +239,16 @@ namespace QDirStat
 
         void prepare( FileInfo * subtree ) override;
 
-        bool check( FileInfo * item ) override;
+        bool check( const FileInfo * item ) override;
+
+        bool overflow() const override { return _overflow; }
 
     private:
 
         FileSearchFilter _filter;
-        int              _count { 0 };
+        int              _count;
+        bool             _overflow;
+
     };
 
 }       // namespace QDirStat

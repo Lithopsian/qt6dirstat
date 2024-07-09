@@ -62,13 +62,13 @@ namespace
 	    if ( !sameVersion )
 	    {
 		name += u'-' + pkg->version();
-		pkg->setMultiVersion( true );
+		pkg->setMultiVersion();
 	    }
 
 	    if ( !sameArch )
 	    {
 		name += u':' + pkg->arch();
-		pkg->setMultiArch( true );
+		pkg->setMultiArch();
 	    }
 
 	    pkg->setName( name );

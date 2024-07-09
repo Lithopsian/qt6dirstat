@@ -151,11 +151,6 @@ namespace QDirStat
 	void fillGaps( const FileAgeStats & stats );
 
 	/**
-	 * Find the gaps between years.
-	 **/
-	YearsList findGaps( const FileAgeStats & stats ) const;
-
-	/**
 	 * Return the currently selected item in the tree widget or 0
 	 * if there is none or if it is the wrong type.
 	 **/

@@ -86,12 +86,6 @@ namespace QDirStat
 	void refresh();
 
 	/**
-	 * Locate one of the items in this list results in the main window's
-	 * tree and treemap widgets via their SelectionModel.
-	 **/
-	void locateInMainWindow( QTreeWidgetItem * item );
-
-	/**
 	 * Open a context menu for an item in the results list.
 	 **/
 	void itemContextMenu( const QPoint & pos );

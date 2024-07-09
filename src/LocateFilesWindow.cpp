@@ -29,6 +29,27 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Locate one of the items in this list results in the main window's
+     * tree and treemap widgets via their SelectionModel.
+     **/
+    void locateInMainWindow( QTreeWidgetItem * item )
+    {
+	if ( !item )
+	    return;
+
+	LocateListItem * searchResult = dynamic_cast<LocateListItem *>( item );
+	CHECK_DYNAMIC_CAST( searchResult, "LocateListItem" );
+
+	// logDebug() << "Locating " << searchResult->path() << " in tree" << Qt::endl;
+	app()->selectionModel()->setCurrentItemPath( searchResult->path() );
+    }
+
+}
+
+
 LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
                                       QWidget    * parent ):
     QDialog { parent },
@@ -48,7 +69,7 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
 	     this,               &LocateFilesWindow::refresh );
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
-	     this,               &LocateFilesWindow::locateInMainWindow );
+	     this,               &locateInMainWindow );
 
     connect( _ui->treeWidget,    &QTreeWidget::customContextMenuRequested,
              this,               &LocateFilesWindow::itemContextMenu );
@@ -118,7 +139,7 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
     instance->show();
 
     // Select the first row after a delay so it doesn't slow down displaying the list
-    QTimer::singleShot( 50, instance, &LocateFilesWindow::selectFirstItem );
+    QTimer::singleShot( 25, instance, &LocateFilesWindow::selectFirstItem );
 }
 
 
@@ -169,27 +190,6 @@ void LocateFilesWindow::showResultsCount() const
 	_ui->resultsLabel->setText( tr( "1 result" ) );
     else
         _ui->resultsLabel->setText( tr( "%1 results" ).arg( results ) );
-}
-
-/*
-void LocateFilesWindow::selectFirstItem()
-{
-    QTreeWidgetItem * firstItem = _ui->treeWidget->topLevelItem( 0 );
-    if ( firstItem )
-        _ui->treeWidget->setCurrentItem( firstItem );
-}
-*/
-
-void LocateFilesWindow::locateInMainWindow( QTreeWidgetItem * item )
-{
-    if ( !item )
-	return;
-
-    LocateListItem * searchResult = dynamic_cast<LocateListItem *>( item );
-    CHECK_DYNAMIC_CAST( searchResult, "LocateListItem" );
-
-    // logDebug() << "Locating " << searchResult->path() << " in tree" << Qt::endl;
-    app()->selectionModel()->setCurrentItemPath( searchResult->path() );
 }
 
 

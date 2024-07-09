@@ -165,9 +165,8 @@ void FilesystemsWindow::populate()
 {
     clear();
 
-    const auto mountPoints = _ui->normalCheckBox->isChecked() ?
-			     MountPoints::normalMountPoints() :
-			     MountPoints::allMountPoints();
+    const bool showAll = _ui->normalCheckBox->isChecked();
+    const auto mountPoints = showAll ? MountPoints::allMountPoints() : MountPoints::normalMountPoints();
     for ( MountPoint * mountPoint : mountPoints )
     {
 	CHECK_PTR( mountPoint);

@@ -53,14 +53,15 @@ void FileAgeStats::collect( const FileInfo * subtree )
 
 void FileAgeStats::collectRecursive( const FileInfo * dir )
 {
-    if ( ! dir )
-        return;
-
     for ( FileInfoIterator it( dir ); *it; ++it )
     {
         const FileInfo * item = *it;
 
-        if ( item && item->isFile() )
+        if ( item->hasChildren() )
+        {
+            collectRecursive( item );
+        }
+        else if ( item->isFile() )
         {
             const auto  yearAndMonth = item->yearAndMonth();
             const short year         = yearAndMonth.year;
@@ -78,9 +79,6 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
                 thisMonthStats->size += item->size();
             }
         }
-
-        if ( item->hasChildren() )
-            collectRecursive( item );
     }
 }
 

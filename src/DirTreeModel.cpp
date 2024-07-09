@@ -49,28 +49,19 @@ namespace
     }
 
 
-    [[gnu::unused]] void dumpDirectChildren( const FileInfo * dir )
+    void dumpDirectChildren( const FileInfo * dir )
     {
 	if ( ! dir )
 	    return;
 
-	FileInfoIterator it( dir );
 
 	if ( dir->hasChildren() )
 	{
-	    logDebug() << "Children of " << dir
-		       << "  (" << (void *) dir << ")"
-		       << Qt::endl;
-	    int count = 0;
+	    logDebug() << "Children of " << dir << "  (" << (void *) dir << ")" << Qt::endl;
 
-	    while ( *it )
-	    {
-		logDebug() << "	   #" << count++ << ": "
-			   << (void *) *it
-			   << "	 " << *it
-			   << Qt::endl;
-		++it;
-	    }
+	    int count = 0;
+	    for ( FileInfoIterator it( dir ); *it; ++it )
+		logDebug() << "	   #" << count++ << ": " << (void *) *it << "	 " << *it << Qt::endl;
 	}
 	else
 	{

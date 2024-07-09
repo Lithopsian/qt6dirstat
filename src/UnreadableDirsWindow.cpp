@@ -24,6 +24,22 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Select one of the search results in the main window's tree and
+     * treemap widgets via their SelectionModel.
+     **/
+    void selectResult( QTreeWidgetItem * widgetItem )
+    {
+	const UnreadableDirListItem * item = dynamic_cast<UnreadableDirListItem *>( widgetItem );
+	if ( item )
+	    app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
+    }
+
+}
+
+
 UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
     QDialog { parent },
     _ui { new Ui::UnreadableDirsWindow }
@@ -38,7 +54,7 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
     Settings::readWindowSettings( this, "UnreadableDirsWindow" );
 
     connect( _ui->treeWidget, &QTreeWidget::currentItemChanged,
-             this,            &UnreadableDirsWindow::selectResult );
+             this,            &selectResult );
 }
 
 
@@ -134,14 +150,6 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
     // No need to recurse through dot entries; they can't have any read error
     // or any subdirectory children which might have a read error.
-}
-
-
-void UnreadableDirsWindow::selectResult( QTreeWidgetItem * widgetItem )
-{
-    const UnreadableDirListItem * item = dynamic_cast<UnreadableDirListItem *>( widgetItem );
-    if ( item )
-	app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
 }
 
 

@@ -37,9 +37,9 @@ namespace
         if ( !fileInfo )
             fileInfo = app()->currentDirInfo();
 
+        // Should always be a fileInfo, but if not then do nothing
         if ( fileInfo )
         {
-            // Should always be a fileInfo, but if not then do nothing
             LocateFilesWindow::populateSharedInstance( treeWalker,
                                                        fileInfo,
                                                        headingText,
