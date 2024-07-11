@@ -9,12 +9,10 @@
 
 #include <QFileInfo>
 #include <QProcess>
-#include <QProcessEnvironment>
 #include <QRegularExpression>
-#include <QStringBuilder>
 
 #include "Cleanup.h"
-#include "DirInfo.h"
+#include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "Logger.h"
 #include "OutputWindow.h"
@@ -438,19 +436,9 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
 {
     if ( _recurse )
     {
-	// Process any children
-	for ( FileInfo * subdir = item->firstChild(); subdir; subdir = subdir->next() )
-	{
-	    /**
-	     * Recursively execute in this subdirectory, but only if it
-	     * really is a directory: file children might have been
-	     * reparented to the directory (normally, they reside in
-	     * the dot entry) if there are no real subdirectories on
-	     * this directory level.
-	     **/
-	    if ( subdir->isDir() )
-		execute( subdir, outputWindow );
-	}
+	// Recursively process any children, including dot entries
+	for ( FileInfoIterator it( item ); *it; ++it )
+	    execute( *it, outputWindow );
     }
 
     // Perform cleanup for this item
