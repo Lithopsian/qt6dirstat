@@ -12,6 +12,7 @@
 #include <QRegularExpression>
 
 #include "Cleanup.h"
+#include "DirInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "Logger.h"
