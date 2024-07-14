@@ -16,8 +16,8 @@
 #include <QTreeWidgetItem>
 
 #include "ui_locate-files-window.h"
-#include "Typedefs.h" // FileSize
 #include "Subtree.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat

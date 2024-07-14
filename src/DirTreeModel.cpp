@@ -14,7 +14,6 @@
 #include "DirTree.h"
 #include "Exception.h"
 #include "ExcludeRules.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "FormatUtil.h"
@@ -57,11 +56,11 @@ namespace
 
 	if ( dir->hasChildren() )
 	{
-	    logDebug() << "Children of " << dir << "  (" << (void *) dir << ")" << Qt::endl;
+	    logDebug() << "Children of " << dir << "  (" << (void *)dir << ")" << Qt::endl;
 
 	    int count = 0;
-	    for ( FileInfoIterator it( dir ); *it; ++it )
-		logDebug() << "	   #" << count++ << ": " << (void *) *it << "	 " << *it << Qt::endl;
+	    for ( AtticIterator it { dir }; *it; ++it )
+		logDebug() << "	   #" << count++ << ": " << (void *)*it << "	 " << *it << Qt::endl;
 	}
 	else
 	{
@@ -624,7 +623,6 @@ FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 
     logError() << "Child #" << childNo << " is out of range (0..." << sortedChildren.size()-1
 	       << ") for " << parent << Qt::endl;
-
     dumpDirectChildren( parent );
 
     return nullptr;
@@ -964,10 +962,10 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 
     // If any readJobFinished signals were ignored because a parent was not
     // finished yet, now is the time to notify the view about those children.
-    for ( FileInfoIterator it( dir ); *it; ++it )
+    for ( DirInfoIterator it { dir }; *it; ++it )
     {
-	if ( (*it)->isDirInfo() && (*it)->readState() != DirReading && (*it)->readState() != DirQueued )
-	    newChildrenNotify( (*it)->toDirInfo() );
+	if ( it->readState() != DirReading && it->readState() != DirQueued )
+	    newChildrenNotify( *it );
     }
 }
 

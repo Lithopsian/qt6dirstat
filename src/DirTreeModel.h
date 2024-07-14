@@ -20,7 +20,6 @@
 #include <QTimer>
 
 #include "DataColumns.h"
-#include "Typedefs.h" // _L1
 
 
 class QTreeWidget;

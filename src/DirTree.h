@@ -169,11 +169,8 @@ namespace QDirStat
 	 *
 	 * Note that this is a very expensive operation since the entire tree is
 	 * searched recursively.
-	 *
-	 * 'findPseudoDirs' specifies if locating pseudo directories like "dot
-	 * entries" (".../<Files>") or "attics" (".../<Ignored>") is desired.
 	 **/
-	FileInfo * locate( const QString & url, bool findPseudoDirs = false ) const;
+	FileInfo * locate( const QString & url ) const;
 
 	/**
 	 * Add a new directory read job to the queue.

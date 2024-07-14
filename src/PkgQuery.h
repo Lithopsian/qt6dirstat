@@ -12,7 +12,7 @@
 
 #include <QCache>
 
-#include "PkgInfo.h"
+#include "PkgInfo.h" // PkgInfoList
 
 
 namespace QDirStat

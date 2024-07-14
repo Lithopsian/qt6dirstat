@@ -9,7 +9,6 @@
 
 #include "FileMTimeStats.h"
 #include "DirTree.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 
 
@@ -34,6 +33,6 @@ void FileMTimeStats::collect( FileInfo * subtree )
     if ( subtree->isFile() )
         append( subtree->mtime() );
 
-    for ( FileInfoIterator it( subtree ); *it; ++it )
+    for ( DotEntryIterator it { subtree }; *it; ++it )
         collect( *it );
 }

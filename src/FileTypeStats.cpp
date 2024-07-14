@@ -9,7 +9,6 @@
 
 #include "FileTypeStats.h"
 #include "DirTree.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 #include "Logger.h"
@@ -113,19 +112,17 @@ void FileTypeStats::collect( const FileInfo * dir )
 {
     MimeCategorizer * categorizer = MimeCategorizer::instance();
 
-    for ( FileInfoIterator it( dir ); *it; ++it )
+    for ( DotEntryIterator it { dir }; *it; ++it )
     {
-	const FileInfo * item = *it;
-
-	if ( item->hasChildren() )
+	if ( it->hasChildren() )
 	{
-	    collect( item );
+	    collect( *it );
 	}
-	else if ( item->isFile() )
+	else if ( it->isFile() )
 	{
 	    // First attempt: try the MIME categorizer.
 	    QString suffix;
-	    const MimeCategory * category = categorizer->category( item, &suffix );
+	    const MimeCategory * category = categorizer->category( *it, &suffix );
 
 	    if ( category )
 	    {
@@ -134,14 +131,14 @@ void FileTypeStats::collect( const FileInfo * dir )
 		// possible suffixies.  When the category is matched using a
 		// non-suffix rule, there may be no suffix even though the file
 		// has a suffix.
-		addCategorySum( category, item );
-		addSuffixSum( suffix, category, item );
+		addCategorySum( category, *it );
+		addSuffixSum( suffix, category, *it );
 	    }
 	    else // !category
 	    {
 		// Use the "Other" category with any filename extension as the suffix
-		addCategorySum( otherCategory(), item );
-		addSuffixSum( filenameExtension( item->name() ), otherCategory(), item );
+		addCategorySum( otherCategory(), *it );
+		addSuffixSum( filenameExtension( it->name() ), otherCategory(), *it );
 	    }
 
 	    // Disregard symlinks, block devices and other special files

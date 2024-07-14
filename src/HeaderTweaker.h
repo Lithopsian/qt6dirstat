@@ -13,7 +13,6 @@
 #include <QHeaderView>
 
 #include "DataColumns.h"
-#include "Typedefs.h"
 
 
 class QAction;

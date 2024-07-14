@@ -12,7 +12,6 @@
 
 #include "FileAgeStats.h"
 #include "Exception.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 
 
@@ -53,7 +52,7 @@ void FileAgeStats::collect( const FileInfo * subtree )
 
 void FileAgeStats::collectRecursive( const FileInfo * dir )
 {
-    for ( FileInfoIterator it( dir ); *it; ++it )
+    for ( DotEntryIterator it { dir }; *it; ++it )
     {
         const FileInfo * item = *it;
 

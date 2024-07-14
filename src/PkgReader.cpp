@@ -9,6 +9,7 @@
 
 #include "PkgReader.h"
 #include "DirTree.h"
+#include "FileInfoIterator.h"
 #include "Exception.h"
 #include "PkgFileListCache.h"
 #include "PkgFilter.h"
@@ -260,11 +261,8 @@ namespace
      **/
     void finalizeAll( DirInfo * subtree )
     {
-	for ( FileInfo * child = subtree->firstChild(); child; child = child->next() )
-	{
-	    if ( child->isDirInfo() )
-		finalizeAll( child->toDirInfo() );
-	}
+	for ( DirInfoIterator it { subtree }; *it; ++it )
+	    finalizeAll( *it );
 
 	if ( !subtree->readError() )
 	    subtree->setReadState( DirFinished );
@@ -331,13 +329,10 @@ namespace
 	if ( pathComponent.isEmpty() )
 	    return nullptr;
 
-	for ( FileInfo * item = parent->firstChild(); item; item = item->next() )
-	{
-	    if ( item->name() == pathComponent )
-		return item;
-	}
-
-	return nullptr;
+	auto it = std::find_if( FileInfoIterator { parent },
+	                        FileInfoIterator {},
+	                        [ & pathComponent ]( FileInfo * item ) { return item->name() == pathComponent; } );
+	return *it;
     }
 
 } // namespace

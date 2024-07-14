@@ -14,10 +14,9 @@
 #include <QUrl>
 
 #include "DirTreeCache.h"
-#include "DirInfo.h"
 #include "DirTree.h"
-#include "DotEntry.h"
 #include "Exception.h"
+#include "FileInfoIterator.h"
 #include "MountPoints.h"
 
 
@@ -154,8 +153,8 @@ namespace
 	    writeTree( cache, item->dotEntry() );
 
 	// Recurse through subdirectories, but not the dot entry
-	for ( const FileInfo * child = item->firstChild(); child; child = child->next() )
-	    writeTree( cache, child );
+	for ( FileInfoIterator it { item }; *it; ++it )
+	    writeTree( cache, *it );
     }
 
 } // namespace
@@ -507,7 +506,7 @@ void CacheReader::addItem()
 
 	// Try the easy way first - the starting point of this cache
 	if ( _parent && !parent )
-	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path, false ) );
+	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path ) );
 
 #if VERBOSE_LOCATE_PARENT
 	if ( parent )
@@ -827,12 +826,8 @@ void CacheReader::finalizeRecursive( DirInfo * dir )
 	_tree->sendReadJobFinished( dir );
     }
 
-    for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
-    {
-	if ( child->isDirInfo() )
-	    finalizeRecursive( child->toDirInfo() );
-    }
-
+    for ( DirInfoIterator it { dir }; *it; ++it )
+	finalizeRecursive( *it );
 }
 
 

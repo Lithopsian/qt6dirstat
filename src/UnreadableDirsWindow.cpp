@@ -13,6 +13,7 @@
 #include "Attic.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
+#include "FileInfoIterator.h"
 #include "HeaderTweaker.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -139,17 +140,11 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem( dir ) );
 
     // Recurse through any subdirectories
-    for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
-    {
-	if ( child->isDirInfo() )
-	    populateRecursive( child );
-    }
+    for ( DirInfoIterator it { fileInfo }; *it; ++it )
+	populateRecursive( *it );
 
-    if ( dir->attic() )
-        populateRecursive( dir->attic() );
-
-    // No need to recurse through dot entries; they can't have any read error
-    // or any subdirectory children which might have a read error.
+    // Dot entries can't contain unreadable dirs, but attics can
+    populateRecursive( dir->attic() );
 }
 
 

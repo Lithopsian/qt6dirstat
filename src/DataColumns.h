@@ -16,6 +16,7 @@
 
 #include "Typedefs.h" // _L1
 
+
 // For use in loops
 #define DataColumnBegin NameCol
 #define DataColumnEnd   UndefinedCol

@@ -34,7 +34,7 @@ namespace
         if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile( 95 );
         if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile( 99 );
 
-        return stats.at( stats.size() - MAX_RESULTS - 1 ); // check() is for > this value
+        return stats.at( stats.size() - MAX_RESULTS - 1 ); // check() for > this value
     }
 
 
@@ -49,7 +49,7 @@ namespace
         if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile(  5 );
         if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile(  1 );
 
-        return stats.at( MAX_RESULTS ); // check() is for <= this value
+        return stats.at( MAX_RESULTS ); // check() for <= this value
     }
 
 } // namespace

@@ -15,7 +15,6 @@
 #include "ActionManager.h"
 #include "DirTreeModel.h"       // itemTypeIcon()
 #include "Exception.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
@@ -169,14 +168,13 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
     if ( !dir )
 	return;
 
-    for ( FileInfoIterator it( dir ); *it; ++it )
+    for ( DotEntryIterator it { dir }; *it; ++it )
     {
-	FileInfo * item = *it;
-	if ( _treeWalker->check( item ) )
-	    _ui->treeWidget->addTopLevelItem( new LocateListItem( item ) );
+	if ( _treeWalker->check( *it ) )
+	    _ui->treeWidget->addTopLevelItem( new LocateListItem( *it ) );
 
-	if ( item->hasChildren() )
-	    populateRecursive( item );
+	if ( it->hasChildren() )
+	    populateRecursive( *it );
     }
 }
 

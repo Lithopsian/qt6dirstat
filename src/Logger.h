@@ -20,6 +20,7 @@
 
 #include "Typedefs.h" // Qt::endl, _L1
 
+
 // Intentionally not using LogDebug, LogMilestone etc. to avoid confusion
 // because of simple typos: logDebug() vs. LogDebug()
 //
