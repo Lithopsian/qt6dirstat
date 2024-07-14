@@ -14,10 +14,8 @@
 #include "Attic.h"
 #include "DirTreeCache.h"
 #include "DirTreeFilter.h"
-#include "DotEntry.h"
 #include "Exception.h"
 #include "ExcludeRules.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "FormatUtil.h"
@@ -107,15 +105,8 @@ namespace
      **/
     void recalc( DirInfo * dir )
     {
-	FileInfo * child = dir->firstChild();
-
-	while ( child )
-	{
-	    if ( child->isDirInfo() )
-		recalc( child->toDirInfo() );
-
-	    child = child->next();
-	}
+	for ( DirInfoIterator it { dir }; *it; ++it )
+	    recalc( *it );
 
 	if ( dir->dotEntry() )
 	    recalc( dir->dotEntry() );
@@ -145,7 +136,7 @@ namespace
 	    dir->deleteEmptyAttic();
 	}
 
-	for ( FileInfoIterator it( dir ); *it; ++it )
+	for ( DotEntryIterator it { dir }; *it; ++it )
 	    unatticAll( *it );
     }
 
@@ -159,37 +150,30 @@ namespace
 	if ( !dir )
 	    return;
 
-	const FileInfoList ignoredChildren = [ dir ]()
+	DotEntryIterator it { dir };
+	while ( *it )
 	{
-	    FileInfoList ignoredChildren;
+	    FileInfo * child = *it;
 
-	    for ( FileInfoIterator it( dir ); *it; ++it )
+	    ++it; // before we re-home that child
+
+	    if ( child->isIgnored() )
 	    {
-		FileInfo * child = *it;
-		if ( child->isIgnored() )
-		    ignoredChildren << child;
-		else
-		    moveIgnoredToAttic( child->toDirInfo() );
+		// Move ignored items to an attic (created if necessary) at this level
+		dir->unlinkChild( child );
+		dir->addToAttic( child );
 	    }
-
-	    return ignoredChildren;
-	}();
-
-	for ( FileInfo * child : ignoredChildren )
-	{
-	    //logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
-	    dir->unlinkChild( child );
-	    dir->addToAttic( child );
-	    unatticAll( child );
+	    else // stop recursing when we've found an ignored item
+	    {
+		moveIgnoredToAttic( child->toDirInfo() ); // recurse away
+	    }
 	}
 
-	if ( !ignoredChildren.isEmpty() )
+	// If there is an attic at this level, empty all attics below it
+	if ( dir->attic() )
 	{
-	    // Recalc the attic to capture error counts in the moved children
-	    // childAdded() doesn't expect the child to already have error counts
+	    unatticAll( dir->attic() );
 	    dir->attic()->recalc();
-
-	    // unlinkChild() has already marked dir and all its ancestors as dirty
 	}
     }
 
@@ -201,11 +185,11 @@ namespace
      **/
     void ignoreEmptyDirs( DirInfo * dir )
     {
-	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
+	for ( FileInfoIterator it { dir }; *it; ++it )
 	{
-	    if ( !child->isIgnored() && child->isDirInfo() )
+	    if ( !it->isIgnored() && it->isDirInfo() )
 	    {
-		DirInfo * subDir = child->toDirInfo();
+		DirInfo * subDir = it->toDirInfo();
 
 		if ( subDir->totalUnignoredItems() == 0 )
 		{
@@ -588,11 +572,11 @@ void DirTree::sendReadJobFinished( DirInfo * dir )
 }
 
 
-FileInfo * DirTree::locate( const QString & url, bool findPseudoDirs ) const
+FileInfo * DirTree::locate( const QString & url ) const
 {
     // Search from the top of the tree
     if ( _root )
-	return _root->locate( url, findPseudoDirs );
+	return _root->locate( url );
 
     // Should never get here, there is always _root
     return nullptr;
