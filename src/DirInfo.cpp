@@ -85,6 +85,7 @@ DirInfo::DirInfo( DirInfo       * parent,
 		  mode_t          mode,
 		  FileSize        size,
 		  FileSize        allocatedSize,
+		  bool            fromCache,
 		  bool            withUidGidPerm,
 		  uid_t           uid,
 		  gid_t           gid,
@@ -104,7 +105,7 @@ DirInfo::DirInfo( DirInfo       * parent,
     _summaryDirty { false },
     _locked { false },
     _touched { false },
-    _fromCache { false },
+    _fromCache { fromCache },
     _readState { DirQueued }
 {
     initCounts();
@@ -275,7 +276,7 @@ void DirInfo::recalc()
 	}
     }
 
-    // Just copy ignored and error counts from ignored items to non-ignored items
+    // Only copy ignored and error counts from ignored items to non-ignored parents
     if ( _attic )
     {
 	_totalIgnoredItems += _attic->totalIgnoredItems();
@@ -440,30 +441,28 @@ void DirInfo::insertChild( FileInfo * newChild )
 {
     CHECK_PTR( newChild );
 
-    if ( newChild->isDir() || !_dotEntry )
+    /**
+     * If there is a dot entry, store any non-directory items in it.
+     * If the child is a directory or there is no dot entry (hopefully
+     * because there are only file children) then store the child
+     * directly in the DirInfo node.
+     *
+     * Note that this test automatically causes inserts to the dot entry
+     * to be done directly because _dotEntry is always 0 for a DotEntry
+     * itself.
+     **/
+    if ( _dotEntry && !newChild->isDir() )
     {
-	/**
-	 * Only directories are stored directly in pure directory nodes -
-	 * unless something went terribly wrong, e.g. there is no dot entry to use.
-	 * If this is a dot entry, store everything it gets directly within it.
-	 *
-	 * In any of those cases, insert the new child in the children list.
-	 *
-	 * The list is unordered so we can always prepend for performance reasons.
-	 **/
-	newChild->setNext( _firstChild );
-	_firstChild = newChild;
-	newChild->setParent( this );	// make sure the parent pointer is correct
-
-	childAdded( newChild );		// update summaries
+	// semi-recursive just to avoid repeating the same code here
+	_dotEntry->insertChild( newChild );
     }
     else
     {
-	/*
-	 * If the child is not a directory, don't store it directly here - use
-	 * this entry's dot entry instead.
-	 */
-	_dotEntry->insertChild( newChild );
+	newChild->setNext( _firstChild );
+	_firstChild = newChild;
+	newChild->setParent( this );
+
+	childAdded( newChild ); // update summaries
     }
 }
 
@@ -703,10 +702,10 @@ void DirInfo::finalizeAll()
     // (very likely) have a dot entry and thus all direct children are
     // subdirectories, not plain files, so we don't need to bother checking
     // plain file children as well - so do finalizeLocal() only after all
-    // children are processed. If this step were the first, for directories
-    // that don't have any subdirectories finalizeLocal() would immediately
-    // get all their plain file children reparented to themselves, so they
-    // would need to be processed in the loop, too.
+    // children are processed. If this step were the first, directories that
+    // don't have any subdirectories finalizeLocal() would immediately get
+    // all their plain file children reparented to themselves, so they would
+    // need to be processed in the loop, too.
 
     finalizeLocal();
 }
@@ -765,6 +764,7 @@ void DirInfo::cleanupAttics()
 
 void DirInfo::checkIgnored()
 {
+    // finalizeLocal won't call this for dot entries, so call them from here
     if ( _dotEntry )
 	_dotEntry->checkIgnored();
 
@@ -783,18 +783,17 @@ void DirInfo::checkIgnored()
 	// Any children must have totalUnignoredItems == 0, so ignore them all
 	for ( FileInfoIterator it( this ); *it; ++it )
 	    (*it)->setIgnored( true );
-//	    _summaryDirty = true;
     }
 
     // Cascade the 'ignored' status up the tree
-    if ( !isPseudoDir() && parent() )
+    if ( !isDotEntry() && parent() )
 	parent()->checkIgnored();
 }
 
 
 const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sortOrder )
 {
-    // Clean old sorted children lists and create new ones
+    // Clea old sorted children lists and create new ones
     dropSortCaches(); // recursive to all ancestors
     _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
 
@@ -812,26 +811,26 @@ void DirInfo::dropSortCache()
 void DirInfo::dropSortCaches()
 {
     // If this dir didn't have any sort cache, there won't be any in the subtree
-    if ( _sortInfo )
+    if ( !_sortInfo )
+	return;
+
+    // logDebug() << "Dropping sort cache for " << this << Qt::endl;
+
+    //  Dot entries don't have dir children (or dot entries) that could have a sort cache
+    if ( !isDotEntry() )
     {
-	// logDebug() << "Dropping sort cache for " << this << Qt::endl;
-
-	//  Dot entries don't have dir children that could have a sort cache
-	if ( !isDotEntry() )
+	for ( FileInfo * child = _firstChild; child; child = child->next() )
 	{
-	    for ( FileInfo * child = _firstChild; child; child = child->next() )
-	    {
-		if ( child->isDirInfo() )
-		    child->toDirInfo()->dropSortCaches();
-	    }
-
-	    if ( _dotEntry )
-		_dotEntry->dropSortCaches();
+	    if ( child->isDirInfo() )
+		child->toDirInfo()->dropSortCaches();
 	}
 
-	if ( _attic )
-	    _attic->dropSortCaches();
+	if ( _dotEntry )
+	    _dotEntry->dropSortCaches();
     }
+
+    if ( _attic )
+	_attic->dropSortCaches();
 
     dropSortCache();
 }
@@ -854,24 +853,20 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
     {
 	// logDebug() << "Reparenting all children of " << oldParent << " to " << this << Qt::endl;
 
-	FileInfo * oldFirstChild = _firstChild;
-	_firstChild              = child;
-	FileInfo * lastChild     = child;
-
-	oldParent->setFirstChild( nullptr );
-	oldParent->recalc();
-
-	_directChildrenCount = -1;
-	_summaryDirty        = true;
-
 	while ( child )
 	{
 	    child->setParent( this );
-	    lastChild = child;
+	    if ( !child->next() )
+		child->setNext( _firstChild );
 	    child = child->next();
 	}
 
-	lastChild->setNext( oldFirstChild );
+	_firstChild = oldParent->firstChild();
+	oldParent->setFirstChild( nullptr );
+
+	// The ancestors of these are the same, so just recalc these two
+	oldParent->_summaryDirty = true;
+	_summaryDirty = true;
     }
 }
 

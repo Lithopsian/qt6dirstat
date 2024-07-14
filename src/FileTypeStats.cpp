@@ -111,9 +111,6 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 
 void FileTypeStats::collect( const FileInfo * dir )
 {
-    if ( !dir )
-	return;
-
     MimeCategorizer * categorizer = MimeCategorizer::instance();
 
     for ( FileInfoIterator it( dir ); *it; ++it )

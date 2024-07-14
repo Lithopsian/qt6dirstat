@@ -95,9 +95,13 @@ namespace QDirStat
 	void init( const FileSizeStats * stats );
 
 	/**
-	 * Return the stored value for percentile no. 'index' (0..100).  Note
-	 * that this directly accesses the percentile list with the assumption
-	 * that it is already populated with 101 entries.
+	 * Return the stored value for percentile no. 'index' (0..100).  This
+	 * directly accesses the percentile list with the assumption that it is
+	 * already populated with 101 entries.
+	 *
+	 * Note that the floating point boundary value from the stats is
+	 * truncated to the floor integer to match the > or <= definition for
+	 * being in that percentile.
 	 **/
 	FileSize percentile( int index ) const;
 
@@ -202,12 +206,6 @@ namespace QDirStat
 	void rebuild();
 
 	/**
-	 * Return the percentile sums from 'fromIndex' to 'toIndex'
-	 * inclusive.
-	 **/
-	FileSize percentileSum( int fromIndex, int toIndex ) const;
-
-	/**
 	 * Return 'true' if percentile no. 'index' is in range for being
 	 * displayed, i.e. if it is between _startPercentile and
 	 * _endPercentile.
@@ -276,13 +274,6 @@ namespace QDirStat
 	void fitToViewport();
 
 	/**
-	 * Resize the view.
-	 *
-	 * Reimplemented from QFrame.
-	 **/
-	void resizeEvent( QResizeEvent * event ) override;
-
-	/**
 	 * Calculate the content geometry to fit into 'newSize'.
 	 **/
 	void calcGeometry( QSize newSize );
@@ -313,6 +304,13 @@ namespace QDirStat
 	qreal overflowSpacing()   const { return  15.0_qr; }; // between histogram and overflow area
 	qreal pieDiameter()       const { return  60.0_qr; };
 	qreal pieSliceOffset()    const { return  10.0_qr; };
+
+	/**
+	 * Resize the view.
+	 *
+	 * Reimplemented from QFrame.
+	 **/
+	void resizeEvent( QResizeEvent * event ) override;
 
 
     private:

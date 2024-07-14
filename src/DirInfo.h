@@ -94,10 +94,11 @@ namespace QDirStat
 		 mode_t          mode,
 		 FileSize        size,
 		 FileSize        allocatedSize,
+		 bool            fromCache,
 		 bool            withUidGidPerm,
 		 uid_t           uid,
 		 gid_t           gid,
-		 time_t	         mtime );
+		 time_t          mtime );
 
 	/**
 	 * Constructor from the bare necessary fields to create a dummy tree.
@@ -109,7 +110,7 @@ namespace QDirStat
 		 const QString & name,
 		 mode_t          mode,
 		 FileSize        size ):
-	    DirInfo { parent, tree, name, mode, size, size, false, 0, 0, 0 }
+	    DirInfo { parent, tree, name, mode, size, size, false, false, 0, 0, 0 }
 	{}
 
 	/**
@@ -330,7 +331,7 @@ namespace QDirStat
 	 * The order of children in this list is absolutely undefined;
 	 * don't rely on any implementation-specific order.
 	 **/
-	virtual void insertChild( FileInfo * newChild );
+	void insertChild( FileInfo * newChild );
 
 	/**
 	 * Add a child to the attic. This is very much like insertChild(), but
@@ -538,11 +539,6 @@ namespace QDirStat
 	virtual bool isFromCache() const { return _fromCache; }
 
 	/**
-	 * Sets a flag that this is the root directory of a cache file read.
-	 **/
-	void setFromCache() { _fromCache = true; }
-
-	/**
 	 * Returns true if this is a DirInfo object.
 	 *
 	 * Don't confuse this with isDir() which tells whether or not this is a
@@ -665,6 +661,10 @@ namespace QDirStat
 	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag
 	 * accordingly.
+	 *
+	 * Note that dot entries are checked by this function and called
+	 * explicitly from it, but there is a separate (no-op) overload
+	 * for attics.
 	 **/
 	virtual void checkIgnored();
 

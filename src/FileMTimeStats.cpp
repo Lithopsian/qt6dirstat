@@ -21,6 +21,7 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 {
     if ( subtree )
     {
+        reserve( subtree->totalFiles() );
         collect( subtree );
         sort();
     }
@@ -29,20 +30,10 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 
 void FileMTimeStats::collect( FileInfo * subtree )
 {
-    if ( isEmpty() )
-        reserve( subtree->totalFiles() );
-
+    // Disregard symlinks, block devices and other special files
     if ( subtree->isFile() )
         append( subtree->mtime() );
 
     for ( FileInfoIterator it( subtree ); *it; ++it )
-    {
-        FileInfo * item = *it;
-
-        // Disregard symlinks, block devices and other special files
-        if ( item->hasChildren() )
-            collect( item );
-        else if ( item->isFile() )
-            append( item->mtime() );
-    }
+        collect( *it );
 }

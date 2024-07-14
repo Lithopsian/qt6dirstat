@@ -33,6 +33,21 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Return the percentile sums from 'fromIndex' to 'toIndex'
+     * inclusive.
+     **/
+    FileSize percentileSum( const FileSizeStats * stats, int fromIndex, int toIndex )
+    {
+	FileSize sum = 0LL;
+
+	for ( int i = fromIndex; i <= toIndex; ++i )
+	    sum += stats->percentileSum( i );
+
+	return sum;
+    }
+
+
+    /**
      * Make the QGraphicsTextItem text bold.
      **/
     void setBold( QGraphicsTextItem * item )
@@ -60,7 +75,7 @@ void HistogramView::init( const FileSizeStats * stats )
 
 FileSize HistogramView::percentile( int index ) const
 {
-    return _stats->percentileList( index );
+    return std::floor( _stats->percentileBoundary( index ) );
 }
 
 
@@ -94,16 +109,6 @@ void HistogramView::setEndPercentile( int index )
 		   << Qt::endl;
     }
 #endif
-}
-
-FileSize HistogramView::percentileSum( int fromIndex, int toIndex ) const
-{
-    FileSize sum = 0LL;
-
-    for ( int i = fromIndex; i <= toIndex; ++i )
-	sum += _stats->percentileSums( i );
-
-    return sum;
 }
 
 
@@ -198,17 +203,6 @@ void HistogramView::calcGeometry( QSize newSize )
 	       << " height: " << _histogramHeight
 	       << Qt::endl;
 #endif
-}
-
-
-void HistogramView::resizeEvent( QResizeEvent * event )
-{
-    // logDebug() << "Event size: " << event->size() << Qt::endl;
-
-    QGraphicsView::resizeEvent( event );
-    calcGeometry( event->size() );
-
-    rebuild();
 }
 
 
@@ -571,11 +565,11 @@ void HistogramView::addOverflowPanel()
     nextPos = addText( nextPos, { cutoffCaption, tr( "%1% of all files" ).arg( cutoff ), "" } );
 
     // Lower pie chart: disk space disregarded
-    const FileSize histogramDiskSpace = percentileSum( _startPercentile, _endPercentile );
-    FileSize cutoffDiskSpace          = percentileSum( 0, _startPercentile );
+    const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
+    FileSize cutoffDiskSpace          = percentileSum( _stats, 0, _startPercentile );
 
     if ( _endPercentile < 100 )
-        cutoffDiskSpace += percentileSum( _endPercentile, 100 );
+        cutoffDiskSpace += percentileSum( _stats, _endPercentile, 100 );
 
     nextPos.setY( nextPos.y() + pieSliceOffset() );
     pieRect = QRectF( nextPos, QSizeF( pieDiameter(), pieDiameter() ) );
@@ -662,4 +656,15 @@ QPointF HistogramView::addPie( const QRectF & rect,
     pie->setTransform( transform );
 
     return { rect.x(), rect.y() + pie->boundingRect().height() };
+}
+
+
+void HistogramView::resizeEvent( QResizeEvent * event )
+{
+    // logDebug() << "Event size: " << event->size() << Qt::endl;
+
+    QGraphicsView::resizeEvent( event );
+    calcGeometry( event->size() );
+
+    rebuild();
 }

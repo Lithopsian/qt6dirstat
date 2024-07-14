@@ -15,6 +15,7 @@
 #include <QList>
 #include <QTextStream> // endl
 
+
 // The size of a standard disk block. This may be different from st_blksize
 // in the stat struct, even though st_blocks is normally calculated based
 // a 512-byte block.
@@ -32,9 +33,14 @@
 
 namespace QDirStat
 {
+    class FileInfo;
+
     using FileSize  = qint64;
     using DirSize   = qint32;
     using FileCount = qint32;
+
+    class FileInfo;
+    using FileInfoList = QVector<FileInfo *>;
 
     using ColorList = QList<QColor>;
 

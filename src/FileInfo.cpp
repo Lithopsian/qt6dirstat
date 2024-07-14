@@ -274,7 +274,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
 	    return foundChild;
     }
 
-    // Special case: One of the pseudo directories is requested.
+    // Special case: one of the pseudo directories is requested.
     if ( findPseudoDirs )
     {
 	if ( dotEntry() && url == dotEntryName() )

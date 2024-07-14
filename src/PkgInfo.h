@@ -102,7 +102,7 @@ namespace QDirStat
         /**
          * Set the multiArch flag.
          **/
-        void setMultiArch( bool val ) { _multiArch = val; }
+        void setMultiArch( bool val = true ) { _multiArch = val; }
 
         /**
          * Return 'true' if this package is installed in multiple versions
@@ -113,21 +113,21 @@ namespace QDirStat
         /**
          * Set the multiVersion flag.
          **/
-        void setMultiVersion( bool val ) { _multiVersion = val; }
+        void setMultiVersion( bool val = true ) { _multiVersion = val; }
 
         /**
          * Returns true if this is a PkgInfo object.
          *
          * Reimplemented - inherited from FileInfo.
          **/
-        virtual bool isPkgInfo() const override { return true; }
+        bool isPkgInfo() const override { return true; }
 
         /**
          * Returns the full URL of this object with full path.
          *
          * Reimplemented - inherited from FileInfo.
          **/
-        virtual QString url() const override
+        QString url() const override
             { return pkgScheme() + ( isPkgUrl( name() ) ? QString() : name() ); }
 
         /**

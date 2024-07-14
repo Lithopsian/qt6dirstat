@@ -42,6 +42,31 @@ namespace
 	return item && item->filesCount() > 0 && item->filesCount() <= MAX_LOCATE_FILES;
     }
 
+
+    /**
+     * Find the gaps between years.
+     **/
+    YearsList findGaps( const FileAgeStats & stats, bool startGapsWithCurrentYear )
+    {
+	YearsList gaps;
+
+	const YearsList & years = stats.years(); // sorted in ascending order
+	if ( years.isEmpty() )
+	    return gaps;
+
+	const short lastYear = startGapsWithCurrentYear ? stats.thisYear() : years.last();
+	if ( lastYear - years.first() == years.count() - 1 )
+	    return gaps;
+
+	for ( short yr = years.first(); yr <= lastYear; yr++ )
+	{
+	    if ( !years.contains( yr ) )
+		gaps << yr;
+	}
+
+	return gaps;
+    }
+
 }
 
 
@@ -227,35 +252,13 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 
 void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
 {
-    const auto gaps = findGaps( stats );
+    const auto gaps = findGaps( stats, _startGapsWithCurrentYear );
     for ( short year : gaps )
     {
 	YearListItem * item = new YearListItem( YearStats( year ) );
 	item->setFlags( Qt::NoItemFlags ); // disabled
 	_ui->treeWidget->addTopLevelItem( item );
     }
-}
-
-
-YearsList FileAgeStatsWindow::findGaps( const FileAgeStats & stats ) const
-{
-    YearsList gaps;
-
-    const YearsList & years = stats.years(); // sorted in ascending order
-    if ( years.isEmpty() )
-	return gaps;
-
-    const short lastYear = _startGapsWithCurrentYear ? stats.thisYear() : years.last();
-    if ( lastYear - years.first() == years.count() - 1 )
-	return gaps;
-
-    for ( short yr = years.first(); yr <= lastYear; yr++ )
-    {
-	if ( !years.contains( yr ) )
-	    gaps << yr;
-    }
-
-    return gaps;
 }
 
 

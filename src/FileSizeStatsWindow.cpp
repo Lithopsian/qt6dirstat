@@ -155,11 +155,11 @@ namespace
 		continue;
 
 	    addItem( table, row, NumberCol, namePrefix + QString::number( i ) );
-	    addItem( table, row, ValueCol,  formatSize( std::floor( stats->percentileList( i ) ) ) );
+	    addItem( table, row, ValueCol,  formatSize( std::floor( stats->percentileBoundary( i ) ) ) );
 	    if ( i > 0 )
 	    {
-		addItem( table, row, SumCol,           formatSize( stats->percentileSums( i ) ) );
-		addItem( table, row, CumulativeSumCol, formatSize( stats->cumulativeSums( i ) ) );
+		addItem( table, row, SumCol,           formatSize( stats->percentileSum( i ) ) );
+		addItem( table, row, CumulativeSumCol, formatSize( stats->cumulativeSum( i ) ) );
 	    }
 
 	    const QString rowName = [ i ]()

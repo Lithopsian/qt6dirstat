@@ -132,21 +132,21 @@ namespace
      * remove the emptied attics.  This is done when a directory has been moved
      * into an attic, so any attics within it are redundant.
      **/
-    void unatticAll( DirInfo * dir )
+    void unatticAll( FileInfo * item )
     {
+	if ( !item->isDirInfo() )
+	    return;
+
+	DirInfo * dir = item->toDirInfo();
 	if ( dir->attic() )
 	{
 	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
 	    dir->takeAllChildren( dir->attic() );
 	    dir->deleteEmptyAttic();
-//	    dir->recalc();
 	}
 
 	for ( FileInfoIterator it( dir ); *it; ++it )
-	{
-	    if ( (*it)->isDirInfo() )
-		unatticAll( (*it)->toDirInfo() );
-	}
+	    unatticAll( *it );
     }
 
 
@@ -180,19 +180,16 @@ namespace
 	    //logDebug() << "Moving ignored " << child << " to attic" << Qt::endl;
 	    dir->unlinkChild( child );
 	    dir->addToAttic( child );
-
-	    if ( child->isDirInfo() )
-		unatticAll( child->toDirInfo() );
+	    unatticAll( child );
 	}
 
 	if ( !ignoredChildren.isEmpty() )
 	{
-	    // Recalc the attic to catch error counts in the moved children
+	    // Recalc the attic to capture error counts in the moved children
 	    // childAdded() doesn't expect the child to already have error counts
-	    if ( dir->attic() )
-		dir->attic()->recalc();
+	    dir->attic()->recalc();
 
-//	    dir->recalc();
+	    // unlinkChild() has already marked dir and all its ancestors as dirty
 	}
     }
 
@@ -444,9 +441,7 @@ void DirTree::finalizeTree()
 {
     if ( _root && hasFilters() )
     {
-//	recalc( root() );
 	ignoreEmptyDirs( root() );
-//	recalc( root() );
 	if ( _root->firstChild() )
             moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
 //	recalc( root() );

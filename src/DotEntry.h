@@ -29,8 +29,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	DotEntry( DirTree * tree,
-		  DirInfo * parent ) :
+	DotEntry( DirTree * tree, DirInfo * parent ):
 	    DirInfo { parent, tree, dotEntryName() }
 	{}
 
@@ -63,11 +62,12 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/
-	void insertChild( FileInfo * newChild ) override;
+//	void insertChild( FileInfo * newChild ) override;
 
 	/**
-	 * Recursively finalize all directories from here on -
-	 * call finalizeLocal() recursively.
+	 * Recursively finalize all directories from here on - call
+	 * finalizeLocal() recursively.  A DotEntry has no directory
+	 * children so nothing to do.
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/

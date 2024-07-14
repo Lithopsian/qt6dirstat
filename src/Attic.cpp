@@ -15,9 +15,6 @@ using namespace QDirStat;
 
 FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
 {
-    if ( !tree() || !parent() )
-	return nullptr;
-
     // Search all children
     for ( FileInfo * child = firstChild(); child; child = child->next() )
     {
@@ -31,4 +28,3 @@ FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
 
     return nullptr;
 }
-

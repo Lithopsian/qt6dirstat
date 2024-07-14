@@ -8,9 +8,7 @@
  */
 
 #include <algorithm> // std::sort()
-#include <cmath>     // cbrt()
-
-#include <QtMath> // qFloor
+#include <cmath>     // cbrt(), floor()
 
 #include "PercentileStats.h"
 #include "Exception.h"
@@ -37,10 +35,10 @@ void PercentileStats::sort()
 }
 
 
-PercentileValue PercentileStats::quantile( int order, int number ) const
+PercentileBoundary PercentileStats::quantile( int order, int number ) const
 {
     if ( isEmpty() )
-	return 0.0l;
+	return 0;
 
     if ( order < 2 || order > 100 )
 	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
@@ -56,7 +54,7 @@ PercentileValue PercentileStats::quantile( int order, int number ) const
 
     // Calculate the data point position for the number and order
     const double          pos    = 1.0 * size() * number / order;
-    const int             index  = qFloor( pos ); // floor because pos 1 is list index 0
+    const int             index  = std::floor( pos ); // floor because pos 1 is list index 0
     const PercentileValue result = at( index );
 
     // If the boundary is on an element, return its value
@@ -64,24 +62,24 @@ PercentileValue PercentileStats::quantile( int order, int number ) const
 	return result;
 
     // The boundary is between two elements, return the average of their values
-    return ( result + at( index - 1 ) ) / 2.0l;
+    return ( result + at( index - 1 ) ) / 2;
 
 }
 
 
 void PercentileStats::calculatePercentiles()
 {
-    _percentileList.clear(); // just in case anyone calls this more than once
+    _percentiles.clear(); // just in case anyone calls this more than once
 
     // Store all the percentile boundaries
     for ( int i=0; i <= 100; ++i )
-	_percentileList.append( percentile( i ) );
+	_percentiles.append( percentile( i ) );
 
     _percentileSums = PercentileList( 101 ); // new list, 101 items, all zero
 
     // Iterate all the data points - should be in order, so add to each percentile in turn
     int currentPercentile = 1;
-    auto it = _percentileList.cbegin() + 1;
+    auto it = _percentiles.cbegin() + 1;
     for ( PercentileValue value : *this )
     {
 	// Have we gone past this percentile upper boundary?
@@ -97,7 +95,7 @@ void PercentileStats::calculatePercentiles()
     _cumulativeSums.clear(); // just in case anyone calls this more than once
 
     // Cumulative totals calculated in a separate iteration for clarity
-    PercentileValue runningTotal = 0.0l;
+    PercentileValue runningTotal = 0;
     for ( PercentileValue percentileSum : asConst( _percentileSums ) )
     {
 	runningTotal += percentileSum;
@@ -114,15 +112,15 @@ void PercentileStats::calculatePercentiles()
 }
 
 
-PercentileValue PercentileStats::percentileList( int index ) const
+PercentileValue PercentileStats::percentileBoundary( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
 
-    return _percentileList.isEmpty() ? 0 : _percentileList[ index ];
+    return _percentiles.isEmpty() ? 0 : _percentiles[ index ];
 }
 
 
-PercentileValue PercentileStats::percentileSums( int index ) const
+PercentileValue PercentileStats::percentileSum( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
 
@@ -130,7 +128,7 @@ PercentileValue PercentileStats::percentileSums( int index ) const
 }
 
 
-PercentileValue PercentileStats::cumulativeSums( int index ) const
+PercentileValue PercentileStats::cumulativeSum( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
 
@@ -152,14 +150,14 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
     // Create a new list for bucketCount, filled with zeroes
     _buckets = BucketList( bucketCount );
 
-    if ( isEmpty() || _percentileList.isEmpty() )
+    if ( isEmpty() || _percentiles.isEmpty() )
         return;
 
     // Remember the validated start and end percentiles that match this bucket list
-    _bucketsStart = _percentileList[ startPercentile ];
-    _bucketsEnd   = _percentileList[ endPercentile   ];
+    _bucketsStart = _percentiles[ startPercentile ];
+    _bucketsEnd   = _percentiles[ endPercentile   ];
 
-    const PercentileValue bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
+    const PercentileBoundary bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
 
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
@@ -177,7 +175,7 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
     // Fill buckets up to the last requested percentile
     int index = 0;
-    PercentileValue nextBucket = _bucketsStart + bucketWidth;
+    PercentileBoundary nextBucket = _bucketsStart + bucketWidth;
     while ( it != cend() && *it <= _bucketsEnd )
     {
 	// Increment the bucket index when we hit the next bucket boundary

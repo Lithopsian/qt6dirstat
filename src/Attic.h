@@ -35,7 +35,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	Attic( DirTree * tree, DirInfo * parent = nullptr ):
+	Attic( DirTree * tree, DirInfo * parent ):
 	    DirInfo { parent, tree, atticName() }
 	{ setIgnored( true ); }
 
@@ -66,7 +66,7 @@ namespace QDirStat
 
 	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag
-	 * accordingly.  For Attic, there is nothing to do.
+	 * accordingly.  An Attic is always ignored, so nothing to do.
 	 *
 	 * Reimplemented - inherited from DirInfo.
 	 **/
