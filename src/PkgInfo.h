@@ -149,8 +149,8 @@ namespace QDirStat
          * Reimplemented from FileInfo.  The default locate() function does not
          * understand schemes, so handle that here.
          **/
-        FileInfo * locate( const QString & locateUrl, bool findPseudoDirs ) override
-            { return locateUrl == url() ? this : FileInfo::locate( locateUrl, findPseudoDirs ); }
+        FileInfo * locate( const QString & locateUrl ) override
+            { return locateUrl == url() ? this : FileInfo::locate( locateUrl ); }
 
         /**
          * Returns the name of the "root" package summary item url (ie. "Pkg:/").

@@ -20,7 +20,7 @@ FileInfo * Subtree::subtree() const
     FileInfo * item = locate();
 
     if ( !item && _useParentFallback && _tree && !_parentUrl.isEmpty() )
-	item = _tree->locate( _parentUrl, true ); // findPseudoDirs
+	item = _tree->locate( _parentUrl );
 
     if ( !item && _useRootFallback && _tree )
 	item = _tree->firstToplevel();
@@ -80,8 +80,7 @@ FileInfo * Subtree::locate() const
     if ( !_tree || _url.isEmpty() )
 	return nullptr;
 
-    return _tree->locate( _url,
-			  true ); // findPseudoDirs
+    return _tree->locate( _url );
 }
 
 /*

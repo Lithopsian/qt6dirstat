@@ -81,7 +81,7 @@ DirInfo * FindFilesDialog::currentSubtree()
     }
     else
     {
-        fileInfo = app()->dirTree()->locate( _lastPath, true ); // findPseudoDirs
+        fileInfo = app()->dirTree()->locate( _lastPath );
         if ( !fileInfo ) // _lastPath outside of this tree
         {
             auto firstToplevel = app()->firstToplevel();

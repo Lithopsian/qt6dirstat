@@ -76,9 +76,12 @@ namespace QDirStat
 	 * Locate a child somewhere in this subtree whose URL (i.e. complete
 	 * path) matches the URL passed. Returns 0 if there is no such child.
 	 *
-	 * Reimplemented - inherited from FileInfo.
+	 * Reimplemented - inherited from FileInfo.  This implementation does
+	 * not search for the "<Ignored>" or "<Ignored><Files>" portion of a
+	 * url unless that is an exact match. The urls of children inside an
+	 * attic do not include "<Ignored>".
 	 **/
-	FileInfo * locate( const QString & url, bool findPseudoDirs ) override;
+	FileInfo * locate( const QString & url ) override;
 
     };	// class Attic
 

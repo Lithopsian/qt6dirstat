@@ -7,24 +7,37 @@
  *              Ian Nartowicz
  */
 
+#include <QStringBuilder>
+
 #include "Attic.h"
+#include "FileInfoIterator.h"
+#include "Logger.h"
 
 
 using namespace QDirStat;
 
 
-FileInfo * Attic::locate( const QString & url, bool findPseudoDirs )
+FileInfo * Attic::locate( const QString & url )
 {
-    // Search all children
-    for ( FileInfo * child = firstChild(); child; child = child->next() )
+    // Don't let a directly-nested dot entry return a spurious match on an un-nested url
+    if ( url == dotEntryName() )
+	return nullptr;
+
+    // Match exactly on this un-nested attic
+    if ( url == atticName() )
+	return this;
+
+    // Try for an exact match on a dot entry nested in this attic
+    if ( url == atticName() % '/' % dotEntryName() )
+	return dotEntry();
+
+   // Recursively search all children including the dot entry
+    for ( DotEntryIterator it { this }; *it; ++it )
     {
-	FileInfo * foundChild = child->locate( url, findPseudoDirs );
+	FileInfo * foundChild = it->locate( url );
 	if ( foundChild )
 	    return foundChild;
     }
-
-    // An attic can have neither an attic nor a dot entry, so there is no need
-    // to search in either of those.
 
     return nullptr;
 }

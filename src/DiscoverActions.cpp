@@ -112,7 +112,7 @@ void DiscoverActions::discoverFilesFromYear( const QString & path, short year )
                    LocateListMTimeCol,
                    Qt::DescendingOrder,
                    QObject::tr( "Files from %1 in %2" ).arg( year ),
-                   app()->dirTree()->locate( path, true ) );
+                   app()->dirTree()->locate( path ) );
 }
 
 
@@ -122,7 +122,7 @@ void DiscoverActions::discoverFilesFromMonth( const QString & path, short year, 
                    LocateListMTimeCol,
                    Qt::DescendingOrder,
                    QObject::tr( "Files from %1 %2 in %3" ).arg( monthAbbreviation( month ) ).arg( year),
-                   app()->dirTree()->locate( path, true ) );
+                   app()->dirTree()->locate( path ) );
 }
 
 

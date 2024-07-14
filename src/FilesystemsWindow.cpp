@@ -165,7 +165,7 @@ void FilesystemsWindow::populate()
 {
     clear();
 
-    const bool showAll = _ui->normalCheckBox->isChecked();
+    const bool showAll = !_ui->normalCheckBox->isChecked();
     const auto mountPoints = showAll ? MountPoints::allMountPoints() : MountPoints::normalMountPoints();
     for ( MountPoint * mountPoint : mountPoints )
     {

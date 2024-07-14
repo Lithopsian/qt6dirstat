@@ -12,7 +12,6 @@
 #include <QRegularExpression>
 
 #include "Cleanup.h"
-#include "DirInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "Logger.h"
@@ -438,7 +437,7 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
     if ( _recurse )
     {
 	// Recursively process any children, including dot entries
-	for ( FileInfoIterator it( item ); *it; ++it )
+	for ( DotEntryIterator it { item }; *it; ++it )
 	    execute( *it, outputWindow );
     }
 

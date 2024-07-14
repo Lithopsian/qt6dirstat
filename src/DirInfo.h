@@ -16,6 +16,8 @@
 
 namespace QDirStat
 {
+    using FileInfoList = QVector<FileInfo *>;
+
     class DirSortInfo;
     class DirTree;
     class DotEntry;
