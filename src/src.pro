@@ -55,6 +55,7 @@ SOURCES =   main.cpp			\
 	    DirTreeFilter.cpp		\
 	    DirTreeView.cpp		\
 	    DiscoverActions.cpp		\
+	    DotEntry.cpp		\
 	    DpkgPkgManager.cpp		\
 	    Exception.cpp		\
 	    ExcludeRules.cpp		\
