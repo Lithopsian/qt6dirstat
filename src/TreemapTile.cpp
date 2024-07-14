@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <cmath> // round()
+#include <cmath> // round(), sqrt()
 
 #include <QElapsedTimer>
 #include <QGraphicsSceneMouseEvent>
@@ -18,7 +18,6 @@
 
 #include "TreemapTile.h"
 #include "ActionManager.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "Logger.h"
 #include "MimeCategorizer.h"
@@ -37,9 +36,9 @@ namespace
      * first and last items doesn't get better any more.  Returns the total size of
      * the items for the row.
      **/
-    FileSize squarify( const QRectF           & rect,
-                       FileInfoBySizeIterator & it,
-                       FileSize                 remainingTotal )
+    FileSize squarify( const QRectF   & rect,
+                       BySizeIterator & it,
+                       FileSize         remainingTotal )
     {
         //logDebug() << "squarify() " << this << " " << rect << Qt::endl;
 
@@ -51,12 +50,12 @@ namespace
         const double rowRatio = width < height ? width / height : height / width;
         const double rowWidthScale = rowRatio * remainingTotal; // really rectWidth
 
-        const FileSize firstSize = (*it)->itemTotalSize();
+        const FileSize firstSize = it->itemTotalSize();
         FileSize sum = 0LL;
         double bestAspectRatio = 0.0;
-        while (*it)
+        while ( *it )
         {
-            const FileSize size = (*it)->itemTotalSize();
+            const FileSize size = it->itemTotalSize();
             if ( size > 0 )
             {
                 sum += size;
@@ -286,7 +285,7 @@ void TreemapTile::init()
 
 void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 {
-    FileInfoBySizeIterator it { _orig };
+    BySizeIterator it { _orig };
     FileSize totalSize = it.totalSize();
 
     if ( totalSize == 0 )
@@ -305,7 +304,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
     double nextOffset = qMin( width, _parentView->minTileSize() );
     while ( *it && offset < width )
     {
-        cumulativeSize += (*it)->itemTotalSize();
+        cumulativeSize += it->itemTotalSize();
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
@@ -313,7 +312,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
             TreemapTile * tile = new VerticalTreemapTile( this, *it, childRect );
             tile->cushionSurface().addHorizontalRidge( childRect.left(), childRect.right() );
 
-            if ( (*it)->isDirInfo() )
+            if ( it->isDirInfo() )
                 addRenderThread( tile, 4 );
 //                tile->_cushion = tile->renderCushion( childRect );
 
@@ -327,7 +326,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 
 void TreemapTile::createChildrenVertical( const QRectF & rect )
 {
-    FileInfoBySizeIterator it { _orig };
+    BySizeIterator it { _orig };
     FileSize totalSize = it.totalSize();
 
     if (totalSize == 0)
@@ -346,7 +345,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
     double nextOffset = qMin( height, _parentView->minTileSize() );
     while ( *it && offset < height )
     {
-        cumulativeSize += (*it)->itemTotalSize();
+        cumulativeSize += it->itemTotalSize();
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
@@ -354,7 +353,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
             TreemapTile * tile = new HorizontalTreemapTile( this, *it, childRect );
             tile->cushionSurface().addVerticalRidge( childRect.top(), childRect.bottom() );
 
-            if ( (*it)->isDirInfo() )
+            if ( it->isDirInfo() )
                 addRenderThread( tile, 4 );
 //                tile->_cushion = tile->renderCushion( childRect );
 
@@ -369,7 +368,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
 void TreemapTile::createSquarifiedChildren( const QRectF & rect )
 {
     // Get all the children of this tile and total them up
-    FileInfoBySizeIterator it { _orig };
+    BySizeIterator it { _orig };
     FileSize remainingTotal = it.totalSize();
 
     // Don't show completely empty directories in the treemap, avoids divide by zero issues
@@ -386,7 +385,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         const double secondary = dir == TreemapHorizontal ? childrenRect.height() : childrenRect.width();
 
         // Find the set of items that fill a row with tiles as near as possible to squares
-        FileInfoListPos rowStartIt = it.currentPos();
+        auto rowStartIt = it.currentPos();
         FileSize rowTotal = squarify( childrenRect, it, remainingTotal );
 
         // Rows 0.5-1.0 pixels high all get rounded up so we'll probably run out of space, but just in case ...
@@ -396,9 +395,9 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         {
             // Aspect ratio hardly matters any more, so fast forward enough items to make half a pixel
             // (many of these tiny items will be dropped while laying out a row of tiles)
-            if (*it)
+            if ( *it )
             {
-                rowTotal += (*it)->itemTotalSize();
+                rowTotal += it->itemTotalSize();
                 ++it;
             }
             else
@@ -416,13 +415,13 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
     }
 }
 
-void TreemapTile::layoutRow( Orientation              dir,
-                             QRectF                 & rect,
-                             FileInfoBySizeIterator & it,
-                             const FileInfo         * rowEnd,
-                             FileSize                 rowTotal,
-                             double                   primary,
-                             double                   height )
+void TreemapTile::layoutRow( Orientation      dir,
+                             QRectF         & rect,
+                             BySizeIterator & it,
+                             const FileInfo * rowEnd,
+                             FileSize         rowTotal,
+                             double           primary,
+                             double           height )
 {
 
     //logDebug() << this << " - " << rect << " - height= " << height << Qt::endl;
@@ -456,7 +455,7 @@ void TreemapTile::layoutRow( Orientation              dir,
     {
         // Position tiles relative to the row start based on the cumulative size of tiles
         //logDebug() << rect << *it << Qt::endl;
-        cumulativeSize += (*it)->itemTotalSize();
+        cumulativeSize += it->itemTotalSize();
         const double newOffset = std::round( cumulativeSize * rowScale );
 
         // Drop tiles that don't reach to the minimum pixel size or fill the row
@@ -469,7 +468,7 @@ void TreemapTile::layoutRow( Orientation              dir,
             TreemapTile * tile = new TreemapTile( this, *it, childRect, rowCushionSurface );
 
             // Don't need to finish calculating cushions once all the leaf-level children have been created
-            if ( (*it)->isDirInfo() )
+            if ( it->isDirInfo() )
 //                tile->_cushion = tile->renderCushion( childRect );
                 addRenderThread( tile, 6 );
             else if ( dir == TreemapHorizontal )
@@ -620,12 +619,6 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 {
     //logDebug() << rect << Qt::endl;
 
-    static const double ambientIntensity = 1.0 * _parentView->ambientLight() / 255;
-    static const double intensityScaling = 1.0 - ambientIntensity;
-    static const double lightX = _parentView->lightX() * intensityScaling;
-    static const double lightY = _parentView->lightY() * intensityScaling;
-    static const double lightZ = _parentView->lightZ() * intensityScaling;
-
     const QColor & color = tileColor( _orig );
 
     QImage image( rect.width(), rect.height(), QImage::Format_RGB32 );
@@ -642,8 +635,9 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
     {
         for ( x = 0, nx = nx0; x < rect.width(); ++data, ++x, nx += xx22 )
         {
-            double cosa  = ( lightZ + ny*lightY + nx*lightX ) / sqrt( nx*nx + ny*ny + 1.0 );
-            cosa = ambientIntensity + qMax( 0.0, cosa );
+            const double num   = _parentView->lightZ() + ny*_parentView->lightY() + nx*_parentView->lightX();
+            const double denom = sqrt( nx*nx + ny*ny + 1.0 );
+            const double cosa  = _parentView->ambientIntensity() + qMax( 0.0, num / denom );
 
             const int red   = 0.5 + cosa * color.red();
             const int green = 0.5 + cosa * color.green();

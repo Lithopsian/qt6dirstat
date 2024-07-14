@@ -347,9 +347,10 @@ namespace QDirStat
 
 	/**
 	 * Returns the intensity of ambient light for cushion shading
-	 * [0..255]
+	 * [0.0..1.0].  This is stored in Settings as an integer between
+	 * 0 and 255.
 	 **/
-	int ambientLight() const { return _ambientLight; }
+	double ambientIntensity() const { return _ambientIntensity; }
 
 	/**
 	 * These return the relative light levels in the x, y, and z directions,
@@ -357,10 +358,13 @@ namespace QDirStat
 	 * and left sides of the largest tiles being in deep shadow, while the
 	 * smaller tiles to the bottom and right are still illuminated and the
 	 * highlight is reasonably centred.
+	 *
+	 * The values here have been adjusted for the configured ambient light
+	 * setting.
 	 **/
-	double lightX() const { return 0.09759; }
-	double lightY() const { return 0.19518; }
-	double lightZ() const { return 0.97590; }
+	double lightX() const { return _lightX; }
+	double lightY() const { return _lightY; }
+	double lightZ() const { return _lightZ; }
 
 	/**
 	 * Returns cushion ridge height degradation factor (0 .. 1.0) for each
@@ -616,12 +620,15 @@ namespace QDirStat
 	QColor _dirGradientEnd;
 	QLinearGradient _dirGradient;
 
-	int    _ambientLight;
 	double _heightScaleFactor;
 	double _cushionHeight;
 	double _minTileSize;
 	double _minSquarifiedTileHeight;
 	int    _maxTileThreshold; // largest sub-tree size at which to spawn a rendering thread
+	double _ambientIntensity;
+	double _lightX;
+	double _lightY;
+	double _lightZ;
 
 	std::unique_ptr<const CushionHeightSequence> _cushionHeights;
 
@@ -633,8 +640,8 @@ namespace QDirStat
 	QThreadPool                   * _threadPool	{ nullptr }; // dedicated thread pool for rendering
 
 	// just for logging
-	QElapsedTimer _stopwatch;
-	TreemapTile * _lastTile; // see PAINT_DEBUGGING in TreemapTile.h
+	QElapsedTimer   _stopwatch;
+	TreemapTile   * _lastTile; // see PAINT_DEBUGGING in TreemapTile.h
 
     }; // class TreemapView
 

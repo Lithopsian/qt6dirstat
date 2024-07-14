@@ -196,7 +196,7 @@ void TreemapView::readSettings()
     _forceCushionGrid   = settings.value( "ForceCushionGrid",  false ).toBool();
     _useDirGradient     = settings.value( "UseDirGradient",    true  ).toBool();
 
-    _ambientLight       = settings.value( "AmbientLight",      DefaultAmbientLight      ).toInt();
+    _ambientIntensity   = settings.value( "AmbientLight",      DefaultAmbientLight      ).toInt() / 255.0;
     _heightScaleFactor  = settings.value( "HeightScaleFactor", DefaultHeightScaleFactor ).toDouble();
     _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight     ).toDouble();
     _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize       ).toInt();
@@ -229,7 +229,7 @@ void TreemapView::writeSettings()
 //    settings.setValue( "EnforceContrast",   _enforceContrast   );
     settings.setValue( "ForceCushionGrid",  _forceCushionGrid  );
     settings.setValue( "UseDirGradient",    _useDirGradient    );
-    settings.setValue( "AmbientLight",      _ambientLight      );
+    settings.setValue( "AmbientLight",      qRound( _ambientIntensity * 255 ) );
     settings.setValue( "HeightScaleFactor", _heightScaleFactor );
     settings.setValue( "CushionHeight",     _cushionHeight     );
     settings.setValue( "MinTileSize",       _minTileSize       );
@@ -349,7 +349,7 @@ void TreemapView::rebuildTreemap()
     {
         //logDebug() << "Restoring old treemap with root " << _savedRootUrl << Qt::endl;
 
-        root = _tree->locate( _savedRootUrl, true );        // node, findPseudoDirs
+        root = _tree->locate( _savedRootUrl );
     }
 
     if ( !root )
@@ -523,6 +523,12 @@ void TreemapView::calculateSettings()
         _dirGradient.setColorAt( 0, _dirGradientStart );
         _dirGradient.setColorAt( 1, _dirGradientEnd   );
     }
+
+    // Cushion shading coefficients for a light source above, somewhat behind, and slightly left
+    const double intensityScaling = 1.0 - _ambientIntensity;
+    _lightX = 0.09759 * intensityScaling;
+    _lightY = 0.19518 * intensityScaling;
+    _lightZ = 0.97590 * intensityScaling;
 }
 
 
