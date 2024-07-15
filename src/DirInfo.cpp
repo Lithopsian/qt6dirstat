@@ -186,16 +186,13 @@ void DirInfo::deleteEmptyDotEntry()
 
 
 
-Attic * DirInfo::ensureAttic()
+void DirInfo::ensureAttic()
 {
     if ( !_attic )
     {
 	// logDebug() << "Creating attic for " << this << Qt::endl;
-
 	_attic = new Attic( tree(), this );
     }
-
-    return _attic;
 }
 
 
@@ -392,9 +389,7 @@ DirSize DirInfo::countDirectChildren()
 
     _directChildrenCount = 0;
 
-    _directChildrenCount += std::count_if( FileInfoIterator { this },
-                                           FileInfoIterator {},
-                                           []( auto ) { return true; } );
+    _directChildrenCount += std::count_if( begin( this ), end( this ), []( auto ) { return true; } );
 
     if ( _dotEntry )
 	++_directChildrenCount;
@@ -473,9 +468,13 @@ void DirInfo::addToAttic( FileInfo * newChild )
     Attic * attic = [ this, newChild ]()
     {
 	if ( !newChild->isDir() && _dotEntry )
-	    return _dotEntry->ensureAttic();
+	{
+	    _dotEntry->ensureAttic();
+	    return _dotEntry->_attic;
+	}
 
-	return ensureAttic();
+	ensureAttic();
+	return _attic;
     }();
 
     if ( newChild->isDotEntry() )
@@ -487,7 +486,6 @@ void DirInfo::addToAttic( FileInfo * newChild )
     {
 	attic->insertChild( newChild );
     }
-
 }
 
 
@@ -498,13 +496,12 @@ void DirInfo::childAdded( FileInfo * newChild )
     {
 	const bool isDir = newChild->isDir();
 
-	// Ideally, un/ignored items would always be counted, but they might be already if the summary's dirty
 	if ( newChild->isIgnored() )
 	    _totalIgnoredItems += isDir ? newChild->totalIgnoredItems() : 1;
-	else if ( !isDir ) // unignored "items" doesn't include directories
-	    ++_totalUnignoredItems;
+	else
+	    _totalUnignoredItems += isDir ? newChild->totalUnignoredItems() : 1;
 
-	// Don't propagate counts from ignored items to non-ignored ancestors
+	// Don't propagate the other counts from ignored items to non-ignored ancestors
 	if ( !newChild->isIgnored() || isIgnored() || isAttic() )
 	{
 	    // Watch for overflows at the top-level directory which should have the biggest numbers
@@ -853,14 +850,14 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
     {
 	// logDebug() << "Reparenting all children of " << oldParent << " to " << this << Qt::endl;
 
-	do
+	while ( child->next() )
 	{
 	    child->setParent( this );
-	    if ( !child->next() )
-		child->setNext( _firstChild );
 	    child = child->next();
-	} while ( child );
+	}
 
+	child->setParent( this );
+	child->setNext( _firstChild );
 
 	_firstChild = oldParent->firstChild();
 	oldParent->setFirstChild( nullptr );

@@ -263,6 +263,12 @@ namespace QDirStat
 	time_t oldestFileMtime() override;
 
 	/**
+	 * Set a flag to show tht the summary total values are no longer
+	 * up to date.
+	 **/
+	void setSummaryDirty() { _summaryDirty = true; }
+
+	/**
 	 * Returns 'true' if this had been excluded while reading.
 	 **/
 	bool isExcluded() const override { return _isExcluded; }
@@ -558,19 +564,6 @@ namespace QDirStat
 	void takeAllChildren( DirInfo * oldParent );
 
 	/**
-	 * Recalculate the summary fields when they are dirty.  This may
-	 * trigger recalculations of its children. This can be a very
-	 * expensive operation since the entire subtree may recursively be
-	 * traversed.
-	 *
-	 * Note that the total counts and sizes are not checked for overflow
-	 * during this operation.  Overall totals will not normally increase
-	 * during the recalculation as it is triggered when items are moved
-	 * from one parent to another or completely deleted.
-	 **/
-	void recalc();
-
-	/**
 	 * Return 'true' if this child is a dominant one among its siblings,
 	 * i.e. if its total size is much larger than the other items on the
 	 * same level.  This won't normally be called unless be called unless
@@ -611,15 +604,27 @@ namespace QDirStat
 	void addDotEntry();
 
 	/**
-	 * Return the attic for this node. If it doesn't have one yet, create
-	 * it first.
+	 * If this node doesn't have an attic, create one.
 	 **/
-	Attic * ensureAttic();
+	void ensureAttic();
 
 	/**
 	 * Return 'true' if there is an attic and it has any children.
 	 **/
 	bool hasAtticChildren() const;
+
+	/**
+	 * Recalculate the summary fields when they are dirty.  This may
+	 * trigger recalculations of its children. This can be a very
+	 * expensive operation since the entire subtree may recursively be
+	 * traversed.
+	 *
+	 * Note that the total counts and sizes are not checked for overflow
+	 * during this operation.  Overall totals will not normally increase
+	 * during the recalculation as it is triggered when items are moved
+	 * from one parent to another or completely deleted.
+	 **/
+	void recalc();
 
 	/**
 	 * Return a structure containing a list of children sorted by 'sortCol'

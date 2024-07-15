@@ -119,6 +119,48 @@ namespace
 #endif
 
     /**
+     * Find the ancestor of an ignored FileInfo item that is the
+     * direct child of the attic.  Only direct children of an attic
+     * can be unattic'd.
+     **/
+    FileInfo * findAtticChild( FileInfo * item )
+    {
+	for ( FileInfo * toplevel = item; toplevel->parent(); toplevel = toplevel->parent() )
+	{
+	    if ( toplevel->parent()->isAttic() )
+		return toplevel;
+	}
+
+	return nullptr;
+    }
+
+
+    /**
+     * Move one ignored item out of the attic.  This is done before
+     * refreshing to ensure that unignored items (after the refresh)
+     * aren't stranded in the attic.  The whole subtree from the
+     * attic level has to be unattic'd.  It, or at least anything
+     * that is still ignored after the refresh, will get moved back
+     * again by finalizeTree().
+     **/
+    void unatticOne( FileInfo * item )
+    {
+	FileInfo * atticChild = findAtticChild( item );
+	if ( !atticChild ) // not in attic - not ignored?
+	    return;
+
+	Attic * attic = atticChild->parent()->toAttic();
+	DirInfo * parent = attic->parent();
+	if ( parent ) // an attic should always have a parent
+	{
+	    attic->unlinkChild( atticChild );
+	    parent->insertChild( atticChild );
+	    parent->deleteEmptyAttic();
+	}
+    }
+
+
+    /**
      * Move all items from any attics below a directory into the attic parent and
      * remove the emptied attics.  This is done when a directory has been moved
      * into an attic, so any attics within it are redundant.
@@ -136,7 +178,7 @@ namespace
 	    dir->deleteEmptyAttic();
 	}
 
-	for ( DotEntryIterator it { dir }; *it; ++it )
+	for ( DotEntryIterator it { item }; *it; ++it )
 	    unatticAll( *it );
     }
 
@@ -162,18 +204,13 @@ namespace
 		// Move ignored items to an attic (created if necessary) at this level
 		dir->unlinkChild( child );
 		dir->addToAttic( child );
+		dir->setSummaryDirty();
+		unatticAll( child );
 	    }
 	    else // stop recursing when we've found an ignored item
 	    {
 		moveIgnoredToAttic( child->toDirInfo() ); // recurse away
 	    }
-	}
-
-	// If there is an attic at this level, empty all attics below it
-	if ( dir->attic() )
-	{
-	    unatticAll( dir->attic() );
-	    dir->attic()->recalc();
 	}
     }
 
@@ -185,11 +222,11 @@ namespace
      **/
     void ignoreEmptyDirs( DirInfo * dir )
     {
-	for ( FileInfoIterator it { dir }; *it; ++it )
+	for ( auto item : dir )
 	{
-	    if ( !it->isIgnored() && it->isDirInfo() )
+	    if ( !item->isIgnored() && item->isDirInfo() )
 	    {
-		DirInfo * subDir = it->toDirInfo();
+		DirInfo * subDir = item->toDirInfo();
 
 		if ( subDir->totalUnignoredItems() == 0 )
 		{
@@ -389,11 +426,15 @@ void DirTree::refresh( DirInfo * subtree )
 
 	//logDebug() << "Refreshing subtree " << subtree << Qt::endl;
 
-	//  Make copies of some key information before it is deleted
+	//  Make copies of some key information before the objects are deleted
 	const QString url = subtree->url();
 	DirInfo * parent = subtree->parent();
 	if ( parent->isAttic() )
 	    parent = parent->parent();
+
+	// Take ignored subtrees out of the attic before refreshing
+	if ( subtree->isIgnored() )
+	    unatticOne( subtree );
 
 	deleteSubtree( subtree );
 
