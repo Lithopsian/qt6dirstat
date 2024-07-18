@@ -671,8 +671,7 @@ void MainWindow::refreshSelected()
 	_ui->treemapView->saveTreemapRoot();
 
 	_stopWatch.start();
-	FileInfoSet refreshSet;
-	refreshSet << sel;
+	FileInfoSet refreshSet { sel };
 
 	try
 	{
