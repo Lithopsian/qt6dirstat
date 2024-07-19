@@ -127,7 +127,7 @@ void DirInfo::initCounts()
     _totalFiles          = 0;
     _totalIgnoredItems   = 0;
     _totalUnignoredItems = 0;
-    _directChildrenCount = 0;
+    _childCount          = 0;
     _errSubDirs          = 0;
     _latestMtime         = mtime();
     _oldestFileMtime     = 0;
@@ -136,7 +136,8 @@ void DirInfo::initCounts()
 
 void DirInfo::clear()
 {
-    // If there are no children of any kind, no need to even mark as dirty
+    // If there are no children of any kind, no need to even mark as dirty,
+    // otherwise cleaning up empty dot entries, etc. drastically slows down reads
     if ( !_firstChild && !_dotEntry && !_attic )
 	return;
 
@@ -166,11 +167,11 @@ void DirInfo::addDotEntry()
 	// logDebug() << "Creating dot entry for " << this << Qt::endl;
 
 	_dotEntry = new DotEntry( tree(), this );
-	++_directChildrenCount;
+	++_childCount;
     }
 }
 
-
+/*
 void DirInfo::deleteEmptyDotEntry()
 {
     if ( !_dotEntry->firstChild() && !_dotEntry->hasAtticChildren() )
@@ -178,12 +179,10 @@ void DirInfo::deleteEmptyDotEntry()
 	delete _dotEntry;
 	_dotEntry = nullptr;
 
-//	countDirectChildren();
-	--_directChildrenCount;
-//	markAsDirty();
+	--_childCount;
     }
 }
-
+*/
 
 
 void DirInfo::ensureAttic()
@@ -192,17 +191,52 @@ void DirInfo::ensureAttic()
     {
 	// logDebug() << "Creating attic for " << this << Qt::endl;
 	_attic = new Attic( tree(), this );
+	++_childCount;
     }
 }
 
 
 void DirInfo::deleteEmptyAttic()
 {
-    if ( _attic && !_attic->firstChild() )
+    if ( _attic && _attic->isEmpty() )
     {
 	delete _attic;
 	_attic = nullptr;
     }
+}
+
+
+void DirInfo::moveToAttic( FileInfo * child )
+{
+    unlinkChild( child );
+
+    if ( child->isDotEntry() )
+    {
+	// Just throw the subtree in the attic, it will be marked dirty anyway
+	ensureAttic();
+	child->setParent( _attic );
+	_attic->_dotEntry = child->toDotEntry();
+    }
+    else
+    {
+	// addToAttic() can add subtrees but won't calculate the summary correctly
+	addToAttic( child );
+    }
+
+    // unlinkChild() marks all ancestors as dirty, but not the attic
+    _attic->_summaryDirty = true;
+    _attic->dropSortCache();
+}
+
+
+void DirInfo::moveAllFromAttic()
+{
+    //logDebug() << "Moving all attic children to the normal children list for " << this << Qt::endl;
+    takeAllChildren( _attic );
+    deleteEmptyAttic();
+
+    // The attic children summary totals won't be included here, so everything has to be re-counted
+    markAsDirty();
 }
 
 
@@ -218,10 +252,12 @@ void DirInfo::recalc()
 
     initCounts();
 
+    // Loop through the children including the dot entry;
+    // the attic is handled separately
     for ( DotEntryIterator it { this }; *it; ++it )
     {
 	// Count the child and add all its sub-totals
-	++_directChildrenCount;
+	++_childCount;
 	_totalSize           += it->totalSize();
 	_totalAllocatedSize  += it->totalAllocatedSize();
 	_totalBlocks         += it->totalBlocks();
@@ -274,6 +310,7 @@ void DirInfo::recalc()
     {
 	_totalIgnoredItems += _attic->totalIgnoredItems();
 	_errSubDirs        += _attic->errSubDirs();
+	++_childCount;
     }
 
     _summaryDirty = false;
@@ -374,27 +411,27 @@ time_t DirInfo::oldestFileMtime()
 }
 
 
-DirSize DirInfo::directChildrenCount()
+DirSize DirInfo::childCount()
 {
     if ( _summaryDirty )
 	recalc();
 
-    return _directChildrenCount;
+    return _childCount;
 }
 
 /*
-DirSize DirInfo::countDirectChildren()
+DirSize DirInfo::countChildren()
 {
     // logDebug() << this << Qt::endl;
 
-    _directChildrenCount = 0;
+    _childCount = 0;
 
-    _directChildrenCount += std::count_if( begin( this ), end( this ), []( auto ) { return true; } );
+    _childCount += std::count_if( begin( this ), end( this ), []( auto ) { return true; } );
 
     if ( _dotEntry )
-	++_directChildrenCount;
+	++_childCount;
 
-    return _directChildrenCount;
+    return _childCount;
 }
 */
 
@@ -477,29 +514,26 @@ void DirInfo::addToAttic( FileInfo * newChild )
 	return _attic;
     }();
 
-    if ( newChild->isDotEntry() )
-    {
-	newChild->setParent( attic );
-	attic->_dotEntry = newChild->toDotEntry();
-    }
-    else
-    {
-	attic->insertChild( newChild );
-    }
+    attic->insertChild( newChild );
 }
 
 
 void DirInfo::childAdded( FileInfo * newChild )
 {
+    //logDebug() << this << " " << newChild << " " << _summaryDirty << Qt::endl;
+
     // No point updating obsolete data - it will have be recalc()-ulated from scratch
     if ( !_summaryDirty )
     {
-	const bool isDir = newChild->isDir();
-
-	if ( newChild->isIgnored() )
-	    _totalIgnoredItems += isDir ? newChild->totalIgnoredItems() : 1;
-	else
-	    _totalUnignoredItems += isDir ? newChild->totalUnignoredItems() : 1;
+	// Only count non-directory items for un/ignored items
+	// Empty directories will be handled separately when the tree is finalised
+	if ( !newChild->isDir() )
+	{
+	    if ( newChild->isIgnored() )
+		++_totalIgnoredItems;
+	    else
+		++_totalUnignoredItems;
+	}
 
 	// Don't propagate the other counts from ignored items to non-ignored ancestors
 	if ( !newChild->isIgnored() || isIgnored() || isAttic() )
@@ -526,13 +560,13 @@ void DirInfo::childAdded( FileInfo * newChild )
 	    if ( newChild->parent() == this )
 	    {
 		// Test for directory overflow (can't currently happen as DirSizeMax == FileCountMax)
-//		if ( _directChildrenCount == DirSizeMax )
+//		if ( _childCount == DirSizeMax )
 //		    THROW( Exception( QString( "more than %1 files in a directory" ).arg( DirSizeMax ) ) );
 
-		++_directChildrenCount;
+		++_childCount;
 	    }
 
-	    if ( isDir )
+	    if ( newChild->isDir() )
 	    {
 		++_totalSubDirs;
 	    }
@@ -589,17 +623,17 @@ void DirInfo::unlinkChild( FileInfo * deletedChild )
 {
     markAsDirty(); // recurses up the tree
 
-    if ( deletedChild == _attic )
-    {
-	//logDebug() << "Unlinking (ie. deleting) attic " << deletedChild << Qt::endl;
-	_attic = nullptr;
-	return;
-    }
-
     if ( deletedChild == _dotEntry )
     {
 	//logDebug() << "Unlinking (ie. deleting) dot entry " << deletedChild << Qt::endl;
 	_dotEntry = nullptr;
+	return;
+    }
+
+    if ( deletedChild == _attic )
+    {
+	//logDebug() << "Unlinking (ie. deleting) attic " << deletedChild << Qt::endl;
+	_attic = nullptr;
 	return;
     }
 
@@ -610,9 +644,8 @@ void DirInfo::unlinkChild( FileInfo * deletedChild )
 	return;
     }
 
-    auto it = std::find_if( FileInfoIterator { this },
-                            FileInfoIterator {},
-                            [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; } );
+    auto compare = [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; };
+    auto it = std::find_if( begin( this ), end( this ), compare );
     if ( *it )
     {
 	// logDebug() << "Unlinking " << deletedChild << Qt::endl;
@@ -721,22 +754,29 @@ void DirInfo::cleanupDotEntries()
     {
 	takeAllChildren( _dotEntry );
 
-	// Reparent the dot entry's attic's children to this item's attic
+	// Reparent the dot entry's attic children to this item's attic
 	if ( _dotEntry->hasAtticChildren() )
 	{
 	    ensureAttic();
 	    _attic->takeAllChildren( _dotEntry->attic() );
+	    _attic->_summaryDirty = true;
+	    _attic->dropSortCache();
 	}
     }
 
     // Delete the dot entry if it is now empty.
     //
-    // This also affects dot entries that were just disowned because they had
-    // no siblings (i.e., there are no subdirectories on this level).
-    //
-    // Note that this also checks if the dot entry's attic (if it has one) is
-    // empty, and that its attic is deleted along with the dot entry.
-    deleteEmptyDotEntry();
+    // This also takes care of dot entries that were just disowned because
+    // they had no siblings (i.e. there are no subdirectories on this level)
+    if ( !_dotEntry->firstChild() && !_dotEntry->hasAtticChildren() )
+    {
+	delete _dotEntry;
+	_dotEntry = nullptr;
+
+//	--_childCount;
+	dropSortCache();
+	_summaryDirty = true;
+    }
 }
 
 
@@ -748,13 +788,10 @@ void DirInfo::cleanupAttics()
     if ( _attic )
     {
 	_attic->finalizeLocal();
-
-	if ( !_attic->firstChild() && !_attic->dotEntry() )
+	deleteEmptyAttic();
+	if ( !_attic )
 	{
-	    delete _attic;
-	    _attic = nullptr;
-
-	    // Cached data is obsolete but parent's still OK
+	    // Cached data is obsolete although ancestors are unchanged
 	    dropSortCache();
 	    _summaryDirty = true;
 	}
@@ -836,7 +873,7 @@ void DirInfo::dropSortCaches()
 const DirInfo * DirInfo::findNearestMountPoint() const
 {
     const DirInfo * dir = this;
-    while ( dir->parent() != dir->tree()->root() && !dir->isMountPoint() )
+    while ( dir->parent() != tree()->root() && !dir->isMountPoint() )
 	dir = dir->parent();
 
     return dir;
@@ -862,9 +899,11 @@ void DirInfo::takeAllChildren( DirInfo * oldParent )
 	_firstChild = oldParent->firstChild();
 	oldParent->setFirstChild( nullptr );
 
-	// The ancestors of these are the same, so just recalc these two
-	oldParent->_summaryDirty = true;
-	_summaryDirty = true;
+	// Recalcs are taken care of by the callers
+	// Need to recalc(), but oldParent will be deleted and other ancestors are still correct
+//	oldParent->_summaryDirty = true;
+//	_summaryDirty = true;
+//	dropSortCache();
     }
 }
 
@@ -881,12 +920,12 @@ void DirInfo::finishReading( DirReadState readState )
 
 DirSortInfo::DirSortInfo( DirInfo       * parent,
                           DataColumn      sortCol,
-			  Qt::SortOrder   sortOrder ):
+                          Qt::SortOrder   sortOrder ):
     _sortedCol { sortCol },
     _sortedOrder { sortOrder }
 {
     // Make space for all the children, including a dot entry and attic
-    _sortedChildren.reserve( parent->directChildrenCount() + 1 );
+    _sortedChildren.reserve( parent->childCount() );
 
     // Add the children and any dot entry
     for ( DotEntryIterator it { parent }; *it; ++it )
@@ -905,22 +944,21 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
     const auto sorter = FileInfoSorter( sortCol, sortOrder );
     std::stable_sort( _sortedChildren.begin(), _sortedChildren.end(), sorter );
 
-#if DIRECT_CHILDREN_COUNT_SANITY_CHECK
-    // Do the sanity check before adding the attic, because it isn't in the direct children count
-    if ( _sortedChildren.size() != parent->directChildrenCount() )
-    {
-	dumpChildrenList( parent, _sortedChildren );
-
-	THROW( Exception( QString( "_directChildrenCount of %1 corrupted; is %2, should be %3" )
-			  .arg( parent->debugUrl() )
-			  .arg( parent->directChildrenCount() )
-			  .arg( _sortedChildren.size() ) ) );
-    }
-#endif
-
     // Add any attic, always last whatever the sort order
     if ( parent->attic() )
 	_sortedChildren.append( parent->attic() );
+
+#if DIRECT_CHILDREN_COUNT_SANITY_CHECK
+    if ( _sortedChildren.size() != parent->childCount() )
+    {
+	dumpChildrenList( parent, _sortedChildren );
+
+	THROW( Exception( QString( "_childCount of %1 corrupted; is %2, should be %3" )
+			  .arg( parent->debugUrl() )
+			  .arg( parent->childCount() )
+			  .arg( _sortedChildren.size() ) ) );
+    }
+#endif
 
     // Store the sort order number for each item directly on the FileInfo object
     DirSize childNumber = 0;

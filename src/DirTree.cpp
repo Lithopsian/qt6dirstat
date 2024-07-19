@@ -45,56 +45,36 @@ namespace
 		     DirTree       * tree,
 		     DirInfo       * parent )
     {
-	struct stat statInfo;
 	// logDebug() << "url: \"" << url << '"' << Qt::endl;
 
-	if ( lstat( url.toUtf8(), &statInfo ) == 0 ) // lstat() OK
-	{
-	    QString name = url;
-
-	    if ( parent && parent != tree->root() )
-		name = SysUtil::baseName( url );
-
-	    if ( S_ISDIR( statInfo.st_mode ) ) // directory
-	    {
-		DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
-
-		if ( parent )
-		{
-		    parent->insertChild( dir );
-
-		    // Get the real parent for comparing device numbers, in case we're in an Attic
-		    if ( parent->isAttic() )
-			parent = parent->parent();
-		    if ( parent &&
-			 parent != tree->root() &&
-			 !parent->isPkgInfo() &&
-			 !parent->isFromCache() &&
-			 dir->device() != parent->device() )
-		    {
-			logDebug() << dir << " is a mount point under " << parent << Qt::endl;
-			dir->setMountPoint();
-		    }
-		}
-
-		return dir;
-	    }
-	    else // not directory
-	    {
-		FileInfo * file = new FileInfo( parent, tree, name, statInfo );
-
-		if ( parent )
-		    parent->insertChild( file );
-
-		return file;
-	    }
-	}
-	else // lstat() failed
+	struct stat statInfo;
+	if ( lstat( url.toUtf8(), &statInfo ) != 0 ) // lstat() failed
 	{
 	    THROW( SysCallFailedException( "lstat", url ) );
+	    return nullptr;
 	}
 
-	return nullptr;
+	const bool isRoot = parent == tree->root();
+	const QString name = isRoot ? url : SysUtil::baseName( url );
+
+	if ( !S_ISDIR( statInfo.st_mode ) ) // not directory
+	{
+	    FileInfo * file = new FileInfo( parent, tree, name, statInfo );
+	    parent->insertChild( file );
+
+	    return file;
+	}
+
+	DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
+	parent->insertChild( dir );
+
+	if ( !isRoot && !parent->isPkgInfo() && !parent->isFromCache() && dir->device() != parent->device() )
+	{
+	    logDebug() << dir << " is a mount point under " << parent << Qt::endl;
+	    dir->setMountPoint();
+	}
+
+	return dir;
     }
 
 #if 0
@@ -139,23 +119,39 @@ namespace
      * Move one ignored item out of the attic.  This is done before
      * refreshing to ensure that unignored items (after the refresh)
      * aren't stranded in the attic.  The whole subtree from the
-     * attic level has to be unattic'd.  It, or at least anything
+     * attic level down has to be unattic'd.  It, or at least anything
      * that is still ignored after the refresh, will get moved back
      * again by finalizeTree().
      **/
-    void unatticOne( FileInfo * item )
+    void unatticOne( DirTree * tree, FileInfo * atticChild )
     {
-	FileInfo * atticChild = findAtticChild( item );
-	if ( !atticChild ) // not in attic - not ignored?
-	    return;
-
 	Attic * attic = atticChild->parent()->toAttic();
 	DirInfo * parent = attic->parent();
 	if ( parent ) // an attic should always have a parent
 	{
-	    attic->unlinkChild( atticChild );
+	    // Notify each change individually so the model can keep track
+	    emit tree->deletingChildren( attic, FileInfoSet { atticChild } );
+	    attic->unlinkChild( atticChild ); // marks all ancestors as dirty
+	    emit tree->childrenDeleted();
+
+	    // Pretend to be clearing all the children of parent, whether we delete anything or not
+	    emit tree->clearingSubtree( parent ); // does recalc()
+	    if ( attic->isEmpty() )
+	    {
+		// Use unlinkChild() so the sort cache is dropped and the tree marked as dirty
+		parent->unlinkChild( attic );
+		delete attic;
+	    }
+	    emit tree->subtreeCleared();
+
+	    // atticChild is still marked ignored, so won't get added to the parent summaries here
 	    parent->insertChild( atticChild );
-	    parent->deleteEmptyAttic();
+
+	    // Notify the model of (nearly) all the parent rows as if they were new
+	    emit tree->readJobFinished( parent );
+
+	    // the model will be one row short at this point, but
+	    // deleteSubtree() is about to be called and everything will get recalculated
 	}
     }
 
@@ -172,13 +168,9 @@ namespace
 
 	DirInfo * dir = item->toDirInfo();
 	if ( dir->attic() )
-	{
-	    //logDebug() << "Moving all attic children to the normal children list for " << dir << Qt::endl;
-	    dir->takeAllChildren( dir->attic() );
-	    dir->deleteEmptyAttic();
-	}
+	    dir->moveAllFromAttic();
 
-	for ( DotEntryIterator it { item }; *it; ++it )
+	for ( DotEntryIterator it { item }; it != nullptr ; ++it )
 	    unatticAll( *it );
     }
 
@@ -202,9 +194,9 @@ namespace
 	    if ( child->isIgnored() )
 	    {
 		// Move ignored items to an attic (created if necessary) at this level
-		dir->unlinkChild( child );
-		dir->addToAttic( child );
-		dir->setSummaryDirty();
+		dir->moveToAttic( child );
+
+		// Empty and delete any attics that have been moved under this attic
 		unatticAll( child );
 	    }
 	    else // stop recursing when we've found an ignored item
@@ -413,12 +405,13 @@ void DirTree::refresh( DirInfo * subtree )
     if ( subtree->isPseudoDir() )
 	subtree = subtree->parent();
 
-    if ( subtree == root() || subtree->parent() == root() )	// Refresh all (from first toplevel)
+    if ( subtree == root() || subtree->parent() == root() )
     {
+	// Refresh all (from first toplevel)
 	clearSubtree( root() ); // clears the contents, but not _url, filters, etc.
 	startReading( QDir::cleanPath( _url ) );
     }
-    else	// Refresh subtree
+    else // refresh subtree with a parent
     {
 	// A full startingReading signal would reset all the tree branches to level 1
 	emit startingRefresh();
@@ -426,15 +419,14 @@ void DirTree::refresh( DirInfo * subtree )
 
 	//logDebug() << "Refreshing subtree " << subtree << Qt::endl;
 
+	// Take ignored subtrees out of the attic before refreshing
+	// This takes care of items that become unignored and empty attics
+	if ( subtree->isIgnored() )
+	    unatticOne( this, findAtticChild( subtree ) );
+
 	//  Make copies of some key information before the objects are deleted
 	const QString url = subtree->url();
-	DirInfo * parent = subtree->parent();
-	if ( parent->isAttic() )
-	    parent = parent->parent();
-
-	// Take ignored subtrees out of the attic before refreshing
-	if ( subtree->isIgnored() )
-	    unatticOne( subtree );
+	DirInfo * parent = subtree->parent(); // parent can no longer be an attic
 
 	deleteSubtree( subtree );
 
@@ -468,8 +460,7 @@ void DirTree::finalizeTree()
     {
 	ignoreEmptyDirs( root() );
 	if ( _root->firstChild() )
-            moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
-//	recalc( root() );
+	    moveIgnoredToAttic( _root->firstChild()->toDirInfo() );
     }
 }
 
@@ -477,7 +468,7 @@ void DirTree::finalizeTree()
 void DirTree::childAddedNotify( FileInfo * newChild )
 {
     if ( !haveClusterSize() )
-        detectClusterSize( newChild );
+	detectClusterSize( newChild );
 
 //    emit childAdded( newChild ); // nobody listening for this
 
@@ -506,11 +497,7 @@ void DirTree::deleteChild( FileInfo * child )
 
 void DirTree::deleteSubtree( DirInfo * subtree )
 {
-    // Make a FileInfoSet to use in the signal to DirTreeModel
-    FileInfoSet subtrees;
-    subtrees << subtree;
-
-    emit deletingChildren( subtree->parent(), subtrees );
+    emit deletingChildren( subtree->parent(), FileInfoSet { subtree } );
     deleteChild( subtree );
     emit childrenDeleted();
 }
@@ -521,9 +508,6 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
     // Don't do anything if a read is in progress or gets started
     if ( _isBusy )
 	return;
-
-//    if ( subtrees.contains( _root ) )
-//	emit clearing();
 
     // Create a map to group the items by parent
     QMultiMap<DirInfo *, FileInfo *>parentMap;
@@ -732,10 +716,10 @@ void DirTree::detectClusterSize( const FileInfo * item )
          item->blocks() > 1 &&          // 1..512 bytes fits into an NTFS fragment
          item->size()   < 2 * STD_BLOCK_SIZE )
     {
-        _blocksPerCluster = item->blocks();
+	_blocksPerCluster = item->blocks();
 
-        logInfo() << "Cluster size: " << _blocksPerCluster << " blocks ("
-                  << formatSize( clusterSize() ) << ")" << Qt::endl;
+	logInfo() << "Cluster size: " << _blocksPerCluster << " blocks ("
+		  << formatSize( clusterSize() ) << ")" << Qt::endl;
 //        logDebug() << "Derived from " << item << " " << formatSize( item->rawByteSize() )
 //                   << " (allocated: " << formatSize( item->rawAllocatedSize() ) << ")"
 //                   << Qt::endl;

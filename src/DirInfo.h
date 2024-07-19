@@ -222,20 +222,21 @@ namespace QDirStat
 	FileCount totalUnignoredItems() override;
 
 	/**
-	 * Returns the total number of direct children of this directory.
+	 * Returns the total number of children of this directory.
 	 *
 	 * If this directory has a dot entry, the dot entry itself is counted,
-	 * but not the file children of the dot entry.
+	 * but not the file children of the dot entry.  If it has an attic,
+	 * that attic is counted.
 	 *
-	 * This method uses a cached value whenever possible, so it is
-	 * considerably faster than the unconditional countDirectChildren()
-	 * method.  The const overload does not check _summaryDirty and
-	 * always returns the cached value.
+	 * This method uses a cached value whenever possible, so it is usually
+	 * considerably faster than the unconditional countChildren() method.
+	 * The const overload does not check _summaryDirty and always returns
+	 * the cached value.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	DirSize directChildrenCount() override;
-	DirSize directChildrenCountConst() const override { return _directChildrenCount; }
+	DirSize childCount() override;
+	DirSize childCountConst() const override { return _childCount; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
@@ -261,12 +262,6 @@ namespace QDirStat
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	time_t oldestFileMtime() override;
-
-	/**
-	 * Set a flag to show tht the summary total values are no longer
-	 * up to date.
-	 **/
-	void setSummaryDirty() { _summaryDirty = true; }
 
 	/**
 	 * Returns 'true' if this had been excluded while reading.
@@ -316,16 +311,15 @@ namespace QDirStat
 	int pendingReadJobs() const override { return _pendingReadJobs; }
 
 	/**
-	 * Delete the dot entry if it is empty, i.e. it does not have any
-	 * children or its attic (if it has one) is also empty. The dot entry's
-	 * attic is implicitly deleted along with it.
+	 * Move 'child' from 'dir' to 'dir'->_attic.
 	 **/
-	void deleteEmptyDotEntry();
+	void moveToAttic( FileInfo * child );
 
 	/**
-	 * Delete the attic if it is empty.
+	 * Move the contents out from the attic and then delete
+	 * the attic.
 	 **/
-	void deleteEmptyAttic();
+	void moveAllFromAttic();
 
 	/**
 	 * Returns the first child of this item or 0 if there is none.
@@ -368,26 +362,6 @@ namespace QDirStat
 	 * Reimplemented - inherited from FileInfo.
 	 **/
 	Attic * attic() const override { return _attic; }
-
-	/**
-	 * Notification that a child has been added somewhere in the subtree.
-	 *
-	 * This function attempts to keep the summary totals up to date while
-	 * children are being added.  This is useful for showing progrsss
-	 * during reads and for knowing whether a directory should be
-	 * considered to be ignored.  This approach breaks down if children
-	 * are deleted or re-parented, and the summaries are simply marked as
-	 * dirty; recalc() will be called (or not) at some stage when the data
-	 * is needed and it will be calculated from scratch.
-	 *
-	 * Checks are made here for any of the totals overflowing storage limits.
-	 * Total sizes and total item counts are tested at the tree root to see
-	 * if they will exceed the maximum possible at this update. All other
-	 * items should have smaller totals.  It is assumed that ignored item
-	 * counts cannot exceed the number of available packaged files which is
-	 * far short of two billion.
-	 **/
-	void childAdded( FileInfo * newChild );
 
 	/**
 	 * Remove a child from the children list.
@@ -559,11 +533,6 @@ namespace QDirStat
 	bool isDirInfo() const override { return true; }
 
 	/**
-	 * Take all children from 'oldParent' and move them to this DirInfo.
-	 **/
-	void takeAllChildren( DirInfo * oldParent );
-
-	/**
 	 * Return 'true' if this child is a dominant one among its siblings,
 	 * i.e. if its total size is much larger than the other items on the
 	 * same level.  This won't normally be called unless be called unless
@@ -599,6 +568,30 @@ namespace QDirStat
 	    { _firstChild = newfirstChild; }
 
 	/**
+	 * Notification that a child has been added somewhere in the subtree.
+	 * This will generally be called by the parent of the new child, and
+	 * this function will propagate the call to all ancestors to include
+	 * the new child in those ancestors summary totals.
+	 *
+	 * This function attempts to keep the summary totals up to date while
+	 * children are being added.  This is useful for showing progrsss
+	 * during reads and for knowing whether a directory should be
+	 * considered to be ignored.  This only succeeds when individual
+	 * items are being added; no attempt is made to calculate totals when
+	 * items with children are added.  When subtrees are being deleted
+	 * or re-parented, then the summary totals will need to be re-calculated
+	 * from scratch by recalc(), probably lazily by setting _summaryDirty.
+	 *
+	 * Checks are made here for any of the totals overflowing storage limits.
+	 * Total sizes and total item counts are tested at the tree root to see
+	 * if they will exceed the maximum possible at this update. All other
+	 * items should have smaller totals.  It is assumed that ignored item
+	 * counts cannot exceed the number of available packaged files which is
+	 * far short of two billion.
+	 **/
+	void childAdded( FileInfo * newChild );
+
+	/**
 	 * Creates a dot entry for this directory.
 	 **/
 	void addDotEntry();
@@ -612,6 +605,23 @@ namespace QDirStat
 	 * Return 'true' if there is an attic and it has any children.
 	 **/
 	bool hasAtticChildren() const;
+
+	/**
+	 * Take all children from 'oldParent' and move them to this DirInfo.
+	 **/
+	void takeAllChildren( DirInfo * oldParent );
+
+	/**
+	 * Delete the dot entry if it is empty, i.e. it does not have any
+	 * children or its attic (if it has one) is also empty. The dot entry's
+	 * attic is implicitly deleted along with it.
+	 **/
+//	void deleteEmptyDotEntry();
+
+	/**
+	 * Delete the attic if it is empty.
+	 **/
+	void deleteEmptyAttic();
 
 	/**
 	 * Recalculate the summary fields when they are dirty.  This may
@@ -660,10 +670,9 @@ namespace QDirStat
 	void dropSortCache();
 
 	/**
-	 * Count the direct children unconditionally and update
-	 * _directChildrenCount.
+	 * Count the children unconditionally and update _childCount.
 	 **/
-//	DirSize countDirectChildren();
+//	DirSize countChildren();
 
 	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag
@@ -719,7 +728,7 @@ namespace QDirStat
 
 	// Summary data, not always current as indicated by the _summaryDirty flag
 	DirReadState   _readState;
-	DirSize        _directChildrenCount;
+	DirSize        _childCount;
 	FileCount      _totalItems;
 	FileCount      _totalSubDirs;
 	FileCount      _totalFiles;
