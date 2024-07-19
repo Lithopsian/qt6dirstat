@@ -45,7 +45,7 @@ void SelectionModel::clear()
 {
     _currentItem = nullptr;
 
-    _selectedItems.clear();
+//    _selectedItems.clear();
     _selectedItemsDirty = true;
     clearSelection();
 }
@@ -251,7 +251,7 @@ void SelectionModel::prepareForRefresh( const FileInfoSet & refreshSet )
 void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
 {
     _selectedItemsDirty = true;
-    _selectedItems.clear();
+//    _selectedItems.clear();
 
     // When the last child is deleted, the current item is lost (by QAbstractItemModel?)
     if ( !_currentItem )
@@ -263,7 +263,7 @@ void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
     else if ( _currentItem->isInSubtree( deletedChild ) )
     {
 	// Not sure this can happen, but this should avoid a dangling pointer
-	setCurrentItem( nullptr );
+	setCurrentItem( nullptr, true );
     }
 }
 

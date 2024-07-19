@@ -372,7 +372,7 @@ void CleanupCollection::execute()
 
     if ( cleanup->askForConfirmation() && !confirmation( cleanup, selection ) )
     {
-	logDebug() << "User declined confirmation" << Qt::endl;
+	//logDebug() << "User declined confirmation" << Qt::endl;
 	return;
     }
 

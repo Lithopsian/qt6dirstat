@@ -48,7 +48,7 @@ namespace
     }
 
 
-    void dumpDirectChildren( const FileInfo * dir )
+    void dumpChildren( const FileInfo * dir )
     {
 	if ( ! dir )
 	    return;
@@ -350,16 +350,15 @@ namespace
 
 
     /**
-     * Return the number of direct children (plus the attic if there is
-     * one) of a subtree.
+     * Return the number of children of a FileInfo item.
      **/
-    int childrenCount( FileInfo * subtree )
+    int childCount( FileInfo * item )
     {
-	if ( !subtree )
+	if ( !item )
 	    return 0;
 
-	const int count = subtree->directChildrenCount();
-	return subtree->attic() ? count + 1 : count;
+	return item->childCount();
+//	return item->attic() ? count + 1 : count;
     }
 
 
@@ -623,7 +622,7 @@ FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 
     logError() << "Child #" << childNo << " is out of range (0..." << sortedChildren.size()-1
 	       << ") for " << parent << Qt::endl;
-    dumpDirectChildren( parent );
+    dumpChildren( parent );
 
     return nullptr;
 }
@@ -690,14 +689,14 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 	    // or may not be finished at this time. For a local dir, it most
 	    // likely is; for a cache reader, there might be more to come.
 	    if ( !_tree->isBusy() )
-		return childrenCount( item );
+		return childCount( item );
 	    break;
 
 	case DirFinished:
 	case DirOnRequestOnly:
 //	case DirCached:
 	case DirAborted:
-	    return childrenCount( item );
+	    return childCount( item );
 
 	// intentionally omitting 'default' case so the compiler can report
 	// missing enum values
@@ -948,8 +947,8 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 	return;
     }
 
-    // dumpDirectChildren( dir );
-    const int count = childrenCount( dir );
+    // dumpChildren( dir );
+    const int count = childCount( dir );
     if ( count > 0 )
     {
 	// logDebug() << "Notifying view about " << count << " new children of " << dir << Qt::endl;
@@ -1017,7 +1016,7 @@ void DirTreeModel::readingFinished()
     _pendingUpdates.clear();
 
     // dumpPersistentIndexList( persistentIndexList() );
-    // dumpDirectChildren( _tree->root() );
+    // dumpChildren( _tree->root() );
 }
 
 
@@ -1105,7 +1104,7 @@ void DirTreeModel::clearingSubtree( DirInfo * subtree )
 
     if ( subtree == _tree->root() || subtree->isTouched() )
     {
-	const int count = childrenCount( subtree );
+	const int count = childCount( subtree );
 	if ( count > 0 )
 	    beginRemoveRows( modelIndex( subtree ), 0, count - 1 );
 
@@ -1165,7 +1164,7 @@ int DirTreeModel::rowNumber( const FileInfo * child ) const
 	logError() << "Child " << child << " (" << (void *)child << ")"
 		   << " not found in " << parent << Qt::endl;
 
-	dumpDirectChildren( parent );
+	dumpChildren( parent );
     }
 
     return row;

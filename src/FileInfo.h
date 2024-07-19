@@ -550,13 +550,14 @@ namespace QDirStat
 	virtual FileCount totalUnignoredItems() { return 0; }
 
 	/**
-	 * Returns the total number of direct children of this item.  It
-	 * also has a const overload.
+	 * Returns the total number of children of this item, including
+	 * the dot entry and attic.  It also has a const overload that
+	 * does not do a recalc() even if the summary totals are dirty.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual FileCount directChildrenCount() { return 0; }
-	virtual FileCount directChildrenCountConst() const { return 0; }
+	virtual FileCount childCount() { return 0; }
+	virtual FileCount childCountConst() const { return 0; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not

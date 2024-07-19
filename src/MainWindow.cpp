@@ -671,11 +671,10 @@ void MainWindow::refreshSelected()
 	_ui->treemapView->saveTreemapRoot();
 
 	_stopWatch.start();
-	FileInfoSet refreshSet { sel };
 
 	try
 	{
-	    sel->tree()->refresh( refreshSet );
+	    sel->tree()->refresh( FileInfoSet { sel } );
 	}
 	catch ( const SysCallFailedException & ex )
 	{
@@ -695,8 +694,7 @@ void MainWindow::applyFutureSelection()
     {
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
 
-        app()->selectionModel()->setCurrentItem( sel,
-                                                 true);  // select
+        app()->selectionModel()->setCurrentItem( sel, true);  // select
 
 	// A bit annoying to open every refreshed directory, so just the top level
 //        if ( sel->parent() == app()->dirTree()->root() )

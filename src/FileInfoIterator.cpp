@@ -16,9 +16,9 @@ using namespace QDirStat;
 
 BySizeIterator::BySizeIterator( const FileInfo * parent )
 {
-    _sortedChildren.reserve( parent->directChildrenCountConst() );
+    _sortedChildren.reserve( parent->childCountConst() );
 
-    for ( DotEntryIterator it( parent ); *it; ++it )
+    for ( DotEntryIterator it { parent }; *it; ++it )
     {
 	_sortedChildren << *it;
 	_totalSize += it->itemTotalSize();

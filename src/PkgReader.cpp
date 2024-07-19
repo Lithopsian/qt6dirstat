@@ -329,9 +329,8 @@ namespace
 	if ( pathComponent.isEmpty() )
 	    return nullptr;
 
-	auto it = std::find_if( FileInfoIterator { parent },
-	                        FileInfoIterator {},
-	                        [ & pathComponent ]( FileInfo * item ) { return item->name() == pathComponent; } );
+	auto compare = [ & pathComponent ]( FileInfo * item ) { return item->name() == pathComponent; };
+	auto it = std::find_if( begin( parent ), end( parent ), compare );
 	return *it;
     }
 
