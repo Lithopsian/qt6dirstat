@@ -36,8 +36,8 @@
  * (direct) subdirectory child and each (direct) file child of 'node'.
  *
  * Range for loops on a FileInfo * container are set up to use the
- * FileInfoIterator class, so to iterate only over the direct children,
- * this can be simplified (or at least shortened) to:
+ * FileInfoIterator class, so to iterate only over the direct children;
+ * the example can be simplified (or at least shortened) to:
  *
  *	  for ( auto child : parent )
  *	     logDebug() << child << ":\t" << child->totalSize() << Qt::endl;
@@ -64,14 +64,14 @@ namespace QDirStat
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = FileInfo *;
 	using difference_type = ptrdiff_t;
-	using pointer = FileInfo **;
-	using reference = FileInfo *&;
+	using pointer = FileInfo *;
+	using reference = FileInfo *;
 
 	/**
-	 * Default constructor: returns an invalid iterator which
+	 * Constructor from nullptr: returns an invalid iterator which
 	 * corresponds to a position past the last child.
 	 **/
-	FileInfoIterator():
+	FileInfoIterator( nullptr_t ):
 	    _current { nullptr }
 	{}
 
@@ -87,7 +87,7 @@ namespace QDirStat
 	/**
 	 * Return the current child pointer or 0 if there are no more.
 	 **/
-	FileInfo * operator*() const { return _current; }
+	reference operator*() const { return _current; }
 
 	/**
 	 * Dereference the iterator so that syntax such as (*it)->
@@ -95,22 +95,23 @@ namespace QDirStat
 	 * return 0 if the iterator is no longer valid, so using
 	 * it will cause undefined behaviour (usually a crash).
 	 **/
-	FileInfo * operator->() const { return _current; }
+	pointer operator->() const { return _current; }
 
 	/**
-	 * Advance to the next child.  Do NOT call this if the iterator
-	 * is not valid (ie. *it = 0).
+	 * Advance to the next child, prefix and postfix.  Do NOT call these
+	 * if the iterator is not valid (ie. *it = 0).
 	 **/
-	void operator++() { _current = _current->next(); }
+	FileInfoIterator & operator++() { _current = _current->next(); return *this; }
+	FileInfoIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
 
 	/**
 	 * Comparison operator overloads for STL operations.
 	 **/
-	bool operator==( const FileInfoIterator & other ) const { return _current == other._current;}
-	bool operator!=( const FileInfoIterator & other ) const { return _current != other._current;}
+	bool operator==( const FileInfoIterator & other ) const { return _current == other._current; }
+	bool operator!=( const FileInfoIterator & other ) const { return !( *this == other ); }
 
     private:
-	FileInfo * _current;
+	pointer _current;
 
     }; // class FileInfoIterator
 
@@ -122,7 +123,7 @@ namespace QDirStat
      * pointers, not the class itself.
      **/
     inline FileInfoIterator begin( const FileInfo * item ) { return item; }
-    inline FileInfoIterator end( const FileInfo * ) { return {}; }
+    inline FileInfoIterator end( const FileInfo * ) { return nullptr; }
 
 
 
@@ -134,42 +135,46 @@ namespace QDirStat
     {
     public:
 	using iterator_category = std::forward_iterator_tag;
-	using value_type = FileInfo *;
+	using value_type = DirInfo *;
 	using difference_type = ptrdiff_t;
-	using pointer = FileInfo **;
-	using reference = FileInfo *&;
+	using pointer = DirInfo *;
+	using reference = DirInfo *;
 
-	DirInfoIterator(): _current { nullptr } {}
-	DirInfoIterator( const FileInfo * parent ): _current { findNextDirInfo( parent->firstChild() ) } {}
+	DirInfoIterator( nullptr_t ):
+	    _current { nullptr }
+	{}
+	DirInfoIterator( const FileInfo * parent ):
+	    _current { nextDirInfo( parent->firstChild() ) }
+	{}
 
-	DirInfo * operator*() const { return _current; }
-	DirInfo * operator->() const { return _current; }
+	reference operator*() const { return _current; }
+	pointer operator->() const { return _current; }
 
-	void operator++() { _current = findNextDirInfo( _current->next() ); }
+	DirInfoIterator & operator++() { _current = nextDirInfo( _current->next() ); return *this; }
+	DirInfoIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
 
-	bool operator==( const DirInfoIterator & other ) const { return _current == other._current;}
-	bool operator!=( const DirInfoIterator & other ) const { return _current != other._current;}
+	bool operator==( const DirInfoIterator & other ) const { return _current == other._current; }
+	bool operator!=( const DirInfoIterator & other ) const { return !( *this == other ); }
 
     protected:
 	/**
 	 * Find the next child that is a DirInfo object, starting
 	 * from 'item'.
 	 **/
-	DirInfo * findNextDirInfo( FileInfo * item )
+	DirInfo * nextDirInfo( FileInfo * item )
 	{
-	    while ( item && !item->isDirInfo() )
-		item = item->next();
+	    while ( item && !item->isDirInfo() ) item = item->next();
 	    return item ? item->toDirInfo() : nullptr;
 	}
 
     private:
-	DirInfo * _current;
+	pointer _current;
 
     }; // class DirInfoIterator
 
 
     inline DirInfoIterator dirInfoBegin( const FileInfo * item ) { return item; }
-    inline DirInfoIterator dirInfoEnd( const FileInfo * ) { return {}; }
+    inline DirInfoIterator dirInfoEnd( const FileInfo * ) { return nullptr; }
 
 
 
@@ -185,10 +190,10 @@ namespace QDirStat
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = FileInfo *;
 	using difference_type = ptrdiff_t;
-	using pointer = FileInfo **;
-	using reference = FileInfo *&;
+	using pointer = FileInfo *;
+	using reference = FileInfo *;
 
-	DotEntryIterator():
+	DotEntryIterator( nullptr_t ):
 	    _dotEntry { nullptr },
 	    _current { nullptr }
 	{}
@@ -197,40 +202,43 @@ namespace QDirStat
 	    _current { parent->firstChild() ? parent->firstChild() : _dotEntry }
 	{}
 
-	FileInfo * operator*() const { return _current; }
-	FileInfo * operator->() const { return _current; }
+	reference operator*() const { return _current; }
+	pointer operator->() const { return _current; }
 
-	void operator++() { _current = next(); }
+	DotEntryIterator & operator++() { _current = next(); return *this; }
+	DotEntryIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
 
-	bool operator==( const DotEntryIterator & other ) const { return _current == other._current;}
-	bool operator!=( const DotEntryIterator & other ) const { return _current != other._current;}
+	bool operator==( const DotEntryIterator & other ) const { return _current == other._current; }
+	bool operator!=( const DotEntryIterator & other ) const { return !( *this == other ); }
 
     protected:
 
 	/**
 	 * Return the next child of this parent, or 0 if there are none.
+	 * If next() is 0, then _current may be the last child or the dot
+	 * entry.
 	 **/
-	FileInfo * next() const
+	pointer next() const
 	    { return _current->next() ? _current->next() : dotEntry(); }
 
 	/**
 	 * Return the dot entry, or 0 if the iterator already points to
 	 * the dot entry.
 	 **/
-	FileInfo * dotEntry() const
+	pointer dotEntry() const
 	    { return _current == _dotEntry ? nullptr : _dotEntry; }
 
 
     private:
 
-	FileInfo * _dotEntry;
-	FileInfo * _current;
+	pointer _dotEntry;
+	pointer _current;
 
     };	// class DotEntryIterator
 
 
     inline DotEntryIterator dotEntryBegin( const FileInfo * item ) { return item; }
-    inline DotEntryIterator dotEntryEnd( const FileInfo * ) { return {}; }
+    inline DotEntryIterator dotEntryEnd( const FileInfo * ) { return nullptr; }
 
 
 
@@ -246,10 +254,10 @@ namespace QDirStat
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = FileInfo *;
 	using difference_type = ptrdiff_t;
-	using pointer = FileInfo **;
-	using reference = FileInfo *&;
+	using pointer = FileInfo *;
+	using reference = FileInfo *;
 
-	AtticIterator():
+	AtticIterator( nullptr_t ):
 	    _dotEntry { nullptr },
 	    _attic { nullptr },
 	    _current { nullptr }
@@ -260,48 +268,52 @@ namespace QDirStat
 	    _current { parent->firstChild() ? parent->firstChild() : _dotEntry ? _dotEntry : _attic }
 	{}
 
-	FileInfo * operator*() const { return _current; }
-	FileInfo * operator->() const { return _current; }
+	reference operator*() const { return _current; }
+	pointer operator->() const { return _current; }
 
-	void operator++() { _current = next(); }
+	AtticIterator & operator++() { _current = next(); return *this; }
+	AtticIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
 
-	bool operator==( const AtticIterator & other ) const { return _current == other._current;}
-	bool operator!=( const AtticIterator & other ) const { return _current != other._current;}
+	bool operator==( const AtticIterator & other ) const { return _current == other._current; }
+	bool operator!=( const AtticIterator & other ) const { return !( *this == other ); }
 
     protected:
 
 	/**
-	 * Return the next child of this parent, or 0 if there are none.
+	 * Return the next child of this parent, if there is one.  If next()
+	 * is 0, then _current may be the last (or only) child, the dot
+	 * entry, or the attic.
 	 **/
-	FileInfo * next() const
-	    { return _current->next() ? _current->next() : dotEntry(); }
+	pointer next() const
+	    { return _current->next() ? _current->next() : attic(); }
 
 	/**
-	 * Return the dot entry if the iterator doesn't already point
-	 * to the dot entry.  Otherwise it will return the attic or 0.
+	 * Return the dot entry if the iterator doesn't already point to
+	 * the dot entry.  Otherwise it will return the attic (which may
+	 * be 0).
 	 **/
-	FileInfo * dotEntry() const
-	    { return !_dotEntry || _current == _dotEntry ? attic() : _dotEntry; }
+	pointer dotEntry() const
+	    { return _current == _dotEntry || !_dotEntry ? _attic : _dotEntry; }
 
 	/**
-	 * Return the attic, or 0 if the iterator already points to
-	 * the attic.
+	 * Return 0 if the iterator already points to the attic.  Otherwise
+	 * it will return the dot entry or attic.
 	 **/
-	FileInfo * attic() const
-	    { return _current == _attic ? nullptr : _attic; }
+	pointer attic() const
+	    { return _current == _attic ? nullptr : dotEntry(); }
 
 
     private:
 
-	FileInfo * _dotEntry;
-	FileInfo * _attic;
-	FileInfo * _current;
+	pointer _dotEntry;
+	pointer _attic;
+	pointer _current;
 
     };	// class AtticIterator
 
 
     inline AtticIterator atticBegin( const FileInfo * item ) { return item; }
-    inline AtticIterator atticEnd( const FileInfo * ) { return {}; }
+    inline AtticIterator atticEnd( const FileInfo * ) { return nullptr; }
 
 
 
@@ -313,24 +325,23 @@ namespace QDirStat
      *
      * This iterator provides additional functions for returning the
      * total size of all children, and for "bookmarking" a position in
-     * the list of children.  It is specialised for use by TreemapTile.
+     * the list of children.  This is specialised for use by TreemapTile
+     * and doesn't currently support STL operations.
+     *
+     * Note that unlike the other iterators, it is safe (although pointless)
+     * to dereference or increment an invalid (past the end) iterator.
      **/
     class BySizeIterator
     {
 	using BySizeIteratorList = QVector<FileInfo *>;
 	using BySizeIteratorPos  = BySizeIteratorList::const_iterator;
 
+
     public:
 
-	using iterator_category = std::forward_iterator_tag;
-	using value_type = FileInfo *;
-	using difference_type = ptrdiff_t;
-	using pointer = FileInfo **;
-	using reference = FileInfo *&;
-
 	/**
-	 * Constructor.  Finds the children of 'parent', including a
-	 * dot entry, and sorts them by decreasing size.  It calculates
+	 * Constructor: finds the children of 'parent', including a dot
+	 * entry, and sorts them by decreasing size.  It also calculates
 	 * the total size of all the children.
 	 **/
 	BySizeIterator( const FileInfo * parent );
@@ -338,8 +349,7 @@ namespace QDirStat
 	/**
 	 * Return the current child object or 0 if there are no more.
 	 **/
-	FileInfo * operator*() const
-	    { return _currentIt == _sortedChildren.cend() ? nullptr : *_currentIt; }
+	FileInfo * operator*() const { return _currentIt == _sortedChildren.cend() ? nullptr : *_currentIt; }
 
 	/**
 	 * Dereference the iterator so that syntax such as (*it)->
@@ -350,8 +360,7 @@ namespace QDirStat
 	/**
 	 * Advance to the next child.
 	 **/
-	void operator++()
-	    { if ( _currentIt != _sortedChildren.cend() ) ++_currentIt; }
+	void operator++() { if ( _currentIt != _sortedChildren.cend() ) ++_currentIt; }
 
 	/**
 	 * Return the total size of the children to be iterated, calculated
