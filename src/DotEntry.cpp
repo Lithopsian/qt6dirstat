@@ -10,9 +10,7 @@
 #include <QStringBuilder>
 
 #include "DotEntry.h"
-#include "Attic.h"
 #include "FileInfoIterator.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -20,13 +18,9 @@ using namespace QDirStat;
 
 FileInfo * DotEntry::locate( const QString & url )
 {
-    // Don't let a directly-nested attic return a spurious match on an un-nested url
-    if ( url == atticName() )
-	return nullptr;
-
-    // Match exactly on this un-nested dot entry
+    // Match exactly on this dot entry as long as it isn't nested in an attic
     if ( url == dotEntryName() )
-	return this;
+	return !parent()->isAttic() ? this : nullptr;
 
     // Try an exact match for an attic nested in this dot entry
     if ( url == dotEntryName() % '/' % atticName() )
@@ -37,9 +31,8 @@ FileInfo * DotEntry::locate( const QString & url )
     {
 	// logDebug() << "Searching DotEntry for " << url << " in " << this << Qt::endl;
 
-	auto it = std::find_if( FileInfoIterator { this },
-	                        FileInfoIterator {},
-	                        [ &url ]( FileInfo * item ) { return item->name() == url; } );
+	auto compare = [ &url ]( FileInfo * item ) { return item->name() == url; };
+	auto it = std::find_if( begin( this ), end( this ), compare );
 	if ( *it )
 	    return *it;
     }
