@@ -179,30 +179,12 @@ void OutputWindow::readStderr()
 
 void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitStatus )
 {
-    switch ( exitStatus )
-    {
-	case QProcess::NormalExit:
-	    //logDebug() << "Process finished normally." << Qt::endl;
-	    addCommandLine( tr( "Process finished." ) );
-	    break;
+    // A crash exit status has already been handled and reported in errorOccurred()
+    if ( exitStatus == QProcess::CrashExit )
+	return;
 
-	case QProcess::CrashExit:
-	    if ( exitCode == 0 )
-	    {
-		// Don't report an exit code of 0: Since we are starting all
-		// processes with a shell, that exit code would be the exit
-		// code of the shell; that would only be useful if the shell
-		// crashed or could not be started.
-		logError() << "Process crashed." << Qt::endl;
-		addStderr( tr( "Process crashed." ) );
-	    }
-	    else
-	    {
-		logError() << "Process crashed. Exit code: " << exitCode << Qt::endl;
-		addStderr( tr( "Process crashed. Exit code: %1" ).arg( exitCode ) );
-	    }
-	    break;
-    }
+    //logDebug() << "Process finished normally with exit code " << exitCode << Qt::endl;
+    addCommandLine( tr( "Process finished with exit code %1." ).arg( exitCode ) );
 
     QProcess * process = senderProcess( __func__ );
     if ( process )
