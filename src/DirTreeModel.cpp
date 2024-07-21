@@ -672,34 +672,34 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
     FileInfo * item = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
     CHECK_MAGIC( item );
 
-    if ( !item->isDirInfo() || item->toDirInfo()->isLocked() )
-	return 0;
-
-    switch ( item->readState() )
+    if ( parentIndex.column() <= 0 && item->isDirInfo() && !item->toDirInfo()->isLocked() )
     {
-	case DirQueued:
-	case DirReading:
-	    // Better keep it simple: Don't report any children until they
-	    // are complete.
-	    break;
+	switch ( item->readState() )
+	{
+	    case DirQueued:
+	    case DirReading:
+		// Better keep it simple: Don't report any children until they
+		// are complete.
+		break;
 
-	case DirError:
-	case DirPermissionDenied:
-	    // This is a hybrid case: Depending on the dir reader, the dir may
-	    // or may not be finished at this time. For a local dir, it most
-	    // likely is; for a cache reader, there might be more to come.
-	    if ( !_tree->isBusy() )
+	    case DirError:
+	    case DirPermissionDenied:
+		// This is a hybrid case: Depending on the dir reader, the dir may
+		// or may not be finished at this time. For a local dir, it most
+		// likely is; for a cache reader, there might be more to come.
+		if ( !_tree->isBusy() )
+		    return childCount( item );
+		break;
+
+	    case DirFinished:
+	    case DirOnRequestOnly:
+//	    case DirCached:
+	    case DirAborted:
 		return childCount( item );
-	    break;
 
-	case DirFinished:
-	case DirOnRequestOnly:
-//	case DirCached:
-	case DirAborted:
-	    return childCount( item );
-
-	// intentionally omitting 'default' case so the compiler can report
-	// missing enum values
+	    // intentionally omitting 'default' case so the compiler can report
+	    // missing enum values
+	}
     }
 
     return 0;
