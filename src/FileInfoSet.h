@@ -36,6 +36,13 @@ namespace QDirStat
 	{}
 
 	/**
+	 * Constructor, initialises the set from a list.
+	 **/
+	FileInfoSet( std::initializer_list<FileInfo *> list ):
+	    QSet<FileInfo *> { list }
+	{}
+
+	/**
 	 * Return the first item in this set or 0 if the set is empty.
 	 *
 	 * This makes most sense if there is only one item at all;

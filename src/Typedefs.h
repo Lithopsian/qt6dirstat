@@ -1,15 +1,15 @@
 /*
- *   File name: FileSize.h
+ *   File name: Typedefs.h
  *   Summary:   Basic typedefs for QDirStat
  *   License:   GPL V2 - See file LICENSE for details.
  *
- *   Author:    Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+ *   Author:    Ian Nartowicz
  */
 
 #ifndef Typedefs_h
 #define Typedefs_h
 
-#include <limits> // LLONG_MAX
+#include <limits>
 
 #include <QColor>
 #include <QList>
@@ -33,14 +33,9 @@
 
 namespace QDirStat
 {
-    class FileInfo;
-
     using FileSize  = qint64;
     using DirSize   = qint32;
     using FileCount = qint32;
-
-    class FileInfo;
-    using FileInfoList = QVector<FileInfo *>;
 
     using ColorList = QList<QColor>;
 

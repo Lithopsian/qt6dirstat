@@ -14,8 +14,8 @@
 #define LOG_OUTPUT   false
 
 
-#include "PkgInfo.h"
-#include "PkgFileListCache.h"
+#include "PkgInfo.h"          // PkgInfoList
+#include "PkgFileListCache.h" // lookup types
 
 
 namespace QDirStat

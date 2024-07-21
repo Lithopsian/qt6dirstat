@@ -9,7 +9,6 @@
 
 #include <QDir>
 #include <QFileInfo>
-#include <QStringBuilder>
 
 #include "DpkgPkgManager.h"
 #include "Exception.h"
@@ -110,7 +109,7 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
     const QStringList lines = output.trimmed().split( u'\n' );
     for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
     {
-	if ( (*line).isEmpty() )
+	if ( line->isEmpty() )
 	    continue;
 
 	// For diversions, the line "diversion by ... from: ..." gives the current owning package
@@ -250,13 +249,13 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 	// The next line should be a diversion to line
 	if ( ++line != lines.end() && isDiversionTo( *line ) )
 	{
-	    const QString & divertingPkg = (*line).split( u' ' ).at( 2 );
+	    const QString & divertingPkg = line->split( u' ' ).at( 2 );
 	    //logDebug() << *line << Qt::endl;
 
 	    if ( ++line != lines.end() )
 	    {
 		// Might now have the (third) line with the list of packages for the original file
-		const QStringList fields = (*line).split( ": "_L1 );
+		const QStringList fields = line->split( ": "_L1 );
 		if ( fields.size() == 2 && resolvePath( fields.last() ) == pathResolved )
 		{
 		    // Pick any one which isn't the diverting package

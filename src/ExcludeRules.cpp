@@ -8,9 +8,7 @@
  */
 
 #include "ExcludeRules.h"
-#include "DirInfo.h"
-#include "DotEntry.h"
-#include "FileInfo.h"
+#include "FileInfoIterator.h"
 #include "Logger.h"
 #include "Settings.h"
 
@@ -74,13 +72,8 @@ bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
 
     // Search through FileInfo children to see if any match
     const DirInfo * parent = dir->dotEntry() ? dir->dotEntry() : dir;
-    for ( const FileInfo * fileInfo = parent->firstChild(); fileInfo; fileInfo = fileInfo->next() )
-    {
-        if ( !fileInfo->isDir() && isMatch( fileInfo->name() ) )
-	    return true;
-    }
-
-    return false;
+    auto match = [ this ]( FileInfo * item ) { return !item->isDir() && isMatch( item->name() ); };
+    return std::any_of( begin( parent ), end( parent ), match );
 }
 
 

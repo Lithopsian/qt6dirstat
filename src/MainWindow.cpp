@@ -603,6 +603,7 @@ void MainWindow::askFindFiles()
 void MainWindow::setFutureSelection()
 {
     const FileInfoSet sel = app()->selectionModel()->selectedItems();
+    //logDebug() << sel.first() << " " << sel.first()->parent() << Qt::endl;
     _futureSelection.set( sel.isEmpty() ? app()->selectionModel()->currentItem() : sel.first() );
 }
 
@@ -670,12 +671,10 @@ void MainWindow::refreshSelected()
 	_ui->treemapView->saveTreemapRoot();
 
 	_stopWatch.start();
-	FileInfoSet refreshSet;
-	refreshSet << sel;
 
 	try
 	{
-	    sel->tree()->refresh( refreshSet );
+	    sel->tree()->refresh( FileInfoSet { sel } );
 	}
 	catch ( const SysCallFailedException & ex )
 	{
@@ -695,11 +694,10 @@ void MainWindow::applyFutureSelection()
     {
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
 
-        app()->selectionModel()->setCurrentItem( sel,
-                                                 true);  // select
+        app()->selectionModel()->setCurrentItem( sel, true);  // select
 
 	// A bit annoying to open every refreshed directory, so just the top level
-        if ( sel->parent() == app()->dirTree()->root() )
+//        if ( sel->parent() == app()->dirTree()->root() )
             _ui->dirTreeView->setExpanded( sel, true );
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
@@ -945,7 +943,7 @@ void MainWindow::navigateToUrl( const QString & url )
     if ( url.isEmpty() )
 	return;
 
-    FileInfo * sel = app()->dirTree()->locate( url, true ); // findPseudoDirs
+    FileInfo * sel = app()->dirTree()->locate( url );
     if ( sel )
     {
 	app()->selectionModel()->setCurrentItem( sel, true ); // select

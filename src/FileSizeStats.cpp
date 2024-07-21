@@ -9,7 +9,6 @@
 
 #include "FileSizeStats.h"
 #include "Exception.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 
@@ -44,7 +43,7 @@ void FileSizeStats::collect( const FileInfo * subtree )
     if ( subtree->isFile() )
         append( subtree->size() );
 
-    for ( FileInfoIterator it( subtree ); *it; ++it )
+    for ( DotEntryIterator it { subtree }; *it; ++it )
         collect( *it );
 }
 
@@ -54,6 +53,6 @@ void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
     if ( subtree->isFile() && subtree->name().toLower().endsWith( suffix ) )
         append( subtree->size() );
 
-    for ( FileInfoIterator it( subtree ); *it; ++it )
+    for ( DotEntryIterator it { subtree }; *it; ++it )
         collect( *it, suffix );
 }

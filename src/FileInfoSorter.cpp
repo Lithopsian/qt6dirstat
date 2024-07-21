@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm>    // std::swap()
-
 #include "FileInfoSorter.h"
 #include "FileInfo.h"
 

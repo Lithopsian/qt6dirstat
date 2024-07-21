@@ -496,7 +496,7 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
 	return;
     }
 
-    setLabel( _ui->pkgSummaryPkgCountLabel, pkg->directChildrenCount() );
+    setLabel( _ui->pkgSummaryPkgCountLabel, pkg->childCount() );
 
     const QString msg = subtreeMsg( pkg );
     if ( msg.isEmpty() )

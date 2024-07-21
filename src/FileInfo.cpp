@@ -11,9 +11,8 @@
 
 #include "FileInfo.h"
 #include "Attic.h"
-#include "DirInfo.h"
 #include "DirTree.h"
-#include "DotEntry.h"
+#include "FileInfoIterator.h"
 #include "Logger.h"
 #include "PkgInfo.h"
 #include "FormatUtil.h"
@@ -200,19 +199,14 @@ QString FileInfo::debugUrl() const
 
     QString result = url();
 
-    if ( isDotEntry() )
+    // Add a pseudo-dir identifier (or two), but only if that is the leaf item
+    if ( isPseudoDir() )
     {
-	result += '/' % dotEntryName();
-    }
-    else if ( isAttic() )
-    {
-	if ( _parent )
-	{
-	    if ( _tree && _parent != _tree->root() )
-		result = _parent->debugUrl() % '/' % atticName();
-	}
-        else
-            result += '/' % atticName();
+	 // Make sure any parent pseudo-dir is in the url
+	if ( _tree && _parent != _tree->root() )
+	    result = _parent->debugUrl();
+
+	result += '/' % ( isAttic() ? atticName() : dotEntryName() );
     }
 
     result.replace( "//"_L1, "/"_L1 );
@@ -244,73 +238,35 @@ bool FileInfo::isInSubtree( const FileInfo * subtree ) const
 }
 
 
-FileInfo * FileInfo::locate( const QString & locateUrl, bool findPseudoDirs )
+FileInfo * FileInfo::locate( const QString & locateUrl )
 {
     if ( !_tree || ( !locateUrl.startsWith( _name ) && this != _tree->root() ) )
 	return nullptr;
 
     QString url = locateUrl;
 
-    if ( this != _tree->root() )		// The root item is invisible
+    // The root item is invisible so don't try to search for it
+    if ( this != _tree->root() )
     {
-	url.remove( 0, _name.length() );	// Remove leading name of this node
+	// Remove leading name of this node
+	url.remove( 0, _name.length() );
 
-	if ( url.length() == 0 )		// Nothing left?
-	    return this;			// Hey! That's us!
+	if ( url.length() == 0 ) // nothing left? That's us!
+	    return this;
 
 	if ( url.startsWith( u'/' ) )
-	    // remove leading delimiters, we're not matching on those
-	    url.remove( 0, 1 );
-	else if ( _name.right(1) != "/"_L1 && !isDotEntry() )
-	    // not the root directory, not a dot entry, so it can't be one of our children
-	    return nullptr;
+	    url.remove( 0, 1 ); // remove leading delimiters, we're not matching on those
+	else if ( _name.right(1) != "/"_L1 && !isPseudoDir() )
+	    return nullptr; // not directory, not root, not pseudo-dir, url can't be one of our children
     }
 
-    // Search all children, recursively
-    for ( FileInfo * child = firstChild(); child; child = child->next() )
+    // Recursively search all children, including the dot entry and attic
+    for ( AtticIterator it { this }; *it; ++it )
     {
-	FileInfo * foundChild = child->locate( url, findPseudoDirs );
+	FileInfo * foundChild = it->locate( url );
 	if ( foundChild )
 	    return foundChild;
     }
-
-    // Special case: one of the pseudo directories is requested.
-    if ( findPseudoDirs )
-    {
-	if ( dotEntry() && url == dotEntryName() )
-	    return dotEntry();
-
-	if ( attic() && url == atticName() )
-	    return attic();
-
-	if ( url == dotEntryName() % '/' % atticName() && dotEntry() && dotEntry()->attic() )
-	    return dotEntry()->attic();
-    }
-
-    // Search the dot entry if there is one - but only if there is no more
-    // path delimiter left in the URL. The dot entry contains files only,
-    // and their names may not contain the path delimiter, nor can they
-    // have children. This check is not strictly necessary, but it may
-    // speed up things a bit if we don't search the non-directory children
-    // if the rest of the URL consists of several pathname components.
-    if ( dotEntry() && !url.contains( u'/' ) )  // No (more) "/" in this URL
-    {
-	// logDebug() << "Searching DotEntry for " << url << " in " << this << Qt::endl;
-
-	for ( FileInfo * child = dotEntry()->firstChild(); child; child = child->next() )
-	{
-	    if ( child->name() == url )
-	    {
-		// logDebug() << "Found " << url << " in " << dotEntry() << Qt::endl;
-		return child;
-	    }
-	}
-
-	// logDebug() << "Cant find " << url << " in DotEntry" << Qt::endl;
-    }
-
-    if ( attic() )
-	return attic()->locate( url, findPseudoDirs );
 
     return nullptr;
 }

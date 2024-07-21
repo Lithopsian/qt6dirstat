@@ -36,7 +36,7 @@ namespace QDirStat
     /**
      * An alternative to using a QPair for passing both the year and
      * month for a FileInfo object.
-     * */
+     **/
     struct YearAndMonth
     {
 	short year;
@@ -268,10 +268,12 @@ namespace QDirStat
 	QString path() const;
 
 	/**
-	 * Very much like FileInfo::url(), but with "/<Files>" appended if this
-	 * is a dot entry. Useful for debugging.
+	 * Very much like FileInfo::url(), but with "/<Files>" or "/<Ignored>"
+	 * appended if this is a pseudo-dir.  QTextStream operator<< outputs
+	 * exactly this.
 	 *
-	 * Note that the QTextStream operator<< outputs exactly this.
+	 * Note that normal items within a pseudo-dir do not include <"/Files>"
+	 * or "</Ignored">, just the plain url.
 	 **/
 	QString debugUrl() const;
 
@@ -548,13 +550,14 @@ namespace QDirStat
 	virtual FileCount totalUnignoredItems() { return 0; }
 
 	/**
-	 * Returns the total number of direct children of this item.  It
-	 * also has a const overload.
+	 * Returns the total number of children of this item, including
+	 * the dot entry and attic.  It also has a const overload that
+	 * does not do a recalc() even if the summary totals are dirty.
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual FileCount directChildrenCount() { return 0; }
-	virtual FileCount directChildrenCountConst() const { return 0; }
+	virtual FileCount childCount() { return 0; }
+	virtual FileCount childCountConst() const { return 0; }
 
 	/**
 	 * Returns the number of subdirectories below this item that could not
@@ -728,11 +731,8 @@ namespace QDirStat
 	 * Derived classes might or might not wish to overwrite this method;
 	 * it's only advisable to do so if a derived class comes up with a
 	 * different method than brute-force searching all children.
-	 *
-	 * 'findPseudoDirs' specifies if locating pseudo directories like "dot
-	 * entries" (".../<Files>") or "attics" (".../<Ignored>") is desired.
 	 **/
-	virtual FileInfo * locate( const QString & url, bool findPseudoDirs );
+	virtual FileInfo * locate( const QString & url );
 
 	/**
 	 * Return the "Dot Entry" for this node if there is one (or 0
@@ -1002,15 +1002,6 @@ namespace QDirStat
 
     };	// class FileInfo
 
-
-
-    typedef QVector<FileInfo *> FileInfoList;
-
-
-
-    //----------------------------------------------------------------------
-    //			       Static Functions
-    //----------------------------------------------------------------------
 
     /**
      * Print the debugUrl() of a FileInfo in a debug stream.

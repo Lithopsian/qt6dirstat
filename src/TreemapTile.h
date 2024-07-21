@@ -26,7 +26,7 @@ class QGraphicsSceneMouseEvent;
 namespace QDirStat
 {
     class FileInfo;
-    class FileInfoBySizeIterator;
+    class BySizeIterator;
     class SelectedTileHighlighter;
     class TreemapView;
 
@@ -209,8 +209,8 @@ namespace QDirStat
 	 * rectangle 'rect'.
 	 **/
 	TreemapTile( TreemapView  * parentView,
-		     FileInfo     * orig,
-		     const QRectF & rect );
+	             FileInfo     * orig,
+	             const QRectF & rect );
 
 	/**
 	 * Destructor.  Note that the highlighter is owned by the scene/view
@@ -227,16 +227,16 @@ namespace QDirStat
 	 * VerticalTreemapTile derived classes.
 	 **/
 	TreemapTile( TreemapTile  * parentTile,
-		     FileInfo     * orig,
-		     const QRectF & rect );
+	             FileInfo     * orig,
+	             const QRectF & rect );
 
 	/**
 	 * Constructor used for squarified children
 	 **/
 	TreemapTile( TreemapTile          * parentTile,
-		     FileInfo             * orig,
-		     const QRectF         & rect,
-		     const CushionSurface & cushionSurface );
+	             FileInfo             * orig,
+	             const QRectF         & rect,
+	             const CushionSurface & cushionSurface );
 
     public:
 
@@ -341,13 +341,13 @@ namespace QDirStat
 	 * Lay out all members of 'row' within 'rect' along its longer side.
 	 * Returns the new rectangle with the layouted area subtracted.
 	 **/
-	void layoutRow( Orientation              dir,
-			QRectF                 & rect,
-			FileInfoBySizeIterator & it,
-			const FileInfo         * rowEnd,
-			FileSize                 rowTotal,
-			double                   primary,
-			double                   secondary );
+	void layoutRow( Orientation      dir,
+	                QRectF         & rect,
+	                BySizeIterator & it,
+	                const FileInfo * rowEnd,
+	                FileSize         rowTotal,
+	                double           primary,
+	                double           secondary );
 
 	/**
 	 * Paint this tile.
@@ -355,8 +355,8 @@ namespace QDirStat
 	 * Reimplemented from QGraphicsRectItem.
 	 **/
 	void paint( QPainter                       * painter,
-		    const QStyleOptionGraphicsItem * option,
-		    QWidget                        * widget = nullptr ) override;
+	            const QStyleOptionGraphicsItem * option,
+	            QWidget                        * widget = nullptr ) override;
 
 	/**
 	 * Notification that item attributes (such as the 'selected' state)
@@ -365,7 +365,7 @@ namespace QDirStat
 	 * Reimplemented from QGraphicsItem.
 	 **/
 	QVariant itemChange( GraphicsItemChange   change,
-			     const QVariant     & value ) override;
+	                     const QVariant     & value ) override;
 
 	/**
 	 * Mouse press event: Handle setting the current item.

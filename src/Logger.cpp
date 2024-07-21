@@ -19,7 +19,6 @@
 #include <QDateTime>
 #include <QDir>
 #include <QRegularExpression>
-#include <QStringBuilder>
 #include <QStringList>
 
 #include "Logger.h"

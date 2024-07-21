@@ -81,6 +81,17 @@ namespace QDirStat
 	 **/
 	DirReadState readState() const override { return parent() ? parent()->readState() : readState(); }
 
+	/**
+	 * Locate a child somewhere in this subtree whose URL (i.e. complete
+	 * path) matches the URL passed. Returns 0 if there is no such child.
+	 *
+	 * Reimplemented - inherited from FileInfo.  This implementation does
+	 * not search for the "<Files>" or "<Files><Ignored>" portion of a
+	 * url unless that is an exact match. The urls of children inside a
+	 * dot entry do not include "<Files>".
+	 **/
+	FileInfo * locate( const QString & url ) override;
+
 
     protected:
 

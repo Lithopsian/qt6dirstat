@@ -138,7 +138,7 @@ namespace QDirStat
      * store, and the corresponding DirInfo * has to be fetched again with
      * DirTree::locate() (which is an expensive operation), but it is a lot
      * safer in case the tree is modified, i.e. if the user starts cleanup
-     * operations or refreshes the tree from disk: Not only are no pointers
+     * operations or refreshes the tree from disk. Not only are no pointers
      * stored that might become invalid, but the search result remains valid
      * even after such an operation since the strings (the paths) will still
      * match an object in the tree in most cases.
@@ -167,7 +167,7 @@ namespace QDirStat
 	UnreadableDirListItem( DirInfo * dir );
 
 	/**
-	 * Return the path of this directory.
+	 * Return the directory object for this item.
 	 **/
 	DirInfo * dir() const { return _dir; }
 

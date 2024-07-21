@@ -35,6 +35,9 @@ namespace QDirStat
      *
      * For each element pair to compare, the FileInfoSorter's operator() will
      * be called with that pair as arguments.
+     *
+     * Note that the sorter can be called on any container of FileInfo pointers
+     * that satisfies the basic iterator requirements.
      **/
     class FileInfoSorter
     {

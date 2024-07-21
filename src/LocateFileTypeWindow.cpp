@@ -13,8 +13,8 @@
 #include "LocateFileTypeWindow.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
-#include "DotEntry.h"
 #include "Exception.h"
+#include "FileInfoIterator.h"
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "MainWindow.h"
@@ -35,17 +35,14 @@ namespace
     {
 	FileInfoSet result;
 
-	if ( !item || !item->isDirInfo() )
+	if ( !item )
 	    return result;
 
-	const DirInfo * dir = item->toDirInfo();
-	if ( dir->dotEntry() )
-	    dir = dir->dotEntry();
-
-	for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
+	const DirInfo * dir = item->dotEntry() ? item->dotEntry() : item->toDirInfo();
+	for ( FileInfoIterator it { dir }; *it; ++it )
 	{
-	    if ( child->isFile() && child->name().endsWith( suffix, Qt::CaseInsensitive ) )
-		result << child;
+	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseInsensitive ) )
+		result << *it;
 	}
 
 	return result;
@@ -166,11 +163,8 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
     }
 
     // Recurse through any subdirectories
-    for ( FileInfo * child = dir->firstChild(); child; child = child->next() )
-    {
-	if ( child->isDirInfo() )
-	    populateRecursive( child );
-    }
+    for ( DirInfoIterator it { dir }; *it; ++it )
+	populateRecursive( *it );
 
     // Unlike in FileTypeStats, there is no need to recurse through
     // any dot entries: They are handled in matchingFiles() already.

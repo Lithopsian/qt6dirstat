@@ -97,7 +97,7 @@ void HistoryButtons::unlock( const FileInfo * currentItem )
     for ( const QString & item : items )
     {
         // Remove stale items and merge duplicates that are now contiguous
-        if ( currentItem->tree()->locate( item, true ) && item != _history->currentItem() )
+        if ( currentItem->tree()->locate( item ) && item != _history->currentItem() )
             _history->add( item );
         else if ( currentIndex >= _history->size() )
             --currentIndex; // adjust the index for items removed before it
