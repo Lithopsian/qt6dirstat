@@ -14,7 +14,6 @@
 #include "DirTree.h"
 #include "Exception.h"
 #include "ExcludeRules.h"
-#include "FileInfo.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "FormatUtil.h"
@@ -49,7 +48,7 @@ namespace
     }
 
 
-    void dumpDirectChildren( const FileInfo * dir )
+    void dumpChildren( const FileInfo * dir )
     {
 	if ( ! dir )
 	    return;
@@ -57,11 +56,11 @@ namespace
 
 	if ( dir->hasChildren() )
 	{
-	    logDebug() << "Children of " << dir << "  (" << (void *) dir << ")" << Qt::endl;
+	    logDebug() << "Children of " << dir << "  (" << (void *)dir << ")" << Qt::endl;
 
 	    int count = 0;
-	    for ( FileInfoIterator it( dir ); *it; ++it )
-		logDebug() << "	   #" << count++ << ": " << (void *) *it << "	 " << *it << Qt::endl;
+	    for ( AtticIterator it { dir }; *it; ++it )
+		logDebug() << "	   #" << count++ << ": " << (void *)*it << "	 " << *it << Qt::endl;
 	}
 	else
 	{
@@ -351,16 +350,15 @@ namespace
 
 
     /**
-     * Return the number of direct children (plus the attic if there is
-     * one) of a subtree.
+     * Return the number of children of a FileInfo item.
      **/
-    int childrenCount( FileInfo * subtree )
+    int childCount( FileInfo * item )
     {
-	if ( !subtree )
+	if ( !item )
 	    return 0;
 
-	const int count = subtree->directChildrenCount();
-	return subtree->attic() ? count + 1 : count;
+	return item->childCount();
+//	return item->attic() ? count + 1 : count;
     }
 
 
@@ -624,8 +622,7 @@ FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 
     logError() << "Child #" << childNo << " is out of range (0..." << sortedChildren.size()-1
 	       << ") for " << parent << Qt::endl;
-
-    dumpDirectChildren( parent );
+    dumpChildren( parent );
 
     return nullptr;
 }
@@ -675,34 +672,34 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
     FileInfo * item = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
     CHECK_MAGIC( item );
 
-    if ( !item->isDirInfo() || item->toDirInfo()->isLocked() )
-	return 0;
-
-    switch ( item->readState() )
+    if ( parentIndex.column() <= 0 && item->isDirInfo() && !item->toDirInfo()->isLocked() )
     {
-	case DirQueued:
-	case DirReading:
-	    // Better keep it simple: Don't report any children until they
-	    // are complete.
-	    break;
+	switch ( item->readState() )
+	{
+	    case DirQueued:
+	    case DirReading:
+		// Better keep it simple: Don't report any children until they
+		// are complete.
+		break;
 
-	case DirError:
-	case DirPermissionDenied:
-	    // This is a hybrid case: Depending on the dir reader, the dir may
-	    // or may not be finished at this time. For a local dir, it most
-	    // likely is; for a cache reader, there might be more to come.
-	    if ( !_tree->isBusy() )
-		return childrenCount( item );
-	    break;
+	    case DirError:
+	    case DirPermissionDenied:
+		// This is a hybrid case: Depending on the dir reader, the dir may
+		// or may not be finished at this time. For a local dir, it most
+		// likely is; for a cache reader, there might be more to come.
+		if ( !_tree->isBusy() )
+		    return childCount( item );
+		break;
 
-	case DirFinished:
-	case DirOnRequestOnly:
-//	case DirCached:
-	case DirAborted:
-	    return childrenCount( item );
+	    case DirFinished:
+	    case DirOnRequestOnly:
+//	    case DirCached:
+	    case DirAborted:
+		return childCount( item );
 
-	// intentionally omitting 'default' case so the compiler can report
-	// missing enum values
+	    // intentionally omitting 'default' case so the compiler can report
+	    // missing enum values
+	}
     }
 
     return 0;
@@ -950,8 +947,8 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 	return;
     }
 
-    // dumpDirectChildren( dir );
-    const int count = childrenCount( dir );
+    // dumpChildren( dir );
+    const int count = childCount( dir );
     if ( count > 0 )
     {
 	// logDebug() << "Notifying view about " << count << " new children of " << dir << Qt::endl;
@@ -964,10 +961,10 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 
     // If any readJobFinished signals were ignored because a parent was not
     // finished yet, now is the time to notify the view about those children.
-    for ( FileInfoIterator it( dir ); *it; ++it )
+    for ( DirInfoIterator it { dir }; *it; ++it )
     {
-	if ( (*it)->isDirInfo() && (*it)->readState() != DirReading && (*it)->readState() != DirQueued )
-	    newChildrenNotify( (*it)->toDirInfo() );
+	if ( it->readState() != DirReading && it->readState() != DirQueued )
+	    newChildrenNotify( *it );
     }
 }
 
@@ -1019,7 +1016,7 @@ void DirTreeModel::readingFinished()
     _pendingUpdates.clear();
 
     // dumpPersistentIndexList( persistentIndexList() );
-    // dumpDirectChildren( _tree->root() );
+    // dumpChildren( _tree->root() );
 }
 
 
@@ -1107,7 +1104,7 @@ void DirTreeModel::clearingSubtree( DirInfo * subtree )
 
     if ( subtree == _tree->root() || subtree->isTouched() )
     {
-	const int count = childrenCount( subtree );
+	const int count = childCount( subtree );
 	if ( count > 0 )
 	    beginRemoveRows( modelIndex( subtree ), 0, count - 1 );
 
@@ -1167,7 +1164,7 @@ int DirTreeModel::rowNumber( const FileInfo * child ) const
 	logError() << "Child " << child << " (" << (void *)child << ")"
 		   << " not found in " << parent << Qt::endl;
 
-	dumpDirectChildren( parent );
+	dumpChildren( parent );
     }
 
     return row;
