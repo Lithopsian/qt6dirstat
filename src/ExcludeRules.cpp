@@ -20,7 +20,7 @@ using namespace QDirStat;
 
 
 QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
-				    const QString & pattern )
+                                    const QString & pattern )
 {
     // Anchor and escape all special characters so a regexp match behaves like a simple comparison
     if ( patternSyntax == FixedString )
@@ -52,7 +52,7 @@ void ExcludeRule::setPattern( const QString & pattern )
 bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) const
 {
     if ( _checkAnyFileChild )  // use matchDirectChildren() for those rules
-        return false;
+	return false;
 
     const QString & matchText = _useFullPath ? fullPath : fileName;
     if ( matchText.isEmpty() || _pattern.isEmpty() )
@@ -65,10 +65,10 @@ bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) co
 bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
 {
     if ( !_checkAnyFileChild || !dir )
-        return false;
+	return false;
 
     if ( _pattern.isEmpty() )
-        return false;
+	return false;
 
     // Search through FileInfo children to see if any match
     const DirInfo * parent = dir->dotEntry() ? dir->dotEntry() : dir;
@@ -86,9 +86,9 @@ bool ExcludeRule::operator!=( const ExcludeRule * other ) const
         return false;
 
     if ( other->patternSyntax()     != patternSyntax() ||
-	 other->pattern()           != pattern()       ||
-	 other->caseSensitive()     != caseSensitive() ||
-	 other->useFullPath()       != useFullPath()   ||
+         other->pattern()           != pattern()       ||
+         other->caseSensitive()     != caseSensitive() ||
+         other->useFullPath()       != useFullPath()   ||
          other->checkAnyFileChild() != checkAnyFileChild() )
     {
         return true;
@@ -113,6 +113,18 @@ namespace
 	    logDebug() << excludeRule << Qt::endl;
     }
 
+
+    /**
+     * Return the enum mapping for the pattern syntax enum PatternSyntax
+     **/
+    SettingsEnumMapping patternSyntaxMapping()
+    {
+	return { { ExcludeRule::RegExp,      "RegExp"_L1      },
+	         { ExcludeRule::Wildcard,    "Wildcard"_L1    },
+	         { ExcludeRule::FixedString, "FixedString"_L1 },
+	       };
+    }
+
 } // namespace
 
 
@@ -126,10 +138,10 @@ ExcludeRules::ExcludeRules()
 
 
 ExcludeRules::ExcludeRules( const QStringList & paths,
-			    ExcludeRule::PatternSyntax patternSyntax,
-			    bool caseSensitive,
-			    bool useFullPath,
-			    bool checkAnyFileChild )
+                            ExcludeRule::PatternSyntax patternSyntax,
+                            bool caseSensitive,
+                            bool useFullPath,
+                            bool checkAnyFileChild )
 {
     for ( const QString & path : paths )
         add( patternSyntax, path, caseSensitive, useFullPath, checkAnyFileChild );
@@ -144,12 +156,13 @@ void ExcludeRules::clear()
 
 
 void ExcludeRules::add( ExcludeRule::PatternSyntax   patternSyntax,
-			const QString              & pattern,
-			bool                         caseSensitive,
+                        const QString              & pattern,
+                        bool                         caseSensitive,
                         bool                         useFullPath,
                         bool                         checkAnyFileChild )
 {
-    ExcludeRule * rule = new ExcludeRule( patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild );
+    ExcludeRule * rule =
+	new ExcludeRule( patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild );
     _rules << rule;
 
     logInfo() << "Added " << rule << Qt::endl;
@@ -209,22 +222,6 @@ void ExcludeRules::addDefaultRules()
 }
 
 
-namespace
-{
-    /**
-     * Return the enum mapping for the pattern syntax enum PatternSyntax
-     **/
-    SettingsEnumMapping patternSyntaxMapping()
-    {
-	return { { ExcludeRule::RegExp,      "RegExp"_L1      },
-		 { ExcludeRule::Wildcard,    "Wildcard"_L1    },
-		 { ExcludeRule::FixedString, "FixedString"_L1 },
-	       };
-    }
-
-} // namespace
-
-
 void ExcludeRules::readSettings()
 {
 //    clear(); // a new object is always used
@@ -247,11 +244,11 @@ void ExcludeRules::readSettings()
 
 	const int syntax = settings.enumValue( "Syntax", ExcludeRule::RegExp, mapping );
 
-	ExcludeRule * rule = new ExcludeRule( ( ExcludeRule::PatternSyntax )syntax,
-					      pattern,
-					      caseSensitive,
-					      useFullPath,
-					      checkAnyFileChild );
+	ExcludeRule * rule = new ExcludeRule( static_cast<ExcludeRule::PatternSyntax>( syntax ),
+	                                      pattern,
+	                                      caseSensitive,
+	                                      useFullPath,
+	                                      checkAnyFileChild );
 
 	if ( !pattern.isEmpty() && rule->isValid() )
 	{

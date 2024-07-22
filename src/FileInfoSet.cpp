@@ -188,15 +188,15 @@ FileInfoSet FileInfoSet::parents() const
     for ( FileInfo * child : *this )
     {
 	if ( child && child->parent() )
-        {
-            FileInfo * parent = child->parent();
+	{
+	    FileInfo * parent = child->parent();
 
-            if ( parent->isPseudoDir() )
-                parent = parent->parent();
+	    if ( parent->isPseudoDir() )
+		parent = parent->parent();
 
-            if ( parent )
-                parents << parent;
-        }
+	    if ( parent )
+		parents << parent;
+	}
     }
 
     return parents.normalized();

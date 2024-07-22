@@ -50,8 +50,7 @@ void FileSizeLabel::setValue( FileSize value, QLatin1String prefix )
 
 void FileSizeLabel::setValueWithLinks( FileSize size, nlink_t numLinks )
 {
-    const QString & text = formatSize( size );
-    QLabel::setText( text % formatLinksInline( numLinks ) );
+    QLabel::setText( formatSize( size ) % formatLinksInline( numLinks ) );
     setToolTip( size, QLatin1String(), numLinks );
 }
 

@@ -13,6 +13,8 @@
 #include <zlib.h>
 
 #include <QRegularExpression>
+#include <QStringBuilder>
+#include <QUrl>
 
 #include "Typedefs.h" //FileSize
 
@@ -25,9 +27,9 @@
 
 namespace QDirStat
 {
-	class DirInfo;
-	class DirTree;
-	class FileInfo;
+    class DirInfo;
+    class DirTree;
+    class FileInfo;
 
     class CacheWriter
     {
@@ -152,12 +154,6 @@ namespace QDirStat
 	bool isDir( const QString & dirName );
 
 	/**
-	 * Converts a string representing a number of bytes into a FileSize
-	 * return value.
-	 **/
-	FileSize readSize( const char * size_str );
-
-	/**
 	 * Check this cache's header (see if it is a QDirStat cache at all)
 	 **/
 	void checkHeader();
@@ -188,14 +184,19 @@ namespace QDirStat
 
 	/**
 	 * Return an unescaped version of 'rawPath'.
+	 *
+	 * Using a protocol part avoids directory names with a colon ":"
+	 * being cut off because it looks like a URL protocol.
 	 **/
-	QString unescapedPath( const QString & rawPath ) const;
+	QString unescapedPath( const QString & rawPath ) const
+	    { return QUrl( "foo:"_L1 % cleanPath( rawPath ) ).path(); }
 
 	/**
 	 * Clean a path: Replace duplicate (or triplicate or more) slashes with
 	 * just one. QUrl doesn't seem to handle those well.
 	 **/
-	QString cleanPath( const QString & rawPath ) const;
+	QString cleanPath( const QString & rawPath ) const
+	    { return QString( rawPath ).replace( _multiSlash, "/" ); }
 
 	/**
 	 * Recursively set the read status of all dirs from 'dir' on, send tree

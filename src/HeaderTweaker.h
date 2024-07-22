@@ -186,11 +186,6 @@ namespace QDirStat
 	void applyLayout( ColumnLayout * layout );
 
 	/**
-	 * Ensure consistency of a layout.
-	 **/
-	void fixupLayout( ColumnLayout * layout );
-
-	/**
 	 * Order the columns according to 'colOrderList'.
 	 **/
 	void setColumnOrder( const DataColumnList & colOrderList);
@@ -212,12 +207,6 @@ namespace QDirStat
 	    { return resizeMode( section ) == QHeaderView::ResizeToContents; }
 
 	/**
-	 * Add any columns that are missing from the default columns to
-	 * 'colList'.
-	 **/
-	void addMissingColumns( DataColumnList & colList );
-
-	/**
 	 * Return the resize mode for the specified section.
 	 **/
 	QHeaderView::ResizeMode resizeMode( int section ) const
@@ -233,16 +222,6 @@ namespace QDirStat
 	 * Read parameters from the settings file.
 	 **/
 	void readSettings();
-
-	/**
-	 * Read the settings for a layout.
-	 **/
-	void readLayoutSettings( ColumnLayout * layout );
-
-	/**
-	 * Write the settings for a layout.
-	 **/
-	void writeLayoutSettings( const ColumnLayout * layout ) const;
 
 
     private:

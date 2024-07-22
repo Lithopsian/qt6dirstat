@@ -19,6 +19,73 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Write the settings for a layout.
+     **/
+    void writeLayoutSettings( const ColumnLayout * layout )
+    {
+	CHECK_PTR( layout );
+
+	Settings settings;
+	settings.beginGroup( "TreeViewLayout_" + layout->name );
+	settings.setValue( "Columns", DataColumns::toStringList( layout->columns ) );
+	settings.endGroup();
+    }
+
+
+    /**
+     * Ensure consistency of a layout.
+     **/
+    void fixupLayout( ColumnLayout * layout )
+    {
+	CHECK_PTR( layout );
+
+	if ( layout->columns.isEmpty() )
+	{
+	    logDebug() << "Falling back to default visible columns" << Qt::endl;
+	    layout->columns = layout->defaultColumns();
+	}
+
+	DataColumns::ensureNameColFirst( layout->columns );
+    }
+
+
+    /**
+     * Read the settings for a layout.
+     **/
+    void readLayoutSettings( ColumnLayout * layout )
+    {
+	CHECK_PTR( layout );
+
+	Settings settings;
+
+	settings.beginGroup( "TreeViewLayout_" + layout->name );
+	layout->columns = DataColumns::fromStringList( settings.value( "Columns" ).toStringList() );
+	settings.endGroup();
+
+	fixupLayout( layout );
+    }
+
+
+    /**
+     * Add any columns that are missing from the default columns to
+     * 'colList'.
+     **/
+    void addMissingColumns( DataColumnList & colList )
+    {
+	const auto defaultColumns = DataColumns::defaultColumns();
+	for ( const DataColumn col : defaultColumns )
+	{
+	    if ( !colList.contains( col ) )
+		 colList << col;
+	}
+    }
+
+}
+
+
 HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
     QObject { parent },
     _treeView { parent },
@@ -33,10 +100,10 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
     createColumnLayouts();
 
     connect( _header, &QHeaderView::sectionCountChanged,
-	     this,    &HeaderTweaker::initHeader );
+             this,    &HeaderTweaker::initHeader );
 
     connect( _header, &QHeaderView::customContextMenuRequested,
-	     this,    &HeaderTweaker::contextMenu );
+             this,    &HeaderTweaker::contextMenu );
 }
 
 
@@ -99,14 +166,14 @@ void HeaderTweaker::contextMenu( const QPoint & pos )
 //    menu.addAction( tr( "Column \"%1\"" ).arg( colName ) );
 //    menu.addSeparator();
     QAction * autoSizeCurrentCol = createAction( &menu,
-						 tr( "Auto &Size" ),
-						 &HeaderTweaker::autoSizeCurrentCol );
+                                                 tr( "Auto &Size" ),
+                                                 &HeaderTweaker::autoSizeCurrentCol );
     autoSizeCurrentCol->setCheckable( true );
     autoSizeCurrentCol->setChecked( autoSizeCol( _currentSection ) );
 
     QAction * hideCurrentCol = createAction( &menu,
-					     tr( "&Hide \"%1\"" ).arg( colName ),
-					     &HeaderTweaker::hideCurrentCol );
+                                             tr( "&Hide \"%1\"" ).arg( colName ),
+                                             &HeaderTweaker::hideCurrentCol );
     hideCurrentCol->setEnabled( _currentSection );
 
     menu.addSeparator();
@@ -309,20 +376,6 @@ void HeaderTweaker::readSettings()
 }
 
 
-void HeaderTweaker::readLayoutSettings( ColumnLayout * layout )
-{
-    CHECK_PTR( layout );
-
-    Settings settings;
-
-    settings.beginGroup( "TreeViewLayout_" + layout->name );
-    layout->columns = DataColumns::fromStringList( settings.value( "Columns" ).toStringList() );
-    settings.endGroup();
-
-    fixupLayout( layout );
-}
-
-
 void HeaderTweaker::writeSettings()
 {
     Settings settings;
@@ -355,32 +408,10 @@ void HeaderTweaker::writeSettings()
 }
 
 
-void HeaderTweaker::writeLayoutSettings( const ColumnLayout * layout ) const
-{
-    CHECK_PTR( layout );
-
-    Settings settings;
-    settings.beginGroup( "TreeViewLayout_" + layout->name );
-    settings.setValue( "Columns", DataColumns::toStringList( layout->columns ) );
-    settings.endGroup();
-}
-
-
 void HeaderTweaker::setColumnVisibility( const DataColumnList & columns )
 {
     for ( int section = 0; section < _header->count(); ++section )
 	_header->setSectionHidden( section, !columns.contains( DataColumns::fromViewCol( section ) ) );
-}
-
-
-void HeaderTweaker::addMissingColumns( DataColumnList & colList )
-{
-    const auto defaultColumns = DataColumns::defaultColumns();
-    for ( const DataColumn col : defaultColumns )
-    {
-	if ( !colList.contains( col ) )
-	     colList << col;
-    }
 }
 
 
@@ -430,20 +461,6 @@ void HeaderTweaker::applyLayout( ColumnLayout * layout )
 }
 
 
-void HeaderTweaker::fixupLayout( ColumnLayout * layout )
-{
-    CHECK_PTR( layout );
-
-    if ( layout->columns.isEmpty() )
-    {
-	logDebug() << "Falling back to default visible columns" << Qt::endl;
-	layout->columns = layout->defaultColumns();
-    }
-
-    DataColumns::ensureNameColFirst( layout->columns );
-}
-
-
 void HeaderTweaker::resizeToContents( QHeaderView * header )
 {
     for ( int col = 0; col < header->count(); ++col )
@@ -456,21 +473,21 @@ DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )
 {
     if ( layoutName == HeaderTweaker::l1Name() )
 	return { NameCol,
-                 PercentBarCol,
-                 PercentNumCol,
-                 SizeCol,
-                 LatestMTimeCol
+	         PercentBarCol,
+	         PercentNumCol,
+	         SizeCol,
+	         LatestMTimeCol
 	       };
 
     if ( layoutName == HeaderTweaker::l2Name() )
 	return { NameCol,
-		 PercentBarCol,
-		 PercentNumCol,
-		 SizeCol,
-		 TotalItemsCol,
-		 TotalFilesCol,
-		 TotalSubDirsCol,
-		 LatestMTimeCol
+	         PercentBarCol,
+	         PercentNumCol,
+	         SizeCol,
+	         TotalItemsCol,
+	         TotalFilesCol,
+	         TotalSubDirsCol,
+	         LatestMTimeCol
 	       };
 
     return DataColumns::allColumns();

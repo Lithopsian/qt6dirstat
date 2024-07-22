@@ -8,10 +8,7 @@
  */
 
 #include <cmath>  // ceil()
-#include <cctype> // isspace()
-
-#include <QStringBuilder>
-#include <QUrl>
+#include <cctype> // isspace(), toupper()
 
 #include "DirTreeCache.h"
 #include "DirTree.h"
@@ -180,12 +177,12 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
     }
 
     gzprintf( cache,
-	     "[qdirstat %s cache file]\n"
-	     "#Generated file - do not edit!\n"
-	     "#\n"
-	     "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
-	     "\n",
-	     CACHE_FORMAT_VERSION );
+             "[qdirstat %s cache file]\n"
+             "#Generated file - do not edit!\n"
+             "#\n"
+             "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
+             "\n",
+             CACHE_FORMAT_VERSION );
 
     writeTree( cache, tree->firstToplevel() );
     gzclose( cache );
@@ -273,14 +270,37 @@ namespace
 	    pathRet.prepend( u'/' );
     }
 
+
+    /**
+     * Converts a string representing a number of bytes into a FileSize
+     * return value.
+     **/
+    FileSize readSize( const char * size_str )
+    {
+	char * end = nullptr;
+	FileSize size = strtoll( size_str, &end, 10 );
+	if ( end )
+	{
+	    switch ( toupper( *end ) )
+	    {
+		case 'K': return size * KB;
+		case 'M': return size * MB;
+		case 'G': return size * GB;
+		case 'T': return size * TB;
+	    }
+	}
+
+	return size;
+    }
+
 } // namespace
 
 
 
 CacheReader::CacheReader( const QString & fileName,
-			  DirTree       * tree,
-			  DirInfo       * parent,
-			  bool            markFromCache ):
+                          DirTree       * tree,
+                          DirInfo       * parent,
+                          bool            markFromCache ):
     _cache { gzopen( fileName.toUtf8().constData(), "r" ) },
     _markFromCache { markFromCache },
     _tree { tree },
@@ -301,9 +321,9 @@ CacheReader::CacheReader( const QString & fileName,
 
 
 CacheReader::CacheReader( const QString & fileName,
-			  DirTree       * tree,
-			  DirInfo       * dir,
-			  DirInfo       * parent ):
+                          DirTree       * tree,
+                          DirInfo       * dir,
+                          DirInfo       * parent ):
     CacheReader { fileName, tree, parent, true }
 {
     if ( dir && !isDir( dir->url() ) ) // Does this cache file match this directory?
@@ -484,7 +504,7 @@ void CacheReader::addItem()
     // Blocks: only stored for sparse files, otherwise just guess from the file size
     const FileSize blocks = blocks_str ?
                             strtoll( blocks_str, 0, 10 ) :
-                            static_cast<FileSize>( std::ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
+                            static_cast<FileSize>( ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
@@ -527,13 +547,13 @@ void CacheReader::addItem()
 	if ( !parent ) // Still nothing?
 	{
 	    logError() << "Line " << _lineNo << ": "
-		       << "Could not locate parent \"" << path << "\" for " << name << Qt::endl;
+	               << "Could not locate parent \"" << path << "\" for " << name << Qt::endl;
 
-            if ( ++_errorCount > MAX_ERROR_COUNT )
-            {
-                logError() << "Too many consistency errors. Giving up." << Qt::endl;
-                _ok = false;
-            }
+	    if ( ++_errorCount > MAX_ERROR_COUNT )
+	    {
+		logError() << "Too many consistency errors. Giving up." << Qt::endl;
+		_ok = false;
+	    }
 
 #if VERBOSE_LOCATE_PARENT
 	    THROW( Exception( "Could not locate cache item parent" ) );
@@ -636,25 +656,6 @@ void CacheReader::addItem()
 }
 
 
-FileSize CacheReader::readSize( const char * size_str )
-{
-    char * end = nullptr;
-    FileSize size = strtoll( size_str, &end, 10 );
-    if ( end )
-    {
- 	switch ( toupper( *end ) )
-	{
-	    case 'K': return size * KB;
-	    case 'M': return size * MB;
-	    case 'G': return size * GB;
-	    case 'T': return size * TB;
-	}
-    }
-
-    return size;
-}
-
-
 bool CacheReader::eof() const
 {
     if ( !_ok || !_cache )
@@ -747,7 +748,7 @@ bool CacheReader::readLine()
     if ( !_ok || !_cache )
 	return false;
 
-    _fieldsCount = 0;
+//    _fieldsCount = 0;
 
     do
     {
@@ -844,18 +845,4 @@ void CacheReader::setReadError( DirInfo * dir ) const
 
 	dir = dir->parent();
     }
-}
-
-
-QString CacheReader::cleanPath( const QString & rawPath ) const
-{
-    return QString( rawPath ).replace( _multiSlash, "/" );
-}
-
-
-QString CacheReader::unescapedPath( const QString & rawPath ) const
-{
-    // Using a protocol part to avoid directory names with a colon ":"
-    // being cut off because it looks like a URL protocol.
-    return QUrl( "foo:"_L1 % cleanPath( rawPath ) ).path();
 }
