@@ -17,7 +17,6 @@
 #include <QFileInfo>
 #include <QModelIndex>
 #include <QTextStream>
-#include <QtMath> // qCeil()
 
 #include "Typedefs.h" // FileSize
 
@@ -81,18 +80,18 @@ namespace QDirStat
 	 * a delegate by some other constructors.
 	 **/
 	FileInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & filename,
-		  mode_t          mode,
-		  FileSize        size,
-		  FileSize        allocatedSize,
-		  bool            withUidGidPerm,
-		  uid_t           uid,
-		  gid_t           gid,
-		  time_t          mtime,
-		  bool            isSparseFile,
-		  FileSize        blocks,
-		  nlink_t         links ):
+	          DirTree       * tree,
+	          const QString & filename,
+	          mode_t          mode,
+	          FileSize        size,
+	          FileSize        allocatedSize,
+	          bool            withUidGidPerm,
+	          uid_t           uid,
+	          gid_t           gid,
+	          time_t          mtime,
+	          bool            isSparseFile,
+	          FileSize        blocks,
+	          nlink_t         links ):
 	    _name { filename },
 	    _parent { parent },
 	    _tree { tree },
@@ -117,22 +116,22 @@ namespace QDirStat
 	 *
 	 **/
 	FileInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & filename,
-		  mode_t          mode,
-		  FileSize        size ):
+	          DirTree       * tree,
+	          const QString & filename,
+	          mode_t          mode,
+	          FileSize        size ):
 	    FileInfo { parent,
-		       tree,
-		       filename,
-		       mode,
-		       size,
-		       size,
-		       false,
-		       0,
-		       0,
-		       0,
-		       false,
-		       blocksFromSize( size ), 1 }
+	               tree,
+	               filename,
+	               mode,
+	               size,
+	               size,
+	               false,
+	               0,
+	               0,
+	               0,
+	               false,
+	               blocksFromSize( size ), 1 }
 	{}
 
 	/**
@@ -141,28 +140,28 @@ namespace QDirStat
 	 *
 	 **/
 	FileInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & filename,
-		  mode_t          mode,
-		  FileSize        size,
-		  FileSize        allocatedSize,
-		  bool            withUidGidPerm,
-		  uid_t           uid,
-		  gid_t           gid,
-		  time_t          mtime ):
+	          DirTree       * tree,
+	          const QString & filename,
+	          mode_t          mode,
+	          FileSize        size,
+	          FileSize        allocatedSize,
+	          bool            withUidGidPerm,
+	          uid_t           uid,
+	          gid_t           gid,
+	          time_t          mtime ):
 	    FileInfo { parent,
-		       tree,
-		       filename,
-		       mode,
-		       size,
-		       allocatedSize,
-		       withUidGidPerm,
-		       uid,
-		       gid,
-		       mtime,
-		       false,
-		       blocksFromSize( size ),
-		       1 }
+	               tree,
+	               filename,
+	               mode,
+	               size,
+	               allocatedSize,
+	               withUidGidPerm,
+	               uid,
+	               gid,
+	               mtime,
+	               false,
+	               blocksFromSize( size ),
+	               1 }
 	{}
 
 	/**
@@ -171,8 +170,8 @@ namespace QDirStat
 	 * situations.
 	 **/
 	FileInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & filename ):
+	          DirTree       * tree,
+	          const QString & filename ):
 	    FileInfo ( parent, tree, filename, 0, 0, 0, false, 0, 0, 0, false, 0, 1 )
 	{}
 
@@ -181,9 +180,9 @@ namespace QDirStat
 	 * expected that this will be used for all "real" files.
 	 **/
 	FileInfo( DirInfo           * parent,
-		  DirTree           * tree,
-		  const QString     & filename,
-		  const struct stat & statInfo );
+	          DirTree           * tree,
+	          const QString     & filename,
+	          const struct stat & statInfo );
 
 	/**
 	 * Suppress copy and assignment constructors (this is not a QObject)
@@ -967,6 +966,17 @@ namespace QDirStat
 	 * If this is not a symlink, an empty string is returned.
 	 **/
 	QString symLinkTarget() const;
+
+	/**
+	 * Return whether a FileInfo item offers a reliable cluster size.
+	 *
+	 * A suitable item needs to be a regular file, large enough to contain
+	 * more than one block, and smaller than twice the standard block size.
+	 * This ensures that the file has one cluster allocated and hence its
+	 * block count is the blocks per cluster for this filesystem.
+	 **/
+	bool fileWithOneCluster() const
+	    { return isFile() && blocks() > 1 && size() < 2 * STD_BLOCK_SIZE; }
 
 
     private:

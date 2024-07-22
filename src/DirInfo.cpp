@@ -30,7 +30,7 @@ using namespace QDirStat;
 namespace
 {
     [[gnu::unused]] void dumpChildrenList( const FileInfo     * dir,
-					   const FileInfoList & children )
+                                           const FileInfoList & children )
     {
 	logDebug() << "Children of " << dir << Qt::endl;
 
@@ -42,8 +42,8 @@ namespace
 
 
 DirInfo::DirInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & name ):
+                  DirTree       * tree,
+                  const QString & name ):
     FileInfo { parent, tree, name },
     _isMountPoint { false },
     _isExcluded { false },
@@ -58,9 +58,9 @@ DirInfo::DirInfo( DirInfo       * parent,
 
 
 DirInfo::DirInfo( DirInfo           * parent,
-		  DirTree           * tree,
-		  const QString     & name,
-		  const struct stat & statInfo ):
+                  DirTree           * tree,
+                  const QString     & name,
+                  const struct stat & statInfo ):
     FileInfo { parent, tree, name, statInfo },
     _isMountPoint { false },
     _isExcluded { false },
@@ -76,26 +76,26 @@ DirInfo::DirInfo( DirInfo           * parent,
 
 
 DirInfo::DirInfo( DirInfo       * parent,
-		  DirTree       * tree,
-		  const QString & name,
-		  mode_t          mode,
-		  FileSize        size,
-		  FileSize        allocatedSize,
-		  bool            fromCache,
-		  bool            withUidGidPerm,
-		  uid_t           uid,
-		  gid_t           gid,
-		  time_t          mtime ):
+                  DirTree       * tree,
+                  const QString & name,
+                  mode_t          mode,
+                  FileSize        size,
+                  FileSize        allocatedSize,
+                  bool            fromCache,
+                  bool            withUidGidPerm,
+                  uid_t           uid,
+                  gid_t           gid,
+                  time_t          mtime ):
     FileInfo { parent,
-	       tree,
-	       name,
-	       mode,
-	       size,
-	       allocatedSize,
-	       withUidGidPerm,
-	       uid,
-	       gid,
-	       mtime },
+               tree,
+               name,
+               mode,
+               size,
+               allocatedSize,
+               withUidGidPerm,
+               uid,
+               gid,
+               mtime },
     _isMountPoint { false },
     _isExcluded { false },
     _summaryDirty { false },
@@ -202,6 +202,9 @@ void DirInfo::deleteEmptyAttic()
     {
 	delete _attic;
 	_attic = nullptr;
+
+	dropSortCache();
+	_summaryDirty = true;
     }
 }
 
@@ -323,99 +326,84 @@ void DirInfo::recalc()
 
 FileSize DirInfo::totalSize()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalSize;
 }
 
 
 FileSize DirInfo::totalAllocatedSize()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalAllocatedSize;
 }
 
 
 FileSize DirInfo::totalBlocks()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalBlocks;
 }
 
 
 FileCount DirInfo::totalItems()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalItems;
 }
 
 
 FileCount DirInfo::totalSubDirs()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalSubDirs;
 }
 
 
 FileCount DirInfo::totalFiles()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalFiles;
 }
 
 
 FileCount DirInfo::totalIgnoredItems()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalIgnoredItems;
 }
 
 
 FileCount DirInfo::totalUnignoredItems()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _totalUnignoredItems;
+}
+
+
+FileCount DirInfo::errSubDirs()
+{
+    ensureClean();
+    return _errSubDirs;
 }
 
 
 time_t DirInfo::latestMtime()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _latestMtime;
 }
 
 
 time_t DirInfo::oldestFileMtime()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _oldestFileMtime;
 }
 
 
 DirSize DirInfo::childCount()
 {
-    if ( _summaryDirty )
-	recalc();
-
+    ensureClean();
     return _childCount;
 }
 
@@ -431,28 +419,12 @@ DirSize DirInfo::countChildren()
     if ( _dotEntry )
 	++_childCount;
 
+    if ( _attic )
+	++_childCount;
+
     return _childCount;
 }
 */
-
-FileCount DirInfo::errSubDirs()
-{
-    if ( _summaryDirty )
-	recalc();
-
-    return _errSubDirs;
-}
-
-
-void DirInfo::setReadState( DirReadState newReadState )
-{
-    // "aborted" has higher priority than "finished"
-    if ( _readState == DirAborted && newReadState == DirFinished )
-	return;
-
-    _readState = newReadState;
-}
-
 
 bool DirInfo::isFinished() const
 {
@@ -585,7 +557,7 @@ void DirInfo::childAdded( FileInfo * newChild )
     }
 
     // Don't drop the sort cache if we are reading because we haven't affected that sort order
-    if ( _sortInfo && _sortInfo->_sortedCol != ReadJobsCol )
+//    if ( _sortInfo && _sortInfo->_sortedCol != ReadJobsCol )
 	dropSortCache();
 
     // Propagate the new child totals up the tree
@@ -706,6 +678,7 @@ QLatin1String DirInfo::sizePrefix() const
 //	case DirCached:
 	    if ( _errSubDirs > 0 )
 		return "> "_L1;
+	    break;
 
 	case DirQueued:
 	case DirReading:
@@ -789,12 +762,6 @@ void DirInfo::cleanupAttics()
     {
 	_attic->finalizeLocal();
 	deleteEmptyAttic();
-	if ( !_attic )
-	{
-	    // Cached data is obsolete although ancestors are unchanged
-	    dropSortCache();
-	    _summaryDirty = true;
-	}
     }
 }
 
@@ -835,13 +802,6 @@ const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sort
     _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
 
     return _sortInfo;
-}
-
-
-void DirInfo::dropSortCache()
-{
-    delete _sortInfo;
-    _sortInfo = nullptr;
 }
 
 
@@ -954,9 +914,9 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
 	dumpChildrenList( parent, _sortedChildren );
 
 	THROW( Exception( QString( "_childCount of %1 corrupted; is %2, should be %3" )
-			  .arg( parent->debugUrl() )
-			  .arg( parent->childCount() )
-			  .arg( _sortedChildren.size() ) ) );
+	                  .arg( parent->debugUrl() )
+	                  .arg( parent->childCount() )
+	                  .arg( _sortedChildren.size() ) ) );
     }
 #endif
 
@@ -998,9 +958,9 @@ DirSize DirSortInfo::findDominantChildren()
 
 #if VERBOSE_DOMINANCE_CHECK
 	logDebug() << this
-		   << "  median: "    << formatPercent( medianPercent )
-		   << "  threshold: " << formatPercent( threshold )
-		   << Qt::endl;
+	           << "  median: "    << formatPercent( medianPercent )
+	           << "  threshold: " << formatPercent( threshold )
+	           << Qt::endl;
 #endif
 
 	// Return the child number of the first child after the dominance threshold

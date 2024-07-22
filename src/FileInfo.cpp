@@ -64,9 +64,9 @@ namespace
 
 
 FileInfo::FileInfo( DirInfo           * parent,
-		    DirTree           * tree,
-		    const QString     & filename,
-		    const struct stat & statInfo ):
+                    DirTree           * tree,
+                    const QString     & filename,
+                    const struct stat & statInfo ):
     _name { filename },
     _parent { parent },
     _tree { tree },
@@ -113,10 +113,10 @@ FileInfo::FileInfo( DirInfo           * parent,
 #if 0
 	if ( _isSparseFile )
 	    logDebug() << "Found sparse file: " << this
-		       << "    Byte size: "     << formatSize( _size )
-		       << "  Allocated: "       << formatSize( _allocatedSize )
-		       << " (" << _blocks << " blocks)"
-		       << Qt::endl;
+	               << "    Byte size: "     << formatSize( _size )
+	               << "  Allocated: "       << formatSize( _allocatedSize )
+	               << " (" << _blocks << " blocks)"
+	               << Qt::endl;
 #endif
 
 #if 0
@@ -379,7 +379,7 @@ QString FileInfo::symLinkTarget() const
 YearAndMonth FileInfo::yearAndMonth() const
 {
     if ( isPseudoDir() || isPkgInfo() )
-        return { 0, 0 };
+	return { 0, 0 };
 
     // Using gmtime() which is standard C/C++
     // unlike gmtime_r() which is not

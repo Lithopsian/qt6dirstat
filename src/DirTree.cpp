@@ -129,29 +129,20 @@ namespace
 	DirInfo * parent = attic->parent();
 	if ( parent ) // an attic should always have a parent
 	{
-	    // Notify each change individually so the model can keep track
 	    emit tree->deletingChildren( attic, FileInfoSet { atticChild } );
-	    attic->unlinkChild( atticChild ); // marks all ancestors as dirty
+	    attic->unlinkChild( atticChild );
 	    emit tree->childrenDeleted();
+	    atticChild->setIgnored( false );
 
-	    // Pretend to be clearing all the children of parent, whether we delete anything or not
-	    emit tree->clearingSubtree( parent ); // does recalc()
-	    if ( attic->isEmpty() )
-	    {
-		// Use unlinkChild() so the sort cache is dropped and the tree marked as dirty
-		parent->unlinkChild( attic );
-		delete attic;
-	    }
+	    // Pretend to be clearing all the children, whether we delete anything or not
+	    // This will keep the model away while we mess with the tree
+	    emit tree->clearingSubtree( parent );
+	    parent->deleteEmptyAttic();
 	    emit tree->subtreeCleared();
 
-	    // atticChild is still marked ignored, so won't get added to the parent summaries here
+	    // Notify the model of all the parent rows as if they were new
 	    parent->insertChild( atticChild );
-
-	    // Notify the model of (nearly) all the parent rows as if they were new
 	    emit tree->readJobFinished( parent );
-
-	    // the model will be one row short at this point, but
-	    // deleteSubtree() is about to be called and everything will get recalculated
 	}
     }
 
@@ -426,7 +417,7 @@ void DirTree::refresh( DirInfo * subtree )
 
 	//  Make copies of some key information before the objects are deleted
 	const QString url = subtree->url();
-	DirInfo * parent = subtree->parent(); // parent can no longer be an attic
+	DirInfo * parent = subtree->parent(); // the parent can't be an attic now
 
 	deleteSubtree( subtree );
 
@@ -467,8 +458,16 @@ void DirTree::finalizeTree()
 
 void DirTree::childAddedNotify( FileInfo * newChild )
 {
-    if ( !haveClusterSize() )
-	detectClusterSize( newChild );
+    if ( !haveClusterSize() && newChild && newChild->fileWithOneCluster() )
+    {
+	_blocksPerCluster = newChild->blocks();
+
+	logInfo() << "Cluster size: " << _blocksPerCluster << " blocks ("
+	          << formatSize( clusterSize() ) << ")" << Qt::endl;
+//	logDebug() << "Derived from " << newChild << " " << formatSize( newChild->rawByteSize() )
+//	           << " (allocated: " << formatSize( newChild->rawAllocatedSize() ) << ")"
+//	           << Qt::endl;
+    }
 
 //    emit childAdded( newChild ); // nobody listening for this
 
@@ -706,24 +705,6 @@ bool DirTree::checkIgnoreFilters( const QString & path ) const
     }
 
     return false;
-}
-
-
-void DirTree::detectClusterSize( const FileInfo * item )
-{
-    if ( item &&
-         item->isFile()     &&
-         item->blocks() > 1 &&          // 1..512 bytes fits into an NTFS fragment
-         item->size()   < 2 * STD_BLOCK_SIZE )
-    {
-	_blocksPerCluster = item->blocks();
-
-	logInfo() << "Cluster size: " << _blocksPerCluster << " blocks ("
-		  << formatSize( clusterSize() ) << ")" << Qt::endl;
-//        logDebug() << "Derived from " << item << " " << formatSize( item->rawByteSize() )
-//                   << " (allocated: " << formatSize( item->rawAllocatedSize() ) << ")"
-//                   << Qt::endl;
-    }
 }
 
 

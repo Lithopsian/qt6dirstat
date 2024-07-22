@@ -41,8 +41,8 @@ namespace QDirStat
 	 * when the children are sorted.
 	 **/
 	DirSortInfo( DirInfo       * parent,
-		     DataColumn      sortCol,
-		     Qt::SortOrder   sortOrder );
+	             DataColumn      sortCol,
+	             Qt::SortOrder   sortOrder );
 
 	/**
 	 * Return a pointer to the dominant children list, creating it if
@@ -83,24 +83,24 @@ namespace QDirStat
 	 * Constructor from a stat buffer (i.e. based on an lstat() call).
 	 **/
 	DirInfo( DirInfo           * parent,
-		 DirTree           * tree,
-		 const QString     & name,
-		 const struct stat & statInfo );
+	         DirTree           * tree,
+	         const QString     & name,
+	         const struct stat & statInfo );
 
 	/**
 	 * Constructor from the raw fields, used by the cache reader.
 	 **/
 	DirInfo( DirInfo       * parent,
-		 DirTree       * tree,
-		 const QString & name,
-		 mode_t          mode,
-		 FileSize        size,
-		 FileSize        allocatedSize,
-		 bool            fromCache,
-		 bool            withUidGidPerm,
-		 uid_t           uid,
-		 gid_t           gid,
-		 time_t          mtime );
+	         DirTree       * tree,
+	         const QString & name,
+	         mode_t          mode,
+	         FileSize        size,
+	         FileSize        allocatedSize,
+	         bool            fromCache,
+	         bool            withUidGidPerm,
+	         uid_t           uid,
+	         gid_t           gid,
+	         time_t          mtime );
 
 	/**
 	 * Constructor from the bare necessary fields to create a dummy tree.
@@ -108,10 +108,10 @@ namespace QDirStat
 	 * and by DirReadJob when stat fails.
 	 **/
 	DirInfo( DirInfo       * parent,
-		 DirTree       * tree,
-		 const QString & name,
-		 mode_t          mode,
-		 FileSize        size ):
+	         DirTree       * tree,
+	         const QString & name,
+	         mode_t          mode,
+	         FileSize        size ):
 	    DirInfo { parent, tree, name, mode, size, size, false, false, 0, 0, 0 }
 	{}
 
@@ -120,8 +120,8 @@ namespace QDirStat
 	 * used for pseudo-directories.
 	 **/
 	DirInfo( DirInfo       * parent,
-		 DirTree       * tree,
-		 const QString & name );
+	         DirTree       * tree,
+	         const QString & name );
 
 	/**
 	 * Constructor from just a tree.  Will have no parent, no name, and
@@ -322,6 +322,11 @@ namespace QDirStat
 	void moveAllFromAttic();
 
 	/**
+	 * Delete the attic if it is empty.
+	 **/
+	void deleteEmptyAttic();
+
+	/**
 	 * Returns the first child of this item or 0 if there is none.
 	 * Use the child's next() method to get the next child.
 	 **/
@@ -395,7 +400,7 @@ namespace QDirStat
 
 	/**
 	 * Notification of an aborted directory read job.  The aborted status
-	 * is propagated up to all the ancestors this DirInfo.
+	 * is propagated up to all the ancestors of this DirInfo.
 	 **/
 	void readJobAborted();
 
@@ -409,8 +414,8 @@ namespace QDirStat
 	void finalizeLocal();
 
 	/**
-	 * Recursively finalize all directories from here on -
-	 * call finalizeLocal() recursively.
+	 * Finalize all directories from here on - calls finalizeLocal()
+	 * recursively.
 	 **/
 	virtual void finalizeAll();
 
@@ -447,7 +452,8 @@ namespace QDirStat
 	 * Set the state of the directory reading process.
 	 * See readState() for details.
 	 **/
-	void setReadState( DirReadState newReadState );
+	void setReadState( DirReadState newReadState )
+	    { if ( _readState != DirAborted || newReadState != DirFinished ) _readState = newReadState; }
 
 	/**
 	 * Return whether the current sort data, if any, matches the given
@@ -492,7 +498,7 @@ namespace QDirStat
 	void unlock() { _locked = false; }
 
 	/**
-	 * Recursively delete all children, including the dot entry.
+	 * Recursively delete all children, including dot entries and attics.
 	 **/
 	void clear();
 
@@ -500,7 +506,7 @@ namespace QDirStat
 	 * Mark this directory as 'touched'. Item models can use this to keep
 	 * track of which items were ever used by a connected view to minimize
 	 * any update events: If no information about an item was ever
-	 * requested by the view, it is not necessary to tell it that that that
+	 * requested by the view, it is not necessary to tell it that that
 	 * data is now outdated.
 	 **/
 	void touch() { _touched = true; }
@@ -619,9 +625,9 @@ namespace QDirStat
 //	void deleteEmptyDotEntry();
 
 	/**
-	 * Delete the attic if it is empty.
+	 * Recalculate the summary totals if they are marked as dirty.
 	 **/
-	void deleteEmptyAttic();
+	 void ensureClean() { if ( _summaryDirty ) recalc(); }
 
 	/**
 	 * Recalculate the summary fields when they are dirty.  This may
@@ -667,7 +673,7 @@ namespace QDirStat
 	/**
 	 * Drop all cached information about children sorting for this object.
 	 **/
-	void dropSortCache();
+	void dropSortCache() { delete _sortInfo; _sortInfo = nullptr; }
 
 	/**
 	 * Count the children unconditionally and update _childCount.
@@ -697,12 +703,6 @@ namespace QDirStat
 	 * children.
 	 **/
 	void cleanupAttics();
-
-	/**
-	 * Notification of an aborted directory read job for 'dir'.  Provided
-	 * so that the aborted status can propagate up the tree.
-	 **/
-//	void readJobAborted( DirInfo * dir );
 
 
     private:
