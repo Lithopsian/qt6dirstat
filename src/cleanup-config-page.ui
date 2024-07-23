@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>CleanupConfigPage</class>
  <widget class="QWidget" name="CleanupConfigPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>571</width>
+    <height>454</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <widget class="QSplitter" name="splitter">
@@ -201,7 +209,7 @@
             <item>
              <widget class="QKeySequenceEdit" name="keySequenceEdit">
               <property name="toolTip">
-               <string>Configure a key combination to trigger this Cleanup - press ctrl or shift to clear the hotkey</string>
+               <string>Configure a key combination to trigger this Cleanup</string>
               </property>
               <property name="styleSheet">
                <string notr="true">#qt_keysequenceedit_lineedit { margin-left: auto; }</string>
@@ -217,6 +225,12 @@
             </property>
             <item>
              <widget class="QLineEdit" name="commandLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
               <property name="toolTip">
                <string>Enter the command to be executed here.
 Each command will be executed with a shell.
@@ -266,6 +280,14 @@ will be executed once for each selected item</string>
              <string/>
             </property>
             <widget class="QWidget" name="optionsPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>241</width>
+               <height>128</height>
+              </rect>
+             </property>
              <property name="toolTip">
               <string>Recurse, confirmation, and refresh policy options</string>
              </property>
@@ -367,6 +389,14 @@ will be executed once for each selected item</string>
              </layout>
             </widget>
             <widget class="QWidget" name="worksForPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>241</width>
+               <height>128</height>
+              </rect>
+             </property>
              <property name="toolTip">
               <string>Works for directories, files, pseudo-entries</string>
              </property>
@@ -424,6 +454,14 @@ will be executed once for each selected item</string>
              </layout>
             </widget>
             <widget class="QWidget" name="outputWindowPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>241</width>
+               <height>128</height>
+              </rect>
+             </property>
              <property name="toolTip">
               <string>Output window display policy</string>
              </property>
@@ -549,6 +587,14 @@ will be executed once for each selected item</string>
              </layout>
             </widget>
             <widget class="QWidget" name="shellPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>241</width>
+               <height>128</height>
+              </rect>
+             </property>
              <property name="toolTip">
               <string>Execution shell for commands</string>
              </property>
