@@ -35,7 +35,7 @@ namespace QDirStat
         /**
          * Constructor.
          **/
-        History();
+        History() { _items.reserve( HISTORY_MAX ); }
 
         /**
          * Replaces the entire history list.

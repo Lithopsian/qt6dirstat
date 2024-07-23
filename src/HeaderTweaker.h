@@ -242,9 +242,8 @@ namespace QDirStat
     /**
      * Helper class to store information about different column layouts.
      **/
-    class ColumnLayout
+    struct ColumnLayout
     {
-    public:
 	ColumnLayout( const QString & name ):
 	    name { name }
 	{}
@@ -262,7 +261,7 @@ namespace QDirStat
 	 **/
 	static DataColumnList defaultColumns( const QString & layoutName );
 
-    };	// class ColumnLayout
+    };	// struct ColumnLayout
 
 }	// namespace QDirStat
 
