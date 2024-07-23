@@ -50,7 +50,7 @@ void GeneralConfigPage::setup()
     _ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
 
     // add word-joiner character to stop unwanted line breaks
-    const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠"_L1 );
+    const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠" );
     _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) + joinedFileName );
 
 }
