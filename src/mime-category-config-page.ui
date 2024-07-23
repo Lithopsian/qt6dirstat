@@ -9,7 +9,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="handleWidth">
-      <number>8</number>
+      <number>10</number>
      </property>
      <property name="childrenCollapsible">
       <bool>false</bool>

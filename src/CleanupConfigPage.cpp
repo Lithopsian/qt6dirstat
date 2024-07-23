@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QMouseEvent>
+
 #include "CleanupConfigPage.h"
 #include "ActionManager.h"
 #include "Cleanup.h"
@@ -42,9 +44,12 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
 
     enableEditWidgets( false );
     fillListWidget();
-    _ui->toolBox->setCurrentIndex( 0 );
     enableWidgets();
     updateActions();
+
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
+    _ui->keySequenceEdit->setClearButtonEnabled();
+#endif
 
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
 	     this,                            &CleanupConfigPage::enableWidgets );
@@ -156,6 +161,8 @@ void CleanupConfigPage::save( void * value )
     cleanup->setTitle  ( _ui->titleLineEdit->text()       );
     cleanup->setCommand( _ui->commandLineEdit->text()     );
 
+    cleanup->setShortcut( _ui->keySequenceEdit->keySequence().toString() );
+
     if ( _ui->shellComboBox->currentText().startsWith( "$SHELL"_L1 ) )
 	cleanup->setShell( "" );
     else
@@ -205,6 +212,7 @@ void CleanupConfigPage::load( void * value )
     _ui->activeGroupBox->setChecked( cleanup->isActive() );
     _ui->titleLineEdit->setText( cleanup->title() );
     _ui->icon->setPixmap( cleanup->iconName() );
+    _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
     _ui->commandLineEdit->setText( cleanup->command() );
 
     if ( cleanup->shell().isEmpty() )
