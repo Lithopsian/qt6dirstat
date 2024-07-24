@@ -116,9 +116,15 @@ p, li { white-space: pre-wrap; }
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
-       <property name="text">
-        <string>&amp;Close</string>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
      </item>
@@ -190,7 +196,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>zoomInButton</tabstop>
   <tabstop>zoomOutButton</tabstop>
   <tabstop>resetZoomButton</tabstop>
-  <tabstop>closeButton</tabstop>
  </tabstops>
  <resources>
   <include location="icons.qrc"/>
@@ -261,13 +266,13 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>closeButton</sender>
-   <signal>clicked()</signal>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
    <receiver>OutputWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>609</x>
+     <x>514</x>
      <y>377</y>
     </hint>
     <hint type="destinationlabel">

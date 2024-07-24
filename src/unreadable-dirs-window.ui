@@ -72,9 +72,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
-       <property name="text">
-        <string>&amp;Close</string>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
      </item>
@@ -87,14 +87,14 @@
  </resources>
  <connections>
   <connection>
-   <sender>closeButton</sender>
-   <signal>clicked()</signal>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
    <receiver>UnreadableDirsWindow</receiver>
-   <slot>reject()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>349</x>
-     <y>277</y>
+     <x>545</x>
+     <y>279</y>
     </hint>
     <hint type="destinationlabel">
      <x>199</x>

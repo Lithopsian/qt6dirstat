@@ -74,9 +74,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
-       <property name="text">
-        <string>&amp;Close</string>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
      </item>
@@ -89,18 +89,18 @@
  </resources>
  <connections>
   <connection>
-   <sender>closeButton</sender>
-   <signal>clicked()</signal>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
    <receiver>LocateFilesWindow</receiver>
-   <slot>deleteLater()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>349</x>
-     <y>277</y>
+     <x>564</x>
+     <y>300</y>
     </hint>
     <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
+     <x>361</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
