@@ -31,22 +31,22 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
 
     setListWidget( _ui->listWidget );
 
-    setMoveUpButton      ( _ui->moveUpButton       );
-    setMoveDownButton    ( _ui->moveDownButton     );
-    setMoveToTopButton   ( _ui->moveToTopButton    );
-    setMoveToBottomButton( _ui->moveToBottomButton );
-    setAddButton         ( _ui->addButton          );
-    setRemoveButton      ( _ui->removeButton       );
+    setToTopButton   ( _ui->toTopButton    );
+    setMoveUpButton  ( _ui->moveUpButton   );
+    setAddButton     ( _ui->addButton      );
+    setRemoveButton  ( _ui->removeButton   );
+    setMoveDownButton( _ui->moveDownButton );
+    setToBottomButton( _ui->toBottomButton );
 
     enableEditRuleWidgets( false );
     fillListWidget();
     updateActions();
 
     connect( _ui->patternLineEdit, &QLineEdit::textChanged,
-	     this,                 &ExcludeRulesConfigPage::patternChanged );
+             this,                 &ExcludeRulesConfigPage::patternChanged );
 
     connect( parent,               &ConfigDialog::applyChanges,
-	     this,                 &ExcludeRulesConfigPage::applyChanges );
+             this,                 &ExcludeRulesConfigPage::applyChanges );
 }
 
 
@@ -73,12 +73,12 @@ void ExcludeRulesConfigPage::applyChanges()
     // Check if anything changed before writing, just for fun
     DirTree * tree = app()->dirTree();
     const ExcludeRules * excludeRules = tree->excludeRules();
-    for ( ExcludeRuleListIterator itOld = excludeRules->cbegin(), itNew = rules.cbegin();
+    for ( auto itOld = excludeRules->cbegin(), itNew = rules.cbegin();
           itNew != rules.cend() || itOld != excludeRules->cend();
 	  ++itNew, ++itOld )
     {
 	// If we ran past the end of either list, or the rules don't match ...
-	if ( itNew == rules.cend() || itOld == excludeRules->cend() || *itOld != *itNew )
+	if ( itNew == rules.cend() || itOld == excludeRules->cend() || **itOld != **itNew )
 	{
 	    excludeRules->writeSettings( rules );
 	    tree->setExcludeRules();
@@ -109,12 +109,6 @@ void ExcludeRulesConfigPage::patternChanged( const QString & newPattern )
 
     if ( currentItem )
 	currentItem->setText( newPattern );
-}
-
-
-void ExcludeRulesConfigPage::enableEditRuleWidgets( bool enable )
-{
-    _ui->rightColumnWidget->setEnabled( enable );
 }
 
 

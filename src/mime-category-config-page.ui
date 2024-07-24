@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MimeCategoryConfigPage</class>
  <widget class="QWidget" name="MimeCategoryConfigPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>550</width>
+    <height>488</height>
+   </rect>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_6">
    <item>
     <widget class="QSplitter" name="horizontalSplitter">
@@ -10,9 +18,6 @@
      </property>
      <property name="handleWidth">
       <number>10</number>
-     </property>
-     <property name="childrenCollapsible">
-      <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget1">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -172,9 +177,6 @@
           </property>
           <property name="handleWidth">
            <number>8</number>
-          </property>
-          <property name="childrenCollapsible">
-           <bool>false</bool>
           </property>
           <widget class="QWidget" name="patternsTopWidget">
            <layout class="QVBoxLayout" name="patternsTopLayout">
@@ -530,32 +532,12 @@
     </widget>
    </item>
   </layout>
-  <action name="actionColour_previews">
+  <action name="actionColourPreviews">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Colour previews</string>
-   </property>
-  </action>
-  <action name="actionAdd_new_category">
-   <property name="icon">
-    <iconset>
-     <disabledoff>:/icons/add.png</disabledoff>
-    </iconset>
-   </property>
-   <property name="text">
-    <string>Create a new category</string>
-   </property>
-  </action>
-  <action name="actionRemove_category">
-   <property name="icon">
-    <iconset>
-     <normalon>:/icons/remove.png</normalon>
-    </iconset>
-   </property>
-   <property name="text">
-    <string>Remove category</string>
    </property>
   </action>
  </widget>

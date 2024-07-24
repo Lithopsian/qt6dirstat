@@ -120,16 +120,6 @@ namespace QDirStat
 	 **/
 	void colourPreviewsTriggered( bool );
 
-	/**
-	 * Process the action to add a new category.
-	 **/
-	void addTriggered( bool checked );
-
-	/**
-	 * Process the action to remove a category.
-	 **/
-	void removeTriggered( bool checked );
-
 
     protected:
 
@@ -203,7 +193,8 @@ namespace QDirStat
 	 *
 	 * Implemented from ListEditor.
 	 **/
-	void updateActions() override;
+	void updateActions() override
+	    { setActions( listWidget()->currentItem() ); }
 
 	/**
 	 * Set the remove button, name, and patterns enabled or disabled,
@@ -226,6 +217,8 @@ namespace QDirStat
 
 	/**
 	 * Handle a right click.
+	 *
+	 * Reimplemented from QWidget.
 	 **/
 	void contextMenuEvent( QContextMenuEvent * event ) override;
 

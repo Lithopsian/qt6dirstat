@@ -22,13 +22,12 @@
 #include "FormatUtil.h"
 
 
-using namespace QDirStat;
-
-
 // This is a mess that became necessary because Qt's moc cannot handle template
 // classes. Yes, this is ugly.
 #define CATEGORY_CAST(VOID_PTR) (static_cast<MimeCategory *>(VOID_PTR))
 
+
+using namespace QDirStat;
 
 
 MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
@@ -46,49 +45,43 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     setup();
 
     connect( _ui->nameLineEdit,             &QLineEdit::textChanged,
-	     this,                          &MimeCategoryConfigPage::nameChanged );
+             this,                          &MimeCategoryConfigPage::nameChanged );
 
     connect( _ui->categoryColorEdit,        &QLineEdit::textChanged,
-	     this,                          &MimeCategoryConfigPage::categoryColorChanged );
+             this,                          &MimeCategoryConfigPage::categoryColorChanged );
 
     connect( _ui->categoryColorButton,      &QPushButton::clicked,
-	     this,                          &MimeCategoryConfigPage::pickCategoryColor );
+             this,                          &MimeCategoryConfigPage::pickCategoryColor );
 
     connect( _ui->tileColorEdit,            &QLineEdit::textChanged,
-	     this,                          &MimeCategoryConfigPage::tileColorChanged );
+             this,                          &MimeCategoryConfigPage::tileColorChanged );
 
     connect( _ui->tileColorButton,          &QPushButton::clicked,
-	     this,                          &MimeCategoryConfigPage::pickTileColor );
+             this,                          &MimeCategoryConfigPage::pickTileColor );
 
     connect( _ui->squarifiedCheckBox,       &QCheckBox::stateChanged,
-	     this,                          &MimeCategoryConfigPage::configChanged );
+             this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->cushionShadingCheckBox,   &QCheckBox::stateChanged,
-	     this,                          &MimeCategoryConfigPage::cushionShadingChanged );
+             this,                          &MimeCategoryConfigPage::cushionShadingChanged );
 
     connect( _ui->cushionHeightSpinBox,     QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
-	     this,                          &MimeCategoryConfigPage::configChanged );
+             this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->heightScaleFactorSpinBox, QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
-	     this,                          &MimeCategoryConfigPage::configChanged );
+             this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->minTileSizeSpinBox,       QOverload<int>::of( &QSpinBox::valueChanged ),
-	     this,                          &MimeCategoryConfigPage::configChanged );
+             this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->horizontalSplitter,       &QSplitter::splitterMoved,
-	     this,                          &MimeCategoryConfigPage::splitterMoved );
+             this,                          &MimeCategoryConfigPage::splitterMoved );
 
-    connect( _ui->actionColour_previews,    &QAction::triggered,
-	     this,                          &MimeCategoryConfigPage::colourPreviewsTriggered );
-
-    connect( _ui->actionAdd_new_category,   &QAction::triggered,
-	     this,                          &MimeCategoryConfigPage::addTriggered );
-
-    connect( _ui->actionRemove_category,    &QAction::triggered,
-	     this,                          &MimeCategoryConfigPage::removeTriggered );
+    connect( _ui->actionColourPreviews,     &QAction::triggered,
+             this,                          &MimeCategoryConfigPage::colourPreviewsTriggered );
 
     connect( parent,                        &ConfigDialog::applyChanges,
-	     this,                          &MimeCategoryConfigPage::applyChanges );
+             this,                          &MimeCategoryConfigPage::applyChanges );
 }
 
 
@@ -135,11 +128,11 @@ void MimeCategoryConfigPage::applyChanges()
 
     // Save the treemap settings first, there might not be anything else to do
     app()->mainWindow()->treemapView()->configChanged( QColor( _ui->tileColorEdit->text() ),
-						       _ui->squarifiedCheckBox->isChecked(),
-						       _ui->cushionShadingCheckBox->isChecked(),
-						       _ui->cushionHeightSpinBox->value(),
-						       _ui->heightScaleFactorSpinBox->value(),
-						       _ui->minTileSizeSpinBox->value() );
+                                                       _ui->squarifiedCheckBox->isChecked(),
+                                                       _ui->cushionShadingCheckBox->isChecked(),
+                                                       _ui->cushionHeightSpinBox->value(),
+                                                       _ui->heightScaleFactorSpinBox->value(),
+                                                       _ui->minTileSizeSpinBox->value() );
 
     // The patterns for the current category might have been modified and not yet saved to the category
     save( value( listWidget()->currentItem() ) );
@@ -172,14 +165,6 @@ void MimeCategoryConfigPage::fillListWidget()
 
     listWidget()->sortItems();
     listWidget()->setCurrentRow( 0 );
-}
-
-
-void MimeCategoryConfigPage::updateActions()
-{
-//    ListEditor::updateActions();
-
-    setActions( listWidget()->currentItem() );
 }
 
 
@@ -256,9 +241,10 @@ void MimeCategoryConfigPage::setActions( const QListWidgetItem * currentItem )
     _ui->patternsBottomWidget->setEnabled( currentItem && !isSymlink );
 
     // Symlinks and executables can't be removed
-    _ui->actionRemove_category->setEnabled( currentItem && !isSymlink && !isExecutable );
-    enableButton( _ui->removeButton, currentItem && !isSymlink && !isExecutable );
-    enableButton( _ui->categoryColorButton, currentItem );
+    removeAction()->setEnabled( currentItem && !isSymlink && !isExecutable );
+
+    // Any category can have a colour
+    _ui->categoryColorButton->setEnabled( currentItem );
 }
 
 
@@ -310,8 +296,8 @@ void MimeCategoryConfigPage::pickCategoryColor()
     {
 	const MimeCategory * category = CATEGORY_CAST( value( currentItem ) );
 	const QColor color = QColorDialog::getColor( category->color(),
-						     window(), // parent
-						     tr( "Pick a category color" ) );
+                                                     window(), // parent
+                                                     tr( "Pick a category color" ) );
 
 	if ( color.isValid() )
 	    _ui->categoryColorEdit->setText( color.name() );
@@ -329,8 +315,8 @@ void MimeCategoryConfigPage::tileColorChanged( const QString & newColor )
 void MimeCategoryConfigPage::pickTileColor()
 {
     const QColor color = QColorDialog::getColor( color,
-						 window(), // parent
-						 tr( "Pick a fixed tile color" ) );
+                                                 window(), // parent
+                                                 tr( "Pick a fixed tile color" ) );
 
     if ( !color.isValid() )
 	return;
@@ -356,10 +342,10 @@ void MimeCategoryConfigPage::configChanged()
     const QColor color( _ui->tileColorEdit->text() );
     _ui->treemapView->configChanged( color.isValid() ? color : QColor( _ui->categoryColorEdit->text() ),
                                      _ui->squarifiedCheckBox->isChecked(),
-				     _ui->cushionShadingCheckBox->isChecked(),
-				     _ui->cushionHeightSpinBox->value(),
-				     _ui->heightScaleFactorSpinBox->value(),
-				     _ui->minTileSizeSpinBox->value() );
+                                     _ui->cushionShadingCheckBox->isChecked(),
+                                     _ui->cushionHeightSpinBox->value(),
+                                     _ui->heightScaleFactorSpinBox->value(),
+                                     _ui->minTileSizeSpinBox->value() );
 }
 
 
@@ -381,7 +367,7 @@ void MimeCategoryConfigPage::save( void * value )
 
     // If they're different to the current patterns on the category, update the category
     if ( caseSensitivePatterns != category->humanReadablePatternList( Qt::CaseSensitive ) ||
-	 caseInsensitivePatterns != category->humanReadablePatternList( Qt::CaseInsensitive ) )
+         caseInsensitivePatterns != category->humanReadablePatternList( Qt::CaseInsensitive ) )
     {
 	category->clear();
 	category->addPatterns( caseSensitivePatterns, Qt::CaseSensitive );
@@ -536,13 +522,13 @@ void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
 {
     //logDebug() << Qt::endl;
 
-    _ui->actionColour_previews->setChecked( app()->mainWindow()->treemapView()->colourPreviews() );
+    _ui->actionColourPreviews->setChecked( app()->mainWindow()->treemapView()->colourPreviews() );
 
     QMenu menu;
-    menu.addAction( _ui->actionAdd_new_category );
-    menu.addAction( _ui->actionRemove_category );
+    menu.addAction( addAction() );
+    menu.addAction( removeAction() );
     menu.addSeparator();
-    menu.addAction( _ui->actionColour_previews );
+    menu.addAction( _ui->actionColourPreviews );
 
     menu.exec( event->globalPos() );
 }
@@ -553,20 +539,6 @@ void MimeCategoryConfigPage::colourPreviewsTriggered( bool checked )
     // Context menu colour previews toggle action
     app()->mainWindow()->treemapView()->setColourPreviews( checked );
     adjustShadingWidth();
-}
-
-
-void MimeCategoryConfigPage::addTriggered( bool )
-{
-    // Context menu add action
-    ListEditor::add();
-}
-
-
-void MimeCategoryConfigPage::removeTriggered( bool )
-{
-    // Context menu remove action
-    ListEditor::remove();
 }
 
 

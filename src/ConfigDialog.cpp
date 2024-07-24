@@ -14,6 +14,7 @@
 #include "ExcludeRulesConfigPage.h"
 #include "GeneralConfigPage.h"
 #include "MimeCategoryConfigPage.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;
@@ -26,14 +27,27 @@ ConfigDialog::ConfigDialog( QWidget * parent ):
     setAttribute(Qt::WA_DeleteOnClose);
 
     _ui->setupUi( this );
+    Settings::readWindowSettings( this, "ConfigDialog" );
 
     _ui->pagesTabWidget->addTab( new GeneralConfigPage( this ), tr( "General" ) );
     _ui->pagesTabWidget->addTab( new MimeCategoryConfigPage( this ), tr( "MIME Categories" ) );
     _ui->pagesTabWidget->addTab( new CleanupConfigPage( this ), tr( "Cleanup Actions" ) );
     _ui->pagesTabWidget->addTab( new ExcludeRulesConfigPage( this ), tr( "Exclude Rules" ) );
 
-    connect( _ui->applyButton, &QPushButton::clicked,
-	     this,             &ConfigDialog::applyChanges );
+    connect( _ui->buttonBox->button( QDialogButtonBox::Ok ),     &QPushButton::clicked,
+             this,                                               &ConfigDialog::accept );
+
+    connect( _ui->buttonBox->button( QDialogButtonBox::Apply ),  &QPushButton::clicked,
+             this,                                               &ConfigDialog::applyChanges );
+
+    connect( _ui->buttonBox->button( QDialogButtonBox::Cancel ), &QPushButton::clicked,
+             this,                                               &ConfigDialog::reject );
+}
+
+
+ConfigDialog::~ConfigDialog()
+{
+    Settings::writeWindowSettings( this, "ConfigDialog" );
 }
 
 

@@ -35,12 +35,12 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
 
     setListWidget( _ui->listWidget );
 
-    setMoveUpButton      ( _ui->moveUpButton       );
-    setMoveDownButton    ( _ui->moveDownButton     );
-    setMoveToTopButton   ( _ui->moveToTopButton    );
-    setMoveToBottomButton( _ui->moveToBottomButton );
-    setAddButton         ( _ui->addButton          );
-    setRemoveButton      ( _ui->removeButton       );
+    setToTopButton   ( _ui->toTopButton    );
+    setMoveUpButton  ( _ui->moveUpButton       );
+    setAddButton     ( _ui->addButton          );
+    setRemoveButton  ( _ui->removeButton       );
+    setMoveDownButton( _ui->moveDownButton     );
+    setToBottomButton( _ui->toBottomButton );
 
     enableEditWidgets( false );
     fillListWidget();
@@ -52,16 +52,16 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
 #endif
 
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
-	     this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
-	     this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,
-	     this,                            &CleanupConfigPage::titleChanged );
+             this,                            &CleanupConfigPage::titleChanged );
 
     connect( parent,                          &ConfigDialog::applyChanges,
-	     this,                            &CleanupConfigPage::applyChanges );
+             this,                            &CleanupConfigPage::applyChanges );
 }
 
 
@@ -87,12 +87,12 @@ void CleanupConfigPage::applyChanges()
 
     // Check if anything changed before writing, just for fun
     CleanupCollection * collection = ActionManager::cleanupCollection();
-    for ( int iOld = 0, iNew = 0; iNew < cleanups.size() || iOld < collection->size(); ++iOld, ++iNew )
+    for ( auto itOld = collection->cbegin(), itNew = cleanups.cbegin();
+          itOld != collection->cend() || itNew != cleanups.cend();
+	  ++itOld, ++itNew )
     {
 	// If we ran past the end of either list, or the cleanups don't match ...
-	if ( iNew == cleanups.size() ||
-	     iOld == collection->size() ||
-	     cleanups.at( iNew ) != collection->at( iOld ) )
+	if ( itNew == cleanups.cend() || itOld == collection->cend() || **itOld != **itNew )
 	{
 	    collection->writeSettings( cleanups );
 	    return;
@@ -188,12 +188,6 @@ void CleanupConfigPage::save( void * value )
 }
 
 
-void CleanupConfigPage::enableEditWidgets( bool enable )
-{
-    _ui->activeGroupBox->setEnabled( enable );
-}
-
-
 void CleanupConfigPage::load( void * value )
 {
     if ( updatesLocked() )
@@ -269,4 +263,11 @@ QString CleanupConfigPage::valueText( void * value )
     CHECK_PTR( cleanup );
 
     return cleanup->cleanTitle();
+}
+
+
+void CleanupConfigPage::add()
+{
+    ListEditor::add();
+    _ui->titleLineEdit->setFocus();
 }
