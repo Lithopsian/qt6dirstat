@@ -289,7 +289,7 @@ namespace QDirStat
 	 * Comparison operator for two Cleanups for the purposes of
 	 * the config dialog.
 	 **/
-	bool operator!=( const Cleanup * other ) const;
+	bool operator!=( const Cleanup & other ) const;
 
 	/**
 	 * Setters (see the corresponding getter for documentation), mainly
