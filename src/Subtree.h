@@ -55,21 +55,19 @@ namespace QDirStat
         Subtree( FileInfo * fileInfo ) { set( fileInfo ); }
 
         /**
-         * Copy constructor.
-         *
-         * clone() doesn't work properly, and probably isn't necessary given
-         * the existing data members.  Luckily, no-one is using the
-         * copy constructors.  Explicitly delete them to draw attention if
-         * any code accidentally or deliberately tries to use them.
+         * Destructor.  Just for the rule of three.
          **/
-        Subtree( const Subtree & other ) = delete;
-//            { clone( other ); }
+        ~Subtree() = default;
 
         /**
-         * Normal copy assignment operator.
+         * Copy constructor and copy assignment.
+         *
+         * Explicitly delete these to draw attention if any code accidentally
+         * or deliberately tries to use them, because they would need to
+         * perform deep copies.
          **/
+        Subtree( const Subtree & other ) = delete;
         Subtree & operator=( const Subtree & other ) = delete;
-//            { clone( other ); return *this; }
 
         /**
          * Assignment operator for a FileInfo pointer. This is an alias for
@@ -185,17 +183,6 @@ namespace QDirStat
          **/
         FileInfo * locate() const;
 
-        /**
-         * Clone subtree 'other' to this one. This is what both the assignment
-         * operator (for Subtrees) and the copy constructor do internally.
-         *
-         * All data members have their own copy constructors, so there isn't a
-         * need for a separate clone/copy function.  It has been fixed to
-         * reference all data members, but not tested as there are no uses of
-         * it in qdirstat.
-         **/
-//        void clone( const Subtree & other );
-
 
     private:
 
@@ -203,7 +190,7 @@ namespace QDirStat
         // Data members
         //
 
-        DirTree * _tree;
+        DirTree * _tree { nullptr };
         QString   _url;
         QString   _parentUrl;
 

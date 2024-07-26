@@ -94,8 +94,9 @@ void SizeColDelegate::paint( QPainter                   * painter,
 	const QPalette & palette = option.palette;
 	const bool disabled      = textBrush == palette.brush( QPalette::Disabled, QPalette::WindowText );
 	const bool selected      = option.state & QStyle::State_Selected;
-	painter->setPen( palette.color( disabled ? QPalette::Disabled : QPalette::Normal,
-					selected ? QPalette::HighlightedText : QPalette::WindowText ) );
+	const auto group         = disabled ? QPalette::Disabled : QPalette::Normal;
+	const auto role          = selected ? QPalette::HighlightedText : QPalette::WindowText;
+	painter->setPen( palette.color( group, role ) );
 
 	// Since we align right, we need to move the rectangle to the left
 	// to reserve some space for the allocated size and any links text.
@@ -120,10 +121,10 @@ QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
     const QStringList data = index.data( SizeTextRole ).toStringList();
     if ( data.size() == 2 || data.size() == 3 )
     {
-	const QString text = data.join( QLatin1String() );
-	const QFont font   = index.data( Qt::FontRole ).value<QFont>();
-	const int width    = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
-	const int height   = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
+	const QString text   = data.join( QLatin1String() );
+	const QFont   font   = index.data( Qt::FontRole ).value<QFont>();
+	const int     width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
+	const int     height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
 #if 0
 	logDebug() << "size hint for \"" << text << "\": " << width << ", " << height << Qt::endl;
 #endif

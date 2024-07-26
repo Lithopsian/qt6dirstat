@@ -199,7 +199,7 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 
     QMenu menu;
 
-    const QStringList actions { "actionCopyPath", "actionMoveToTrash", "---" };
+    const QStringList actions { "actionCopyPath", "actionMoveToTrash", ActionManager::separator() };
     ActionManager::addEnabledActions( &menu, actions );
 
     ActionManager::addEnabledCleanups( &menu );

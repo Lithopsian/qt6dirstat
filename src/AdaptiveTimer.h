@@ -56,23 +56,13 @@ namespace QDirStat
          *
          * An empty cooldowns list effectively means only the first stage will ever
          * be used.  This will typically deliver the requests with a zero delay.  An
-         * empty delays list means that a fixed default delay will be used, but for
-         * this the alternate constructor should be used.
+         * empty delays list means that a fixed default delay of 0 will be used.
          *
          * The delays will typically be longer for higher stages, while the cooldowns
          * will be shorter so that the longer delays are only used for repidly-repeated
          * requests while shorter delays will be used for less frequent requests.
          **/
         AdaptiveTimer( QObject * parent, Delays delays, Cooldowns cooldowns );
-
-        /**
-         * Constructor with a single default delay.  There are no escalation stages
-         * and the delay is a fixed length in milliseconds.  Nobody using this at the
-         * moment (HistogramView was using it, and previously DelayedRebuilder, but
-         * only as a hack workaround for trying to set the histogram geometry before
-         * the window was visible).
-         **/
-//        AdaptiveTimer( QObject * parent, int defaultDelay = 0 );
 
         /**
          * Return the current delay stage.
@@ -131,7 +121,6 @@ namespace QDirStat
         int           _delayStage       { 0 };
         Delays        _delays;
         Cooldowns     _cooldowns;
-        int           _defaultDelay     { 0 };
 
         QTimer        _deliveryTimer;
         QTimer        _cooldownTimer;

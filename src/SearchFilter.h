@@ -16,23 +16,23 @@
 
 namespace QDirStat
 {
+    enum FilterMode
+    {
+        Auto,       // Guess from pattern (see below)
+        Contains,   // Fixed string
+        StartsWith, // Fixed string
+        ExactMatch, // Fixed string
+        Wildcard,
+        RegExp,
+        SelectAll   // Pattern is irrelevant
+    };
+
     /**
      * Base class for search filters like PkgFilter or FileSearchFilter.
      **/
     class SearchFilter
     {
     public:
-
-        enum FilterMode
-        {
-            Auto,       // Guess from pattern (see below)
-            Contains,   // Fixed string
-            StartsWith, // Fixed string
-            ExactMatch, // Fixed string
-            Wildcard,
-            RegExp,
-            SelectAll   // Pattern is irrelevant
-        };
 
         /**
          * Constructor: Create a search filter with the specified pattern and
@@ -79,12 +79,6 @@ namespace QDirStat
         bool isCaseSensitive() const { return _caseSensitive; }
 
         /**
-         * Set the match to case sensitive ('true') or case insensitive
-         * ('false'). The default is case insensitive.
-         **/
-//        void setCaseSensitive( bool sensitive = true );
-
-        /**
          * Convert a filter mode to a string.  Only used for logging stream
          * operators in the various classes derived from this one.
          **/
@@ -103,14 +97,6 @@ namespace QDirStat
 
             return QString( "<Unknown FilterMode %1" ).arg( filterMode );
         }
-
-
-    protected:
-
-        /**
-         * Guess the filter mode from the pattern if "Auto" was selected.
-         **/
-        void guessFilterMode();
 
 
     private:
@@ -134,7 +120,7 @@ namespace QDirStat
                << "\" mode \""
                << SearchFilter::toString( filter.filterMode() )
                << "\" "
-               <<( filter.isCaseSensitive()? " case sensitive>" : ">" );
+               << ( filter.isCaseSensitive()? " case sensitive>" : ">" );
 
         return stream;
     }

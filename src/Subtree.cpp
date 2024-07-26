@@ -82,18 +82,3 @@ FileInfo * Subtree::locate() const
 
     return _tree->locate( _url );
 }
-
-/*
-void Subtree::clone( const Subtree & other )
-{
-    if ( &other == this )
-	return;
-
-    _tree = other.tree();
-    _url  = other.url();
-    _parentUrl  = other.parentUrl();
-
-    _useRootFallback   = other.useRootFallback();
-    _useParentFallback = other.useParentFallback();
-}
-*/

@@ -15,6 +15,44 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    FilterMode guessFilterMode( QString & pattern, FilterMode defaultFilterMode )
+    {
+        if ( pattern.isEmpty() )
+            return SelectAll;
+
+        if ( pattern.startsWith( u'=' ) )
+        {
+            pattern.remove( 0, 1 );
+            return ExactMatch;
+        }
+
+        if ( pattern.startsWith( u'*' ) || pattern.contains( "*.*"_L1 ) )
+            return Wildcard;
+
+        if ( pattern.contains( ".*"_L1 ) ||
+             pattern.contains( u'^'    ) ||
+             pattern.contains( u'$'    ) ||
+             pattern.contains( u'('    ) ||
+             pattern.contains( u'|'    ) ||
+             pattern.contains( u'['    ) )
+        {
+            return RegExp;
+        }
+
+        if ( pattern.contains( u'*' ) || pattern.contains( u'?' ) )
+            return Wildcard;
+
+        if ( defaultFilterMode == Auto )
+            return StartsWith;
+
+        return defaultFilterMode;
+    }
+
+}
+
+
 SearchFilter::SearchFilter( const QString & pattern,
                             FilterMode      filterMode,
                             FilterMode      defaultFilterMode,
@@ -25,7 +63,12 @@ SearchFilter::SearchFilter( const QString & pattern,
     _caseSensitive { caseSensitive }
 {
     if ( _filterMode == Auto )
-        guessFilterMode();
+    {
+        _filterMode = guessFilterMode( _pattern, _defaultFilterMode );
+        #if 0
+            logDebug() << "using filter mode " << toString( _filterMode ) << " from \"" << _pattern << "\"" << Qt::endl;
+        #endif
+    }
 
     QRegularExpression::PatternOptions patternOptions;
     if ( !caseSensitive )
@@ -39,51 +82,6 @@ SearchFilter::SearchFilter( const QString & pattern,
     // Make an attempt to recover from guessing an invalid regexp
     if ( filterMode == Auto && _filterMode == RegExp && !_regexp.isValid() )
         _filterMode = StartsWith;
-}
-
-
-void SearchFilter::guessFilterMode()
-{
-    if ( _pattern.isEmpty() )
-    {
-        _filterMode = SelectAll;
-    }
-    else if ( _pattern.startsWith( u'=' ) )
-    {
-        _filterMode = ExactMatch;
-        _pattern.remove( 0, 1 );
-    }
-    else if ( _pattern.startsWith( u'*'   ) ||
-              _pattern.contains( "*.*"_L1 ) )
-    {
-        _filterMode = Wildcard;
-    }
-    else if ( _pattern.contains( ".*"_L1 ) ||
-              _pattern.contains( u'^'    ) ||
-              _pattern.contains( u'$'    ) ||
-              _pattern.contains( u'('    ) ||
-              _pattern.contains( u'|'    ) ||
-              _pattern.contains( u'['    ) )
-    {
-        _filterMode = RegExp;
-    }
-    else if ( _pattern.contains( u'*' ) ||
-              _pattern.contains( u'?' ) )
-    {
-        _filterMode = Wildcard;
-    }
-    else if ( _defaultFilterMode == Auto )
-    {
-        _filterMode = StartsWith;
-    }
-    else
-    {
-        _filterMode = _defaultFilterMode;
-    }
-
-#if 0
-    logDebug() << "using filter mode " << toString( _filterMode ) << " from \"" << _pattern << "\"" << Qt::endl;
-#endif
 }
 
 

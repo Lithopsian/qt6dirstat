@@ -10,7 +10,7 @@
 #ifndef Version_h
 #define Version_h
 
-#define QDIRSTAT_VERSION "0.3"_L1
+#define QDIRSTAT_VERSION "0.3"
 #define MENUBAR_VERSION "V" QDIRSTAT_VERSION
 
 #define RELEASE_VERSION  "0.3"

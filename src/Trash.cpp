@@ -309,5 +309,5 @@ void TrashDir::move( const QString & path,
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
     const bool success = file.rename( targetPath );
     if ( !success )
-	THROW( FileException( path, QString( "Could not move %1 to %2" ).arg( path ).arg( targetPath ) ) );
+	THROW( FileException( path, QString( "Could not move %1 to %2" ).arg( path, targetPath ) ) );
 }
