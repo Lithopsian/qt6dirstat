@@ -14,7 +14,6 @@
 #include "ConfigDialog.h"
 #include "DirTree.h"
 #include "DirInfo.h"
-#include "Exception.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
 #include "MimeCategory.h"
@@ -75,7 +74,7 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
              this,                          &MimeCategoryConfigPage::configChanged );
 
     connect( _ui->horizontalSplitter,       &QSplitter::splitterMoved,
-             this,                          &MimeCategoryConfigPage::splitterMoved );
+             this,                          &MimeCategoryConfigPage::adjustShadingWidth );
 
     connect( _ui->actionColourPreviews,     &QAction::triggered,
              this,                          &MimeCategoryConfigPage::colourPreviewsTriggered );
@@ -153,7 +152,6 @@ void MimeCategoryConfigPage::applyChanges()
 
 void MimeCategoryConfigPage::fillListWidget()
 {
-//    listWidget()->clear(); // should always be empty, but future-proof it
     //logDebug() << listWidget()->count() << ", " << currentRow << Qt::endl;
 
     for ( const MimeCategory * mimeCategory : MimeCategorizer::instance()->categories() )
@@ -174,8 +172,6 @@ void MimeCategoryConfigPage::currentItemChanged( QListWidgetItem * current,
     //logDebug() << current << ", " << previous << Qt::endl;
 
     ListEditor::currentItemChanged( current, previous );
-
-    setActions( current );
 
     setBackground( current );
     setBackground( previous );
@@ -219,14 +215,14 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
 	    gradient.setColorAt( shadingStart, category->color() );
     }
 
-    const QBrush brush( gradient );
-
-    item->setBackground( brush );
+    item->setBackground( gradient );
 }
 
 
-void MimeCategoryConfigPage::setActions( const QListWidgetItem * currentItem )
+void MimeCategoryConfigPage::updateActions()
 {
+    const QListWidgetItem * currentItem = listWidget()->currentItem();
+
     const bool isSymlink =
 	currentItem && currentItem->text() == MimeCategorizer::instance()->symlinkCategoryName();
     const bool isExecutable =
@@ -426,11 +422,7 @@ void * MimeCategoryConfigPage::createValue()
 void MimeCategoryConfigPage::removeValue( void * value )
 {
     // LitEditor is removing a row in the category list
-    MimeCategory * category = CATEGORY_CAST( value );
-    CHECK_PTR( category );
-
-    delete category;
-
+    delete CATEGORY_CAST( value );
     _dirty = true;
 }
 
@@ -438,7 +430,6 @@ void MimeCategoryConfigPage::removeValue( void * value )
 QString MimeCategoryConfigPage::valueText( void * value )
 {
     const MimeCategory * category = CATEGORY_CAST( value );
-    CHECK_PTR( category );
 
     return category->name();
 }

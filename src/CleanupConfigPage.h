@@ -115,7 +115,7 @@ namespace QDirStat
 	 * of the splitter.
 	 **/
 	void enableEditWidgets( bool enable )
-	    { _ui->activeGroupBox->setEnabled( enable ); }
+	    { _ui->rightColumnWidget->setEnabled( enable ); }
 
 
     private:

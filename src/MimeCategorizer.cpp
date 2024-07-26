@@ -24,9 +24,9 @@ namespace
      * Add one filename/category combination to a map.
      **/
     void addExactKey( ExactMatches        & keys,
-		      QBitArray           & lengths,
-		      const QString       & key,
-		      const MimeCategory  * category )
+                      QBitArray           & lengths,
+                      const QString       & key,
+                      const MimeCategory  * category )
     {
 	//logDebug() << "adding " << keyList << " to " << category << Qt::endl;
 	if ( keys.contains( key ) )
@@ -53,8 +53,8 @@ namespace
      * Adds one simple suffix to one suffix map.
      **/
     void addSuffixKey( SuffixMatches      & suffixes,
-		       const QString      & suffix,
-		       const MimeCategory * category )
+                       const QString      & suffix,
+                       const MimeCategory * category )
     {
 	if ( suffixes.contains( suffix ) )
 	{
@@ -263,8 +263,8 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 
 
 const MimeCategory * MimeCategorizer::matchWildcardSuffix( const SuffixMatches & map,
-							   const QString       & filename,
-							   const QString       & suffix ) const
+                                                           const QString       & filename,
+                                                           const QString       & suffix ) const
 {
     const auto rangeIts = map.equal_range( suffix );
     for ( auto it = rangeIts.first; it != rangeIts.second && it.key() == suffix; ++it )
@@ -463,8 +463,11 @@ void MimeCategorizer::ensureMandatoryCategories()
     _executableCategory = findCategoryByName( executableCategoryName() );
     if ( !_executableCategory )
     {
-	// Special catchall category for files that don't match anything else, cannot be deleted
-	_executableCategory = create( executableCategoryName(), Qt::magenta );
+	// Special catchall category for files that don't match anything else, must exist
+	_executableCategory = addCategory( executableCategoryName(),
+	                                   Qt::magenta,
+	                                   QString(),
+	                                   "*.jsa, *.ucode, lft.db, traceproto.db, traceroute.db" );
 	writeSettings( _categories );
     }
 
@@ -472,162 +475,153 @@ void MimeCategorizer::ensureMandatoryCategories()
     _symlinkCategory = findCategoryByName( symlinkCategoryName() );
     if ( !_symlinkCategory )
     {
-	// Special category for symlinks regardless of the filename, cannot be deleted
+	// Special category for symlinks regardless of the filename, must exist
 	_symlinkCategory = create( symlinkCategoryName(), Qt::blue );
 	writeSettings( _categories );
     }
 }
 
 
-void MimeCategorizer::addDefaultCategory( const QString & name,
-					  const QColor  & color,
-					  const QString & caseInsensitivePatterns,
-					  const QString & caseSensitivePatterns )
+MimeCategory * MimeCategorizer::addCategory( const QString & name,
+                                             const QColor  & color,
+                                             const QString & caseInsensitivePatterns,
+                                             const QString & caseSensitivePatterns )
 {
     MimeCategory * category = create( name, color);
     category->addPatterns( caseInsensitivePatterns.split( u',' ), Qt::CaseInsensitive );
     category->addPatterns( caseSensitivePatterns.split  ( u',' ), Qt::CaseSensitive   );
+    return category;
 }
 
 void MimeCategorizer::addDefaultCategories()
 {
-    addDefaultCategory( tr( "archive (compressed)" ),
-			Qt::green,
-			"*.7z, *.arj, *.bz2, *.cab, *.cpio.gz, *.gz, *.jmod, "
-			"*.jsonlz4, *.lz, *.lzo, *.rar, *.tar.bz2, *.tar.gz, "
-			"*.tar.lz, *.tar.lzo, *.tar.xz, *.tar.zst, *.tbz2, "
-			"*.tgz, *.txz, *.tz2, *.tzst, *.xz, *.zip, *.zst",
-			"pack-*.pack" );
+    addCategory( tr( "archive (compressed)" ),
+                 Qt::green,
+                 "*.7z, *.arj, *.bz2, *.cab, *.cpio.gz, *.gz, *.jmod, " \
+                 "*.jsonlz4, *.lz, *.lzo, *.rar, *.tar.bz2, *.tar.gz, " \
+                 "*.tar.lz, *.tar.lzo, *.tar.xz, *.tar.zst, *.tbz2, "   \
+                 "*.tgz, *.txz, *.tz2, *.tzst, *.xz, *.zip, *.zst",
+                 "pack-*.pack" );
 
-    addDefaultCategory( tr( "archive (uncompressed)" ),
-			"#88ff88",
-			"*.cpio, *.tar",
-			QString() );
+    addCategory( tr( "archive (uncompressed)" ),
+                 "#88ff88",
+                 "*.cpio, *.tar",
+                 QString() );
 
-    addDefaultCategory( tr( "configuration file" ),
-			"#aabbff",
-			QString(),
-			"*.alias, *.cfg, *.conf, *.conffiles, *.config, *.dep, "
-			"*.desktop, *.ini, *.kmap, *.lang, *.my, *.page, *.properties, "
-			"*.rc, *.service, *.shlibs, *.symbols, *.templates, *.theme, "
-			"*.triggers, *.xcd, *.xsl, .config, .gitignore, Kconfig, "
-			"control, gtkrc" );
+    addCategory( tr( "configuration file" ),
+                 "#aabbff",
+                 QString(),
+                 "*.alias, *.cfg, *.conf, *.conffiles, *.config, *.dep, "         \
+                 "*.desktop, *.ini, *.kmap, *.lang, *.my, *.page, *.properties, " \
+                 "*.rc, *.service, *.shlibs, *.symbols, *.templates, *.theme, "   \
+                 "*.triggers, *.xcd, *.xsl, .config, .gitignore, Kconfig, "       \
+                 "control, gtkrc" );
 
-    addDefaultCategory( tr( "database" ),
-			"#22aaff",
-			QString(),
-			"*.alias.bin, *.builtin.bin, *.dat, *.db, *.dep.bin, *.enc, "
-			"*.hwdb, *.idx, *.lm, *.md5sums, *.odb, *.order, *.sbstore, "
-			"*.sqlite, *.sqlite-wal, *.symbols.bin, *.tablet, *.vlpset, "
-			"*.yaml, magic.mgc" );
+    addCategory( tr( "database" ),
+                 "#22aaff",
+                 QString(),
+                 "*.alias.bin, *.builtin.bin, *.dat, *.db, *.dep.bin, *.enc, " \
+                 "*.hwdb, *.idx, *.lm, *.md5sums, *.odb, *.order, *.sbstore, " \
+                 "*.sqlite, *.sqlite-wal, *.symbols.bin, *.tablet, *.vlpset, " \
+                 "*.yaml, magic.mgc" );
 
-    addDefaultCategory( tr( "disk image" ),
-			"#aaaaaa",
-			"*.fsa, *.iso",
-			"*.BIN, *.img" );
+    addCategory( tr( "disk image" ),
+                 "#aaaaaa",
+                 "*.fsa, *.iso",
+                 "*.BIN, *.img" );
 
-    addDefaultCategory( tr( "document" ),
-			"#66ccff",
-			"*.css, *.csv, *.doc, *.docbook, *.docx, *.dotx, *.dvi, "
-			"*.dvi.bz2, *.epub, *.htm, *.html, *.json, *.latex, *.log, "
-			"*.md, *.pdf, *.pod, *.potx, *.ppsx, *.ppt, *.pptx, *.ps, "
-			"*.readme, *.rst, *.sav, *.sdc, *.sdc.gz, *.sdd, *.sdp, *.sdw, "
-			"*.sla, *.sla.gz, *.slaz, *.sxi, *.tex, *.txt, *.xls, *.xlsx, "
-			"*.xlt, *.xml, copyright, readme*",
-			"*.list, *.log.0, *.log.1, *.odc, *.odg, *.odp, *.ods, *.odt, "
-			"*.otc, *.otp, *.ots, *.ott" );
+    addCategory( tr( "document" ),
+                 "#66ccff",
+                 "*.css, *.csv, *.doc, *.docbook, *.docx, *.dotx, *.dvi, "        \
+                 "*.dvi.bz2, *.epub, *.htm, *.html, *.json, *.latex, *.log, "     \
+                 "*.md, *.pdf, *.pod, *.potx, *.ppsx, *.ppt, *.pptx, *.ps, "      \
+                 "*.readme, *.rst, *.sav, *.sdc, *.sdc.gz, *.sdd, *.sdp, *.sdw, " \
+                 "*.sla, *.sla.gz, *.slaz, *.sxi, *.tex, *.txt, *.xls, *.xlsx, "  \
+                 "*.xlt, *.xml, copyright, readme*",
+                 "*.list, *.log.0, *.log.1, *.odc, *.odg, *.odp, *.ods, *.odt, "  \
+                 "*.otc, *.otp, *.ots, *.ott" );
 
-    addDefaultCategory( executableCategoryName(),
-			Qt::magenta,
-			QString(),
-			"*.jsa, *.ucode, lft.db, traceproto.db, traceroute.db" );
+    addCategory( tr( "font" ),
+                 "#44ddff",
+                 QString(),
+                 "*.afm, *.bdf, *.cache-7, *.cache-8, *.otf, *.pcf, *.pcf.gz, " \
+                 "*.pf1, *.pf2, *.pfa, *.pfb, *.t1, *.ttf" );
 
-    addDefaultCategory( tr( "font" ),
-			"#44ddff",
-			QString(),
-			"*.afm, *.bdf, *.cache-7, *.cache-8, *.otf, *.pcf, *.pcf.gz, "
-			"*.pf1, *.pf2, *.pfa, *.pfb, *.t1, *.ttf" );
+    addCategory( tr( "game file" ),
+                 "#ff88dd",
+                 QString(),
+                 "*.MHK, *.bsp, *.mdl, *.pak, *.wad" );
 
-    addDefaultCategory( tr( "game file" ),
-			"#ff88dd",
-			QString(),
-			"*.MHK, *.bsp, *.mdl, *.pak, *.wad" );
+    addCategory( tr( "icon" ),
+                 "#00ddff",
+                 "*.icns, *.ico, *.xpm",
+                 QString() );
 
-    addDefaultCategory( tr( "icon" ),
-			"#00ddff",
-			"*.icns, *.ico, *.xpm",
-			QString() );
+    addCategory( tr( "image" ),
+                 Qt::cyan,
+                 "*.gif, *.jpeg, *.jpg, *.jxl, *.mng, *.png, *.tga, *.tif, *.tiff, " \
+                 "*.webp, *.xcf.bz2, *.xcf.gz",
+                 QString() );
 
-    addDefaultCategory( tr( "image" ),
-			Qt::cyan,
-			"*.gif, *.jpeg, *.jpg, *.jxl, *.mng, *.png, *.tga, *.tif, *.tiff, "
-			"*.webp, *.xcf.bz2, *.xcf.gz",
-			QString() );
+    addCategory( tr( "image (uncompressed)" ),
+                 "#88ffff",
+                 "*.bmp, *.pbm, *.pgm, *.pnm, *.ppm, *.spr, *.svg, *.xcf",
+                 QString() );
 
-    addDefaultCategory( tr( "image (uncompressed)" ),
-			"#88ffff",
-			"*.bmp, *.pbm, *.pgm, *.pnm, *.ppm, *.spr, *.svg, *.xcf",
-			QString() );
+    addCategory( tr( "junk" ),
+                 Qt::red,
+                 "*.bak, *.keep, *.old, *.~",
+                 "core" );
 
-    addDefaultCategory( tr( "junk" ),
-			Qt::red,
-			"*.bak, *.keep, *.old, *.~",
-			"core" );
+    addCategory( tr( "music" ),
+                 Qt::yellow,
+                 "*.aac, *.ape, *.f4a, *.f4b, *.flac, *.m4a, *.m4b, *.mid, *.mka, " \
+                 "*.mp3, *.oga, *.ogg, *.opus, *.ra, *.rax, *.wav, *.wma",
+                 QString() );
 
-    addDefaultCategory( tr( "music" ),
-			Qt::yellow,
-			"*.aac, *.ape, *.f4a, *.f4b, *.flac, *.m4a, *.m4b, *.mid, *.mka, "
-			"*.mp3, *.oga, *.ogg, *.opus, *.ra, *.rax, *.wav, *.wma",
-			QString() );
+    addCategory( tr( "object file" ),
+                 "#ee8822",
+                 "lib*.a",
+                 "*.Po, *.a.cmd, *.al, *.elc, *.go, *.gresource, *.ko, *.ko.cmd, "   \
+                 "*.ko.xz, *.ko.zst, *.la, *.lo, *.mo, *.moc, *.o, *.o.cmd, *.pyc, " \
+                 "*.qrc, *.typelib, built-in.a, vmlinux.a" );
 
-    addDefaultCategory( tr( "object file" ),
-			"#ee8822",
-			"lib*.a",
-			"*.Po, *.a.cmd, *.al, *.elc, *.go, *.gresource, *.ko, *.ko.cmd, "
-			"*.ko.xz, *.ko.zst, *.la, *.lo, *.mo, *.moc, *.o, *.o.cmd, *.pyc, "
-			"*.qrc, *.typelib, built-in.a, vmlinux.a" );
+    addCategory( tr( "packaged program" ),
+                 "#88aa66",
+                 "*.rpm, *.xpi",
+                 "*.deb, *.ja, *.jar, *.sfi, *.tm" );
 
-    addDefaultCategory( tr( "packaged program" ),
-			"#88aa66",
-			"*.rpm, *.xpi",
-			"*.deb, *.ja, *.jar, *.sfi, *.tm" );
+    addCategory( tr( "script" ),
+                 "#ff8888",
+                 QString(),
+                 "*.BAT, *.bash, *.bashrc, *.csh, *.js, *.ksh, *.m4, *.pl, *.pm, " \
+                 "*.postinst, *.postrm, *.preinst, *.prerm, *.sh, *.tcl, *.tmac, " \
+                 "*.xba, *.zsh" );
 
-    addDefaultCategory( tr( "script" ),
-			"#ff8888",
-			QString(),
-			"*.BAT, *.bash, *.bashrc, *.csh, *.js, *.ksh, *.m4, *.pl, *.pm, "
-			"*.postinst, *.postrm, *.preinst, *.prerm, *.sh, *.tcl, *.tmac, "
-			"*.xba, *.zsh" );
+    addCategory( tr( "shared object" ),
+                 "#ff7722",
+                 "*.dll, *.so",
+                 "*.so.*, *.so.0, *.so.1" );
 
-    addDefaultCategory( tr( "shared object" ),
-			"#ff7722",
-			"*.dll, *.so",
-			"*.so.*, *.so.0, *.so.1" );
+    addCategory( tr( "source file" ),
+                 "#ffbb44",
+                 QString(),
+                 "*.S, *.S_shipped, *.asm, *.c, *.cc, *.cmake, *.cpp, *.cxx, *.dts, "   \
+                 "*.dtsi, *.el, *.f, *.fuc3, *.fuc3.h, *.fuc5, *.fuc5.h, *.gir, *.h, "  \
+                 "*.h_shipped, *.hpp, *.java, *.msg, *.ph, *.php, *.po, *.pot, *.pro, " \
+                 "*.pxd, *.py, *.pyi, *.pyx, *.rb, *.scm, Kbuild, Makefile" );
 
-    addDefaultCategory( tr( "source file" ),
-			"#ffbb44",
-			QString(),
-			"*.S, *.S_shipped, *.asm, *.c, *.cc, *.cmake, *.cpp, *.cxx, *.dts, "
-			"*.dtsi, *.el, *.f, *.fuc3, *.fuc3.h, *.fuc5, *.fuc5.h, *.gir, *.h, "
-			"*.h_shipped, *.hpp, *.java, *.msg, *.ph, *.php, *.po, *.pot, *.pro, "
-			"*.pxd, *.py, *.pyi, *.pyx, *.rb, *.scm, Kbuild, Makefile" );
+    addCategory( tr( "source file (generated)" ),
+                 "#ffaa22",
+                 QString(),
+                 "*.f90, *.mod.c, *.ui, moc_*.cpp, qrc_*.cpp, ui_*.h" );
 
-    addDefaultCategory( tr( "source file (generated)" ),
-			"#ffaa22",
-			QString(),
-			"*.f90, *.mod.c, *.ui, moc_*.cpp, qrc_*.cpp, ui_*.h" );
-
-    addDefaultCategory( symlinkCategoryName(),
-			Qt::blue,
-			QString(),
-			QString() );
-
-    addDefaultCategory( tr( "video" ),
-			"#aa44ff",
-			"*.asf, *.avi, *.divx, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, "
-			"*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.ogm, *.ogv, *.rm, "
-			"*.vdr, *.vob, *.webm, *.wmp, *.wmv",
-			QString() );
+    addCategory( tr( "video" ),
+                 "#aa44ff",
+                 "*.asf, *.avi, *.divx, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, " \
+                 "*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.ogm, *.ogv, *.rm, "
+                 "*.vdr, *.vob, *.webm, *.wmp, *.wmv",
+                 QString() );
 
     writeSettings( _categories );
 }

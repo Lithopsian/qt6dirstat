@@ -10,7 +10,6 @@
 #include "ExcludeRulesConfigPage.h"
 #include "ConfigDialog.h"
 #include "DirTree.h"
-#include "Exception.h"
 #include "ExcludeRules.h"
 #include "QDirStatApp.h"
 
@@ -38,7 +37,7 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
     setMoveDownButton( _ui->moveDownButton );
     setToBottomButton( _ui->toBottomButton );
 
-    enableEditRuleWidgets( false );
+    enableEditWidgets( false );
     fillListWidget();
     updateActions();
 
@@ -144,13 +143,13 @@ void ExcludeRulesConfigPage::load( void * value )
 
     if ( !excludeRule )
     {
-        enableEditRuleWidgets( false );
+        enableEditWidgets( false );
         _ui->patternLineEdit->setText( "" );
 
 	return;
     }
 
-    enableEditRuleWidgets( true );
+    enableEditWidgets( true );
     _ui->patternLineEdit->setText( excludeRule->pattern() );
 
     _ui->caseSensitiveCheckBox->setChecked( excludeRule->caseSensitive() );
@@ -192,17 +191,13 @@ void * ExcludeRulesConfigPage::createValue()
 
 void ExcludeRulesConfigPage::removeValue( void * value )
 {
-    ExcludeRule * excludeRule = EXCLUDE_RULE_CAST( value );
-    CHECK_PTR( excludeRule );
-
-    delete excludeRule;
+    delete EXCLUDE_RULE_CAST( value );
 }
 
 
 QString ExcludeRulesConfigPage::valueText( void * value )
 {
     const ExcludeRule * excludeRule = EXCLUDE_RULE_CAST( value );
-    CHECK_PTR( excludeRule );
 
     return excludeRule->pattern();
 }

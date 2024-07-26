@@ -239,8 +239,8 @@ namespace QDirStat
 	 * plain suffix pattern.
 	 **/
 	const MimeCategory * matchWildcardSuffix( const SuffixMatches & map,
-						  const QString       & filename,
-						  const QString       & suffix ) const;
+	                                          const QString       & filename,
+	                                          const QString       & suffix ) const;
 
 	/**
 	 * Iterate over the regular expression list trying each until the first
@@ -255,26 +255,32 @@ namespace QDirStat
 	void ensureMandatoryCategories();
 
 	/**
-	 * Add default categories in case none were read from the settings.
-	 **/
-	void addDefaultCategory( const QString & name,
-				 const QColor  & color,
-				 const QString & caseSensitivePatterns,
-				 const QString & caseInsensitivePatterns );
-	void addDefaultCategories();
-
-	/**
 	 * Create a new category and add it to the live list held in this class.
 	 **/
 	MimeCategory * create( const QString & name, const QColor & color );
 
+	/**
+	 * Add a category from a name, colour, and comma-delimited patterns
+	 * strings.
+	 **/
+	MimeCategory * addCategory( const QString & name,
+	                            const QColor  & color,
+	                            const QString & caseSensitivePatterns,
+	                            const QString & caseInsensitivePatterns );
 
-	signals:
+	/**
+	 * Add default categories in case none were read from the settings.
+	 **/
+	void addDefaultCategories();
+
+
+    signals:
 
 	/**
 	 * Emitted when changes are applied from the settings dialogue.
 	 **/
 	void categoriesChanged();
+
 
     private:
 

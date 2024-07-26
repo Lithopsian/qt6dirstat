@@ -44,19 +44,14 @@ namespace QDirStat
 	void applyChanges();
 
 	/**
-	 * Abandon changes and revert everything to the original settings.
-	 **/
-//	void discardChanges();
-
-	/**
 	 * Create a new list item.  Overload of ListEditor::add() to allow
 	 * detection of new insertions for sorting and setting focus when
 	 * new items are added.
 	 *
 	 * A sorted QListWidget does not behave well with items that have the
-	 * same sort key, in this case the category name.  So the category list
-	 * is configured to be unsorted and is then sorted explicitly whenever
-	 * a sort key changes, including inserting a new category.
+	 * same sort key, in this case an empty category name.  So the category
+	 * list is configured to be unsorted and is then sorted explicitly
+	 * whenever a sort key changes, including inserting a new category.
 	 **/
 	void add() override;
 
@@ -108,12 +103,6 @@ namespace QDirStat
 	 * The category list has been shown.  Adjust the colour shading.
 	 **/
 	void showEvent( QShowEvent * ) override { adjustShadingWidth(); }
-
-	/**
-	 * The pane splitter has moved, meaning the list has resized without
-	 * a resize event.  Adjust the shading width.
-	 **/
-	void splitterMoved( int, int ) { adjustShadingWidth(); }
 
 	/**
 	 * Process the action to toggle the colour previews.
@@ -193,8 +182,7 @@ namespace QDirStat
 	 *
 	 * Implemented from ListEditor.
 	 **/
-	void updateActions() override
-	    { setActions( listWidget()->currentItem() ); }
+	void updateActions() override;
 
 	/**
 	 * Set the remove button, name, and patterns enabled or disabled,

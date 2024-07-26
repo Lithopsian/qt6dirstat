@@ -14,8 +14,8 @@
 #include "Cleanup.h"
 #include "CleanupCollection.h"
 #include "ConfigDialog.h"
-#include "Exception.h"
 #include "OutputWindow.h"
+#include "Typedefs.h"
 
 
 // This is a mess that became necessary because Qt's moc cannot handle template
@@ -250,17 +250,13 @@ void * CleanupConfigPage::createValue()
 
 void CleanupConfigPage::removeValue( void * value )
 {
-    Cleanup * cleanup = CLEANUP_CAST( value );
-    CHECK_PTR( cleanup );
-
-    delete cleanup;
+    delete CLEANUP_CAST( value );
 }
 
 
 QString CleanupConfigPage::valueText( void * value )
 {
     const Cleanup * cleanup = CLEANUP_CAST( value );
-    CHECK_PTR( cleanup );
 
     return cleanup->cleanTitle();
 }

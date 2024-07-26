@@ -60,7 +60,7 @@ namespace QDirStat
 	/**
 	 * Enable or disable the widgets to edit an exclude rule.
 	 **/
-	void enableEditRuleWidgets( bool enable )
+	void enableEditWidgets( bool enable )
 	    { _ui->rightColumnWidget->setEnabled( enable ); }
 
 	/**
