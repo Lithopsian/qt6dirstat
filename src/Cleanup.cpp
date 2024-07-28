@@ -76,14 +76,14 @@ namespace
 	return { "open -a Terminal.app ." };
 #else
 	return { "gnome-terminal",
-		 "xfce4-terminal",
-		 "lxterminal",
-		 "eterm",
-		 "terminology",
-		 "mate-terminal",
-		 "tilix",
-		 "qterminal",
-		 "konsole --workdir",
+	         "xfce4-terminal",
+	         "lxterminal",
+	         "eterm",
+	         "terminology",
+	         "mate-terminal",
+	         "tilix",
+	         "qterminal",
+	         "konsole --workdir",
 	       };
 #endif
     }
@@ -98,13 +98,13 @@ namespace
 	return { "open" };
 #else
 	return { "dolphin",
-		 "nautilus",
-		 "thunar",
-		 "pcmanfm",
-		 "pcmanfm-qt",
-		 "spacefm",
-		 "caja",
-		 "nemo",
+	         "nautilus",
+	         "thunar",
+	         "pcmanfm",
+	         "pcmanfm-qt",
+	         "spacefm",
+	         "caja",
+	         "nemo",
 	       };
 #endif
     }
@@ -175,13 +175,13 @@ namespace
 	{
 	    logInfo() << "Detected desktop \"" << desktop << '"' << Qt::endl;
 
-		// KDE konsole misbehaves in every way possible:
-		//
-		// It cannot be started in the background from a cleanup action,
-		// it will terminate when QDirStat terminates,
-		// and it doesn't give a shit about its current working directory.
-		// So all the other terminals need to be explicitly started in
-		// the background, but konsole not.
+	    // KDE konsole misbehaves in every way possible:
+	    //
+	    // It cannot be started in the background from a cleanup action,
+	    // it will terminate when QDirStat terminates,
+	    // and it doesn't give a shit about its current working directory.
+	    // So all the other terminals need to be explicitly started in
+	    // the background, but konsole not.
 	    const QString desktopApp = [ &desktop ]()
 	    {
 		if ( desktop == "gnome"_L1 ||
@@ -361,8 +361,7 @@ namespace
      *     "xdg-open %p"
      *     "tar cjvf %n.tar.bz2 && rm -rf %n"
      **/
-    QString expandVariables( const FileInfo * item,
-				    const QString  & unexpanded )
+    QString expandVariables( const FileInfo * item, const QString  & unexpanded )
     {
 	QString expanded = expandDesktopSpecificApps( unexpanded );
 
@@ -518,8 +517,8 @@ FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
 
 
 void Cleanup::runCommand( const FileInfo * item,
-			  const QString  & command,
-			  OutputWindow   * outputWindow ) const
+                          const QString  & command,
+                          OutputWindow   * outputWindow ) const
 {
     const QString shell = chooseShell( outputWindow );
 

@@ -26,20 +26,14 @@ ActionManager * ActionManager::instance()
 
 
 void ActionManager::setActions( QWidget        * parent,
-				SelectionModel * selectionModel,
-				QToolBar       * toolBar,
-				QMenu          * menu )
+                                SelectionModel * selectionModel,
+                                QToolBar       * toolBar,
+                                QMenu          * menu )
 {
+    CHECK_PTR( parent );
+
     instance()->addTree( parent );
     instance()->setCleanupCollection( new CleanupCollection( parent, selectionModel, toolBar, menu ) );
-}
-
-
-void ActionManager::addTree( const QWidget * tree )
-{
-    CHECK_PTR( tree );
-
-    _widgetTrees << tree;
 }
 
 
@@ -117,8 +111,8 @@ void ActionManager::moveToTrash()
 
 
 void ActionManager::swapActions( QWidget * widget,
-				 QAction * actionToRemove,
-				 QAction * actionToAdd )
+                                 QAction * actionToRemove,
+                                 QAction * actionToAdd )
 {
     if ( !widget->actions().contains( actionToRemove ) )
 	return;

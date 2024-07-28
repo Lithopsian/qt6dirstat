@@ -63,28 +63,28 @@ namespace QDirStat
 	 * so it will create the singleton instance.
 	 **/
 	static void setActions( QWidget        * parent,
-				SelectionModel * selectionModel,
-				QToolBar       * toolBar,
-				QMenu          * menu );
+	                        SelectionModel * selectionModel,
+	                        QToolBar       * toolBar,
+	                        QMenu          * menu );
 
 	/**
 	 * Add all the actions listed in 'actionNames' to a widget.
 	 **/
 	static bool addActions( QWidget * widget, const QStringList & actionNames )
-		{ return instance()->addActions( widget, actionNames, false ); }
+	    { return instance()->addActions( widget, actionNames, false ); }
 
 	/**
 	 * Add only the enabled actions in 'actionNames' to a widget.
 	 **/
 	static bool addEnabledActions( QWidget * widget, const QStringList & actionNames )
-		{ return instance()->addActions( widget, actionNames, true ); }
+	    { return instance()->addActions( widget, actionNames, true ); }
 
 	/**
 	 * Replace one action by another, for example in a toolbar.
 	 **/
 	static void swapActions( QWidget * widget,
-				 QAction * actionToRemove,
-				 QAction * actionToAdd );
+	                         QAction * actionToRemove,
+	                         QAction * actionToAdd );
 
 	/**
 	 * Returns a pointer to the CleanupCollection.
@@ -119,7 +119,7 @@ namespace QDirStat
 	 * guarded pointer so it doesn't matter if it is destroyed) to search
 	 * for QActions when requested.
 	 **/
-	void addTree( const QWidget * tree );
+	void addTree( const QWidget * tree ) { _widgetTrees << tree; }
 
 	/**
 	 * Gives a pointer to the (likely only) CleanupCollection.
@@ -147,8 +147,8 @@ namespace QDirStat
 	 * were not found.
 	 **/
 	bool addActions( QWidget           * widget,
-			 const QStringList & actionNames,
-			 bool                enabledOnly);
+	                 const QStringList & actionNames,
+	                 bool                enabledOnly);
 
 
     private:

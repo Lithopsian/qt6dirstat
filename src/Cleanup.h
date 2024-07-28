@@ -59,19 +59,19 @@ namespace QDirStat
 	 * 'command' is the shell command to execute.
 	 **/
 	Cleanup( QObject            * parent,
-		 bool                 active,
-		 const QString      & title,
-		 const QString      & command,
-		 bool                 recurse,
-		 bool                 askForConfirmation,
-		 RefreshPolicy        refreshPolicy,
-		 bool                 worksForDir,
-		 bool                 worksForFile,
-		 bool                 worksForDotEntry,
-		 OutputWindowPolicy   outputWindowPolicy = ShowAfterTimeout,
-		 int                  outputWindowTimeout = 500,
-		 bool                 outputWindowAutoClose = false,
-		 QString              shell = "" ):
+	         bool                 active,
+	         const QString      & title,
+	         const QString      & command,
+	         bool                 recurse,
+	         bool                 askForConfirmation,
+	         RefreshPolicy        refreshPolicy,
+	         bool                 worksForDir,
+	         bool                 worksForFile,
+	         bool                 worksForDotEntry,
+	         OutputWindowPolicy   outputWindowPolicy = ShowAfterTimeout,
+	         int                  outputWindowTimeout = 500,
+	         bool                 outputWindowAutoClose = false,
+	         QString              shell = "" ):
 	    QAction { title, parent },
 	    _active { active },
 	    _title { title },
@@ -103,10 +103,10 @@ namespace QDirStat
 	 **/
 	Cleanup( const Cleanup * other ):
 	    Cleanup { nullptr, other->_active, other->_title, other->_command,
-		      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
-		      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
-		      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
-		      other->_shell }
+	              other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
+	              other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
+	              other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
+	              other->_shell }
 	{
 	    setIcon( other->iconName() );     // carried on the Cleanup as QString and QAction as QIcon
 	    setShortcut( other->shortcut() ); // only carried on the underlying QAction
@@ -323,7 +323,7 @@ namespace QDirStat
 	void setOutputWindowAutoClose( bool               autoClose ) { _outputWindowAutoClose = autoClose; }
 	void setShell                ( const QString    & sh        ) { _shell                 = sh;        }
 	void setIcon                 ( const QString    & iconName  )
-		{ QAction::setIcon( QIcon::fromTheme( _iconName = iconName ) ); }
+	    { QAction::setIcon( QIcon::fromTheme( _iconName = iconName ) ); }
 
 
     public slots:
@@ -365,8 +365,8 @@ namespace QDirStat
 	 * Run a command with 'item' as base to expand variables.
 	 **/
 	void runCommand( const FileInfo * item,
-			 const QString	& command,
-			 OutputWindow	* outputWindow) const;
+	                 const QString  & command,
+	                 OutputWindow   * outputWindow) const;
 
 
     private:
