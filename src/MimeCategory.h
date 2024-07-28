@@ -11,7 +11,6 @@
 #define MimeCategory_h
 
 #include <QColor>
-#include <QList>
 #include <QStringList>
 #include <QTextStream>
 
@@ -25,9 +24,7 @@ namespace QDirStat
      *
      * The idea is to collect those detailed types in one category to give it
      * common attributes like the QDirStat treemap color so the user can get an
-     * impression how much disk space each type consumes. If there are too many
-     * different colors, it is difficult to tell which is which, so we are
-     * summarizing similar MIME types into their common category.
+     * impression how much disk space each type consumes.
      **/
     class MimeCategory
     {
@@ -36,8 +33,8 @@ namespace QDirStat
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
 	MimeCategory():
-		_name { "" },
-		_color { Qt::white }
+	    _name { "" },
+	    _color { Qt::white }
 	{}
 
 	/**
@@ -221,10 +218,10 @@ namespace QDirStat
      **/
     inline QTextStream & operator<< ( QTextStream & str, MimeCategory * category )
     {
-        if ( category )
-            str << "<MimeCategory " << category->name() << ">";
-        else
-            str << "<NULL MimeCategory *>";
+	if ( category )
+	    str << "<MimeCategory " << category->name() << ">";
+	else
+	    str << "<NULL MimeCategory *>";
 
 	return str;
     }

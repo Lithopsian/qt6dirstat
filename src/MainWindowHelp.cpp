@@ -22,23 +22,23 @@ using namespace QDirStat;
 
 void MainWindow::showAboutDialog()
 {
-    const QString text = "<h2>Qt6DirStat "_L1 % QDIRSTAT_VERSION % "</h2><p>"_L1 %
+    const QString text = "<h2>Qt6DirStat " QDIRSTAT_VERSION "</h2><p>" %
         tr( "Qt-based directory statistics -- showing where all your disk space has gone "
             "and trying to help you to clean it up." ) %
-        "</p><p>"_L1 %
+        "</p><p>" %
         tr( "(c) 2015-2024 Stefan Hundhammer and 2023-2024 Ian Nartowicz" ) %
-        "</p><p>"_L1 %
+        "</p><p>" %
         tr( "License: GPL V2 (GNU General Public License Version 2)" ) %
-        "</p><p>"_L1 %
+        "</p><p>" %
         tr( "This is free Open Source software, provided to you hoping that it might be "
             "useful for you. It does not cost you anything, but on the other hand there "
             "is no warranty or promise of anything." ) %
-        "</p><p>"_L1 %
+        "</p><p>" %
         tr( "This software was made with the best intentions and greatest care, but still "
             "there is the off chance that something might go wrong which might damage "
             "data on your computer. Under no circumstances will the authors of this program "
             "be held responsible for anything like that. Use this program at your own risk." ) %
-        "</p>"_L1;
+        "</p>";
 
     QMessageBox::about( this, tr( "About Qt6DirStat" ), text );
 }
@@ -47,18 +47,18 @@ void MainWindow::showAboutDialog()
 void MainWindow::showDonateDialog()
 {
     const QString text = tr( "<h2>Donate</h2>" ) %
-        "<p><nobr>"_L1 %
-        tr( "QDirStat is Free Open Source Software." ) %
-        "</nobr></p><p><nobr>"_L1 %
+        "<p><nobr>" %
+        tr( "Qt6DirStat is Free Open Source Software." ) %
+        "</nobr></p><p><nobr>" %
         tr( "If you find it useful, please consider donating." ) %
-        "</nobr>\n<nobr>"_L1 %
+        "</nobr>\n<nobr>" %
         tr( "You can donate any amount of your choice:" ) %
-        "</nobr></p><p>"_L1 %
-        "<a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EYJXAVLGNRR5W\">"_L1 %
+        "</nobr></p><p>" %
+        "<a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EYJXAVLGNRR5W\">" %
         tr( "QDirStat at PayPal" ) %
-        "</a></p><p><nobr>("_L1 %
+        "</a></p><p><nobr>(" %
         tr( "opens in external browser window" ) %
-        ")</nobr></p>"_L1;
+        ")</nobr></p>";
 
 
     QMessageBox::about( this, tr( "Donate" ), text );

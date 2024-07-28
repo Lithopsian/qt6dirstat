@@ -77,19 +77,13 @@ bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
 }
 
 
-bool ExcludeRule::operator!=( const ExcludeRule * other ) const
+bool ExcludeRule::operator!=( const ExcludeRule & other ) const
 {
-    if ( !other )
-        return true;
-
-    if ( other == this )
-        return false;
-
-    if ( other->patternSyntax()     != patternSyntax() ||
-         other->pattern()           != pattern()       ||
-         other->caseSensitive()     != caseSensitive() ||
-         other->useFullPath()       != useFullPath()   ||
-         other->checkAnyFileChild() != checkAnyFileChild() )
+    if ( other.patternSyntax()     != patternSyntax() ||
+         other.pattern()           != pattern()       ||
+         other.caseSensitive()     != caseSensitive() ||
+         other.useFullPath()       != useFullPath()   ||
+         other.checkAnyFileChild() != checkAnyFileChild() )
     {
         return true;
     }

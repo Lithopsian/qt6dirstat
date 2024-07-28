@@ -7,13 +7,15 @@
  *              Ian Nartowicz
  */
 
+#include <QMouseEvent>
+
 #include "CleanupConfigPage.h"
 #include "ActionManager.h"
 #include "Cleanup.h"
 #include "CleanupCollection.h"
 #include "ConfigDialog.h"
-#include "Exception.h"
 #include "OutputWindow.h"
+#include "Typedefs.h"
 
 
 // This is a mess that became necessary because Qt's moc cannot handle template
@@ -33,30 +35,33 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
 
     setListWidget( _ui->listWidget );
 
-    setMoveUpButton      ( _ui->moveUpButton       );
-    setMoveDownButton    ( _ui->moveDownButton     );
-    setMoveToTopButton   ( _ui->moveToTopButton    );
-    setMoveToBottomButton( _ui->moveToBottomButton );
-    setAddButton         ( _ui->addButton          );
-    setRemoveButton      ( _ui->removeButton       );
+    setToTopButton   ( _ui->toTopButton    );
+    setMoveUpButton  ( _ui->moveUpButton       );
+    setAddButton     ( _ui->addButton          );
+    setRemoveButton  ( _ui->removeButton       );
+    setMoveDownButton( _ui->moveDownButton     );
+    setToBottomButton( _ui->toBottomButton );
 
     enableEditWidgets( false );
     fillListWidget();
-    _ui->toolBox->setCurrentIndex( 0 );
     enableWidgets();
     updateActions();
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
+    _ui->keySequenceEdit->setClearButtonEnabled( true );
+#endif
+
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
-	     this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
-	     this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,
-	     this,                            &CleanupConfigPage::titleChanged );
+             this,                            &CleanupConfigPage::titleChanged );
 
     connect( parent,                          &ConfigDialog::applyChanges,
-	     this,                            &CleanupConfigPage::applyChanges );
+             this,                            &CleanupConfigPage::applyChanges );
 }
 
 
@@ -82,12 +87,12 @@ void CleanupConfigPage::applyChanges()
 
     // Check if anything changed before writing, just for fun
     CleanupCollection * collection = ActionManager::cleanupCollection();
-    for ( int iOld = 0, iNew = 0; iNew < cleanups.size() || iOld < collection->size(); ++iOld, ++iNew )
+    for ( auto itOld = collection->cbegin(), itNew = cleanups.cbegin();
+          itOld != collection->cend() || itNew != cleanups.cend();
+	  ++itOld, ++itNew )
     {
 	// If we ran past the end of either list, or the cleanups don't match ...
-	if ( iNew == cleanups.size() ||
-	     iOld == collection->size() ||
-	     cleanups.at( iNew ) != collection->at( iOld ) )
+	if ( itNew == cleanups.cend() || itOld == collection->cend() || **itOld != **itNew )
 	{
 	    collection->writeSettings( cleanups );
 	    return;
@@ -156,6 +161,8 @@ void CleanupConfigPage::save( void * value )
     cleanup->setTitle  ( _ui->titleLineEdit->text()       );
     cleanup->setCommand( _ui->commandLineEdit->text()     );
 
+    cleanup->setShortcut( _ui->keySequenceEdit->keySequence().toString() );
+
     if ( _ui->shellComboBox->currentText().startsWith( "$SHELL"_L1 ) )
 	cleanup->setShell( "" );
     else
@@ -181,12 +188,6 @@ void CleanupConfigPage::save( void * value )
 }
 
 
-void CleanupConfigPage::enableEditWidgets( bool enable )
-{
-    _ui->activeGroupBox->setEnabled( enable );
-}
-
-
 void CleanupConfigPage::load( void * value )
 {
     if ( updatesLocked() )
@@ -205,6 +206,7 @@ void CleanupConfigPage::load( void * value )
     _ui->activeGroupBox->setChecked( cleanup->isActive() );
     _ui->titleLineEdit->setText( cleanup->title() );
     _ui->icon->setPixmap( cleanup->iconName() );
+    _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
     _ui->commandLineEdit->setText( cleanup->command() );
 
     if ( cleanup->shell().isEmpty() )
@@ -248,17 +250,20 @@ void * CleanupConfigPage::createValue()
 
 void CleanupConfigPage::removeValue( void * value )
 {
-    Cleanup * cleanup = CLEANUP_CAST( value );
-    CHECK_PTR( cleanup );
-
-    delete cleanup;
+    delete CLEANUP_CAST( value );
 }
 
 
 QString CleanupConfigPage::valueText( void * value )
 {
     const Cleanup * cleanup = CLEANUP_CAST( value );
-    CHECK_PTR( cleanup );
 
     return cleanup->cleanTitle();
+}
+
+
+void CleanupConfigPage::add()
+{
+    ListEditor::add();
+    _ui->titleLineEdit->setFocus();
 }

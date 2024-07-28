@@ -121,7 +121,7 @@ void DiscoverActions::discoverFilesFromMonth( const QString & path, short year, 
     discoverFiles( new FilesFromMonthTreeWalker( year, month ),
                    LocateListMTimeCol,
                    Qt::DescendingOrder,
-                   QObject::tr( "Files from %1 %2 in %3" ).arg( monthAbbreviation( month ) ).arg( year),
+                   QObject::tr( "Files from %1 %2 in %3" ).arg( monthAbbreviation( month ), year),
                    app()->dirTree()->locate( path ) );
 }
 

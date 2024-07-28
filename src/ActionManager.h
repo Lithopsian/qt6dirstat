@@ -52,6 +52,11 @@ namespace QDirStat
     public:
 
 	/**
+	 * Constructor. Protected because this is a singleton class.
+	 **/
+	static const char * separator() { return "---"; }
+
+	/**
 	 * Adds a widget tree and transfers the CleanupCollection to the
 	 * ActionManager.  This is most likelely the only actions that will
 	 * be needed here and should normally be the first call to this class,

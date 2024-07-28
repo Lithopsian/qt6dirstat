@@ -130,7 +130,7 @@ namespace
      **/
     QString linksSizeText( FileInfo * item )
     {
-	return QString( formatSize( item->rawByteSize() ) + formatLinksInline( item->links() ) );
+	return QString( formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) );
     }
 
 
@@ -138,7 +138,8 @@ namespace
      * Return a list containing two strings for the delegate: the size formatted
      * with special for individual bytes, eg "137 B "; and the allocated size in
      * whole kilobytes, eg. "(8k)". This is only intended to be called if
-     * useSmallFilSizeText() returns true.
+     * useSmallFilSizeText() returns true; in particular, the allocated size is
+     * known to be an exact multiple of 1024.
      **/
     QStringList smallSizeText( FileInfo * item )
     {
@@ -192,7 +193,7 @@ namespace
 	    return QVariant();
 
 	if ( item->isDirInfo() )
-	    return QString( item->sizePrefix() + formatSize( item->totalAllocatedSize() ) );
+	    return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
 
 	if ( item->isSparseFile() ) // delegate will use SizeTextRole
 	    return QVariant();
@@ -272,10 +273,14 @@ namespace
 
 	    switch ( col )
 	    {
-		case TotalItemsCol:      return item->sizePrefix() + QString::number( item->totalItems() );
-		case TotalFilesCol:      return item->sizePrefix() + QString::number( item->totalFiles() );
-		case TotalSubDirsCol:    return item->sizePrefix() + QString::number( item->totalSubDirs() );
-		case OldestFileMTimeCol: return formatTime( item->oldestFileMtime() );
+		case TotalItemsCol:
+		    return QString( item->sizePrefix() % QString::number( item->totalItems() ) );
+		case TotalFilesCol:
+		    return QString( item->sizePrefix() % QString::number( item->totalFiles() ) );
+		case TotalSubDirsCol:
+		    return QString( item->sizePrefix() % QString::number( item->totalSubDirs() ) );
+		case OldestFileMTimeCol:
+		    return formatTime( item->oldestFileMtime() );
 	    }
 	}
 
@@ -387,18 +392,21 @@ namespace
     QVariant sizeColTooltip( FileInfo * item )
     {
 	if ( item->isDirInfo() )
-	    return QVariant( item->sizePrefix() + formatByteSize( item->totalAllocatedSize() ) );
+	    return QVariant( item->sizePrefix() % formatByteSize( item->totalAllocatedSize() ) );
 
-	QString text = item->sizePrefix() + formatByteSize( item->rawByteSize() );
-
-	if ( item->allocatedSize() != item->rawByteSize() || item->isSparseFile() )
+	const QString sizeText = formatByteSize( item->rawByteSize() );
+	const QString allocText = [ item ]()
 	{
-	    text += QObject::tr( " %1<br/>%2 allocated" )
-		    .arg( item->isSparseFile() ? QObject::tr( "sparse data" ) : QObject::tr( "used" ) )
-		    .arg( formatByteSize( item->rawAllocatedSize() ) );
-	}
+	    if ( item->allocatedSize() == item->rawByteSize() && !item->isSparseFile() )
+		return QString();
 
-	return whitespacePre( text + formatLinksRichText( item->links() ) );
+	    const QString usedText = item->isSparseFile() ? QObject::tr( "sparse data" ) : QObject::tr( "used" );
+	    const QString allocText = formatByteSize( item->rawAllocatedSize() );
+	    return QString( ' ' % usedText % '\n' % allocText % ' ' % QObject::tr( "allocated" ) );
+	}();
+	const QString linksText = formatLinksRichText( item->links() );
+
+	return whitespacePre( item->sizePrefix() % sizeText % allocText % linksText );
     }
 
 
@@ -423,11 +431,11 @@ namespace
      **/
     QVariant sizeTextData( FileInfo * item )
     {
-	// List of 3 strings, the third (links) may be empty
+	// List of 3 strings, for sparse files, the third (links) may be empty
 	if ( item->isSparseFile() )
 	    return sparseSizeText( item );
 
-	// List of 2 strings
+	// List of 2 strings, for small files with allocations in exact multiples of 1024
 	if ( useSmallFileSizeText( item ) && item->links() == 1 )
 	    return smallSizeText( item );
 

@@ -10,8 +10,9 @@
 #ifndef ListEditor_h
 #define ListEditor_h
 
-#include <QAbstractButton>
+#include <QAction>
 #include <QListWidgetItem>
+#include <QToolButton>
 #include <QWidget>
 
 
@@ -36,12 +37,10 @@ namespace QDirStat
      * to implement them.
      *
      * This class was first designed as a template class, but since even in
-     * 2016 Qt's moc still cannot handle templates, ugly void * and nightmarish
+     * 2016 Qt's moc cannot handle templates, ugly void * and nightmarish
      * type casts had to be used. This is due to deficiencies of the underlying
      * tools, not by design. Yes, this is ugly. But it's the best that can be
-     * done with that moc preprocessor that dates back to 1995 or so. You'd
-     * think that with C++11 and whatnot those limitations could be lifted, but
-     * it doesn't look like anybody cares enough.
+     * done with that moc preprocessor that dates back to 1995 or so.
      **/
     class ListEditor: public QWidget
     {
@@ -117,10 +116,51 @@ namespace QDirStat
 	virtual QString valueText( void * value ) = 0;
 
 
-	//--------------------------------------------------------------------
+    protected slots:
+
+	/**
+	 * Move the current list item to the top of the list.
+	 **/
+	void toTop();
+
+	/**
+	 * Move the current list item one position up.
+	 **/
+	void moveUp();
+
+	/**
+	 * Create a new list item.
+	 **/
+	virtual void add();
+
+	/**
+	 * Remove the current list item.
+	 **/
+	void remove();
+
+	/**
+	 * Move the current list item one position down.
+	 **/
+	void moveDown();
+
+	/**
+	 * Move the current list item to the bottom of the list.
+	 **/
+	void toBottom();
+
+	/**
+	 * Enable or disable buttons depending on internal status.
+	 **/
+	virtual void updateActions();
+
+	/**
+	 * Notification that the current item in the list widget changed.
+	 **/
+	virtual void currentItemChanged( QListWidgetItem * current,
+					 QListWidgetItem * previous);
 
 
-    public:
+    protected:
 
 	/**
 	 * Set the QListWidget to work on.
@@ -144,86 +184,34 @@ namespace QDirStat
 	void setUpdatesLocked( bool locked ) { _updatesLocked = locked; }
 
 	/**
-	 * Return the first row for moveUp() and moveToTop(). Normally this is
-	 * row 0, but this can be set to another value to freeze the rows
-	 * before this logical first row.
-	 **/
-	int firstRow() const { return _firstRow; }
-
-	/**
-	 * Set the first row for moveUp() and moveToTop().
-	 **/
-//	void setFirstRow( int newFirstRow ) { _firstRow = newFirstRow; }
-
-
-	//
-	// Set the various buttons and connect them to the appropriate slot.
-	//
-
-	void setMoveUpButton      ( QAbstractButton * button );
-	void setMoveDownButton    ( QAbstractButton * button );
-	void setMoveToTopButton   ( QAbstractButton * button );
-	void setMoveToBottomButton( QAbstractButton * button );
-	void setAddButton         ( QAbstractButton * button );
-	void setRemoveButton      ( QAbstractButton * button );
-
-
-    protected slots:
-
-	/**
-	 * Move the current list item one position up.
-	 **/
-	void moveUp();
-
-	/**
-	 * Move the current list item one position down.
-	 **/
-	void moveDown();
-
-	/**
-	 * Move the current list item to the top of the list.
-	 **/
-	void moveToTop();
-
-	/**
-	 * Move the current list item to the bottom of the list.
-	 **/
-	void moveToBottom();
-
-	/**
-	 * Create a new list item.
-	 **/
-	virtual void add();
-
-	/**
-	 * Remove the current list item.
-	 **/
-	void remove();
-
-	/**
-	 * Enable or disable buttons depending on internal status.
-	 **/
-	virtual void updateActions();
-
-	/**
-	 * Notification that the current item in the list widget changed.
-	 **/
-	virtual void currentItemChanged( QListWidgetItem * current,
-					 QListWidgetItem * previous);
-
-
-    protected:
-
-	/**
 	 * Convert 'item' to a ListEditorItem<void *> and return its value.
 	 **/
 	void * value( QListWidgetItem * item );
 
 	/**
-	 * Enable or disable a button if it is non-null.
+	 * Handle a right click.
+	 *
+	 * Reimplemented from QWidget.
 	 **/
-	void enableButton( QAbstractButton * button, bool enabled )
-	    { if ( button ) button->setEnabled( enabled ); }
+	void contextMenuEvent( QContextMenuEvent * event ) override;
+
+	//
+	// Set the various buttons and connect them to the appropriate action.
+	//
+
+	void setToTopButton   ( QToolButton * button );
+	void setMoveUpButton  ( QToolButton * button );
+	void setAddButton     ( QToolButton * button );
+	void setRemoveButton  ( QToolButton * button );
+	void setMoveDownButton( QToolButton * button );
+	void setToBottomButton( QToolButton * button );
+
+	QAction * toTopAction()    { return &_toTopAction; }
+	QAction * moveUpAction()   { return &_moveUpAction; }
+	QAction * addAction()      { return &_addAction; }
+	QAction * removeAction()   { return &_removeAction; }
+	QAction * moveDownAction() { return &_moveDownAction; }
+	QAction * toBottomAction() { return &_toBottomAction; }
 
 
     private:
@@ -232,15 +220,22 @@ namespace QDirStat
 	// Data members
 	//
 
-	QListWidget     * _listWidget		{ nullptr };
-	const int         _firstRow		{ 0 };
-	bool              _updatesLocked	{ false };
-	QAbstractButton * _moveUpButton		{ nullptr };
-	QAbstractButton * _moveDownButton	{ nullptr };
-	QAbstractButton * _moveToTopButton	{ nullptr };
-	QAbstractButton * _moveToBottomButton	{ nullptr };
-	QAbstractButton * _addButton		{ nullptr };
-	QAbstractButton * _removeButton		{ nullptr };
+	bool _updatesLocked	{ false };
+
+	QListWidget * _listWidget	{ nullptr };
+	QToolButton * _toTopButton	{ nullptr };
+	QToolButton * _moveUpButton	{ nullptr };
+	QToolButton * _addButton	{ nullptr };
+	QToolButton * _removeButton	{ nullptr };
+	QToolButton * _moveDownButton	{ nullptr };
+	QToolButton * _toBottomButton	{ nullptr };
+
+	QAction _toTopAction    { QIcon( ":/icons/move-top.png" ),    tr( "Move to &top" ),           this };
+	QAction _moveUpAction   { QIcon( ":/icons/move-up.png" ),     tr( "Move &up" ),               this };
+	QAction _addAction      { QIcon( ":/icons/add.png" ),         tr( "&Create a new category" ), this };
+	QAction _removeAction   { QIcon( ":/icons/remove.png" ),      tr( "&Remove category" ),       this };
+	QAction _moveDownAction { QIcon( ":/icons/move-down.png" ),   tr( "Move &down" ),             this };
+	QAction _toBottomAction { QIcon( ":/icons/move-bottom.png" ), tr( "Move to &bottom" ),        this };
 
     };	// class ListEditor
 

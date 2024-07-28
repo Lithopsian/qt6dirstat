@@ -115,7 +115,7 @@ namespace
 		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
 		const QString title = cleanTitle + QString( itemSpaces - titleWidth, u' ' );
 
-		return QString( "<h3>%1</h3>%2<br/>" ).arg( title ).arg( itemLine );
+		return QString( "<h3>%1</h3>%2<br/>" ).arg( title, itemLine );
 	    }
 
 	    const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
@@ -141,7 +141,7 @@ namespace
 	    const int spaces = longestLine / spaceWidth - titleWidth;
 	    const QString title = cleanTitle + QString( spaces, u' ' );
 
-	    return QString( "<h3>%1</h3>%2<br>" ).arg( title ).arg( urls.join( "<br>"_L1 ) );
+	    return QString( "<h3>%1</h3>%2<br>" ).arg( title, urls.join( "<br>"_L1 ) );
 	}();
 
 	const int ret = QMessageBox::question( qApp->activeWindow(),

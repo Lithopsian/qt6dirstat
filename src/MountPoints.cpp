@@ -26,6 +26,14 @@ using namespace QDirStat;
 namespace
 {
     // Verbose logging, all callers might be commented out
+    [[gnu::unused]] void dumpAllMountPoints()
+    {
+        const auto allMountPoints = MountPoints::allMountPoints();
+        for ( const MountPoint * mountPoint : allMountPoints )
+            logDebug() << mountPoint->path() << Qt::endl;
+    }
+
+
     [[gnu::unused]] void dumpNormalMountPoints()
     {
         const auto normalMountPoints = MountPoints::normalMountPoints();
@@ -96,18 +104,6 @@ MountPoints * MountPoints::instance()
     static MountPoints _instance;
 
     return &_instance;
-}
-
-
-MountPoints::MountPoints()
-{
-    init();
-}
-
-
-MountPoints::~MountPoints()
-{
-    clear();
 }
 
 
@@ -426,13 +422,6 @@ MountPointList MountPoints::normalMountPoints()
     return result;
 }
 
-/*
-void MountPoints::dump()
-{
-    for ( const MountPoint * mountPoint : instance()->_mountPointList )
-        logDebug() << mountPoint->path() << Qt::endl;
-}
-*/
 
 QString MountPoints::device( const QString & url )
 {

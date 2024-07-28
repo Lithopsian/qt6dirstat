@@ -37,6 +37,11 @@ namespace QDirStat
 	ConfigDialog( QWidget * parent );
 
 	/**
+	 * Destructor.
+	 **/
+	~ConfigDialog() override;
+
+	/**
 	 * Static method for using one shared instance of this class between
 	 * multiple parts of the application. This will create a new instance
 	 * if there is none yet (or any more).
@@ -51,24 +56,6 @@ namespace QDirStat
 	 * settings dialog window.
 	 **/
 	static void showSharedInstance( QWidget * parent );
-
-
-    protected slots:
-
-	/**
-	 * Accept the dialog contents, i.e. the user clicked the "OK" button.
-	 *
-	 * Reimplemented from QDialog.
-	 **/
-	void accept() override;
-
-	/**
-	 * Reject the dialog contents, i.e. the user clicked the "Cancel"
-	 * button.
-	 *
-	 * Reimplemented from QDialog.
-	 **/
-	void reject() override;
 
 
     signals:
@@ -88,6 +75,24 @@ namespace QDirStat
 	 * config pages require this signal.
 	 **/
 //	void discardChanges();
+
+
+    protected slots:
+
+	/**
+	 * Accept the dialog contents, i.e. the user clicked the "OK" button.
+	 *
+	 * Reimplemented from QDialog.
+	 **/
+	void accept() override;
+
+	/**
+	 * Reject the dialog contents, i.e. the user clicked the "Cancel"
+	 * button.
+	 *
+	 * Reimplemented from QDialog.
+	 **/
+	void reject() override;
 
 
     private:

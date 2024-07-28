@@ -15,7 +15,7 @@
 #include <QFont>
 #include <QSet>
 #include <QSettings>
-#include <QStringList>
+#include <QStringBuilder>
 
 #include "Typedefs.h" // ColorList
 
@@ -57,7 +57,7 @@ namespace QDirStat
 	 * to QCoreApplication::applicationName() + 'suffix'.
 	 **/
 	Settings( const char * suffix ):
-	    QSettings { QCoreApplication::organizationName(), QCoreApplication::applicationName() + suffix }
+	    QSettings { QCoreApplication::organizationName(), QCoreApplication::applicationName() % suffix }
 	{ _usedConfigFiles << fileName(); }
 
 
@@ -85,7 +85,7 @@ namespace QDirStat
 	 * classes which  will provide a suitable prefix.
 	 **/
 	void beginListGroup( int num )
-	    { QSettings::beginGroup( listGroupPrefix() + QString( "_%1" ).arg( num, 2, 10, QChar( u'0' ) ) ); }
+	    { QSettings::beginGroup( listGroupPrefix() % QString( "_%1" ).arg( num, 2, 10, QChar( u'0' ) ) ); }
 
 	/**
 	 * Provided to pair with beginListGroup(), although it just calls

@@ -2,13 +2,24 @@
 <ui version="4.0">
  <class>CleanupConfigPage</class>
  <widget class="QWidget" name="CleanupConfigPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>558</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="layoutWidget">
+     <property name="handleWidth">
+      <number>10</number>
+     </property>
+     <widget class="QWidget" name="leftColumnWidget">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QListWidget" name="listWidget">
@@ -32,7 +43,7 @@
        <item>
         <layout class="QVBoxLayout" name="toolButtonLayout">
          <item>
-          <widget class="QToolButton" name="moveToTopButton">
+          <widget class="QToolButton" name="toTopButton">
            <property name="toolTip">
             <string>Move the current cleanup action to the top of the list</string>
            </property>
@@ -113,7 +124,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="moveToBottomButton">
+          <widget class="QToolButton" name="toBottomButton">
            <property name="toolTip">
             <string>Move the current cleanup action to the bottom of the list</string>
            </property>
@@ -127,13 +138,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget_2">
+     <widget class="QWidget" name="rightColumnWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>8</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="bottomMargin">
-          <number>8</number>
-         </property>
          <item>
           <widget class="QLabel" name="titleCaption">
            <property name="font">
@@ -176,33 +187,16 @@
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
+         <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0">
-            <item>
-             <widget class="QLabel" name="commandCaption">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>24</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>&amp;Command line:</string>
-              </property>
-              <property name="buddy">
-               <cstring>commandLineEdit</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="icon">
-              <property name="pixmap">
-               <pixmap resource="icons.qrc">:/icons/information.png</pixmap>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLabel" name="commandCaption">
+            <property name="text">
+             <string>&amp;Command line:</string>
+            </property>
+            <property name="buddy">
+             <cstring>commandLineEdit</cstring>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLineEdit" name="commandLineEdit">
@@ -219,84 +213,68 @@ will be executed once for each selected item</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="miniHelpLabel">
-            <property name="toolTip">
-             <string>&lt;p style=&quot;white-space: pre&quot;&gt;These variables expand into file or directory names:&lt;br/&gt;commands will be executed in the selected directory or the parent&lt;br/&gt;directory of files; if multiple items are selected, the command will be&lt;br/&gt;executed once for each item, or once per directory if %d is used.&lt;/p&gt;</string>
-            </property>
-            <property name="text">
-             <string>%d - Directory name with full path
-%n - File / directory name without path
-%p - Full path
-</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="recurseCheckBox">
-            <property name="toolTip">
-             <string>&lt;p style='white-space:pre'&gt;Select if the command should be executed recursively for&lt;br/&gt;each directory in the selected branch; the command will be&lt;br/&gt;called separately for each directory level&lt;/p&gt;</string>
-            </property>
-            <property name="text">
-             <string>&amp;Recurse into subdirectories</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="askForConfirmationCheckBox">
-            <property name="toolTip">
-             <string>Check this for a confirmation dialog before executing the commands</string>
-            </property>
-            <property name="text">
-             <string>As&amp;k for confirmation</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <property name="topMargin">
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <property name="bottomMargin">
              <number>8</number>
             </property>
+            <item>
+             <widget class="QLabel" name="miniHelpLabel">
+              <property name="toolTip">
+               <string>&lt;p style=&quot;white-space: pre&quot;&gt;These variables expand into file or directory names:&lt;br/&gt;commands will be executed in the selected directory or the parent&lt;br/&gt;directory of files; if multiple items are selected, the command will be&lt;br/&gt;executed once for each item, or once per directory if %d is used.&lt;/p&gt;</string>
+              </property>
+              <property name="text">
+               <string>%d - Directory name with full path
+%n - File/directory name without path
+%p - Full path</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
             <property name="bottomMargin">
-             <number>16</number>
+             <number>8</number>
             </property>
             <item>
-             <widget class="QLabel" name="refreshPolicyCaption">
+             <widget class="QLabel" name="hotkeyLabel">
               <property name="text">
-               <string>Tree refresh polic&amp;y after cleanup:</string>
-              </property>
-              <property name="buddy">
-               <cstring>refreshPolicyComboBox</cstring>
+               <string>Hotkey:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="refreshPolicyComboBox">
+             <widget class="QKeySequenceEdit" name="keySequenceEdit">
               <property name="toolTip">
-               <string>&lt;p style='white-space:pre'&gt;This specifies if and how the directory tree should be re-read&lt;br/&gt;from disk after the cleanup action is finished.&lt;/p&gt;</string>
+               <string>Configure a key combination to trigger this Cleanup</string>
               </property>
-              <item>
-               <property name="text">
-                <string>No refresh</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Refresh only this item</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Refresh this item's parent</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Assume item has been deleted</string>
-               </property>
-              </item>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="icon">
+              <property name="toolTip">
+               <string>Icon associated with this Cleanup
+Only Cleanups with icons appear in the main toolbar</string>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="icons.qrc">:/icons/information.png</pixmap>
+              </property>
              </widget>
             </item>
            </layout>
@@ -306,58 +284,168 @@ will be executed once for each selected item</string>
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>220</height>
+              <height>240</height>
              </size>
             </property>
-            <property name="currentIndex">
-             <number>1</number>
+            <property name="toolTip">
+             <string>Options, refresh policy, output window policy, and command shell</string>
             </property>
+            <property name="statusTip">
+             <string/>
+            </property>
+            <widget class="QWidget" name="optionsPage">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>256</width>
+               <height>128</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Recurse, confirmation, and refresh policy options</string>
+             </property>
+             <attribute name="label">
+              <string>Options</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <property name="spacing">
+               <number>8</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_8">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="recurseCheckBox">
+                  <property name="toolTip">
+                   <string>&lt;p style='white-space:pre'&gt;Select if the command should be executed recursively for&lt;br/&gt;each directory in the selected branch; the command will be&lt;br/&gt;called separately for each directory level&lt;/p&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>&amp;Recurse into subdirectories</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="askForConfirmationCheckBox">
+                  <property name="toolTip">
+                   <string>Check this for a confirmation dialog before executing the commands</string>
+                  </property>
+                  <property name="text">
+                   <string>As&amp;k for confirmation</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_2">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="refreshPolicyCaption">
+                  <property name="text">
+                   <string>Tree refresh polic&amp;y after cleanup:</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>refreshPolicyComboBox</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="refreshPolicyComboBox">
+                  <property name="toolTip">
+                   <string>&lt;p style='white-space:pre'&gt;This specifies if and how the directory tree should be re-read&lt;br/&gt;from disk after the cleanup action is finished.&lt;/p&gt;</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>No refresh</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Refresh only this item</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Refresh this item's parent</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Assume item has been deleted</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="optionsPageSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
             <widget class="QWidget" name="worksForPage">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>185</width>
-               <height>93</height>
+               <width>256</width>
+               <height>128</height>
               </rect>
+             </property>
+             <property name="toolTip">
+              <string>Works for directories, files, pseudo-entries</string>
              </property>
              <attribute name="label">
               <string>Works For...</string>
              </attribute>
-             <layout class="QVBoxLayout" name="worksForPageLayout">
+             <layout class="QVBoxLayout" name="verticalLayout">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout">
-                <item>
-                 <widget class="QCheckBox" name="worksForDirCheckBox">
-                  <property name="toolTip">
-                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%d and %p expand to the full path of the directory;&lt;br/&gt;%n expands to the name of the directory without the path.&lt;/p&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>&amp;Directories</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="worksForFilesCheckBox">
-                  <property name="toolTip">
-                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%n expands to the name of the file with no path;&lt;br/&gt;%d and %p expand to the full path of the parent directory.&lt;/p&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>&amp;Files</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="worksForDotEntriesCheckBox">
-                  <property name="toolTip">
-                   <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to &amp;lt;Files&amp;gt; pseudo-dirs:&lt;br/&gt;%d and %p expand to the full path of the parent directory;&lt;br/&gt;%n expands to the string &quot;&amp;lt;Files&amp;gt;&quot;.&lt;br/&gt;&lt;b&gt;The command is always executed in the parent directory.&lt;/b&gt;&lt;/p&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>&lt;Files&gt; pseudo &amp;entries</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QCheckBox" name="worksForDirCheckBox">
+                <property name="toolTip">
+                 <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%d and %p expand to the full path of the directory;&lt;br/&gt;%n expands to the name of the directory without the path.&lt;/p&gt;</string>
+                </property>
+                <property name="text">
+                 <string>&amp;Directories</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="worksForFilesCheckBox">
+                <property name="toolTip">
+                 <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%n expands to the name of the file with no path;&lt;br/&gt;%d and %p expand to the full path of the parent directory.&lt;/p&gt;</string>
+                </property>
+                <property name="text">
+                 <string>&amp;Files</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="worksForDotEntriesCheckBox">
+                <property name="toolTip">
+                 <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to &amp;lt;Files&amp;gt; pseudo-dirs:&lt;br/&gt;%d and %p expand to the full path of the parent directory;&lt;br/&gt;%n expands to the string &quot;&amp;lt;Files&amp;gt;&quot;.&lt;br/&gt;&lt;b&gt;The command is always executed in the parent directory.&lt;/b&gt;&lt;/p&gt;</string>
+                </property>
+                <property name="text">
+                 <string>&lt;Files&gt; pseudo &amp;entries</string>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="worksForPageSpacer">
@@ -379,14 +467,20 @@ will be executed once for each selected item</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>235</width>
-               <height>136</height>
+               <width>256</width>
+               <height>128</height>
               </rect>
+             </property>
+             <property name="toolTip">
+              <string>Output window display policy</string>
              </property>
              <attribute name="label">
               <string>Output Window</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
               <item>
                <layout class="QGridLayout" name="outputWindowPageGridLayout" columnstretch="0,1">
                 <item row="0" column="0">
@@ -509,9 +603,12 @@ will be executed once for each selected item</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>224</width>
-               <height>82</height>
+               <width>256</width>
+               <height>128</height>
               </rect>
+             </property>
+             <property name="toolTip">
+              <string>Execution shell for commands</string>
              </property>
              <attribute name="label">
               <string>Shell</string>
@@ -612,9 +709,6 @@ will be executed once for each selected item</string>
   <tabstop>listWidget</tabstop>
   <tabstop>activeGroupBox</tabstop>
   <tabstop>titleLineEdit</tabstop>
-  <tabstop>commandLineEdit</tabstop>
-  <tabstop>recurseCheckBox</tabstop>
-  <tabstop>askForConfirmationCheckBox</tabstop>
   <tabstop>refreshPolicyComboBox</tabstop>
   <tabstop>worksForDirCheckBox</tabstop>
   <tabstop>worksForFilesCheckBox</tabstop>
@@ -628,11 +722,13 @@ will be executed once for each selected item</string>
   <tabstop>removeButton</tabstop>
   <tabstop>moveUpButton</tabstop>
   <tabstop>moveDownButton</tabstop>
-  <tabstop>moveToTopButton</tabstop>
-  <tabstop>moveToBottomButton</tabstop>
+  <tabstop>toTopButton</tabstop>
+  <tabstop>toBottomButton</tabstop>
  </tabstops>
  <resources>
   <include location="../../qdirstat-master/src/icons.qrc"/>
+  <include location="icons.qrc"/>
+  <include location="icons.qrc"/>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>

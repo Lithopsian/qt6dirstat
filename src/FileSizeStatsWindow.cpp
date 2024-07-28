@@ -141,7 +141,7 @@ namespace
 	const QStringList headers = { QObject::tr( "Percentile"  ),
 				      QObject::tr( "Size cutoff" ),
 				      QObject::tr( "Name" ),
-				      QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix ).arg( namePrefix ),
+				      QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix, namePrefix ),
 				      QObject::tr( "Cumulative sum" ),
 				    };
 	table->setColumnCount( headers.size() );
@@ -306,7 +306,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 {
     const Subtree subtree( fileInfo );
     const QString & url = subtree.url();
-    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix ).arg( url ) );
+    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
     resizeEvent( nullptr );
 
     if ( suffix.isEmpty() )

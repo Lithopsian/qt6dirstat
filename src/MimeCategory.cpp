@@ -67,7 +67,7 @@ namespace
 
 
 void MimeCategory::addExactMatch( const QString       & rawPattern,
-				  Qt::CaseSensitivity   caseSensitivity )
+                                  Qt::CaseSensitivity   caseSensitivity )
 {
     QString pattern = rawPattern.trimmed();
 
@@ -85,7 +85,7 @@ void MimeCategory::addExactMatch( const QString       & rawPattern,
 
 
 void MimeCategory::addSuffix( const QString       & rawSuffix,
-			      Qt::CaseSensitivity   caseSensitivity )
+                              Qt::CaseSensitivity   caseSensitivity )
 {
     // Normalize suffix: Remove leading "*." or "."
     QString suffix = rawSuffix.trimmed();
@@ -109,7 +109,7 @@ void MimeCategory::addSuffix( const QString       & rawSuffix,
 
 
 void MimeCategory::addWildcardSuffix( const QString       & rawPattern,
-				      Qt::CaseSensitivity   caseSensitivity )
+                                      Qt::CaseSensitivity   caseSensitivity )
 {
     QString pattern = rawPattern.trimmed();
 
@@ -127,7 +127,7 @@ void MimeCategory::addWildcardSuffix( const QString       & rawPattern,
 
 
 void MimeCategory::addWildcard( const QString       & rawPattern,
-				Qt::CaseSensitivity   caseSensitivity )
+                                Qt::CaseSensitivity   caseSensitivity )
 {
     const QString pattern = rawPattern.trimmed();
 
@@ -136,13 +136,13 @@ void MimeCategory::addWildcard( const QString       & rawPattern,
 	caseSensitivity == Qt::CaseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
 
     // Append wildcard if not empty and not already there
-//    if ( !pattern.isEmpty() && !wildcardList.contains( pattern ) )
+    if ( !pattern.isEmpty() && !wildcardList.contains( pattern ) )
 	wildcardList << pattern;
 }
 
 
 void MimeCategory::addPattern( const QString       & rawPattern,
-			       Qt::CaseSensitivity   caseSensitivity )
+                               Qt::CaseSensitivity   caseSensitivity )
 {
     const QString pattern = rawPattern.trimmed();
 
@@ -158,11 +158,11 @@ void MimeCategory::addPattern( const QString       & rawPattern,
 
 
 void MimeCategory::addPatterns( const QStringList   & patterns,
-				Qt::CaseSensitivity   caseSensitivity )
+                                Qt::CaseSensitivity   caseSensitivity )
 {
     for ( const QString & rawPattern : patterns )
     {
-	QString pattern = rawPattern.trimmed();
+	const QString pattern = rawPattern.trimmed();
 	if ( !pattern.isEmpty() )
 	    addPattern( pattern, caseSensitivity );
     }

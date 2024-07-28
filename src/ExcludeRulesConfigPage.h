@@ -35,6 +35,7 @@ namespace QDirStat
 
 
     protected slots:
+
 	/**
 	 * Create a new list item.  Overload of ListEditor::add() to allow
 	 * detection of new insertions so that focus can be put in the only
@@ -59,7 +60,8 @@ namespace QDirStat
 	/**
 	 * Enable or disable the widgets to edit an exclude rule.
 	 **/
-	void enableEditRuleWidgets( bool enable );
+	void enableEditWidgets( bool enable )
+	    { _ui->rightColumnWidget->setEnabled( enable ); }
 
 	/**
 	 * Fill the exclude rule list widget from the ExcludeRules.

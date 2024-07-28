@@ -328,6 +328,14 @@
           <bool>true</bool>
          </property>
          <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>476</width>
+            <height>546</height>
+           </rect>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -487,15 +495,11 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="buttonBoxLayout">
-     <item alignment="Qt::AlignRight">
-      <widget class="QPushButton" name="closeButton">
-       <property name="text">
-        <string>&amp;Close</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -526,28 +530,11 @@
   <tabstop>fileSizeHistogramHelpButton</tabstop>
   <tabstop>overflowAreaHelpButton</tabstop>
   <tabstop>histogramOptionsHelpButton</tabstop>
-  <tabstop>closeButton</tabstop>
   <tabstop>percentilesTableHelpButton</tabstop>
   <tabstop>bucketsTableHelpButton</tabstop>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>closeButton</sender>
-   <signal>clicked()</signal>
-   <receiver>FileSizeStatsWindow</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>627</x>
-     <y>621</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>endPercentileSlider</sender>
    <signal>valueChanged(int)</signal>
@@ -609,6 +596,22 @@
     <hint type="destinationlabel">
      <x>67</x>
      <y>527</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>FileSizeStatsWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
     </hint>
    </hints>
   </connection>

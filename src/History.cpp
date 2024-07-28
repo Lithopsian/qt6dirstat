@@ -13,12 +13,12 @@
 
 using namespace QDirStat;
 
-
+/*
 History::History()
 {
     _items.reserve( HISTORY_MAX );
 }
-
+*/
 
 void History::clear()
 {

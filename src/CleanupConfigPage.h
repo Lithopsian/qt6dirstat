@@ -38,6 +38,13 @@ namespace QDirStat
     protected slots:
 
 	/**
+	 * Create a new list item.  Overload of ListEditor::add() to allow
+	 * detection of new insertions so that focus can be put in the only
+	 * sensible place.
+	 **/
+	void add() override;
+
+	/**
 	 * Write changes back to the settings.
 	 **/
 	void applyChanges();
@@ -107,7 +114,8 @@ namespace QDirStat
 	 * Enable or disable all the edit widgets on the right side
 	 * of the splitter.
 	 **/
-	void enableEditWidgets( bool enable );
+	void enableEditWidgets( bool enable )
+	    { _ui->rightColumnWidget->setEnabled( enable ); }
 
 
     private:

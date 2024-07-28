@@ -26,10 +26,10 @@ namespace
     /**
      * Process events (except user input events) for the specified time.
      **/
-    void processEvents( int millisec )
+    void processEvents()
     {
 	QEventLoop eventLoop;
-	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents, millisec );
+	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents, PROCESS_EVENTS_MILLISEC );
     }
 } // namespace
 
@@ -40,7 +40,7 @@ BusyPopup::BusyPopup( const QString & text ):
     setMargin( 15 );
     setWindowTitle( QString() );
     show();
-    processEvents( PROCESS_EVENTS_MILLISEC );
+    processEvents();
 }
 
 

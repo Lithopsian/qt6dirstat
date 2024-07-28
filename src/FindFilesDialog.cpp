@@ -61,7 +61,7 @@ FileSearchFilter FindFilesDialog::fileSearchFilter()
 
     FileSearchFilter filter( fileInfo ? fileInfo->toDirInfo() : nullptr,
                              _ui->patternField->text(),
-                             static_cast<SearchFilter::FilterMode>( _ui->filterModeComboBox->currentIndex() ),
+                             static_cast<FilterMode>( _ui->filterModeComboBox->currentIndex() ),
                              _ui->caseSensitiveCheckBox->isChecked(),
                              _ui->findFilesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked(),
                              findDirs,

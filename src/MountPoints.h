@@ -225,12 +225,12 @@ namespace QDirStat
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
 	 **/
-	MountPoints();
+	MountPoints() { init(); }
 
 	/**
 	 * Destructor.
 	 **/
-	~MountPoints();
+	~MountPoints() { clear(); }
 
 	/**
 	 * Suppress copy and assignment constructors (this is a singleton)
@@ -378,12 +378,6 @@ namespace QDirStat
 	 * Return 'true' if 'device' is mounted.
 	 **/
 	bool isDeviceMounted( const QString & device ) const;
-
-	/**
-	 * Dump all current mount points to the log. This does not call
-	 * ensurePopulated() first.
-	 **/
-//	static void dump();
 
 
     private:

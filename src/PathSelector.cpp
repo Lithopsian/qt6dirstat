@@ -139,9 +139,9 @@ PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
     {
 	const QString boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>";
 	tooltip += "<br/>" %
-	    boilerplate.arg( QObject::tr( "Used" ) ).arg( formatSize( mountPoint->usedSize() ) ) %
-	    boilerplate.arg( QObject::tr( "Free for users" ) ).arg( formatSize( mountPoint->freeSizeForUser() ) ) %
-	    boilerplate.arg( QObject::tr( "Free for root" ) ).arg( formatSize( mountPoint->freeSizeForRoot() ) );
+	    boilerplate.arg( QObject::tr( "Used" ), formatSize( mountPoint->usedSize() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for users" ), formatSize( mountPoint->freeSizeForUser() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for root" ), formatSize( mountPoint->freeSizeForRoot() ) );
     }
 #endif
 

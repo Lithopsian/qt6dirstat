@@ -92,9 +92,10 @@ namespace QDirStat
 
 	/**
 	 * Return whether the given model column (int) represents a valid
-	 * header column enum, nopt including ReadJobsCol and UndefinedCol
+	 * header column enum, not including ReadJobsCol and UndefinedCol
 	 **/
-	inline bool isValidCol( int modelCol ) { return modelCol >= firstCol() && modelCol <= lastCol(); }
+	inline bool isValidCol( int modelCol )
+		{ return modelCol >= firstCol() && modelCol <= lastCol(); }
 
 	/**
 	 * Convert a column to string

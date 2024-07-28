@@ -28,8 +28,7 @@ QDirStatApp::QDirStatApp( int &argc, char **argv ):
     if ( styleSheet().isEmpty() )
     {
         const QString cssFile = QString( "%1/%2/%2.css" )
-                                .arg( QStandardPaths::writableLocation( QStandardPaths::ConfigLocation ) )
-                                .arg( applicationName() );
+            .arg( QStandardPaths::writableLocation( QStandardPaths::ConfigLocation ), applicationName() );
         QFile file ( cssFile );
         if ( !file.open( QFile::ReadOnly | QFile::Text ) )
             return;

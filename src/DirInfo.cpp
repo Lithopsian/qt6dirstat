@@ -914,9 +914,7 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
 	dumpChildrenList( parent, _sortedChildren );
 
 	THROW( Exception( QString( "_childCount of %1 corrupted; is %2, should be %3" )
-	                  .arg( parent->debugUrl() )
-	                  .arg( parent->childCount() )
-	                  .arg( _sortedChildren.size() ) ) );
+	                  .arg( parent->debugUrl(), parent->childCount(), _sortedChildren.size() ) ) );
     }
 #endif
 

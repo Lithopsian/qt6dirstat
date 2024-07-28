@@ -30,6 +30,7 @@ namespace QDirStat
     class Trash;
 
     typedef QList<Cleanup *> CleanupList;
+    typedef CleanupList::const_iterator CleanupListIterator;
 
     /**
      * Set of Cleanup actions to be performed for DirTree items, consisting of
@@ -93,6 +94,18 @@ namespace QDirStat
 	 * Move the selected items to trash.
 	 **/
 	void moveToTrash();
+
+	/**
+	 * Return a const iterator for the first Cleanup.
+	 **/
+	CleanupListIterator begin() const { return cbegin(); }
+	CleanupListIterator cbegin() const { return _cleanupList.cbegin(); }
+
+	/**
+	 * Return a const iterator for past the last Cleanup.
+	 **/
+	CleanupListIterator end() const { return cend(); }
+	CleanupListIterator cend() const { return _cleanupList.cend(); }
 
 	/**
 	 * Write configuration for all cleanups.
