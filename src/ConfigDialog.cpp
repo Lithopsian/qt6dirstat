@@ -13,7 +13,6 @@
 #include "CleanupConfigPage.h"
 #include "ExcludeRulesConfigPage.h"
 #include "GeneralConfigPage.h"
-#include "HotkeyConfigPage.h"
 #include "MimeCategoryConfigPage.h"
 #include "Settings.h"
 
