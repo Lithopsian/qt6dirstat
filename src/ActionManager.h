@@ -38,7 +38,7 @@ namespace QDirStat
     {
 
 	/**
-	 * Constructor. Protected because this is a singleton class.
+	 * Constructor. Private because this is a singleton class.
 	 **/
 	ActionManager() = default;
 

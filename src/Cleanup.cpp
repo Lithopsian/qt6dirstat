@@ -387,34 +387,21 @@ namespace
 	return expanded;
     }
 
+
+    /**
+     * Retrieve the directory part of a FileInfo's path.
+     **/
+    QString itemDir( const FileInfo * item )
+    {
+	QString dir = item->path();
+
+	if ( !item->isDir() && !item->isPseudoDir() )
+	    dir.remove( QRegularExpression( "/[^/]*$" ) );
+
+	return dir;
+    }
+
 } // namespace
-
-
-
-Cleanup::Cleanup( const Cleanup * other ):
-    Cleanup { nullptr, other->_active, other->_title, other->_command,
-	      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
-	      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
-	      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
-	      other->_shell }
-{
-    setIcon( other->iconName() );     // carried on both the Cleanup and QAction (as a pixmap)
-    setShortcut( other->shortcut() ); // only carried on the underlying QAction
-}
-
-
-void Cleanup::setTitle( const QString & title )
-{
-    _title = title;
-    QAction::setText( _title );
-}
-
-
-void Cleanup::setIcon( const QString & iconName )
-{
-    _iconName = iconName;
-    QAction::setIcon( QPixmap( _iconName ) );
-}
 
 
 bool Cleanup::worksFor( FileInfo * item ) const
@@ -444,17 +431,6 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
     // Perform cleanup for this item
     if ( worksFor( item ) )
 	runCommand( item, _command, outputWindow );
-}
-
-
-QString Cleanup::itemDir( const FileInfo * item ) const
-{
-    QString dir = item->path();
-
-    if ( !item->isDir() && !item->isPseudoDir() )
-	dir.remove( QRegularExpression( "/[^/]*$" ) );
-
-    return dir;
 }
 
 

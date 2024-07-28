@@ -101,7 +101,16 @@ namespace QDirStat
 	 * provide a copy without being a real action so that the config
 	 * dialog can play about with it.
 	 **/
-	Cleanup( const Cleanup * other );
+	Cleanup( const Cleanup * other ):
+	    Cleanup { nullptr, other->_active, other->_title, other->_command,
+		      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
+		      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
+		      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
+		      other->_shell }
+	{
+	    setIcon( other->iconName() );     // carried on the Cleanup as QString and QAction as QIcon
+	    setShortcut( other->shortcut() ); // only carried on the underlying QAction
+	}
 
 	/**
 	 * Return the command line that will be executed upon calling
@@ -124,6 +133,11 @@ namespace QDirStat
 	 **/
 	QString cleanTitle() const
 	    { return _title.isEmpty() ? _command : QString( _title ).remove( u'&' ); }
+
+	/**
+	 * Return the icon for this cleanup action.
+	 **/
+	const QIcon icon() const { return QAction::icon(); }
 
 	/**
 	 * Return the icon name of this cleanup action.
@@ -295,10 +309,9 @@ namespace QDirStat
 	 * Setters (see the corresponding getter for documentation), mainly
 	 * for the config page.
 	 **/
+	void setTitle                ( const QString    & title     ) { QAction::setText( _title = title ); }
 	void setActive               ( bool               active    ) { _active                = active;    }
-	void setTitle                ( const QString    & title     );
 	void setCommand              ( const QString    & command   ) { _command               = command;   }
-	void setIcon                 ( const QString    & iconName  );
 	void setRecurse              ( bool               recurse   ) { _recurse               = recurse;   }
 	void setAskForConfirmation   ( bool               ask       ) { _askForConfirmation    = ask;       }
 	void setRefreshPolicy        ( RefreshPolicy      policy    ) { _refreshPolicy         = policy;    }
@@ -309,6 +322,8 @@ namespace QDirStat
 	void setOutputWindowTimeout  ( int                timeout   ) { _outputWindowTimeout   = timeout;   }
 	void setOutputWindowAutoClose( bool               autoClose ) { _outputWindowAutoClose = autoClose; }
 	void setShell                ( const QString    & sh        ) { _shell                 = sh;        }
+	void setIcon                 ( const QString    & iconName  )
+		{ QAction::setIcon( QIcon::fromTheme( _iconName = iconName ) ); }
 
 
     public slots:
@@ -339,11 +354,6 @@ namespace QDirStat
 	 **/
 	static QString defaultShell()
 	    { return defaultShells().isEmpty() ? QString() : defaultShells().first(); }
-
-	/**
-	 * Retrieve the directory part of a FileInfo's path.
-	 **/
-	QString itemDir( const FileInfo * item ) const;
 
 	/**
 	 * Choose a suitable shell. Try this->shell() and fall back to

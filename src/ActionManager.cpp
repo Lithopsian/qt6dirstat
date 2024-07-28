@@ -111,7 +111,8 @@ void ActionManager::addEnabledCleanups( QWidget * widget )
 
 void ActionManager::moveToTrash()
 {
-    cleanupCollection()->moveToTrash();
+    if ( instance()->_cleanupCollection )
+	cleanupCollection()->moveToTrash();
 }
 
 

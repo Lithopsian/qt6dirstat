@@ -205,9 +205,11 @@ void CleanupConfigPage::load( void * value )
 
     _ui->activeGroupBox->setChecked( cleanup->isActive() );
     _ui->titleLineEdit->setText( cleanup->title() );
-    _ui->icon->setPixmap( cleanup->iconName() );
-    _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
     _ui->commandLineEdit->setText( cleanup->command() );
+    _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
+
+    QIcon icon = cleanup->icon();
+    _ui->icon->setPixmap( icon.pixmap( icon.actualSize( QSize( 24, 24 ) ) ) );
 
     if ( cleanup->shell().isEmpty() )
     {

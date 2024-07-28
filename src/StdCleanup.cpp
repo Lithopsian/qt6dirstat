@@ -142,6 +142,7 @@ namespace
 					 false,
 					 true );
 	cleanup->setShell( "/bin/bash" );
+	cleanup->setIcon( "edit-delete" );
 
 	return cleanup;
     }
@@ -265,6 +266,7 @@ namespace
 					 true,
 					 true,
 					 true );
+	cleanup->setIcon( "help-about" );
 
 	return cleanup;
     }
