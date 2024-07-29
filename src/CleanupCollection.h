@@ -112,6 +112,11 @@ namespace QDirStat
 	 **/
 	void writeSettings( const CleanupList & newCleanups );
 
+	/**
+	 * Return whether there is an active Cleanup (that will refresh).
+	 **/
+	bool isBusy() const { return _activeOutputWindow; }
+
 
     signals:
 
@@ -160,6 +165,12 @@ namespace QDirStat
 	 * Add all actions to the specified menu and keep it updated when the
 	 * collection changes.
 	 **/
+	void lastProcessFinished( int totalErrorCount );
+
+	/**
+	 * Add all actions to the specified menu and keep it updated when the
+	 * collection changes.
+	 **/
 	void addToMenu( QMenu * menu );
 
 	/**
@@ -190,20 +201,9 @@ namespace QDirStat
 	void add( Cleanup * cleanup );
 
 	/**
-	 * Return the index of a cleanup or -1 if it is not part of this
-	 * collection.
-	 **/
-	int indexOf( Cleanup * cleanup ) const;
-
-	/**
 	 * Add the standard cleanups to this collection.
 	 **/
 	void addStdCleanups();
-
-	/**
-	 * Remove a cleanup from this collection and delete it.
-	 **/
-//	void remove( Cleanup * cleanup );
 
 	/**
 	 * Update all menus that have the 'keepUpdated' flag set.
@@ -237,6 +237,7 @@ namespace QDirStat
 	std::unique_ptr<Trash>    _trash;
 	QList<QPointer<QMenu>>    _menus;
 	QList<QPointer<QToolBar>> _toolBars;
+	QWidget                 * _activeOutputWindow { nullptr };
 
     };	// class CleanupCollection
 

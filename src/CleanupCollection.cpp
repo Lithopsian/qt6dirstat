@@ -59,8 +59,8 @@ namespace
      * directories (including dot entries) or files.
      **/
     QStringList filteredUrls( const FileInfoSet & items,
-			      bool                dirs,
-			      bool                files )
+                              bool                dirs,
+                              bool                files )
     {
 	QStringList urls;
 
@@ -145,9 +145,9 @@ namespace
 	}();
 
 	const int ret = QMessageBox::question( qApp->activeWindow(),
-					       QObject::tr( "Please Confirm" ),
-					       whitespacePre( msg ),
-					       QMessageBox::Yes | QMessageBox::No );
+	                                       QObject::tr( "Please Confirm" ),
+	                                       whitespacePre( msg ),
+	                                       QMessageBox::Yes | QMessageBox::No );
 
 	return ret == QMessageBox::Yes;
     }
@@ -159,9 +159,9 @@ namespace
     SettingsEnumMapping refreshPolicyMapping()
     {
 	return { { Cleanup::NoRefresh,     "NoRefresh"_L1     },
-		 { Cleanup::RefreshThis,   "RefreshThis"_L1   },
-		 { Cleanup::RefreshParent, "RefreshParent"_L1 },
-		 { Cleanup::AssumeDeleted, "AssumeDeleted"_L1 },
+	         { Cleanup::RefreshThis,   "RefreshThis"_L1   },
+	         { Cleanup::RefreshParent, "RefreshParent"_L1 },
+	         { Cleanup::AssumeDeleted, "AssumeDeleted"_L1 },
 	       };
     }
 
@@ -172,9 +172,9 @@ namespace
     SettingsEnumMapping outputWindowPolicyMapping()
     {
 	return { { Cleanup::ShowAlways,        "ShowAlways"_L1        },
-		 { Cleanup::ShowIfErrorOutput, "ShowIfErrorOutput"_L1 },
-		 { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"_L1  },
-		 { Cleanup::ShowNever,         "ShowNever"_L1         },
+	         { Cleanup::ShowIfErrorOutput, "ShowIfErrorOutput"_L1 },
+	         { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"_L1  },
+	         { Cleanup::ShowNever,         "ShowNever"_L1         },
 	       };
     }
 
@@ -183,9 +183,9 @@ namespace
 
 
 CleanupCollection::CleanupCollection( QObject        * parent,
-				      SelectionModel * selectionModel,
-				      QToolBar       * toolBar,
-				      QMenu          * menu ):
+                                      SelectionModel * selectionModel,
+                                      QToolBar       * toolBar,
+                                      QMenu          * menu ):
     QObject { parent },
     _selectionModel { selectionModel },
     _trash { new Trash() }
@@ -198,7 +198,7 @@ CleanupCollection::CleanupCollection( QObject        * parent,
 
     // Available Cleanups depend on the currently-selected items
     connect( selectionModel, QOverload<>::of( &SelectionModel::selectionChanged ),
-	     this,           &CleanupCollection::updateActions );
+             this,           &CleanupCollection::updateActions );
 }
 
 
@@ -213,29 +213,11 @@ void CleanupCollection::add( Cleanup * cleanup )
     _cleanupList << cleanup;
 
     connect( cleanup, &Cleanup::triggered,
-	     this,    &CleanupCollection::execute );
+             this,    &CleanupCollection::execute );
 
     updateMenusAndToolBars();
 }
 
-/*
-void CleanupCollection::remove( Cleanup * cleanup )
-{
-    const int index = indexOf( cleanup );
-
-    if ( index == -1 )
-    {
-	logError() << "No such cleanup: " << cleanup << Qt::endl;
-	return;
-    }
-
-    _cleanupList.removeAt( index );
-    delete cleanup;
-
-    // No need for updateMenusAndToolBars() since QObject/QWidget will take care of
-    // deleted actions all by itself.
-}
-*/
 
 void CleanupCollection::addStdCleanups()
 {
@@ -247,16 +229,6 @@ void CleanupCollection::addStdCleanups()
 
     CleanupSettings settings;
     settings.setValue( "StdCleanupsAdded", true );
-}
-
-
-int CleanupCollection::indexOf( Cleanup * cleanup ) const
-{
-    const int index = _cleanupList.indexOf( cleanup );
-    if ( index == -1 )
-	logError() << "Cleanup " << cleanup << " is not in this collection" << Qt::endl;
-
-    return index;
 }
 
 
@@ -296,14 +268,11 @@ void CleanupCollection::updateActions()
     const bool pkgSelected      = sel.containsPkg();
     const bool atticSelected    = sel.containsAttic();
     const bool dotEntrySelected = sel.containsDotEntry();
-    const bool busy             = sel.containsBusyItem();
+    const bool itemBusy         = sel.containsBusyItem();
     const bool treeBusy         = sel.treeIsBusy();
-    const bool canCleanup       = !atticSelected && !pkgSelected && !busy && !empty;
-    const bool pkgView = [ empty, &sel ]()
+    const bool canCleanup       = !isBusy() && !atticSelected && !pkgSelected && !itemBusy && !empty;
+    const bool pkgView = empty ? false : [ &sel ]()
     {
-	if ( empty )
-	    return false;
-
 	const FileInfo * firstToplevel = sel.first()->tree()->firstToplevel();
 	return firstToplevel && firstToplevel->isPkgInfo();
     }();
@@ -311,11 +280,11 @@ void CleanupCollection::updateActions()
     for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	const bool enable = canCleanup && cleanup->isActive() &&
-			    ( !treeBusy         || cleanup->refreshPolicy() == Cleanup::NoRefresh ) &&
-			    ( !pkgView          || !cleanup->requiresRefresh() ) &&
-			    ( !dirSelected      || cleanup->worksForDir() ) &&
-			    ( !dotEntrySelected || cleanup->worksForDotEntry() ) &&
-			    ( !fileSelected     || cleanup->worksForFile() );
+	                    ( !treeBusy         || cleanup->refreshPolicy() == Cleanup::NoRefresh ) &&
+	                    ( !pkgView          || !cleanup->requiresRefresh() ) &&
+	                    ( !dirSelected      || cleanup->worksForDir() ) &&
+	                    ( !dotEntrySelected || cleanup->worksForDotEntry() ) &&
+	                    ( !fileSelected     || cleanup->worksForFile() );
 	cleanup->setEnabled( enable );
     }
 }
@@ -323,7 +292,8 @@ void CleanupCollection::updateActions()
 
 void CleanupCollection::updateMenus()
 {
-    _menus.removeAll( nullptr ); // Remove QPointers that have become invalid
+    // Remove QPointers that have become invalid
+    _menus.removeAll( nullptr );
 
     for ( QMenu * menu : asConst( _menus ) )
     {
@@ -338,7 +308,8 @@ void CleanupCollection::updateMenus()
 
 void CleanupCollection::updateToolBars()
 {
-    _toolBars.removeAll( nullptr ); // Remove QPointers that have become invalid
+    // Remove QPointers that have become invalid
+    _toolBars.removeAll( nullptr );
 
     for ( QToolBar * toolBar : asConst( _toolBars ) )
     {
@@ -376,9 +347,10 @@ void CleanupCollection::execute()
 	return;
     }
 
-    emit startingCleanup( cleanup->cleanTitle() );
-
     OutputWindow * outputWindow = new OutputWindow( activeWindow, cleanup->outputWindowAutoClose() );
+    if ( cleanup->refreshPolicy() != Cleanup::NoRefresh )
+	_activeOutputWindow = outputWindow;
+    emit startingCleanup( cleanup->cleanTitle() );
 
     switch ( cleanup->outputWindowPolicy() )
     {
@@ -404,7 +376,7 @@ void CleanupCollection::execute()
 	createRefresher( outputWindow, selection.parents() );
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
-	     this,         &CleanupCollection::cleanupFinished );
+             this,         &CleanupCollection::lastProcessFinished );
 
     // Process the raw FileInfoSet to eliminate duplicates.  For Cleanups
     // not containing the %p or %n variables, create a de-duplicated list of
@@ -425,6 +397,13 @@ void CleanupCollection::execute()
     }
 
     outputWindow->noMoreProcesses();
+}
+
+
+void CleanupCollection::lastProcessFinished( int totalErrorCount )
+{
+    _activeOutputWindow = nullptr;
+    emit cleanupFinished( totalErrorCount );
 }
 
 
@@ -512,12 +491,12 @@ void CleanupCollection::readSettings()
 	const int  outputWindowTimeout   = settings.value( "OutputWindowTimeout",   0     ).toInt();
 
 	const int refreshPolicy = settings.enumValue( "RefreshPolicy",
-						      Cleanup::NoRefresh,
-						      refreshMapping );
+	                                              Cleanup::NoRefresh,
+	                                              refreshMapping );
 
 	const int outputWindowPolicy = settings.enumValue( "OutputWindowPolicy",
-							   Cleanup::ShowAfterTimeout,
-							   outputWindowMapping );
+	                                                   Cleanup::ShowAfterTimeout,
+	                                                   outputWindowMapping );
 
 	if ( command.isEmpty() || title.isEmpty() )
 	{
@@ -526,12 +505,12 @@ void CleanupCollection::readSettings()
 	else
 	{
 	    Cleanup * cleanup = new Cleanup( this, active, title, command,
-					     recurse, askForConfirmation,
-					     static_cast<Cleanup::RefreshPolicy>( refreshPolicy ),
-					     worksForDir, worksForFile, worksForDotEntry,
-					     static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
-					     outputWindowTimeout, outputWindowAutoClose,
-					     shell );
+	                                     recurse, askForConfirmation,
+	                                     static_cast<Cleanup::RefreshPolicy>( refreshPolicy ),
+	                                     worksForDir, worksForFile, worksForDotEntry,
+	                                     static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
+	                                     outputWindowTimeout, outputWindowAutoClose,
+	                                     shell );
 	    add( cleanup );
 
 	    if ( !iconName.isEmpty() )
@@ -632,11 +611,15 @@ void CleanupCollection::moveToTrash()
     // Move all selected items to trash
     for ( const FileInfo * item : selectedItems )
     {
-	qApp->processEvents(); // give the output window a chance
+//	qApp->processEvents(); // give the output window a chance
 	if ( _trash->trash( item->path() ) )
 	    outputWindow->addStdout( tr( "Moved to trash: " ) + item->path() );
 	else
 	    outputWindow->addStderr( tr( "Move to trash failed for " ) + item->path() );
+
+	// Give the output window a chance to display before this loop completes
+	QEventLoop eventLoop;
+	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
     }
 
     outputWindow->noMoreProcesses();
@@ -649,5 +632,5 @@ void CleanupCollection::createRefresher( OutputWindow * outputWindow, const File
     Refresher * refresher = new Refresher( this, refreshSet );
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
-	     refresher,    &Refresher::refresh );
+             refresher,    &Refresher::refresh );
 }

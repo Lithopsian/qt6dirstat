@@ -430,7 +430,7 @@ Only Cleanups with icons appear in the main toolbar</string>
               <item>
                <widget class="QCheckBox" name="worksForFilesCheckBox">
                 <property name="toolTip">
-                 <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to directories:&lt;br/&gt;%n expands to the name of the file with no path;&lt;br/&gt;%d and %p expand to the full path of the parent directory.&lt;/p&gt;</string>
+                 <string>&lt;p style=&quot;white-space: pre&quot;&gt;Indicates whether this command can be applied to files (including symlinks and special files):&lt;br/&gt;%n expands to the name of the file with no path;&lt;br/&gt;%d and %p expand to the full path of the parent directory.&lt;/p&gt;</string>
                 </property>
                 <property name="text">
                  <string>&amp;Files</string>

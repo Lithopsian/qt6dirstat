@@ -291,6 +291,15 @@ namespace QDirStat
 	bool outputWindowAutoClose() const { return _outputWindowAutoClose; }
 
 	/**
+	 * The heart of the matter: perform the cleanup with the FileInfo
+	 * specified.
+	 *
+	 * 'outputWindow' is the optional dialog to watch the commands and
+	 * their stdout and stderr output as they are executed.
+	 **/
+	void execute( FileInfo * item, OutputWindow * outputWindow );
+
+	/**
 	 * From a FileInfoSet, create a list of unique items based
 	 * on the variables for this cleanup.  For %d (directories),
 	 * this will be a set of any directoiry items and the parents
@@ -326,18 +335,6 @@ namespace QDirStat
 	    { QAction::setIcon( QIcon::fromTheme( _iconName = iconName ) ); }
 
 
-    public slots:
-
-	/**
-	 * The heart of the matter: Perform the cleanup with the FileInfo
-	 * specified.
-	 *
-	 * 'outputWindow' is the optional dialog to watch the commands and
-	 * their stdout and stderr output as they are executed.
-	 **/
-	void execute( FileInfo * item, OutputWindow * outputWindow );
-
-
     protected:
 
 	/**
@@ -360,13 +357,6 @@ namespace QDirStat
 	 * defaultShell(). Return an empty string if no usable shell is found.
 	 **/
 	QString chooseShell( OutputWindow * outputWindow ) const;
-
-	/**
-	 * Run a command with 'item' as base to expand variables.
-	 **/
-	void runCommand( const FileInfo * item,
-	                 const QString  & command,
-	                 OutputWindow   * outputWindow) const;
 
 
     private:

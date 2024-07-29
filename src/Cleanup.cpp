@@ -400,6 +400,36 @@ namespace
 	return dir;
     }
 
+
+    /**
+     * Run a command with 'item' as base to expand variables.
+     **/
+    void runCommand( const QString  & shell,
+                     const FileInfo * item,
+                     const QString  & command,
+                     OutputWindow   * outputWindow )
+    {
+	if ( shell.isEmpty() )
+	{
+	    outputWindow->show(); // Regardless of user settings
+	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action" ) );
+	    logError() << "ERROR: No usable shell" << Qt::endl;
+	    return;
+	}
+
+	// Deliberately create with no parent so they aren't destroyed untidily at shutdown
+	QProcess * process = new QProcess();
+	process->setProgram( shell );
+	process->setArguments( { "-c", expandVariables( item, command ) } );
+	process->setWorkingDirectory( itemDir( item ) );
+	// logDebug() << "New process \"" << process << Qt::endl;
+
+	outputWindow->addProcess( process );
+
+	// CleanupCollection will take care of refreshing if it is
+	// configured for this cleanup
+    }
+
 } // namespace
 
 
@@ -429,7 +459,7 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
 
     // Perform cleanup for this item
     if ( worksFor( item ) )
-	runCommand( item, _command, outputWindow );
+	runCommand( chooseShell( outputWindow ), item, _command, outputWindow );
 }
 
 
@@ -513,34 +543,6 @@ FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
     }
 
     return parents;
-}
-
-
-void Cleanup::runCommand( const FileInfo * item,
-                          const QString  & command,
-                          OutputWindow   * outputWindow ) const
-{
-    const QString shell = chooseShell( outputWindow );
-
-    if ( shell.isEmpty() )
-    {
-	outputWindow->show(); // Regardless of user settings
-	outputWindow->addStderr( tr( "No usable shell - aborting cleanup action" ) );
-	logError() << "ERROR: No usable shell" << Qt::endl;
-	return;
-    }
-
-    // Deliberately create with no parent so they aren't destroyed untidily at shutdown
-    QProcess * process = new QProcess();
-    process->setProgram( shell );
-    process->setArguments( { "-c", expandVariables( item, command ) } );
-    process->setWorkingDirectory( itemDir( item ) );
-    // logDebug() << "New process \"" << process << Qt::endl;
-
-    outputWindow->addProcess( process );
-
-    // The CleanupCollection will take care about refreshing if this is
-    // configured for this cleanup.
 }
 
 

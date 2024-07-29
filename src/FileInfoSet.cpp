@@ -100,19 +100,7 @@ bool FileInfoSet::containsFile() const
 {
     for ( const FileInfo * item : *this )
     {
-	if ( item && item->isFile() )
-	    return true;
-    }
-
-    return false;
-}
-
-
-bool FileInfoSet::containsSpecial() const
-{
-    for ( const FileInfo * item : *this )
-    {
-	if ( item && item->isSpecial() )
+	if ( item && !item->isDirInfo() )
 	    return true;
     }
 

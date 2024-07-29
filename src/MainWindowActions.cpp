@@ -10,12 +10,7 @@
 #include <QMouseEvent>
 
 #include "MainWindow.h"
-#include "DirTree.h"
 #include "DiscoverActions.h"
-#include "FileInfo.h"
-#include "HistoryButtons.h"
-#include "QDirStatApp.h"
-#include "SelectionModel.h"
 #include "Version.h"
 
 
@@ -152,57 +147,6 @@ void MainWindow::connectTreemapAction( QAction * action, void( TreemapView::*act
 void MainWindow::connectFunctorAction( QAction * action, void( *actee )( void ) )
 {
     connect( action, &QAction::triggered, actee );
-}
-
-
-void MainWindow::updateActions()
-{
-    const bool       reading       = app()->dirTree()->isBusy();
-    const FileInfo * firstToplevel = app()->firstToplevel();
-    const bool       isTree        = firstToplevel && !reading;
-    const bool       pkgView       = firstToplevel && firstToplevel->isPkgInfo();
-
-    _ui->actionStopReading->setEnabled  ( reading );
-    _ui->actionRefreshAll->setEnabled   ( isTree );
-    _ui->actionAskReadCache->setEnabled ( !reading );
-    _ui->actionAskWriteCache->setEnabled( isTree && !pkgView && firstToplevel->isDirInfo() );
-
-    const FileInfoSet selectedItems     = app()->selectionModel()->selectedItems();
-    const bool        sel               = selectedItems.size() > 0;
-    const FileInfo  * first             = sel ? selectedItems.first() : nullptr;
-    const bool        selSizeOne        = !reading && selectedItems.size() == 1 && !pkgView;
-
-    _ui->actionRefreshSelected->setEnabled( selSizeOne && !first->isMountPoint() && !first->isExcluded() );
-    _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
-    _ui->actionReadExcluded->setEnabled   ( selSizeOne && first->isExcluded()   );
-
-    const FileInfo * currentItem       = app()->selectionModel()->currentItem();
-    const bool       pseudoDirSelected = selectedItems.containsPseudoDir();
-
-    _ui->actionCopyPath->setEnabled   ( isTree && currentItem );
-    _ui->actionFindFiles->setEnabled  ( firstToplevel );
-    _ui->actionMoveToTrash->setEnabled( !reading && sel && !pseudoDirSelected && !pkgView );
-
-    _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
-    _ui->actionGoToToplevel->setEnabled( firstToplevel );
-
-    _ui->actionCloseAllTreeLevels->setEnabled( firstToplevel );
-    _ui->menuExpandTreeToLevel->setEnabled   ( firstToplevel );
-
-    const bool showingTreemap = _ui->treemapView->isVisible();
-//    _ui->actionTreemapAsSidePanel->setEnabled( showingTreemap );
-    _ui->actionTreemapZoomTo->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
-    _ui->actionTreemapZoomIn->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
-    _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );
-    _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
-
-    for ( QAction * action : _ui->menuDiscover->actions() )
-    {
-	if ( action != _ui->actionShowFilesystems )
-	    action->setEnabled( isTree );
-    }
-
-    _historyButtons->updateActions();
 }
 
 
