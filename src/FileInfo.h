@@ -1056,9 +1056,7 @@ namespace QDirStat
 	return stream;
     }
 
-
 }	// namespace QDirStat
-
 
 #endif // ifndef FileInfo_h
 

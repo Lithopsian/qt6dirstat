@@ -291,5 +291,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // FileTypeStatsWindow_h

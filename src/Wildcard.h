@@ -144,7 +144,6 @@ namespace QDirStat
 	{}
     };
 
-
 }	// namespace QDirStat
 
 #endif	// Wildcard_h

@@ -57,6 +57,7 @@ namespace QDirStat
 	std::unique_ptr<Ui::GeneralConfigPage> _ui;
 
     }; // class GeneralConfigPage
-}
+
+} // namespace QDirStat
 
 #endif // GeneralConfigPage_h

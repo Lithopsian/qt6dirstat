@@ -124,6 +124,7 @@ namespace QDirStat
 
         return stream;
     }
-}
+
+} // namespace QDirStat
 
 #endif  // SearchFilter_h

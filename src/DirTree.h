@@ -492,11 +492,6 @@ namespace QDirStat
 	void deleteChild( FileInfo * child );
 
 	/**
-	 * Try to derive the cluster size from 'item'.
-	 **/
-	void detectClusterSize( const FileInfo * item );
-
-	/**
 	 * Clear all temporary exclude rules.
 	 **/
 	void clearTmpExcludeRules() { setTmpExcludeRules( nullptr ); }
@@ -522,6 +517,5 @@ namespace QDirStat
     };	// class DirTree
 
 }	// namespace QDirStat
-
 
 #endif // ifndef DirTree_h

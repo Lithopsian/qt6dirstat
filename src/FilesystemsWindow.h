@@ -220,8 +220,9 @@ namespace QDirStat
 	FileSize _freeSize;
 	bool     _isNetworkMount;
 	bool     _isReadOnly;
-    };
 
-}
+    }; // class FilesystemItem
+
+} // namespace QDirStat
 
 #endif	// FilesystemsWindow_h

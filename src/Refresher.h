@@ -62,7 +62,8 @@ namespace QDirStat
     private:
 
 	const FileInfoSet _items;
-    };
+
+    };	// class FileInfoSet
 
 }	// namespace QDirStat
 

@@ -117,5 +117,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // PacManPkgManager_h

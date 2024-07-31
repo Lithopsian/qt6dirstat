@@ -212,6 +212,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef PercentileStats_h
 

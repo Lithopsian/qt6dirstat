@@ -354,5 +354,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef HistogramView_h

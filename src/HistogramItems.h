@@ -58,5 +58,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef HistogramItems_h

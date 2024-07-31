@@ -314,7 +314,6 @@ namespace QDirStat
 
     };	// class MimeCategorizer
 
-
 }	// namespace QDirStat
 
 #endif	// MimeCategorizer_h

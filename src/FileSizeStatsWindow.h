@@ -156,9 +156,8 @@ namespace QDirStat
 	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
 	std::unique_ptr<FileSizeStats>           _stats;
 
-    };
+    }; // class FileSizeStatsWindow
 
 } // namespace QDirStat
-
 
 #endif // FileSizeStatsWindow_h

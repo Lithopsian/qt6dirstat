@@ -745,6 +745,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef DirInfo_h
 

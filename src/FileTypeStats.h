@@ -157,5 +157,4 @@ namespace QDirStat
     };
 }
 
-
 #endif // FileTypeStats_h

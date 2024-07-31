@@ -216,6 +216,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef CleanupCollection_h
 

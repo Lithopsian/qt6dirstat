@@ -57,10 +57,9 @@ namespace QDirStat
 	 **/
 	void collect( const FileInfo * subtree, const QString & suffix );
 
-    };
+    };	// class FileSizeStats
 
 }	// namespace QDirStat
-
 
 #endif // ifndef FileSizeStats_h
 

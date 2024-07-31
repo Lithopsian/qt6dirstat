@@ -57,5 +57,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// BusyPopup_h

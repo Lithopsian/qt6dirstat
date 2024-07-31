@@ -393,8 +393,8 @@ namespace QDirStat
 
 	return stream;
     }
-}	// namespace QDirStat
 
+}	// namespace QDirStat
 
 #endif // ifndef Cleanup_h
 

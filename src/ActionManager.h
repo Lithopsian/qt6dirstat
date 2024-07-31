@@ -173,5 +173,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// ActionManager_h

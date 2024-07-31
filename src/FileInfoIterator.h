@@ -389,6 +389,5 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // ifndef FileInfoIterator_h
 

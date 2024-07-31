@@ -412,5 +412,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // MountPoints_h

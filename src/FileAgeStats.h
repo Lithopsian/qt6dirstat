@@ -159,5 +159,4 @@ namespace QDirStat
 
 }       // namespace QDirStat
 
-
 #endif  // FileAgeStats_h

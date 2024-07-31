@@ -261,7 +261,6 @@ namespace QDirStat
 
     };	// class SelectionModelProxy
 
-
 }	// namespace QDirStat
 
 #endif	// SelectionModel_h

@@ -246,5 +246,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // LocateFilesWindow_h

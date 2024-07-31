@@ -218,5 +218,4 @@ namespace QDirStat
 
 }       // namespace QDirStat
 
-
 #endif // ifndef PkgInfo_h

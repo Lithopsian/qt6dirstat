@@ -276,5 +276,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// ifndef DpkgPkgManager

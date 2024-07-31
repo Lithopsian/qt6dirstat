@@ -149,7 +149,6 @@ namespace QDirStat
 	return stream;
     }
 
-
 }	// namespace QDirStat
 
 #endif	// DataColumns_h

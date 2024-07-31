@@ -134,5 +134,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// FileInfoSet_h
