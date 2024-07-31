@@ -215,7 +215,8 @@ namespace QDirStat
 	QString  _path;
 	int      _count;
 	FileSize _totalSize;
-    };
+
+    }; // class SuffixSearchResultItem
 
 } // namespace QDirStat
 

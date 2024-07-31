@@ -154,7 +154,8 @@ namespace QDirStat
 
 	FileSize    _totalSize { 0LL };
 
-    };
-}
+    }; // class FileTypeStats
+
+} // namespace QDirStat
 
 #endif // FileTypeStats_h

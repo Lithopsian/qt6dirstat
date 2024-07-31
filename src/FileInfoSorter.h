@@ -61,8 +61,8 @@ namespace QDirStat
 	DataColumn    _sortCol;
 	Qt::SortOrder _sortOrder;
 
-    };	   // class FileInfoSorter
+    }; // class FileInfoSorter
 
-}      // namespace QDirStat
+} // namespace QDirStat
 
 #endif // FileInfoSorter_h

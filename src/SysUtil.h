@@ -235,5 +235,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // SysUtil_h

@@ -518,5 +518,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef TreemapTile_h

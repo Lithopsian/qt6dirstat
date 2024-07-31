@@ -234,9 +234,10 @@ namespace QDirStat
 	DirInfo * _latestDir	{ nullptr }; // the latest drectory read from the cache file, parent to subsequent file children
 
 	QRegularExpression	_multiSlash { "//+" };
-    };
 
-}	// namespace QDirStat
+    }; // CacheReader
+
+} // namespace QDirStat
 
 #endif // ifndef DirTreeCache_h
 

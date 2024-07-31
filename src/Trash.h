@@ -171,5 +171,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// Trash_h

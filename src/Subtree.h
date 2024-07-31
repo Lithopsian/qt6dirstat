@@ -201,5 +201,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef Subtree_h
