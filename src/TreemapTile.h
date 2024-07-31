@@ -11,7 +11,6 @@
 #define TreemapTile_h
 
 #include <QGraphicsRectItem>
-#include <QTextStream>
 #include <QVector>
 
 #include "Typedefs.h" // FileSize
@@ -21,6 +20,7 @@
 
 
 class QGraphicsSceneMouseEvent;
+class QTextStream;
 
 
 namespace QDirStat

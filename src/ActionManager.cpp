@@ -17,6 +17,41 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Remove all actions from the given widget, which would normally
+     * be a menu or toolbar.
+     **/
+    void removeAllFromWidget( QWidget * widget )
+    {
+	if ( !widget )
+	    return;
+
+	const auto actions = widget->actions();
+	for ( QAction * action : actions )
+	    widget->removeAction( action );
+    }
+
+
+    /**
+     * Search the tree for the first QAction with the Qt object name
+     * 'actionName'. Return 0 if there is no such QAction.
+     **/
+    QAction * action( const QObject * tree, const QString & actionName )
+    {
+	QAction * action = tree->findChild<QAction *>( actionName );
+	if ( action )
+	    return action;
+
+	logError() << "No action with name " << actionName << " found" << Qt::endl;
+
+	return nullptr;
+    }
+
+} // namespace
+
+
 ActionManager * ActionManager::instance()
 {
     static ActionManager _instance;
@@ -25,41 +60,24 @@ ActionManager * ActionManager::instance()
 }
 
 
-void ActionManager::setActions( QWidget        * parent,
-                                SelectionModel * selectionModel,
-                                QToolBar       * toolBar,
-                                QMenu          * menu )
+void ActionManager::init( QWidget        * parent,
+                          SelectionModel * selectionModel,
+                          QToolBar       * toolBar,
+                          QMenu          * menu )
 {
     CHECK_PTR( parent );
+    CHECK_PTR( selectionModel );
+    CHECK_PTR( menu );
+    CHECK_PTR( toolBar );
 
-    instance()->addTree( parent );
-    instance()->setCleanupCollection( new CleanupCollection( parent, selectionModel, toolBar, menu ) );
+    _cleanupCollection = new CleanupCollection( parent, selectionModel, toolBar, menu );
 }
 
 
-QAction * ActionManager::action( const QString & actionName ) const
-{
-    for ( const auto & tree : _widgetTrees )
-    {
-	if ( tree ) // might have been destroyed
-	{
-	    QAction * action = tree->findChild<QAction *>( actionName );
-	    if ( action )
-		return action;
-	}
-    }
-
-    logError() << "No action with name " << actionName << " found" << Qt::endl;
-
-    return nullptr;
-}
-
-
-bool ActionManager::addActions( QWidget *           widget,
+void ActionManager::addActions( QWidget           * widget,
                                 const QStringList & actionNames,
-                                bool                enabledOnly  )
+                                bool                enabledOnly  ) const
 {
-    bool foundAll = true;
     QMenu * menu = qobject_cast<QMenu *>( widget );
 
     for ( const QString & actionName : actionNames )
@@ -69,37 +87,26 @@ bool ActionManager::addActions( QWidget *           widget,
 	    if ( menu )
 		menu->addSeparator();
 	}
+	else if ( actionName == cleanups() )
+	{
+	    if ( _cleanupCollection )
+	    {
+		if ( enabledOnly )
+		    _cleanupCollection->addEnabled( widget );
+		else
+		    _cleanupCollection->addActive( widget );
+	    }
+	}
 	else
 	{
-	    QAction * act = action( actionName );
+	    QAction * act = action( _cleanupCollection->parent(), actionName );
 	    if ( act )
 	    {
 		if ( act->isEnabled() || !enabledOnly )
                     widget->addAction( act );
             }
-	    else
-	    {
-		// ActionManager::action() already logs an error if not found
-		foundAll = false;
-	    }
 	}
     }
-
-    return foundAll;
-}
-
-
-void ActionManager::addActiveCleanups( QWidget * widget )
-{
-    if ( instance()->_cleanupCollection )
-	instance()->_cleanupCollection->addActive( widget );
-}
-
-
-void ActionManager::addEnabledCleanups( QWidget * widget )
-{
-    if ( instance()->_cleanupCollection )
-	instance()->_cleanupCollection->addEnabled( widget );
 }
 
 
@@ -119,4 +126,41 @@ void ActionManager::swapActions( QWidget * widget,
 
     widget->insertAction( actionToRemove, actionToAdd );
     widget->removeAction( actionToRemove );
+}
+
+
+QMenu * ActionManager::createMenu( const QStringList & actions, const QStringList & enabledActions )
+{
+    QMenu * menu = new QMenu {};
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    instance()->_menu = menu;
+
+    addActions( menu, actions );
+    addEnabledActions( menu, enabledActions );
+    instance()->_menuActiveActions = actions;
+    instance()->_menuEnabledActions = enabledActions;
+
+    return menu;
+}
+
+
+void ActionManager::updateMenu()
+{
+    // Make sure the Cleanups are up-to-date
+    _cleanupCollection->updateActions();
+
+    if ( !_menu )
+    {
+	// No context menu, clear out any action names that may have been saved
+	_menuActiveActions.clear();
+	_menuEnabledActions.clear();
+	return;
+    }
+
+    // Remove all actions from this menu
+    removeAllFromWidget( _menu );
+
+    // Add the actions provided for the context menu, including any cleanups
+    addActions( _menu, _menuActiveActions );
+    addEnabledActions( _menu, _menuEnabledActions );
 }

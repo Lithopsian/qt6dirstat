@@ -36,25 +36,6 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Remove all actions from the given widget, which would normally
-     * be a menu or toolbar.
-     **/
-    void removeAllFromWidget( QWidget * widget )
-    {
-	if ( !widget )
-	    return;
-
-	const auto actions = widget->actions();
-	for ( QAction * action : actions )
-	{
-	    Cleanup * cleanup = qobject_cast<Cleanup *>( action );
-	    if ( cleanup )
-		widget->removeAction( cleanup );
-	}
-    }
-
-
-    /**
      * Return the URLs for the selected item types in 'items':
      * directories (including dot entries) or files.
      **/
@@ -187,18 +168,12 @@ CleanupCollection::CleanupCollection( QObject        * parent,
                                       QToolBar       * toolBar,
                                       QMenu          * menu ):
     QObject { parent },
+    _trash { new Trash() },
     _selectionModel { selectionModel },
-    _trash { new Trash() }
+    _toolBar { toolBar },
+    _menu { menu }
 {
     readSettings();
-
-    // Add to the toolbar and menu, and keep these in sync with this object
-    addToToolBar( toolBar );
-    addToMenu( menu );
-
-    // Available Cleanups depend on the currently-selected items
-    connect( selectionModel, QOverload<>::of( &SelectionModel::selectionChanged ),
-             this,           &CleanupCollection::updateActions );
 }
 
 
@@ -214,8 +189,6 @@ void CleanupCollection::add( Cleanup * cleanup )
 
     connect( cleanup, &Cleanup::triggered,
              this,    &CleanupCollection::execute );
-
-    updateMenusAndToolBars();
 }
 
 
@@ -245,16 +218,6 @@ void CleanupCollection::clear()
 {
     qDeleteAll( _cleanupList );
     _cleanupList.clear();
-
-    // No need for updateMenusAndToolBars() since QObject/QWidget will take
-    // care of deleted actions all by itself.
-}
-
-
-void CleanupCollection::updateMenusAndToolBars()
-{
-    updateMenus();
-    updateToolBars();
 }
 
 
@@ -286,38 +249,6 @@ void CleanupCollection::updateActions()
 	                    ( !dotEntrySelected || cleanup->worksForDotEntry() ) &&
 	                    ( !fileSelected     || cleanup->worksForFile() );
 	cleanup->setEnabled( enable );
-    }
-}
-
-
-void CleanupCollection::updateMenus()
-{
-    // Remove QPointers that have become invalid
-    _menus.removeAll( nullptr );
-
-    for ( QMenu * menu : asConst( _menus ) )
-    {
-	// Remove all Cleanups from this menu
-	removeAllFromWidget( menu );
-
-	// Add the current cleanups in the current order
-	addToMenu( menu );
-    }
-}
-
-
-void CleanupCollection::updateToolBars()
-{
-    // Remove QPointers that have become invalid
-    _toolBars.removeAll( nullptr );
-
-    for ( QToolBar * toolBar : asConst( _toolBars ) )
-    {
-	// Remove all Cleanups from this tool bar
-	removeAllFromWidget( toolBar );
-
-	// Add the current cleanups in the current order
-	addToToolBar( toolBar );
     }
 }
 
@@ -407,17 +338,6 @@ void CleanupCollection::lastProcessFinished( int totalErrorCount )
 }
 
 
-void CleanupCollection::addToMenu( QMenu * menu )
-{
-    CHECK_PTR( menu );
-
-    addActive( menu );
-
-    if ( !_menus.contains( menu ) )
-	_menus << menu;
-}
-
-
 void CleanupCollection::addActive( QWidget * widget ) const
 {
     CHECK_PTR( widget );
@@ -453,9 +373,6 @@ void CleanupCollection::addToToolBar( QToolBar * toolBar )
 	if ( cleanup->isActive() && !cleanup->icon().isNull() )
 	    toolBar->addAction( cleanup );
     }
-
-    if ( !_toolBars.contains( toolBar ) )
-	_toolBars << toolBar;
 }
 
 
@@ -527,6 +444,11 @@ void CleanupCollection::readSettings()
         addStdCleanups();
 
     updateActions();
+
+    // All Cleanups will be gone (or not yet created) from the toolbar and menu ...
+    // ... so add them back
+    addToToolBar( _toolBar );
+    addActive( _menu );
 }
 
 
@@ -611,7 +533,6 @@ void CleanupCollection::moveToTrash()
     // Move all selected items to trash
     for ( const FileInfo * item : selectedItems )
     {
-//	qApp->processEvents(); // give the output window a chance
 	if ( _trash->trash( item->path() ) )
 	    outputWindow->addStdout( tr( "Moved to trash: " ) + item->path() );
 	else

@@ -13,7 +13,6 @@
 #include <QList>
 
 #include "DirInfo.h"
-#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -177,7 +176,7 @@ namespace QDirStat
         /**
          * Returns the package scheme prefix.
          **/
-        static QLatin1String pkgScheme() { return "Pkg:/"_L1; }
+        static QLatin1String pkgScheme() { return QLatin1String( "Pkg:/" ); }
 
 
     private:

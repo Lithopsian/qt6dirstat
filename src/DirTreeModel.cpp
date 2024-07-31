@@ -564,7 +564,6 @@ void DirTreeModel::setBaseFont( const QFont & font )
 void DirTreeModel::createTree()
 {
     _tree = new DirTree( this );
-    _tree->setExcludeRules();
 
     connect( _tree, &DirTree::startingReading,
 	     this,  &DirTreeModel::startingRead );

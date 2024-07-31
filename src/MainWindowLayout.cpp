@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <QContextMenuEvent>
 #include <QActionGroup>
+#include <QContextMenuEvent>
 
 #include "MainWindow.h"
 #include "ActionManager.h"
@@ -216,22 +216,21 @@ void MainWindow::contextMenuEvent( QContextMenuEvent * event )
     {
         if ( widget == _ui->centralWidget )
         {
-            QMenu menu;
-            const QStringList actions1 { "actionLayout1",
-                                         "actionLayout2",
-                                         "actionLayout3",
-                                         ActionManager::separator(),
-                                         "actionShowBreadcrumbs",
-                                         "actionShowDetailsPanel",
-                                         "actionShowDirTree",
-                                         "actionShowTreemap",
-//                                         ActionManager::separator(),
-//                                         "actionTreemapOnSide",
-//                                         "actionDetailsWithTreemap",
+            const QStringList actions { "actionLayout1",
+                                        "actionLayout2",
+                                        "actionLayout3",
+                                        ActionManager::separator(),
+                                        "actionShowBreadcrumbs",
+                                        "actionShowDetailsPanel",
+                                        "actionShowDirTree",
+                                        "actionShowTreemap",
+//                                        ActionManager::separator(),
+//                                        "actionTreemapOnSide",
+//                                        "actionDetailsWithTreemap",
                                        };
-            ActionManager::addActions( &menu, actions1 );
+            QMenu * menu = ActionManager::createMenu( actions, {} );
+            menu->exec( event->globalPos() );
 
-            menu.exec( event->globalPos() );
             return;
         }
         widget = widget->parentWidget();

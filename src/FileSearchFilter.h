@@ -10,8 +10,6 @@
 #ifndef FileSearchFilter_h
 #define FileSearchFilter_h
 
-#include <QTextStream>
-
 #include "SearchFilter.h"
 #include "Typedefs.h" // _L1
 

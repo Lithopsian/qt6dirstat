@@ -500,7 +500,7 @@ void MimeCategorizer::addDefaultCategories()
                  "*.7z, *.arj, *.bz2, *.cab, *.cpio.gz, *.gz, *.jmod, " \
                  "*.jsonlz4, *.lz, *.lzo, *.rar, *.tar.bz2, *.tar.gz, " \
                  "*.tar.lz, *.tar.lzo, *.tar.xz, *.tar.zst, *.tbz2, "   \
-                 "*.tgz, *.txz, *.tz2, *.tzst, *.xz, *.zip, *.zst",
+                 "*.tgz, *.txz, *.tz2, *.tzst, *.xz, *.zip, *.zpaq, *.zst",
                  "pack-*.pack" );
 
     addCategory( tr( "archive (uncompressed)" ),
@@ -532,13 +532,13 @@ void MimeCategorizer::addDefaultCategories()
 
     addCategory( tr( "document" ),
                  "#66ccff",
-                 "*.css, *.csv, *.doc, *.docbook, *.docx, *.dotx, *.dvi, "        \
-                 "*.dvi.bz2, *.epub, *.htm, *.html, *.json, *.latex, *.log, "     \
-                 "*.md, *.pdf, *.pod, *.potx, *.ppsx, *.ppt, *.pptx, *.ps, "      \
-                 "*.readme, *.rst, *.sav, *.sdc, *.sdc.gz, *.sdd, *.sdp, *.sdw, " \
-                 "*.sla, *.sla.gz, *.slaz, *.sxi, *.tex, *.txt, *.xls, *.xlsx, "  \
+                 "*.css, *.csv, *.doc, *.docbook, *.docx, *.dotx, *.dvi, "         \
+                 "*.dvi.bz2, *.epub, *.htm, *.html, *.json, *.latex, *.log, "      \
+                 "*.ly, *.md, *.pdf, *.pod, *.potx, *.ppsx, *.ppt, *.pptx, *.ps, " \
+                 "*.readme, *.rst, *.sav, *.sdc, *.sdc.gz, *.sdd, *.sdp, *.sdw, "  \
+                 "*.sla, *.sla.gz, *.slaz, *.sxi, *.tex, *.txt, *.xls, *.xlsx, "   \
                  "*.xlt, *.xml, copyright, readme*",
-                 "*.list, *.log.0, *.log.1, *.odc, *.odg, *.odp, *.ods, *.odt, "  \
+                 "*.list, *.log.0, *.log.1, *.odc, *.odg, *.odp, *.ods, *.odt, " \
                  "*.otc, *.otp, *.ots, *.ott" );
 
     addCategory( tr( "font" ),
@@ -570,13 +570,14 @@ void MimeCategorizer::addDefaultCategories()
 
     addCategory( tr( "junk" ),
                  Qt::red,
-                 "*.bak, *.keep, *.old, *.~",
+                 "*.bak, *.keep, *.old, *.orig, *.~",
                  "core" );
 
     addCategory( tr( "music" ),
                  Qt::yellow,
-                 "*.aac, *.ape, *.f4a, *.f4b, *.flac, *.m4a, *.m4b, *.mid, *.mka, " \
-                 "*.mp3, *.oga, *.ogg, *.opus, *.ra, *.rax, *.wav, *.wma",
+                 "*.aac, *.aif, *.ape, *.caf, *.dff, *.dsf, *.f4a, *.f4b, *.flac, " \
+                 "*.m4a, *.m4b, *.mid, *.mka, *.mp3, *.oga, *.ogg, *.opus, *.ra, "  \
+                 "*.rax, *.w64, *.wav, *.wma, *.wv, *.wvc",
                  QString() );
 
     addCategory( tr( "object file" ),
@@ -618,8 +619,8 @@ void MimeCategorizer::addDefaultCategories()
 
     addCategory( tr( "video" ),
                  "#aa44ff",
-                 "*.asf, *.avi, *.divx, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, " \
-                 "*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.ogm, *.ogv, *.rm, "
+                 "*.asf, *.avi, *.divx, *.dv, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, " \
+                 "*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.mts, *.ogm, *.ogv, *.rm, "   \
                  "*.vdr, *.vob, *.webm, *.wmp, *.wmv",
                  QString() );
 

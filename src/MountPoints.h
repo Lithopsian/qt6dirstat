@@ -12,7 +12,6 @@
 
 #include <memory>
 
-#include <QList>
 #include <QStringList>
 #include <QTextStream>
 

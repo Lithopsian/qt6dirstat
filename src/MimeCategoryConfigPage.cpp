@@ -14,11 +14,11 @@
 #include "ConfigDialog.h"
 #include "DirTree.h"
 #include "DirInfo.h"
+#include "FormatUtil.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
 #include "MimeCategory.h"
 #include "QDirStatApp.h"
-#include "FormatUtil.h"
 
 
 // This is a mess that became necessary because Qt's moc cannot handle template
@@ -154,7 +154,7 @@ void MimeCategoryConfigPage::fillListWidget()
 {
     //logDebug() << listWidget()->count() << ", " << currentRow << Qt::endl;
 
-    for ( const MimeCategory * mimeCategory : MimeCategorizer::instance()->categories() )
+    for ( const MimeCategory * mimeCategory : *( MimeCategorizer::instance() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real categories
 	MimeCategory * category = new MimeCategory( *mimeCategory );

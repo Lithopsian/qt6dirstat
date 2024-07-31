@@ -89,7 +89,7 @@ void CleanupConfigPage::applyChanges()
     CleanupCollection * collection = ActionManager::cleanupCollection();
     for ( auto itOld = collection->cbegin(), itNew = cleanups.cbegin();
           itOld != collection->cend() || itNew != cleanups.cend();
-	  ++itOld, ++itNew )
+          ++itOld, ++itNew )
     {
 	// If we ran past the end of either list, or the cleanups don't match ...
 	if ( itNew == cleanups.cend() || itOld == collection->cend() || **itOld != **itNew )
@@ -105,7 +105,7 @@ void CleanupConfigPage::fillListWidget()
 {
     listWidget()->clear();
 
-    for ( const Cleanup * cleanup : ActionManager::cleanupCollection()->cleanupList() )
+    for ( const Cleanup * cleanup : *ActionManager::cleanupCollection() )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	Cleanup * newCleanup = new Cleanup( cleanup );
