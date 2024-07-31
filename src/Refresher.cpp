@@ -27,13 +27,14 @@ void Refresher::refresh()
     {
 	//logDebug() << "Refreshing " << _items.size() << " items" << Qt::endl;
 
-	DirTree * tree = _items.first()->tree();
-	if ( tree )
+	// Only attempt to refresh if the first item at least is still valid
+	const FileInfo * item = _items.first();
+	if ( item && item->checkMagicNumber() && item->tree() )
 	{
 	    // This can throw when refreshing the root if it is no longer accessible
 	    try
 	    {
-		tree->refresh( _items );
+		item->tree()->refresh( _items );
 	    }
 	    catch ( const SysCallFailedException & ex )
 	    {
