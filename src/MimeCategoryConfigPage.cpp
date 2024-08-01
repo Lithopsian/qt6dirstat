@@ -412,10 +412,9 @@ void MimeCategoryConfigPage::setPatternList( QPlainTextEdit    * textEdit,
 void * MimeCategoryConfigPage::createValue()
 {
     // ListEditor is making a new row in the category list
-    MimeCategory * category = new MimeCategory( "", Qt::white );
     _dirty = true;
 
-    return category;
+    return new MimeCategory();
 }
 
 
