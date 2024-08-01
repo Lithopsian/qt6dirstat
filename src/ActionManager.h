@@ -102,12 +102,14 @@ namespace QDirStat
 
 	/**
 	 * Create and return a menu containing the given actions.  For now,
-	 * this function only supports one list of actions added if they are
-	 * active and one list of actions added only if they are enabled,
-	 * with the "enabled" list being placed on the menu after the "active"
-	 * list.
+	 * this function only supports one list of actions always added (or
+	 * if they are active for cleanups), and one list of actions added
+	 * only if they are enabled, with the "enabled" list being placed
+	 * on the menu after the "active" list.  None of the callers
+	 * currently need anything more generic and complex than this.
 	 *
-	 * The menu object will delete itself when the menu closes.
+	 * The returned QMenu object will automatically delete itself when
+	 * it closes.
 	 **/
 	static QMenu * createMenu( const QStringList & actions,
 	                           const QStringList & enabledActions );
@@ -153,7 +155,10 @@ namespace QDirStat
 	                 bool                enabledOnly) const;
 
 	/**
-	 * Update CleanupCollection actions and any open context menu.
+	 * Update any open menu that was created with the createMenu()
+	 * fuction. All actions matching the stored enabled actions list are
+	 * removed from the end of the menu and then replaced with the
+	 * currently-enabled actions from that list.
 	 **/
 	void updateMenu();
 
@@ -166,7 +171,6 @@ namespace QDirStat
 
 	CleanupCollection * _cleanupCollection;
 	QPointer<QMenu>     _menu;
-	QStringList         _menuActiveActions;
 	QStringList         _menuEnabledActions;
 
     };	// class ActionManager

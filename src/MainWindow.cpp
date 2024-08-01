@@ -38,7 +38,6 @@
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "Settings.h"
 #include "SignalBlocker.h"
 #include "SysUtil.h"
 #include "UnreadableDirsWindow.h"

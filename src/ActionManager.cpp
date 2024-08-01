@@ -10,6 +10,7 @@
 #include <QMenu>
 
 #include "ActionManager.h"
+#include "Cleanup.h"
 #include "CleanupCollection.h"
 #include "Exception.h"
 
@@ -20,17 +21,53 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Remove all actions from the given widget, which would normally
-     * be a menu or toolbar.
+     * Remove actions in 'actionsNames' from the widget, which will
+     * typically be a menu.  Start at the end of the list and remove
+     * actions until one is reached that is not in the list.
+     *
+     * This slightly complicated approach avoids the "active actions"
+     * part of the menu flickering even though it can't change while
+     * the menu is open.  It also means the active action names list
+     * doesn't need to be stored.
      **/
-    void removeAllFromWidget( QWidget * widget )
+    void removeFromWidget( QWidget * menu, const QStringList & actionNames )
     {
-	if ( !widget )
+	if ( !menu || actionNames.isEmpty() )
 	    return;
 
-	const auto actions = widget->actions();
-	for ( QAction * action : actions )
-	    widget->removeAction( action );
+	int pos = actionNames.size() - 1;
+	const auto menuActions = menu->actions();
+	for ( auto it = menuActions.crbegin(); it != menuActions.crend() && pos >= 0; ++it )
+	{
+	    QAction * menuAction = *it;
+
+	    // Action name "<Cleanups>", remove actions until one that isn't a Cleanup
+	    if ( actionNames[ pos ] == ActionManager::cleanups() )
+	    {
+		if ( qobject_cast<Cleanup *>( menuAction ) )
+		{
+		    // Remove a Cleanup, keep looking for more
+		    menu->removeAction( menuAction );
+		    continue;
+		}
+
+		//  Not a Cleanup, move on to the next (previous) action in the list
+		--pos;
+	    }
+
+	    // Search the list (backwards) for a match
+	    while ( menuAction->objectName() != actionNames[ pos ] &&
+	            ( !menuAction->isSeparator() || actionNames[ pos ] != ActionManager::separator() ) )
+	    {
+		// End of the list, can't be any more actions to remove
+		if ( --pos < 0 )
+		    return;
+	    }
+
+	    // Remove a matching action and move to the next (previous) name in the list
+	    menu->removeAction( menuAction );
+	    --pos;
+	}
     }
 
 
@@ -129,16 +166,17 @@ void ActionManager::swapActions( QWidget * widget,
 }
 
 
-QMenu * ActionManager::createMenu( const QStringList & actions, const QStringList & enabledActions )
+QMenu * ActionManager::createMenu( const QStringList & actions,
+                                   const QStringList & enabledActions )
 {
     QMenu * menu = new QMenu {};
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    instance()->_menu = menu;
-
     addActions( menu, actions );
     addEnabledActions( menu, enabledActions );
-    instance()->_menuActiveActions = actions;
-    instance()->_menuEnabledActions = enabledActions;
+
+    ActionManager * actionManager = instance();
+    actionManager->_menu = menu;
+    actionManager->_menuEnabledActions = enabledActions;
 
     return menu;
 }
@@ -152,15 +190,13 @@ void ActionManager::updateMenu()
     if ( !_menu )
     {
 	// No context menu, clear out any action names that may have been saved
-	_menuActiveActions.clear();
 	_menuEnabledActions.clear();
 	return;
     }
 
-    // Remove all actions from this menu
-    removeAllFromWidget( _menu );
+    // Remove enabled actions from the menu
+    removeFromWidget( _menu, _menuEnabledActions );
 
-    // Add the actions provided for the context menu, including any cleanups
-    addActions( _menu, _menuActiveActions );
+    // Add the enabled actions originally provided for the context menu, including any cleanups
     addEnabledActions( _menu, _menuEnabledActions );
 }

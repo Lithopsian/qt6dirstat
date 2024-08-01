@@ -75,7 +75,8 @@ namespace QDirStat
 	 * Return the cleanup with the specified index or 0 if the index is out
 	 * of range.
 	 **/
-	const Cleanup * at( int index ) const;
+	const Cleanup * at( int index ) const
+	    { return index >= 0 && index < _cleanupList.size() ? _cleanupList.at( index ) : nullptr; }
 
 	/**
 	 * Return the number of cleanup actions in this collection.

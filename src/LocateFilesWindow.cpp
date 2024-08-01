@@ -196,9 +196,8 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
     if ( !_ui->treeWidget->itemAt( pos ) )
 	return;
 
-    const QStringList actions1 { "actionCopyPath", "actionMoveToTrash" };
-    const QStringList actions2 { ActionManager::separator(), ActionManager::cleanups() };
-    QMenu * menu = ActionManager::createMenu( actions1, actions2 );
+    QMenu * menu = ActionManager::createMenu( { "actionCopyPath", "actionMoveToTrash" },
+                                              { ActionManager::separator(), ActionManager::cleanups() } );
     menu->exec( _ui->treeWidget->mapToGlobal( pos ) );
 }
 

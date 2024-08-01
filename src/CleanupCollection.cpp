@@ -205,15 +205,6 @@ void CleanupCollection::addStdCleanups()
 }
 
 
-const Cleanup * CleanupCollection::at( int index ) const
-{
-    if ( index >= 0 && index < _cleanupList.size() )
-	return _cleanupList.at( index );
-
-    return nullptr;
-}
-
-
 void CleanupCollection::clear()
 {
     qDeleteAll( _cleanupList );
@@ -364,8 +355,6 @@ void CleanupCollection::addEnabled( QWidget * widget ) const
 
 void CleanupCollection::addToToolBar( QToolBar * toolBar )
 {
-    CHECK_PTR( toolBar );
-
     for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {
 	// Add only cleanups that have an icon to avoid overcrowding the
