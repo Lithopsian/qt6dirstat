@@ -211,29 +211,24 @@ void MainWindow::showBars()
 
 void MainWindow::contextMenuEvent( QContextMenuEvent * event )
 {
-    QWidget * widget = QApplication::widgetAt( event->globalPos() );
-    while ( widget->parentWidget() )
+    if ( _ui->centralWidget->underMouse() )
     {
-        if ( widget == _ui->centralWidget )
-        {
-            const QStringList actions { "actionLayout1",
-                                        "actionLayout2",
-                                        "actionLayout3",
-                                        ActionManager::separator(),
-                                        "actionShowBreadcrumbs",
-                                        "actionShowDetailsPanel",
-                                        "actionShowDirTree",
-                                        "actionShowTreemap",
+        const QStringList actions { "actionLayout1",
+                                    "actionLayout2",
+                                    "actionLayout3",
+                                    ActionManager::separator(),
+                                    "actionShowBreadcrumbs",
+                                    "actionShowDetailsPanel",
+                                    "actionShowDirTree",
+                                    "actionShowTreemap",
 //                                        ActionManager::separator(),
 //                                        "actionTreemapOnSide",
 //                                        "actionDetailsWithTreemap",
-                                       };
-            QMenu * menu = ActionManager::createMenu( actions, {} );
-            menu->exec( event->globalPos() );
+                                   };
+        QMenu * menu = ActionManager::createMenu( actions, {} );
+        menu->exec( event->globalPos() );
 
-            return;
-        }
-        widget = widget->parentWidget();
+        return;
     }
 
     QMenu * menu = createPopupMenu();

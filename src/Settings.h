@@ -10,6 +10,7 @@
 #ifndef Settings_h
 #define Settings_h
 
+#include <QAction>
 #include <QColor>
 #include <QCoreApplication>
 #include <QFont>
@@ -166,6 +167,18 @@ namespace QDirStat
 	    { if ( !contains( key ) ) setFontValue( key, value ); }
 	void setDefaultValue( const char * key, const ColorList & value )
 	    { if ( !contains( key ) ) setColorListValue( key, value ); }
+
+	/**
+	 * Read the hotkey setting for an action and apply it if it is a valid
+	 * key sequence.  An empty string is valid and means there will be no
+	 * hotkey for that action.
+	 *
+	 * If there is no empty or valid shortcut, then the hotkey already
+	 * configured for the action is written to the Settings, so errors are
+	 * "corrected" and the settings file will contain a list of all the
+	 * configurable actions.
+	 **/
+	void applyActionHotkey( QAction * action );
 
 	/**
 	 * Read window settings (size and position) from the settings and apply

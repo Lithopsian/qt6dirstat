@@ -57,34 +57,34 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 
     MountPoints::reload();
     initWidgets();
-    Settings::readWindowSettings( this, "FilesystemsWindow" );
+    readSettings();
 
     connect( this,                &FilesystemsWindow::readFilesystem,
-	     app()->mainWindow(), &MainWindow::readFilesystem );
+             app()->mainWindow(), &MainWindow::readFilesystem );
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
-	     this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::refresh );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
-	     this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::refresh );
 
     connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
-	      this,               &FilesystemsWindow::contextMenu);
+              this,               &FilesystemsWindow::contextMenu);
 
     connect( _ui->fsTree,         &QTreeWidget::itemDoubleClicked,
-	     _ui->actionRead,     &QAction::triggered );
+             _ui->actionRead,     &QAction::triggered );
 
     connect( _ui->readButton,     &QAbstractButton::clicked,
-	     _ui->actionRead,     &QAction::triggered );
+             _ui->actionRead,     &QAction::triggered );
 
     connect( _ui->actionRead,     &QAction::triggered,
-	     this,                &FilesystemsWindow::readSelectedFilesystem );
+             this,                &FilesystemsWindow::readSelectedFilesystem );
 
     connect( _ui->actionCopy,     &QAction::triggered,
-	     this,                &FilesystemsWindow::copyDeviceToClipboard );
+             this,                &FilesystemsWindow::copyDeviceToClipboard );
 
     connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
-	     this,                &FilesystemsWindow::enableActions );
+             this,                &FilesystemsWindow::enableActions );
 }
 
 
@@ -102,6 +102,18 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FilesystemsWindow( parent );
 
     return _sharedInstance;
+}
+
+
+void FilesystemsWindow::readSettings()
+{
+    Settings::readWindowSettings( this, "FilesystemsWindow" );
+
+    Settings settings;
+    settings.beginGroup( "FilesystemsWindow" );
+    settings.applyActionHotkey( _ui->actionRead );
+    settings.applyActionHotkey( _ui->actionCopy );
+    settings.endGroup();
 }
 
 

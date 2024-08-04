@@ -102,6 +102,11 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Read the window and hotkey settings.
+	 **/
+	void readSettings();
+
+	/**
 	 * Populate the window with all normal filesystems. Bind mounts,
 	 * filesystems mounted several times and Btrfs subvolumes are excluded.
 	 **/

@@ -113,6 +113,11 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Read the window and hotkey settings.
+	 **/
+	void readSettings();
+
+	/**
 	 * One-time initialization of the widgets in this window.
 	 **/
 	void initWidgets();

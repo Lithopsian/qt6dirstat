@@ -594,9 +594,6 @@
    <property name="shortcut">
     <string>Alt+Up</string>
    </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
-   </property>
   </action>
   <action name="actionGoToToplevel">
    <property name="icon">
@@ -611,9 +608,6 @@
    </property>
    <property name="shortcut">
     <string>Alt+Home</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionAbout">
@@ -1125,8 +1119,8 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>313</x>
-     <y>250</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>313</x>

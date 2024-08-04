@@ -276,6 +276,29 @@ void Settings::setEnumValue( const char                * key,
 }
 
 
+void Settings::applyActionHotkey( QAction * action )
+{
+    const QString actionName { action->objectName() };
+    if ( actionName.isEmpty() ) // separators, menus, Cleanups, etc., just in case
+	return;
+
+    if ( contains( actionName ) )
+    {
+	const QString shortcut { value( actionName ).toString() };
+	const QKeySequence hotkey { shortcut };
+	if ( shortcut.isEmpty() || !hotkey.isEmpty() )
+	{
+	    // Put any empty or valid key sequence on the action even if it's already set
+	    action->setShortcut( hotkey.toString() );
+	    return;
+	}
+    }
+
+    // Use the .ui shortcut as the default setting
+    setValue( actionName, action->shortcut().toString() );
+}
+
+
 void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup )
 {
     QDirStat::Settings settings;
