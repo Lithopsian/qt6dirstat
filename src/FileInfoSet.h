@@ -17,7 +17,7 @@
 
 namespace QDirStat
 {
-	class FileInfo;
+    class FileInfo;
 
     /**
      * Container for FileInfo pointers. This is a wrapper around QSet with a
@@ -57,15 +57,11 @@ namespace QDirStat
 	bool containsDir() const;
 
 	/**
-	 * Return 'true' if the set contains any file item.
+	 * Return 'true' if the set contains any file item.  "File" here
+	 * is in the broadest sense, ie. anything that isn't a DirInfo, not
+	 * just regular files.
 	 **/
 	bool containsFile() const;
-
-	/**
-	 * Return 'true' if the set contains any special file,
-	 * i.e., a char or block device, a FIFO, or a socket.
-	 **/
-	bool containsSpecial() const;
 
 	/**
 	 * Return 'true' if the set contains any PkgInfo item.
@@ -137,6 +133,5 @@ namespace QDirStat
     };	// class FileInfoSet
 
 }	// namespace QDirStat
-
 
 #endif	// FileInfoSet_h

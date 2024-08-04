@@ -42,6 +42,7 @@ namespace QDirStat
     typedef QHash<QString, const MimeCategory *>  ExactMatches;
     typedef QMultiHash<QString, WildcardPair>     SuffixMatches;
     typedef QList<const MimeCategory *>           MimeCategoryList;
+    typedef MimeCategoryList::const_iterator      MimeCategoryIterator;
 
     /**
      * Class to determine the MimeCategory of filenames.
@@ -135,9 +136,16 @@ namespace QDirStat
 	const MimeCategory * category( const FileInfo * item, QString * suffix_ret );
 
 	/**
-	 * Return the MimeCategories list.
+	 * Return a const iterator for the first category.
 	 **/
-	const MimeCategoryList & categories() const { return _categories; }
+	MimeCategoryIterator begin() const { return cbegin(); }
+	MimeCategoryIterator cbegin() const { return _categories.cbegin(); }
+
+	/**
+	 * Return a const iterator for past the last category.
+	 **/
+	MimeCategoryIterator end() const { return cend(); }
+	MimeCategoryIterator cend() const { return _categories.cend(); }
 
 	/**
 	 * Replace the existing category list wih a new list.  The new categories
@@ -305,7 +313,6 @@ namespace QDirStat
 	QReadWriteLock      _lock;
 
     };	// class MimeCategorizer
-
 
 }	// namespace QDirStat
 

@@ -161,6 +161,7 @@ namespace QDirStat
         QStringList _items;
 
     };  // class History
-}
+
+} // namespace QDirStat
 
 #endif  // History_h

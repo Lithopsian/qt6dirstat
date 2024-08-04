@@ -12,9 +12,7 @@
 
 #include <memory>
 
-#include <QList>
 #include <QObject>
-#include <QPointer>
 
 
 class QMenu;
@@ -43,7 +41,9 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor.  The toolbar and menu are stored and kept in sync
+	 * with the set of active Cleanups.  This class does not take
+	 * ownership of the selection model, toolbar, or menu.
 	 **/
 	CleanupCollection( QObject        * parent,
 	                   SelectionModel * selectionModel,
@@ -67,10 +67,7 @@ namespace QDirStat
 	 * Add all currently enabled actions to the given widget.
 	 *
 	 * This method is intended for context menus that are created for just
-	 * one menu selection and then immediately discarded.  The menu is not
-	 * remembered or kept in sync with future changes,  It can also be used
-	 * to add Cleanups to other widget, for example to get action hotkeys in
-	 * a window.
+	 * one menu selection and then immediately discarded.
 	 **/
 	void addEnabled( QWidget * widget ) const;
 
@@ -78,17 +75,13 @@ namespace QDirStat
 	 * Return the cleanup with the specified index or 0 if the index is out
 	 * of range.
 	 **/
-	const Cleanup * at( int index ) const;
+	const Cleanup * at( int index ) const
+	    { return index >= 0 && index < _cleanupList.size() ? _cleanupList.at( index ) : nullptr; }
 
 	/**
 	 * Return the number of cleanup actions in this collection.
 	 **/
 	int size() const { return _cleanupList.size(); }
-
-	/**
-	 * Return the internal cleanup list.
-	 **/
-	const CleanupList & cleanupList() const { return _cleanupList; }
 
 	/**
 	 * Move the selected items to trash.
@@ -111,6 +104,17 @@ namespace QDirStat
 	 * Write configuration for all cleanups.
 	 **/
 	void writeSettings( const CleanupList & newCleanups );
+
+	/**
+	 * Return whether there is an active Cleanup (that will refresh).
+	 **/
+	bool isBusy() const { return _activeOutputWindow; }
+
+	/**
+	 * Update the enabled/disabled state of all cleanup actions depending
+	 * on the SelectionModel.
+	 **/
+	void updateActions();
 
 
     signals:
@@ -142,28 +146,21 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Update the enabled/disabled state of all cleanup actions depending
-	 * on the SelectionModel.
-	 **/
-	void updateActions();
-
-	/**
 	 * Execute a cleanup. This uses sender() to find out which cleanup it
 	 * was.
 	 **/
 	void execute();
 
+	/**
+	 * Reset _activeOutputWindow to 0 and emit the cleanupFinished signal.
+	 **/
+	void lastProcessFinished( int totalErrorCount );
+
 
     protected:
 
 	/**
-	 * Add all actions to the specified menu and keep it updated when the
-	 * collection changes.
-	 **/
-	void addToMenu( QMenu * menu );
-
-	/**
-	 * Add all actions that have an icon to the specified tool bar and keep
+	 * Add all Cleanups that have an icon to the specified tool bar and keep
 	 * it updated when the collections changes.
 	 **/
 	void addToToolBar( QToolBar * toolBar );
@@ -179,7 +176,10 @@ namespace QDirStat
 	void clear();
 
 	/**
-	 * Read configuration for all cleanups.
+	 * Read configuration for all cleanups.  After the Cleanups have been
+	 * generated, the stored toolbar and menu are updated.  The previous
+	 * actions will have been deleted by Qt, so new ones are created.  They
+	 * are always added at the end of the toolbar or menu.
 	 **/
 	void readSettings();
 
@@ -190,35 +190,9 @@ namespace QDirStat
 	void add( Cleanup * cleanup );
 
 	/**
-	 * Return the index of a cleanup or -1 if it is not part of this
-	 * collection.
-	 **/
-	int indexOf( Cleanup * cleanup ) const;
-
-	/**
 	 * Add the standard cleanups to this collection.
 	 **/
 	void addStdCleanups();
-
-	/**
-	 * Remove a cleanup from this collection and delete it.
-	 **/
-//	void remove( Cleanup * cleanup );
-
-	/**
-	 * Update all menus that have the 'keepUpdated' flag set.
-	 **/
-	void updateMenus();
-
-	/**
-	 * Update all tool bars that have the 'keepUpdated' flag set.
-	 **/
-	void updateToolBars();
-
-	/**
-	 * Update all menus that have the 'keepUpdated' flag set.
-	 **/
-	void updateMenusAndToolBars();
 
 	/**
 	 * Create a refresher for the given refresh set.
@@ -232,16 +206,16 @@ namespace QDirStat
 	// Data members
 	//
 
-	SelectionModel          * _selectionModel;
 	CleanupList               _cleanupList;
 	std::unique_ptr<Trash>    _trash;
-	QList<QPointer<QMenu>>    _menus;
-	QList<QPointer<QToolBar>> _toolBars;
+	SelectionModel          * _selectionModel;
+	QToolBar                * _toolBar;
+	QMenu                   * _menu;
+	QWidget                 * _activeOutputWindow { nullptr };
 
     };	// class CleanupCollection
 
 }	// namespace QDirStat
-
 
 #endif // ifndef CleanupCollection_h
 

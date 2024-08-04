@@ -76,14 +76,14 @@ namespace
 	return { "open -a Terminal.app ." };
 #else
 	return { "gnome-terminal",
-		 "xfce4-terminal",
-		 "lxterminal",
-		 "eterm",
-		 "terminology",
-		 "mate-terminal",
-		 "tilix",
-		 "qterminal",
-		 "konsole --workdir",
+	         "xfce4-terminal",
+	         "lxterminal",
+	         "eterm",
+	         "terminology",
+	         "mate-terminal",
+	         "tilix",
+	         "qterminal",
+	         "konsole --workdir",
 	       };
 #endif
     }
@@ -98,13 +98,13 @@ namespace
 	return { "open" };
 #else
 	return { "dolphin",
-		 "nautilus",
-		 "thunar",
-		 "pcmanfm",
-		 "pcmanfm-qt",
-		 "spacefm",
-		 "caja",
-		 "nemo",
+	         "nautilus",
+	         "thunar",
+	         "pcmanfm",
+	         "pcmanfm-qt",
+	         "spacefm",
+	         "caja",
+	         "nemo",
 	       };
 #endif
     }
@@ -175,13 +175,13 @@ namespace
 	{
 	    logInfo() << "Detected desktop \"" << desktop << '"' << Qt::endl;
 
-		// KDE konsole misbehaves in every way possible:
-		//
-		// It cannot be started in the background from a cleanup action,
-		// it will terminate when QDirStat terminates,
-		// and it doesn't give a shit about its current working directory.
-		// So all the other terminals need to be explicitly started in
-		// the background, but konsole not.
+	    // KDE konsole misbehaves in every way possible:
+	    //
+	    // It cannot be started in the background from a cleanup action,
+	    // it will terminate when QDirStat terminates,
+	    // and it doesn't give a shit about its current working directory.
+	    // So all the other terminals need to be explicitly started in
+	    // the background, but konsole not.
 	    const QString desktopApp = [ &desktop ]()
 	    {
 		if ( desktop == "gnome"_L1 ||
@@ -361,8 +361,7 @@ namespace
      *     "xdg-open %p"
      *     "tar cjvf %n.tar.bz2 && rm -rf %n"
      **/
-    QString expandVariables( const FileInfo * item,
-				    const QString  & unexpanded )
+    QString expandVariables( const FileInfo * item, const QString  & unexpanded )
     {
 	QString expanded = expandDesktopSpecificApps( unexpanded );
 
@@ -387,34 +386,51 @@ namespace
 	return expanded;
     }
 
+
+    /**
+     * Retrieve the directory part of a FileInfo's path.
+     **/
+    QString itemDir( const FileInfo * item )
+    {
+	QString dir = item->path();
+
+	if ( !item->isDir() && !item->isPseudoDir() )
+	    dir.remove( QRegularExpression( "/[^/]*$" ) );
+
+	return dir;
+    }
+
+
+    /**
+     * Run a command with 'item' as base to expand variables.
+     **/
+    void runCommand( const QString  & shell,
+                     const FileInfo * item,
+                     const QString  & command,
+                     OutputWindow   * outputWindow )
+    {
+	if ( shell.isEmpty() )
+	{
+	    outputWindow->show(); // Regardless of user settings
+	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action" ) );
+	    logError() << "ERROR: No usable shell" << Qt::endl;
+	    return;
+	}
+
+	// Deliberately create with no parent so they aren't destroyed untidily at shutdown
+	QProcess * process = new QProcess();
+	process->setProgram( shell );
+	process->setArguments( { "-c", expandVariables( item, command ) } );
+	process->setWorkingDirectory( itemDir( item ) );
+	// logDebug() << "New process \"" << process << Qt::endl;
+
+	outputWindow->addProcess( process );
+
+	// CleanupCollection will take care of refreshing if it is
+	// configured for this cleanup
+    }
+
 } // namespace
-
-
-
-Cleanup::Cleanup( const Cleanup * other ):
-    Cleanup { nullptr, other->_active, other->_title, other->_command,
-	      other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
-	      other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
-	      other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
-	      other->_shell }
-{
-    setIcon( other->iconName() );     // carried on both the Cleanup and QAction (as a pixmap)
-    setShortcut( other->shortcut() ); // only carried on the underlying QAction
-}
-
-
-void Cleanup::setTitle( const QString & title )
-{
-    _title = title;
-    QAction::setText( _title );
-}
-
-
-void Cleanup::setIcon( const QString & iconName )
-{
-    _iconName = iconName;
-    QAction::setIcon( QPixmap( _iconName ) );
-}
 
 
 bool Cleanup::worksFor( FileInfo * item ) const
@@ -443,18 +459,7 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
 
     // Perform cleanup for this item
     if ( worksFor( item ) )
-	runCommand( item, _command, outputWindow );
-}
-
-
-QString Cleanup::itemDir( const FileInfo * item ) const
-{
-    QString dir = item->path();
-
-    if ( !item->isDir() && !item->isPseudoDir() )
-	dir.remove( QRegularExpression( "/[^/]*$" ) );
-
-    return dir;
+	runCommand( chooseShell( outputWindow ), item, _command, outputWindow );
 }
 
 
@@ -538,34 +543,6 @@ FileInfoSet Cleanup::deDuplicateParents( const FileInfoSet & sel )
     }
 
     return parents;
-}
-
-
-void Cleanup::runCommand( const FileInfo * item,
-			  const QString  & command,
-			  OutputWindow   * outputWindow ) const
-{
-    const QString shell = chooseShell( outputWindow );
-
-    if ( shell.isEmpty() )
-    {
-	outputWindow->show(); // Regardless of user settings
-	outputWindow->addStderr( tr( "No usable shell - aborting cleanup action" ) );
-	logError() << "ERROR: No usable shell" << Qt::endl;
-	return;
-    }
-
-    // Deliberately create with no parent so they aren't destroyed untidily at shutdown
-    QProcess * process = new QProcess();
-    process->setProgram( shell );
-    process->setArguments( { "-c", expandVariables( item, command ) } );
-    process->setWorkingDirectory( itemDir( item ) );
-    // logDebug() << "New process \"" << process << Qt::endl;
-
-    outputWindow->addProcess( process );
-
-    // The CleanupCollection will take care about refreshing if this is
-    // configured for this cleanup.
 }
 
 

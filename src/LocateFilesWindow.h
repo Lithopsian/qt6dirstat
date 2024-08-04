@@ -242,9 +242,9 @@ namespace QDirStat
 	QString  _path;
 	FileSize _size;
 	time_t   _mtime;
-    };
+
+    }; // class LocateListItem
 
 } // namespace QDirStat
-
 
 #endif // LocateFilesWindow_h

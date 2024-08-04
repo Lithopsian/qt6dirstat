@@ -104,7 +104,9 @@ namespace QDirStat
         bool              _started	{ false };
         QList<QProcess *> _running;
         QList<QProcess *> _waiting;
-    };
-}
+
+    }; // class ProcessStarter
+
+} // namespace QDDirStat
 
 #endif  // ProcessStarter_h

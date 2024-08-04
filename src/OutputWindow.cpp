@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QApplication>
 #include <QCloseEvent>
 #include <QTimer>
 #include <QtMath> // qFloor()
@@ -370,7 +369,10 @@ QProcess * OutputWindow::startNextProcess()
 	logInfo() << "Starting: " << process << Qt::endl;
 
 	process->start();
-	qApp->processEvents(); // Keep GUI responsive
+
+//	QEventLoop eventLoop;
+//	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
+//	qApp->processEvents(); // Keep GUI responsive
     }
 
     updateActions();

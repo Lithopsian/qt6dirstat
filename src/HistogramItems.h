@@ -54,9 +54,8 @@ namespace QDirStat
 	 **/
 	void adjustBar( qreal adjustment );
 
-    };
+    }; // class HistogramBar
 
-}	// namespace QDirStat
-
+} // namespace QDirStat
 
 #endif // ifndef HistogramItems_h

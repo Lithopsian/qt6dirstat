@@ -943,7 +943,7 @@ namespace QDirStat
 
 	/**
 	 * Returns true if this is a "special" file, i.e. a (block or character)
-	 * device, a FIFO (named pipe) or a socket.
+	 * device, a FIFO (named pipe), or a socket.
 	 **/
 	bool isSpecial()     const { return  S_ISBLK ( _mode ) ||
 	                                     S_ISCHR ( _mode ) ||
@@ -1056,9 +1056,7 @@ namespace QDirStat
 	return stream;
     }
 
-
 }	// namespace QDirStat
-
 
 #endif // ifndef FileInfo_h
 

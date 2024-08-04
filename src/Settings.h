@@ -300,7 +300,7 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
 
-    };
+    };	// class MimeCategorySettings
 
 }	// namespace QDirStat
 

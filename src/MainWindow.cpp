@@ -38,7 +38,6 @@
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
-#include "Settings.h"
 #include "SignalBlocker.h"
 #include "SysUtil.h"
 #include "UnreadableDirsWindow.h"
@@ -142,61 +141,65 @@ void MainWindow::connectSignals( DirTree        * dirTree,
     const CleanupCollection * cleanupCollection = ActionManager::cleanupCollection();
 
     connect( dirTree,                  &DirTree::startingReading,
-	     this,                     &MainWindow::startingReading );
+             this,                     &MainWindow::startingReading );
 
     connect( dirTree,                  &DirTree::startingRefresh,
-	     this,                     &MainWindow::busyDisplay );
+             this,                     &MainWindow::busyDisplay );
 
     connect( dirTree,                  &DirTree::finished,
-	     this,                     &MainWindow::readingFinished );
+             this,                     &MainWindow::readingFinished );
 
     connect( dirTree,                  &DirTree::aborted,
-	     this,                     &MainWindow::readingAborted );
+             this,                     &MainWindow::readingAborted );
 
     connect( dirTreeModel,             &DirTreeModel::layoutChanged,
-	     this,                     &MainWindow::layoutChanged );
+             this,                     &MainWindow::layoutChanged );
 
     connect( selectionModel,           &SelectionModel::currentBranchChanged,
-	     _ui->dirTreeView,         &DirTreeView::closeAllExcept );
+             _ui->dirTreeView,         &DirTreeView::closeAllExcept );
 
     connect( selectionModel,           &SelectionModel::currentItemChanged,
-	     _historyButtons,          &HistoryButtons::addToHistory );
+             _historyButtons,          &HistoryButtons::addToHistory );
 
     connect( _historyButtons,          &HistoryButtons::navigateToUrl,
-	     this,                     &MainWindow::navigateToUrl );
+             this,                     &MainWindow::navigateToUrl );
 
     connect( selectionModel,           &SelectionModel::currentItemChanged,
-	     _ui->breadcrumbNavigator, &BreadcrumbNavigator::setPath );
+             _ui->breadcrumbNavigator, &BreadcrumbNavigator::setPath );
 
     connect( _ui->breadcrumbNavigator, &BreadcrumbNavigator::pathClicked,
-	     selectionModel,           &SelectionModel::setCurrentItemPath );
+             selectionModel,           &SelectionModel::setCurrentItemPath );
 
     connect( selectionModel,           &SelectionModel::selectionChanged,
-	     this,                     &MainWindow::selectionChanged );
+             this,                     &MainWindow::selectionChanged );
 
     connect( selectionModel,           &SelectionModel::currentItemChanged,
-	     this,                     &MainWindow::currentItemChanged );
+             this,                     &MainWindow::currentItemChanged );
+
+    // Connect here so this is called after MainWindow::updateActions
+    connect( selectionModel,           &SelectionModel::selectionChanged,
+                                       &ActionManager::updateActions );
 
     connect( cleanupCollection,        &CleanupCollection::startingCleanup,
-	     this,                     &MainWindow::startingCleanup );
+             this,                     &MainWindow::startingCleanup );
 
     connect( cleanupCollection,        &CleanupCollection::cleanupFinished,
-	     this,                     &MainWindow::cleanupFinished );
+             this,                     &MainWindow::cleanupFinished );
 
     connect( cleanupCollection,        &CleanupCollection::assumedDeleted,
              this,                     &MainWindow::assumedDeleted );
 
     connect( _ui->treemapView,         &TreemapView::treemapChanged,
-	     this,                     &MainWindow::updateActions );
+             this,                     &MainWindow::updateActions );
 
     connect( _ui->treemapView,         &TreemapView::hoverEnter,
-	     this,                     &MainWindow::showCurrent );
+             this,                     &MainWindow::showCurrent );
 
     connect( _ui->treemapView,         &TreemapView::hoverLeave,
-	     this,                     &MainWindow::showSummary );
+             this,                     &MainWindow::showSummary );
 
     connect( &_updateTimer,            &QTimer::timeout,
-	     this,                     &MainWindow::showElapsedTime );
+             this,                     &MainWindow::showElapsedTime );
 }
 
 
@@ -838,6 +841,7 @@ void MainWindow::startingCleanup( const QString & cleanupName )
 
     _historyButtons->lock();
     setFutureSelection();
+    updateActions();
 
     showProgress( tr( "Starting cleanup action " ) + cleanupName );
 }
@@ -1061,6 +1065,61 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
     _ui->dirTreeView->setFocus(); // no point leaving focus on the treemap
 
     updateActions();
+}
+
+
+void MainWindow::updateActions()
+{
+    const bool       reading       = app()->dirTree()->isBusy();
+    const FileInfo * firstToplevel = app()->firstToplevel();
+    const bool       isTree        = firstToplevel && !reading;
+    const bool       pkgView       = firstToplevel && firstToplevel->isPkgInfo();
+
+    _ui->actionStopReading->setEnabled  ( reading );
+    _ui->actionRefreshAll->setEnabled   ( isTree );
+    _ui->actionAskReadCache->setEnabled ( !reading );
+    _ui->actionAskWriteCache->setEnabled( isTree && !pkgView && firstToplevel->isDirInfo() );
+
+    const FileInfoSet selectedItems = app()->selectionModel()->selectedItems();
+    const bool        sel           = selectedItems.size() > 0;
+    const FileInfo  * first         = sel ? selectedItems.first() : nullptr;
+    const bool        selSizeOne    = !reading && selectedItems.size() == 1 && !pkgView;
+
+    _ui->actionRefreshSelected->setEnabled( selSizeOne && !first->isMountPoint() && !first->isExcluded() );
+    _ui->actionContinueReading->setEnabled( selSizeOne && first->isMountPoint() );
+    _ui->actionReadExcluded->setEnabled   ( selSizeOne && first->isExcluded()   );
+
+    const FileInfo * currentItem       = app()->selectionModel()->currentItem();
+    const bool       pseudoDirSelected = selectedItems.containsPseudoDir();
+    const bool       active            = reading || ActionManager::cleanupCollection()->isBusy();
+
+    _ui->actionCopyPath->setEnabled   ( isTree && currentItem );
+    _ui->actionFindFiles->setEnabled  ( firstToplevel );
+    _ui->actionMoveToTrash->setEnabled( !active && sel && !pseudoDirSelected && !pkgView );
+
+    _ui->actionGoUp->setEnabled        ( currentItem && currentItem->treeLevel() > 1 );
+    _ui->actionGoToToplevel->setEnabled( firstToplevel );
+
+    _ui->actionCloseAllTreeLevels->setEnabled( firstToplevel );
+    _ui->menuExpandTreeToLevel->setEnabled   ( firstToplevel );
+
+    const bool showingTreemap = _ui->treemapView->isVisible();
+//    _ui->actionTreemapAsSidePanel->setEnabled( showingTreemap );
+    _ui->actionTreemapZoomTo->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
+    _ui->actionTreemapZoomIn->setEnabled     ( showingTreemap && _ui->treemapView->canZoomIn() );
+    _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );
+    _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
+
+    for ( QAction * action : _ui->menuDiscover->actions() )
+    {
+	if ( action != _ui->actionShowFilesystems )
+	    action->setEnabled( isTree );
+    }
+
+    _historyButtons->updateActions();
+
+    // This has to happen *after* the actions here have been updated
+//    ActionManager::updateActions();
 }
 
 

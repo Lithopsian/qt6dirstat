@@ -195,9 +195,9 @@ namespace QDirStat
     private:
 
 	DirInfo * _dir;
-    };
+
+    }; // class UnreadableDirListItem
 
 } // namespace QDirStat
-
 
 #endif // UnreadableDirsWindow_h

@@ -19,22 +19,22 @@
  */
 class SignalBlocker
 {
-public:
-    SignalBlocker( QObject * obj ):
-	_obj { obj }
-    {
-	_oldBlocked = obj->signalsBlocked();
-	obj->blockSignals( true );
-    }
+    public:
+	SignalBlocker( QObject * obj ):
+	    _obj { obj }
+	{
+	    _oldBlocked = obj->signalsBlocked();
+	    obj->blockSignals( true );
+	}
 
-    ~SignalBlocker()
-    {
-	_obj->blockSignals( _oldBlocked );
-    }
+	~SignalBlocker()
+	{
+	    _obj->blockSignals( _oldBlocked );
+	}
 
-private:
-    QObject * _obj;
-    bool      _oldBlocked;
+    private:
+	QObject * _obj;
+	bool      _oldBlocked;
 };
 
 #endif // SignalBlocker_h

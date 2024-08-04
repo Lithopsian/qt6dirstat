@@ -39,10 +39,8 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a Refresher that will refresh all subtrees in 'items' it its
+	 * Create a Refresher that will refresh all subtrees in 'items' in its
 	 * refresh() slot.
-	 *
-	 * All items are assumed to belong to the same DirTree.
 	 **/
 	Refresher( QObject * parent, const FileInfoSet & items ):
 	    QObject { parent },
@@ -62,7 +60,8 @@ namespace QDirStat
     private:
 
 	const FileInfoSet _items;
-    };
+
+    };	// class FileInfoSet
 
 }	// namespace QDirStat
 

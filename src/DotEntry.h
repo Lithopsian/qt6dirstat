@@ -109,6 +109,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef DotEntry_h
 

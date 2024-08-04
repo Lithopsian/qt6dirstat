@@ -157,5 +157,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // PkgQuery_h

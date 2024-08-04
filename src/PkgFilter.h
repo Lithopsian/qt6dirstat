@@ -94,6 +94,7 @@ namespace QDirStat
 
         return stream;
     }
-}
+
+} // namespace QDirStat
 
 #endif  // PkgFilter_h

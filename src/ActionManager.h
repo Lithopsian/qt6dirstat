@@ -10,7 +10,6 @@
 #ifndef ActionManager_h
 #define ActionManager_h
 
-#include <QList>
 #include <QPointer>
 
 
@@ -22,7 +21,6 @@ class QToolBar;
 namespace QDirStat
 {
     class CleanupCollection;
-    class FileInfo;
     class SelectionModel;
 
     /**
@@ -36,9 +34,8 @@ namespace QDirStat
      **/
     class ActionManager
     {
-
 	/**
-	 * Constructor. Protected because this is a singleton class.
+	 * Constructor. Private because this is a singleton class.
 	 **/
 	ActionManager() = default;
 
@@ -48,43 +45,74 @@ namespace QDirStat
 	 **/
 	static ActionManager * instance();
 
+	/**
+	 * Adds a widget tree and transfers the CleanupCollection to the
+	 * ActionManager.  This should generally be called as soon as the
+	 * instance is created; eg. instance()->init( ... ).
+	 **/
+	void init( QWidget        * parent,
+	           SelectionModel * selectionModel,
+	           QToolBar       * toolBar,
+	           QMenu          * cleanupMenu );
+
 
     public:
 
 	/**
-	 * Constructor. Protected because this is a singleton class.
-	 **/
-	static const char * separator() { return "---"; }
-
-	/**
 	 * Adds a widget tree and transfers the CleanupCollection to the
-	 * ActionManager.  This is most likelely the only actions that will
-	 * be needed here and should normally be the first call to this class,
-	 * so it will create the singleton instance.
+	 * ActionManager.  This should normally be the first call to this class,
+	 * and it will create the singleton instance.
 	 **/
 	static void setActions( QWidget        * parent,
-				SelectionModel * selectionModel,
-				QToolBar       * toolBar,
-				QMenu          * menu );
+	                        SelectionModel * selectionModel,
+	                        QToolBar       * toolBar,
+	                        QMenu          * cleanupMenu )
+	    { instance()->init( parent, selectionModel, toolBar, cleanupMenu ); }
+
+	/**
+	 * Returns the string used to indicate a separator in menus
+	 * constructed by this class.
+	 **/
+	static const QLatin1String separator() { return QLatin1String( "---" ); }
+
+	/**
+	 * Returns the string used to indicate that a list of Cleanups
+	 * should be included in menus constructed by this class.
+	 **/
+	static const QLatin1String cleanups() { return QLatin1String( "<Cleanups>" ); }
 
 	/**
 	 * Add all the actions listed in 'actionNames' to a widget.
 	 **/
-	static bool addActions( QWidget * widget, const QStringList & actionNames )
-		{ return instance()->addActions( widget, actionNames, false ); }
+	static void addActions( QWidget * widget, const QStringList & actionNames )
+	    { instance()->addActions( widget, actionNames, false ); }
 
 	/**
 	 * Add only the enabled actions in 'actionNames' to a widget.
 	 **/
-	static bool addEnabledActions( QWidget * widget, const QStringList & actionNames )
-		{ return instance()->addActions( widget, actionNames, true ); }
+	static void addEnabledActions( QWidget * widget, const QStringList & actionNames )
+	    { instance()->addActions( widget, actionNames, true ); }
 
 	/**
 	 * Replace one action by another, for example in a toolbar.
 	 **/
 	static void swapActions( QWidget * widget,
-				 QAction * actionToRemove,
-				 QAction * actionToAdd );
+	                         QAction * actionToRemove,
+	                         QAction * actionToAdd );
+
+	/**
+	 * Create and return a menu containing the given actions.  For now,
+	 * this function only supports one list of actions always added (or
+	 * if they are active for cleanups), and one list of actions added
+	 * only if they are enabled, with the "enabled" list being placed
+	 * on the menu after the "active" list.  None of the callers
+	 * currently need anything more generic and complex than this.
+	 *
+	 * The returned QMenu object will automatically delete itself when
+	 * it closes.
+	 **/
+	static QMenu * createMenu( const QStringList & actions,
+	                           const QStringList & enabledActions );
 
 	/**
 	 * Returns a pointer to the CleanupCollection.
@@ -96,14 +124,11 @@ namespace QDirStat
 	    { return instance()->_cleanupCollection; }
 
 	/**
-	 * Add enabled Cleanups to the given widget.
+	 * Update the stored toolbar, cleanup menu, and context menu with
+	 * the current actions and cleanups.
 	 **/
-	static void addActiveCleanups( QWidget * widget );
-
-	/**
-	 * Add enabled Cleanups to the given widget.
-	 **/
-	static void addEnabledCleanups( QWidget * widget );
+	static void updateActions()
+	    { instance()->updateMenu(); }
 
 	/**
 	 * Moves the selected items to trash.
@@ -114,41 +139,28 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Add a widget tree. This does not transfer ownership of that widget
-	 * tree. The ActionManager will keep the pointer of this tree (with a
-	 * guarded pointer so it doesn't matter if it is destroyed) to search
-	 * for QActions when requested.
-	 **/
-	void addTree( const QWidget * tree );
-
-	/**
-	 * Gives a pointer to the (likely only) CleanupCollection.
-	 **/
-	void setCleanupCollection( CleanupCollection * cleanupCollection )
-	    { _cleanupCollection = cleanupCollection; }
-
-	/**
-	 * Search the known widget trees for the first QAction with the Qt
-	 * object name 'actionName'. Return 0 if there is no such QAction.
-	 **/
-	QAction * action( const QString & actionName ) const;
-
-	/**
-	 * Add all the actions in 'actionNames' to a menu. Return 'true' if
-	 * success, 'false' if any of the actions were not found.
+	 * Add all the actions in 'actionNames' to a widget.
 	 *
 	 * If 'enabledOnly' is 'true', only those actions that are currently
 	 * enabled are added.
 	 *
-	 * If an action name in actionNames starts with "---", a separator is
-	 * added to the menu instead of an action.
+	 * There are special actionName strings to indicate a separator
+	 * (only added for menus) and a list of Cleanups.
 	 *
-	 * Note that this class already logs an error for action names that
-	 * were not found.
+	 * Note that this class logs an error for action names that were not
+	 * found.
 	 **/
-	bool addActions( QWidget           * widget,
-			 const QStringList & actionNames,
-			 bool                enabledOnly);
+	void addActions( QWidget           * widget,
+	                 const QStringList & actionNames,
+	                 bool                enabledOnly) const;
+
+	/**
+	 * Update any open menu that was created with the createMenu()
+	 * fuction. All actions matching the stored enabled actions list are
+	 * removed from the end of the menu and then replaced with the
+	 * currently-enabled actions from that list.
+	 **/
+	void updateMenu();
 
 
     private:
@@ -157,12 +169,12 @@ namespace QDirStat
 	// Data members
 	//
 
-	QList<QPointer<const QWidget>>   _widgetTrees;
-	CleanupCollection              * _cleanupCollection { nullptr };
+	CleanupCollection * _cleanupCollection;
+	QPointer<QMenu>     _menu;
+	QStringList         _menuEnabledActions;
 
     };	// class ActionManager
 
 }	// namespace QDirStat
-
 
 #endif	// ActionManager_h

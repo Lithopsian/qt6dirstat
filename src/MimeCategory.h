@@ -226,7 +226,6 @@ namespace QDirStat
 	return str;
     }
 
-
 }	// namespace QDirStat
 
 #endif	// MimeCategory_h

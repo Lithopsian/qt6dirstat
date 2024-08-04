@@ -84,33 +84,28 @@ void DirTreeView::contextMenu( const QPoint & pos )
 	return;
     }
 
-    QMenu menu;
-
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
-    const QStringList actions1 { "actionGoUp",
-                                 "actionGoToToplevel",
-                               };
-    ActionManager::addActions( &menu, actions1 );
+    const QStringList actions { "actionGoUp",
+                                "actionGoToToplevel",
+                                ActionManager::separator(),
+                                "actionCopyPath",
+                                "actionMoveToTrash",
+                              };
 
-    const QStringList actions2 { "actionStopReading",
-                                 "actionRefreshAll",
-                                 ActionManager::separator(),
-                                 "actionRefreshSelected",
-                                 "actionReadExcluded",
-                                 "actionContinueReading",
-                                 ActionManager::separator(),
-                                 "actionCopyPath",
-                                 "actionMoveToTrash",
-                                 ActionManager::separator(),
-                               };
-    ActionManager::addEnabledActions( &menu, actions2 );
+    const QStringList enabledActions { ActionManager::separator(),
+                                       "actionStopReading",
+                                       "actionRefreshAll",
+                                       "actionRefreshSelected",
+                                       "actionReadExcluded",
+                                       "actionContinueReading",
+                                       ActionManager::separator(),
+                                       ActionManager::cleanups(),
+                                     };
 
-    // User-defined cleanups
-    ActionManager::addEnabledCleanups( &menu );
-
-    menu.exec( mapToGlobal( pos ) );
+    QMenu * menu = ActionManager::createMenu( actions, enabledActions );
+    menu->exec( mapToGlobal( pos ) );
 }
 
 

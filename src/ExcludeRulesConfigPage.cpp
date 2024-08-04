@@ -74,7 +74,7 @@ void ExcludeRulesConfigPage::applyChanges()
     const ExcludeRules * excludeRules = tree->excludeRules();
     for ( auto itOld = excludeRules->cbegin(), itNew = rules.cbegin();
           itNew != rules.cend() || itOld != excludeRules->cend();
-	  ++itNew, ++itOld )
+          ++itNew, ++itOld )
     {
 	// If we ran past the end of either list, or the rules don't match ...
 	if ( itNew == rules.cend() || itOld == excludeRules->cend() || **itOld != **itNew )

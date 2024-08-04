@@ -110,7 +110,7 @@ namespace QDirStat
 	 **/
 	void clear();
 
-    };
+    }; // class FileSizeLabel
 
 } // namespace QDirStat
 

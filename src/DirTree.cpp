@@ -238,6 +238,8 @@ DirTree::DirTree( QObject * parent ):
     QObject { parent },
     _root { new DirInfo( this ) }
 {
+    setExcludeRules();
+
     connect( &_jobQueue, &DirReadJobQueue::finished,
 	     this,       &DirTree::sendFinished );
 

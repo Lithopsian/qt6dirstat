@@ -842,8 +842,6 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
 
     //logDebug() << "Context menu for " << this << Qt::endl;
 
-    QMenu menu;
-
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
@@ -854,14 +852,14 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
                                 ActionManager::separator(),
                                 "actionCopyPath",
                                 "actionMoveToTrash",
-                                ActionManager::separator(),
-                              };
-    ActionManager::addActions( &menu, actions );
+                                };
 
-    // User-defined cleanups
-    ActionManager::addEnabledCleanups( &menu );
+    const QStringList enabledActions { ActionManager::separator(),
+                                       ActionManager::cleanups(),
+                                     };
 
-    menu.exec( event->screenPos() );
+    QMenu * menu = ActionManager::createMenu( actions, enabledActions );
+    menu->exec( event->screenPos() );
 }
 
 void TreemapTile::hoverEnterEvent( QGraphicsSceneHoverEvent * )

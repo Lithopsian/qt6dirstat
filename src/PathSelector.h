@@ -154,7 +154,8 @@ namespace QDirStat
     private:
 
 	QString      _path;
-    };
+
+    };	// class PathSelectorItem
 
 }	// namespace QDirStat
 

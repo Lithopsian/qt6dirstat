@@ -181,5 +181,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // PkgManager_h

@@ -350,9 +350,8 @@ namespace QDirStat
 	qreal _histogramHeight;
 	bool  _geometryDirty;
 
-    };
+    }; // class HistogramView
 
-}	// namespace QDirStat
-
+} // namespace QDirStat
 
 #endif // ifndef HistogramView_h

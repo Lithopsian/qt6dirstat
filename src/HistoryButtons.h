@@ -143,7 +143,8 @@ namespace QDirStat
 	QAction * _actionGoForward;
 	bool      _locked { false };
 
-    };
+    };	// class HistoryButtons
+
 }	// namespace QDirStat
 
 #endif	// HistoryButtons_h

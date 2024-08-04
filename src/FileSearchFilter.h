@@ -10,8 +10,6 @@
 #ifndef FileSearchFilter_h
 #define FileSearchFilter_h
 
-#include <QTextStream>
-
 #include "SearchFilter.h"
 #include "Typedefs.h" // _L1
 
@@ -117,6 +115,7 @@ namespace QDirStat
 
         return stream;
     }
-}
+
+} // namespace QDirStat
 
 #endif  // FileSearchFilter_h

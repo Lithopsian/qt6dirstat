@@ -175,5 +175,4 @@ namespace QDirStat
 
 } // namespace QDirStat
 
-
 #endif // RpmPkgManager_h

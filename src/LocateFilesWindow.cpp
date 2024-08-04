@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QMenu>
 #include <QPointer>
 #include <QResizeEvent>
 
@@ -197,22 +196,15 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
     if ( !_ui->treeWidget->itemAt( pos ) )
 	return;
 
-    QMenu menu;
-
-    const QStringList actions { "actionCopyPath", "actionMoveToTrash", ActionManager::separator() };
-    ActionManager::addEnabledActions( &menu, actions );
-
-    ActionManager::addEnabledCleanups( &menu );
-
-    menu.exec( _ui->treeWidget->mapToGlobal( pos ) );
+    QMenu * menu = ActionManager::createMenu( { "actionCopyPath", "actionMoveToTrash" },
+                                              { ActionManager::separator(), ActionManager::cleanups() } );
+    menu->exec( _ui->treeWidget->mapToGlobal( pos ) );
 }
 
 
 void LocateFilesWindow::addCleanupHotkeys()
 {
-    ActionManager::addActions( this, { "actionMoveToTrash", "actionFindFiles" } );
-
-    ActionManager::addActiveCleanups( this );
+    ActionManager::addActions( this, { "actionMoveToTrash", "actionFindFiles", ActionManager::cleanups() } );
 }
 
 
@@ -225,7 +217,6 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
     // Calculate a width from the dialog less margins, less a bit more
     elideLabel( _ui->heading, heading, size().width() - 24 );
 }
-
 
 
 

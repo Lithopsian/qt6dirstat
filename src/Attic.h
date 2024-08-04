@@ -87,6 +87,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef Attic_h
 

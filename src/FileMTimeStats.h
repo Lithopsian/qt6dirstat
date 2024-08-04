@@ -46,6 +46,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef FileMTimeStats_h
 

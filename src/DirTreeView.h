@@ -167,5 +167,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif	// DirTreeView_h

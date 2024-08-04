@@ -105,7 +105,8 @@ namespace QDirStat
 	QMultiHash<QString, QString> _pkgFileNames;
 	QSet<QString>                _fileNames;
 
-    };
+    }; 	// class PkgFileListCache
+
 }	// namespace QDirStat
 
 #endif	// PkgFileListCache_h

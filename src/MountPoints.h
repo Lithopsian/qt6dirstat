@@ -12,7 +12,6 @@
 
 #include <memory>
 
-#include <QList>
 #include <QStringList>
 #include <QTextStream>
 
@@ -412,6 +411,5 @@ namespace QDirStat
     }
 
 } // namespace QDirStat
-
 
 #endif // MountPoints_h

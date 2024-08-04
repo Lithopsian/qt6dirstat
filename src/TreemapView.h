@@ -790,5 +790,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-
 #endif // ifndef TreemapView_h

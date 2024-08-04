@@ -130,7 +130,8 @@ namespace QDirStat
         //
 
         BreadcrumbList _breadcrumbs;
-    };
+
+    }; // class BreadcrumbNavigator
 
 } // namespace QDirStat
 

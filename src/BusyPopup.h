@@ -53,9 +53,8 @@ namespace QDirStat
 	 **/
 	void showEvent( QShowEvent * event ) override;
 
-    };	// BusyPopup
+    };	// class BusyPopup
 
 }	// namespace QDirStat
-
 
 #endif	// BusyPopup_h
