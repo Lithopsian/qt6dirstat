@@ -82,6 +82,8 @@ namespace QDirStat
 	/**
 	 * Set the directory tree to work on. Without this, this widget will
 	 * not display anything.
+	 *
+	 * Note that TreemapView does not take ownership of the tree.
 	 **/
 	void setDirTree( const DirTree * tree );
 

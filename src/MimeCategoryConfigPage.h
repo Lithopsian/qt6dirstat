@@ -16,6 +16,9 @@
 #include "ui_mime-category-config-page.h"
 
 
+class QListWidget;
+
+
 namespace QDirStat
 {
     class ConfigDialog;
@@ -113,14 +116,30 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Return the list widget for this class (ie.notebook page).
+	 *
+	 * Reimplemented from ListEditor.
+	 **/
+	QListWidget * listWidget() const override { return _ui->listWidget; };
+
+	/**
+	 * Returns the corresponding tool button.
+	 *
+	 * Reimplemented from ListEditor.  The default implementations
+	 * return 0.
+	 **/
+	QToolButton * addButton()      const override { return _ui->addButton;      };
+	QToolButton * removeButton()   const override { return _ui->removeButton;   };
+
+	/**
 	 * Populate the widgets.
 	 **/
-	void setup();
+	void populateTreemapTab();
 
 	/**
 	 * Fill the category list widget from the category collection.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 	void fillListWidget() override;
 
@@ -149,23 +168,23 @@ namespace QDirStat
 	 * Create a new value with default values.
 	 * This is called when the 'Add' button is clicked.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
-	void * createValue() override;
+	void * newValue() override;
 
 	/**
-	 * Remove a value from the internal list and delete it.
+	 * Delete a value from the internal list.
 	 *
 	 * This is called when the 'Remove' button is clicked.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
-	void removeValue( void * value ) override;
+	void deleteValue( void * value ) override;
 
 	/**
-	 * Return a text for the list item of 'value'.
+	 * Return a text for the list item 'value'.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 
 	QString valueText( void * value ) override;
@@ -173,35 +192,16 @@ namespace QDirStat
 	/**
 	 * Signal handler for a change in the list widget current item.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 	void currentItemChanged( QListWidgetItem * current, QListWidgetItem * previous) override;
 
 	/**
 	 * Update actions to match the current item properties.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 	void updateActions() override;
-
-	/**
-	 * Set the remove button, name, and patterns enabled or disabled,
-	 * based on the name of the current category item.
-	 *
-	 * Called by currentItemChanged() and updateActions().
-	 **/
-	void setActions( const QListWidgetItem * currentItem );
-
-	/**
-	 * Convert 'patternList' into a newline-separated string and set it as
-	 * text of 'textEdit'.
-	 **/
-	void setPatternList( QPlainTextEdit * textEdit, const QStringList & patternList );
-
-	/**
-	 * Add demo content to the tremap view.
-	 **/
-	void populateTreemapView();
 
 	/**
 	 * Handle a right click.
@@ -217,7 +217,6 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::MimeCategoryConfigPage> _ui;
 
-	DirTree * _dirTree;
 	bool      _dirty { false };
 
     };	// class MimeCategoryConfigPage

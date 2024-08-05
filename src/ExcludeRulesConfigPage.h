@@ -16,6 +16,9 @@
 #include "ui_exclude-rules-config-page.h"
 
 
+class QListWidget;
+
+
 namespace QDirStat
 {
     class ConfigDialog;
@@ -49,13 +52,33 @@ namespace QDirStat
 	void applyChanges();
 
 	/**
-	 * Notification that the user changed the "Pattern" field of the
+	 * Notification that the user changed the pattern field of the
 	 * current exclude rule.
 	 **/
 	void patternChanged( const QString & newPattern );
 
 
     protected:
+
+	/**
+	 * Return the list widget for this class (ie.notebook page).
+	 *
+	 * Reimplemented from ListEditor.
+	 **/
+	QListWidget * listWidget() const override { return _ui->listWidget; };
+
+	/**
+	 * Returns the corresponding tool button.
+	 *
+	 * Reimplemented from ListEditor.  The default implementations
+	 * return 0.
+	 **/
+	QToolButton * toTopButton()    const override { return _ui->toTopButton;    };
+	QToolButton * moveUpButton()   const override { return _ui->moveUpButton;   };
+	QToolButton * addButton()      const override { return _ui->addButton;      };
+	QToolButton * removeButton()   const override { return _ui->removeButton;   };
+	QToolButton * moveDownButton() const override { return _ui->moveDownButton; };
+	QToolButton * toBottomButton() const override { return _ui->toBottomButton; };
 
 	/**
 	 * Enable or disable the widgets to edit an exclude rule.
@@ -65,22 +88,20 @@ namespace QDirStat
 
 	/**
 	 * Fill the exclude rule list widget from the ExcludeRules.
-	 *
-	 * Implemented from ListEditor.
 	 **/
 	void fillListWidget() override;
 
 	/**
 	 * Save the contents of the widgets to the specified value.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 	void save( void * value ) override;
 
 	/**
 	 * Load the content of the widgets from the specified value.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 	void load( void * value ) override;
 
@@ -88,24 +109,24 @@ namespace QDirStat
 	 * Create a new value with default values.
 	 * This is called when the 'Add' button is clicked.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
-	void * createValue() override;
+	void * newValue() override;
 
 	/**
-	 * Remove a value from the internal list and delete it.
+	 * Delete a value from the internal list.
 	 *
 	 * This is called when the 'Remove' button is clicked and the user
 	 * confirms the confirmation pop-up.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
-	void removeValue( void * value );
+	void deleteValue( void * value );
 
 	/**
 	 * Return a text for the list item of 'value'.
 	 *
-	 * Implemented from ListEditor.
+	 * Reimplemented from ListEditor.
 	 **/
 
 	QString valueText( void * value ) override;
