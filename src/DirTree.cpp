@@ -236,7 +236,7 @@ namespace
 
 DirTree::DirTree( QObject * parent ):
     QObject { parent },
-    _root { new DirInfo( this ) }
+    _root { new DirInfo { this } }
 {
     setExcludeRules();
 
@@ -291,13 +291,6 @@ void DirTree::clear()
 
     _isBusy           = false;
     _blocksPerCluster = -1;
-}
-
-
-void DirTree::reset()
-{
-    clearTmpExcludeRules();
-    clearFilters();
 }
 
 

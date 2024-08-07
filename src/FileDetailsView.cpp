@@ -131,9 +131,9 @@ namespace
 FileDetailsView::FileDetailsView( QWidget * parent ):
     QStackedWidget { parent },
     _ui { new Ui::FileDetailsView },
-    _pkgUpdateTimer { new AdaptiveTimer( this,
-                                         { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
-                                         { 3000, 1000, 500, 250, 150 } ) } // cooldown stages
+    _pkgUpdateTimer { new AdaptiveTimer { this,
+                                          { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
+                                          { 3000, 1000, 500, 250, 150 } } } // cooldown stages
 {
     _ui->setupUi( this );
 

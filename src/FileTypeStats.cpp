@@ -92,7 +92,7 @@ namespace
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
-    _otherCategory { new MimeCategory( QObject::tr( "Other" ) ) }
+    _otherCategory { new MimeCategory { QObject::tr( "Other" ) } }
 {
     if ( subtree && subtree->checkMagicNumber() )
     {

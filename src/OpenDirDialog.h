@@ -69,11 +69,6 @@ namespace QDirStat
 	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
 
 	/**
-	 * Return this dialog's path selector so it can be populated.
-	 **/
-//	PathSelector * pathSelector() const { return _ui->pathSelector; }
-
-	/**
 	 * Read settings from the config file
 	 **/
 	void readSettings();

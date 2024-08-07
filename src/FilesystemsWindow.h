@@ -78,11 +78,6 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Refresh (reload) all data.
-	 **/
-	void refresh();
-
-	/**
 	 * Enable or disable widgets such as the "Read" button.
 	 **/
 	void enableActions();
@@ -115,7 +110,7 @@ namespace QDirStat
 	/**
 	 * Clear all data and widget contents.
 	 **/
-	void clear();
+	void clear() { _ui->fsTree->clear(); }
 
 	/**
 	 * One-time initialization of the widgets in this window.

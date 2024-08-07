@@ -161,7 +161,7 @@ namespace QDirStat
 	 * Clear all exclude rules and filters of this tree.  The items themselves
 	 * are not cleared since this can only be done safely by the model.
 	 **/
-	void reset();
+	void reset() { clearTmpExcludeRules(); clearFilters(); }
 
 	/**
 	 * Locate a child somewhere in the tree whose URL (i.e. complete path)

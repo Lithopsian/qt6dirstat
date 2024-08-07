@@ -25,27 +25,111 @@ using namespace QDirStat;
 
 namespace
 {
+    void dumpMountPoints( bool showAll )
+    {
+        for ( MountPointIterator it { showAll }; *it; ++it )
+            logDebug() << *it << Qt::endl;
+    }
+
     // Verbose logging, all callers might be commented out
     [[gnu::unused]] void dumpAllMountPoints()
     {
-        const auto allMountPoints = MountPoints::allMountPoints();
-        for ( const MountPoint * mountPoint : allMountPoints )
-            logDebug() << mountPoint->path() << Qt::endl;
+        dumpMountPoints( true );
     }
 
 
     [[gnu::unused]] void dumpNormalMountPoints()
     {
-        const auto normalMountPoints = MountPoints::normalMountPoints();
-        for ( const MountPoint * mountPoint : normalMountPoints )
-            logDebug() << mountPoint->path() << Qt::endl;
+        dumpMountPoints( false );
     }
 
 
+    /**
+     * Change filesystem type "fuseblk" to "ntfs" for NTFS devices.
+     **/
     void handleFuseblk( QString & fsType, const QStringList & ntfsDevices, const QString & device )
     {
         if ( fsType == "fuseblk"_L1 && ntfsDevices.contains( device ) )
-            fsType = "ntfs"_L1;
+            fsType = "ntfs";
+    }
+
+
+    /**
+     * Try to check with the external "lsblk" command (if available) what
+     * block devices use NTFS and return a list of them.
+     **/
+    QStringList findNtfsDevices()
+    {
+        const QLatin1String lsblkCommand = []()
+            {
+                 if ( SysUtil::haveCommand( "/bin/lsblk" ) )
+                    return "/bin/lsblk"_L1;
+
+                if ( !SysUtil::haveCommand( "/usr/bin/lsblk" ) )
+                    return "/usr/bin/lsblk"_L1;
+
+                return QLatin1String();
+            }();
+
+        if ( lsblkCommand.isEmpty() )
+        {
+            logInfo() << "No lsblk command available" << Qt::endl;
+            return QStringList();
+        }
+
+        int exitCode;
+        const QString output = SysUtil::runCommand( lsblkCommand,
+                                                    { "--noheadings", "--list", "--output", "name,fstype" },
+                                                    &exitCode,
+                                                    LSBLK_TIMEOUT_SEC,
+                                                    false,        // logCommand
+                                                    false,        // logOutput
+                                                    true );       // logError
+        if ( exitCode != 0 )
+            return QStringList();
+
+        const QStringList lines = output.split( u'\n' )
+            .filter( QRegularExpression { "\\s+ntfs", QRegularExpression::CaseInsensitiveOption } );
+
+        QStringList ntfsDevices;
+        for ( const QString & line : lines )
+        {
+            const QString device = "/dev/" + line.split( QRegularExpression { "\\s+" } ).first();
+            logDebug() << "NTFS on " << device << Qt::endl;
+            ntfsDevices << device;
+        }
+
+        return ntfsDevices;
+    }
+
+
+    /**
+     * Return 'true' if 'device' is mounted.
+     **/
+    bool isDeviceMounted( const QString & device, MountPointMap & mountPointMap )
+    {
+        for ( const MountPoint * mountPoint : mountPointMap )
+        {
+            if ( mountPoint->device() == device )
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Check if any of the mount points has filesystem type "btrfs".
+     **/
+    bool checkForBtrfs( const MountPointMap & mountPointMap )
+    {
+        for ( const MountPoint * mountPoint : mountPointMap )
+        {
+            if ( mountPoint && mountPoint->isBtrfs() )
+            return true;
+        }
+
+        return false;
     }
 
 } // namespace
@@ -110,31 +194,17 @@ MountPoints * MountPoints::instance()
 void MountPoints::init()
 {
     clear();
-    _isPopulated     = false;
+
     _hasBtrfs        = false;
     _checkedForBtrfs = false;
-}
 
-
-void MountPoints::clear()
-{
-    qDeleteAll( _mountPointList );
-    _mountPointList.clear();
-    _mountPointMap.clear();
-}
-
-
-const MountPoint * MountPoints::findByPath( const QString & path )
-{
-    instance()->ensurePopulated();
-
-    return instance()->_mountPointMap.value( path, nullptr );
+    populate();
 }
 
 
 const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 {
-    const QFileInfo fileInfo( startPath );
+    const QFileInfo fileInfo { startPath };
     QString path = fileInfo.canonicalFilePath(); // absolute path without symlinks or ..
 
 //    if ( path != startPath )
@@ -152,7 +222,7 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
             pathComponents.removeLast();
             path = u'/' + pathComponents.join( u'/' );
 
-            mountPoint = instance()->_mountPointMap.value( path, nullptr );
+            mountPoint = findByPath( path );
         }
     }
 
@@ -162,62 +232,38 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 }
 
 
-bool MountPoints::isDeviceMounted( const QString & device ) const
-{
-    // Do NOT call ensurePopulated() here: This would cause a recursion in the
-    // populating process!
-
-    for ( const MountPoint * mountPoint : instance()->_mountPointList )
-    {
-        if ( mountPoint->device() == device )
-            return true;
-    }
-
-    return false;
-}
-
-
 bool MountPoints::hasBtrfs()
 {
-    instance()->ensurePopulated();
+    auto mountPoints = instance();
 
-    if ( !instance()->_checkedForBtrfs )
+    if ( !mountPoints->_checkedForBtrfs )
     {
-        instance()->_hasBtrfs = instance()->checkForBtrfs();
-        instance()->_checkedForBtrfs = true;
+        mountPoints->_hasBtrfs = checkForBtrfs( mountPoints->_mountPointMap );
+        mountPoints->_checkedForBtrfs = true;
     }
 
-    return instance()->_hasBtrfs;
+    return mountPoints->_hasBtrfs;
 }
 
 
-void MountPoints::ensurePopulated()
+void MountPoints::populate()
 {
-    if ( _isPopulated )
-        return;
+    QStringList ntfsDevices = findNtfsDevices();
 
 #if USE_PROC_MOUNTS
-
-    read( "/proc/mounts" ) || read( "/etc/mtab" );
-
-    if ( !_isPopulated )
+    read( "/proc/mounts", ntfsDevices ) || read( "/etc/mtab", ntfsDevices );
+    if ( _mountPointMap.size() == 0 )
         logError() << "Could not read either /proc/mounts or /etc/mtab" << Qt::endl;
-
 #endif
 
 #if HAVE_Q_STORAGE_INFO
-
-    if ( !_isPopulated )
-        readStorageInfo();
-
+    if ( _mountPointMap.size() == 0 )
+        readStorageInfo( ntfsDevices );
 #endif
-
-    _isPopulated = true; // don't try more than once
-//    dumpNormalMountPoints();
 }
 
 
-bool MountPoints::read( const QString & filename )
+bool MountPoints::read( const QString & filename, const QStringList & ntfsDevices )
 {
     QFile file( filename );
 
@@ -227,16 +273,14 @@ bool MountPoints::read( const QString & filename )
         return false;
     }
 
-    findNtfsDevices();
     QTextStream in( &file );
     int lineNo = 0;
-    int count  = 0;
     QString line = in.readLine();
 
     while ( !line.isNull() ) // in.atEnd() always returns true for /proc/*
     {
         ++lineNo;
-        const QStringList fields = line.split( QRegularExpression( "\\s+" ), Qt::SkipEmptyParts );
+        QStringList fields = line.split( QRegularExpression { "\\s+" }, Qt::SkipEmptyParts );
 
         if ( fields.isEmpty() ) // allow empty lines
             continue;
@@ -255,33 +299,29 @@ bool MountPoints::read( const QString & filename )
 
         const QString & device = fields[0];
 
-        QString path = fields[1];
+        QString & path = fields[1];
         path.replace( "\\040"_L1, " "_L1 );
 
-        QString fsType = fields[2];
-        handleFuseblk( fsType, _ntfsDevices, device );
+        QString & fsType = fields[2];
+        handleFuseblk( fsType, ntfsDevices, device );
 
         const QString & mountOpts = fields[3];
         // ignoring fsck and dump order (0 0)
 
-        MountPoint * mountPoint = new MountPoint( device, path, fsType, mountOpts );
+        MountPoint * mountPoint = new MountPoint { device, path, fsType, mountOpts };
         postProcess( mountPoint );
         add( mountPoint );
-
-        if ( !mountPoint->isDuplicate() )
-            ++count;
 
         line = in.readLine();
     }
 
-    if ( count < 1 )
+    if ( _mountPointMap.size() == 0 )
     {
         logWarning() << "No mountpoints in " << filename << Qt::endl;
         return false;
     }
 
-    // logDebug() << "Read " << _mountPointList.size() << " mount points from " << filename << Qt::endl;
-    _isPopulated = true;
+    // logDebug() << "Read " << _mountPointMap.size() << " mount points from " << filename << Qt::endl;
     return true;
 }
 
@@ -290,7 +330,7 @@ void MountPoints::postProcess( MountPoint * mountPoint )
 {
 //    logDebug() << mountPoint << Qt::endl;
 
-    if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device() ) )
+    if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), _mountPointMap ) )
     {
         mountPoint->setDuplicate();
 
@@ -306,20 +346,9 @@ void MountPoints::postProcess( MountPoint * mountPoint )
     }
 }
 
-
-void MountPoints::add( MountPoint * mountPoint )
-{
-    _mountPointList << mountPoint;
-    _mountPointMap[ mountPoint->path() ] = mountPoint;
-}
-
-
 #if HAVE_Q_STORAGE_INFO
-
-bool MountPoints::readStorageInfo()
+void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
 {
-    findNtfsDevices();
-
     const auto mountedVolumes = QStorageInfo::mountedVolumes();
     for ( const QStorageInfo & mount : mountedVolumes )
     {
@@ -327,101 +356,36 @@ bool MountPoints::readStorageInfo()
         const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String();
 
         QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
-        handleFuseblk( fsType, _ntfsDevices, device );
+        handleFuseblk( fsType, ntfsDevices, device );
 
-        MountPoint * mountPoint = new MountPoint( device,
-                                                  mount.rootPath(),
-                                                  fsType,
-                                                  mountOptions );
+        MountPoint * mountPoint = new MountPoint { device, mount.rootPath(), fsType, mountOptions };
         postProcess( mountPoint );
         add( mountPoint );
     }
 
-    if ( _mountPointList.isEmpty() )
+    if ( _mountPointMap.isEmpty() )
     {
         logWarning() << "No mountpoints found with QStorageInfo" << Qt::endl;
-        return false;
-    }
-    else
-    {
-        // logDebug() << "Read " << _mountPointList.size() << " mount points from QStorageInfo" << Qt::endl;
-        _isPopulated = true;
-        return true;
-    }
-}
-
-#endif // HAVE_Q_STORAGE_INFO
-
-
-bool MountPoints::checkForBtrfs()
-{
-    ensurePopulated();
-
-    for ( const MountPoint * mountPoint : asConst( _mountPointMap ) )
-    {
-        if ( mountPoint && mountPoint->isBtrfs() )
-            return true;
-    }
-
-    return false;
-}
-
-
-void MountPoints::findNtfsDevices()
-{
-    _ntfsDevices.clear();
-
-    QLatin1String lsblkCommand = "/bin/lsblk"_L1;
-    if ( !SysUtil::haveCommand( lsblkCommand ) )
-        lsblkCommand = "/usr/bin/lsblk"_L1;
-    if ( !SysUtil::haveCommand( lsblkCommand ) )
-    {
-        logInfo() << "No lsblk command available" << Qt::endl;
         return;
     }
 
-    int exitCode;
-    const QString output = SysUtil::runCommand( lsblkCommand,
-                                                { "--noheading", "--list", "--output", "name,fstype" },
-                                                &exitCode,
-                                                LSBLK_TIMEOUT_SEC,
-                                                false,        // logCommand
-                                                false,        // logOutput
-                                                true );       // logError
-    if ( exitCode == 0 )
-    {
-        const QStringList lines = output.split( u'\n' )
-            .filter( QRegularExpression( "\\s+ntfs", QRegularExpression::CaseInsensitiveOption ) );
-
-        for ( const QString & line : lines )
-        {
-            const QString device = "/dev/" + line.split( QRegularExpression( "\\s+" ) ).first();
-            logDebug() << "NTFS on " << device << Qt::endl;
-            _ntfsDevices << device;
-        }
-    }
+    // logDebug() << "Read " << _mountPointMap.size() << " mount points from QStorageInfo" << Qt::endl;
 }
-
-
+#endif // HAVE_Q_STORAGE_INFO
+/*
 MountPointList MountPoints::normalMountPoints()
 {
-    instance()->ensurePopulated();
     MountPointList result;
 
-    for ( MountPoint * mountPoint : instance()->_mountPointList )
+    for ( MountPoint * mountPoint : instance()->_mountPointMap )
     {
-        if ( !mountPoint->isSystemMount()     &&
-             !mountPoint->isDuplicate()       &&
-             !mountPoint->isUnmountedAutofs() &&
-             !mountPoint->isSnapPackage()        )
-        {
+        if ( mountPoint->isNormalMountPoint() )
             result << mountPoint;
-        }
     }
 
     return result;
 }
-
+*/
 
 QString MountPoints::device( const QString & url )
 {

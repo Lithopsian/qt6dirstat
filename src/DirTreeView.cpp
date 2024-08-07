@@ -29,8 +29,8 @@ using namespace QDirStat;
 
 DirTreeView::DirTreeView( QWidget * parent ):
     QTreeView { parent },
-    _sizeColDelegate { new SizeColDelegate( this ) },
-    _headerTweaker { new HeaderTweaker( header(), this ) }
+    _sizeColDelegate { new SizeColDelegate { this } },
+    _headerTweaker { new HeaderTweaker { header(), this } }
 {
     setItemDelegateForColumn( SizeCol, _sizeColDelegate );
 
@@ -247,7 +247,7 @@ void DirTreeView::scrolled( int )
 			     TotalFilesCol,
 			     TotalSubDirsCol,
 			     UserCol,
-			     GroupCol
+			     GroupCol,
 			   } )
     {
 	// Only check visible columns that are configured to auto-size

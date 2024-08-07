@@ -168,7 +168,7 @@ CleanupCollection::CleanupCollection( QObject        * parent,
                                       QToolBar       * toolBar,
                                       QMenu          * menu ):
     QObject { parent },
-    _trash { new Trash() },
+    _trash { new Trash },
     _selectionModel { selectionModel },
     _toolBar { toolBar },
     _menu { menu }
@@ -410,13 +410,13 @@ void CleanupCollection::readSettings()
 	}
 	else
 	{
-	    Cleanup * cleanup = new Cleanup( this, active, title, command,
-	                                     recurse, askForConfirmation,
-	                                     static_cast<Cleanup::RefreshPolicy>( refreshPolicy ),
-	                                     worksForDir, worksForFile, worksForDotEntry,
-	                                     static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
-	                                     outputWindowTimeout, outputWindowAutoClose,
-	                                     shell );
+	    Cleanup * cleanup = new Cleanup { this, active, title, command,
+	                                      recurse, askForConfirmation,
+	                                      static_cast<Cleanup::RefreshPolicy>( refreshPolicy ),
+	                                      worksForDir, worksForFile, worksForDotEntry,
+	                                      static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
+	                                      outputWindowTimeout, outputWindowAutoClose,
+	                                      shell };
 	    add( cleanup );
 
 	    if ( !iconName.isEmpty() )
@@ -511,7 +511,7 @@ void CleanupCollection::moveToTrash()
     const FileInfoSet selectedItems = _selectionModel->selectedItems();
 
     // Prepare output window
-    OutputWindow * outputWindow = new OutputWindow( qApp->activeWindow(), true );
+    OutputWindow * outputWindow = new OutputWindow { qApp->activeWindow(), true };
 
     // Prepare refresher
     createRefresher( outputWindow, selectedItems.parents() );
@@ -539,7 +539,7 @@ void CleanupCollection::moveToTrash()
 void CleanupCollection::createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet )
 {
     _selectionModel->prepareForRefresh( refreshSet );
-    Refresher * refresher = new Refresher( this, refreshSet );
+    Refresher * refresher = new Refresher { this, refreshSet };
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
              refresher,    &Refresher::refresh );

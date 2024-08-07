@@ -14,8 +14,8 @@
 
 #include "FilesystemsWindow.h"
 #include "DirTreeModel.h"
-#include "Exception.h"
 #include "FormatUtil.h"
+#include "Logger.h"
 #include "MountPoints.h"
 #include "HeaderTweaker.h"
 #include "MainWindow.h"
@@ -55,7 +55,6 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    MountPoints::reload();
     initWidgets();
     readSettings();
 
@@ -63,10 +62,10 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
              app()->mainWindow(), &MainWindow::readFilesystem );
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
-             this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::populate );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
-             this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::populate );
 
     connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
               this,               &FilesystemsWindow::contextMenu);
@@ -122,19 +121,12 @@ void FilesystemsWindow::showBtrfsFreeSizeWarning()
     PanelMessage::showFilesystemsMsg( this, _ui->vBox );
 }
 
-
-void FilesystemsWindow::refresh()
-{
-    MountPoints::reload();
-    populate();
-}
-
-
+/*
 void FilesystemsWindow::clear()
 {
     _ui->fsTree->clear();
 }
-
+*/
 
 void FilesystemsWindow::initWidgets()
 {
@@ -177,14 +169,13 @@ void FilesystemsWindow::populate()
 {
     clear();
 
-    const bool showAll = !_ui->normalCheckBox->isChecked();
-    const auto mountPoints = showAll ? MountPoints::allMountPoints() : MountPoints::normalMountPoints();
-    for ( MountPoint * mountPoint : mountPoints )
-    {
-	CHECK_PTR( mountPoint);
+    MountPoints::reload();
 
-	FilesystemItem * item = new FilesystemItem( mountPoint, _ui->fsTree );
-	item->setIcon( 0, QIcon( app()->dirTreeModel()->treeIconDir() + icon( mountPoint ) ) );
+    const bool showAll = !_ui->normalCheckBox->isChecked();
+    for ( MountPointIterator it { showAll }; *it; ++it )
+    {
+	FilesystemItem * item = new FilesystemItem { *it, _ui->fsTree };
+	item->setIcon( FS_DeviceCol, QIcon( app()->dirTreeModel()->treeIconDir() + icon( *it ) ) );
     }
 
     if ( MountPoints::hasBtrfs() )

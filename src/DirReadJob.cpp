@@ -454,7 +454,7 @@ bool LocalDirReadJob::checkForNtfs()
 CacheReadJob::CacheReadJob( DirTree       * tree,
 			    const QString & cacheFileName ):
     DirReadJob { tree, nullptr },
-    _reader { new CacheReader( cacheFileName, tree ) }
+    _reader { new CacheReader { cacheFileName, tree } }
 {
     init();
 }
@@ -465,7 +465,7 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 			    DirInfo       * parent,
 			    const QString & cacheFileName ):
     DirReadJob { tree, parent },
-    _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
+    _reader { new CacheReader { cacheFileName, tree, dir, parent } }
 {
     init();
 }

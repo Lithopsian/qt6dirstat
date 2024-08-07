@@ -25,11 +25,34 @@ HistoryButtons::HistoryButtons( QAction * actionGoBack,
                                 QAction * actionGoForward,
                                 QWidget * parent ):
     QObject { parent },
-    _history { new History() },
+    _history { new History },
     _actionGoBack { actionGoBack },
     _actionGoForward { actionGoForward }
 {
-    initHistoryButtons();
+    // Two menus - they'll always look the same, but positioning changes slightly as a visual clue
+    QMenu * backMenu = new QMenu();
+    _actionGoBack->setMenu( backMenu );
+
+    QMenu * forwardMenu = new QMenu();
+    _actionGoForward->setMenu( forwardMenu );
+
+    connect( backMenu,         &QMenu::aboutToShow,
+             this,             &HistoryButtons::updateHistoryMenu );
+
+    connect( backMenu,         &QMenu::triggered,
+             this,             &HistoryButtons::historyMenuAction );
+
+    connect( forwardMenu,      &QMenu::aboutToShow,
+             this,             &HistoryButtons::updateHistoryMenu );
+
+    connect( forwardMenu,      &QMenu::triggered,
+             this,             &HistoryButtons::historyMenuAction );
+
+    connect( _actionGoBack,    &QAction::triggered,
+             this,             &HistoryButtons::historyGoBack );
+
+    connect( _actionGoForward, &QAction::triggered,
+             this,             &HistoryButtons::historyGoForward );
 }
 
 
@@ -38,7 +61,7 @@ HistoryButtons::~HistoryButtons() = default;
 
 void HistoryButtons::clear()
 {
-    _history->clear();
+    _history.reset( new History );
 }
 
 
@@ -76,7 +99,7 @@ void HistoryButtons::addToHistory( const FileInfo * item )
     if ( item )
     {
         const QString url = item->debugUrl();
-        if ( url != _history->currentItem() )
+        if ( _history->isEmpty() || url != _history->currentItem() )
         {
             _history->add( url );
             updateActions();
@@ -92,7 +115,7 @@ void HistoryButtons::unlock( const FileInfo * currentItem )
     // Clean the history to remove items that are no longer in the tree
     int currentIndex = _history->currentIndex();
     const QStringList items = _history->allItems();
-    _history->clear();
+    clear();
 
     for ( const QString & item : items )
     {
@@ -107,35 +130,6 @@ void HistoryButtons::unlock( const FileInfo * currentItem )
         _history->setCurrentIndex( currentIndex );
 
     addToHistory( currentItem );
-}
-
-
-void HistoryButtons::initHistoryButtons()
-{
-    // Two menus - they'll always look the same, but positioning changes slightly as a visual clue
-    QMenu * backMenu    = new QMenu();
-    QMenu * forwardMenu = new QMenu();
-
-    connect( backMenu,         &QMenu::aboutToShow,
-             this,             &HistoryButtons::updateHistoryMenu );
-
-    connect( backMenu,         &QMenu::triggered,
-             this,             &HistoryButtons::historyMenuAction );
-
-    connect( forwardMenu,      &QMenu::aboutToShow,
-             this,             &HistoryButtons::updateHistoryMenu );
-
-    connect( forwardMenu,      &QMenu::triggered,
-             this,             &HistoryButtons::historyMenuAction );
-
-    connect( _actionGoBack,    &QAction::triggered,
-             this,             &HistoryButtons::historyGoBack );
-
-    connect( _actionGoForward, &QAction::triggered,
-             this,             &HistoryButtons::historyGoForward );
-
-    _actionGoBack->setMenu   ( backMenu    );
-    _actionGoForward->setMenu( forwardMenu );
 }
 
 

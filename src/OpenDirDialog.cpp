@@ -16,7 +16,6 @@
 #include "OpenDirDialog.h"
 #include "ExistingDir.h"
 #include "Logger.h"
-#include "MountPoints.h"
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -30,14 +29,12 @@ using namespace QDirStat;
 OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
     QDialog { parent },
     _ui { new Ui::OpenDirDialog },
-    _filesystemModel { new QFileSystemModel( this ) }
+    _filesystemModel { new QFileSystemModel { this } }
 {
     _ui->setupUi( this );
 
-    MountPoints::reload();
-
     _ui->pathSelector->addHomeDir();
-    _ui->pathSelector->addMountPoints( MountPoints::normalMountPoints() );
+    _ui->pathSelector->addNormalMountPoints();
     _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
 
     initPathComboBox();
