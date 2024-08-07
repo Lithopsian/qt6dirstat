@@ -10,8 +10,8 @@
 #include <QElapsedTimer>
 
 #include "MimeCategorizer.h"
-#include "Exception.h"
 #include "FileInfo.h"
+#include "Logger.h"
 #include "Settings.h"
 
 
@@ -135,7 +135,7 @@ void MimeCategorizer::clear()
 
 const QString & MimeCategorizer::name( const FileInfo * item )
 {
-    const QReadLocker locker( &_lock );
+    const QReadLocker locker { &_lock };
 
     return category( item )->name();
 }
@@ -143,7 +143,7 @@ const QString & MimeCategorizer::name( const FileInfo * item )
 
 const QColor & MimeCategorizer::color( const FileInfo * item )
 {
-    const QReadLocker locker( &_lock );
+    const QReadLocker locker { &_lock };
 
     return category( item )->color();
 }
@@ -151,19 +151,17 @@ const QColor & MimeCategorizer::color( const FileInfo * item )
 
 const MimeCategory * MimeCategorizer::category( const FileInfo * item, QString * suffix_ret )
 {
-    if ( !item )
-	return nullptr;
+    if ( item )
+    {
+	const QReadLocker locker { &_lock };
 
-    CHECK_MAGIC( item );
+	const MimeCategory * matchedCategory = category( item->name(), suffix_ret );
+	if ( matchedCategory )
+	    return matchedCategory;
 
-    const QReadLocker locker( &_lock );
-
-    const MimeCategory * matchedCategory = category( item->name(), suffix_ret );
-    if ( matchedCategory )
-	return matchedCategory;
-
-    if ( ( item->mode() & S_IXUSR ) == S_IXUSR )
-	return _executableCategory;
+	if ( ( item->mode() & S_IXUSR ) == S_IXUSR )
+	    return _executableCategory;
+    }
 
     return nullptr;
 }
@@ -304,7 +302,7 @@ const MimeCategory * MimeCategorizer::findCategoryByName( const QString & catego
 
 MimeCategory * MimeCategorizer::create( const QString & name, const QColor & color )
 {
-    MimeCategory * category = new MimeCategory( name, color );
+    MimeCategory * category = new MimeCategory { name, color };
     _categories << category;
 
     return category;
@@ -332,8 +330,8 @@ void MimeCategorizer::buildMaps()
 	buildWildcardLists( category );
     }
 
-    logDebug() << "maps built in " << stopwatch.restart() << "ms - "
-               << _wildcards.size() << " regular expressions" << Qt::endl;
+    logDebug() << "maps built in " << stopwatch.restart() << "ms ("
+               << _wildcards.size() << " naked regular expressions)" << Qt::endl;
 }
 
 
@@ -482,12 +480,12 @@ void MimeCategorizer::ensureMandatoryCategories()
 }
 
 
-MimeCategory * MimeCategorizer::addCategory( const QString & name,
-                                             const QColor  & color,
-                                             const QString & caseInsensitivePatterns,
-                                             const QString & caseSensitivePatterns )
+const MimeCategory * MimeCategorizer::addCategory( const QString & name,
+                                                   const QColor  & color,
+                                                   const QString & caseInsensitivePatterns,
+                                                   const QString & caseSensitivePatterns )
 {
-    MimeCategory * category = create( name, color);
+    MimeCategory * category = create( name, color );
     category->addPatterns( caseInsensitivePatterns.split( u',' ), Qt::CaseInsensitive );
     category->addPatterns( caseSensitivePatterns.split  ( u',' ), Qt::CaseSensitive   );
     return category;

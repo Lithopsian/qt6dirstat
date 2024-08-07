@@ -59,15 +59,15 @@ void ExcludeRulesConfigPage::applyChanges()
 
     // Check if anything changed before writing, just for fun
     DirTree * tree = app()->dirTree();
-    const ExcludeRules * excludeRules = tree->excludeRules();
-    for ( auto itOld = excludeRules->cbegin(), itNew = rules.cbegin();
-          itNew != rules.cend() || itOld != excludeRules->cend();
+    const auto excludeRulesEnd = tree->excludeRules()->cend();
+    for ( auto itOld = tree->excludeRules()->cbegin(), itNew = rules.cbegin();
+          itNew != rules.cend() || itOld != excludeRulesEnd;
           ++itNew, ++itOld )
     {
 	// If we ran past the end of either list, or the rules don't match ...
-	if ( itNew == rules.cend() || itOld == excludeRules->cend() || **itOld != **itNew )
+	if ( itNew == rules.cend() || itOld == excludeRulesEnd || **itOld != **itNew )
 	{
-	    excludeRules->writeSettings( rules );
+	    ExcludeRules::writeSettings( rules );
 	    tree->setExcludeRules();
 	    return;
 	}

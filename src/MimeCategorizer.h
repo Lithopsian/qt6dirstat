@@ -271,10 +271,10 @@ namespace QDirStat
 	 * Add a category from a name, colour, and comma-delimited patterns
 	 * strings.
 	 **/
-	MimeCategory * addCategory( const QString & name,
-	                            const QColor  & color,
-	                            const QString & caseSensitivePatterns,
-	                            const QString & caseInsensitivePatterns );
+	const MimeCategory * addCategory( const QString & name,
+	                                  const QColor  & color,
+	                                  const QString & caseSensitivePatterns,
+	                                  const QString & caseInsensitivePatterns );
 
 	/**
 	 * Add default categories in case none were read from the settings.

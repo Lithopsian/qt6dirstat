@@ -63,7 +63,7 @@ namespace QDirStat
         /**
          * Return the pattern without the leading "Pkg:/".
          **/
-        const QString & pattern() const { return SearchFilter::pattern(); }
+//        const QString & pattern() const { return SearchFilter::pattern(); }
 
         /**
          * Return the filter package URL including the leading "Pkg:/".

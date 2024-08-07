@@ -93,12 +93,11 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 void MainWindow::setUnpkgExcludeRules( const UnpkgSettings & unpkgSettings )
 {
     // Set up the exclude rules for directories that should be ignored
-    ExcludeRules * excludeRules = new ExcludeRules( unpkgSettings.excludeDirs(),
-                                                    ExcludeRule::Wildcard,
-                                                    true,    // case-sensitive
-                                                    true,    // useFullPath
-                                                    false ); // checkAnyFileChild
-    app()->dirTree()->setTmpExcludeRules( excludeRules );
+    app()->dirTree()->setTmpExcludeRules( new ExcludeRules( unpkgSettings.excludeDirs(),
+                                                            ExcludeRule::Wildcard,
+                                                            true,    // case-sensitive
+                                                            true,    // useFullPath
+                                                            false ) ); // checkAnyFileChild
 }
 
 

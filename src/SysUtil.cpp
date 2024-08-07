@@ -26,11 +26,12 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 			     bool            logOutput )
 {
     int exitCode = -1;
-    QString output = runCommand( commandLine, &exitCode,
-                                    COMMAND_TIMEOUT_SEC,
-                                    logCommand,
-                                    logOutput,
-                                    true ); // ignoreErrCode
+    QString output = runCommand( commandLine,
+                                 &exitCode,
+                                 COMMAND_TIMEOUT_SEC,
+                                 logCommand,
+                                 logOutput,
+                                 true ); // ignoreErrCode
 
     if ( exitCode != 0 )
     {

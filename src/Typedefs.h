@@ -39,9 +39,6 @@ namespace QDirStat
 
     using ColorList = QList<QColor>;
 
-    class MountPoint;
-    using MountPointList = QList<MountPoint *>;
-
     /**
      * Provide a qreal literal suffix.  qreal is not always
      * a double (although it almost always is).

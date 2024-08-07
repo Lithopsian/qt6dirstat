@@ -22,16 +22,20 @@ using namespace QDirStat;
 QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
                                     const QString & pattern )
 {
-    // Anchor and escape all special characters so a regexp match behaves like a simple comparison
-    if ( patternSyntax == FixedString )
-	return Wildcard::anchoredPattern( Wildcard::escape( pattern ) );
+    switch ( patternSyntax )
+    {
+	case FixedString:
+	    // Anchor and escape all special characters so a regexp match behaves like a simple comparison
+	    return Wildcard::anchoredPattern( Wildcard::escape( pattern ) );
 
-    // Convert the *, ?, and [] wildcards to regexp equivalents and anchor the pattern
-    if ( patternSyntax == Wildcard )
-	return Wildcard::wildcardToRegularExpression( pattern );
+	case Wildcard:
+	    // Convert the *, ?, and [] wildcards to regexp equivalents and anchor the pattern
+	    return Wildcard::wildcardToRegularExpression( pattern );
 
-    // Note: unanchored for regexp!
-    return pattern;
+	default:
+	    // Note: unanchored for regexp!
+	    return pattern;
+    }
 }
 
 
@@ -122,41 +126,14 @@ namespace
 } // namespace
 
 
-ExcludeRules::ExcludeRules()
-{
-    readSettings();
-#if VERBOSE_EXCLUDE_MATCHES
-    dumpExcludeRules( this );
-#endif
-}
-
-
-ExcludeRules::ExcludeRules( const QStringList & paths,
-                            ExcludeRule::PatternSyntax patternSyntax,
-                            bool caseSensitive,
-                            bool useFullPath,
-                            bool checkAnyFileChild )
-{
-    for ( const QString & path : paths )
-        add( patternSyntax, path, caseSensitive, useFullPath, checkAnyFileChild );
-}
-
-
-void ExcludeRules::clear()
-{
-    qDeleteAll( _rules );
-    _rules.clear();
-}
-
-
 void ExcludeRules::add( ExcludeRule::PatternSyntax   patternSyntax,
                         const QString              & pattern,
                         bool                         caseSensitive,
                         bool                         useFullPath,
                         bool                         checkAnyFileChild )
 {
-    ExcludeRule * rule =
-	new ExcludeRule( patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild );
+    const ExcludeRule * rule =
+	new ExcludeRule { patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild };
     _rules << rule;
 
     logInfo() << "Added " << rule << Qt::endl;
@@ -168,7 +145,7 @@ bool ExcludeRules::match( const QString & fullPath, const QString & fileName ) c
     if ( fullPath.isEmpty() || fileName.isEmpty() )
 	return false;
 
-    for ( const ExcludeRule * rule : asConst( _rules ) )
+    for ( const ExcludeRule * rule : _rules )
     {
 	if ( rule->match( fullPath, fileName ) )
 	{
@@ -188,7 +165,7 @@ bool ExcludeRules::matchDirectChildren( const DirInfo * dir ) const
     if ( !dir )
 	return false;
 
-    for ( const ExcludeRule * rule : asConst( _rules ) )
+    for ( const ExcludeRule * rule : _rules )
     {
 	if ( rule->matchDirectChildren( dir ) )
 	{
@@ -205,8 +182,6 @@ bool ExcludeRules::matchDirectChildren( const DirInfo * dir ) const
 
 void ExcludeRules::addDefaultRules()
 {
-    //logInfo() << "Adding default exclude rules" << Qt::endl;
-
     add( ExcludeRule::FixedString, "/timeshift", true, true, false );
 
     ExcludeRuleSettings settings;
@@ -218,8 +193,6 @@ void ExcludeRules::addDefaultRules()
 
 void ExcludeRules::readSettings()
 {
-//    clear(); // a new object is always used
-
     const SettingsEnumMapping mapping = patternSyntaxMapping();
 
     ExcludeRuleSettings settings;
@@ -228,9 +201,9 @@ void ExcludeRules::readSettings()
     const auto groups = settings.findListGroups();
     for ( const QString & groupName : groups )
     {
+	// Read one exclude rule
 	settings.beginGroup( groupName );
 
-	// Read one exclude rule
 	const QString pattern        = settings.value( "Pattern"                  ).toString();
 	const bool caseSensitive     = settings.value( "CaseSensitive",     true  ).toBool();
 	const bool useFullPath       = settings.value( "UseFullPath",       false ).toBool();
@@ -238,11 +211,11 @@ void ExcludeRules::readSettings()
 
 	const int syntax = settings.enumValue( "Syntax", ExcludeRule::RegExp, mapping );
 
-	ExcludeRule * rule = new ExcludeRule( static_cast<ExcludeRule::PatternSyntax>( syntax ),
-	                                      pattern,
-	                                      caseSensitive,
-	                                      useFullPath,
-	                                      checkAnyFileChild );
+	const ExcludeRule * rule = new ExcludeRule { static_cast<ExcludeRule::PatternSyntax>( syntax ),
+	                                             pattern,
+	                                             caseSensitive,
+	                                             useFullPath,
+	                                             checkAnyFileChild };
 
 	if ( !pattern.isEmpty() && rule->isValid() )
 	{
@@ -271,8 +244,7 @@ void ExcludeRules::writeSettings( const ExcludeRuleList & newRules )
 
     SettingsEnumMapping mapping = patternSyntaxMapping();
 
-    // Similar to CleanupCollection::writeSettings(), using a separate group
-    // for each exclude rule for better readability in the settings file.
+    // Use a separate numbered group for each exclude rule
     for ( int i=0; i < newRules.size(); ++i )
     {
 	const ExcludeRule * rule = newRules.at(i);
