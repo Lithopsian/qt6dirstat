@@ -19,32 +19,6 @@
 namespace QDirStat
 {
     /**
-     * Item class for the QListWidget in a ListEditor. This connects the
-     * QListWidgetItem with a void * pointer to the underlying configuration
-     * object.
-     **/
-    class ListEditorItem: public QListWidgetItem
-    {
-    public:
-	/**
-	 * Create a new item with the specified text and store the value.
-	 **/
-	ListEditorItem( QListWidget * listWidget, const QString & text, void * value ):
-	    QListWidgetItem { text, listWidget },
-	    _value { value }
-	{}
-
-	/**
-	 * Return the associated value.
-	 **/
-	void * value() const { return _value; }
-
-    private:
-	void * _value;
-    };
-
-
-    /**
      * This is an abstract widget base class for config pages that have a list
      * of items on the left and details for one item (the current item) on the
      * right.
@@ -83,7 +57,7 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return the list widget for this page (derived class).
+	 * Return the list widget for this page.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
@@ -103,7 +77,7 @@ namespace QDirStat
 	virtual QToolButton * toBottomButton() const { return nullptr; };
 
 	/**
-	 * Fill the list widget: create a ListEditorItem for each value.
+	 * Fill the list widget: create a QListWidgetItem for each value.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
@@ -214,10 +188,9 @@ namespace QDirStat
 	                   void( ListEditor::*actee )( void ) );
 
 	/**
-	 * Create a ListEditorItem and add it to the list widget.
+	 * Create a QListWidgetItem and add it to the list widget.
 	 **/
-	ListEditorItem * createItem( const QString & valueText, void * value )
-	    { return new ListEditorItem { listWidget(), valueText, value }; }
+	QListWidgetItem * createItem( const QString & valueText, void * value );
 
 	/**
 	 * Enable or disable buttons depending on internal status.
@@ -225,7 +198,7 @@ namespace QDirStat
 	virtual void updateActions();
 
 	/**
-	 * Convert 'item' to a ListEditorItem and return its value.
+	 * Return the value (void *) for 'item'.
 	 **/
 	void * value( QListWidgetItem * item );
 

@@ -109,9 +109,9 @@ void ListEditor::moveCurrentItem( int newRow )
     {
 	list->insertItem( newRow, currentItem );
 	list->setCurrentItem( currentItem );
+	currentItemChanged( currentItem, currentItem );
     }
 
-    currentItemChanged( currentItem, currentItem );
 }
 
 
@@ -130,7 +130,7 @@ void ListEditor::moveUp()
 void ListEditor::add()
 {
     void * value = newValue();
-    ListEditorItem * item = createItem( valueText( value ), value );
+    QListWidgetItem * item = createItem( valueText( value ), value );
     listWidget()->setCurrentItem( item );
 }
 
@@ -187,15 +187,21 @@ void ListEditor::currentItemChanged( QListWidgetItem * current,
 }
 
 
+QListWidgetItem * ListEditor::createItem( const QString & valueText, void * value )
+{
+    QListWidgetItem * item = new QListWidgetItem { valueText, listWidget() };
+    item->setData( Qt::UserRole, QVariant::fromValue( value ) );
+
+    return item;
+}
+
+
 void * ListEditor::value( QListWidgetItem * item )
 {
-    if ( !item )
-	return nullptr;
+    if ( item )
+	return item->data( Qt::UserRole ).value<void *>();
 
-    ListEditorItem * editorItem = dynamic_cast<ListEditorItem *>( item );
-    CHECK_DYNAMIC_CAST( editorItem, "ListEditorItem *" );
-
-    return editorItem->value();
+    return nullptr;
 }
 
 
