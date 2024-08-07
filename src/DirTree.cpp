@@ -42,8 +42,8 @@ namespace
      * 'doThrow' is 'true', and it just returns 0 if it is 'false'.
      **/
     FileInfo * stat( const QString & url,
-		     DirTree       * tree,
-		     DirInfo       * parent )
+                     DirTree       * tree,
+                     DirInfo       * parent )
     {
 	// logDebug() << "url: \"" << url << '"' << Qt::endl;
 
@@ -241,10 +241,10 @@ DirTree::DirTree( QObject * parent ):
     setExcludeRules();
 
     connect( &_jobQueue, &DirReadJobQueue::finished,
-	     this,       &DirTree::sendFinished );
+             this,       &DirTree::sendFinished );
 
     connect( this,       &DirTree::deletingChild,
-	     &_jobQueue, &DirReadJobQueue::deletingChildNotify );
+             &_jobQueue, &DirReadJobQueue::deletingChildNotify );
 }
 
 

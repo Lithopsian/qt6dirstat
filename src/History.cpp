@@ -22,7 +22,7 @@ QString History::goBack()
     if ( !canGoBack() )
     {
         logWarning() << "Can't go back any more";
-        return "";
+        return QString();
     }
 
     _current--;
@@ -40,7 +40,7 @@ QString History::goForward()
     if ( !canGoForward() )
     {
         logWarning() << "Can't go forward any more";
-        return "";
+        return QString();
     }
 
     ++_current;

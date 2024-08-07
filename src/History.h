@@ -77,8 +77,14 @@ namespace QDirStat
 
         /**
          * Return the current item in the history stack.
+         *
+         * Not that it isn't safe to call this function when _current is
+         * not a valid index in the history list (eg. when the list is
+         * empty).
          **/
         const QString & currentItem() const { return _items.at( _current ); }
+        bool isCurrentItem( const QString & url ) const
+            { return _current >= 0 && _current < _items.size() ? url == currentItem() : false; }
 
         /**
          * Return the index (from 0 on) of the current history item or -1 if
