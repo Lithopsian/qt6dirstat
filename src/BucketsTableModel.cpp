@@ -24,7 +24,7 @@ int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
 {
     if ( ! index.isValid() )
-        return QVariant();
+        return QVariant{};
 
     switch ( role )
     {
@@ -32,22 +32,22 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
             {
                 const int row = index.row();
                 if ( row < 0 || row >= _stats->bucketCount() )
-                    return QVariant();
+                    return QVariant{};
 
                 switch ( index.column() )
                 {
                     case StartCol:  return formatSize( _stats->bucketStart( row ) );
                     case EndCol:    return formatSize( _stats->bucketEnd  ( row ) );
                     case ValueCol:  return QString::number( _stats->bucket( row ) );
-                    default:        return QVariant();
+                    default:        return QVariant{};
                 }
             }
 
         case Qt::TextAlignmentRole:
-            return QVariant( Qt::AlignVCenter | Qt::AlignRight );
+            return QVariant{ Qt::AlignVCenter | Qt::AlignRight };
 
         default:
-            return QVariant();
+            return QVariant{};
     }
 }
 
@@ -64,22 +64,22 @@ QVariant BucketsTableModel::headerData( int section, Qt::Orientation orientation
                     case StartCol: return tr( "Start size" );
                     case EndCol:   return tr( "End size"   );
                     case ValueCol: return tr( "Files"      );
-                    default:       return QVariant();
+                    default:       return QVariant{};
                 }
             }
 
             if ( section < _stats->bucketCount() )
                 return QString::number( section + 1 );
 
-            return QVariant();
+            return QVariant{};
 
         case Qt::TextAlignmentRole:
             if ( orientation == Qt::Horizontal )
-                return QVariant( Qt::AlignVCenter | Qt::AlignHCenter );
+                return QVariant{ Qt::AlignVCenter | Qt::AlignHCenter };
             else
-                return QVariant( Qt::AlignVCenter | Qt::AlignRight );
+                return QVariant{ Qt::AlignVCenter | Qt::AlignRight };
 
         default:
-            return QVariant();
+            return QVariant{};
     }
 }

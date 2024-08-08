@@ -68,9 +68,9 @@ PathSelector::PathSelector( QWidget * parent ):
 
 void PathSelector::addHomeDir()
 {
-    PathSelectorItem * item = new PathSelectorItem{ QDir::homePath(), this };
+    PathSelectorItem * item{ new PathSelectorItem{ QDir::homePath(), this } };
 
-    QIcon icon { ":/icons/48x48/home-dir.png" };
+    QIcon icon{ ":/icons/48x48/home-dir.png" };
     if ( !icon.isNull() )
 	item->setIcon( icon );
 
@@ -82,9 +82,9 @@ void PathSelector::addNormalMountPoints()
 {
     MountPoints::reload();
 
-    for ( MountPointIterator it { false } ; *it ; ++it )
+    for ( MountPointIterator it{ false } ; *it ; ++it )
     {
-	PathSelectorItem * item = new PathSelectorItem{ *it, this };
+	PathSelectorItem * item{ new PathSelectorItem{ *it, this } };
 	const auto type = it->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
 	item->setIcon( _iconProvider.icon( type ) );
     }

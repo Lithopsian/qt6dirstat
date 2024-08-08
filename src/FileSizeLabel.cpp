@@ -21,7 +21,7 @@ using namespace QDirStat;
 
 void FileSizeLabel::clear()
 {
-    QLabel::setToolTip( QString() );
+    QLabel::setToolTip( QString{} );
     QLabel::clear();
 }
 
@@ -51,14 +51,14 @@ void FileSizeLabel::setValue( FileSize value, QLatin1String prefix )
 void FileSizeLabel::setValueWithLinks( FileSize size, nlink_t numLinks )
 {
     QLabel::setText( formatSize( size ) % formatLinksInline( numLinks ) );
-    setToolTip( size, QLatin1String(), numLinks );
+    setToolTip( size, QLatin1String{}, numLinks );
 }
 
 
 void FileSizeLabel::setToolTip( FileSize size, QLatin1String prefix, nlink_t numLinks )
 {
     if ( size < 1000 ) // not useful below (rounded) 1 kB
-	QLabel::setToolTip( QString() );
+	QLabel::setToolTip( QString{} );
 
     QLabel::setToolTip( whitespacePre( prefix % formatByteSize( size ) % formatLinksRichText( numLinks ) ) );
 }
@@ -67,7 +67,7 @@ void FileSizeLabel::setToolTip( FileSize size, QLatin1String prefix, nlink_t num
 void FileSizeLabel::setText( const QString & text )
 {
     QLabel::setText( text );
-    QLabel::setToolTip( QString() );
+    QLabel::setToolTip( QString{} );
 }
 
 

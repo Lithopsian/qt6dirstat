@@ -121,7 +121,7 @@ namespace
 			 const QString & multiLineText )
     {
 	const QStringList lines = multiLineText.split( u'\n' );
-	QString result = lines.isEmpty() ? QString() : prefix;
+	QString result = lines.isEmpty() ? QString{} : prefix;
 	result += lines.join( '\n' % prefix );
 
 	return result;
@@ -179,7 +179,7 @@ namespace
 	{
 	    logError() << "ERROR: Directory " << logDir << " is not owned by " << userName() << Qt::endl;
 
-	    QByteArray nameTemplate( QString( logDir % "-XXXXXX" ).toUtf8() );
+	    QByteArray nameTemplate( QString{ logDir % "-XXXXXX" }.toUtf8() );
 	    const char * result = mkdtemp( nameTemplate.data() );
 	    if ( result )
 	    {
@@ -215,7 +215,7 @@ namespace
     {
 	QString oldName = filename;
 	oldName.remove( QRegularExpression( "\\.log$" ) );
-	oldName += QString( "-%1.old" ).arg( no, 2, 10, QChar( u'0' ) );
+	oldName += QString{ "-%1.old" }.arg( no, 2, 10, QChar( u'0' ) );
 
 	return oldName;
     }
@@ -276,7 +276,7 @@ namespace
 	    }
 	}
 
-	const QStringList matches = dir.entryList( QStringList( oldNamePattern( filename ) ), QDir::Files );
+	const auto matches = dir.entryList( QStringList{ oldNamePattern( filename ) }, QDir::Files );
 	for ( const QString & match : matches )
 	{
 	    if ( !keepers.contains( match ) )
@@ -313,8 +313,8 @@ Logger * Logger::_defaultLogger = nullptr;
 
 
 Logger::Logger( const QString & filename ):
-    _logStream { stderr, QIODevice::WriteOnly },
-    _nullStream { stderr, QIODevice::WriteOnly }
+    _logStream{ stderr, QIODevice::WriteOnly },
+    _nullStream{ stderr, QIODevice::WriteOnly }
 {
     init();
     createNullStream();
@@ -326,8 +326,8 @@ Logger::Logger( const QString & rawLogDir,
 		const QString & rawFilename,
 		bool            doRotate,
 		int             logRotateCount ):
-    _logStream { stderr, QIODevice::WriteOnly },
-    _nullStream { stderr, QIODevice::WriteOnly }
+    _logStream{ stderr, QIODevice::WriteOnly },
+    _nullStream{ stderr, QIODevice::WriteOnly }
 {
     init();
     createNullStream();

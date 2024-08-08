@@ -254,20 +254,20 @@ void HistogramView::rebuild()
 	calcGeometry( viewport()->size() );
 
     delete scene();
-    setScene( new QGraphicsScene( this ) );
+    setScene( new QGraphicsScene{ this } );
 
     const QPalette palette = scene()->palette();
     scene()->setBackgroundBrush( palette.base() );
 
     _panelBackground    = palette.alternateBase();
-    _barBrush           = QColor( 0xB0, 0xB0, 0xD0 );
-    _barPen             = QColor( 0x40, 0x40, 0x50 );
-    _medianPen          = QPen( palette.linkVisited().color(), 2 );
-    _quartilePen        = QPen( palette.link().color(), 2 );
+    _barBrush           = QColor{ 0xB0, 0xB0, 0xD0 };
+    _barPen             = QColor{ 0x40, 0x40, 0x50 };
+    _medianPen          = QPen{ palette.linkVisited().color(), 2 };
+    _quartilePen        = QPen{ palette.link().color(), 2 };
     _percentilePen      = palette.color( QPalette::Disabled, QPalette::ButtonText );
     _decilePen          = palette.buttonText().color();
     _piePen             = palette.text().color();
-    _overflowSliceBrush = QColor( 0xD0, 0x40, 0x20 );
+    _overflowSliceBrush = QColor{ 0xD0, 0x40, 0x20 };
 
     addHistogramBackground();
     addAxes();
@@ -285,11 +285,11 @@ void HistogramView::rebuild()
 
 void HistogramView::addHistogramBackground()
 {
-    const QRectF rect = QRectF(-leftBorder(),
-			       -( topBorder() + _histogramHeight ),
-			       leftBorder() + _histogramWidth + rightBorder(),
-			       topBorder() + _histogramHeight + bottomBorder() );
-    QGraphicsRectItem * panel = scene()->addRect( rect, QPen( Qt::NoPen ), _panelBackground );
+    const QRectF rect = QRectF{-leftBorder(),
+                               -( topBorder() + _histogramHeight ),
+                               leftBorder() + _histogramWidth + rightBorder(),
+                               topBorder() + _histogramHeight + bottomBorder() };
+    QGraphicsRectItem * panel = scene()->addRect( rect, QPen{ Qt::NoPen }, _panelBackground );
     panel->setZValue( PanelBackgroundLayer );
 }
 
@@ -312,9 +312,9 @@ void HistogramView::addYAxisLabel()
     item->setHtml( (_useLogHeightScale ? "log<sub>2</sub>(n)   -->" : "n   -->") );
     setBold( item );
 
-    const qreal   textWidth   = item->boundingRect().width();
-    const qreal   textHeight  = item->boundingRect().height();
-    const QPointF labelCenter = { -leftBorder() / 2, -_histogramHeight / 2 };
+    const qreal   textWidth  = item->boundingRect().width();
+    const qreal   textHeight = item->boundingRect().height();
+    const QPointF labelCenter{ -leftBorder() / 2, -_histogramHeight / 2 };
 
     item->setRotation( 270 );
     item->setPos( labelCenter.x() - textHeight / 2, labelCenter.y() + textWidth  / 2 );
@@ -330,7 +330,7 @@ void HistogramView::addXAxisLabel()
 
     const qreal   textWidth   = item->boundingRect().width();
     const qreal   textHeight  = item->boundingRect().height();
-    const QPointF labelCenter = { _histogramWidth / 2, bottomBorder() };
+    const QPointF labelCenter{ _histogramWidth / 2, bottomBorder() };
     item->setPos( labelCenter.x() - textWidth / 2, labelCenter.y() - textHeight ); // Align bottom
 
     item->setZValue( TextLayer );
@@ -410,7 +410,7 @@ void HistogramView::addQuartileText()
     const QFontMetrics metrics( nTextItem->font() );
     const QChar sigma( 0x2211 );
     if ( metrics.inFont( sigma ) )
-	nTextItem->setPlainText( QString( "%1n: %L2" ).arg( sigma ).arg( n ) );
+	nTextItem->setPlainText( QString{ "%1n: %L2" }.arg( sigma ).arg( n ) );
 
     if ( n == 0 )
 	y -= nTextItem->boundingRect().height();
@@ -440,7 +440,7 @@ void HistogramView::addHistogramBars()
 	const double val = applyLogHeight( _stats->bucket( i ) );
 	const QRectF rect( i * barWidth, topBorder() + viewMargin(), barWidth, -( _histogramHeight + axisExtraLength() ) );
 	const qreal fillHeight = maxVal == 0 ? 0 : _histogramHeight * val / maxVal;
-	scene()->addItem( new HistogramBar( this, _stats, i, rect, fillHeight ) );
+	scene()->addItem( new HistogramBar{ this, _stats, i, rect, fillHeight } );
     }
 }
 
@@ -525,7 +525,7 @@ void HistogramView::addOverflowPanel()
 		       -( topBorder() + _histogramHeight ),
 		       overflowWidth() + 2 * overflowBorder(),
 		       topBorder() + _histogramHeight + bottomBorder() );
-    QGraphicsRectItem * cutoffPanel = scene()->addRect( rect, QPen( Qt::NoPen ), _panelBackground );
+    QGraphicsRectItem * cutoffPanel = scene()->addRect( rect, QPen{ Qt::NoPen }, _panelBackground );
 
     const auto cutoffLines = [ this ]()
     {
@@ -550,7 +550,7 @@ void HistogramView::addOverflowPanel()
 
     // Upper pie chart: number of files cut off
     nextPos.setY( nextPos.y() + pieSliceOffset() );
-    QRectF pieRect( QRectF( nextPos, QSizeF( pieDiameter(), pieDiameter() ) ) );
+    QRectF pieRect( QRectF{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } } );
 
     const int cutoff = _startPercentile + 100 - _endPercentile;
     nextPos = addPie( pieRect, 100 - cutoff, cutoff, _barBrush, _overflowSliceBrush );
@@ -572,7 +572,7 @@ void HistogramView::addOverflowPanel()
         cutoffDiskSpace += percentileSum( _stats, _endPercentile, 100 );
 
     nextPos.setY( nextPos.y() + pieSliceOffset() );
-    pieRect = QRectF( nextPos, QSizeF( pieDiameter(), pieDiameter() ) );
+    pieRect = QRectF{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } };
 
     if ( cutoffDiskSpace > histogramDiskSpace )
 	nextPos = addPie( pieRect, cutoffDiskSpace, histogramDiskSpace, _overflowSliceBrush, _barBrush );
@@ -607,8 +607,10 @@ void HistogramView::addLine( int             percentileIndex,
     const FileSize totalWidth   = axisEndVal - axisStartVal;
     const qreal    x            = _histogramWidth * ( xValue - axisStartVal ) / totalWidth;
 
-    QGraphicsLineItem * line =
-	new QGraphicsLineItem( x, markerExtraHeight(), x, -( _histogramHeight + markerExtraHeight() ) );
+    QGraphicsLineItem * line{ new QGraphicsLineItem{ x,
+                                                     markerExtraHeight(),
+                                                     x,
+                                                     -( _histogramHeight + markerExtraHeight() ) } };
     line->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( xValue ) ) );
     line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );
     line->setPen( pen );
@@ -638,7 +640,7 @@ QPointF HistogramView::addPie( const QRectF & rect,
     slice1->setPen( _piePen );
 
     QRectF rect2( rect );
-    rect2.moveTopLeft( rect.topLeft() + QPointF( pieSliceOffset(), 0.0_qr) );
+    rect2.moveTopLeft( rect.topLeft() + QPointF{ pieSliceOffset(), 0.0_qr } );
 
     QGraphicsEllipseItem * slice2 = scene()->addEllipse( rect2 );
     slice2->setStartAngle( -angle2 / 2 );

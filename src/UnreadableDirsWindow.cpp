@@ -71,7 +71,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
     static QPointer<UnreadableDirsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new UnreadableDirsWindow( app()->mainWindow() );
+	_sharedInstance = new UnreadableDirsWindow{ app()->mainWindow() };
 
     return _sharedInstance;
 }
@@ -116,7 +116,7 @@ void UnreadableDirsWindow::populate( FileInfo * fileInfo )
     _ui->treeWidget->sortByColumn( UD_Path, Qt::AscendingOrder );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
-    _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString() );
+    _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString{} );
 
     //logDebug() << count << " directories" << Qt::endl;
 
@@ -137,7 +137,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
     DirInfo * dir = fileInfo->toDirInfo();
     if ( dir->readError() )
-	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem( dir ) );
+	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem{ dir } );
 
     // Recurse through any subdirectories
     for ( DirInfoIterator it { fileInfo }; *it; ++it )

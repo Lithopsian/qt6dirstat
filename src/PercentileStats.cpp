@@ -41,10 +41,10 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
 	return 0;
 
     if ( order < 2 || order > 100 )
-	THROW( Exception( QString( "Invalid quantile order %1" ).arg( order ) ) );
+	THROW( Exception{ QString{ "Invalid quantile order %1" }.arg( order ) } );
 
     if ( number > order )
-	THROW( Exception( QString( "Invalid quantile #%1 for %2-quantile" ).arg( number ).arg( order ) ) );
+	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
 
     if ( number == 0 )
 	return first();
@@ -142,10 +142,10 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
     CHECK_PERCENTILE_INDEX( endPercentile   );
 
     if ( startPercentile >= endPercentile )
-        THROW( Exception( "startPercentile must be less than endPercentile" ) );
+        THROW( Exception{ "startPercentile must be less than endPercentile" } );
 
     if ( bucketCount < 1 )
-        THROW( Exception( QString( "Invalid bucket count %1" ).arg( bucketCount ) ) );
+        THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
     // Create a new list for bucketCount, filled with zeroes
     _buckets = BucketList( bucketCount );

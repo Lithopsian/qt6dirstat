@@ -176,7 +176,7 @@ namespace QDirStat
         /**
          * Returns the package scheme prefix.
          **/
-        static QLatin1String pkgScheme() { return QLatin1String{ "Pkg:/" }; }
+        static QLatin1String pkgScheme() { return "Pkg:/"_L1; }
 
 
     private:

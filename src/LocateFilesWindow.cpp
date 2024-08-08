@@ -50,9 +50,9 @@ namespace
 
 LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
                                       QWidget    * parent ):
-    QDialog { parent },
-    _ui { new Ui::LocateFilesWindow },
-    _treeWalker { treeWalker }
+    QDialog{ parent },
+    _ui{ new Ui::LocateFilesWindow },
+    _treeWalker{ treeWalker }
 {
     // logDebug() << "init" << Qt::endl;
 
@@ -89,7 +89,7 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
     if ( _sharedInstance )
 	_sharedInstance->_treeWalker.reset( treeWalker );
     else
-	_sharedInstance = new LocateFilesWindow( treeWalker, app()->mainWindow() );
+	_sharedInstance = new LocateFilesWindow{ treeWalker, app()->mainWindow() };
 
     return _sharedInstance;
 }
@@ -167,10 +167,10 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
     if ( !dir )
 	return;
 
-    for ( DotEntryIterator it { dir }; *it; ++it )
+    for ( DotEntryIterator it{ dir }; *it; ++it )
     {
 	if ( _treeWalker->check( *it ) )
-	    _ui->treeWidget->addTopLevelItem( new LocateListItem( *it ) );
+	    _ui->treeWidget->addTopLevelItem( new LocateListItem{ *it } );
 
 	if ( it->hasChildren() )
 	    populateRecursive( *it );
@@ -212,7 +212,7 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 {
     // Format the heading with the current url, which may be a fallback
     const FileInfo * fileInfo = _subtree();
-    const QString heading = _ui->heading->statusTip().arg( fileInfo ? fileInfo->url() : QString() );
+    const QString heading = _ui->heading->statusTip().arg( fileInfo ? fileInfo->url() : QString{} );
 
     // Calculate a width from the dialog less margins, less a bit more
     elideLabel( _ui->heading, heading, size().width() - 24 );
@@ -222,7 +222,7 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 
 
 LocateListItem::LocateListItem( FileInfo * item ):
-    QTreeWidgetItem { QTreeWidgetItem::UserType }
+    QTreeWidgetItem{ QTreeWidgetItem::UserType }
 {
     CHECK_PTR( item );
 

@@ -21,18 +21,18 @@ using namespace QDirStat;
 
 
 ConfigDialog::ConfigDialog( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::ConfigDialog }
+    QDialog{ parent },
+    _ui{ new Ui::ConfigDialog }
 {
     setAttribute( Qt::WA_DeleteOnClose );
 
     _ui->setupUi( this );
     Settings::readWindowSettings( this, "ConfigDialog" );
 
-    _ui->pagesTabWidget->addTab( new GeneralConfigPage     ( this ), tr( "General"         ) );
-    _ui->pagesTabWidget->addTab( new MimeCategoryConfigPage( this ), tr( "MIME Categories" ) );
-    _ui->pagesTabWidget->addTab( new CleanupConfigPage     ( this ), tr( "Cleanup Actions" ) );
-    _ui->pagesTabWidget->addTab( new ExcludeRulesConfigPage( this ), tr( "Exclude Rules"   ) );
+    _ui->pagesTabWidget->addTab( new GeneralConfigPage     { this }, tr( "General"         ) );
+    _ui->pagesTabWidget->addTab( new MimeCategoryConfigPage{ this }, tr( "MIME Categories" ) );
+    _ui->pagesTabWidget->addTab( new CleanupConfigPage     { this }, tr( "Cleanup Actions" ) );
+    _ui->pagesTabWidget->addTab( new ExcludeRulesConfigPage{ this }, tr( "Exclude Rules"   ) );
 
     connect( _ui->buttonBox->button( QDialogButtonBox::Ok ),     &QPushButton::clicked,
              this,                                               &ConfigDialog::accept );
@@ -56,7 +56,7 @@ ConfigDialog * ConfigDialog::sharedInstance( QWidget * parent )
     static QPointer<ConfigDialog> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new ConfigDialog( parent );
+	_sharedInstance = new ConfigDialog{ parent };
 
     return _sharedInstance;
 }

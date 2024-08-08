@@ -19,8 +19,8 @@ using namespace QDirStat;
 
 
 FileAgeStats::FileAgeStats( const FileInfo * subtree ):
-    _thisYear { static_cast<short>( QDate::currentDate().year() ) },
-    _thisMonth { static_cast<short>( QDate::currentDate().month() ) }
+    _thisYear{ static_cast<short>( QDate::currentDate().year() ) },
+    _thisMonth{ static_cast<short>( QDate::currentDate().month() ) }
 {
     CHECK_PTR( subtree );
 
@@ -52,7 +52,7 @@ void FileAgeStats::collect( const FileInfo * subtree )
 
 void FileAgeStats::collectRecursive( const FileInfo * dir )
 {
-    for ( DotEntryIterator it { dir }; *it; ++it )
+    for ( DotEntryIterator it{ dir }; *it; ++it )
     {
         const FileInfo * item = *it;
 

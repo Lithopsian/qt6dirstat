@@ -139,8 +139,8 @@ namespace QDirStat
     /**
      * Print a DataColumnList in text form to a debug stream
      **/
-    inline QTextStream & operator<< ( QTextStream &          stream,
-                                      const DataColumnList & colList )
+    inline QTextStream & operator<<( QTextStream &          stream,
+                                     const DataColumnList & colList )
     {
 	stream << "[ "
                << DataColumns::toStringList( colList ).join( ", "_L1 )

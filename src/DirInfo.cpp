@@ -44,14 +44,14 @@ namespace
 DirInfo::DirInfo( DirInfo       * parent,
                   DirTree       * tree,
                   const QString & name ):
-    FileInfo { parent, tree, name },
-    _isMountPoint { false },
-    _isExcluded { false },
-    _summaryDirty { false },
-    _locked { false },
-    _touched { false },
-    _fromCache { false },
-    _readState { DirFinished }
+    FileInfo{ parent, tree, name },
+    _isMountPoint{ false },
+    _isExcluded{ false },
+    _summaryDirty{ false },
+    _locked{ false },
+    _touched{ false },
+    _fromCache{ false },
+    _readState{ DirFinished }
 {
     initCounts();
 }
@@ -61,14 +61,14 @@ DirInfo::DirInfo( DirInfo           * parent,
                   DirTree           * tree,
                   const QString     & name,
                   const struct stat & statInfo ):
-    FileInfo { parent, tree, name, statInfo },
-    _isMountPoint { false },
-    _isExcluded { false },
-    _summaryDirty { false },
-    _locked { false },
-    _touched { false },
-    _fromCache { false },
-    _readState { DirQueued }
+    FileInfo{ parent, tree, name, statInfo },
+    _isMountPoint{ false },
+    _isExcluded{ false },
+    _summaryDirty{ false },
+    _locked{ false },
+    _touched{ false },
+    _fromCache{ false },
+    _readState{ DirQueued }
 {
     initCounts();
     addDotEntry();
@@ -86,23 +86,23 @@ DirInfo::DirInfo( DirInfo       * parent,
                   uid_t           uid,
                   gid_t           gid,
                   time_t          mtime ):
-    FileInfo { parent,
-               tree,
-               name,
-               mode,
-               size,
-               allocatedSize,
-               withUidGidPerm,
-               uid,
-               gid,
-               mtime },
-    _isMountPoint { false },
-    _isExcluded { false },
-    _summaryDirty { false },
-    _locked { false },
-    _touched { false },
-    _fromCache { fromCache },
-    _readState { DirQueued }
+    FileInfo{ parent,
+              tree,
+              name,
+              mode,
+              size,
+              allocatedSize,
+              withUidGidPerm,
+              uid,
+              gid,
+              mtime },
+    _isMountPoint{ false },
+    _isExcluded{ false },
+    _summaryDirty{ false },
+    _locked{ false },
+    _touched{ false },
+    _fromCache{ fromCache },
+    _readState{ DirQueued }
 {
     initCounts();
     addDotEntry();
@@ -166,7 +166,7 @@ void DirInfo::addDotEntry()
     {
 	// logDebug() << "Creating dot entry for " << this << Qt::endl;
 
-	_dotEntry = new DotEntry( tree(), this );
+	_dotEntry = new DotEntry{ tree(), this };
 	++_childCount;
     }
 }
@@ -190,7 +190,7 @@ void DirInfo::ensureAttic()
     if ( !_attic )
     {
 	// logDebug() << "Creating attic for " << this << Qt::endl;
-	_attic = new Attic( tree(), this );
+	_attic = new Attic{ tree(), this };
 	++_childCount;
     }
 }
@@ -257,7 +257,7 @@ void DirInfo::recalc()
 
     // Loop through the children including the dot entry;
     // the attic is handled separately
-    for ( DotEntryIterator it { this }; *it; ++it )
+    for ( DotEntryIterator it{ this }; *it; ++it )
     {
 	// Count the child and add all its sub-totals
 	++_childCount;
@@ -514,11 +514,11 @@ void DirInfo::childAdded( FileInfo * newChild )
 	    if ( parent() && parent() == tree()->root() )
 	    {
 		if ( _totalItems == FileCountMax )
-		    THROW( TooManyFilesException() );
+		    THROW( TooManyFilesException{} );
 
 		if ( _totalSize          > FileSizeMax - newChild->size() ||
 		     _totalAllocatedSize > FileSizeMax - newChild->allocatedSize() )
-		    THROW( FilesystemTooBigException() );
+		    THROW( FilesystemTooBigException{} );
 	    }
 
 	    if ( newChild->mtime() > _latestMtime )
@@ -533,7 +533,7 @@ void DirInfo::childAdded( FileInfo * newChild )
 	    {
 		// Test for directory overflow (can't currently happen as DirSizeMax == FileCountMax)
 //		if ( _childCount == DirSizeMax )
-//		    THROW( Exception( QString( "more than %1 files in a directory" ).arg( DirSizeMax ) ) );
+//		    THROW( Exception{ QString{ "more than %1 files in a directory" }.arg( DirSizeMax ) } );
 
 		++_childCount;
 	    }
@@ -687,7 +687,7 @@ QLatin1String DirInfo::sizePrefix() const
 	// No 'default' branch so the compiler can catch unhandled enum values
     }
 
-    return QLatin1String();
+    return QLatin1String{};
 }
 
 
@@ -701,7 +701,7 @@ void DirInfo::finalizeLocal()
 
 void DirInfo::finalizeAll()
 {
-    for ( DirInfoIterator it { this }; *it; ++it )
+    for ( DirInfoIterator it{ this }; *it; ++it )
 	it->finalizeAll();
 
     // Optimization: as long as this directory is not finalized yet, it does
@@ -785,7 +785,7 @@ void DirInfo::checkIgnored()
     if ( newIgnored )
     {
 	// Any children must have totalUnignoredItems == 0, so ignore them all
-	for ( DotEntryIterator it { this }; *it; ++it )
+	for ( DotEntryIterator it{ this }; *it; ++it )
 	    it->setIgnored( true );
     }
 
@@ -799,7 +799,7 @@ const DirSortInfo * DirInfo::newSortInfo( DataColumn sortCol, Qt::SortOrder sort
 {
     // Clea old sorted children lists and create new ones
     dropSortCaches(); // recursive to all ancestors
-    _sortInfo = new DirSortInfo( this, sortCol, sortOrder );
+    _sortInfo = new DirSortInfo{ this, sortCol, sortOrder };
 
     return _sortInfo;
 }
@@ -816,7 +816,7 @@ void DirInfo::dropSortCaches()
     //  Dot entries don't have dir children (or dot entries) that could have a sort cache
     if ( !isDotEntry() )
     {
-	for ( DirInfoIterator it { this }; *it; ++it )
+	for ( DirInfoIterator it{ this }; *it; ++it )
 	    it->dropSortCaches();
 
 	if ( _dotEntry )
@@ -881,14 +881,14 @@ void DirInfo::finishReading( DirReadState readState )
 DirSortInfo::DirSortInfo( DirInfo       * parent,
                           DataColumn      sortCol,
                           Qt::SortOrder   sortOrder ):
-    _sortedCol { sortCol },
-    _sortedOrder { sortOrder }
+    _sortedCol{ sortCol },
+    _sortedOrder{ sortOrder }
 {
     // Make space for all the children, including a dot entry and attic
     _sortedChildren.reserve( parent->childCount() );
 
     // Add the children and any dot entry
-    for ( DotEntryIterator it { parent }; *it; ++it )
+    for ( DotEntryIterator it{ parent }; *it; ++it )
 	_sortedChildren.append( *it );
 
     // logDebug() << "Sorting children of " << this << " by " << sortCol << Qt::endl;
@@ -913,8 +913,8 @@ DirSortInfo::DirSortInfo( DirInfo       * parent,
     {
 	dumpChildrenList( parent, _sortedChildren );
 
-	THROW( Exception( QString( "_childCount of %1 corrupted; is %2, should be %3" )
-	                  .arg( parent->debugUrl(), parent->childCount(), _sortedChildren.size() ) ) );
+	THROW( Exception{ QString{ "_childCount of %1 corrupted; is %2, should be %3" }
+	                  .arg( parent->debugUrl(), parent->childCount(), _sortedChildren.size() ) } );
     }
 #endif
 

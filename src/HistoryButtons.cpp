@@ -30,10 +30,10 @@ HistoryButtons::HistoryButtons( QAction * actionGoBack,
     _actionGoForward{ actionGoForward }
 {
     // Two menus - they'll always look the same, but positioning changes slightly as a visual clue
-    QMenu * backMenu = new QMenu;
+    QMenu * backMenu{ new QMenu };
     _actionGoBack->setMenu( backMenu );
 
-    QMenu * forwardMenu = new QMenu;
+    QMenu * forwardMenu{ new QMenu };
     _actionGoForward->setMenu( forwardMenu );
 
     connect( backMenu,         &QMenu::aboutToShow,
@@ -144,12 +144,12 @@ void HistoryButtons::updateHistoryMenu()
 
     menu->clear();
 
-    QActionGroup * actionGroup = new QActionGroup{ menu };
+    QActionGroup * actionGroup{ new QActionGroup{ menu } };
 
     // Populate the menu, most recent entry first
     for ( int i = _history->size() - 1; i >= 0; i-- )
     {
-        QAction * action = new QAction{ _history->item( i ), actionGroup };
+        QAction * action{ new QAction{ _history->item( i ), actionGroup } };
         action->setCheckable( true );
         action->setChecked( i == _history->currentIndex() );
         action->setData( i );

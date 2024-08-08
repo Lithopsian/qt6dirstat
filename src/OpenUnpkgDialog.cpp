@@ -20,14 +20,14 @@ using namespace QDirStat;
 
 
 OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::OpenUnpkgDialog }
+    QDialog{ parent },
+    _ui{ new Ui::OpenUnpkgDialog }
 {
     _ui->setupUi( this );
 
-    _ui->startingDirComboBox->setCompleter( new ExistingDirCompleter( this ) );
+    _ui->startingDirComboBox->setCompleter( new ExistingDirCompleter{ this } );
 
-    ExistingDirValidator * validator = new ExistingDirValidator( this );
+    ExistingDirValidator * validator{ new ExistingDirValidator{ this } };
     _ui->startingDirComboBox->setValidator( validator );
 
     QLineEdit * lineEdit = _ui->startingDirComboBox->lineEdit();
@@ -58,7 +58,7 @@ OpenUnpkgDialog::~OpenUnpkgDialog()
 
 QString OpenUnpkgDialog::startingDir() const
 {
-    return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString();
+    return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString{};
 }
 
 

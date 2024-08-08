@@ -50,7 +50,7 @@ QLatin1String DataColumns::toString( DataColumn col )
     }
 
     logError() << "Unknown DataColumn " << toViewCol( col ) << Qt::endl;
-    return QLatin1String();
+    return QLatin1String{};
 }
 
 

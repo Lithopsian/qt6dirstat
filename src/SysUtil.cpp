@@ -159,7 +159,7 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 
     QStringList pathSegments = path.split( u'/', Qt::SkipEmptyParts );
     pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString( path.startsWith( u'/' ) ? u'/' : QString() ) + pathSegments.join( u'/' );
+    const QString parentPath = QString{ path.startsWith( u'/' ) ? u'/' : QString{} } + pathSegments.join( u'/' );
     const DirSaver dir( parentPath );
 
     // We can't use access() here since that would follow symlinks.
@@ -232,7 +232,7 @@ QString SysUtil::baseName( const QString & fileName )
     if ( !segments.isEmpty() )
 	return segments.last();
 
-    return QString();
+    return QString{};
 }
 
 
@@ -262,5 +262,5 @@ QString SysUtil::homeDir( uid_t uid )
     if ( pw )
 	return QString::fromUtf8( pw->pw_dir );
 
-    return QString();
+    return QString{};
 }

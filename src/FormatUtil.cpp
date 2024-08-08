@@ -20,15 +20,15 @@ using namespace QDirStat;
 
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
-    static QStringList units { QObject::tr( " kB" ),
-                               QObject::tr( " MB" ),
-                               QObject::tr( " GB" ),
-                               QObject::tr( " TB" ),
-                               QObject::tr( " PB" ),
-                               QObject::tr( " EB" ),
-                               QObject::tr( " ZB" ),
-                               QObject::tr( " YB" ),
-                             };
+    static QStringList units{ QObject::tr( " kB" ),
+                              QObject::tr( " MB" ),
+                              QObject::tr( " GB" ),
+                              QObject::tr( " TB" ),
+                              QObject::tr( " PB" ),
+                              QObject::tr( " EB" ),
+                              QObject::tr( " ZB" ),
+                              QObject::tr( " YB" ),
+                            };
 
     if ( lSize < 1000 )
     {
@@ -55,7 +55,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 QString QDirStat::formatTime( time_t rawTime )
 {
     if ( rawTime == (time_t)0 )
-	return QString();
+	return QString{};
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
     const QDateTime time = QDateTime::fromTime_t( rawTime );
@@ -117,9 +117,9 @@ QString QDirStat::formatMillisec( qint64 millisec )
     else
     {
 	const int sec = millisec / 1000L;
-	return QString( "%1:%2:%3" ).arg( hours, 2, 10, QChar( u'0' ) )
-				    .arg( min,   2, 10, QChar( u'0' ) )
-				    .arg( sec,   2, 10, QChar( u'0' ) );
+	return QString{ "%1:%2:%3" }.arg( hours, 2, 10, QChar{ u'0' } )
+	                            .arg( min,   2, 10, QChar{ u'0' } )
+	                            .arg( sec,   2, 10, QChar{ u'0' } );
     }
 }
 
@@ -140,7 +140,7 @@ QString QDirStat::monthAbbreviation( short month )
         case 10: return QObject::tr( "Oct" );
         case 11: return QObject::tr( "Nov" );
         case 12: return QObject::tr( "Dec" );
-        default: return QString();
+        default: return QString{};
     }
 }
 

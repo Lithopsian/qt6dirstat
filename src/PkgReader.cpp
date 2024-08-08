@@ -124,7 +124,7 @@ namespace
      **/
     void addToTree( DirTree * tree, const PkgInfoList & pkgList )
     {
-	PkgInfo * top = new PkgInfo( tree, tree->root() );
+	PkgInfo * top{ new PkgInfo{ tree, tree->root() } };
 	tree->root()->insertChild( top );
 
 	for ( PkgInfo * pkg : pkgList )
@@ -158,7 +158,7 @@ namespace
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 	env.insert( "LANG", "C" ); // Prevent output in translated languages
 
-	QProcess * process = new QProcess();
+	QProcess * process{ new QProcess{} };
 	process->setProgram( program );
 	process->setArguments( args );
 	process->setProcessEnvironment( env );
@@ -212,20 +212,20 @@ void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgL
     }
 
     for ( PkgInfo * pkg : pkgList )
-	tree->addJob( new CachePkgReadJob( tree, pkg, _verboseMissingPkgFiles, fileListCache ) );
+	tree->addJob( new CachePkgReadJob{ tree, pkg, _verboseMissingPkgFiles, fileListCache } );
 }
 
 
 void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList )
 {
-    ProcessStarter * processStarter = new ProcessStarter( _maxParallelProcesses, true );
+    ProcessStarter * processStarter{ new ProcessStarter{ _maxParallelProcesses, true } };
 
     for ( PkgInfo * pkg : pkgList )
     {
 	QProcess * process = createReadFileListProcess( pkg );
 	if ( process )
 	{
-	    tree->addBlockedJob( new AsyncPkgReadJob( tree, pkg, _verboseMissingPkgFiles, process ) );
+	    tree->addBlockedJob( new AsyncPkgReadJob{ tree, pkg, _verboseMissingPkgFiles, process } );
 	    processStarter->add( process );
 	}
     }
@@ -261,7 +261,7 @@ namespace
      **/
     void finalizeAll( DirInfo * subtree )
     {
-	for ( DirInfoIterator it { subtree }; *it; ++it )
+	for ( DirInfoIterator it{ subtree }; *it; ++it )
 	    finalizeAll( *it );
 
 	if ( !subtree->readError() )
@@ -314,9 +314,9 @@ namespace
 	    return nullptr;
 
 	if ( S_ISDIR( statInfo.st_mode ) )	// directory
-	    return new DirInfo( parent, tree, name, statInfo );
+	    return new DirInfo{ parent, tree, name, statInfo };
 	else					// not directory
-	    return new FileInfo( parent, tree, name, statInfo );
+	    return new FileInfo{ parent, tree, name, statInfo };
     }
 
 
@@ -456,8 +456,8 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 				  PkgInfo   * pkg,
 				  bool        verboseMissingPkgFiles,
 				  QProcess  * readFileListProcess ):
-    PkgReadJob { tree, pkg, verboseMissingPkgFiles },
-    _readFileListProcess { readFileListProcess }
+    PkgReadJob{ tree, pkg, verboseMissingPkgFiles },
+    _readFileListProcess{ readFileListProcess }
 {
     CHECK_PTR( _readFileListProcess );
 
@@ -513,5 +513,5 @@ QStringList CachePkgReadJob::fileList()
     if ( _fileListCache->containsPkg( pkg()->name() ) )
 	return _fileListCache->fileList( pkg()->name() );
 
-    return QStringList();
+    return QStringList{};
 }

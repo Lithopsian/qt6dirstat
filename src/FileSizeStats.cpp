@@ -29,7 +29,7 @@ FileSizeStats::FileSizeStats( FileInfo * subtree ):
 
 
 FileSizeStats::FileSizeStats( const FileInfo * subtree, const QString & suffix ):
-    PercentileStats {}
+    PercentileStats{}
 {
     CHECK_PTR( subtree );
 
@@ -43,7 +43,7 @@ void FileSizeStats::collect( const FileInfo * subtree )
     if ( subtree->isFile() )
         append( subtree->size() );
 
-    for ( DotEntryIterator it { subtree }; *it; ++it )
+    for ( DotEntryIterator it{ subtree }; *it; ++it )
         collect( *it );
 }
 
@@ -53,6 +53,6 @@ void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
     if ( subtree->isFile() && subtree->name().toLower().endsWith( suffix ) )
         append( subtree->size() );
 
-    for ( DotEntryIterator it { subtree }; *it; ++it )
+    for ( DotEntryIterator it{ subtree }; *it; ++it )
         collect( *it, suffix );
 }

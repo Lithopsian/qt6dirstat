@@ -21,13 +21,13 @@ using namespace QDirStat;
 
 
 QDirStatApp::QDirStatApp( int &argc, char **argv ):
-    QApplication { argc, argv }
+    QApplication{ argc, argv }
 {
     // logDebug() << "Creating app" << Qt::endl;
 
     if ( styleSheet().isEmpty() )
     {
-        const QString cssFile = QString( "%1/%2/%2.css" )
+        const QString cssFile = QString{ "%1/%2/%2.css" }
             .arg( QStandardPaths::writableLocation( QStandardPaths::ConfigLocation ), applicationName() );
         QFile file ( cssFile );
         if ( !file.open( QFile::ReadOnly | QFile::Text ) )

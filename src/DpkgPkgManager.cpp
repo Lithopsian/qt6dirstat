@@ -98,7 +98,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
     const QFileInfo fileInfo( path );
     const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false ); // error code likely, ignore
     if ( exitCode != 0 )
-	return QString();
+	return QString{};
 
     return searchOwningPkg( path, filenameOutput );
 }
@@ -132,12 +132,12 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 
 	    const QString & path1 = fields1.last();
 	    const QString divertPkg =
-		isLocalDiversion( *line ) ? QString() : fields1.first().split( u' ' ).at( 2 );
+		isLocalDiversion( *line ) ? QString{} : fields1.first().split( u' ' ).at( 2 );
 
 	    // the next line should contain the path where this file now resides
 	    // (or would reside if it hasn't been diverted yet)
 	    if ( ++line == lines.end() )
-		return QString();
+		return QString{};
 
 	    if ( !isDiversionTo( *line ) )
 		continue;
@@ -157,7 +157,7 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 		continue;
 
 	    if ( ++line == lines.end() )
-		return QString();
+		return QString{};
 
 	    // and the line after that might give the package and the original file path
 	    const QStringList fields3 = line->split( ": "_L1 );
@@ -214,7 +214,7 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 	}
     }
 
-    return QString();
+    return QString{};
 }
 
 
@@ -235,7 +235,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
     int exitCode = -1;
     const QString output = runDpkg( path, exitCode, true ); // don't ignore error codes
     if ( exitCode != 0 )
-	return QString();
+	return QString{};
 
     const QStringList lines = output.trimmed().split( u'\n' );
     for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
@@ -269,7 +269,7 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 	}
     }
 
-    return QString();
+    return QString{};
 }
 
 
@@ -277,8 +277,8 @@ PkgInfoList DpkgPkgManager::installedPkg() const
 {
     int exitCode = -1;
     const QString output = runCommand( "/usr/bin/dpkg-query",
-				       { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
-				       &exitCode );
+                               { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
+                               &exitCode );
 
     if ( exitCode == 0 )
 	return parsePkgList( output );
@@ -309,7 +309,7 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 
 		if ( status == "install ok installed"_L1 || status == "hold ok installed"_L1 )
 		{
-		    pkgList << new PkgInfo( name, version, arch, this );
+		    pkgList << new PkgInfo{ name, version, arch, this };
 		}
 		else
 		{
@@ -383,7 +383,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     const QStringList lines = output.split( u'\n' );
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
-    PkgFileListCache * cache = new PkgFileListCache( this, lookupType );
+    PkgFileListCache * cache{ new PkgFileListCache{ this, lookupType } };
 
     // Sample output:
     //
@@ -416,7 +416,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	    const QStringList fields1 = line->split( ": "_L1 );
 	    const QString & path1 = fields1.last();
 	    const QString divertingPkg =
-		isLocalDiversion( *line ) ? QString() : fields1.first().split( u' ' ).at( 2 );
+		isLocalDiversion( *line ) ? QString{} : fields1.first().split( u' ' ).at( 2 );
 
 	    // the next line should contain the path where this file now resides
 	    ++line;

@@ -158,7 +158,7 @@ namespace QDirStat
 
     private:
 
-        int         _current { -1 };
+        int         _current{ -1 };
         QStringList _items;
 
     };  // class History

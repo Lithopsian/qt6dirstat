@@ -38,7 +38,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     int exitCode = -1;
     QString output = runCommand( "/usr/bin/pacman", { "-Qo", path }, &exitCode );
     if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
-	return QString();
+	return QString{};
 
     // Sample output:
     //
@@ -86,7 +86,7 @@ PkgInfoList PacManPkgManager::parsePkgList( const QString & output ) const
                 const QString name    = fields.takeFirst();
                 const QString version = fields.takeFirst();
                 const QString arch    = "";
-                pkgList << new PkgInfo( name, version, arch, this );
+                pkgList << new PkgInfo{ name, version, arch, this };
             }
         }
     }

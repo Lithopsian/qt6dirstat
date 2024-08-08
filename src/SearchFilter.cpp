@@ -57,10 +57,10 @@ SearchFilter::SearchFilter( const QString & pattern,
                             FilterMode      filterMode,
                             FilterMode      defaultFilterMode,
                             bool            caseSensitive ):
-    _pattern { pattern },
-    _filterMode { filterMode },
-    _defaultFilterMode { defaultFilterMode },
-    _caseSensitive { caseSensitive }
+    _pattern{ pattern },
+    _filterMode{ filterMode },
+    _defaultFilterMode{ defaultFilterMode },
+    _caseSensitive{ caseSensitive }
 {
     if ( _filterMode == Auto )
     {

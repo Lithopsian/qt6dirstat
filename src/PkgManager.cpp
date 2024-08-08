@@ -19,15 +19,15 @@ QStringList PkgManager::fileList( const PkgInfo * pkg ) const
 {
     CHECK_PTR( pkg );
 
-    const QString command = fileListCommand( pkg );
+    const QString command{ fileListCommand( pkg ) };
     if ( !command.isEmpty() )
     {
         int exitCode = -1;
-        const QString output = SysUtil::runCommand( command, &exitCode );
+        const QString output{ SysUtil::runCommand( command, &exitCode ) };
         if ( exitCode == 0 )
             return parseFileList( output );
     }
 
-    return QStringList();
+    return QStringList{};
 }
 

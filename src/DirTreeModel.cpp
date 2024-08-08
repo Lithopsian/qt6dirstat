@@ -59,7 +59,7 @@ namespace
 	    logDebug() << "Children of " << dir << "  (" << (void *)dir << ")" << Qt::endl;
 
 	    int count = 0;
-	    for ( AtticIterator it { dir }; *it; ++it )
+	    for ( AtticIterator it{ dir }; *it; ++it )
 		logDebug() << "	   #" << count++ << ": " << (void *)*it << "	 " << *it << Qt::endl;
 	}
 	else
@@ -130,7 +130,7 @@ namespace
      **/
     QString linksSizeText( FileInfo * item )
     {
-	return QString( formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) );
+	return QString{ formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) };
     }
 
 
@@ -193,7 +193,7 @@ namespace
 	    return QVariant();
 
 	if ( item->isDirInfo() )
-	    return QString( item->sizePrefix() % formatSize( item->totalAllocatedSize() ) );
+	    return QString{ item->sizePrefix() % formatSize( item->totalAllocatedSize() ) };
 
 	if ( item->isSparseFile() ) // delegate will use SizeTextRole
 	    return QVariant();
@@ -219,7 +219,7 @@ namespace
 		return QObject::tr( "[aborted]" );
 
 	    if ( !item->firstChild() && col != NameCol )
-		return QString( u'?' );
+		return "?";
 	}
 
 	switch ( col )
@@ -267,18 +267,18 @@ namespace
 		    case TotalItemsCol:
 		    case TotalFilesCol:
 		    case TotalSubDirsCol:
-			return QString( u'?' );
+			return "?";
 		}
 	    }
 
 	    switch ( col )
 	    {
 		case TotalItemsCol:
-		    return QString( item->sizePrefix() % QString::number( item->totalItems() ) );
+		    return QString{ item->sizePrefix() % QString::number( item->totalItems() ) };
 		case TotalFilesCol:
-		    return QString( item->sizePrefix() % QString::number( item->totalFiles() ) );
+		    return QString{ item->sizePrefix() % QString::number( item->totalFiles() ) };
 		case TotalSubDirsCol:
-		    return QString( item->sizePrefix() % QString::number( item->totalSubDirs() ) );
+		    return QString{ item->sizePrefix() % QString::number( item->totalSubDirs() ) };
 		case OldestFileMTimeCol:
 		    return formatTime( item->oldestFileMtime() );
 	    }
@@ -398,11 +398,11 @@ namespace
 	const QString allocText = [ item ]()
 	{
 	    if ( item->allocatedSize() == item->rawByteSize() && !item->isSparseFile() )
-		return QString();
+		return QString{};
 
 	    const QString usedText = item->isSparseFile() ? QObject::tr( "sparse data" ) : QObject::tr( "used" );
 	    const QString allocText = formatByteSize( item->rawAllocatedSize() );
-	    return QString( ' ' % usedText % '\n' % allocText % ' ' % QObject::tr( "allocated" ) );
+	    return QString{ ' ' % usedText % '\n' % allocText % ' ' % QObject::tr( "allocated" ) };
 	}();
 	const QString linksText = formatLinksRichText( item->links() );
 
@@ -446,7 +446,7 @@ namespace
 
 
 DirTreeModel::DirTreeModel( QObject * parent ):
-    QAbstractItemModel { parent }
+    QAbstractItemModel{ parent }
 {
     CHECK_PTR( parent ); // no MainWindow!
 
@@ -482,13 +482,13 @@ void DirTreeModel::readSettings()
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
-    _dirReadErrLightTheme     = settings.colorValue( "DirReadErrColor",     QColor( 0xdd, 0x00, 0x00 ) );
-    _subtreeReadErrLightTheme = settings.colorValue( "SubtreeReadErrColor", QColor( 0xaa, 0x44, 0x44 ) );
+    _dirReadErrLightTheme     = settings.colorValue( "DirReadErrColor",     QColor{ 0xdd, 0x00, 0x00 } );
+    _subtreeReadErrLightTheme = settings.colorValue( "SubtreeReadErrColor", QColor{ 0xaa, 0x44, 0x44 } );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-dark" );
-    _dirReadErrDarkTheme     = settings.colorValue( "DirReadErrColor",     QColor( 0xff, 0x44, 0xcc ) );
-    _subtreeReadErrDarkTheme = settings.colorValue( "SubtreeReadErrColor", QColor( 0xff, 0xaa, 0xdd ) );
+    _dirReadErrDarkTheme     = settings.colorValue( "DirReadErrColor",     QColor{ 0xff, 0x44, 0xcc } );
+    _subtreeReadErrDarkTheme = settings.colorValue( "SubtreeReadErrColor", QColor{ 0xff, 0xaa, 0xdd } );
     settings.endGroup();
 
     _tree->setCrossFilesystems( _crossFilesystems );
@@ -563,7 +563,7 @@ void DirTreeModel::setBaseFont( const QFont & font )
 
 void DirTreeModel::createTree()
 {
-    _tree = new DirTree( this );
+    _tree = new DirTree{ this };
 
     connect( _tree, &DirTree::startingReading,
 	     this,  &DirTreeModel::startingRead );
@@ -878,7 +878,7 @@ void DirTreeModel::setTreeWidgetSizes( QTreeWidget * treeWidget ) const
         QFont biggerFont = treeWidget->font();
         biggerFont.setPointSizeF( biggerFont.pointSizeF() * 1.1 );
         treeWidget->setFont( biggerFont );
-	//setStyleSheet( QString( "QTreeView { font-size: %1pt; }" ).arg( pointSize ) );
+	//setStyleSheet( QString{ "QTreeView{ font-size: %1pt; }" }.arg( pointSize ) );
     }
 
     treeWidget->setIconSize( dirTreeIconSize() );
@@ -968,7 +968,7 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 
     // If any readJobFinished signals were ignored because a parent was not
     // finished yet, now is the time to notify the view about those children.
-    for ( DirInfoIterator it { dir }; *it; ++it )
+    for ( DirInfoIterator it{ dir }; *it; ++it )
     {
 	if ( it->readState() != DirReading && it->readState() != DirQueued )
 	    newChildrenNotify( *it );

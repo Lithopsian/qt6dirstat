@@ -193,7 +193,7 @@ namespace QDirStat
      * and qsizetype (and potentially other long long ints).  Use
      * formatSize() explicitly if you need this.
      **/
-//    inline QTextStream & operator<< ( QTextStream & stream, FileSize lSize )
+//    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
 //	{ return stream << formatSize( lSize ); }
 
 }       // namespace QDirStat

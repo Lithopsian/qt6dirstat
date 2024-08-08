@@ -308,7 +308,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         const QString & mountOpts = fields[3];
         // ignoring fsck and dump order (0 0)
 
-        MountPoint * mountPoint = new MountPoint{ device, path, fsType, mountOpts };
+        MountPoint * mountPoint{ new MountPoint{ device, path, fsType, mountOpts } };
         postProcess( mountPoint );
         add( mountPoint );
 
@@ -353,12 +353,12 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
     for ( const QStorageInfo & mount : mountedVolumes )
     {
         const QString device( QString::fromUtf8( mount.device() ) );
-        const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String();
+        const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String{};
 
         QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
         handleFuseblk( fsType, ntfsDevices, device );
 
-        MountPoint * mountPoint = new MountPoint{ device, mount.rootPath(), fsType, mountOptions };
+        MountPoint * mountPoint{ new MountPoint{ device, mount.rootPath(), fsType, mountOptions } } ;
         postProcess( mountPoint );
         add( mountPoint );
     }
@@ -393,7 +393,7 @@ QString MountPoints::device( const QString & url )
     if ( mountPoint )
         return mountPoint->device();
 
-    return QString();
+    return QString{};
 }
 
 

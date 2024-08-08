@@ -168,7 +168,7 @@ namespace
         // Draw the outline as thin as practical
         const qreal sizeForPen = qMin( rect.width(), rect.height() );
         const qreal penSize = sizeForPen < penScale ? sizeForPen / penScale : 1;
-        painter->setPen( QPen( color, penSize ) );
+        painter->setPen( QPen{ color, penSize } );
 
         // Draw along only the top and left edges to avoid doubling the line thickness
         if ( rect.x() > 0 )
@@ -207,7 +207,7 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
 
 //    _parentView->threadPool()->waitForDone(); // destructor already waits
 
-//    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : QString()) << Qt::endl;
+//    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : QString{}) << Qt::endl;
 }
 
 // constructor for simple (non-squarified) children
@@ -308,8 +308,8 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
-            QRectF childRect = QRectF( rect.left() + offset, rect.top(), newOffset - offset, rect.height() );
-            TreemapTile * tile = new VerticalTreemapTile( this, *it, childRect );
+            QRectF childRect = QRectF{ rect.left() + offset, rect.top(), newOffset - offset, rect.height() };
+            TreemapTile * tile{ new VerticalTreemapTile{ this, *it, childRect } };
             tile->cushionSurface().addHorizontalRidge( childRect.left(), childRect.right() );
 
             if ( it->isDirInfo() )
@@ -349,8 +349,8 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
         const double newOffset = std::round( scale * cumulativeSize );
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
-            QRectF childRect = QRectF( rect.left(), rect.top() + offset, rect.width(), newOffset - offset );
-            TreemapTile * tile = new HorizontalTreemapTile( this, *it, childRect );
+            QRectF childRect = QRectF{ rect.left(), rect.top() + offset, rect.width(), newOffset - offset };
+            TreemapTile * tile{ new HorizontalTreemapTile{ this, *it, childRect } };
             tile->cushionSurface().addVerticalRidge( childRect.top(), childRect.bottom() );
 
             if ( it->isDirInfo() )
@@ -462,10 +462,10 @@ void TreemapTile::layoutRow( Orientation      dir,
         if ( newOffset >= nextOffset && !_parentView->treemapCancelled() )
         {
             QRectF childRect = dir == TreemapHorizontal ?
-                QRectF( rectX + offset, rectY, newOffset - offset, height ) :
-                QRectF( rectX, rectY + offset, height, newOffset - offset );
+                QRectF{ rectX + offset, rectY, newOffset - offset, height } :
+                QRectF{ rectX, rectY + offset, height, newOffset - offset };
 
-            TreemapTile * tile = new TreemapTile( this, *it, childRect, rowCushionSurface );
+            TreemapTile * tile{ new TreemapTile{ this, *it, childRect, rowCushionSurface } };
 
             // Don't need to finish calculating cushions once all the leaf-level children have been created
             if ( it->isDirInfo() )
@@ -546,7 +546,7 @@ void TreemapTile::paint( QPainter                       * painter,
     // it actually has child tiles (no tile will be created for zero-sized children)
     if ( _orig->hasChildren() && childItems().size() > 0 )
     {
-//        logDebug() << this << "(" << boundingRect() << ")" << ( isObscured() ? " - obscured" : QString() ) << Qt::endl;
+//        logDebug() << this << "(" << boundingRect() << ")" << ( isObscured() ? " - obscured" : QString{} ) << Qt::endl;
         return;
     }
 
@@ -603,9 +603,9 @@ void TreemapTile::paint( QPainter                       * painter,
         // that for every tile, so we draw that highlight frame manually
         // if this is a leaf tile.
         painter->setBrush( Qt::NoBrush );
-        QRectF selectionRect = rect;
-        selectionRect.setSize( rect.size() - QSizeF( 1.0, 1.0 ) );
-        painter->setPen( QPen( _parentView->selectedItemsColor(), 1 ) );
+        QRectF selectionRect{ rect };
+        selectionRect.setSize( rect.size() - QSizeF{ 1.0, 1.0 } );
+        painter->setPen( QPen{ _parentView->selectedItemsColor(), 1 } );
         painter->drawRect( selectionRect );
     }
 
@@ -662,8 +662,8 @@ const QColor & TreemapTile::tileColor( const FileInfo * file ) const
 
 void TreemapTile::invalidateCushions()
 {
-    _cushion = QPixmap();
-    setBrush( QBrush() );
+    _cushion = QPixmap{};
+    setBrush( QBrush{} );
 
     const auto items = childItems();
     for ( QGraphicsItem * graphicsItem : items )
@@ -694,7 +694,7 @@ QVariant TreemapTile::itemChange( GraphicsItemChange   change,
         else if ( !_highlighter )
         {
             //logDebug() << "Creating highlighter for " << this << Qt::endl;
-            _highlighter = new SelectedTileHighlighter( _parentView, this );
+            _highlighter = new SelectedTileHighlighter{ _parentView, this };
         }
     }
 
