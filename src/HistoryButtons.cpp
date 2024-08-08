@@ -24,16 +24,16 @@ using namespace QDirStat;
 HistoryButtons::HistoryButtons( QAction * actionGoBack,
                                 QAction * actionGoForward,
                                 QWidget * parent ):
-    QObject { parent },
-    _history { new History },
-    _actionGoBack { actionGoBack },
-    _actionGoForward { actionGoForward }
+    QObject{ parent },
+    _history{ new History },
+    _actionGoBack{ actionGoBack },
+    _actionGoForward{ actionGoForward }
 {
     // Two menus - they'll always look the same, but positioning changes slightly as a visual clue
-    QMenu * backMenu = new QMenu();
+    QMenu * backMenu = new QMenu;
     _actionGoBack->setMenu( backMenu );
 
-    QMenu * forwardMenu = new QMenu();
+    QMenu * forwardMenu = new QMenu;
     _actionGoForward->setMenu( forwardMenu );
 
     connect( backMenu,         &QMenu::aboutToShow,
@@ -112,23 +112,26 @@ void HistoryButtons::unlock( const FileInfo * currentItem )
 {
     _locked = false;
 
-    // Clean the history to remove items that are no longer in the tree
+    // Create a "cleaned" history list without items that are no longer in the tree
+    History * cleanedHistory{ new History };
     int currentIndex = _history->currentIndex();
-    const QStringList items = _history->allItems();
-    clear();
 
-    for ( const QString & item : items )
+    for ( const QString & item : *_history )
     {
         // Remove stale items and merge duplicates that are now contiguous
-        if ( currentItem->tree()->locate( item ) && !_history->isCurrentItem( item ) )
-            _history->add( item );
-        else if ( currentIndex >= _history->size() )
+        if ( currentItem->tree()->locate( item ) && !cleanedHistory->isCurrentItem( item ) )
+            cleanedHistory->add( item );
+        else if ( currentIndex >= cleanedHistory->size() )
             --currentIndex; // adjust the index for items removed before it
     }
+
+    // Replace the current history with the cleaned history
+    _history.reset( cleanedHistory );
 
     if ( currentIndex >= 0 )
         _history->setCurrentIndex( currentIndex );
 
+    // The current item may have changed after a refresh
     addToHistory( currentItem );
 }
 
@@ -141,12 +144,12 @@ void HistoryButtons::updateHistoryMenu()
 
     menu->clear();
 
-    QActionGroup * actionGroup = new QActionGroup( menu );
+    QActionGroup * actionGroup = new QActionGroup{ menu };
 
-    const QStringList & items = _history->allItems();
-    for ( int i = items.size() - 1; i >= 0; i-- )
+    // Populate the menu, most recent entry first
+    for ( int i = _history->size() - 1; i >= 0; i-- )
     {
-        QAction * action = new QAction( items.at( i ), actionGroup );
+        QAction * action = new QAction{ _history->item( i ), actionGroup };
         action->setCheckable( true );
         action->setChecked( i == _history->currentIndex() );
         action->setData( i );

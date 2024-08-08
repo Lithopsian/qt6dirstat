@@ -116,8 +116,8 @@ namespace QDirStat
          * Return the history item with the specified 'index' (from 0 on) or an
          * empty string if there is no item with that index.
          **/
-//        QString item( int index ) const
-//            { return index >= 0 && index < _items.size() ? _items.at( index ) : QString(); }
+        const QString & item( int index ) const
+            { return _items.at( index ); }
 
         /**
          * The size of the history stack, i.e. the number of items that are
@@ -131,7 +131,13 @@ namespace QDirStat
         /**
          * Return the list of all items on the history stack.
          **/
-        const QStringList & allItems() const { return _items; }
+//        const QStringList & allItems() const { return _items; }
+
+        /**
+         * Return begin and end iterators for the internal list.
+         **/
+        QStringList::const_iterator begin() const { return _items.begin(); }
+        QStringList::const_iterator end()   const { return _items.end();   }
 
 
     protected:
