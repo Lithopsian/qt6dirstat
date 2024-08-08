@@ -115,7 +115,7 @@ namespace QDirStat
 	 *
 	 * This default implementation returns nothing.
 	 **/
-	virtual PkgInfoList installedPkg() const { return PkgInfoList(); }
+	virtual PkgInfoList installedPkg() const { return PkgInfoList{}; }
 
 	/**
 	 * Return the list of files and directories owned by a package.
@@ -148,7 +148,7 @@ namespace QDirStat
 	 * This default implementation does nothing.
 	 **/
 	virtual QStringList parseFileList( const QString & ) const
-	    { return QStringList(); }
+	    { return QStringList{}; }
 
 	/**
 	 * Return 'true' if this package manager supports building a file list

@@ -180,7 +180,7 @@ namespace QDirStat
 	 * Returns the configured tree icon size.
 	 **/
 	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize( 1024, 1024 ) ); }
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
 
 	/**
 	 * Update internal settings from the general configuration page.
@@ -472,7 +472,7 @@ namespace QDirStat
 	 **/
 	QModelIndex index( int row,
 			   int column,
-			   const QModelIndex & parent = QModelIndex() ) const override;
+			   const QModelIndex & parent = QModelIndex{} ) const override;
 
 	/**
 	 * Return the parent model index of item 'index'.
@@ -491,15 +491,15 @@ namespace QDirStat
 	bool            _crossFilesystems;
 	bool            _useBoldForDominantItems;
 	DirTreeItemSize _treeItemSize;
-	DataColumn      _sortCol		{ ReadJobsCol };
-	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
+	DataColumn      _sortCol{ ReadJobsCol };
+	Qt::SortOrder   _sortOrder{ Qt::DescendingOrder };
 
 	QSet<DirInfo *> _pendingUpdates;
 	QTimer          _updateTimer;
 	int             _updateTimerMillisec;
 	int             _slowUpdateMillisec;
-	bool            _slowUpdate		{ false };
-	bool            _removingRows		{ false };
+	bool            _slowUpdate{ false };
+	bool            _removingRows{ false };
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;

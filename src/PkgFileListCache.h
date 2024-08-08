@@ -44,9 +44,9 @@ namespace QDirStat
 	 * for. This has significant impact on the memory footprint.
 	 **/
 	PkgFileListCache( const PkgManager * pkgManager,
-			  LookupType         lookupType ):
-	    _pkgManager { pkgManager },
-	    _lookupType { lookupType }
+	                  LookupType         lookupType ):
+	    _pkgManager{ pkgManager },
+	    _lookupType{ lookupType }
 	{}
 
 	/**

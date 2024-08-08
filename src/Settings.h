@@ -58,7 +58,7 @@ namespace QDirStat
 	 * to QCoreApplication::applicationName() + 'suffix'.
 	 **/
 	Settings( const char * suffix ):
-	    QSettings { QCoreApplication::organizationName(), QCoreApplication::applicationName() % suffix }
+	    QSettings{ QCoreApplication::organizationName(), QCoreApplication::applicationName() % suffix }
 	{ _usedConfigFiles << fileName(); }
 
 
@@ -70,7 +70,7 @@ namespace QDirStat
 	 * used for all groups.
 	 **/
 	Settings():
-	    Settings { "" }
+	    Settings{ "" }
 	{}
 
 	/**
@@ -78,7 +78,7 @@ namespace QDirStat
 	 * Not normally used in the base class.
 	 **/
 	virtual const QLatin1String listGroupPrefix() const
-	    { return QLatin1String(); }
+	    { return QLatin1String{}; }
 
 	/**
 	 * Begin a group (section) by using a prefix and number, for
@@ -86,7 +86,7 @@ namespace QDirStat
 	 * classes which  will provide a suitable prefix.
 	 **/
 	void beginListGroup( int num )
-	    { QSettings::beginGroup( listGroupPrefix() % QString( "_%1" ).arg( num, 2, 10, QChar( u'0' ) ) ); }
+	    { QSettings::beginGroup( listGroupPrefix() % QString{ "_%1" }.arg( num, 2, 10, QChar{ u'0' } ) ); }
 
 	/**
 	 * Provided to pair with beginListGroup(), although it just calls
@@ -139,16 +139,16 @@ namespace QDirStat
 	 * 'enumMapping' maps each valid enum value to the corresponding string.
 	 **/
 	int enumValue( const char                * key,
-		       int                         fallback,
-		       const SettingsEnumMapping & enumMapping );
+	               int                         fallback,
+	               const SettingsEnumMapping & enumMapping );
 
 	/**
 	 * Write an enum value in string format to the settings.
 	 * 'enumMapping' maps each valid enum value to the corresponding string.
 	 **/
 	void setEnumValue( const char                * key,
-			   int                         enumValue,
-			   const SettingsEnumMapping & enumMapping );
+	                   int                         enumValue,
+	                   const SettingsEnumMapping & enumMapping );
 
 	/**
 	 * Set a value, but only if that key is not already in the settings.

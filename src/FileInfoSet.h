@@ -31,15 +31,13 @@ namespace QDirStat
 	 * Constructor, creates an empty QSet.  This is the default constructor,
 	 * only specified here for clarity.
 	 **/
-	FileInfoSet():
-	    QSet<FileInfo *> {}
-	{}
+	FileInfoSet() = default;
 
 	/**
 	 * Constructor, initialises the set from a list.
 	 **/
 	FileInfoSet( std::initializer_list<FileInfo *> list ):
-	    QSet<FileInfo *> { list }
+	    QSet<FileInfo *>{ list }
 	{}
 
 	/**

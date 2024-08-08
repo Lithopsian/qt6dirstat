@@ -51,7 +51,7 @@ namespace QDirStat
 	 * is specified using the CaseInsensitiveWildcard sub-class.
 	 **/
 	Wildcard( const QString & pattern, PatternOption options ):
-	    QRegularExpression { wildcardRegularExpression( pattern, options ) }
+	    QRegularExpression{ wildcardRegularExpression( pattern, options ) }
 	{}
 
 
@@ -84,8 +84,8 @@ namespace QDirStat
 	 * from a wildcard-style string.
 	 **/
 	static QRegularExpression wildcardRegularExpression( const QString  & pattern,
-							     PatternOptions   options )
-	    { return QRegularExpression( wildcardToRegularExpression( pattern ), options ); }
+	                                                     PatternOptions   options )
+	    { return QRegularExpression{ wildcardToRegularExpression( pattern ), options }; }
 
 	/**
 	 * This function was added to Qt in 5.12.  It converts any valid regular
@@ -105,7 +105,7 @@ namespace QDirStat
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 6, 6, 0 )
 	static QString wildcardToRegularExpression( const QString & pattern,
-						    QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
+	                                            QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
 #endif
 
     };	// class Wildcard
@@ -123,7 +123,7 @@ namespace QDirStat
 	 * Constructor
 	 **/
 	CaseSensitiveWildcard( const QString & pattern ):
-	    Wildcard { pattern, NoPatternOption }
+	    Wildcard{ pattern, NoPatternOption }
 	{}
     };
 
@@ -140,7 +140,7 @@ namespace QDirStat
 	 * Constructor
 	 **/
 	CaseInsensitiveWildcard( const QString & pattern ):
-	    Wildcard { pattern, CaseInsensitiveOption }
+	    Wildcard{ pattern, CaseInsensitiveOption }
 	{}
     };
 

@@ -252,8 +252,8 @@ namespace QDirStat
 	                    int             count,
 	                    FileSize        totalSize,
 	                    float           percentage ):
-	    FileTypeItem { itemName( otherCategory, suffix ), count, totalSize, percentage },
-	    _suffix { suffix }
+	    FileTypeItem{ itemName( otherCategory, suffix ), count, totalSize, percentage },
+	    _suffix{ suffix }
 	{}
 
 	/**

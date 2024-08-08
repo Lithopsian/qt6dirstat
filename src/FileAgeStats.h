@@ -33,14 +33,14 @@ namespace QDirStat
 
         short    year;                     // 1970 (time_t 0 seconds) - 32767
         short    month;                    // 1-12 or 0 for the complete year
-        float    filesPercent   { 0.0f };   // 0.0 .. 100.0
-        int      filesCount     { 0    };
-        float    sizePercent    { 0.0f };   // 0.0 .. 100.0
-        FileSize size           { 0LL };
+        float    filesPercent{ 0.0f };     // 0.0 .. 100.0
+        int      filesCount{ 0 };
+        float    sizePercent{ 0.0f };      // 0.0 .. 100.0
+        FileSize size{ 0LL };
 
         YearStats( short yr = 0, short mn = 0 ):
-            year { yr },
-            month { mn }
+            year{ yr },
+            month{ mn }
         {}
 
     };  // class YearStats

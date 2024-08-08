@@ -167,7 +167,7 @@ namespace QDirStat
 	 * Set auto size mode for all columns on or off.
 	 **/
 	 QHeaderView::ResizeMode toggleResizeMode( QHeaderView::ResizeMode resizeMode )
-		{ return resizeMode == QHeaderView::Interactive ? QHeaderView::ResizeToContents : QHeaderView::Interactive; }
+	    { return resizeMode == QHeaderView::Interactive ? QHeaderView::ResizeToContents : QHeaderView::Interactive; }
 
 	/**
 	 * Set auto size mode for all columns on or off.
@@ -232,9 +232,9 @@ namespace QDirStat
 
 	DirTreeView                    * _treeView;
 	QHeaderView                    * _header;
-	int                              _currentSection	{ -1 };
+	int                              _currentSection{ -1 };
 	QHash<QString, ColumnLayout *>   _layouts;
-	ColumnLayout                   * _currentLayout	{ nullptr };
+	ColumnLayout                   * _currentLayout{ nullptr };
 
     };	// class HeaderTweaker
 
@@ -245,7 +245,7 @@ namespace QDirStat
     struct ColumnLayout
     {
 	ColumnLayout( const QString & name ):
-	    name { name }
+	    name{ name }
 	{}
 
 	QString        name;

@@ -56,7 +56,6 @@ namespace QDirStat
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
-
         //-----------------------------------------------------------------
         //                     Optional Features
         //-----------------------------------------------------------------

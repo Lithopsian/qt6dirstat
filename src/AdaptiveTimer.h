@@ -116,9 +116,9 @@ namespace QDirStat
         Payload       _payload;
 
         QElapsedTimer _payloadStopwatch;
-        qint64        _payloadTime      { 0 };
+        qint64        _payloadTime{ 0 };
 
-        int           _delayStage       { 0 };
+        int           _delayStage{ 0 };
         Delays        _delays;
         Cooldowns     _cooldowns;
 

@@ -60,7 +60,7 @@ namespace Qt
         inline namespace StringLiterals
         {
             constexpr inline QLatin1String operator""_L1( const char * str, size_t size ) noexcept
-                { return QLatin1String( str, int( size ) ); }
+                { return QLatin1String{ str, int( size ) }; }
         }
     }
 #endif

@@ -128,7 +128,7 @@ namespace QDirStat
     /**
      * Print a DataColumn in text form to a debug stream
      **/
-    inline QTextStream & operator<< ( QTextStream & stream, DataColumn col )
+    inline QTextStream & operator<<( QTextStream & stream, DataColumn col )
     {
 	stream << DataColumns::toString( col );
 

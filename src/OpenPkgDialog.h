@@ -49,7 +49,7 @@ namespace QDirStat
 	 * 'true' if the user cancelled the dialog.
 	 **/
 	static PkgFilter askPkgFilter( bool    * cancelled_ret,
-				       QWidget * parent = nullptr   );
+	                               QWidget * parent = nullptr   );
 
 	/**
 	 * The package filter the user entered.

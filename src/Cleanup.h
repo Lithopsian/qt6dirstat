@@ -72,20 +72,20 @@ namespace QDirStat
 	         int                  outputWindowTimeout = 500,
 	         bool                 outputWindowAutoClose = false,
 	         QString              shell = "" ):
-	    QAction { title, parent },
-	    _active { active },
-	    _title { title },
-	    _command { command },
-	    _recurse { recurse },
-	    _askForConfirmation { askForConfirmation },
-	    _refreshPolicy { refreshPolicy },
-	    _worksForDir { worksForDir },
-	    _worksForFile { worksForFile },
-	    _worksForDotEntry { worksForDotEntry },
-	    _outputWindowPolicy { outputWindowPolicy },
-	    _outputWindowTimeout { outputWindowTimeout },
-	    _outputWindowAutoClose { outputWindowAutoClose },
-	    _shell { shell }
+	    QAction{ title, parent },
+	    _active{ active },
+	    _title{ title },
+	    _command{ command },
+	    _recurse{ recurse },
+	    _askForConfirmation{ askForConfirmation },
+	    _refreshPolicy{ refreshPolicy },
+	    _worksForDir{ worksForDir },
+	    _worksForFile{ worksForFile },
+	    _worksForDotEntry{ worksForDotEntry },
+	    _outputWindowPolicy{ outputWindowPolicy },
+	    _outputWindowTimeout{ outputWindowTimeout },
+	    _outputWindowAutoClose{ outputWindowAutoClose },
+	    _shell{ shell }
 	{}
 
 	/**
@@ -93,7 +93,7 @@ namespace QDirStat
 	 * with the default settings and no parent.
 	 **/
 	Cleanup():
-	    Cleanup { nullptr, true, "", "", false, false, RefreshThis, true, true, false }
+	    Cleanup{ nullptr, true, "", "", false, false, RefreshThis, true, true, false }
 	{}
 
 	/**
@@ -102,11 +102,11 @@ namespace QDirStat
 	 * dialog can play about with it.
 	 **/
 	Cleanup( const Cleanup * other ):
-	    Cleanup { nullptr, other->_active, other->_title, other->_command,
-	              other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
-	              other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
-	              other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
-	              other->_shell }
+	    Cleanup{ nullptr, other->_active, other->_title, other->_command,
+	             other->_recurse, other->_askForConfirmation, other->_refreshPolicy,
+	             other->_worksForDir, other->_worksForFile, other->_worksForDotEntry,
+	             other->_outputWindowPolicy, other->_outputWindowTimeout, other->_outputWindowAutoClose,
+	             other->_shell }
 	{
 	    setIcon( other->iconName() );     // carried on the Cleanup as QString and QAction as QIcon
 	    setShortcut( other->shortcut() ); // only carried on the underlying QAction
@@ -132,7 +132,7 @@ namespace QDirStat
 	 * Uses the ID as fallback if the name is empty.
 	 **/
 	QString cleanTitle() const
-	    { return _title.isEmpty() ? _command : QString( _title ).remove( u'&' ); }
+	    { return _title.isEmpty() ? _command : QString{ _title }.remove( u'&' ); }
 
 	/**
 	 * Return the icon for this cleanup action.
@@ -350,7 +350,7 @@ namespace QDirStat
 	 * usable shell at all.
 	 **/
 	static QString defaultShell()
-	    { return defaultShells().isEmpty() ? QString() : defaultShells().first(); }
+	    { return defaultShells().isEmpty() ? QString{} : defaultShells().first(); }
 
 	/**
 	 * Choose a suitable shell. Try this->shell() and fall back to
@@ -384,7 +384,7 @@ namespace QDirStat
 
 
 
-    inline QTextStream & operator<< ( QTextStream & stream, const Cleanup * cleanup )
+    inline QTextStream & operator<<( QTextStream & stream, const Cleanup * cleanup )
     {
 	if ( cleanup )
 	    stream << cleanup->cleanTitle();

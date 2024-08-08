@@ -117,10 +117,10 @@ namespace QDirStat
         PkgReadJob( DirTree   * tree,
                     PkgInfo   * pkg,
                     bool        verboseMissingPkgFiles ):
-            QObject {},
-            DirReadJob { tree, pkg },
-            _pkg { pkg },
-            _verboseMissingPkgFiles { verboseMissingPkgFiles }
+            QObject{},
+            DirReadJob{ tree, pkg },
+            _pkg{ pkg },
+            _verboseMissingPkgFiles{ verboseMissingPkgFiles }
         {}
 
         /**
@@ -273,8 +273,8 @@ namespace QDirStat
                          PkgInfo           * pkg,
                          bool                verboseMissingPkgFiles,
                          PkgFileListCachePtr fileListCache ):
-            PkgReadJob { tree, pkg, verboseMissingPkgFiles },
-            _fileListCache { fileListCache }
+            PkgReadJob{ tree, pkg, verboseMissingPkgFiles },
+            _fileListCache{ fileListCache }
         {}
 
 

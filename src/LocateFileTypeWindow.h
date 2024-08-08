@@ -182,8 +182,8 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	SuffixSearchResultItem( const QString & path,
-				int             count,
-				FileSize        totalSize );
+	                        int             count,
+	                        FileSize        totalSize );
 
 	/**
 	 * Getters for the item properties.

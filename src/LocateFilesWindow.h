@@ -72,10 +72,10 @@ namespace QDirStat
 	 * is closed.
          **/
 	static void populateSharedInstance( TreeWalker    * treeWalker,
-					    FileInfo      * fileInfo,
-					    const QString & headingText,
-					    int             sortCol,
-					    Qt::SortOrder   sortOrder );
+	                                    FileInfo      * fileInfo,
+	                                    const QString & headingText,
+	                                    int             sortCol,
+	                                    Qt::SortOrder   sortOrder );
 
 
     protected slots:

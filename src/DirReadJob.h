@@ -134,8 +134,8 @@ namespace QDirStat
 
 	DirTree         * _tree;
 	DirInfo         * _dir;
-	DirReadJobQueue * _queue	{ nullptr };
-	bool              _started	{ false };
+	DirReadJobQueue * _queue{ nullptr };
+	bool              _started{ false };
 
     };	// class DirReadJob
 
@@ -184,7 +184,7 @@ namespace QDirStat
 	 * Process one subdirectory entry.
 	 **/
 	void processSubDir( const QString & entryName,
-			    DirInfo       * subDir );
+	                    DirInfo       * subDir );
 
 	/**
 	 * Read a cache file that was picked up along the way:
@@ -244,8 +244,8 @@ namespace QDirStat
 
 	QString _dirName;
 	bool    _applyFileChildExcludeRules;
-	bool    _checkedForNtfs	{ false };
-	bool    _isNtfs		{ false };
+	bool    _checkedForNtfs{ false };
+	bool    _isNtfs{ false };
 
     };	// LocalDirReadJob
 
@@ -434,7 +434,7 @@ namespace QDirStat
     /**
      * Human-readable output of a DirReadJob in a debug stream.
      **/
-    inline QTextStream & operator<< ( QTextStream & str, DirReadJob * job )
+    inline QTextStream & operator<<( QTextStream & str, DirReadJob * job )
     {
 	if ( job )
 	{

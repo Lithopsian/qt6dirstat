@@ -23,13 +23,13 @@ namespace QDirStat
      **/
     struct Breadcrumb
     {
-        Breadcrumb( const QString & path = QString() ):
-            pathComponent { path }
+	Breadcrumb( const QString & path = QString{} ):
+	    pathComponent{ path }
 	{}
 
-        QString pathComponent;
-        QString displayName;   // This may be shortened
-        QString url;
+	QString pathComponent;
+	QString displayName;   // This may be shortened
+	QString url;
     };
 
 

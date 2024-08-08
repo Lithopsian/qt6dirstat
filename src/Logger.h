@@ -110,9 +110,9 @@ public:
      * logWarning() etc. macros instead.
      */
     QTextStream & log( const QString & srcFile,
-		       int             srcLine,
-		       const QString & srcFunction,
-		       LogSeverity     severity );
+                       int             srcLine,
+                       const QString & srcFunction,
+                       LogSeverity     severity );
 
     /**
      * Static version of the internal logging function.
@@ -121,10 +121,10 @@ public:
      * If 'logger' is 0, the default logger is used.
      */
     static QTextStream & log( Logger        * logger,
-			      const QString & srcFile,
-			      int             srcLine,
-			      const QString & srcFunction,
-			      LogSeverity     severity );
+                              const QString & srcFile,
+                              int             srcLine,
+                              const QString & srcFunction,
+                              LogSeverity     severity );
 
     /**
      * Log a plain newline without any prefix (timestamp, source file name,

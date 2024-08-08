@@ -43,8 +43,8 @@ namespace QDirStat
 	 * refresh() slot.
 	 **/
 	Refresher( QObject * parent, const FileInfoSet & items ):
-	    QObject { parent },
-	    _items { items }
+	    QObject{ parent },
+	    _items{ items }
 	{}
 
 

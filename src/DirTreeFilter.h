@@ -71,8 +71,8 @@ namespace QDirStat
 	 * filename.  Used by the create method to generate a filter.
 	 **/
 	DirTreePatternFilter( const QString & pattern ):
-	    DirTreeFilter {},
-	    _wildcard { CaseSensitiveWildcard( pattern.contains( u'/' ) ? pattern : "*/" + pattern ) }
+	    DirTreeFilter{},
+	    _wildcard{ CaseSensitiveWildcard( pattern.contains( u'/' ) ? pattern : "*/" + pattern ) }
 	{}
 
 
@@ -119,8 +119,8 @@ namespace QDirStat
 	 * Constructor. 'suffix' should start with a dot (".").
 	 **/
 	DirTreeSuffixFilter( const QString & suffix ):
-	    DirTreeFilter {},
-	    _suffix { suffix }
+	    DirTreeFilter{},
+	    _suffix{ suffix }
 	{}
 
 	/**

@@ -136,9 +136,9 @@ namespace QDirStat
         // Data members
         //
 
-        MainWindow     * _mainWindow     { nullptr };
-        DirTreeModel   * _dirTreeModel   { nullptr };
-        SelectionModel * _selectionModel { nullptr };
+        MainWindow     * _mainWindow{ nullptr };
+        DirTreeModel   * _dirTreeModel{ nullptr };
+        SelectionModel * _selectionModel{ nullptr };
 
     };  // class QDirStatApp
 

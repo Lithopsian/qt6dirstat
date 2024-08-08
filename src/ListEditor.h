@@ -45,7 +45,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	ListEditor( QWidget * parent ):
-	    QWidget { parent }
+	    QWidget{ parent }
 	{}
 
 	/**
@@ -220,12 +220,12 @@ namespace QDirStat
 	/**
 	 * Getters for the actions
 	 **/
-	QAction * actionToTop()    { return toTopButton()->defaultAction();    }
-	QAction * actionMoveUp()   { return moveUpButton()->defaultAction();   }
-	QAction * actionAdd()      { return addButton()->defaultAction();      }
-	QAction * actionRemove()   { return removeButton()->defaultAction();   }
-	QAction * actionMoveDown() { return moveDownButton()->defaultAction(); }
-	QAction * actionToBottom() { return toBottomButton()->defaultAction(); }
+	QAction * actionToTop()    const { return toTopButton()->defaultAction();    }
+	QAction * actionMoveUp()   const { return moveUpButton()->defaultAction();   }
+	QAction * actionAdd()      const { return addButton()->defaultAction();      }
+	QAction * actionRemove()   const { return removeButton()->defaultAction();   }
+	QAction * actionMoveDown() const { return moveDownButton()->defaultAction(); }
+	QAction * actionToBottom() const { return toBottomButton()->defaultAction(); }
 
     };	// class ListEditor
 

@@ -21,7 +21,7 @@ class SignalBlocker
 {
     public:
 	SignalBlocker( QObject * obj ):
-	    _obj { obj }
+	    _obj{ obj }
 	{
 	    _oldBlocked = obj->signalsBlocked();
 	    obj->blockSignals( true );

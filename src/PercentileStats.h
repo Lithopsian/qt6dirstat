@@ -204,8 +204,8 @@ namespace QDirStat
 	PercentileList _percentileSums;
 	PercentileList _cumulativeSums;
 
-	PercentileBoundary _bucketsStart { 0 };
-	PercentileBoundary _bucketsEnd { 0 };
+	PercentileBoundary _bucketsStart{ 0 };
+	PercentileBoundary _bucketsEnd{ 0 };
 	BucketList         _buckets;
 
     };	// class PercentileStats

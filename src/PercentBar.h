@@ -54,16 +54,16 @@ namespace QDirStat
 	 * delegate to this one.
 	 **/
 	PercentBarDelegate( QTreeView * treeView,
-			    int         percentBarCol,
-			    int         barWidth,
-			    QColor      barBackground,
-			    ColorList   fillColors ):
-	    QStyledItemDelegate { treeView },
-	    _percentBarCol { percentBarCol },
-	    _sizeHintWidth { barWidth },
-	    _barBackground { barBackground },
-	    _fillColors { fillColors },
-	    _indentation { treeView->indentation() }
+	                    int         percentBarCol,
+	                    int         barWidth,
+	                    QColor      barBackground,
+	                    ColorList   fillColors ):
+	    QStyledItemDelegate{ treeView },
+	    _percentBarCol{ percentBarCol },
+	    _sizeHintWidth{ barWidth },
+	    _barBackground{ barBackground },
+	    _fillColors{ fillColors },
+	    _indentation{ treeView->indentation() }
 	{}
 
 	/**
@@ -71,15 +71,15 @@ namespace QDirStat
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	void paint( QPainter                   * painter,
-		    const QStyleOptionViewItem & option,
-		    const QModelIndex          & index ) const override;
+	            const QStyleOptionViewItem & option,
+	            const QModelIndex          & index ) const override;
 
 	/**
 	 * Return a size hint for one cell in the view.
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	QSize sizeHint( const QStyleOptionViewItem & option,
-			const QModelIndex          & index) const override;
+	                const QModelIndex          & index) const override;
 
 
     protected:
@@ -89,9 +89,9 @@ namespace QDirStat
 	 * 'indentPixel' is the number of pixels to indent the bar.
 	 **/
 	void paintPercentBar( QPainter                   * painter,
-			      const QStyleOptionViewItem & option,
-			      const QModelIndex          & index,
-			      float                        percent ) const;
+	                      const QStyleOptionViewItem & option,
+	                      const QModelIndex          & index,
+	                      float                        percent ) const;
 
 
     private:

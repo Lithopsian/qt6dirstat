@@ -61,7 +61,7 @@ namespace QDirStat
 	 * instance.
 	 **/
 	static void populateSharedInstance( QWidget         * parent,
-					    FileInfo        * fileInfo );
+	                                    FileInfo        * fileInfo );
 
 
     signals:
@@ -181,10 +181,10 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::FileAgeStatsWindow> _ui;
 
-	PercentBarDelegate * _filesPercentBarDelegate	{ nullptr };
-	PercentBarDelegate * _sizePercentBarDelegate	{ nullptr };
+	PercentBarDelegate * _filesPercentBarDelegate{ nullptr };
+	PercentBarDelegate * _sizePercentBarDelegate{ nullptr };
 	Subtree              _subtree;
-	bool                 _startGapsWithCurrentYear	{ true };
+	bool                 _startGapsWithCurrentYear{ true };
 
     };	// class FileAgeStatsWindow
 
@@ -248,8 +248,8 @@ namespace QDirStat
 	 **/
 	void set( YearListColumns col, Qt::Alignment alignment, const QString & text )
 	{
-		setText( col, text );
-		setTextAlignment( col, Qt::AlignVCenter | alignment );
+	    setText( col, text );
+	    setTextAlignment( col, Qt::AlignVCenter | alignment );
 	}
 
 

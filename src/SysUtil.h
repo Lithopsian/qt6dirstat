@@ -49,9 +49,9 @@ namespace QDirStat
 	 * log the command's output if 'logOutput' is 'true'.
 	 **/
 	bool tryRunCommand( const QString & commandLine,
-			    const QString & expectedResult,
-			    bool            logCommand = LOG_COMMANDS,
-			    bool            logOutput  = LOG_OUTPUT );
+	                    const QString & expectedResult,
+	                    bool            logCommand = LOG_COMMANDS,
+	                    bool            logOutput  = LOG_OUTPUT );
 
 	/**
 	 * Run a command line and return its output. If exitCode_ret is
@@ -132,7 +132,7 @@ namespace QDirStat
 	 * Check if this program runs with 'sudo'.
 	 **/
 	inline bool runningWithSudo()
-	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty(); }
+	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString{} ).isEmpty(); }
 
 	/**
 	 * Check if this program runs as the real root user, with root
@@ -222,7 +222,7 @@ namespace QDirStat
 	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
-	    { return QString( unescaped ).replace( u'\'', "'\\''"_L1 ); }
+	    { return QString{ unescaped }.replace( u'\'', "'\\''"_L1 ); }
 
 	/**
 	 * Return a string in single quotes, with single quotes in the string

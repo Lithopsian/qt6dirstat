@@ -151,7 +151,7 @@ namespace QDirStat
 
 	QVector<const PkgManager *> _pkgManagers; // primary and secondary package managers found
 
-	QCache<QString, QString>  _cache; // mapping of paths and package names
+	QCache<QString, QString> _cache; // mapping of paths and package names
 
     }; // class PkgQuery
 
