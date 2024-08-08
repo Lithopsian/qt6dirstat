@@ -22,8 +22,8 @@ using namespace QDirStat;
 
 PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
                                     QListWidget * parent ):
-    QListWidgetItem { parent },
-    _path { mountPoint->path() }
+    QListWidgetItem{ parent },
+    _path{ mountPoint->path() }
 {
     QString text = _path % u'\n';
 
@@ -53,7 +53,7 @@ PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
 
 
 PathSelector::PathSelector( QWidget * parent ):
-    QListWidget { parent }
+    QListWidget{ parent }
 {
     connect( this, &PathSelector::currentItemChanged,
              this, &PathSelector::slotItemSelected );
@@ -68,7 +68,7 @@ PathSelector::PathSelector( QWidget * parent ):
 
 void PathSelector::addHomeDir()
 {
-    PathSelectorItem * item = new PathSelectorItem { QDir::homePath(), this };
+    PathSelectorItem * item = new PathSelectorItem{ QDir::homePath(), this };
 
     QIcon icon { ":/icons/48x48/home-dir.png" };
     if ( !icon.isNull() )
@@ -84,7 +84,7 @@ void PathSelector::addNormalMountPoints()
 
     for ( MountPointIterator it { false } ; *it ; ++it )
     {
-	PathSelectorItem * item = new PathSelectorItem { *it, this };
+	PathSelectorItem * item = new PathSelectorItem{ *it, this };
 	const auto type = it->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
 	item->setIcon( _iconProvider.icon( type ) );
     }

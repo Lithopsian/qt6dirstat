@@ -43,10 +43,10 @@ namespace QDirStat
 	            const QString & path,
 	            const QString & filesystemType,
 	            const QString & mountOptions ):
-	    _device { device },
-	    _path { path },
-	    _filesystemType { filesystemType },
-	    _mountOptions { mountOptions.split( ',' ) }
+	    _device{ device },
+	    _path{ path },
+	    _filesystemType{ filesystemType },
+	    _mountOptions{ mountOptions.split( ',' ) }
 	{}
 
 	/**
@@ -227,17 +227,17 @@ namespace QDirStat
 
 //    typedef QList<MountPoint *>           MountPointList;
     typedef QMap<QString, MountPoint *>   MountPointMap;
-    typedef MountPointMap::const_iterator MountPointMapIterator;
+//    typedef MountPointMap::const_iterator MountPointMapIterator;
 
 
     /**
      * Singleton class to access the current mount points.  Access through
      * the public static methods.
      *
-     * The class is instantiated when it is first accessed and an internal
-     * list of mount points will be populated.
+     * The class is instantiated when it is first accessed and the map
+     * of mount points is populated.
      **/
-    class MountPoints
+    class MountPoints: public MountPointMap
     {
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
@@ -271,10 +271,10 @@ namespace QDirStat
 	void init();
 
 	/**
-	 * Clear the internal mountpoints map and all the mountpoints.
+	 * Clear the map and delete all the mountpoints.
 	 **/
 	void clear()
-	    { qDeleteAll( _mountPointMap ); _mountPointMap.clear(); }
+	    { qDeleteAll( *this ); MountPointMap::clear(); }
 
 
     public:
@@ -286,7 +286,7 @@ namespace QDirStat
 	 * valid until the next call to clear().
 	 **/
 	static const MountPoint * findByPath( const QString & path )
-	    { return instance()->_mountPointMap.value( path, nullptr ); }
+	    { return instance()->value( path, nullptr ); }
 
 	/**
 	 * Find the nearest mount point upwards in the directory hierarchy
@@ -321,17 +321,16 @@ namespace QDirStat
 //	static MountPointList normalMountPoints();
 
 	/**
-	 * Return a list of "normal" mount points, i.e. those that are not
-	 * system mounts, bind mounts or duplicate mounts.
+	 * Return a list of all mount points.
 	 **/
 //	static MountPointList allMountPoints()
-//	    { return instance()->_mountPointMap.values(); }
+//	    { return instance()->values(); }
 
 	/**
-	 * Return begin and end iterators for the mount point list.
+	 * Return begin and end iterators for the mount point map.
 	 **/
-	static MountPointMapIterator cbegin() { return instance()->_mountPointMap.cbegin(); }
-	static MountPointMapIterator cend()   { return instance()->_mountPointMap.cend();   }
+	static MountPointMap::const_iterator cbegin() { return instance()->MountPointMap::cbegin(); }
+	static MountPointMap::const_iterator cend()   { return instance()->MountPointMap::cend();   }
 
 	/**
 	 * Return 'true' if size information for mount points is available.
@@ -377,15 +376,15 @@ namespace QDirStat
 #endif
 
 	/**
-	 * Post-process a mount point and add it to the internal list and map.
+	 * Post-process a mount point and add it to the map.
 	 **/
 	void postProcess( MountPoint * mountPoint );
 
 	/**
-	 * Add a mount point to the internal map.
+	 * Add a mount point to the map.
 	 **/
 	void add( MountPoint * mountPoint )
-	    { _mountPointMap[ mountPoint->path() ] = mountPoint; }
+	    { insert( mountPoint->path(), mountPoint ); }
 
 
     private:
@@ -394,7 +393,6 @@ namespace QDirStat
 	// Data members
 	//
 
-	MountPointMap _mountPointMap;
 	bool          _hasBtrfs;
 	bool          _checkedForBtrfs;
 
@@ -410,15 +408,16 @@ namespace QDirStat
      *
      * Note that this iterator follows the standard QDirStat format,
      * but is not STL-compliant and can't be used in range for loops
-     * or algorithms.
+     * or algorithms, not least because the sinlgeton object is not
+     * public.
      **/
     class MountPointIterator
     {
     public:
 	MountPointIterator( bool all ):
-	    _all { all },
-	    _end { MountPoints::cend() },
-	    _current { find( MountPoints::cbegin() ) }
+	    _all{ all },
+	    _end{ MountPoints::cend() },
+	    _current{ find( MountPoints::cbegin() ) }
 	{}
 
 	MountPoint * operator*() const { return _current == _end ? nullptr : _current.value(); }
@@ -432,7 +431,7 @@ namespace QDirStat
 	 * Find the next mount point that is "normal", starting
 	 * from 'item', or any mount point if '_all' is true.
 	 **/
-	MountPointMapIterator find( MountPointMapIterator current )
+	MountPointMap::const_iterator find( MountPointMap::const_iterator current )
 	{
 	    while ( !_all && current != _end && !current.value()->isNormalMountPoint() )
 		++current;
@@ -441,8 +440,8 @@ namespace QDirStat
 
     private:
 	bool _all;
-	MountPointMapIterator _end;
-	MountPointMapIterator _current;
+	MountPointMap::const_iterator _end;
+	MountPointMap::const_iterator _current;
 
     }; // class MountPointIterator
 
