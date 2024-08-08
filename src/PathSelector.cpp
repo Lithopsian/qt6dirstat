@@ -25,7 +25,7 @@ PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
     QListWidgetItem{ parent },
     _path{ mountPoint->path() }
 {
-    QString text = _path % u'\n';
+    QString text{ _path % u'\n' };
 
     if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
 	text += formatSize( mountPoint->totalSize() ) % "  "_L1;
@@ -33,12 +33,12 @@ PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
     text += mountPoint->filesystemType();
     setText( text );
 
-    QString tooltip = mountPoint->device();
+    QString tooltip{ mountPoint->device() };
 
 #if SHOW_SIZES_IN_TOOLTIP
     if ( mountPoint->hasSizeInfo() )
     {
-	const QString boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>";
+	const QString{ boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>" };
 	tooltip += "<br/>" %
 	    boilerplate.arg( QObject::tr( "Used" ), formatSize( mountPoint->usedSize() ) ) %
 	    boilerplate.arg( QObject::tr( "Free for users" ), formatSize( mountPoint->freeSizeForUser() ) ) %

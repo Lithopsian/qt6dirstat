@@ -59,7 +59,7 @@ namespace
      **/
     bool isCruft( const QString & suffix, int suffixCount, int categoryCount )
     {
-	const int letters = suffix.count( QRegularExpression( "[a-zA-Z]" ) );
+	const int letters = suffix.count( QRegularExpression{ "[a-zA-Z]" } );
 	if ( letters == 0 )
 	    return true;
 

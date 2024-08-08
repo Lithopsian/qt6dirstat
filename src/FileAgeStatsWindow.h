@@ -60,8 +60,8 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
 	 **/
-	static void populateSharedInstance( QWidget         * parent,
-	                                    FileInfo        * fileInfo );
+	static void populateSharedInstance( QWidget  * parent,
+	                                    FileInfo * fileInfo );
 
 
     signals:

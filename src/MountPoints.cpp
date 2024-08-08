@@ -78,23 +78,23 @@ namespace
         }
 
         int exitCode;
-        const QString output = SysUtil::runCommand( lsblkCommand,
-                                                    { "--noheadings", "--list", "--output", "name,fstype" },
-                                                    &exitCode,
-                                                    LSBLK_TIMEOUT_SEC,
-                                                    false,        // logCommand
-                                                    false,        // logOutput
-                                                    true );       // logError
+        const QString output{ SysUtil::runCommand( lsblkCommand,
+                                                   { "--noheadings", "--list", "--output", "name,fstype" },
+                                                   &exitCode,
+                                                   LSBLK_TIMEOUT_SEC,
+                                                   false,        // logCommand
+                                                   false,        // logOutput
+                                                   true ) };       // logError
         if ( exitCode != 0 )
             return QStringList{};
 
-        const QStringList lines = output.split( u'\n' )
-            .filter( QRegularExpression{ "\\s+ntfs", QRegularExpression::CaseInsensitiveOption } );
+        const QStringList lines{ output.split( u'\n' )
+            .filter( QRegularExpression{ "\\s+ntfs", QRegularExpression::CaseInsensitiveOption } ) };
 
         QStringList ntfsDevices;
         for ( const QString & line : lines )
         {
-            const QString device = "/dev/" + line.split( QRegularExpression{ "\\s+" } ).first();
+            const QString device{ "/dev/" + line.split( QRegularExpression{ "\\s+" } ).first() };
             logDebug() << "NTFS on " << device << Qt::endl;
             ntfsDevices << device;
         }
@@ -137,7 +137,7 @@ namespace
 
 bool MountPoint::isNetworkMount() const
 {
-    const QString fsType = _filesystemType.toLower();
+    const QString fsType{ _filesystemType.toLower() };
 
     if ( fsType.startsWith( "nfs"_L1  ) ) return true;
     if ( fsType.startsWith( "cifs"_L1 ) ) return true;
@@ -205,7 +205,7 @@ void MountPoints::init()
 const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 {
     const QFileInfo fileInfo{ startPath };
-    QString path = fileInfo.canonicalFilePath(); // absolute path without symlinks or ..
+    QString path{ fileInfo.canonicalFilePath() }; // absolute path without symlinks or ..
 
 //    if ( path != startPath )
 //        logDebug() << startPath << " canonicalized is " << path << Qt::endl;
@@ -214,7 +214,7 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 
     if ( !mountPoint )
     {
-        QStringList pathComponents = startPath.split( u'/', Qt::SkipEmptyParts );
+        QStringList pathComponents{ startPath.split( u'/', Qt::SkipEmptyParts ) };
 
         while ( !mountPoint && !pathComponents.isEmpty() )
         {
@@ -248,7 +248,7 @@ bool MountPoints::hasBtrfs()
 
 void MountPoints::populate()
 {
-    QStringList ntfsDevices = findNtfsDevices();
+    QStringList ntfsDevices{ findNtfsDevices() };
 
 #if USE_PROC_MOUNTS
     read( "/proc/mounts", ntfsDevices ) || read( "/etc/mtab", ntfsDevices );
@@ -273,14 +273,14 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         return false;
     }
 
-    QTextStream in( &file );
+    QTextStream in{ &file };
     int lineNo = 0;
-    QString line = in.readLine();
+    QString line{ in.readLine() };
 
     while ( !line.isNull() ) // in.atEnd() always returns true for /proc/*
     {
         ++lineNo;
-        QStringList fields = line.split( QRegularExpression{ "\\s+" }, Qt::SkipEmptyParts );
+        QStringList fields{ line.split( QRegularExpression{ "\\s+" }, Qt::SkipEmptyParts ) };
 
         if ( fields.isEmpty() ) // allow empty lines
             continue;
@@ -297,15 +297,15 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         //   /dev/sda7 /work ext4 rw,relatime,data=ordered 0 0
         //   nas:/share/work /nas/work nfs rw,local_lock=none 0 0
 
-        const QString & device = fields[0];
+        const QString & device{ fields[0] };
 
-        QString & path = fields[1];
+        QString & path{ fields[1] };
         path.replace( "\\040"_L1, " "_L1 );
 
-        QString & fsType = fields[2];
+        QString & fsType{ fields[2] };
         handleFuseblk( fsType, ntfsDevices, device );
 
-        const QString & mountOpts = fields[3];
+        const QString & mountOpts{ fields[3] };
         // ignoring fsck and dump order (0 0)
 
         MountPoint * mountPoint{ new MountPoint{ device, path, fsType, mountOpts } };
@@ -341,7 +341,7 @@ void MountPoints::postProcess( MountPoint * mountPoint )
 
     if ( mountPoint->isSnapPackage() )
     {
-        const QString pkgName = mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty );
+        const QString pkgName{ mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty ) };
         logInfo() << "Found snap package \"" << pkgName << "\" at " << mountPoint->path() << Qt::endl;
     }
 }
@@ -355,7 +355,7 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
         const QString device( QString::fromUtf8( mount.device() ) );
         const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String{};
 
-        QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
+        QString fsType{ QString::fromUtf8( mount.fileSystemType() ) };
         handleFuseblk( fsType, ntfsDevices, device );
 
         MountPoint * mountPoint{ new MountPoint{ device, mount.rootPath(), fsType, mountOptions } } ;

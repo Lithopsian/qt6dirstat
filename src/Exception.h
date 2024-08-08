@@ -353,10 +353,10 @@ protected:
 
 template<class EX_t>
 void _throw_helper( const EX_t    & exception,
-		    Logger        * logger,
-		    const QString & srcFile,
-		    int             srcLine,
-		    const QString & srcFunction )
+                    Logger        * logger,
+                    const QString & srcFile,
+                    int             srcLine,
+                    const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "THROW " << exception.className() << ": " << exception.what() << Qt::endl;
@@ -367,10 +367,10 @@ void _throw_helper( const EX_t    & exception,
 
 template<class EX_t>
 void _caught_helper( const EX_t    & exception,
-		     Logger        * logger,
-		     const QString & srcFile,
-		     int             srcLine,
-		     const QString & srcFunction )
+                     Logger        * logger,
+                     const QString & srcFile,
+                     int             srcLine,
+                     const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "CAUGHT " << exception.className() << ": " << exception.what() << Qt::endl;
@@ -379,10 +379,10 @@ void _caught_helper( const EX_t    & exception,
 
 template<class EX_t>
 void _rethrow_helper( const EX_t    & exception,
-		      Logger        * logger,
-		      const QString & srcFile,
-		      int             srcLine,
-		      const QString & srcFunction )
+                      Logger        * logger,
+                      const QString & srcFile,
+                      int             srcLine,
+                      const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "RETHROW " << exception.className() << ": " << exception.what() << Qt::endl;

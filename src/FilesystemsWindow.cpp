@@ -191,7 +191,7 @@ void FilesystemsWindow::enableActions()
 
 void FilesystemsWindow::readSelectedFilesystem()
 {
-    const QString path = selectedPath();
+    const QString path{ selectedPath() };
     if ( !path.isEmpty() )
     {
 	//logDebug() << "Read " << path << Qt::endl;
@@ -260,7 +260,7 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
     _isNetworkMount{ mountPoint->isNetworkMount()  },
     _isReadOnly    { mountPoint->isReadOnly()      }
 {
-    QString dev = _device;
+    QString dev{ _device };
 
     // Cut off insanely long generated device mapper names
     const int limit = sizeof( "/dev/mapper/luks-123456" );

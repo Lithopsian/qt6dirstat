@@ -39,7 +39,7 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 	return false;
     }
 
-    const bool expected = QRegularExpression( expectedResult ).match( output ).hasMatch();
+    const bool expected = QRegularExpression{ expectedResult }.match( output ).hasMatch();
 
     return expected;
 }
@@ -55,7 +55,7 @@ QString SysUtil::runCommand( const QString & commandLine,
     if ( exitCode_ret )
 	*exitCode_ret = -1;
 
-    QStringList args = commandLine.split( QRegularExpression( "\\s+" ) );
+    QStringList args = commandLine.split( QRegularExpression{ "\\s+" } );
 
     if ( args.size() < 1 )
     {

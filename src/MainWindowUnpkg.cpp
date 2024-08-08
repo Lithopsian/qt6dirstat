@@ -126,7 +126,7 @@ QString MainWindow::parseUnpkgStartingDir( const UnpkgSettings & unpkgSettings )
     // Remove any scheme prefix to leave a standard Unix absolute path
     QString dir = unpkgSettings.startingDir();
     const QString unpkgPattern = '^' % unpkgScheme() % "/*"_L1;
-    dir.replace( QRegularExpression( unpkgPattern, QRegularExpression::CaseInsensitiveOption ), "/" );
+    dir.replace( QRegularExpression{ unpkgPattern, QRegularExpression::CaseInsensitiveOption }, "/" );
 
     return dir;
 }

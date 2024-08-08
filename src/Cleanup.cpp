@@ -395,7 +395,7 @@ namespace
 	QString dir = item->path();
 
 	if ( !item->isDir() && !item->isPseudoDir() )
-	    dir.remove( QRegularExpression( "/[^/]*$" ) );
+	    dir.remove( QRegularExpression{ "/[^/]*$" } );
 
 	return dir;
     }

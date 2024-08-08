@@ -34,7 +34,7 @@ namespace
         if ( stats.size() <= MAX_RESULTS * 20  ) return stats.percentile( 95 );
         if ( stats.size() <= MAX_RESULTS * 100 ) return stats.percentile( 99 );
 
-        return stats.at( stats.size() - MAX_RESULTS - 1 ); // check() for > this value
+        return stats.at( stats.size() - MAX_RESULTS ); // check() for >= this value
     }
 
 
@@ -66,7 +66,7 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool LargestFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->size() > _threshold;
+    return item && item->isFile() && item->size() >= _threshold;
 }
 
 
@@ -83,7 +83,7 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool NewFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->mtime() > _threshold;
+    return item && item->isFile() && item->mtime() >= _threshold;
 }
 
 

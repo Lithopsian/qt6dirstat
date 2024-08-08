@@ -669,10 +669,10 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	HighlightRect( const TreemapTile * tile,
-		       const QColor      & color,
-		       int                 lineWidth,
-		       Qt::PenStyle        lineStyle,
-		       qreal               zValue );
+	               const QColor      & color,
+	               int                 lineWidth,
+	               Qt::PenStyle        lineStyle,
+	               qreal               zValue );
 
     }; // class HighlightRect
 

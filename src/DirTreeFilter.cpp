@@ -31,7 +31,7 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
 	const QString suffix = QString{ pattern }.remove( 0, 1 );
 
 	// Use a suffix filter if the suffix contains only "word" characters
-	if ( QRegularExpression( "\\A\\.(?:\\w+)\\z" ).match( suffix ).hasMatch() )
+	if ( QRegularExpression{ "\\A\\.(?:\\w+)\\z" }.match( suffix ).hasMatch() )
 	    return new DirTreeSuffixFilter{ suffix };
     }
 

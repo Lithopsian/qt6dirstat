@@ -146,43 +146,43 @@ namespace QDirStat
 	 **/
 	QString homeDir( uid_t uid );
 
-        /**
-         * Return 'true' if a symbolic link is broken, i.e. the (first level)
-         * target of the symlink does not exist in the filesystem.
-         **/
+	/**
+	 * Return 'true' if a symbolic link is broken, i.e. the (first level)
+	 * target of the symlink does not exist in the filesystem.
+	 **/
 //        bool isBrokenSymLink( const QString & path );
 
-        /**
-         * Read the (first level) target of a symbolic link.
-         * Unlike readLink( const QString & ) above, this does not make any
-         * assumptions of name encoding in the filessytem; it just uses bytes.
-         *
-         * This is a more user-friendly version of readlink(2).
-         *
-         * This returns an empty QByteArray if 'path' is not a symlink.
-         **/
-        QByteArray readLink( const QByteArray & path );
+	/**
+	 * Read the (first level) target of a symbolic link.
+	 * Unlike readLink( const QString & ) above, this does not make any
+	 * assumptions of name encoding in the filessytem; it just uses bytes.
+	 *
+	 * This is a more user-friendly version of readlink(2).
+	 *
+	 * This returns an empty QByteArray if 'path' is not a symlink.
+	 **/
+	QByteArray readLink( const QByteArray & path );
 
-        /**
-         * Read the (first level) target of a symbolic link, assuming UTF-8
-         * encoding of names in the filesystem.
-         * This is a more user-friendly version of readlink(2).
-         *
-         * This returns an empty QByteArray if 'path' is not a symlink.
-         **/
-        inline QByteArray readLink( const QString & path )
+	/**
+	 * Read the (first level) target of a symbolic link, assuming UTF-8
+	 * encoding of names in the filesystem.
+	 * This is a more user-friendly version of readlink(2).
+	 *
+	 * This returns an empty QByteArray if 'path' is not a symlink.
+	 **/
+	inline QByteArray readLink( const QString & path )
 	    { return readLink( path.toUtf8() ); }
 
-        /**
-         * Return the (first level) target of a symbolic link, i.e. the path
-         * that the link points to. That target may again be a symlink;
-         * this function does not follow multiple levels of symlinks.
-         *
-         * If 'path' is not a symlink, this returns an empty string.
-         *
-         * This function assumes UTF-8 encoding of names in the filesystem.
-         **/
-        inline QString symLinkTarget( const QString & path )
+	/**
+	 * Return the (first level) target of a symbolic link, i.e. the path
+	 * that the link points to. That target may again be a symlink;
+	 * this function does not follow multiple levels of symlinks.
+	 *
+	 * If 'path' is not a symlink, this returns an empty string.
+	 *
+	 * This function assumes UTF-8 encoding of names in the filesystem.
+	 **/
+	inline QString symLinkTarget( const QString & path )
 	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**

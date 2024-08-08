@@ -48,7 +48,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     // blank-separated section #4; let's remove the part before the package
     // name.
 
-    output.remove( QRegularExpression( "^.*is owned by " ) );
+    output.remove( QRegularExpression{ "^.*is owned by " } );
     const QString pkg = output.section( u' ', 0, 0 );
 
     return pkg;

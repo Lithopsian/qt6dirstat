@@ -1043,7 +1043,7 @@ namespace QDirStat
 	{
 	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
 	    stream << "<QModelIndex row: " << index.row()
-		   << " col: " << index.column();
+	           << " col: " << index.column();
 
 	    if ( item && !item->checkMagicNumber() )
 		stream << " <INVALID FileInfo *>";

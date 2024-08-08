@@ -98,7 +98,7 @@ void HistoryButtons::addToHistory( const FileInfo * item )
 
     if ( item )
     {
-        const QString url = item->debugUrl();
+        const QString url{ item->debugUrl() };
         if ( !_history->isCurrentItem( url ) )
         {
             _history->add( url );

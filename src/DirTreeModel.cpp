@@ -642,7 +642,7 @@ FileInfo * DirTreeModel::findChild( DirInfo * parent, int childNo ) const
 QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parentIndex ) const
 {
     if ( !_tree  || !_tree->root() || !hasIndex( row, column, parentIndex ) )
-	return QModelIndex();
+	return QModelIndex{};
 
     FileInfo * parent = parentIndex.isValid() ? internalPointerCast( parentIndex ) : _tree->root();
     CHECK_MAGIC( parent );
@@ -650,22 +650,22 @@ QModelIndex DirTreeModel::index( int row, int column, const QModelIndex & parent
     if ( parent->isDirInfo() )
 	return createIndex( row, column, findChild( parent->toDirInfo(), row ) );
 
-    return QModelIndex();
+    return QModelIndex{};
 }
 
 
 QModelIndex DirTreeModel::parent( const QModelIndex & index ) const
 {
     if ( !index.isValid() )
-	return QModelIndex();
+	return QModelIndex{};
 
     const FileInfo * child = internalPointerCast( index );
     if ( !checkMagicNumber( child ) )
-	return QModelIndex();
+	return QModelIndex{};
 
     FileInfo * parent = child->parent();
     if ( !parent || parent == _tree->root() )
-	return QModelIndex();
+	return QModelIndex{};
 
     const int row = rowNumber( parent );
     // logDebug() << "Parent of " << child << " is " << parent << " #" << row << Qt::endl;
@@ -1154,7 +1154,7 @@ QModelIndex DirTreeModel::modelIndex( FileInfo * item, int column ) const
 	    return createIndex( row, column, item );
     }
 
-    return QModelIndex();
+    return QModelIndex{};
 }
 
 

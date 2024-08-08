@@ -89,7 +89,7 @@ namespace QDirStat
 	 * the cache file will be placed at the root of the tree.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree       * tree ):
+	             DirTree       * tree ):
 	    CacheReader{ fileName, tree, nullptr, false }
 	{}
 
@@ -101,9 +101,9 @@ namespace QDirStat
 	 * can be made aware of what has happened.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree       * tree,
-		     DirInfo       * dir,
-		     DirInfo       * parent );
+	             DirTree       * tree,
+	             DirInfo       * dir,
+	             DirInfo       * parent );
 
 	/**
 	 * Destructor

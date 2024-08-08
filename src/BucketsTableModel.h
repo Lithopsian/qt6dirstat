@@ -92,7 +92,7 @@ namespace QDirStat
 
     private:
 
-        const FileSizeStats * _stats{ nullptr };
+	const FileSizeStats * _stats{ nullptr };
 
     }; // class BucketsTableModel
 

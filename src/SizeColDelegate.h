@@ -29,9 +29,9 @@ namespace QDirStat
 
     public:
 
-        /**
-         * Constructor.
-         **/
+	/**
+	 * Constructor.
+	 **/
 	SizeColDelegate( QTreeView * treeView ):
 	    QStyledItemDelegate{ treeView }
 	{}

@@ -260,16 +260,16 @@ namespace QDirStat
 	 * Constructor that reads the file contents into an empty tree.
 	 **/
 	CacheReadJob( DirTree       * tree,
-		      const QString & cacheFileName );
+	              const QString & cacheFileName );
 
 	/**
 	 * Constructor that checks that the cache file contents match the
 	 * given toplevel.
 	 **/
 	CacheReadJob( DirTree       * tree,
-		      DirInfo       * dir,
-		      DirInfo       * parent,
-		      const QString & cacheFileName );
+	              DirInfo       * dir,
+	              DirInfo       * parent,
+	              const QString & cacheFileName );
 
 	/**
 	 * Start reading the cache. Prior to this nothing happens.
