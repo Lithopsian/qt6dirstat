@@ -60,11 +60,11 @@ namespace QDirStat
 	             bool            caseSensitive,
 	             bool            useFullPath,
 	             bool            checkAnyFileChild ):
-	    QRegularExpression { formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) },
-	    _patternSyntax { patternSyntax },
-	    _pattern { pattern },
-	    _useFullPath { useFullPath },
-	    _checkAnyFileChild { checkAnyFileChild }
+	    QRegularExpression{ formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) },
+	    _patternSyntax{ patternSyntax },
+	    _pattern{ pattern },
+	    _useFullPath{ useFullPath },
+	    _checkAnyFileChild{ checkAnyFileChild }
 	{}
 
 	/**
@@ -311,7 +311,7 @@ namespace QDirStat
     /**
      * Print the regexp of a FileInfo in a debug stream.
      **/
-    inline QTextStream & operator<< ( QTextStream & stream, const ExcludeRule * rule )
+    inline QTextStream & operator<<( QTextStream & stream, const ExcludeRule * rule )
     {
 	if ( rule )
 	    stream << "<ExcludeRule \"" << rule->pattern() << "\""

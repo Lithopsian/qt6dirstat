@@ -33,24 +33,24 @@ namespace QDirStat
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
 	MimeCategory():
-	    _name { "" },
-	    _color { Qt::white }
+	    _name{ "" },
+	    _color{ Qt::white }
 	{}
 
 	/**
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
 	MimeCategory( const QString & name ):
-	    _name { name },
-	    _color { Qt::white }
+	    _name{ name },
+	    _color{ Qt::white }
 	{}
 
 	/**
 	 * Create a MimeCategory with the specified name and color.
 	 **/
 	MimeCategory( const QString & name, const QColor  & color ):
-	    _name { name },
-	    _color { color.isValid() ? color : Qt::white }
+	    _name{ name },
+	    _color{ color.isValid() ? color : Qt::white }
 	{}
 
 	/**
@@ -216,7 +216,7 @@ namespace QDirStat
     /**
      * Human-readable output of a MimeCategory in a debug stream.
      **/
-    inline QTextStream & operator<< ( QTextStream & str, MimeCategory * category )
+    inline QTextStream & operator<<( QTextStream & str, MimeCategory * category )
     {
 	if ( category )
 	    str << "<MimeCategory " << category->name() << ">";

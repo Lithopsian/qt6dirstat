@@ -128,8 +128,8 @@ namespace QDirStat
 	 * Reimplemented from ListEditor.  The default implementations
 	 * return 0.
 	 **/
-	QToolButton * addButton()      const override { return _ui->addButton;      };
-	QToolButton * removeButton()   const override { return _ui->removeButton;   };
+	QToolButton * addButton()    const override { return _ui->addButton;      };
+	QToolButton * removeButton() const override { return _ui->removeButton;   };
 
 	/**
 	 * Populate the widgets.
@@ -217,7 +217,7 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::MimeCategoryConfigPage> _ui;
 
-	bool      _dirty { false };
+	bool      _dirty{ false };
 
     };	// class MimeCategoryConfigPage
 

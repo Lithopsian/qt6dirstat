@@ -119,8 +119,8 @@ namespace QDirStat
 	/**
 	 * Aaggregate entries to each of the maps.
 	 **/
-	void addCategorySum     ( const MimeCategory * category, const FileInfo * item );
-	void addSuffixSum       ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
+	void addCategorySum( const MimeCategory * category, const FileInfo * item );
+	void addSuffixSum  ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
 
 	/**
 	 * Move entries that have a '.' in the name but do not have
@@ -152,7 +152,7 @@ namespace QDirStat
 	SuffixMap   _suffixes;
 	CategoryMap _categories;
 
-	FileSize    _totalSize { 0LL };
+	FileSize    _totalSize{ 0LL };
 
     }; // class FileTypeStats
 

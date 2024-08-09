@@ -154,7 +154,7 @@ namespace QDirStat
 	std::unique_ptr<Ui::FileDetailsView> _ui;
 
 	AdaptiveTimer * _pkgUpdateTimer;
-	int             _labelLimit { 0 };
+	int             _labelLimit{ 0 };
 
     };	// class FileDetailsView
 

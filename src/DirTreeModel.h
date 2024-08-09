@@ -180,16 +180,16 @@ namespace QDirStat
 	 * Returns the configured tree icon size.
 	 **/
 	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize( 1024, 1024 ) ); }
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
 
 	/**
 	 * Update internal settings from the general configuration page.
 	 * Any changes will be saved to the conf file in the destructor.
 	 **/
 	void updateSettings( bool crossFilesystems,
-			     bool useBoldForDominant,
-			     DirTreeItemSize dirTreeItemSize,
-			     int updateTimerMillisec );
+	                     bool useBoldForDominant,
+	                     DirTreeItemSize dirTreeItemSize,
+	                     int updateTimerMillisec );
 
 	/**
 	 * Refresh the selected items: Re-read their contents from disk.
@@ -234,7 +234,7 @@ namespace QDirStat
 	 * Sort the model.
 	 **/
 	void sort( int column,
-		   Qt::SortOrder order = Qt::AscendingOrder ) override;
+	           Qt::SortOrder order = Qt::AscendingOrder ) override;
 
 	/**
 	 * Return the resource path of the directory icon.
@@ -457,8 +457,8 @@ namespace QDirStat
 	 * specified section (column number).
 	 **/
 	QVariant headerData( int             section,
-			     Qt::Orientation orientation,
-			     int             role ) const override;
+	                     Qt::Orientation orientation,
+	                     int             role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if
@@ -471,8 +471,8 @@ namespace QDirStat
 	 * number) and column of item 'parent'.
 	 **/
 	QModelIndex index( int row,
-			   int column,
-			   const QModelIndex & parent = QModelIndex() ) const override;
+	                   int column,
+	                   const QModelIndex & parent = QModelIndex{} ) const override;
 
 	/**
 	 * Return the parent model index of item 'index'.
@@ -491,15 +491,15 @@ namespace QDirStat
 	bool            _crossFilesystems;
 	bool            _useBoldForDominantItems;
 	DirTreeItemSize _treeItemSize;
-	DataColumn      _sortCol		{ ReadJobsCol };
-	Qt::SortOrder   _sortOrder		{ Qt::DescendingOrder };
+	DataColumn      _sortCol{ ReadJobsCol };
+	Qt::SortOrder   _sortOrder{ Qt::DescendingOrder };
 
 	QSet<DirInfo *> _pendingUpdates;
 	QTimer          _updateTimer;
 	int             _updateTimerMillisec;
 	int             _slowUpdateMillisec;
-	bool            _slowUpdate		{ false };
-	bool            _removingRows		{ false };
+	bool            _slowUpdate{ false };
+	bool            _removingRows{ false };
 
 	// Colors and fonts
 	QColor _dirReadErrLightTheme;

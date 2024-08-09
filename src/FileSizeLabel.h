@@ -38,7 +38,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	FileSizeLabel( QWidget * parent = nullptr ):
-	    QLabel { parent }
+	    QLabel{ parent }
 	{}
 
 	/**
@@ -97,11 +97,11 @@ namespace QDirStat
 	 **/
 	void setBold( bool bold );
 
-        /**
-         * Suppress the content of FileSizeLabel 'cloneLabel' if it has the
-         * same content as this label: clear its text and disable its caption
-         * 'caption'.
-         **/
+	/**
+	 * Suppress the content of FileSizeLabel 'cloneLabel' if it has the
+	 * same content as this label: clear its text and disable its caption
+	 * 'caption'.
+	 **/
 //        void suppressIfSameContent( FileSizeLabel * cloneLabel, QLabel * caption ) const;
 
 	/**

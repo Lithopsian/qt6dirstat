@@ -67,7 +67,7 @@ namespace QDirStat
 	 * match the current history position, it is recorded as the most
 	 * most recent.
 	 **/
-	void unlock( const FileInfo * currentItem );
+	void unlock( const FileInfo * newCurrentItem );
 
 
     public slots:
@@ -124,7 +124,7 @@ namespace QDirStat
 
 	QAction * _actionGoBack;
 	QAction * _actionGoForward;
-	bool      _locked { false };
+	bool      _locked{ false };
 
     };	// class HistoryButtons
 

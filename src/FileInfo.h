@@ -92,22 +92,22 @@ namespace QDirStat
 	          bool            isSparseFile,
 	          FileSize        blocks,
 	          nlink_t         links ):
-	    _name { filename },
-	    _parent { parent },
-	    _tree { tree },
-	    _isLocalFile { true },
-	    _isSparseFile { isSparseFile },
-	    _isIgnored { false },
-	    _hasUidGidPerm { withUidGidPerm },
-	    _device { 0 },
-	    _mode { mode },
-	    _links { links },
-	    _uid { uid },
-	    _gid { gid },
-	    _size { size },
-	    _blocks { blocks },
-	    _allocatedSize { allocatedSize },
-	    _mtime { mtime }
+	    _name{ filename },
+	    _parent{ parent },
+	    _tree{ tree },
+	    _isLocalFile{ true },
+	    _isSparseFile{ isSparseFile },
+	    _isIgnored{ false },
+	    _hasUidGidPerm{ withUidGidPerm },
+	    _device{ 0 },
+	    _mode{ mode },
+	    _links{ links },
+	    _uid{ uid },
+	    _gid{ gid },
+	    _size{ size },
+	    _blocks{ blocks },
+	    _allocatedSize{ allocatedSize },
+	    _mtime{ mtime }
 	{}
 
 	/**
@@ -120,18 +120,18 @@ namespace QDirStat
 	          const QString & filename,
 	          mode_t          mode,
 	          FileSize        size ):
-	    FileInfo { parent,
-	               tree,
-	               filename,
-	               mode,
-	               size,
-	               size,
-	               false,
-	               0,
-	               0,
-	               0,
-	               false,
-	               blocksFromSize( size ), 1 }
+	    FileInfo{ parent,
+	              tree,
+	              filename,
+	              mode,
+	              size,
+	              size,
+	              false,
+	              0,
+	              0,
+	              0,
+	              false,
+	              blocksFromSize( size ), 1 }
 	{}
 
 	/**
@@ -149,19 +149,19 @@ namespace QDirStat
 	          uid_t           uid,
 	          gid_t           gid,
 	          time_t          mtime ):
-	    FileInfo { parent,
-	               tree,
-	               filename,
-	               mode,
-	               size,
-	               allocatedSize,
-	               withUidGidPerm,
-	               uid,
-	               gid,
-	               mtime,
-	               false,
-	               blocksFromSize( size ),
-	               1 }
+	    FileInfo{ parent,
+	              tree,
+	              filename,
+	              mode,
+	              size,
+	              allocatedSize,
+	              withUidGidPerm,
+	              uid,
+	              gid,
+	              mtime,
+	              false,
+	              blocksFromSize( size ),
+	              1 }
 	{}
 
 	/**
@@ -172,7 +172,7 @@ namespace QDirStat
 	FileInfo( DirInfo       * parent,
 	          DirTree       * tree,
 	          const QString & filename ):
-	    FileInfo ( parent, tree, filename, 0, 0, 0, false, 0, 0, 0, false, 0, 1 )
+	    FileInfo{ parent, tree, filename, 0, 0, 0, false, 0, 0, 0, false, 0, 1 }
 	{}
 
 	/**
@@ -819,7 +819,7 @@ namespace QDirStat
 	 * This default implementation returns an empty string. Derived classes
 	 * that can handle child items should reimplement this.
 	 **/
-	virtual QLatin1String sizePrefix() const { return QLatin1String(); }
+	virtual QLatin1String sizePrefix() const { return QLatin1String{}; }
 
 	/**
 	 * Returns true if this is a DirInfo object.
@@ -957,7 +957,7 @@ namespace QDirStat
 	 * of that also exists.
 	 **/
 	bool isBrokenSymLink() const
-	    { return isSymLink() ? !QFileInfo( QFileInfo( path() ).symLinkTarget() ).exists() : false; }
+	    { return isSymLink() ? !QFileInfo{ QFileInfo{ path() }.symLinkTarget() }.exists() : false; }
 
 	/**
 	 * Return the (direct) target path if this is a symlink. This does not
@@ -990,11 +990,11 @@ namespace QDirStat
 	QString    _name;		// the file name (without path!)
 
 	DirInfo  * _parent;		// pointer to the parent (DirInfo) item
-	FileInfo * _next { nullptr };	// pointer to the next child in the same parent
+	FileInfo * _next{ nullptr };	// pointer to the next child in the same parent
 	DirTree  * _tree;		// pointer to the parent tree
 
-	DirSize    _rowNumber { 0 };		// order of this child when the children are sorted
-	short      _magic { FileInfoMagic };	// magic number to detect if this object is valid
+	DirSize    _rowNumber{ 0 };		// order of this child when the children are sorted
+	short      _magic{ FileInfoMagic };	// magic number to detect if this object is valid
 
 	bool       _isLocalFile   :1;	// flag: local or remote file?
 	bool       _isSparseFile  :1;	// flag: sparse file (file with "holes")?
@@ -1016,7 +1016,7 @@ namespace QDirStat
     /**
      * Print the debugUrl() of a FileInfo in a debug stream.
      **/
-    inline QTextStream & operator<< ( QTextStream & stream, const FileInfo * info )
+    inline QTextStream & operator<<( QTextStream & stream, const FileInfo * info )
     {
 	if ( info )
 	{
@@ -1043,7 +1043,7 @@ namespace QDirStat
 	{
 	    FileInfo * item = static_cast<FileInfo *>( index.internalPointer() );
 	    stream << "<QModelIndex row: " << index.row()
-		   << " col: " << index.column();
+	           << " col: " << index.column();
 
 	    if ( item && !item->checkMagicNumber() )
 		stream << " <INVALID FileInfo *>";

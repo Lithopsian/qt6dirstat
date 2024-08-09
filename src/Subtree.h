@@ -190,12 +190,12 @@ namespace QDirStat
         // Data members
         //
 
-        DirTree * _tree { nullptr };
+        DirTree * _tree{ nullptr };
         QString   _url;
         QString   _parentUrl;
 
-        bool      _useRootFallback      { true };
-        bool      _useParentFallback    { false };
+        bool      _useRootFallback{ true };
+        bool      _useParentFallback{ false };
 
     };	// class Subtree
 

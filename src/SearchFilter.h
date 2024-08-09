@@ -95,7 +95,7 @@ namespace QDirStat
                 case Auto:       return "Auto";
             }
 
-            return QString( "<Unknown FilterMode %1" ).arg( filterMode );
+            return QString{ "<Unknown FilterMode %1" }.arg( filterMode );
         }
 
 
@@ -112,8 +112,8 @@ namespace QDirStat
     };  // class SearchFilter
 
 
-    inline QTextStream & operator<< ( QTextStream        & stream,
-                                      const SearchFilter & filter )
+    inline QTextStream & operator<<( QTextStream        & stream,
+                                     const SearchFilter & filter )
     {
         stream << "<SearchFilter \""
                << filter.pattern()

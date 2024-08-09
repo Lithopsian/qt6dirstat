@@ -64,8 +64,8 @@ namespace QDirStat
 	 * Any suffix should start with '.', but not '*.".
 	 **/
 	static void populateSharedInstance( QWidget       * mainWindow,
-					    FileInfo      * fileInfo,
-					    const QString & suffix = "" );
+	                                    FileInfo      * fileInfo,
+	                                    const QString & suffix = "" );
 
 
     protected slots:

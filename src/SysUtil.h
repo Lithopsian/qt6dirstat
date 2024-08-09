@@ -49,9 +49,9 @@ namespace QDirStat
 	 * log the command's output if 'logOutput' is 'true'.
 	 **/
 	bool tryRunCommand( const QString & commandLine,
-			    const QString & expectedResult,
-			    bool            logCommand = LOG_COMMANDS,
-			    bool            logOutput  = LOG_OUTPUT );
+	                    const QString & expectedResult,
+	                    bool            logCommand = LOG_COMMANDS,
+	                    bool            logOutput  = LOG_OUTPUT );
 
 	/**
 	 * Run a command line and return its output. If exitCode_ret is
@@ -132,7 +132,7 @@ namespace QDirStat
 	 * Check if this program runs with 'sudo'.
 	 **/
 	inline bool runningWithSudo()
-	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString() ).isEmpty(); }
+	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString{} ).isEmpty(); }
 
 	/**
 	 * Check if this program runs as the real root user, with root
@@ -146,43 +146,43 @@ namespace QDirStat
 	 **/
 	QString homeDir( uid_t uid );
 
-        /**
-         * Return 'true' if a symbolic link is broken, i.e. the (first level)
-         * target of the symlink does not exist in the filesystem.
-         **/
+	/**
+	 * Return 'true' if a symbolic link is broken, i.e. the (first level)
+	 * target of the symlink does not exist in the filesystem.
+	 **/
 //        bool isBrokenSymLink( const QString & path );
 
-        /**
-         * Read the (first level) target of a symbolic link.
-         * Unlike readLink( const QString & ) above, this does not make any
-         * assumptions of name encoding in the filessytem; it just uses bytes.
-         *
-         * This is a more user-friendly version of readlink(2).
-         *
-         * This returns an empty QByteArray if 'path' is not a symlink.
-         **/
-        QByteArray readLink( const QByteArray & path );
+	/**
+	 * Read the (first level) target of a symbolic link.
+	 * Unlike readLink( const QString & ) above, this does not make any
+	 * assumptions of name encoding in the filessytem; it just uses bytes.
+	 *
+	 * This is a more user-friendly version of readlink(2).
+	 *
+	 * This returns an empty QByteArray if 'path' is not a symlink.
+	 **/
+	QByteArray readLink( const QByteArray & path );
 
-        /**
-         * Read the (first level) target of a symbolic link, assuming UTF-8
-         * encoding of names in the filesystem.
-         * This is a more user-friendly version of readlink(2).
-         *
-         * This returns an empty QByteArray if 'path' is not a symlink.
-         **/
-        inline QByteArray readLink( const QString & path )
+	/**
+	 * Read the (first level) target of a symbolic link, assuming UTF-8
+	 * encoding of names in the filesystem.
+	 * This is a more user-friendly version of readlink(2).
+	 *
+	 * This returns an empty QByteArray if 'path' is not a symlink.
+	 **/
+	inline QByteArray readLink( const QString & path )
 	    { return readLink( path.toUtf8() ); }
 
-        /**
-         * Return the (first level) target of a symbolic link, i.e. the path
-         * that the link points to. That target may again be a symlink;
-         * this function does not follow multiple levels of symlinks.
-         *
-         * If 'path' is not a symlink, this returns an empty string.
-         *
-         * This function assumes UTF-8 encoding of names in the filesystem.
-         **/
-        inline QString symLinkTarget( const QString & path )
+	/**
+	 * Return the (first level) target of a symbolic link, i.e. the path
+	 * that the link points to. That target may again be a symlink;
+	 * this function does not follow multiple levels of symlinks.
+	 *
+	 * If 'path' is not a symlink, this returns an empty string.
+	 *
+	 * This function assumes UTF-8 encoding of names in the filesystem.
+	 **/
+	inline QString symLinkTarget( const QString & path )
 	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**
@@ -222,7 +222,7 @@ namespace QDirStat
 	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
-	    { return QString( unescaped ).replace( u'\'', "'\\''"_L1 ); }
+	    { return QString{ unescaped }.replace( u'\'', "'\\''"_L1 ); }
 
 	/**
 	 * Return a string in single quotes, with single quotes in the string

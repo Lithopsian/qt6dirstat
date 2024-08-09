@@ -64,6 +64,15 @@ namespace QDirStat
         QString goForward();
 
         /**
+         * Go to item number 'index' in the history and return the new current
+         * item.
+         *
+         * Note that an empty string will be return if index is not a valid
+         * entry in the history.
+         **/
+        QString goTo( int index );
+
+        /**
          * Check if it is possible to go one item back in the history.
          * Use this to enable or disable the history "Back" button.
          **/
@@ -76,15 +85,14 @@ namespace QDirStat
         bool canGoForward() const { return _current >= 0 && _current < _items.size() - 1; }
 
         /**
-         * Return the current item in the history stack.
+         * Return whether 'url' is the current item in the history stack.
          *
-         * Not that it isn't safe to call this function when _current is
+         * Note that it isn't safe to call this function when _current is
          * not a valid index in the history list (eg. when the list is
          * empty).
          **/
-        const QString & currentItem() const { return _items.at( _current ); }
         bool isCurrentItem( const QString & url ) const
-            { return _current >= 0 && _current < _items.size() ? url == currentItem() : false; }
+            { return isValidIndex( _current ) ? url == _items.at( _current ) : false; }
 
         /**
          * Return the index (from 0 on) of the current history item or -1 if
@@ -96,16 +104,6 @@ namespace QDirStat
          * are discarded).
          **/
         int currentIndex() const { return _current; }
-
-        /**
-         * Move to any valid history item by index directly.
-         * Return 'true' if successful, 'false' if error.
-         *
-         * This is intended for a history menu where the user can navigate
-         * directly to any item in that menu. The effect is the same as
-         * multiple goBack() or goForward() calls until that item is reached.
-         **/
-        bool setCurrentIndex( int index );
 
         /**
          * Return 'true' if the history is empty, 'false' otherwise.
@@ -153,12 +151,22 @@ namespace QDirStat
          * Dump the current history stack to the log.
          * This is meant for debugging.
          **/
-        void dump() const;
+        bool isValidIndex( int index ) const
+            { return index >= 0 && index < _items.size(); }
+
+        /**
+         * Return the current item in the history stack.
+         *
+         * Not that it isn't safe to call this function when _current is
+         * not a valid index in the history list (eg. when the list is
+         * empty).
+         **/
+        const QString & currentItem() const { return _items.at( _current ); }
 
 
     private:
 
-        int         _current { -1 };
+        int         _current{ -1 };
         QStringList _items;
 
     };  // class History

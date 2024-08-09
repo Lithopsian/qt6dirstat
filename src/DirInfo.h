@@ -64,7 +64,7 @@ namespace QDirStat
 	DataColumn    _sortedCol;
 	Qt::SortOrder _sortedOrder;
 	FileInfoList  _sortedChildren;
-	DirSize       _firstNonDominantChild { -1 };
+	DirSize       _firstNonDominantChild{ -1 };
 
     };	// class DirSortInfo
 
@@ -112,7 +112,7 @@ namespace QDirStat
 	         const QString & name,
 	         mode_t          mode,
 	         FileSize        size ):
-	    DirInfo { parent, tree, name, mode, size, size, false, false, 0, 0, 0 }
+	    DirInfo{ parent, tree, name, mode, size, size, false, false, 0, 0, 0 }
 	{}
 
 	/**
@@ -129,7 +129,7 @@ namespace QDirStat
 	 * is created.
 	 **/
 	DirInfo( DirTree * tree ):
-	    DirInfo { nullptr, tree, "" }
+	    DirInfo{ nullptr, tree, "" }
 	{}
 
 	/**
@@ -711,7 +711,7 @@ namespace QDirStat
 	// Data members
 	//
 
-	int            _pendingReadJobs	{ 0 };
+	int            _pendingReadJobs{ 0 };
 
 	bool           _isMountPoint:1;		// flag: is this a mount point?
 	bool           _isExcluded:1;		// flag: was this directory excluded?
@@ -721,10 +721,10 @@ namespace QDirStat
 	bool           _fromCache:1;		// is this the root of a cache file read
 
 	// Children management
-	FileInfo     * _firstChild	{ nullptr };	// pointer to the first child
-	DotEntry     * _dotEntry	{ nullptr };	// pseudo entry to hold non-dir children
-	Attic        * _attic		{ nullptr };	// pseudo entry to hold ignored children
-	DirSortInfo  * _sortInfo	{ nullptr };	// sorted children lists
+	FileInfo     * _firstChild{ nullptr };	// pointer to the first child
+	DotEntry     * _dotEntry{ nullptr };	// pseudo entry to hold non-dir children
+	Attic        * _attic{ nullptr };	// pseudo entry to hold ignored children
+	DirSortInfo  * _sortInfo{ nullptr };	// sorted children lists
 
 	// Summary data, not always current as indicated by the _summaryDirty flag
 	DirReadState   _readState;

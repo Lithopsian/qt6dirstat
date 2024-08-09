@@ -30,7 +30,7 @@ namespace QDirStat
 	Q_OBJECT
 
 	/**
-	 * Internal constructor.
+	 * Private constructor.
 	 *
 	 * Use the static method askFindFiles for access.
 	 **/

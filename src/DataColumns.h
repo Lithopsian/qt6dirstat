@@ -65,9 +65,9 @@ namespace QDirStat
 	 **/
 	inline int toViewCol( DataColumn modelCol ) { return modelCol; }
 
-        /**
-         * Return all model columns in default order
-         **/
+	/**
+	 * Return all model columns in default order
+	 **/
 	DataColumnList allColumns();
 
 	/**
@@ -95,7 +95,7 @@ namespace QDirStat
 	 * header column enum, not including ReadJobsCol and UndefinedCol
 	 **/
 	inline bool isValidCol( int modelCol )
-		{ return modelCol >= firstCol() && modelCol <= lastCol(); }
+	    { return modelCol >= firstCol() && modelCol <= lastCol(); }
 
 	/**
 	 * Convert a column to string
@@ -128,7 +128,7 @@ namespace QDirStat
     /**
      * Print a DataColumn in text form to a debug stream
      **/
-    inline QTextStream & operator<< ( QTextStream & stream, DataColumn col )
+    inline QTextStream & operator<<( QTextStream & stream, DataColumn col )
     {
 	stream << DataColumns::toString( col );
 
@@ -139,12 +139,10 @@ namespace QDirStat
     /**
      * Print a DataColumnList in text form to a debug stream
      **/
-    inline QTextStream & operator<< ( QTextStream &          stream,
-                                      const DataColumnList & colList )
+    inline QTextStream & operator<<( QTextStream &          stream,
+                                     const DataColumnList & colList )
     {
-	stream << "[ "
-               << DataColumns::toStringList( colList ).join( ", "_L1 )
-               << " ]";
+	stream << "[ " << DataColumns::toStringList( colList ).join( ", "_L1 ) << " ]";
 
 	return stream;
     }

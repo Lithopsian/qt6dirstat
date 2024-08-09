@@ -23,13 +23,13 @@ namespace QDirStat
      **/
     struct Breadcrumb
     {
-        Breadcrumb( const QString & path = QString() ):
-            pathComponent { path }
+	Breadcrumb( const QString & path = QString{} ):
+	    pathComponent{ path }
 	{}
 
-        QString pathComponent;
-        QString displayName;   // This may be shortened
-        QString url;
+	QString pathComponent;
+	QString displayName;   // This may be shortened
+	QString url;
     };
 
 
@@ -71,7 +71,7 @@ namespace QDirStat
 
 	/**
 	 * Set the path from a FileInfo item.
-         * A null item clears the path.
+	 * A null item clears the path.
 	 **/
 	void setPath( const FileInfo * item );
 
@@ -89,47 +89,47 @@ namespace QDirStat
 
     protected:
 
-        /**
-         * Return the total display length of all breadcrumbs plus delimiters.
-         **/
-        int breadcrumbsLen() const;
+	/**
+	 * Return the total display length of all breadcrumbs plus delimiters.
+	 **/
+	int breadcrumbsLen() const;
 
-        /**
-         * Fill the internal _breadcrumbs with content by traversing up the
-         * tree from 'item' to the toplevel.
-         **/
-        void fillBreadcrumbs( const FileInfo * item );
+	/**
+	 * Fill the internal _breadcrumbs with content by traversing up the
+	 * tree from 'item' to the toplevel.
+	 **/
+	void fillBreadcrumbs( const FileInfo * item );
 
-        /**
-         * Generate HTML from _breadcrumbs
-         **/
-        QString html() const;
+	/**
+	 * Generate HTML from _breadcrumbs
+	 **/
+	QString html() const;
 
-        /**
-         * Shorten exessively long _breadcrumbs so they have a better chance to
-         * fit on the screen.
-         **/
-        void shortenBreadcrumbs();
+	/**
+	 * Shorten exessively long _breadcrumbs so they have a better chance to
+	 * fit on the screen.
+	 **/
+	void shortenBreadcrumbs();
 
-        /**
-         * Return the longest breadcrumb that has not been
-         * shortened yet or 0 if there are no more.
-         **/
-        Breadcrumb * pickLongBreadcrumb();
+	/**
+	 * Return the longest breadcrumb that has not been
+	 * shortened yet or 0 if there are no more.
+	 **/
+	Breadcrumb * pickLongBreadcrumb();
 
-        /**
-         * Write the internal _breadcrumbs to the log.
-         **/
-        void logBreadcrumbs() const;
+	/**
+	 * Write the internal _breadcrumbs to the log.
+	 **/
+	void logBreadcrumbs() const;
 
 
     private:
 
-        //
-        // Data members
-        //
+	//
+	// Data members
+	//
 
-        BreadcrumbList _breadcrumbs;
+	BreadcrumbList _breadcrumbs;
 
     }; // class BreadcrumbNavigator
 

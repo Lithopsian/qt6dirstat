@@ -25,7 +25,7 @@ public:
      * Constructor.
      */
     Exception( const QString & msg ):
-	_what { msg }
+	_what{ msg }
     {}
 
     /**
@@ -62,7 +62,7 @@ class NullPointerException: public Exception
 {
 public:
     NullPointerException():
-	Exception { "Null pointer" }
+	Exception{ "Null pointer" }
     {}
 
     ~NullPointerException() noexcept override = default;
@@ -76,8 +76,8 @@ class FileException: public Exception
 {
 public:
     FileException( const QString & filename, const QString & msg ):
-	Exception { msg },
-	_filename { filename }
+	Exception{ msg },
+	_filename{ filename }
     {}
 
     ~FileException() noexcept override = default;
@@ -94,9 +94,9 @@ class SysCallFailedException: public Exception
 {
 public:
     SysCallFailedException( const QString & sysCall,
-			    const QString & resourceName ):
-	Exception { errMsg( sysCall, resourceName ) },
-	_resourceName { resourceName }
+                            const QString & resourceName ):
+	Exception{ errMsg( sysCall, resourceName ) },
+	_resourceName{ resourceName }
     {}
 
     ~SysCallFailedException() noexcept override = default;
@@ -123,7 +123,7 @@ class DynamicCastException: public Exception
 {
 public:
     DynamicCastException( const QString & expectedType ):
-	Exception { "dynamic_cast failed; expected: " + expectedType }
+	Exception{ "dynamic_cast failed; expected: " + expectedType }
     {}
 
     ~DynamicCastException() noexcept override = default;
@@ -138,8 +138,8 @@ class BadMagicNumberException: public Exception
 {
 public:
     BadMagicNumberException( const void * badPointer ):
-	Exception { QString( "Magic number check failed for address 0x%1" )
-	            .arg( reinterpret_cast<quintptr>( badPointer ), 0, 16 ) }
+	Exception{ QString{ "Magic number check failed for address 0x%1" }
+	           .arg( reinterpret_cast<quintptr>( badPointer ), 0, 16 ) }
     {}
 
     ~BadMagicNumberException() noexcept override = default;
@@ -162,14 +162,14 @@ public:
      *	   validMin <= index <= validMax
      **/
     IndexOutOfRangeException( int             invalidIndex,
-			      int             validMin,
-			      int             validMax,
-			      const QString & prefix ):
-	Exception { QString( "%1: %2 valid: %3...%4" )
-	            .arg( prefix )
-	            .arg( invalidIndex )
-	            .arg( validMin )
-	            .arg( validMax ) }
+                              int             validMin,
+                              int             validMax,
+                              const QString & prefix ):
+	Exception{ QString{ "%1: %2 valid: %3...%4" }
+	           .arg( prefix )
+	           .arg( invalidIndex )
+	           .arg( validMin )
+	           .arg( validMax ) }
     {}
 
     ~IndexOutOfRangeException() noexcept override = default;
@@ -192,7 +192,7 @@ public:
      *	   validMin <= index <= validMax
      **/
     TooManyFilesException():
-	Exception { QString( "more than %1 files" ).arg( FileCountMax ) }
+	Exception{ QString{ "more than %1 files" }.arg( FileCountMax ) }
     {}
 
     ~TooManyFilesException() noexcept override = default;
@@ -214,7 +214,7 @@ public:
      *	   validMin <= index <= validMax
      **/
     FilesystemTooBigException():
-	Exception { errMsg() }
+	Exception{ errMsg() }
     {}
 
     ~FilesystemTooBigException() noexcept override = default;
@@ -287,7 +287,7 @@ protected:
     {						\
 	if ( !(PTR) )				\
 	{					\
-	    THROW( NullPointerException() );	\
+	    THROW( NullPointerException{} );	\
 	}					\
     } while( 0 )
 
@@ -300,7 +300,7 @@ protected:
     {								\
 	if ( !(PTR) )						\
 	{							\
-	    THROW( DynamicCastException( EXPECTED_TYPE) );	\
+	    THROW( DynamicCastException{ EXPECTED_TYPE } );	\
 	}							\
     } while( 0 )
 
@@ -313,12 +313,12 @@ protected:
     {								\
 	if ( !(PTR) )						\
 	{							\
-	    THROW( NullPointerException() );			\
+	    THROW( NullPointerException{} );			\
 	}							\
 								\
 	if ( !PTR->checkMagicNumber() )				\
 	{							\
-	    THROW( BadMagicNumberException( PTR ) );		\
+	    THROW( BadMagicNumberException{ PTR } );		\
 	}							\
     } while( 0 )
 
@@ -335,7 +335,7 @@ protected:
 	if ( (INDEX) < (VALID_MIN) ||				\
 	     (INDEX) > (VALID_MAX) )				\
 	{							\
-	    THROW( IndexOutOfRangeException( (INDEX), (VALID_MIN), (VALID_MAX), (MSG) ) ); \
+	    THROW( ( IndexOutOfRangeException{ (INDEX), (VALID_MIN), (VALID_MAX), (MSG) } ) ); \
 	}							\
     } while( 0 )
 
@@ -353,10 +353,10 @@ protected:
 
 template<class EX_t>
 void _throw_helper( const EX_t    & exception,
-		    Logger        * logger,
-		    const QString & srcFile,
-		    int             srcLine,
-		    const QString & srcFunction )
+                    Logger        * logger,
+                    const QString & srcFile,
+                    int             srcLine,
+                    const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "THROW " << exception.className() << ": " << exception.what() << Qt::endl;
@@ -367,10 +367,10 @@ void _throw_helper( const EX_t    & exception,
 
 template<class EX_t>
 void _caught_helper( const EX_t    & exception,
-		     Logger        * logger,
-		     const QString & srcFile,
-		     int             srcLine,
-		     const QString & srcFunction )
+                     Logger        * logger,
+                     const QString & srcFile,
+                     int             srcLine,
+                     const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "CAUGHT " << exception.className() << ": " << exception.what() << Qt::endl;
@@ -379,10 +379,10 @@ void _caught_helper( const EX_t    & exception,
 
 template<class EX_t>
 void _rethrow_helper( const EX_t    & exception,
-		      Logger        * logger,
-		      const QString & srcFile,
-		      int             srcLine,
-		      const QString & srcFunction )
+                      Logger        * logger,
+                      const QString & srcFile,
+                      int             srcLine,
+                      const QString & srcFunction )
 {
     Logger::log( logger, srcFile, srcLine, srcFunction, LogSeverityWarning )
 	<< "RETHROW " << exception.className() << ": " << exception.what() << Qt::endl;

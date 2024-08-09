@@ -220,7 +220,7 @@ namespace QDirStat
 	QString     _path;
 	QString     _filesystemType;
 	QStringList _mountOptions;
-	bool        _isDuplicate { false };
+	bool        _isDuplicate{ false };
 
     }; // class MountPoint
 
@@ -448,7 +448,7 @@ namespace QDirStat
 
 
 
-    inline QTextStream & operator<< ( QTextStream & stream, MountPoint * mp )
+    inline QTextStream & operator<<( QTextStream & stream, MountPoint * mp )
     {
 	if ( mp )
 	{

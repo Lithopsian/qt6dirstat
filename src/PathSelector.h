@@ -30,8 +30,8 @@ namespace QDirStat
 	 **/
 	PathSelectorItem( const QString & path,
 	                  QListWidget   * parent = nullptr ):
-	    QListWidgetItem { path, parent },
-	    _path { path }
+	    QListWidgetItem{ path, parent },
+	    _path{ path }
 	{}
 
 	/**

@@ -36,13 +36,13 @@ namespace QDirStat
                  const QString    & version,
                  const QString    & arch,
                  const PkgManager * pkgManager ):
-            DirInfo { parent, tree, name },
-            _pkgManager { pkgManager },
-            _baseName { name },
-            _version { version },
-            _arch { arch },
-            _multiVersion { false },
-            _multiArch { false }
+            DirInfo{ parent, tree, name },
+            _pkgManager{ pkgManager },
+            _baseName{ name },
+            _version{ version },
+            _arch{ arch },
+            _multiVersion{ false },
+            _multiArch{ false }
         {}
 
     public:
@@ -56,7 +56,7 @@ namespace QDirStat
                  const QString    & version,
                  const QString    & arch,
                  const PkgManager * pkgManager ):
-            PkgInfo { nullptr, nullptr, name, version, arch, pkgManager }
+            PkgInfo{ nullptr, nullptr, name, version, arch, pkgManager }
         {}
 
         /**
@@ -65,7 +65,7 @@ namespace QDirStat
          **/
         PkgInfo( DirTree          * tree,
                  DirInfo          * parent ):
-            PkgInfo { tree, parent, pkgSummaryUrl(), QString(), QString(), nullptr }
+            PkgInfo{ tree, parent, pkgSummaryUrl(), QString{}, QString{}, nullptr }
         {}
 
         /**
@@ -127,7 +127,7 @@ namespace QDirStat
          * Reimplemented - inherited from FileInfo.
          **/
         QString url() const override
-            { return pkgScheme() + ( isPkgUrl( name() ) ? QString() : name() ); }
+            { return pkgScheme() + ( isPkgUrl( name() ) ? QString{} : name() ); }
 
         /**
          * Return 'true' if this is a package URL, i.e. it starts with "Pkg:".
@@ -176,7 +176,7 @@ namespace QDirStat
         /**
          * Returns the package scheme prefix.
          **/
-        static QLatin1String pkgScheme() { return QLatin1String( "Pkg:/" ); }
+        static QLatin1String pkgScheme() { return "Pkg:/"_L1; }
 
 
     private:
@@ -201,7 +201,7 @@ namespace QDirStat
     /**
      * Print the debugUrl() of a PkgInfo in a debug stream.
      **/
-    inline QTextStream & operator<< ( QTextStream & stream, const PkgInfo * info )
+    inline QTextStream & operator<<( QTextStream & stream, const PkgInfo * info )
     {
         if ( info )
         {

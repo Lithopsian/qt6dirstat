@@ -509,10 +509,10 @@ namespace QDirStat
 	DirReadJobQueue              _jobQueue;
 	QList<const DirTreeFilter *> _filters;
 
-	bool _crossFilesystems	{ false };
-	bool _isBusy		{ false };
-	bool _ignoreHardLinks	{ false };
-	int  _blocksPerCluster	{ -1 };
+	bool _crossFilesystems{ false };
+	bool _isBusy{ false };
+	bool _ignoreHardLinks{ false };
+	int  _blocksPerCluster{ -1 };
 
     };	// class DirTree
 
