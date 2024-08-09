@@ -207,8 +207,8 @@ int PercentileStats::bestBucketCount( FileCount n, int max )
     {
 #if VERBOSE_LOGGING
 	logInfo() << "Limiting bucket count to " << max
-		  << " instead of " << result
-		  << Qt::endl;
+	          << " instead of " << result
+	          << Qt::endl;
 #endif
 
 	return max;

@@ -300,7 +300,7 @@ void DirTree::startReading( const QString & rawUrl )
 
     _url = [ &rawUrl ]()
     {
-	const QFileInfo fileInfo( rawUrl );
+	const QFileInfo fileInfo{ rawUrl };
 
 	if ( fileInfo.isDir() ) // return the input path, just canonicalised
 	    return fileInfo.canonicalFilePath();
@@ -309,7 +309,7 @@ void DirTree::startReading( const QString & rawUrl )
 	    return fileInfo.canonicalPath();
 
 	if ( fileInfo.isSymLink() ) // symlink target doesn't exist, return symlink parent directory
-	    return QFileInfo( fileInfo.absolutePath() ).canonicalFilePath();
+	    return QFileInfo{ fileInfo.absolutePath() }.canonicalFilePath();
 
 	return fileInfo.absoluteFilePath(); // return nonexistent input file which should throw
     }();

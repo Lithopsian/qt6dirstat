@@ -19,7 +19,7 @@ using namespace QDirStat;
 
 QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 {
-    const bool ok = !input.isEmpty() && QDir( input ).exists();
+    const bool ok = !input.isEmpty() && QDir{ input }.exists();
 
 #if 0
     logDebug() << "Checking \"" << input << "\": "

@@ -287,12 +287,12 @@ QString TrashDir::uniqueName( const QString & path )
 void TrashDir::createTrashInfo( const QString & path,
 				const QString & targetName )
 {
-    QFile trashInfo( infoPath() % '/' % targetName % ".trashinfo"_L1 );
+    QFile trashInfo{ infoPath() % '/' % targetName % ".trashinfo"_L1 };
 
     if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
 	THROW( ( FileException{ trashInfo.fileName(), "Can't open "_L1 % trashInfo.fileName() } ) );
 
-    QTextStream str( &trashInfo );
+    QTextStream str{ &trashInfo };
     str << "[Trash Info]" << Qt::endl;
     str << "Path=" << path << Qt::endl;
     str << "DeletionDate=" << QDateTime::currentDateTime().toString( Qt::ISODate ) << Qt::endl;
@@ -302,7 +302,7 @@ void TrashDir::createTrashInfo( const QString & path,
 void TrashDir::move( const QString & path,
 		     const QString & targetName )
 {
-    QFile file( path );
+    QFile file{ path };
     const QString targetPath = filesPath() % '/' % targetName;
 
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories

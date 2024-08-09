@@ -451,7 +451,7 @@ void MainWindow::readingFinished()
     if ( firstToplevel && firstToplevel->errSubDirs() > 0 )
 	showDirPermissionsWarning();
 
-	//dumpModelTree( app()->dirTreeModel(), QModelIndex{}treew, "" );
+    //dumpModelTree( app()->dirTreeModel(), QModelIndex{}, "" );
 }
 
 
