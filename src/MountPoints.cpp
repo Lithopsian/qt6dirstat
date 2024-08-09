@@ -137,7 +137,7 @@ namespace
 
 bool MountPoint::isNetworkMount() const
 {
-    const QString fsType = _filesystemType.toLower();
+    const QString fsType{ _filesystemType.toLower() };
 
     if ( fsType.startsWith( "nfs"_L1  ) ) return true;
     if ( fsType.startsWith( "cifs"_L1 ) ) return true;
@@ -273,7 +273,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         return false;
     }
 
-    QTextStream in( &file );
+    QTextStream in{ &file };
     int lineNo = 0;
     QString line = in.readLine();
 
@@ -352,10 +352,10 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
     const auto mountedVolumes = QStorageInfo::mountedVolumes();
     for ( const QStorageInfo & mount : mountedVolumes )
     {
-        const QString device( QString::fromUtf8( mount.device() ) );
-        const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String();
+        const QString device = QString::fromUtf8( mount.device() );
+        const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String{};
 
-        QString fsType( QString::fromUtf8( mount.fileSystemType() ) );
+        QString fsType = QString::fromUtf8( mount.fileSystemType() );
         handleFuseblk( fsType, ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint{ device, mount.rootPath(), fsType, mountOptions };
@@ -393,7 +393,7 @@ QString MountPoints::device( const QString & url )
     if ( mountPoint )
         return mountPoint->device();
 
-    return QString();
+    return QString{};
 }
 
 

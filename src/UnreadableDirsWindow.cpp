@@ -42,8 +42,8 @@ namespace
 
 
 UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::UnreadableDirsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::UnreadableDirsWindow }
 {
     // logDebug() << "init" << Qt::endl;
 
@@ -71,7 +71,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
     static QPointer<UnreadableDirsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new UnreadableDirsWindow( app()->mainWindow() );
+	_sharedInstance = new UnreadableDirsWindow{ app()->mainWindow() };
 
     return _sharedInstance;
 }
@@ -81,12 +81,12 @@ void UnreadableDirsWindow::initWidgets()
 {
     app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
-    const QStringList headerLabels { tr( "Directory" ),
-                                     tr( "User" ),
-                                     tr( "Group" ),
-                                     tr( "Permissions" ),
-                                     tr( "Perm." ),
-                                   };
+    const QStringList headerLabels{ tr( "Directory" ),
+                                    tr( "User" ),
+                                    tr( "Group" ),
+                                    tr( "Permissions" ),
+                                    tr( "Perm." ),
+                                  };
     _ui->treeWidget->setColumnCount( headerLabels.size() );
     _ui->treeWidget->setHeaderLabels( headerLabels );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
@@ -116,7 +116,7 @@ void UnreadableDirsWindow::populate( FileInfo * fileInfo )
     _ui->treeWidget->sortByColumn( UD_Path, Qt::AscendingOrder );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
-    _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString() );
+    _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString{} );
 
     //logDebug() << count << " directories" << Qt::endl;
 
@@ -137,10 +137,10 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
     DirInfo * dir = fileInfo->toDirInfo();
     if ( dir->readError() )
-	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem( dir ) );
+	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem{ dir } );
 
     // Recurse through any subdirectories
-    for ( DirInfoIterator it { fileInfo }; *it; ++it )
+    for ( DirInfoIterator it{ fileInfo }; *it; ++it )
 	populateRecursive( *it );
 
     // Dot entries can't contain unreadable dirs, but attics can
@@ -151,8 +151,8 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
 
 UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
-    QTreeWidgetItem ( QTreeWidgetItem::UserType ),
-    _dir { dir }
+    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    _dir{ dir }
 {
     set( UD_Path,        dir->url() + "    ",        Qt::AlignLeft  );
     set( UD_User,        dir->userName(),            Qt::AlignLeft  );

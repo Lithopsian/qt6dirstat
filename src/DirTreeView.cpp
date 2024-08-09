@@ -28,9 +28,9 @@ using namespace QDirStat;
 
 
 DirTreeView::DirTreeView( QWidget * parent ):
-    QTreeView { parent },
-    _sizeColDelegate { new SizeColDelegate { this } },
-    _headerTweaker { new HeaderTweaker { header(), this } }
+    QTreeView{ parent },
+    _sizeColDelegate{ new SizeColDelegate{ this } },
+    _headerTweaker{ new HeaderTweaker{ header(), this } }
 {
     setItemDelegateForColumn( SizeCol, _sizeColDelegate );
 
@@ -60,7 +60,7 @@ void DirTreeView::readSettings()
     settings.beginGroup( "DirTreeView" );
 
     const int barWidth         = settings.value         ( "PercentBarWidth",      150 ).toInt();
-    const QColor barBackground = settings.colorValue    ( "PercentBarBackground", QColor( 160, 160, 160 ) );
+    const QColor barBackground = settings.colorValue    ( "PercentBarBackground", QColor{ 160, 160, 160 } );
     const ColorList barColors  = settings.colorListValue( "PercentBarColors",     percentBarDefaultColors() );
 
     settings.setDefaultValue( "PercentBarWidth",      barWidth );
@@ -70,7 +70,7 @@ void DirTreeView::readSettings()
     settings.endGroup();
 
     // Now we have all the settings for the percent bar delegate
-    _percentBarDelegate  = new PercentBarDelegate( this, PercentBarCol, barWidth, barBackground, barColors );
+    _percentBarDelegate = new PercentBarDelegate{ this, PercentBarCol, barWidth, barBackground, barColors };
     setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
 }
 
@@ -87,22 +87,22 @@ void DirTreeView::contextMenu( const QPoint & pos )
     // The first action should not be a destructive one like "move to trash":
     // It's just too easy to select and execute the first action accidentially,
     // especially on a laptop touchpad.
-    const QStringList actions { "actionGoUp",
-                                "actionGoToToplevel",
-                                ActionManager::separator(),
-                                "actionCopyPath",
-                                "actionMoveToTrash",
-                              };
+    const QStringList actions{ "actionGoUp",
+                               "actionGoToToplevel",
+                               ActionManager::separator(),
+                               "actionCopyPath",
+                               "actionMoveToTrash",
+                             };
 
-    const QStringList enabledActions { ActionManager::separator(),
-                                       "actionStopReading",
-                                       "actionRefreshAll",
-                                       "actionRefreshSelected",
-                                       "actionReadExcluded",
-                                       "actionContinueReading",
-                                       ActionManager::separator(),
-                                       ActionManager::cleanups(),
-                                     };
+    const QStringList enabledActions{ ActionManager::separator(),
+                                      "actionStopReading",
+                                      "actionRefreshAll",
+                                      "actionRefreshSelected",
+                                      "actionReadExcluded",
+                                      "actionContinueReading",
+                                      ActionManager::separator(),
+                                      ActionManager::cleanups(),
+                                    };
 
     QMenu * menu = ActionManager::createMenu( actions, enabledActions );
     menu->exec( mapToGlobal( pos ) );

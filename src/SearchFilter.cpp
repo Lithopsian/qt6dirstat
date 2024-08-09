@@ -57,10 +57,10 @@ SearchFilter::SearchFilter( const QString & pattern,
                             FilterMode      filterMode,
                             FilterMode      defaultFilterMode,
                             bool            caseSensitive ):
-    _pattern { pattern },
-    _filterMode { filterMode },
-    _defaultFilterMode { defaultFilterMode },
-    _caseSensitive { caseSensitive }
+    _pattern{ pattern },
+    _filterMode{ filterMode },
+    _defaultFilterMode{ defaultFilterMode },
+    _caseSensitive{ caseSensitive }
 {
     if ( _filterMode == Auto )
     {
@@ -77,7 +77,7 @@ SearchFilter::SearchFilter( const QString & pattern,
     if ( _filterMode == Wildcard )
         _regexp = Wildcard::wildcardRegularExpression( pattern, patternOptions );
     else if ( _filterMode == RegExp )
-        _regexp = QRegularExpression( pattern, patternOptions );
+        _regexp = QRegularExpression{ pattern, patternOptions };
 
     // Make an attempt to recover from guessing an invalid regexp
     if ( filterMode == Auto && _filterMode == RegExp && !_regexp.isValid() )

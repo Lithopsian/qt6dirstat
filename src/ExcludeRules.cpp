@@ -133,7 +133,7 @@ void ExcludeRules::add( ExcludeRule::PatternSyntax   patternSyntax,
                         bool                         checkAnyFileChild )
 {
     const ExcludeRule * rule =
-	new ExcludeRule { patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild };
+	new ExcludeRule{ patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild };
     _rules << rule;
 
     logInfo() << "Added " << rule << Qt::endl;
@@ -211,11 +211,11 @@ void ExcludeRules::readSettings()
 
 	const int syntax = settings.enumValue( "Syntax", ExcludeRule::RegExp, mapping );
 
-	const ExcludeRule * rule = new ExcludeRule { static_cast<ExcludeRule::PatternSyntax>( syntax ),
-	                                             pattern,
-	                                             caseSensitive,
-	                                             useFullPath,
-	                                             checkAnyFileChild };
+	const ExcludeRule * rule = new ExcludeRule{ static_cast<ExcludeRule::PatternSyntax>( syntax ),
+	                                            pattern,
+	                                            caseSensitive,
+	                                            useFullPath,
+	                                            checkAnyFileChild };
 
 	if ( !pattern.isEmpty() && rule->isValid() )
 	{

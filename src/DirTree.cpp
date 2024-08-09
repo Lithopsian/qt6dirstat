@@ -50,7 +50,7 @@ namespace
 	struct stat statInfo;
 	if ( lstat( url.toUtf8(), &statInfo ) != 0 ) // lstat() failed
 	{
-	    THROW( SysCallFailedException( "lstat", url ) );
+	    THROW( ( SysCallFailedException{ "lstat", url } ) );
 	    return nullptr;
 	}
 
@@ -59,13 +59,13 @@ namespace
 
 	if ( !S_ISDIR( statInfo.st_mode ) ) // not directory
 	{
-	    FileInfo * file = new FileInfo( parent, tree, name, statInfo );
+	    FileInfo * file = new FileInfo{ parent, tree, name, statInfo };
 	    parent->insertChild( file );
 
 	    return file;
 	}
 
-	DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
+	DirInfo * dir = new DirInfo{ parent, tree, name, statInfo };
 	parent->insertChild( dir );
 
 	if ( !isRoot && !parent->isPkgInfo() && !parent->isFromCache() && dir->device() != parent->device() )
@@ -85,7 +85,7 @@ namespace
      **/
     void recalc( DirInfo * dir )
     {
-	for ( DirInfoIterator it { dir }; *it; ++it )
+	for ( DirInfoIterator it{ dir }; *it; ++it )
 	    recalc( *it );
 
 	if ( dir->dotEntry() )
@@ -129,7 +129,7 @@ namespace
 	DirInfo * parent = attic->parent();
 	if ( parent ) // an attic should always have a parent
 	{
-	    emit tree->deletingChildren( attic, FileInfoSet { atticChild } );
+	    emit tree->deletingChildren( attic, FileInfoSet{ atticChild } );
 	    attic->unlinkChild( atticChild );
 	    emit tree->childrenDeleted();
 	    atticChild->setIgnored( false );
@@ -161,7 +161,7 @@ namespace
 	if ( dir->attic() )
 	    dir->moveAllFromAttic();
 
-	for ( DotEntryIterator it { item }; it != nullptr ; ++it )
+	for ( DotEntryIterator it{ item }; it != nullptr ; ++it )
 	    unatticAll( *it );
     }
 
@@ -175,7 +175,7 @@ namespace
 	if ( !dir )
 	    return;
 
-	DotEntryIterator it { dir };
+	DotEntryIterator it{ dir };
 	while ( *it )
 	{
 	    FileInfo * child = *it;
@@ -228,15 +228,15 @@ namespace
      **/
     void createLocalDirReadJob( DirTree * tree, FileInfo * item )
     {
-	tree->addJob( new LocalDirReadJob( tree, item->toDirInfo(), false ) );
+	tree->addJob( new LocalDirReadJob{ tree, item->toDirInfo(), false } );
     }
 
 } // namespace
 
 
 DirTree::DirTree( QObject * parent ):
-    QObject { parent },
-    _root { new DirInfo { this } }
+    QObject{ parent },
+    _root{ new DirInfo{ this } }
 {
     setExcludeRules();
 
@@ -316,7 +316,7 @@ void DirTree::startReading( const QString & rawUrl )
 
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
     logInfo() << "url:    " << _url << Qt::endl;
-    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString() ) << Qt::endl;
+    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString{} ) << Qt::endl;
 
     sendStartingReading();
 
@@ -491,7 +491,7 @@ void DirTree::deleteChild( FileInfo * child )
 
 void DirTree::deleteSubtree( DirInfo * subtree )
 {
-    emit deletingChildren( subtree->parent(), FileInfoSet { subtree } );
+    emit deletingChildren( subtree->parent(), FileInfoSet{ subtree } );
     deleteChild( subtree );
     emit childrenDeleted();
 }
@@ -611,7 +611,7 @@ bool DirTree::writeCache( const QString & cacheFileName )
 
 bool DirTree::readCache( const QString & cacheFileName )
 {
-    CacheReadJob * readJob = new CacheReadJob( this, cacheFileName );
+    CacheReadJob * readJob = new CacheReadJob{ this, cacheFileName };
 
     if ( !readJob->reader() )
     {
@@ -639,7 +639,7 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
 
 void DirTree::setExcludeRules()
 {
-    _excludeRules.reset( new ExcludeRules() );
+    _excludeRules.reset( new ExcludeRules{} );
 }
 
 

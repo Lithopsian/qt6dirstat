@@ -30,7 +30,7 @@ void ListEditor::createAction( const QString      & actionName,
     if ( !button )
 	return;
 
-    QAction * action = new QAction { QIcon( icon ), text, this };
+    QAction * action = new QAction{ QIcon{ icon }, text, this };
     action->setObjectName( actionName );
     action->setShortcut( keySequence );
 
@@ -101,7 +101,7 @@ void ListEditor::connectActions()
 void ListEditor::moveCurrentItem( int newRow )
 {
     QListWidget * list = listWidget();
-    SignalBlocker blocker { list };
+    SignalBlocker blocker{ list };
 
     int currentRow = list->currentRow();
     QListWidgetItem * currentItem = list->takeItem( currentRow );
@@ -189,7 +189,7 @@ void ListEditor::currentItemChanged( QListWidgetItem * current,
 
 QListWidgetItem * ListEditor::createItem( const QString & valueText, void * value )
 {
-    QListWidgetItem * item = new QListWidgetItem { valueText, listWidget() };
+    QListWidgetItem * item = new QListWidgetItem{ valueText, listWidget() };
     item->setData( Qt::UserRole, QVariant::fromValue( value ) );
 
     return item;

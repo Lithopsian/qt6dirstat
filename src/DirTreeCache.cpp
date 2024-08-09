@@ -150,7 +150,7 @@ namespace
 	    writeTree( cache, item->dotEntry() );
 
 	// Recurse through subdirectories, but not the dot entry
-	for ( FileInfoIterator it { item }; *it; ++it )
+	for ( FileInfoIterator it{ item }; *it; ++it )
 	    writeTree( cache, *it );
     }
 
@@ -301,10 +301,10 @@ CacheReader::CacheReader( const QString & fileName,
                           DirTree       * tree,
                           DirInfo       * parent,
                           bool            markFromCache ):
-    _cache { gzopen( fileName.toUtf8().constData(), "r" ) },
-    _markFromCache { markFromCache },
-    _tree { tree },
-    _parent { parent }
+    _cache{ gzopen( fileName.toUtf8().constData(), "r" ) },
+    _markFromCache{ markFromCache },
+    _tree{ tree },
+    _parent{ parent }
 {
     if ( !tree )
 	return;
@@ -324,7 +324,7 @@ CacheReader::CacheReader( const QString & fileName,
                           DirTree       * tree,
                           DirInfo       * dir,
                           DirInfo       * parent ):
-    CacheReader { fileName, tree, parent, true }
+    CacheReader{ fileName, tree, parent, true }
 {
     if ( dir && !isDir( dir->url() ) ) // Does this cache file match this directory?
     {
@@ -556,7 +556,7 @@ void CacheReader::addItem()
 	    }
 
 #if VERBOSE_LOCATE_PARENT
-	    THROW( Exception( "Could not locate cache item parent" ) );
+	    THROW( Exception{ "Could not locate cache item parent" } );
 #endif
 	    return;	// Ignore this cache line completely
 	}
@@ -568,8 +568,8 @@ void CacheReader::addItem()
 #if VERBOSE_CACHE_DIRS
 	logDebug() << "Creating DirInfo for " << url << " with parent " << parent << Qt::endl;
 #endif
-	DirInfo * dir = new DirInfo( parent, _tree, url,
-	                             mode, size, alloc, _markFromCache, hasUidGidPerm, uid, gid, mtime );
+	DirInfo * dir = new DirInfo{ parent, _tree, url,
+	                             mode, size, alloc, _markFromCache, hasUidGidPerm, uid, gid, mtime };
 	dir->setReadState( DirReading );
 
 	_latestDir = dir;
@@ -643,9 +643,9 @@ void CacheReader::addItem()
 	logDebug() << "Creating FileInfo for " << debugPath << Qt::endl;
 #endif
 
-	FileInfo * item = new FileInfo( parent, _tree, name,
+	FileInfo * item = new FileInfo{ parent, _tree, name,
 	                                mode, size, alloc, hasUidGidPerm, uid, gid, mtime,
-	                                isSparseFile, blocks, links );
+	                                isSparseFile, blocks, static_cast<nlink_t>( links ) };
 	parent->insertChild( item );
 	_tree->childAddedNotify( item );
     }
@@ -694,7 +694,7 @@ bool CacheReader::isDir( const QString & dirName )
 		return false;
 	}
 
-	return QString( path ) == dirName;
+	return QString{ path } == dirName;
     }
 
     return false;
@@ -827,7 +827,7 @@ void CacheReader::finalizeRecursive( DirInfo * dir )
 	_tree->sendReadJobFinished( dir );
     }
 
-    for ( DirInfoIterator it { dir }; *it; ++it )
+    for ( DirInfoIterator it{ dir }; *it; ++it )
 	finalizeRecursive( *it );
 }
 

@@ -108,31 +108,33 @@ void HistoryButtons::addToHistory( const FileInfo * item )
 }
 
 
-void HistoryButtons::unlock( const FileInfo * currentItem )
+void HistoryButtons::unlock( const FileInfo * newCurrentItem )
 {
     _locked = false;
 
+    const DirTree * tree = newCurrentItem->tree();
+
     // Create a "cleaned" history list without items that are no longer in the tree
-    History * cleanedHistory{ new History };
+    History * cleanedHistory = new History;
     int currentIndex = _history->currentIndex();
 
     for ( const QString & item : *_history )
     {
         // Remove stale items and merge duplicates that are now contiguous
-        if ( currentItem->tree()->locate( item ) && !cleanedHistory->isCurrentItem( item ) )
+        if ( tree->locate( item ) && !cleanedHistory->isCurrentItem( item ) )
             cleanedHistory->add( item );
         else if ( currentIndex >= cleanedHistory->size() )
-            --currentIndex; // adjust the index for items removed before it
+            --currentIndex; // adjust the index for items not included before it
     }
 
     // Replace the current history with the cleaned history
     _history.reset( cleanedHistory );
 
     if ( currentIndex >= 0 )
-        _history->setCurrentIndex( currentIndex );
+        _history->goTo( currentIndex );
 
     // The current item may have changed after a refresh
-    addToHistory( currentItem );
+    addToHistory( newCurrentItem );
 }
 
 
@@ -160,6 +162,8 @@ void HistoryButtons::updateHistoryMenu()
 
 void HistoryButtons::historyMenuAction( QAction * action )
 {
-    if ( action && _history->setCurrentIndex( action->data().toInt() ) )
-        emit navigateToUrl( _history->currentItem() );
+    if ( !action )
+        return;
+
+    emit navigateToUrl( _history->goTo( action->data().toInt() ) );
 }

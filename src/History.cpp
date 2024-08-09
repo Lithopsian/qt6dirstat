@@ -17,6 +17,35 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Dump the current history stack to the log.
+     * This is meant for debugging.
+     **/
+    [[gnu::unused]] void dump( const QStringList & items, int current )
+    {
+        if ( items.isEmpty() )
+        {
+            logDebug() << "Empty history" << Qt::endl;
+            return;
+        }
+
+        logNewline();
+
+        for ( int i = 0; i < items.size(); ++i )
+        {
+            logDebug() << ( i == current ? " ---> " : QString{ 6, u' ' } )
+                       << "#" << i
+                       << ": \"" << items.at( i ) << '"' << Qt::endl;
+        }
+
+        logNewline();
+    }
+
+}
+
+
 QString History::goBack()
 {
     if ( !canGoBack() )
@@ -28,7 +57,7 @@ QString History::goBack()
     _current--;
 
 #if VERBOSE_HISTORY
-    dump();
+    dump( _items, _current );
 #endif
 
     return currentItem();
@@ -46,31 +75,28 @@ QString History::goForward()
     ++_current;
 
 #if VERBOSE_HISTORY
-    dump();
+    dump( _items, _current );
 #endif
 
     return currentItem();
 }
 
 
-bool History::setCurrentIndex( int index )
+QString History::goTo( int index )
 {
-    if ( index >= 0 && index < _items.size() )
-    {
-        _current = index;
-#if VERBOSE_HISTORY
-        dump();
-#endif
-
-        return true;
-    }
-    else
+    if ( !isValidIndex( index ) )
     {
         logWarning() << "Index " << index << " out of range" << Qt::endl;
-        dump();
 
-        return false;
+        return QString{};
     }
+
+    _current = index;
+#if VERBOSE_HISTORY
+    dump( _items, _current );
+#endif
+
+    return currentItem();
 }
 
 
@@ -84,7 +110,7 @@ void History::add( const QString & item )
     if ( _items.size() >= capacity() )
         _items.removeFirst();
 
-    // Add the new item
+    // Add the new item to the list
     _items << item;
 
     // The new current is always the item just added
@@ -92,27 +118,6 @@ void History::add( const QString & item )
 
 #if VERBOSE_HISTORY
     logDebug() << "After add():" << Qt::endl;
-    dump();
+    dump( _items, _current );
 #endif
-}
-
-
-void History::dump() const
-{
-    if ( _items.isEmpty() )
-    {
-        logDebug() << "Empty history" << Qt::endl;
-        return;
-    }
-
-    logNewline();
-
-    for ( int i = 0; i < _items.size(); ++i )
-    {
-        logDebug() << ( i == _current ? " ---> " : QString( 6, u' ' ) )
-                   << "#" << i
-                   << ": \"" << _items.at( i ) << '"' << Qt::endl;
-    }
-
-    logNewline();
 }

@@ -35,7 +35,7 @@ namespace
         if ( color.isValid() )
             settings.colorValue( setting, color );
         else
-            settings.setValue( setting, QString() );
+            settings.setValue( setting, QString{} );
     }
 
 
@@ -75,10 +75,10 @@ namespace
 
 
 TreemapView::TreemapView( QWidget * parent ):
-    QGraphicsView { parent }
+    QGraphicsView{ parent }
 {
     // Only one scene, never destroyed, create it now for simplicity
-    setScene( new QGraphicsScene( this ) );
+    setScene( new QGraphicsScene{ this } );
 
     readSettings();
 
@@ -169,7 +169,7 @@ void TreemapView::setSelectionModel( SelectionModel * selectionModel )
 
     // Use the proxy for all selection model receiving signals
     delete _selectionModelProxy; // should always be 0 here anyway
-    _selectionModelProxy = new SelectionModelProxy( selectionModel, this );
+    _selectionModelProxy = new SelectionModelProxy{ selectionModel, this };
 
     connect( _selectionModelProxy, &SelectionModelProxy::currentItemChanged,
              this,                 &TreemapView::updateCurrentItem );
@@ -201,15 +201,15 @@ void TreemapView::readSettings()
     _cushionHeight      = settings.value( "CushionHeight",     DefaultCushionHeight     ).toDouble();
     _minTileSize        = settings.value( "MinTileSize",       DefaultMinTileSize       ).toInt();
 
-    _tileFixedColor     = settings.colorValue( "TileFixedColor",     QColor()                   );
+    _tileFixedColor     = settings.colorValue( "TileFixedColor",     QColor{}                   );
     _currentItemColor   = settings.colorValue( "CurrentItemColor",   Qt::red                    );
     _selectedItemsColor = settings.colorValue( "SelectedItemsColor", Qt::yellow                 );
     _highlightColor     = settings.colorValue( "HighlightColor",     Qt::white                  );
     _cushionGridColor   = settings.colorValue( "CushionGridColor",   Qt::darkGray               );
     _outlineColor       = settings.colorValue( "OutlineColor",       Qt::black                  );
-    _dirFillColor       = settings.colorValue( "DirFillColor",       QColor( 0x60, 0x60, 0x60 ) );
-    _dirGradientStart   = settings.colorValue( "DirGradientStart",   QColor( 0x60, 0x60, 0x70 ) );
-    _dirGradientEnd     = settings.colorValue( "DirGradientEnd",     QColor( 0x70, 0x70, 0x80 ) );
+    _dirFillColor       = settings.colorValue( "DirFillColor",       QColor{ 0x60, 0x60, 0x60 } );
+    _dirGradientStart   = settings.colorValue( "DirGradientStart",   QColor{ 0x60, 0x60, 0x70 } );
+    _dirGradientEnd     = settings.colorValue( "DirGradientEnd",     QColor{ 0x70, 0x70, 0x80 } );
 
     settings.endGroup();
 
@@ -359,7 +359,7 @@ void TreemapView::rebuildTreemap()
 
     rebuildTreemap( root );
 
-    _savedRootUrl = QString();
+    _savedRootUrl = QString{};
     //logDebug() << _savedRootUrl << Qt::endl;
 }
 
@@ -395,10 +395,10 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
     _watcher.setFuture( QtConcurrent::run( [ this, newRoot, rect ]()
     {
         // By default the number of CPUs, which will sometimes block creation of render threads
-        _threadPool = new QThreadPool();
+        _threadPool = new QThreadPool{};
         _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
 
-        TreemapTile * tile = new TreemapTile( this, newRoot, rect );
+        TreemapTile * tile = new TreemapTile{ this, newRoot, rect };
 
         delete _threadPool; // will wait for all the render threads to complete
 
@@ -507,7 +507,7 @@ void TreemapView::configChanged( const QColor & fixedColor,
 void TreemapView::calculateSettings()
 {
     // Pre-calculate cushion heights from the configured starting height and scale factor.
-    _cushionHeights.reset( new CushionHeightSequence( _cushionHeight, _heightScaleFactor ) );
+    _cushionHeights.reset( new CushionHeightSequence{ _cushionHeight, _heightScaleFactor } );
 
     // Calculate thresholds for tile sizes that will be submitted to a render thread
     _maxTileThreshold = ( _squarify ? 150 : 75 ) + 10 * QThread::idealThreadCount();
@@ -518,7 +518,7 @@ void TreemapView::calculateSettings()
     // Directory gradient can't currently change after startup, but calculate it here anyway
     if ( _useDirGradient )
     {
-        _dirGradient = QLinearGradient();
+        _dirGradient = QLinearGradient{};
         _dirGradient.setCoordinateMode( QGradient::ObjectMode );
         _dirGradient.setColorAt( 0, _dirGradientStart );
         _dirGradient.setColorAt( 1, _dirGradientEnd   );
@@ -559,7 +559,7 @@ void TreemapView::deleteNotify( FileInfo * )
         {
             // A shortcut for the most common case: No zoom. Simply use the
             // tree's root for the next treemap rebuild.
-            _savedRootUrl = QString();
+            _savedRootUrl = QString{};
         }
     }
     else
@@ -645,20 +645,27 @@ void TreemapView::enable()
 
 void TreemapView::setCurrentTile( const TreemapTile * tile )
 {
-    if ( !tile || tile == _rootTile )
+    // Always clear the current highlight
+    delete _currentTileHighlighter;
+    _currentTileHighlighter = nullptr;
+
+    if ( !tile )
         return;
 
     //logDebug() << tile << " " << _stopwatch.restart() << "ms" << Qt::endl;
 
     //logDebug() << highlightedParent() << " " << tile->parentTile() << Qt::endl;
 
-    delete _currentTileHighlighter;
-    _currentTileHighlighter = nullptr;
+    // Clear the parent highlights if the current tile parent has changed
     if ( highlightedParent() != tile->parentTile() )
         clearParentsHighlight();
 
+    // Don't highlight the root tile
+    if ( tile == _rootTile )
+        return;
+
     //logDebug() " Highlighting the current tile" << Qt::endl;
-    _currentTileHighlighter = new CurrentTileHighlighter( this, tile, tile->isSelected() );
+    _currentTileHighlighter = new CurrentTileHighlighter{ this, tile, tile->isSelected() };
 
     if ( _selectionModel->currentItem() != tile->orig() && _selectionModelProxy )
     {
@@ -720,7 +727,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
         }
     }
 
-    //logDebug() << " map built in " << _stopwatch.restart() << "ms" << (map.isEmpty() ? " (empty) " : QString()) << Qt::endl;
+    //logDebug() << " map built in " << _stopwatch.restart() << "ms" << (map.isEmpty() ? " (empty) " : QString{}) << Qt::endl;
 
     for ( const FileInfo * item : newSelection )
     {
@@ -807,12 +814,12 @@ void TreemapView::highlightParents( const TreemapTile * tile )
 
     while ( parent && parent != _rootTile )
     {
-        _parentHighlightList << new ParentTileHighlighter( this, parent, parent->orig()->debugUrl() );
+        _parentHighlightList << new ParentTileHighlighter{ this, parent, parent->orig()->debugUrl() };
         parent = parent->parentTile();
     }
 
     if ( !_parentHighlightList.isEmpty() )
-        _sceneMask = new SceneMask( _parentHighlightList.last()->tile(), 0.6 * 255 );
+        _sceneMask = new SceneMask{ _parentHighlightList.last()->tile(), qRound( 0.6 * 255 ) };
 }
 
 
@@ -843,7 +850,7 @@ const TreemapTile * TreemapView::highlightedParent() const
 
 void TreemapView::saveTreemapRoot()
 {
-    _savedRootUrl = _rootTile ? _rootTile->orig()->debugUrl() : QString();
+    _savedRootUrl = _rootTile ? _rootTile->orig()->debugUrl() : QString{};
     //logDebug() << _savedRootUrl << Qt::endl;
 }
 
@@ -854,7 +861,7 @@ HighlightRect::HighlightRect( const TreemapTile * tile,
                               int                 lineWidth,
                               Qt::PenStyle        lineStyle,
                               qreal               zValue ):
-    QGraphicsRectItem { tile->rect() }
+    QGraphicsRectItem{ tile->rect() }
 {
     setPen( QPen( color, lineWidth, lineStyle ) );
     setZValue( zValue );
@@ -884,7 +891,7 @@ QPainterPath ParentTileHighlighter::shape() const
 
 
 SceneMask::SceneMask( const TreemapTile * tile, int opacity ):
-    QGraphicsPathItem {}
+    QGraphicsPathItem{ this }
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
     CHECK_PTR( tile );
@@ -898,7 +905,7 @@ SceneMask::SceneMask( const TreemapTile * tile, int opacity ):
     path.addRect( tile->rect() );
     setPath( path );
 
-    setBrush( QColor( 0x30, 0x30, 0x30, opacity ) );
+    setBrush( QColor{ 0x30, 0x30, 0x30, opacity } );
     setZValue( SceneMaskLayer );
 
     tile->scene()->addItem( this );

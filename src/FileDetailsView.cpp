@@ -36,10 +36,10 @@ namespace
      * Set a label with a number and an optional prefix.
      **/
     void setLabel( QLabel        * label,
-		   int             number,
-		   QLatin1String   prefix = QLatin1String() )
+                   int             number,
+                   QLatin1String   prefix = QLatin1String{} )
     {
-	label->setText( prefix % QString( "%L1" ).arg( number ) );
+	label->setText( prefix % QString{ "%L1" }.arg( number ) );
     }
 
 
@@ -47,8 +47,8 @@ namespace
      * Set a file size label with a file size and an optional prefix.
      **/
     void setLabel( FileSizeLabel * label,
-		   FileSize        size,
-		   QLatin1String   prefix = QLatin1String() )
+                   FileSize        size,
+                   QLatin1String   prefix = QLatin1String{} )
     {
 	label->setValue( size, prefix );
     }
@@ -94,7 +94,7 @@ namespace
 	if ( file->isSocket()      ) return QObject::tr( "socket"           );
 
 	logWarning() << " unexpected mode: " << file->mode() << Qt::endl;
-	return QString();
+	return QString{};
     }
 
 
@@ -104,7 +104,7 @@ namespace
      **/
     QString errorStyleSheet()
     {
-	return QString( "QLabel { color: %1; }" ).arg( app()->dirTreeModel()->dirReadErrColor().name() );
+	return QString{ "QLabel { color: %1; }" }.arg( app()->dirTreeModel()->dirReadErrColor().name() );
     }
 
 
@@ -114,7 +114,7 @@ namespace
      **/
     QString dirColorStyle( const DirInfo * dir )
     {
-	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : QString();
+	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : QString{};
     }
 
 } // namespace
@@ -129,11 +129,13 @@ namespace
 // of files and then quickly drop to a shorter delay when the repeated requests stop
 // or slow down.
 FileDetailsView::FileDetailsView( QWidget * parent ):
-    QStackedWidget { parent },
-    _ui { new Ui::FileDetailsView },
-    _pkgUpdateTimer { new AdaptiveTimer { this,
-                                          { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
-                                          { 3000, 1000, 500, 250, 150 } } } // cooldown stages
+    QStackedWidget{ parent },
+    _ui{ new Ui::FileDetailsView },
+    _pkgUpdateTimer{ new AdaptiveTimer{ this,
+                                        { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
+                                        { 3000, 1000, 500, 250, 150 }
+                                      }
+                    } // cooldown stages
 {
     _ui->setupUi( this );
 
@@ -221,8 +223,8 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	}
 	else
 	{
-	    _ui->fileLinkLabel->setStyleSheet( QString() );
-	    _ui->fileLinkLabel->setToolTip( shortTarget != fullTarget ? fullTarget : QString() );
+	    _ui->fileLinkLabel->setStyleSheet( QString{} );
+	    _ui->fileLinkLabel->setToolTip( shortTarget != fullTarget ? fullTarget : QString{} );
 	}
     }
     else if ( isSpecial )
@@ -278,7 +280,7 @@ void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 	else if ( isSystemFile )
 	{
 	    // Submit a timed query to find the owning package, if any
-	    const QString delayHint = QString( _pkgUpdateTimer->delayStage(), u'.' )
+	    const QString delayHint = QString{ _pkgUpdateTimer->delayStage(), u'.' }
 	                              .replace( u'.', ". "_L1 );
 	    _ui->filePackageLabel->setText( delayHint );
 
@@ -335,7 +337,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
     _ui->dirTypeLabel->setText( dir->isMountPoint() ? tr( "mount point" ) :
                                 dir->isPseudoDir() ?  tr( "pseudo directory" ) :
 		                                      tr( "directory" ) );
-    _ui->dirTypeLabel->setStyleSheet( dir->isPseudoDir() ? QString() : "QToolTip { max-width: 0px }" );
+    _ui->dirTypeLabel->setStyleSheet( dir->isPseudoDir() ? QString{} : "QToolTip { max-width: 0px }" );
 
     _ui->dirFromCacheIcon->setVisible( dir->isFromCache() );
     _ui->dirDuplicateIcon->setVisible( isMountPoint && MountPoints::isDuplicate( dir->url() ) );
@@ -367,7 +369,7 @@ QString FileDetailsView::readStateMsg( int readState )
 //	default:
     }
 
-    return QString();
+    return QString{};
 }
 
 

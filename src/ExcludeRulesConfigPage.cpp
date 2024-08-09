@@ -21,8 +21,8 @@ using namespace QDirStat;
 
 
 ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
-    ListEditor { parent },
-    _ui { new Ui::ExcludeRulesConfigPage }
+    ListEditor{ parent },
+    _ui{ new Ui::ExcludeRulesConfigPage }
 {
     _ui->setupUi( this );
 
@@ -82,7 +82,7 @@ void ExcludeRulesConfigPage::fillListWidget()
     for ( const ExcludeRule * excludeRule : *( app()->dirTree()->excludeRules() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
-	ExcludeRule * rule = new ExcludeRule { *excludeRule };
+	ExcludeRule * rule = new ExcludeRule{ *excludeRule };
 	createItem( rule->pattern(), rule );
     }
 
@@ -168,7 +168,7 @@ void * ExcludeRulesConfigPage::newValue()
 {
     // "Empty" rule, but set the options that we want to start with:
     // wildcard, case-sensitive, and directory name without path
-    return new ExcludeRule { ExcludeRule::Wildcard, "", true, false, false };
+    return new ExcludeRule{ ExcludeRule::Wildcard, "", true, false, false };
 }
 
 

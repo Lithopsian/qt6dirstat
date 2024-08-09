@@ -67,18 +67,18 @@ FileInfo::FileInfo( DirInfo           * parent,
                     DirTree           * tree,
                     const QString     & filename,
                     const struct stat & statInfo ):
-    _name { filename },
-    _parent { parent },
-    _tree { tree },
-    _isLocalFile { true },
-    _isIgnored { false },
-    _hasUidGidPerm { true },
-    _device { statInfo.st_dev },
-    _mode { statInfo.st_mode },
-    _links { statInfo.st_nlink },
-    _uid { statInfo.st_uid },
-    _gid { statInfo.st_gid },
-    _mtime { statInfo.st_mtime }
+    _name{ filename },
+    _parent{ parent },
+    _tree{ tree },
+    _isLocalFile{ true },
+    _isIgnored{ false },
+    _hasUidGidPerm{ true },
+    _device{ statInfo.st_dev },
+    _mode{ statInfo.st_mode },
+    _links{ statInfo.st_nlink },
+    _uid{ statInfo.st_uid },
+    _gid{ statInfo.st_gid },
+    _mtime{ statInfo.st_mtime }
 {
 
     if ( isSpecial() )
@@ -261,7 +261,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl )
     }
 
     // Recursively search all children, including the dot entry and attic
-    for ( AtticIterator it { this }; *it; ++it )
+    for ( AtticIterator it{ this }; *it; ++it )
     {
 	FileInfo * foundChild = it->locate( url );
 	if ( foundChild )
@@ -292,25 +292,25 @@ float FileInfo::subtreeAllocatedPercent()
 
 QString FileInfo::userName() const
 {
-    return hasUid() ? SysUtil::userName( uid() ) : QString();
+    return hasUid() ? SysUtil::userName( uid() ) : QString{};
 }
 
 
 QString FileInfo::groupName() const
 {
-    return hasGid() ? SysUtil::groupName( gid() ) : QString();
+    return hasGid() ? SysUtil::groupName( gid() ) : QString{};
 }
 
 
 QString FileInfo::symbolicPermissions() const
 {
-    return hasPerm() ? symbolicMode( _mode ) : QString();
+    return hasPerm() ? symbolicMode( _mode ) : QString{};
 }
 
 
 QString FileInfo::octalPermissions() const
 {
-    return hasPerm() ? octalMode( _mode ) : QString();
+    return hasPerm() ? octalMode( _mode ) : QString{};
 }
 
 
@@ -372,7 +372,7 @@ bool FileInfo::filesystemCanReportBlocks() const
 
 QString FileInfo::symLinkTarget() const
 {
-    return isSymLink() ? SysUtil::symLinkTarget( path() ) : QString();
+    return isSymLink() ? SysUtil::symLinkTarget( path() ) : QString{};
 }
 
 

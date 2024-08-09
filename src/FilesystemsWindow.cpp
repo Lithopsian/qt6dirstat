@@ -48,8 +48,8 @@ namespace
 
 
 FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FilesystemsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FilesystemsWindow }
 {
     setAttribute( Qt::WA_DeleteOnClose );
 
@@ -98,7 +98,7 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
     static QPointer<FilesystemsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FilesystemsWindow( parent );
+	_sharedInstance = new FilesystemsWindow{ parent };
 
     return _sharedInstance;
 }
@@ -130,7 +130,7 @@ void FilesystemsWindow::clear()
 
 void FilesystemsWindow::initWidgets()
 {
-    QStringList headers { tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
+    QStringList headers{ tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
 
     if ( MountPoints::hasSizeInfo() )
 	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
@@ -172,9 +172,9 @@ void FilesystemsWindow::populate()
     MountPoints::reload();
 
     const bool showAll = !_ui->normalCheckBox->isChecked();
-    for ( MountPointIterator it { showAll }; *it; ++it )
+    for ( MountPointIterator it{ showAll }; *it; ++it )
     {
-	FilesystemItem * item = new FilesystemItem { *it, _ui->fsTree };
+	FilesystemItem * item = new FilesystemItem{ *it, _ui->fsTree };
 	item->setIcon( FS_DeviceCol, QIcon( app()->dirTreeModel()->treeIconDir() + icon( *it ) ) );
     }
 
@@ -210,7 +210,7 @@ QString FilesystemsWindow::selectedPath() const
 	    return item->mountPath();
     }
 
-    return QString();
+    return QString{};
 }
 
 
@@ -249,16 +249,16 @@ void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 
 
 FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
-    QTreeWidgetItem { parent },
-    _device         { mountPoint->device()          },
-    _mountPath      { mountPoint->path()            },
-    _fsType         { mountPoint->filesystemType()  },
-    _totalSize      { mountPoint->totalSize()       },
-    _usedSize       { mountPoint->usedSize()        },
-    _reservedSize   { mountPoint->reservedSize()    },
-    _freeSize       { mountPoint->freeSizeForUser() },
-    _isNetworkMount { mountPoint->isNetworkMount()  },
-    _isReadOnly     { mountPoint->isReadOnly()      }
+    QTreeWidgetItem{ parent },
+    _device        { mountPoint->device()          },
+    _mountPath     { mountPoint->path()            },
+    _fsType        { mountPoint->filesystemType()  },
+    _totalSize     { mountPoint->totalSize()       },
+    _usedSize      { mountPoint->usedSize()        },
+    _reservedSize  { mountPoint->reservedSize()    },
+    _freeSize      { mountPoint->freeSizeForUser() },
+    _isNetworkMount{ mountPoint->isNetworkMount()  },
+    _isReadOnly    { mountPoint->isReadOnly()      }
 {
     QString dev = _device;
 

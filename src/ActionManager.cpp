@@ -130,7 +130,7 @@ void ActionManager::init( QWidget        * parent,
 
     readSettings( parent );
 
-    _cleanupCollection = new CleanupCollection { parent, selectionModel, toolBar, menu };
+    _cleanupCollection = new CleanupCollection{ parent, selectionModel, toolBar, menu };
 }
 
 
@@ -192,7 +192,7 @@ void ActionManager::swapActions( QWidget * widget,
 QMenu * ActionManager::createMenu( const QStringList & actions,
                                    const QStringList & enabledActions )
 {
-    QMenu * menu = new QMenu {};
+    QMenu * menu = new QMenu{};
     menu->setAttribute( Qt::WA_DeleteOnClose );
     addActions( menu, actions );
     addEnabledActions( menu, enabledActions );

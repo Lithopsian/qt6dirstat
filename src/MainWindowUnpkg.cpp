@@ -93,11 +93,11 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 void MainWindow::setUnpkgExcludeRules( const UnpkgSettings & unpkgSettings )
 {
     // Set up the exclude rules for directories that should be ignored
-    app()->dirTree()->setTmpExcludeRules( new ExcludeRules( unpkgSettings.excludeDirs(),
+    app()->dirTree()->setTmpExcludeRules( new ExcludeRules{ unpkgSettings.excludeDirs(),
                                                             ExcludeRule::Wildcard,
                                                             true,    // case-sensitive
                                                             true,    // useFullPath
-                                                            false ) ); // checkAnyFileChild
+                                                            false } ); // checkAnyFileChild
 }
 
 
@@ -107,7 +107,7 @@ void MainWindow::setUnpkgFilters( const UnpkgSettings & unpkgSettings,
     // Filter for ignoring all files from all installed packages
     DirTree * tree = app()->dirTree();
     tree->clearFilters();
-    tree->addFilter( new DirTreePkgFilter( pkgManager ) );
+    tree->addFilter( new DirTreePkgFilter{ pkgManager } );
 
     // Add the filters for each file pattern the user explicitly requested to ignore
     for ( const QString & pattern : unpkgSettings.ignorePatterns() )
@@ -126,7 +126,7 @@ QString MainWindow::parseUnpkgStartingDir( const UnpkgSettings & unpkgSettings )
     // Remove any scheme prefix to leave a standard Unix absolute path
     QString dir = unpkgSettings.startingDir();
     const QString unpkgPattern = '^' % unpkgScheme() % "/*"_L1;
-    dir.replace( QRegularExpression( unpkgPattern, QRegularExpression::CaseInsensitiveOption ), "/" );
+    dir.replace( QRegularExpression{ unpkgPattern, QRegularExpression::CaseInsensitiveOption }, "/" );
 
     return dir;
 }

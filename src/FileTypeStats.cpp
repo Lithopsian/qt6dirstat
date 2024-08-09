@@ -46,7 +46,7 @@ namespace
 	    // Use the shortest extension
 	    return filename.section( u'.', -1 );
 
-	return QString();
+	return QString{};
     }
 
     /**
@@ -59,7 +59,7 @@ namespace
      **/
     bool isCruft( const QString & suffix, int suffixCount, int categoryCount )
     {
-	const int letters = suffix.count( QRegularExpression( "[a-zA-Z]" ) );
+	const int letters = suffix.count( QRegularExpression{ "[a-zA-Z]" } );
 	if ( letters == 0 )
 	    return true;
 
@@ -92,7 +92,7 @@ namespace
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
-    _otherCategory { new MimeCategory { QObject::tr( "Other" ) } }
+    _otherCategory{ new MimeCategory{ QObject::tr( "Other" ) } }
 {
     if ( subtree && subtree->checkMagicNumber() )
     {
@@ -112,7 +112,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 {
     MimeCategorizer * categorizer = MimeCategorizer::instance();
 
-    for ( DotEntryIterator it { dir }; *it; ++it )
+    for ( DotEntryIterator it{ dir }; *it; ++it )
     {
 	if ( it->hasChildren() )
 	{
@@ -159,7 +159,7 @@ void FileTypeStats::addCategorySum( const MimeCategory * category, const FileInf
 void FileTypeStats::addSuffixSum( const QString & suffix, const MimeCategory * category, const FileInfo * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
-    const SuffixCategory suffixCategory { suffix, category };
+    const SuffixCategory suffixCategory{ suffix, category };
     CountSum & countSum = _suffixes[ suffixCategory ];
     ++countSum.count;
     countSum.sum += item->size();
@@ -176,7 +176,7 @@ void FileTypeStats::removeCruft()
     const int otherCategoryCount = _categories[ otherCategory() ].count;
 
     // QHash will default-construct (ie. zeroes) the entry if it don't exist yet
-    CountSum & noExtension = _suffixes[ { QString(), otherCategory() } ];
+    CountSum & noExtension = _suffixes[ { QString{}, otherCategory() } ];
 
 #if VERBOSE_STATS
     FileSize totalMergedSum   = 0LL;
@@ -228,7 +228,7 @@ void FileTypeStats::removeCruft()
     // The price of finding the cruft entry just once is having to delete it ...
     // ... if it was default-constructed and is still empty
     if ( noExtension.count == 0 )
-	_suffixes.remove( { QString(), otherCategory() } );
+	_suffixes.remove( { QString{}, otherCategory() } );
 }
 
 

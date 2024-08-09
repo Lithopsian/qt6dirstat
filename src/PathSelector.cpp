@@ -38,7 +38,7 @@ PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
 #if SHOW_SIZES_IN_TOOLTIP
     if ( mountPoint->hasSizeInfo() )
     {
-	const QString boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>";
+	const QString{ boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>" };
 	tooltip += "<br/>" %
 	    boilerplate.arg( QObject::tr( "Used" ), formatSize( mountPoint->usedSize() ) ) %
 	    boilerplate.arg( QObject::tr( "Free for users" ), formatSize( mountPoint->freeSizeForUser() ) ) %
@@ -70,7 +70,7 @@ void PathSelector::addHomeDir()
 {
     PathSelectorItem * item = new PathSelectorItem{ QDir::homePath(), this };
 
-    QIcon icon { ":/icons/48x48/home-dir.png" };
+    QIcon icon{ ":/icons/48x48/home-dir.png" };
     if ( !icon.isNull() )
 	item->setIcon( icon );
 
@@ -82,7 +82,7 @@ void PathSelector::addNormalMountPoints()
 {
     MountPoints::reload();
 
-    for ( MountPointIterator it { false } ; *it ; ++it )
+    for ( MountPointIterator it{ false } ; *it ; ++it )
     {
 	PathSelectorItem * item = new PathSelectorItem{ *it, this };
 	const auto type = it->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;

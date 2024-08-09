@@ -20,11 +20,11 @@ using namespace QDirStat;
 
 
 HistogramBar::HistogramBar( HistogramView       * parent,
-			    const FileSizeStats * stats,
-			    int                   number,
-			    const QRectF        & rect,
-			    qreal                 fillHeight ):
-    QGraphicsRectItem { rect.normalized() }
+                            const FileSizeStats * stats,
+                            int                   number,
+                            const QRectF        & rect,
+                            qreal                 fillHeight ):
+    QGraphicsRectItem{ rect.normalized() }
 {
     setFlags( ItemHasNoContents );
     setAcceptHoverEvents( true );
@@ -40,8 +40,8 @@ HistogramBar::HistogramBar( HistogramView       * parent,
     setToolTip( whitespacePre( tooltip ) );
 
     // Filled rectangle is relative to its parent
-    QRectF filledRect( rect.x(), 0, rect.width(), -fillHeight);
-    QGraphicsRectItem * filledBar = new QGraphicsRectItem( filledRect.normalized(), this );
+    QRectF filledRect{ rect.x(), 0, rect.width(), -fillHeight};
+    QGraphicsRectItem * filledBar = new QGraphicsRectItem{ filledRect.normalized(), this };
     filledBar->setPen( parent->barPen() );
     filledBar->setBrush( parent->barBrush() );
 }

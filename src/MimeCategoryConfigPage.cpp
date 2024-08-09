@@ -34,7 +34,7 @@ namespace
      **/
     void populateTreemapView( TreemapView * treemapView )
     {
-	DirTree * dirTree = new DirTree { treemapView };
+	DirTree * dirTree = new DirTree{ treemapView };
 
 	DirInfo        * root    = dirTree->root();
 	const mode_t     mode    = 0755;
@@ -50,25 +50,25 @@ namespace
 	//	    dir211
 	//	    dir212
 
-	DirInfo * dir1 = new DirInfo { root, dirTree, "dir1", mode, dirSize };
+	DirInfo * dir1 = new DirInfo{ root, dirTree, "dir1", mode, dirSize };
 	root->insertChild( dir1 );
 
-	DirInfo * dir11 = new DirInfo { dir1, dirTree, "dir11", mode, dirSize };
+	DirInfo * dir11 = new DirInfo{ dir1, dirTree, "dir11", mode, dirSize };
 	dir1->insertChild( dir11 );
 
-	DirInfo * dir12 = new DirInfo { dir1, dirTree, "dir12", mode, dirSize };
+	DirInfo * dir12 = new DirInfo{ dir1, dirTree, "dir12", mode, dirSize };
 	dir1->insertChild( dir12 );
 
-	DirInfo * dir2 = new DirInfo { root, dirTree, "dir2", mode, dirSize };
+	DirInfo * dir2 = new DirInfo{ root, dirTree, "dir2", mode, dirSize };
 	root->insertChild( dir2 );
 
-	DirInfo * dir21 = new DirInfo { dir2, dirTree, "dir21", mode, dirSize };
+	DirInfo * dir21 = new DirInfo{ dir2, dirTree, "dir21", mode, dirSize };
 	dir2->insertChild( dir21 );
 
-	DirInfo * dir211 = new DirInfo { dir21, dirTree, "dir211", mode, dirSize };
+	DirInfo * dir211 = new DirInfo{ dir21, dirTree, "dir211", mode, dirSize };
 	dir21->insertChild( dir211 );
 
-	DirInfo * dir212 = new DirInfo { dir21, dirTree, "dir212", mode, dirSize };
+	DirInfo * dir212 = new DirInfo{ dir21, dirTree, "dir212", mode, dirSize };
 	dir21->insertChild( dir212 );
 
 
@@ -84,7 +84,7 @@ namespace
 		const FileSize fileSize = random->bounded( 1, maxSize );
 
 		// Create a FileInfo item and add it to the parent
-		const QString fileName = QString( "File_%1" ).arg( i );
+		const QString fileName = QString{ "File_%1" }.arg( i );
 		parent->insertChild( new FileInfo{ parent, dirTree, fileName, mode, fileSize } );
 	    }
 
@@ -114,8 +114,8 @@ namespace
 
 
 MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
-    ListEditor { parent },
-    _ui { new Ui::MimeCategoryConfigPage }
+    ListEditor{ parent },
+    _ui{ new Ui::MimeCategoryConfigPage }
 {
     //logDebug() << "MimeCategoryConfigPage constructor" << Qt::endl;
 
@@ -204,7 +204,7 @@ void MimeCategoryConfigPage::applyChanges()
     //logDebug() << Qt::endl;
 
     // Save the treemap settings first, there might not be anything else to do
-    app()->mainWindow()->treemapView()->configChanged( QColor( _ui->tileColorEdit->text() ),
+    app()->mainWindow()->treemapView()->configChanged( QColor{ _ui->tileColorEdit->text() },
                                                        _ui->squarifiedCheckBox->isChecked(),
                                                        _ui->cushionShadingCheckBox->isChecked(),
                                                        _ui->cushionHeightSpinBox->value(),
@@ -235,7 +235,7 @@ void MimeCategoryConfigPage::fillListWidget()
     for ( const MimeCategory * mimeCategory : *( MimeCategorizer::instance() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real categories
-	MimeCategory * category = new MimeCategory { *mimeCategory };
+	MimeCategory * category = new MimeCategory{ *mimeCategory };
 	createItem( category->name(), category );
     }
 
@@ -378,7 +378,7 @@ void MimeCategoryConfigPage::pickCategoryColor()
 void MimeCategoryConfigPage::tileColorChanged( const QString & newColor )
 {
     const QColor color( newColor );
-    _ui->treemapView->setFixedColor( color.isValid() ? color : QColor( _ui->categoryColorEdit->text() ) );
+    _ui->treemapView->setFixedColor( color.isValid() ? color : QColor{ _ui->categoryColorEdit->text() } );
 }
 
 
@@ -405,7 +405,7 @@ void MimeCategoryConfigPage::configChanged()
 {
     // Rebuild the mini-treemap with the latest settings
     const QColor color( _ui->tileColorEdit->text() );
-    _ui->treemapView->configChanged( color.isValid() ? color : QColor( _ui->categoryColorEdit->text() ),
+    _ui->treemapView->configChanged( color.isValid() ? color : QColor{ _ui->categoryColorEdit->text() },
                                      _ui->squarifiedCheckBox->isChecked(),
                                      _ui->cushionShadingCheckBox->isChecked(),
                                      _ui->cushionHeightSpinBox->value(),
@@ -446,17 +446,17 @@ void MimeCategoryConfigPage::load( void * value )
     //logDebug() << category << " (" << value << ")" << Qt::endl;
 
     // Populate the name and pattern fields from this category
-    _ui->nameLineEdit->setText( category ? category->name() : QString() );
+    _ui->nameLineEdit->setText( category ? category->name() : QString{} );
 
-    QStringList patternList = category ? category->humanReadablePatternList( Qt::CaseSensitive ) : QStringList();
+    QStringList patternList = category ? category->humanReadablePatternList( Qt::CaseSensitive ) : QStringList{};
     setPatternList( _ui->caseSensitivePatternsTextEdit, patternList );
 
-    patternList = category ? category->humanReadablePatternList( Qt::CaseInsensitive ) : QStringList();
+    patternList = category ? category->humanReadablePatternList( Qt::CaseInsensitive ) : QStringList{};
     setPatternList( _ui->caseInsensitivePatternsTextEdit, patternList );
 
     // Set this category colour in the form and mini-treemap
-    const QColor color = category ? category->color() : QColor();
-    _ui->categoryColorEdit->setText( color.isValid() ? category->color().name() : QString() );
+    const QColor color = category ? category->color() : QColor{};
+    _ui->categoryColorEdit->setText( color.isValid() ? category->color().name() : QString{} );
     _ui->treemapView->setFixedColor( color );
 }
 

@@ -71,7 +71,7 @@ namespace
                                     FileSize        sum,
                                     float           percent )
     {
-	auto item = new FileTypeItem( name, count, sum, percent );
+	auto item = new FileTypeItem{ name, count, sum, percent };
 	treeWidget->addTopLevelItem( item );
 
 	return item;
@@ -94,7 +94,7 @@ namespace
                         FileSize        sum,
                         float           percent )
     {
-	auto item = new SuffixFileTypeItem( otherCategory, suffix, count, sum, percent );
+	auto item = new SuffixFileTypeItem{ otherCategory, suffix, count, sum, percent };
 	parent->addChild( item );
     }
 
@@ -102,8 +102,8 @@ namespace
 
 
 FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FileTypeStatsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FileTypeStatsWindow }
 {
     // logDebug() << "constructor" << Qt::endl;
 
@@ -165,7 +165,7 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
     static QPointer<FileTypeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FileTypeStatsWindow( parent );
+	_sharedInstance = new FileTypeStatsWindow{ parent };
 
     return _sharedInstance;
 }
@@ -342,7 +342,7 @@ QString FileTypeStatsWindow::currentSuffix() const
     if ( item && !item->suffix().isEmpty() )
 	return item->suffix();
 
-    return QString();
+    return QString{};
 }
 
 
@@ -409,11 +409,11 @@ FileTypeItem::FileTypeItem( const QString & name,
                             int             count,
                             FileSize        totalSize,
                             float           percentage ):
-    QTreeWidgetItem { QTreeWidgetItem::UserType },
-    _name { name },
-    _count { count },
-    _totalSize { totalSize },
-    _percentage { percentage }
+    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    _name{ name },
+    _count{ count },
+    _totalSize{ totalSize },
+    _percentage{ percentage }
 {
     set( FT_NameCol,       Qt::AlignLeft,  name );
     set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );

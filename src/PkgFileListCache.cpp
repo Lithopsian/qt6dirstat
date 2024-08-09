@@ -14,7 +14,7 @@
 #define CHECK_LOOKUP_TYPE(wanted)					  \
 do {									  \
     if ( ( _lookupType & (wanted) ) != (wanted) )			  \
-	THROW( Exception( "Cache not set up for this type of lookup" ) ); \
+	THROW( Exception{ "Cache not set up for this type of lookup" } ); \
 } while ( false )
 
 
@@ -26,7 +26,7 @@ QStringList PkgFileListCache::fileList( const QString & pkgName ) const
 {
     CHECK_LOOKUP_TYPE( LookupByPkg );
 
-    QStringList fileList( _pkgFileNames.values( pkgName ) );
+    QStringList fileList = _pkgFileNames.values( pkgName );
     fileList.sort();
 
     return fileList;

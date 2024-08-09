@@ -10,7 +10,7 @@
 #define LONG_CMD_TIMEOUT_SEC    30	// for SysUtil.h
 #define DEFAULT_WARNING_SEC      7	// for SysUtil.h
 
-#include <iostream>	// cerr/endl;
+#include <iostream> // cerr/endl;
 
 #include <QElapsedTimer>
 
@@ -73,7 +73,7 @@ QString RpmPkgManager::owningPkg( const QString & path ) const
                                        &exitCode );
 
     if ( exitCode != 0 || output.contains( "not owned by any package"_L1 ) )
-	return QString();
+	return QString{};
 
     return output;
 }
@@ -86,9 +86,9 @@ PkgInfoList RpmPkgManager::installedPkg() const
     timer.start();
 
     const QString output = runCommand( rpmCommand(),
-				       { "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
-				       &exitCode,
-				       LONG_CMD_TIMEOUT_SEC );
+                                       { "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
+                                       &exitCode,
+                                       LONG_CMD_TIMEOUT_SEC );
 
     if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
 	rebuildRpmDbWarning();
@@ -119,7 +119,7 @@ PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
 		if ( arch == "(none)"_L1 )
 		    arch = "";
 
-		pkgList << new PkgInfo( name, version, arch, this );
+		pkgList << new PkgInfo{ name, version, arch, this };
 	    }
 	}
     }
@@ -174,7 +174,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
-    PkgFileListCache * cache = new PkgFileListCache( this, lookupType );
+    PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
 
     // Sample output:
     //

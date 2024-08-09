@@ -25,9 +25,9 @@ using namespace QDirStat;
 
 
 CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
-    ListEditor { parent },
-    _ui { new Ui::CleanupConfigPage },
-    _outputWindowDefaultTimeout { OutputWindow::defaultShowTimeout() }
+    ListEditor{ parent },
+    _ui{ new Ui::CleanupConfigPage },
+    _outputWindowDefaultTimeout{ OutputWindow::defaultShowTimeout() }
 {
     _ui->setupUi( this );
 
@@ -96,7 +96,7 @@ void CleanupConfigPage::fillListWidget()
     for ( const Cleanup * cleanup : *ActionManager::cleanupCollection() )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
-	Cleanup * newCleanup = new Cleanup { cleanup };
+	Cleanup * newCleanup = new Cleanup{ cleanup };
 	createItem( newCleanup->cleanTitle(), newCleanup );
     }
 
@@ -196,7 +196,7 @@ void CleanupConfigPage::load( void * value )
     _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
 
     QIcon icon = cleanup->icon();
-    _ui->icon->setPixmap( icon.pixmap( icon.actualSize( QSize( 24, 24 ) ) ) );
+    _ui->icon->setPixmap( icon.pixmap( icon.actualSize( QSize{ 24, 24 } ) ) );
 
     if ( cleanup->shell().isEmpty() )
     {
