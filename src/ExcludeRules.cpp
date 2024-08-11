@@ -134,7 +134,7 @@ void ExcludeRules::add( ExcludeRule::PatternSyntax   patternSyntax,
 {
     const ExcludeRule * rule =
 	new ExcludeRule{ patternSyntax, pattern, caseSensitive, useFullPath, checkAnyFileChild };
-    _rules << rule;
+    append( rule );
 
     logInfo() << "Added " << rule << Qt::endl;
 }
@@ -145,7 +145,7 @@ bool ExcludeRules::match( const QString & fullPath, const QString & fileName ) c
     if ( fullPath.isEmpty() || fileName.isEmpty() )
 	return false;
 
-    for ( const ExcludeRule * rule : _rules )
+    for ( const ExcludeRule * rule : *this )
     {
 	if ( rule->match( fullPath, fileName ) )
 	{
@@ -165,7 +165,7 @@ bool ExcludeRules::matchDirectChildren( const DirInfo * dir ) const
     if ( !dir )
 	return false;
 
-    for ( const ExcludeRule * rule : _rules )
+    for ( const ExcludeRule * rule : *this )
     {
 	if ( rule->matchDirectChildren( dir ) )
 	{
@@ -187,7 +187,7 @@ void ExcludeRules::addDefaultRules()
     ExcludeRuleSettings settings;
     settings.setValue( "DefaultExcludeRulesAdded", true );
 
-    writeSettings( _rules );
+    writeSettings( *this );
 }
 
 
@@ -219,7 +219,7 @@ void ExcludeRules::readSettings()
 
 	if ( !pattern.isEmpty() && rule->isValid() )
 	{
-	    _rules << rule;
+	    append( rule );
 	}
 	else
 	{
