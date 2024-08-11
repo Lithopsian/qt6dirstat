@@ -18,7 +18,6 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
     const int wclen = pattern.size();
     QString rx;
     rx.reserve( wclen + wclen / 16 );
-    qsizetype i = 0;
     const QChar * wc = pattern.data();
 
     struct GlobSettings
@@ -45,6 +44,7 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
         }
     }();
 
+    int i = 0;
     while ( i < wclen )
     {
         const QChar c = wc[ i++ ];

@@ -13,6 +13,7 @@
 #include "Exception.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSorter.h"
+#include "FormatUtil.h"
 
 
 // How many times the standard deviation from the average is considered dominant
@@ -29,12 +30,12 @@ using namespace QDirStat;
 
 namespace
 {
-    [[gnu::unused]] void dumpChildrenList( const FileInfo     * dir,
+    [[gnu::unused]] void dumpChildrenList( const FileInfo     * parent,
                                            const FileInfoList & children )
     {
-	logDebug() << "Children of " << dir << Qt::endl;
+	logDebug() << "Children of " << parent << Qt::endl;
 
-	for ( qsizetype i=0; i < children.size(); ++i )
+	for ( int i=0; i < children.size(); ++i )
 	    logDebug() << "    #" << i << ": " << children.at(i) << Qt::endl;
     }
 
