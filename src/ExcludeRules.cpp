@@ -49,7 +49,7 @@ void ExcludeRule::setPatternSyntax( PatternSyntax patternSyntax )
 void ExcludeRule::setPattern( const QString & pattern )
 {
     _pattern = pattern;
-    QRegularExpression::setPattern( formatPattern( _patternSyntax, pattern ) );
+    _regExp.setPattern( formatPattern( _patternSyntax, pattern ) );
 }
 
 

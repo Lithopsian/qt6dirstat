@@ -23,7 +23,7 @@ namespace QDirStat
     /**
      * One single exclude rule to check text (file names) against.
      **/
-    class ExcludeRule: public QRegularExpression
+    class ExcludeRule
     {
     public:
 
@@ -60,7 +60,7 @@ namespace QDirStat
 	             bool            caseSensitive,
 	             bool            useFullPath,
 	             bool            checkAnyFileChild ):
-	    QRegularExpression{ formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) },
+	    _regExp{ formatPattern( patternSyntax, pattern ), makePatternOptions( caseSensitive ) },
 	    _patternSyntax{ patternSyntax },
 	    _pattern{ pattern },
 	    _useFullPath{ useFullPath },
@@ -133,13 +133,25 @@ namespace QDirStat
 	 * Set whether this rule is case-sensitive.
 	 **/
 	void setCaseSensitive( bool caseSensitive )
-	  { setPatternOptions( makePatternOptions( caseSensitive ) ); }
+	  { _regExp.setPatternOptions( makePatternOptions( caseSensitive ) ); }
 
 	/**
 	 * Returns whether this rule is case-sensitive.
 	 **/
 	bool caseSensitive() const
-	    { return !( patternOptions() & CaseInsensitiveOption ); }
+	    { return !( _regExp.patternOptions() & QRegularExpression::CaseInsensitiveOption ); }
+
+	/**
+	 * Returns whether this rule is valid.
+	 **/
+	bool isValid() const
+	    { return _regExp.isValid(); }
+
+	/**
+	 * Returns whether this rule is valid.
+	 **/
+	QString errorString() const
+	    { return _regExp.errorString(); }
 
 	/**
 	 * Comparison operator between this exclude rule and another,
@@ -157,14 +169,16 @@ namespace QDirStat
 	* anchored and so all matches are "exact".
 	**/
 	bool isMatch( const QString & string ) const
-	    { return QRegularExpression::match( string ).hasMatch(); }
+	    { return _regExp.match( string ).hasMatch(); }
 
 	/**
 	* Constructs the QRegularExpression::PatternOptions flags, currently just
 	* repesenting case-sensitivity.
 	**/
-	static PatternOptions makePatternOptions( bool caseSensitive )
-	    { return caseSensitive ? NoPatternOption : CaseInsensitiveOption; }
+	static QRegularExpression::PatternOptions makePatternOptions( bool caseSensitive )
+	    { return caseSensitive ?
+	             QRegularExpression::NoPatternOption :
+	             QRegularExpression::CaseInsensitiveOption; }
 
 	/**
 	* Formats a pattern string depending on the specified matching syntax.  Fixed
@@ -178,6 +192,7 @@ namespace QDirStat
 
     private:
 
+	QRegularExpression _regExp;
 	PatternSyntax _patternSyntax;
 	QString       _pattern;
 	bool          _useFullPath;
