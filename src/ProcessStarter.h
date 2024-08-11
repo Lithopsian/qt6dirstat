@@ -11,7 +11,6 @@
 #define ProcessStarter_h
 
 #include <QObject>
-#include <QList>
 #include <QProcess>
 
 
@@ -84,8 +83,8 @@ namespace QDirStat
         /**
          * Notification that a process has finished.
          **/
-        void processFinished( int,
-                              QProcess::ExitStatus );
+        void processFinished( int, QProcess::ExitStatus );
+
 
     protected:
 
@@ -102,8 +101,9 @@ namespace QDirStat
         int               _maxParallel;
         bool              _autoDelete;
         bool              _started{ false };
-        QList<QProcess *> _running;
-        QList<QProcess *> _waiting;
+
+        QVector<QProcess *> _running;
+        QVector<QProcess *> _waiting;
 
     }; // class ProcessStarter
 

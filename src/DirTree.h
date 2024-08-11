@@ -505,9 +505,9 @@ namespace QDirStat
 	std::unique_ptr<const ExcludeRules> _excludeRules;
 	std::unique_ptr<const ExcludeRules> _tmpExcludeRules;
 
-	QString                      _url;
-	DirReadJobQueue              _jobQueue;
-	QList<const DirTreeFilter *> _filters;
+	QString                        _url;
+	DirReadJobQueue                _jobQueue;
+	QVector<const DirTreeFilter *> _filters;
 
 	bool _crossFilesystems{ false };
 	bool _isBusy{ false };

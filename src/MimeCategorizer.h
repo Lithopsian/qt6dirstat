@@ -41,8 +41,9 @@ namespace QDirStat
      **/
     typedef QHash<QString, const MimeCategory *>  ExactMatches;
     typedef QMultiHash<QString, WildcardPair>     SuffixMatches;
-    typedef QList<const MimeCategory *>           MimeCategoryList;
+    typedef QVector<const MimeCategory *>         MimeCategoryList;
     typedef MimeCategoryList::const_iterator      MimeCategoryIterator;
+    typedef QVector<WildcardPair>                 WildcardList;
 
     /**
      * Class to determine the MimeCategory of filenames.
@@ -306,7 +307,7 @@ namespace QDirStat
 	ExactMatches        _caseSensitiveExact;
 	SuffixMatches       _caseInsensitiveSuffixes;
 	SuffixMatches       _caseSensitiveSuffixes;
-	QList<WildcardPair> _wildcards;
+	WildcardList        _wildcards;
 	QBitArray           _caseInsensitiveLengths;
 	QBitArray           _caseSensitiveLengths;
 

@@ -11,7 +11,6 @@
 #define FileAgeStats_h
 
 #include <QHash>
-#include <QList>
 
 #include "Typedefs.h" // FileSize
 

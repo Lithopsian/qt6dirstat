@@ -11,7 +11,6 @@
 #define PercentBar_h
 
 #include <QColor>
-#include <QList>
 #include <QStyledItemDelegate>
 #include <QTreeView>
 

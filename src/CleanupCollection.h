@@ -27,7 +27,7 @@ namespace QDirStat
     class SelectionModel;
     class Trash;
 
-    typedef QList<Cleanup *> CleanupList;
+    typedef QVector<Cleanup *>          CleanupList;
     typedef CleanupList::const_iterator CleanupListIterator;
 
     /**

@@ -10,8 +10,6 @@
 #ifndef PkgInfo_h
 #define PkgInfo_h
 
-#include <QList>
-
 #include "DirInfo.h"
 
 
@@ -158,20 +156,6 @@ namespace QDirStat
 
 
     protected:
-
-        /**
-         * Locate a path in this PkgInfo subtree:
-         * Return the corresponding FileInfo or 0 if not found.
-         **/
-//        FileInfo * locate( const QString & path );
-
-        /**
-         * Locate a path that is already split up into its components in this
-         * PkgInfo subtree: Return the corresponding FileInfo or 0 if not
-         * found.
-         **/
-//        FileInfo * locate( const QStringList & pathComponents )
-//            { return locate( this, pathComponents ); }
 
         /**
          * Returns the package scheme prefix.
