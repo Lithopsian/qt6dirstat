@@ -111,8 +111,8 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 	// Fill the percentage
 	const int fillWidth = qRound( ( w - 2 * penWidth ) * percent / 100 );
 	painter->fillRect( x + penWidth, y + penWidth,
-			   fillWidth + 1, h - 2 * penWidth + 1,
-			   _fillColors.at( qMin( depth, _fillColors.size()-1 ) ) );
+	                   fillWidth + 1, h - 2 * penWidth + 1,
+	                   _fillColors.at( qMin( depth, _fillColors.size()-1 ) ) );
 
 	// Draw 3D shadows.
 	const QColor & background = painter->background().color();

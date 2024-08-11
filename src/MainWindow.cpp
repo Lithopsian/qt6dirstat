@@ -818,7 +818,7 @@ void MainWindow::showCurrent( FileInfo * item )
 void MainWindow::showSummary()
 {
     const FileInfoSet sel = app()->selectionModel()->selectedItems();
-    const int count = sel.size();
+    const auto count = sel.size();
 
     if ( count > 1 )
     {

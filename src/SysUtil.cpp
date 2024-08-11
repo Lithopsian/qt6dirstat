@@ -196,7 +196,7 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 
 QByteArray SysUtil::readLink( const QByteArray & path )
 {
-#ifndef PATH_MAX
+#ifdef PATH_MAX
     const int maxLen = PATH_MAX;
 #else
     // no max path, just pick a big number that isn't too out of control
@@ -206,7 +206,7 @@ QByteArray SysUtil::readLink( const QByteArray & path )
     // 99+% of symlinks will fit in a small buffer
     QByteArray buf{ 256, Qt::Uninitialized };
 
-    ssize_t len = ::readlink( path, buf.data(), buf.size() );
+    auto len = ::readlink( path, buf.data(), buf.size() );
     while ( len == buf.size() ) {
         // readlink(2) will fill our buffer and not necessarily terminate with NUL;
         if ( buf.size() >= maxLen )

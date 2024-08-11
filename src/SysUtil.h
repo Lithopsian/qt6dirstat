@@ -166,6 +166,7 @@ namespace QDirStat
 	/**
 	 * Read the (first level) target of a symbolic link, assuming UTF-8
 	 * encoding of names in the filesystem.
+	 *
 	 * This is a more user-friendly version of readlink(2).
 	 *
 	 * This returns an empty QByteArray if 'path' is not a symlink.

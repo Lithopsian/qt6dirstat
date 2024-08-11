@@ -41,7 +41,7 @@ namespace
 	    keys.insert( key, category );
 
 	    // Mark the length pf this pattern so we only try to match filenames wih the right length
-	    const int length = key.size();
+	    const auto length = key.size();
 	    if ( length >= lengths.size() )
 		lengths.resize( length + 1 );
 	    lengths.setBit( length );
@@ -199,7 +199,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
     // possible to produce any matches before doing the actual case-sensitive and insensitive
     // tests.  There are a finite set of pattern lengths and only filenames of these lengths
     // can match.
-    const int length = filename.size();
+    const auto length = filename.size();
 
     if ( length < _caseSensitiveLengths.size() && _caseSensitiveLengths.testBit( length ) )
     {

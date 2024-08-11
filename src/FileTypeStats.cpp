@@ -64,7 +64,7 @@ namespace
 	    return true;
 
 	// The most common case: 3-letter suffix
-	const int len = suffix.size();
+	const auto len = suffix.size();
 	if ( len == 3 && letters == 3 )
 	    return false;
 

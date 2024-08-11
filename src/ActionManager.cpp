@@ -54,7 +54,7 @@ namespace
 	if ( !menu || actionNames.isEmpty() )
 	    return;
 
-	int pos = actionNames.size() - 1;
+	auto pos = actionNames.size() - 1;
 	const auto menuActions = menu->actions();
 	for ( auto it = menuActions.crbegin(); it != menuActions.crend() && pos >= 0; ++it )
 	{
