@@ -119,7 +119,7 @@ void TreemapView::clear()
 
         // Deleting these can take a while, so delegate to a thread
         TreemapTile * rootTile = _rootTile;
-        static_cast<void>( QtConcurrent::run( [ rootTile ]() { delete rootTile; } ) );
+        std::ignore = QtConcurrent::run( [ rootTile ]() { delete rootTile; } );
         _rootTile = nullptr;
     }
 

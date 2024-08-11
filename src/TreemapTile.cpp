@@ -506,7 +506,7 @@ void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
     QtConcurrent::run( _parentView->threadPool(), tile, &TreemapTile::renderChildCushions );
 #else
-    static_cast<void>( QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile ) );
+    std::ignore = QtConcurrent::run( _parentView->threadPool(), &TreemapTile::renderChildCushions, tile );
 #endif
 }
 
@@ -621,7 +621,10 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 
     const QColor & color = tileColor( _orig );
 
-    QImage image{ qRound( rect.width() ), qRound( rect.height() ), QImage::Format_RGB32 };
+    // These don't need rounding, they're already whole pixels, but make the narrowing explicit
+    const int width = static_cast<int>( rect.width() );
+    const int height = static_cast<int>( rect.height() );
+    QImage image{ width, height, QImage::Format_RGB32 };
     QRgb * data = reinterpret_cast<QRgb *>( image.bits() );
 
     const double xx22 = 2.0 * _cushionSurface.xx2();
