@@ -135,7 +135,7 @@ namespace QDirStat
         /**
          * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
          **/
-        static QLatin1String unpkgScheme() { return QLatin1String( "Unpkg:/" ); }
+        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
 
         /**
          * Disable the treemap, reset the permissions warning, breadcrumbs,
@@ -687,7 +687,7 @@ namespace QDirStat
         Subtree          _futureSelection;
 
         bool             _showDirPermissionsMsg;
-        bool             _enableDirPermissionsMsg { false };
+        bool             _enableDirPermissionsMsg{ false };
         bool             _urlInWindowTitle;
 
         QTimer           _updateTimer;

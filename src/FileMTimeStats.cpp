@@ -16,7 +16,7 @@ using namespace QDirStat;
 
 
 FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
-    PercentileStats {}
+    PercentileStats{}
 {
     if ( subtree )
     {
@@ -33,6 +33,6 @@ void FileMTimeStats::collect( FileInfo * subtree )
     if ( subtree->isFile() )
         append( subtree->mtime() );
 
-    for ( DotEntryIterator it { subtree }; *it; ++it )
+    for ( DotEntryIterator it{ subtree }; *it; ++it )
         collect( *it );
 }

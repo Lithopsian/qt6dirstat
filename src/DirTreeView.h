@@ -65,7 +65,7 @@ namespace QDirStat
 	 * Scroll to the current item (index).  This will open any necessary
 	 * branches and attempt to center the item in the viewport.
 	 **/
-	void scrollToCurrent() { scrollTo ( currentIndex(), QAbstractItemView::PositionAtCenter ); }
+	void scrollToCurrent() { scrollTo( currentIndex(), QAbstractItemView::PositionAtCenter ); }
 
 
     public slots:
@@ -117,18 +117,18 @@ namespace QDirStat
 	 **/
 	ColorList percentBarDefaultColors()
 	{
-	    return ColorList { QColor(   0,   0, 255 ),
-	                       QColor(  34,  34, 255 ),
-	                       QColor(  68,  68, 255 ),
-	                       QColor(  85,  85, 255 ),
-	                       QColor( 102, 102, 255 ),
-	                       QColor( 119, 119, 255 ),
-	                       QColor( 136, 136, 255 ),
-	                       QColor( 153, 153, 255 ),
-	                       QColor( 170, 170, 255 ),
-	                       QColor( 187, 187, 255 ),
-	                       QColor( 204, 204, 255 ),
-	                     };
+	    return ColorList{ QColor{   0,   0, 255 },
+	                      QColor{  34,  34, 255 },
+	                      QColor{  68,  68, 255 },
+	                      QColor{  85,  85, 255 },
+	                      QColor{ 102, 102, 255 },
+	                      QColor{ 119, 119, 255 },
+	                      QColor{ 136, 136, 255 },
+	                      QColor{ 153, 153, 255 },
+	                      QColor{ 170, 170, 255 },
+	                      QColor{ 187, 187, 255 },
+	                      QColor{ 204, 204, 255 },
+	                    };
 	}
 
 	/**

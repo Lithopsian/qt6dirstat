@@ -26,7 +26,7 @@ QString MainWindow::layoutName( const QAction * action ) const
     if ( action == _ui->actionLayout1 ) return HeaderTweaker::l1Name();
     if ( action == _ui->actionLayout2 ) return HeaderTweaker::l2Name();
     if ( action == _ui->actionLayout3 ) return HeaderTweaker::l3Name();
-    return QString();
+    return QString{};
 }
 
 
@@ -49,7 +49,7 @@ void MainWindow::initLayouts( const QString & currentLayoutName )
 {
     // Qt Designer does not support QActionGroups; it was there for Qt 3, but
     // they dropped that feature for Qt 4/5.
-    _layoutActionGroup = new QActionGroup( this );
+    _layoutActionGroup = new QActionGroup{ this };
 
     // Note that the column layouts are handled in the HeaderTweaker and its
     // ColumnLayout helper class; see also HeaderTweaker.h and .cpp.
@@ -174,7 +174,7 @@ void MainWindow::readLayoutSetting( const QString & layoutName )
 //    const bool detailsWithTreemap = settings.value( "DetailsWithTreemap", false ).toBool();
     settings.endGroup();
 
-    const QList<QVariant> data { showBreadcrumbs, showDetailsPanel, showDirTree, showTreemap };
+    const QList<QVariant> data{ showBreadcrumbs, showDetailsPanel, showDirTree, showTreemap };
     layoutAction( layoutName )->setData( data );
 }
 
@@ -211,29 +211,24 @@ void MainWindow::showBars()
 
 void MainWindow::contextMenuEvent( QContextMenuEvent * event )
 {
-    QWidget * widget = QApplication::widgetAt( event->globalPos() );
-    while ( widget->parentWidget() )
+    if ( _ui->centralWidget->underMouse() )
     {
-        if ( widget == _ui->centralWidget )
-        {
-            const QStringList actions { "actionLayout1",
-                                        "actionLayout2",
-                                        "actionLayout3",
-                                        ActionManager::separator(),
-                                        "actionShowBreadcrumbs",
-                                        "actionShowDetailsPanel",
-                                        "actionShowDirTree",
-                                        "actionShowTreemap",
-//                                        ActionManager::separator(),
-//                                        "actionTreemapOnSide",
-//                                        "actionDetailsWithTreemap",
-                                       };
-            QMenu * menu = ActionManager::createMenu( actions, {} );
-            menu->exec( event->globalPos() );
+        const QStringList actions{ "actionLayout1",
+                                   "actionLayout2",
+                                   "actionLayout3",
+                                   ActionManager::separator(),
+                                   "actionShowBreadcrumbs",
+                                   "actionShowDetailsPanel",
+                                   "actionShowDirTree",
+                                   "actionShowTreemap",
+//                                   ActionManager::separator(),
+//                                   "actionTreemapOnSide",
+//                                   "actionDetailsWithTreemap",
+                                  };
+        QMenu * menu = ActionManager::createMenu( actions, {} );
+        menu->exec( event->globalPos() );
 
-            return;
-        }
-        widget = widget->parentWidget();
+        return;
     }
 
     QMenu * menu = createPopupMenu();

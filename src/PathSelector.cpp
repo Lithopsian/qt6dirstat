@@ -10,7 +10,6 @@
 #include <QDir>
 
 #include "PathSelector.h"
-#include "Exception.h"
 #include "FormatUtil.h"
 #include "MountPoints.h"
 
@@ -21,53 +20,74 @@
 using namespace QDirStat;
 
 
-PathSelector::PathSelector( QWidget * parent ):
-    QListWidget { parent }
+PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
+                                    QListWidget * parent ):
+    QListWidgetItem{ parent },
+    _path{ mountPoint->path() }
 {
-    connect( this, &PathSelector::currentItemChanged,
-	     this, &PathSelector::slotItemSelected );
+    QString text = _path % u'\n';
 
-    connect( this, &PathSelector::itemClicked,
-	     this, &PathSelector::slotItemSelected );
+    if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
+	text += formatSize( mountPoint->totalSize() ) % "  "_L1;
 
-    connect( this, &PathSelector::itemActivated,
-	     this, &PathSelector::slotItemDoubleClicked );
+    text += mountPoint->filesystemType();
+    setText( text );
+
+    QString tooltip = mountPoint->device();
+
+#if SHOW_SIZES_IN_TOOLTIP
+    if ( mountPoint->hasSizeInfo() )
+    {
+	const QString{ boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>" };
+	tooltip += "<br/>" %
+	    boilerplate.arg( QObject::tr( "Used" ), formatSize( mountPoint->usedSize() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for users" ), formatSize( mountPoint->freeSizeForUser() ) ) %
+	    boilerplate.arg( QObject::tr( "Free for root" ), formatSize( mountPoint->freeSizeForRoot() ) );
+    }
+#endif
+
+    setToolTip( tooltip );
 }
 
 
-PathSelectorItem * PathSelector::addPath( const QString & path,
-                                          const QIcon   & icon )
+
+
+PathSelector::PathSelector( QWidget * parent ):
+    QListWidget{ parent }
 {
-    PathSelectorItem * item = new PathSelectorItem( path, this );
+    connect( this, &PathSelector::currentItemChanged,
+             this, &PathSelector::slotItemSelected );
 
-    if ( !icon.isNull() )
-	item->setIcon( icon );
+    connect( this, &PathSelector::itemClicked,
+             this, &PathSelector::slotItemSelected );
 
-    return item;
+    connect( this, &PathSelector::itemActivated,
+             this, &PathSelector::slotItemDoubleClicked );
 }
 
 
 void PathSelector::addHomeDir()
 {
-    PathSelectorItem * item = addPath( QDir::homePath(), QIcon( ":/icons/48x48/home-dir.png" ) );
+    PathSelectorItem * item = new PathSelectorItem{ QDir::homePath(), this };
+
+    QIcon icon{ ":/icons/48x48/home-dir.png" };
+    if ( !icon.isNull() )
+	item->setIcon( icon );
+
     item->setToolTip( tr( "Your home directory" ) );
 }
 
 
-void PathSelector::addMountPoint( MountPoint * mountPoint )
+void PathSelector::addNormalMountPoints()
 {
-    CHECK_PTR( mountPoint );
+    MountPoints::reload();
 
-    PathSelectorItem * item = new PathSelectorItem( mountPoint, this );
-    const auto type = mountPoint->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
-    item->setIcon( _iconProvider.icon( type ) );
-}
-
-
-void PathSelector::addMountPoints( const MountPointList & mountPoints )
-{
-    for ( MountPoint * mountPoint : mountPoints )
-	addMountPoint( mountPoint );
+    for ( MountPointIterator it{ false } ; *it ; ++it )
+    {
+	PathSelectorItem * item = new PathSelectorItem{ *it, this };
+	const auto type = it->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
+	item->setIcon( _iconProvider.icon( type ) );
+    }
 }
 
 
@@ -115,35 +135,3 @@ void PathSelector::selectParentMountPoint( const QString & wantedPath )
     }
 }
 */
-
-
-
-
-PathSelectorItem::PathSelectorItem( MountPoint   * mountPoint,
-				    PathSelector * parent ):
-    QListWidgetItem { parent },
-    _path { mountPoint->path() }
-{
-    QString text = _path + u'\n';
-
-    if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
-	text += formatSize( mountPoint->totalSize() ) + "  "_L1;
-
-    text += mountPoint->filesystemType();
-    setText( text );
-
-    QString tooltip = mountPoint->device();
-
-#if SHOW_SIZES_IN_TOOLTIP
-    if ( mountPoint->hasSizeInfo() )
-    {
-	const QString boilerplate = "<tr><td>%1: </td><td align='right'>%2</td></tr>";
-	tooltip += "<br/>" %
-	    boilerplate.arg( QObject::tr( "Used" ), formatSize( mountPoint->usedSize() ) ) %
-	    boilerplate.arg( QObject::tr( "Free for users" ), formatSize( mountPoint->freeSizeForUser() ) ) %
-	    boilerplate.arg( QObject::tr( "Free for root" ), formatSize( mountPoint->freeSizeForRoot() ) );
-    }
-#endif
-
-    setToolTip( tooltip );
-}

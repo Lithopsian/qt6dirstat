@@ -32,13 +32,13 @@ namespace QDirStat
 	 * the settings.
 	 **/
 	UnpkgSettings( const QString & startingDir,
-		       const QStringList & excludeDirs,
-		       const QStringList & ignorePatterns,
-		       bool crossFilesystems ):
-	    _startingDir { startingDir },
-	    _excludeDirs { excludeDirs },
-	    _ignorePatterns { ignorePatterns },
-	    _crossFilesystems { crossFilesystems }
+	               const QStringList & excludeDirs,
+	               const QStringList & ignorePatterns,
+	               bool crossFilesystems ):
+	    _startingDir{ startingDir },
+	    _excludeDirs{ excludeDirs },
+	    _ignorePatterns{ ignorePatterns },
+	    _crossFilesystems{ crossFilesystems }
 	{}
 
 	/**
@@ -48,7 +48,7 @@ namespace QDirStat
 	 * startingDir is then overwritten.
 	 **/
 	UnpkgSettings( const QString & startingDir ):
-	    UnpkgSettings {}
+	    UnpkgSettings{}
 	{ _startingDir = startingDir; }
 
 	/**

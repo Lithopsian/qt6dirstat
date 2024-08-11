@@ -42,7 +42,7 @@ namespace
     {
 	// Find the maximum number of suffix items to show in the "Other" category
 	Settings settings;
-	settings.beginGroup( "FileAgeStatsWindow" );
+	settings.beginGroup( "FileTypeStatsWindow" );
 	const int topX = settings.value( "TopX", 50 ).toInt();
 	settings.setDefaultValue( "TopX", topX );
 	settings.endGroup();
@@ -71,7 +71,7 @@ namespace
                                     FileSize        sum,
                                     float           percent )
     {
-	auto item = new FileTypeItem( name, count, sum, percent );
+	auto item = new FileTypeItem{ name, count, sum, percent };
 	treeWidget->addTopLevelItem( item );
 
 	return item;
@@ -94,7 +94,7 @@ namespace
                         FileSize        sum,
                         float           percent )
     {
-	auto item = new SuffixFileTypeItem( otherCategory, suffix, count, sum, percent );
+	auto item = new SuffixFileTypeItem{ otherCategory, suffix, count, sum, percent };
 	parent->addChild( item );
     }
 
@@ -102,8 +102,8 @@ namespace
 
 
 FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FileTypeStatsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FileTypeStatsWindow }
 {
     // logDebug() << "constructor" << Qt::endl;
 
@@ -112,11 +112,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initWidgets();
-    Settings::readWindowSettings( this, "FileTypeStatsWindow" );
-
-    // Add actions to this window to get the hotkeys
-    addAction( _ui->actionLocate );
-    addAction( _ui->actionSizeStats );
+    readSettings();
 
     const DirTree        * dirTree        = app()->dirTree();
     const SelectionModel * selectionModel = app()->selectionModel();
@@ -128,31 +124,31 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
              this,                 &FileTypeStatsWindow::syncedRefresh );
 
     connect( selectionModel,       &SelectionModel::currentItemChanged,
-	     this,                 &FileTypeStatsWindow::syncedPopulate );
+             this,                 &FileTypeStatsWindow::syncedPopulate );
 
     connect( _ui->treeWidget,      &QTreeWidget::currentItemChanged,
-	     this,                 &FileTypeStatsWindow::enableActions );
+             this,                 &FileTypeStatsWindow::enableActions );
 
     connect( _ui->treeWidget,      &QTreeWidget::customContextMenuRequested,
-	     this,                 &FileTypeStatsWindow::contextMenu);
+             this,                 &FileTypeStatsWindow::contextMenu);
 
     connect( _ui->treeWidget,      &QTreeWidget::itemDoubleClicked,
-	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
+             this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
     connect( _ui->refreshButton,   &QAbstractButton::clicked,
-	     this,                 &FileTypeStatsWindow::refresh );
+             this,                 &FileTypeStatsWindow::refresh );
 
     connect( _ui->locateButton,    &QAbstractButton::clicked,
-	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
+             this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
     connect( _ui->actionLocate,    &QAction::triggered,
-	     this,                 &FileTypeStatsWindow::locateCurrentFileType );
+             this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
     connect( _ui->sizeStatsButton, &QAbstractButton::clicked,
-	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+             this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
     connect( _ui->actionSizeStats, &QAction::triggered,
-	     this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+             this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 }
 
 
@@ -169,7 +165,7 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
     static QPointer<FileTypeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FileTypeStatsWindow( parent );
+	_sharedInstance = new FileTypeStatsWindow{ parent };
 
     return _sharedInstance;
 }
@@ -187,8 +183,24 @@ void FileTypeStatsWindow::initWidgets()
 }
 
 
+void FileTypeStatsWindow::readSettings()
+{
+    Settings::readWindowSettings( this, "FileTypeStatsWindow" );
+
+    Settings settings;
+    settings.beginGroup( "FileTypeStatsWindow" );
+    settings.applyActionHotkey( _ui->actionLocate );
+    settings.applyActionHotkey( _ui->actionSizeStats );
+    settings.endGroup();
+
+    // Add actions to this window to get the hotkeys
+    addAction( _ui->actionLocate );
+    addAction( _ui->actionSizeStats );
+}
+
+
 void FileTypeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-						  FileInfo       * subtree )
+                                                  FileInfo       * subtree )
 {
     if ( !subtree )
         return;
@@ -330,7 +342,7 @@ QString FileTypeStatsWindow::currentSuffix() const
     if ( item && !item->suffix().isEmpty() )
 	return item->suffix();
 
-    return QString();
+    return QString{};
 }
 
 
@@ -397,11 +409,11 @@ FileTypeItem::FileTypeItem( const QString & name,
                             int             count,
                             FileSize        totalSize,
                             float           percentage ):
-    QTreeWidgetItem { QTreeWidgetItem::UserType },
-    _name { name },
-    _count { count },
-    _totalSize { totalSize },
-    _percentage { percentage }
+    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    _name{ name },
+    _count{ count },
+    _totalSize{ totalSize },
+    _percentage{ percentage }
 {
     set( FT_NameCol,       Qt::AlignLeft,  name );
     set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );

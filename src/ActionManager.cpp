@@ -13,6 +13,7 @@
 #include "Cleanup.h"
 #include "CleanupCollection.h"
 #include "Exception.h"
+#include "Settings.h"
 
 
 using namespace QDirStat;
@@ -20,6 +21,24 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Read hotkey settings and apply to the existing actions found
+     * within 'tree'.  The ui file hotkeys are used as default values.
+     **/
+    void readSettings( QWidget * tree )
+    {
+	Settings settings;
+
+	settings.beginGroup( "Hotkeys" );
+
+	const auto actions = tree->findChildren<QAction *>( nullptr, Qt::FindDirectChildrenOnly );
+	for ( QAction * action : actions )
+	    settings.applyActionHotkey( action );
+
+	settings.endGroup();
+    }
+
+
     /**
      * Remove actions in 'actionsNames' from the widget, which will
      * typically be a menu.  Start at the end of the list and remove
@@ -73,11 +92,13 @@ namespace
 
     /**
      * Search the tree for the first QAction with the Qt object name
-     * 'actionName'. Return 0 if there is no such QAction.
+     * 'actionName'. Return 0 if there is no such QAction.  All named
+     * actions in MainWindow are direct children of the main window
+     * object so don't search recursively.
      **/
     QAction * action( const QObject * tree, const QString & actionName )
     {
-	QAction * action = tree->findChild<QAction *>( actionName );
+	QAction * action = tree->findChild<QAction *>( actionName, Qt::FindDirectChildrenOnly );
 	if ( action )
 	    return action;
 
@@ -107,7 +128,9 @@ void ActionManager::init( QWidget        * parent,
     CHECK_PTR( menu );
     CHECK_PTR( toolBar );
 
-    _cleanupCollection = new CleanupCollection( parent, selectionModel, toolBar, menu );
+    readSettings( parent );
+
+    _cleanupCollection = new CleanupCollection{ parent, selectionModel, toolBar, menu };
 }
 
 
@@ -169,8 +192,8 @@ void ActionManager::swapActions( QWidget * widget,
 QMenu * ActionManager::createMenu( const QStringList & actions,
                                    const QStringList & enabledActions )
 {
-    QMenu * menu = new QMenu {};
-    menu->setAttribute(Qt::WA_DeleteOnClose);
+    QMenu * menu = new QMenu{};
+    menu->setAttribute( Qt::WA_DeleteOnClose );
     addActions( menu, actions );
     addEnabledActions( menu, enabledActions );
 

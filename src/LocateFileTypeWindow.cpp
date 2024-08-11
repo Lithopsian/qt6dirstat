@@ -39,7 +39,7 @@ namespace
 	    return result;
 
 	const DirInfo * dir = item->dotEntry() ? item->dotEntry() : item->toDirInfo();
-	for ( FileInfoIterator it { dir }; *it; ++it )
+	for ( FileInfoIterator it{ dir }; *it; ++it )
 	{
 	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseInsensitive ) )
 		result << *it;
@@ -52,8 +52,8 @@ namespace
 
 
 LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::LocateFileTypeWindow }
+    QDialog{ parent },
+    _ui{ new Ui::LocateFileTypeWindow }
 {
     // logDebug() << "init" << Qt::endl;
 
@@ -65,10 +65,10 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
     Settings::readWindowSettings( this, "LocateFileTypeWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
-	     this,               &LocateFileTypeWindow::refresh );
+             this,               &LocateFileTypeWindow::refresh );
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
-	     this,               &LocateFileTypeWindow::selectResult );
+             this,               &LocateFileTypeWindow::selectResult );
 }
 
 
@@ -84,7 +84,7 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
     static QPointer<LocateFileTypeWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new LocateFileTypeWindow( app()->mainWindow() );
+	_sharedInstance = new LocateFileTypeWindow{ app()->mainWindow() };
 
     return _sharedInstance;
 }
@@ -159,11 +159,11 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 	for ( const FileInfo * file : matches )
 	    totalSize += file->size();
 
-	_ui->treeWidget->addTopLevelItem( new SuffixSearchResultItem( dir->url(), matches.size(), totalSize ) );
+	_ui->treeWidget->addTopLevelItem( new SuffixSearchResultItem{ dir->url(), matches.size(), totalSize } );
     }
 
     // Recurse through any subdirectories
-    for ( DirInfoIterator it { dir }; *it; ++it )
+    for ( DirInfoIterator it{ dir }; *it; ++it )
 	populateRecursive( *it );
 
     // Unlike in FileTypeStats, there is no need to recurse through
@@ -214,12 +214,12 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 
 
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
-						int             count,
-						FileSize        totalSize ):
-    QTreeWidgetItem { QTreeWidgetItem::UserType },
-    _path { path },
-    _count { count },
-    _totalSize { totalSize }
+                                                int             count,
+                                                FileSize        totalSize ):
+    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    _path{ path },
+    _count{ count },
+    _totalSize{ totalSize }
 {
     set( SSR_CountCol,     QString::number( count ), Qt::AlignRight );
     set( SSR_TotalSizeCol, formatSize( totalSize ),  Qt::AlignRight );

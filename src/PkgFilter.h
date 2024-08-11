@@ -29,7 +29,7 @@ namespace QDirStat
          * and SelectAll filter mode.
          **/
         PkgFilter():
-            PkgFilter { "", SelectAll }
+            PkgFilter{ "", SelectAll }
         {}
 
         /**
@@ -54,16 +54,16 @@ namespace QDirStat
          **/
         PkgFilter( const QString & pattern,
                    FilterMode      filterMode = Auto ):
-            SearchFilter { normalizedPattern( pattern ),
-                           filterMode,
-                           StartsWith, // defaultFilterMode
-                           true }      // case-sensitive
+            SearchFilter{ normalizedPattern( pattern ),
+                          filterMode,
+                          StartsWith, // defaultFilterMode
+                          true }      // case-sensitive
         {}
 
         /**
          * Return the pattern without the leading "Pkg:/".
          **/
-        const QString & pattern() const { return SearchFilter::pattern(); }
+//        const QString & pattern() const { return SearchFilter::pattern(); }
 
         /**
          * Return the filter package URL including the leading "Pkg:/".
@@ -82,8 +82,8 @@ namespace QDirStat
     };  // class PkgFilter
 
 
-    inline QTextStream & operator<< ( QTextStream     & stream,
-                                      const PkgFilter & filter )
+    inline QTextStream & operator<<( QTextStream     & stream,
+                                     const PkgFilter & filter )
     {
         stream << "<PkgFilter \""
                << filter.pattern()

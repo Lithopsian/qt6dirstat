@@ -19,7 +19,7 @@ using namespace QDirStat;
 
 QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 {
-    const bool ok = !input.isEmpty() && QDir( input ).exists();
+    const bool ok = !input.isEmpty() && QDir{ input }.exists();
 
 #if 0
     logDebug() << "Checking \"" << input << "\": "
@@ -35,9 +35,9 @@ QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
 
 
 ExistingDirCompleter::ExistingDirCompleter( QObject * parent ):
-    QCompleter { parent }
+    QCompleter{ parent }
 {
-    QFileSystemModel * model = new QFileSystemModel( this );
+    QFileSystemModel * model = new QFileSystemModel{ this };
     model->setRootPath( "/" );
     model->setFilter( QDir::Dirs );
     model->setReadOnly( true );

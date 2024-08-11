@@ -130,8 +130,8 @@ namespace
     inline void fixFileOwner( const UsedFileList & filenames )
     {
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-	const QString sudoUid = env.value( "SUDO_UID", QString() );
-	const QString sudoGid = env.value( "SUDO_GID", QString() );
+	const QString sudoUid = env.value( "SUDO_UID", QString{} );
+	const QString sudoGid = env.value( "SUDO_GID", QString{} );
 
 	if ( sudoUid.isEmpty() || sudoGid.isEmpty() )
 	{
@@ -183,7 +183,7 @@ namespace
 
 QColor Settings::colorValue( const char * key, const QColor & fallback )
 {
-    const QColor color( value( key ).toString() );
+    const QColor color{ value( key ).toString() };
     if ( color.isValid() )
 	return color;
 
@@ -221,7 +221,7 @@ ColorList Settings::colorListValue( const char * key, const ColorList & fallback
     const QStringList colorList = value( key ).toStringList();
     for ( const QString & rgb : colorList )
     {
-	const QColor color( rgb );
+	const QColor color{ rgb };
 
 	if ( color.isValid() )
 	    valueList << color;
@@ -276,13 +276,36 @@ void Settings::setEnumValue( const char                * key,
 }
 
 
+void Settings::applyActionHotkey( QAction * action )
+{
+    const QString actionName = action->objectName();
+    if ( actionName.isEmpty() ) // separators, menus, Cleanups, etc., just in case
+	return;
+
+    if ( contains( actionName ) )
+    {
+	const QString shortcut = value( actionName ).toString();
+	const QKeySequence hotkey{ shortcut };
+	if ( shortcut.isEmpty() || !hotkey.isEmpty() )
+	{
+	    // Put any empty or valid key sequence on the action even if it's already set
+	    action->setShortcut( hotkey.toString() );
+	    return;
+	}
+    }
+
+    // Use the .ui shortcut as the default setting
+    setValue( actionName, action->shortcut().toString() );
+}
+
+
 void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup )
 {
     QDirStat::Settings settings;
 
     settings.beginGroup( settingsGroup );
-    const QPoint winPos  = settings.value( "WindowPos",  QPoint( -99, -99 ) ).toPoint();
-    const QSize  winSize = settings.value( "WindowSize", QSize (   0,   0 ) ).toSize();
+    const QPoint winPos  = settings.value( "WindowPos",  QPoint{ -99, -99 } ).toPoint();
+    const QSize  winSize = settings.value( "WindowSize", QSize {   0,   0 } ).toSize();
     settings.endGroup();
 
     if ( winSize.height() > 100 && winSize.width() > 100 )
@@ -355,7 +378,7 @@ void Settings::migrate()
 
 
 CleanupSettings::CleanupSettings():
-    Settings { "-cleanup" }
+    Settings{ "-cleanup" }
 {
     migrate();
 }
@@ -364,7 +387,7 @@ CleanupSettings::CleanupSettings():
 
 
 ExcludeRuleSettings::ExcludeRuleSettings():
-    Settings { "-exclude" }
+    Settings{ "-exclude" }
 {
     migrate();
 }
@@ -373,7 +396,7 @@ ExcludeRuleSettings::ExcludeRuleSettings():
 
 
 MimeCategorySettings::MimeCategorySettings():
-    Settings { "-mime" }
+    Settings{ "-mime" }
 {
     migrate();
 }

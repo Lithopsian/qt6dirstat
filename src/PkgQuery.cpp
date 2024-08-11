@@ -49,9 +49,9 @@ void PkgQuery::checkPkgManagers()
 {
     logInfo() << "Checking available supported package managers..." << Qt::endl;
 
-    checkPkgManager( new DpkgPkgManager()   );
-    checkPkgManager( new RpmPkgManager()    );
-    checkPkgManager( new PacManPkgManager() );
+    checkPkgManager( new DpkgPkgManager   );
+    checkPkgManager( new RpmPkgManager    );
+    checkPkgManager( new PacManPkgManager );
 
     // The following is just for logging
     if ( _pkgManagers.isEmpty() )
@@ -125,7 +125,7 @@ QString PkgQuery::getOwningPackage( const QString & path )
 #endif
 
     // Insert package name (even if empty) into the cache
-    _cache.insert( path, new QString( pkg ), CACHE_COST );
+    _cache.insert( path, new QString{ pkg }, CACHE_COST );
 
     return pkg;
 }
@@ -151,7 +151,7 @@ QStringList PkgQuery::getFileList( const PkgInfo * pkg ) const
             return fileList;
     }
 
-    return QStringList();
+    return QStringList{};
 }
 
 

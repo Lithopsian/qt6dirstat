@@ -82,6 +82,8 @@ namespace QDirStat
 	/**
 	 * Set the directory tree to work on. Without this, this widget will
 	 * not display anything.
+	 *
+	 * Note that TreemapView does not take ownership of the tree.
 	 **/
 	void setDirTree( const DirTree * tree );
 
@@ -89,7 +91,7 @@ namespace QDirStat
 	 * Returns the minimum recommended size for this widget.
 	 * Reimplemented from QWidget.
 	 **/
-	QSize minimumSizeHint() const override { return QSize( 0, 0 ); }
+	QSize minimumSizeHint() const override { return QSize{ 0, 0 }; }
 
 	/**
 	 * Returns this view's current item.
@@ -268,7 +270,7 @@ namespace QDirStat
 	/**
 	 * Returns the brush to be used for filling visible directory tiles.
 	 **/
-	QBrush dirBrush() const { return _useDirGradient ? QBrush( _dirGradient ) : QBrush( _dirFillColor ); }
+	QBrush dirBrush() const { return _useDirGradient ? QBrush{ _dirGradient } : QBrush{ _dirFillColor }; }
 
 	/**
 	 * Returns 'true' if directories should be rendered with a gradient,
@@ -589,14 +591,14 @@ namespace QDirStat
     private:
 
 	// Data members
-	const DirTree       * _tree			{ nullptr };
-	SelectionModel      * _selectionModel		{ nullptr };
-	SelectionModelProxy * _selectionModelProxy	{ nullptr };
+	const DirTree       * _tree{ nullptr };
+	SelectionModel      * _selectionModel{ nullptr };
+	SelectionModelProxy * _selectionModelProxy{ nullptr };
 
-	TreemapTile         * _rootTile			{ nullptr };
-	HighlightRect       * _currentTileHighlighter	{ nullptr };
-	const SceneMask     * _sceneMask		{ nullptr };
-	FileInfo            * _newRoot			{ nullptr };
+	TreemapTile         * _rootTile{ nullptr };
+	HighlightRect       * _currentTileHighlighter{ nullptr };
+	const SceneMask     * _sceneMask{ nullptr };
+	FileInfo            * _newRoot{ nullptr };
 	ParentHighlightList   _parentHighlightList;
 	QString               _savedRootUrl;
 
@@ -632,12 +634,12 @@ namespace QDirStat
 
 	std::unique_ptr<const CushionHeightSequence> _cushionHeights;
 
-	bool _disabled		{ false }; // flag to disable all treemap builds
-	bool _treemapRunning	{ false }; // internal flag to avoid race conditions when cancelling builds
+	bool _disabled{ false };       // flag to disable all treemap builds
+	bool _treemapRunning{ false }; // internal flag to avoid race conditions when cancelling builds
 
 	QFutureWatcher<TreemapTile *>   _watcher;
-	std::atomic<TreemapCancel>      _treemapCancel	{ TreemapCancelNone }; // flag to the treemap build thread
-	QThreadPool                   * _threadPool	{ nullptr }; // dedicated thread pool for rendering
+	std::atomic<TreemapCancel>      _treemapCancel{ TreemapCancelNone }; // flag to the treemap build thread
+	QThreadPool                   * _threadPool{ nullptr }; // dedicated thread pool for rendering
 
 	// just for logging
 	QElapsedTimer   _stopwatch;
@@ -667,10 +669,10 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	HighlightRect( const TreemapTile * tile,
-		       const QColor      & color,
-		       int                 lineWidth,
-		       Qt::PenStyle        lineStyle,
-		       qreal               zValue );
+	               const QColor      & color,
+	               int                 lineWidth,
+	               Qt::PenStyle        lineStyle,
+	               qreal               zValue );
 
     }; // class HighlightRect
 
@@ -689,11 +691,11 @@ namespace QDirStat
 	CurrentTileHighlighter( const TreemapView * treemapView,
 	                        const TreemapTile * tile,
 	                        bool                isSelected ):
-	    HighlightRect { tile,
-			    treemapView->currentItemColor(),
-			    2,
-			    isSelected ? Qt::SolidLine : Qt::DotLine,
-			    CurrentHighlightLayer }
+	    HighlightRect{ tile,
+	                   treemapView->currentItemColor(),
+	                   2,
+	                   isSelected ? Qt::SolidLine : Qt::DotLine,
+	                   CurrentHighlightLayer }
 	{}
 
     }; // class CurrentTileHighlighter
@@ -713,11 +715,11 @@ namespace QDirStat
     public:
 	SelectedTileHighlighter( const TreemapView * treemapView,
 	                         const TreemapTile * tile ):
-	    HighlightRect { tile,
-			    treemapView->selectedItemsColor(),
-			    2,
-			    Qt::SolidLine,
-			    TileHighlightLayer }
+	    HighlightRect{ tile,
+	                   treemapView->selectedItemsColor(),
+	                   2,
+	                   Qt::SolidLine,
+	                   TileHighlightLayer }
 	{}
 
     }; // class SelectedTileHighlighter
@@ -736,12 +738,12 @@ namespace QDirStat
 	ParentTileHighlighter( const TreemapView * treemapView,
 	                       const TreemapTile * tile,
 	                       const QString     & tooltip ):
-	    HighlightRect { tile,
-			    treemapView->highlightColor(),
-			    treemapView->highlightedParent() ? 1 : 2,
-			    Qt::SolidLine,
-			    SceneHighlightLayer },
-	    _tile { tile }
+	    HighlightRect{ tile,
+	                   treemapView->highlightColor(),
+	                   treemapView->highlightedParent() ? 1 : 2,
+	                   Qt::SolidLine,
+	                   SceneHighlightLayer },
+	    _tile{ tile }
 	{
 	    setToolTip( tooltip );
 	}

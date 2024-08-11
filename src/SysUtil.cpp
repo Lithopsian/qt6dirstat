@@ -26,11 +26,12 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 			     bool            logOutput )
 {
     int exitCode = -1;
-    QString output = runCommand( commandLine, &exitCode,
-                                    COMMAND_TIMEOUT_SEC,
-                                    logCommand,
-                                    logOutput,
-                                    true ); // ignoreErrCode
+    QString output = runCommand( commandLine,
+                                 &exitCode,
+                                 COMMAND_TIMEOUT_SEC,
+                                 logCommand,
+                                 logOutput,
+                                 true ); // ignoreErrCode
 
     if ( exitCode != 0 )
     {
@@ -38,7 +39,7 @@ bool SysUtil::tryRunCommand( const QString & commandLine,
 	return false;
     }
 
-    const bool expected = QRegularExpression( expectedResult ).match( output ).hasMatch();
+    const bool expected = QRegularExpression{ expectedResult }.match( output ).hasMatch();
 
     return expected;
 }
@@ -54,7 +55,7 @@ QString SysUtil::runCommand( const QString & commandLine,
     if ( exitCode_ret )
 	*exitCode_ret = -1;
 
-    QStringList args = commandLine.split( QRegularExpression( "\\s+" ) );
+    QStringList args = commandLine.split( QRegularExpression{ "\\s+" } );
 
     if ( args.size() < 1 )
     {
@@ -158,7 +159,7 @@ bool SysUtil::isBrokenSymLink( const QString & path )
 
     QStringList pathSegments = path.split( u'/', Qt::SkipEmptyParts );
     pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString( path.startsWith( u'/' ) ? u'/' : QString() ) + pathSegments.join( u'/' );
+    const QString parentPath = QString{ path.startsWith( u'/' ) ? u'/' : QString{} } + pathSegments.join( u'/' );
     const DirSaver dir( parentPath );
 
     // We can't use access() here since that would follow symlinks.
@@ -203,13 +204,13 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 #endif
 
     // 99+% of symlinks will fit in a small buffer
-    QByteArray buf( 256, Qt::Uninitialized );
+    QByteArray buf{ 256, Qt::Uninitialized };
 
     ssize_t len = ::readlink( path, buf.data(), buf.size() );
     while ( len == buf.size() ) {
         // readlink(2) will fill our buffer and not necessarily terminate with NUL;
         if ( buf.size() >= maxLen )
-            return QByteArray();
+            return QByteArray{};
 
         // double the size and try again
         buf.resize( buf.size() * 2 );
@@ -217,7 +218,7 @@ QByteArray SysUtil::readLink( const QByteArray & path )
     }
 
     if (len == -1)
-        return QByteArray();
+        return QByteArray{};
 
     buf.resize( len );
     return buf;
@@ -231,7 +232,7 @@ QString SysUtil::baseName( const QString & fileName )
     if ( !segments.isEmpty() )
 	return segments.last();
 
-    return QString();
+    return QString{};
 }
 
 
@@ -261,5 +262,5 @@ QString SysUtil::homeDir( uid_t uid )
     if ( pw )
 	return QString::fromUtf8( pw->pw_dir );
 
-    return QString();
+    return QString{};
 }

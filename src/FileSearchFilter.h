@@ -48,19 +48,19 @@ namespace QDirStat
                           bool            findDirs,
                           bool            findSymLinks,
                           bool            findPkgs ):
-            SearchFilter { pattern, filterMode, Contains, caseSensitive },
-            _dir { dir },
-            _findFiles { findFiles },
-            _findDirs { findDirs },
-            _findSymLinks { findSymLinks },
-            _findPkgs { findPkgs }
+            SearchFilter{ pattern, filterMode, Contains, caseSensitive },
+            _dir{ dir },
+            _findFiles{ findFiles },
+            _findDirs{ findDirs },
+            _findSymLinks{ findSymLinks },
+            _findPkgs{ findPkgs }
         {}
 
         /** Default constructor, constructs a filter with no tree and an
          * empty search pattern.
          **/
         FileSearchFilter():
-            FileSearchFilter { nullptr, "", Auto, true, true, true, true, true }
+            FileSearchFilter{ nullptr, "", Auto, true, true, true, true, true }
         {}
 
         /**
@@ -80,16 +80,16 @@ namespace QDirStat
     private:
 
         DirInfo * _dir;
-        bool      _findFiles    { true };
-        bool      _findDirs     { true };
-        bool      _findSymLinks { true };
-        bool      _findPkgs     { true };
+        bool      _findFiles{ true };
+        bool      _findDirs{ true };
+        bool      _findSymLinks{ true };
+        bool      _findPkgs{ true };
 
     };  // class FileSearchFilter
 
 
-    inline QTextStream & operator<< ( QTextStream            & stream,
-                                      const FileSearchFilter & filter )
+    inline QTextStream & operator<<( QTextStream            & stream,
+                                     const FileSearchFilter & filter )
     {
         QStringList findTypes;
 

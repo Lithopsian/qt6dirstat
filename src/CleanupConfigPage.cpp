@@ -15,11 +15,9 @@
 #include "CleanupCollection.h"
 #include "ConfigDialog.h"
 #include "OutputWindow.h"
-#include "Typedefs.h"
+#include "Typedefs.h" // _L1
 
 
-// This is a mess that became necessary because Qt's moc cannot handle template
-// classes. Yes, this is ugly.
 #define CLEANUP_CAST(VOID_PTR) (static_cast<Cleanup *>(VOID_PTR))
 
 
@@ -27,35 +25,25 @@ using namespace QDirStat;
 
 
 CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
-    ListEditor { parent },
-    _ui { new Ui::CleanupConfigPage },
-    _outputWindowDefaultTimeout { OutputWindow::defaultShowTimeout() }
+    ListEditor{ parent },
+    _ui{ new Ui::CleanupConfigPage },
+    _outputWindowDefaultTimeout{ OutputWindow::defaultShowTimeout() }
 {
     _ui->setupUi( this );
 
-    setListWidget( _ui->listWidget );
-
-    setToTopButton   ( _ui->toTopButton    );
-    setMoveUpButton  ( _ui->moveUpButton       );
-    setAddButton     ( _ui->addButton          );
-    setRemoveButton  ( _ui->removeButton       );
-    setMoveDownButton( _ui->moveDownButton     );
-    setToBottomButton( _ui->toBottomButton );
-
     enableEditWidgets( false );
-    fillListWidget();
-    enableWidgets();
-    updateActions();
+    connectActions();
+    enableWindowPolicyWidgets();
 
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
     _ui->keySequenceEdit->setClearButtonEnabled( true );
 #endif
 
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
-             this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
     connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
-             this,                            &CleanupConfigPage::enableWidgets );
+             this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,
              this,                            &CleanupConfigPage::titleChanged );
@@ -70,20 +58,20 @@ CleanupConfigPage::~CleanupConfigPage()
     // logDebug() << "CleanupConfigPage destructor" << Qt::endl;
 
     // Delete the working cleanup clones
-    for ( int i = 0; i < listWidget()->count(); ++i )
-	delete CLEANUP_CAST( value( listWidget()->item( i ) ) );
+    for ( int i = 0; i < _ui->listWidget->count(); ++i )
+	delete CLEANUP_CAST( value( _ui->listWidget->item( i ) ) );
 }
 
 
 void CleanupConfigPage::applyChanges()
 {
     // The values for the current cleanup action might have been modified and not yet saved
-    save( value( listWidget()->currentItem() ) );
+    save( value( _ui->listWidget->currentItem() ) );
 
     // Build a list of the working cleanups to write out to the settings file
     CleanupList cleanups;
-    for ( int i = 0; i < listWidget()->count(); ++i )
-	cleanups << CLEANUP_CAST( value( listWidget()->item( i ) ) );
+    for ( int i = 0; i < _ui->listWidget->count(); ++i )
+	cleanups << CLEANUP_CAST( value( _ui->listWidget->item( i ) ) );
 
     // Check if anything changed before writing, just for fun
     CleanupCollection * collection = ActionManager::cleanupCollection();
@@ -103,20 +91,20 @@ void CleanupConfigPage::applyChanges()
 
 void CleanupConfigPage::fillListWidget()
 {
-    listWidget()->clear();
+    _ui->listWidget->clear();
 
     for ( const Cleanup * cleanup : *ActionManager::cleanupCollection() )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
-	Cleanup * newCleanup = new Cleanup( cleanup );
-	listWidget()->addItem( new ListEditorItem( newCleanup->cleanTitle(), newCleanup ) );
+	Cleanup * newCleanup = new Cleanup{ cleanup };
+	createItem( newCleanup->cleanTitle(), newCleanup );
     }
 
-    listWidget()->setCurrentRow( 0 );
+    _ui->listWidget->setCurrentRow( 0 );
 }
 
 
-void CleanupConfigPage::enableWidgets()
+void CleanupConfigPage::enableWindowPolicyWidgets()
 {
     const int  policyIndex      = _ui->outputWindowPolicyComboBox->currentIndex();
     const bool show             = policyIndex != Cleanup::ShowNever;
@@ -138,7 +126,7 @@ void CleanupConfigPage::enableWidgets()
 
 void CleanupConfigPage::titleChanged( const QString & newTitle )
 {
-    QListWidgetItem * currentItem = listWidget()->currentItem();
+    QListWidgetItem * currentItem = _ui->listWidget->currentItem();
 
     if ( currentItem )
     {
@@ -152,9 +140,7 @@ void CleanupConfigPage::titleChanged( const QString & newTitle )
 void CleanupConfigPage::save( void * value )
 {
     Cleanup * cleanup = CLEANUP_CAST( value );
-    // logDebug() << cleanup << Qt::endl;
-
-    if ( !cleanup || updatesLocked() )
+    if ( !cleanup )
 	return;
 
     cleanup->setActive ( _ui->activeGroupBox->isChecked() );
@@ -190,13 +176,14 @@ void CleanupConfigPage::save( void * value )
 
 void CleanupConfigPage::load( void * value )
 {
-    if ( updatesLocked() )
-	return;
-
     const Cleanup * cleanup = CLEANUP_CAST( value );
     if ( !cleanup )
     {
 	enableEditWidgets( false );
+	_ui->titleLineEdit->clear();
+	_ui->commandLineEdit->clear();
+	_ui->keySequenceEdit->clear();
+	_ui->icon->clear();
 
 	return;
     }
@@ -209,7 +196,7 @@ void CleanupConfigPage::load( void * value )
     _ui->keySequenceEdit->setKeySequence( cleanup->shortcut().toString() );
 
     QIcon icon = cleanup->icon();
-    _ui->icon->setPixmap( icon.pixmap( icon.actualSize( QSize( 24, 24 ) ) ) );
+    _ui->icon->setPixmap( icon.pixmap( icon.actualSize( QSize{ 24, 24 } ) ) );
 
     if ( cleanup->shell().isEmpty() )
     {
@@ -244,13 +231,13 @@ void CleanupConfigPage::load( void * value )
 }
 
 
-void * CleanupConfigPage::createValue()
+void * CleanupConfigPage::newValue()
 {
-    return new Cleanup();
+    return new Cleanup {};
 }
 
 
-void CleanupConfigPage::removeValue( void * value )
+void CleanupConfigPage::deleteValue( void * value )
 {
     delete CLEANUP_CAST( value );
 }

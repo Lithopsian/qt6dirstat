@@ -53,7 +53,7 @@ namespace
 
         if ( path != "/"_L1 && path.contains( u'/' ) )
         {
-            QStringList components = path.split( u'/', Qt::SkipEmptyParts );
+            QStringList components{ path.split( u'/', Qt::SkipEmptyParts ) };
 
             if ( !components.empty() )
                 name_ret = components.takeLast();
@@ -69,7 +69,7 @@ namespace
 
 
 BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
-    QLabel { parent }
+    QLabel{ parent }
 {
     clear();
 
@@ -213,7 +213,7 @@ int BreadcrumbNavigator::breadcrumbsLen() const
 
     for ( const Breadcrumb & crumb : asConst( _breadcrumbs ) )
     {
-        const QString & name = crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName;
+        const QString & name{ crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName };
 
         len += name.length();
 

@@ -71,8 +71,8 @@ namespace
 
 
 FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FileAgeStatsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FileAgeStatsWindow }
 {
     // logDebug() << "init" << Qt::endl;
 
@@ -126,7 +126,7 @@ FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
     static QPointer<FileAgeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FileAgeStatsWindow( parent );
+	_sharedInstance = new FileAgeStatsWindow{ parent };
 
     return _sharedInstance;
 }
@@ -137,14 +137,14 @@ void FileAgeStatsWindow::initWidgets()
     // Set the row height based on the configured DirTree icon height
     app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
 
-    const QStringList headers { tr( "Year"    ),
-                                tr( "Files"   ),
-                                tr( "Files %" ),  // percent bar
-                                tr( "%"       ),  // percent value
-                                tr( "Size"    ),
-                                tr( "Size %"  ),  // percent bar
-                                tr( "%"       ),  // percent value
-                              };
+    const QStringList headers{ tr( "Year"    ),
+                               tr( "Files"   ),
+                               tr( "Files %" ),  // percent bar
+                               tr( "%"       ),  // percent value
+                               tr( "Size"    ),
+                               tr( "Size %"  ),  // percent bar
+                               tr( "%"       ),  // percent value
+                             };
     _ui->treeWidget->setHeaderLabels( headers );
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignCenter );
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
@@ -152,7 +152,7 @@ void FileAgeStatsWindow::initWidgets()
 
 
 void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-						 FileInfo       * fileInfo )
+                                                 FileInfo       * fileInfo )
 {
     if ( !fileInfo )
         return;
@@ -224,7 +224,7 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 	if ( yearStats )
 	{
 	    // Add a year item
-	    YearListItem * item = new YearListItem( *yearStats );
+	    YearListItem * item = new YearListItem{ *yearStats };
 	    _ui->treeWidget->addTopLevelItem( item );
 
 	    // Add the month items if applicable
@@ -235,7 +235,7 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 		    YearStats * monthStats = stats.monthStats( year, month );
 		    if ( monthStats )
 		    {
-			YearListItem * monthItem = new YearListItem( *monthStats );
+			YearListItem * monthItem = new YearListItem{ *monthStats };
 			item->addChild( monthItem );
 
 			if ( monthStats->filesCount == 0 )
@@ -255,7 +255,7 @@ void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
     const auto gaps = findGaps( stats, _startGapsWithCurrentYear );
     for ( short year : gaps )
     {
-	YearListItem * item = new YearListItem( YearStats( year ) );
+	YearListItem * item = new YearListItem{ YearStats{ year } };
 	item->setFlags( Qt::NoItemFlags ); // disabled
 	_ui->treeWidget->addTopLevelItem( item );
     }
@@ -301,7 +301,7 @@ void FileAgeStatsWindow::readSettings()
     int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
 
     const QColor percentBarBackground =
-	settings.colorValue    ( "PercentBarBackground",  QColor( 160, 160, 160 ) );
+	settings.colorValue    ( "PercentBarBackground",  QColor{ 160, 160, 160 } );
     const ColorList filesPercentBarColors =
 	settings.colorListValue( "FilesPercentBarColors", { 0xbb0000, 0x00aa00 } );
     const ColorList sizePercentBarColors =
@@ -318,18 +318,18 @@ void FileAgeStatsWindow::readSettings()
     Settings::readWindowSettings( this, "FileAgeStatsWindow" );
 
     // Delegates for the two percent bars
-    _filesPercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
-						       YearListFilesPercentBarCol,
-						       percentBarWidth,
-						       percentBarBackground,
-						       filesPercentBarColors );
+    _filesPercentBarDelegate = new PercentBarDelegate{ _ui->treeWidget,
+                                                       YearListFilesPercentBarCol,
+                                                       percentBarWidth,
+                                                       percentBarBackground,
+                                                       filesPercentBarColors };
     _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
 
-    _sizePercentBarDelegate = new PercentBarDelegate( _ui->treeWidget,
-						      YearListSizePercentBarCol,
-						      percentBarWidth,
-						      percentBarBackground,
-						      sizePercentBarColors );
+    _sizePercentBarDelegate = new PercentBarDelegate{ _ui->treeWidget,
+                                                      YearListSizePercentBarCol,
+                                                      percentBarWidth,
+                                                      percentBarBackground,
+                                                      sizePercentBarColors };
     _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
 }
 
@@ -373,13 +373,13 @@ void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 
 
 YearListItem::YearListItem( const YearStats & stats ) :
-    QTreeWidgetItem { QTreeWidgetItem::UserType },
-    _year { stats.year },
-    _month { stats.month },
-    _filesCount { stats.filesCount },
-    _filesPercent { stats.filesPercent },
-    _size { stats.size },
-    _sizePercent { stats.sizePercent }
+    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    _year{ stats.year },
+    _month{ stats.month },
+    _filesCount{ stats.filesCount },
+    _filesPercent{ stats.filesPercent },
+    _size{ stats.size },
+    _sizePercent{ stats.sizePercent }
 {
     const bool monthItem = _month > 0;
     const QString text = monthItem ? monthAbbreviation( _month ) : QString::number( _year );

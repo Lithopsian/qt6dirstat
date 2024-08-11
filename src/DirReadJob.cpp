@@ -115,8 +115,8 @@ namespace
 
 DirReadJob::DirReadJob( DirTree * tree,
 			DirInfo * dir  ):
-    _tree { tree },
-    _dir { dir }
+    _tree{ tree },
+    _dir{ dir }
 {
     if ( _dir )
 	_dir->readJobAdded();
@@ -158,8 +158,8 @@ void DirReadJob::finished()
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
 				  DirInfo * dir,
 				  bool      applyFileChildExcludeRules ):
-    DirReadJob { tree, dir },
-    _applyFileChildExcludeRules { applyFileChildExcludeRules }
+    DirReadJob{ tree, dir },
+    _applyFileChildExcludeRules{ applyFileChildExcludeRules }
 {
     if ( dir )
 	_dirName = dir->url();
@@ -238,7 +238,7 @@ void LocalDirReadJob::startReading()
 	    {
 		if ( S_ISDIR( statInfo.st_mode ) )	// directory child
 		{
-		    processSubDir( entryName, new DirInfo( dir(), tree(), entryName, statInfo ) );
+		    processSubDir( entryName, new DirInfo{ dir(), tree(), entryName, statInfo } );
 		}
 		else  // non-directory child
 		{
@@ -275,7 +275,7 @@ void LocalDirReadJob::startReading()
                         statInfo.st_nlink = 1;
                     }
 #endif
-		    FileInfo * child = new FileInfo( dir(), tree(), entryName, statInfo );
+		    FileInfo * child = new FileInfo{ dir(), tree(), entryName, statInfo };
 
 		    if ( tree()->checkIgnoreFilters( fullName( entryName ) ) )
 			dir()->addToAttic( child );
@@ -327,14 +327,14 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
     }
     else if ( !crossingFilesystems( dir(), subDir ) ) // normal case
     {
-	tree()->addJob( new LocalDirReadJob( tree(), subDir, true ) );
+	tree()->addJob( new LocalDirReadJob{ tree(), subDir, true } );
     }
     else	    // The subdirectory we just found is a mount point.
     {
 	subDir->setMountPoint();
 
 	if ( tree()->crossFilesystems() && shouldCrossIntoFilesystem( subDir ) )
-	    tree()->addJob( new LocalDirReadJob( tree(), subDir, true ) );
+	    tree()->addJob( new LocalDirReadJob{ tree(), subDir, true } );
 	else
 	    subDir->finishReading( DirOnRequestOnly );
     }
@@ -347,7 +347,7 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
     const bool isToplevel = dir() && tree()->root() == dir()->parent();
     DirInfo * parent = isToplevel ? nullptr : dir()->parent();
 
-    CacheReadJob * cacheReadJob = new CacheReadJob( tree(), dir(), parent, cacheFullName );
+    CacheReadJob * cacheReadJob = new CacheReadJob{tree(), dir(), parent, cacheFullName };
 
     if ( cacheReadJob->reader() ) // Does this cache file match this directory?
     {
@@ -417,7 +417,7 @@ void LocalDirReadJob::handleLstatError( const QString & entryName )
      * Not much we can do when lstat() didn't work; let's at
      * least create an (almost empty) entry as a placeholder.
      */
-    DirInfo * child = new DirInfo( dir(), tree(), entryName );
+    DirInfo * child = new DirInfo{ dir(), tree(), entryName };
     child->finalizeLocal();
     child->setReadState( DirError );
     dir()->insertChild( child );
@@ -453,8 +453,8 @@ bool LocalDirReadJob::checkForNtfs()
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
 			    const QString & cacheFileName ):
-    DirReadJob { tree, nullptr },
-    _reader { new CacheReader( cacheFileName, tree ) }
+    DirReadJob{ tree, nullptr },
+    _reader{ new CacheReader{ cacheFileName, tree } }
 {
     init();
 }
@@ -464,8 +464,8 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 			    DirInfo       * dir,
 			    DirInfo       * parent,
 			    const QString & cacheFileName ):
-    DirReadJob { tree, parent },
-    _reader { new CacheReader( cacheFileName, tree, dir, parent ) }
+    DirReadJob{ tree, parent },
+    _reader{ new CacheReader{ cacheFileName, tree, dir, parent } }
 {
     init();
 }

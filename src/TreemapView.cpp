@@ -75,7 +75,7 @@ namespace
 
 
 TreemapView::TreemapView( QWidget * parent ):
-    QGraphicsView { parent }
+    QGraphicsView{ parent }
 {
     // Only one scene, never destroyed, create it now for simplicity
     setScene( new QGraphicsScene{ this } );
@@ -398,7 +398,7 @@ void TreemapView::rebuildTreemap( FileInfo * newRoot )
         _threadPool = new QThreadPool{};
         _threadPool->setMaxThreadCount( _threadPool->maxThreadCount() * 2 );
 
-        TreemapTile * tile{ new TreemapTile{ this, newRoot, rect } };
+        TreemapTile * tile = new TreemapTile{ this, newRoot, rect };
 
         delete _threadPool; // will wait for all the render threads to complete
 
@@ -518,7 +518,7 @@ void TreemapView::calculateSettings()
     // Directory gradient can't currently change after startup, but calculate it here anyway
     if ( _useDirGradient )
     {
-        _dirGradient = QLinearGradient();
+        _dirGradient = QLinearGradient{};
         _dirGradient.setCoordinateMode( QGradient::ObjectMode );
         _dirGradient.setColorAt( 0, _dirGradientStart );
         _dirGradient.setColorAt( 1, _dirGradientEnd   );
@@ -861,7 +861,7 @@ HighlightRect::HighlightRect( const TreemapTile * tile,
                               int                 lineWidth,
                               Qt::PenStyle        lineStyle,
                               qreal               zValue ):
-    QGraphicsRectItem { tile->rect() }
+    QGraphicsRectItem{ tile->rect() }
 {
     setPen( QPen( color, lineWidth, lineStyle ) );
     setZValue( zValue );
@@ -891,7 +891,7 @@ QPainterPath ParentTileHighlighter::shape() const
 
 
 SceneMask::SceneMask( const TreemapTile * tile, int opacity ):
-    QGraphicsPathItem {}
+    QGraphicsPathItem{ this }
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
     CHECK_PTR( tile );

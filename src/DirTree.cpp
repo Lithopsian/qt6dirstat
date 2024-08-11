@@ -42,15 +42,15 @@ namespace
      * 'doThrow' is 'true', and it just returns 0 if it is 'false'.
      **/
     FileInfo * stat( const QString & url,
-		     DirTree       * tree,
-		     DirInfo       * parent )
+                     DirTree       * tree,
+                     DirInfo       * parent )
     {
 	// logDebug() << "url: \"" << url << '"' << Qt::endl;
 
 	struct stat statInfo;
 	if ( lstat( url.toUtf8(), &statInfo ) != 0 ) // lstat() failed
 	{
-	    THROW( SysCallFailedException( "lstat", url ) );
+	    THROW( ( SysCallFailedException{ "lstat", url } ) );
 	    return nullptr;
 	}
 
@@ -59,13 +59,13 @@ namespace
 
 	if ( !S_ISDIR( statInfo.st_mode ) ) // not directory
 	{
-	    FileInfo * file = new FileInfo( parent, tree, name, statInfo );
+	    FileInfo * file = new FileInfo{ parent, tree, name, statInfo };
 	    parent->insertChild( file );
 
 	    return file;
 	}
 
-	DirInfo * dir = new DirInfo( parent, tree, name, statInfo );
+	DirInfo * dir = new DirInfo{ parent, tree, name, statInfo };
 	parent->insertChild( dir );
 
 	if ( !isRoot && !parent->isPkgInfo() && !parent->isFromCache() && dir->device() != parent->device() )
@@ -85,7 +85,7 @@ namespace
      **/
     void recalc( DirInfo * dir )
     {
-	for ( DirInfoIterator it { dir }; *it; ++it )
+	for ( DirInfoIterator it{ dir }; *it; ++it )
 	    recalc( *it );
 
 	if ( dir->dotEntry() )
@@ -129,7 +129,7 @@ namespace
 	DirInfo * parent = attic->parent();
 	if ( parent ) // an attic should always have a parent
 	{
-	    emit tree->deletingChildren( attic, FileInfoSet { atticChild } );
+	    emit tree->deletingChildren( attic, FileInfoSet{ atticChild } );
 	    attic->unlinkChild( atticChild );
 	    emit tree->childrenDeleted();
 	    atticChild->setIgnored( false );
@@ -161,7 +161,7 @@ namespace
 	if ( dir->attic() )
 	    dir->moveAllFromAttic();
 
-	for ( DotEntryIterator it { item }; it != nullptr ; ++it )
+	for ( DotEntryIterator it{ item }; it != nullptr ; ++it )
 	    unatticAll( *it );
     }
 
@@ -175,7 +175,7 @@ namespace
 	if ( !dir )
 	    return;
 
-	DotEntryIterator it { dir };
+	DotEntryIterator it{ dir };
 	while ( *it )
 	{
 	    FileInfo * child = *it;
@@ -228,23 +228,23 @@ namespace
      **/
     void createLocalDirReadJob( DirTree * tree, FileInfo * item )
     {
-	tree->addJob( new LocalDirReadJob( tree, item->toDirInfo(), false ) );
+	tree->addJob( new LocalDirReadJob{ tree, item->toDirInfo(), false } );
     }
 
 } // namespace
 
 
 DirTree::DirTree( QObject * parent ):
-    QObject { parent },
-    _root { new DirInfo( this ) }
+    QObject{ parent },
+    _root{ new DirInfo{ this } }
 {
     setExcludeRules();
 
     connect( &_jobQueue, &DirReadJobQueue::finished,
-	     this,       &DirTree::sendFinished );
+             this,       &DirTree::sendFinished );
 
     connect( this,       &DirTree::deletingChild,
-	     &_jobQueue, &DirReadJobQueue::deletingChildNotify );
+             &_jobQueue, &DirReadJobQueue::deletingChildNotify );
 }
 
 
@@ -294,20 +294,13 @@ void DirTree::clear()
 }
 
 
-void DirTree::reset()
-{
-    clearTmpExcludeRules();
-    clearFilters();
-}
-
-
 void DirTree::startReading( const QString & rawUrl )
 {
     //logDebug() << "rawUrl: \"" << rawUrl << '"' << Qt::endl;
 
     _url = [ &rawUrl ]()
     {
-	const QFileInfo fileInfo( rawUrl );
+	const QFileInfo fileInfo{ rawUrl };
 
 	if ( fileInfo.isDir() ) // return the input path, just canonicalised
 	    return fileInfo.canonicalFilePath();
@@ -316,14 +309,14 @@ void DirTree::startReading( const QString & rawUrl )
 	    return fileInfo.canonicalPath();
 
 	if ( fileInfo.isSymLink() ) // symlink target doesn't exist, return symlink parent directory
-	    return QFileInfo( fileInfo.absolutePath() ).canonicalFilePath();
+	    return QFileInfo{ fileInfo.absolutePath() }.canonicalFilePath();
 
 	return fileInfo.absoluteFilePath(); // return nonexistent input file which should throw
     }();
 
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
     logInfo() << "url:    " << _url << Qt::endl;
-    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString() ) << Qt::endl;
+    logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString{} ) << Qt::endl;
 
     sendStartingReading();
 
@@ -498,7 +491,7 @@ void DirTree::deleteChild( FileInfo * child )
 
 void DirTree::deleteSubtree( DirInfo * subtree )
 {
-    emit deletingChildren( subtree->parent(), FileInfoSet { subtree } );
+    emit deletingChildren( subtree->parent(), FileInfoSet{ subtree } );
     deleteChild( subtree );
     emit childrenDeleted();
 }
@@ -618,7 +611,7 @@ bool DirTree::writeCache( const QString & cacheFileName )
 
 bool DirTree::readCache( const QString & cacheFileName )
 {
-    CacheReadJob * readJob = new CacheReadJob( this, cacheFileName );
+    CacheReadJob * readJob = new CacheReadJob{ this, cacheFileName };
 
     if ( !readJob->reader() )
     {
@@ -646,7 +639,7 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
 
 void DirTree::setExcludeRules()
 {
-    _excludeRules.reset( new ExcludeRules() );
+    _excludeRules.reset( new ExcludeRules{} );
 }
 
 

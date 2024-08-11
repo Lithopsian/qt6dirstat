@@ -20,8 +20,8 @@ using namespace QDirStat;
 
 
 OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
-    QDialog { parent },
-    _ui { new Ui::OutputWindow }
+    QDialog{ parent },
+    _ui{ new Ui::OutputWindow }
 {
     _ui->setupUi( this );
 
@@ -128,7 +128,7 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     QTextCursor cursor( _ui->terminal->textCursor() );
 
     QTextCharFormat format;
-    format.setForeground( QBrush( textColor ) );
+    format.setForeground( QBrush{ textColor } );
     cursor.setCharFormat( format );
     cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText + u'\n' );
 }
@@ -208,7 +208,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
 	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
 	    case QProcess::UnknownError:  return tr( "Unknown error." );
 	    case QProcess::Crashed:       return tr( "Crashed" );
-	    default:                      return QString();
+	    default:                      return QString{};
 	}
     }();
 
@@ -438,10 +438,10 @@ void OutputWindow::readSettings()
 
     settings.beginGroup( "OutputWindow" );
 
-    _terminalBackground  = settings.colorValue( "TerminalBackground", QColor( Qt::black        ) );
-    _commandTextColor    = settings.colorValue( "CommandTextColor",   QColor( Qt::white        ) );
-    _stdoutColor         = settings.colorValue( "StdoutTextColor",    QColor( 0xff, 0xaa, 0x00 ) );
-    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor( Qt::red          ) );
+    _terminalBackground  = settings.colorValue( "TerminalBackground", QColor{ Qt::black        } );
+    _commandTextColor    = settings.colorValue( "CommandTextColor",   QColor{ Qt::white        } );
+    _stdoutColor         = settings.colorValue( "StdoutTextColor",    QColor{ 0xff, 0xaa, 0x00 } );
+    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor{ Qt::red          } );
     _terminalDefaultFont = settings.fontValue ( "TerminalFont",       _ui->terminal->font()      );
 
     settings.setDefaultValue( "TerminalBackground", _terminalBackground  );

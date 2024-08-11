@@ -73,13 +73,13 @@ namespace QDirStat
 	 * Returns the string used to indicate a separator in menus
 	 * constructed by this class.
 	 **/
-	static const QLatin1String separator() { return QLatin1String( "---" ); }
+	static const QLatin1String separator() { return QLatin1String{ "---" }; }
 
 	/**
 	 * Returns the string used to indicate that a list of Cleanups
 	 * should be included in menus constructed by this class.
 	 **/
-	static const QLatin1String cleanups() { return QLatin1String( "<Cleanups>" ); }
+	static const QLatin1String cleanups() { return QLatin1String{ "<Cleanups>" }; }
 
 	/**
 	 * Add all the actions listed in 'actionNames' to a widget.

@@ -48,8 +48,8 @@ namespace
 
 
     void qt_logger( QtMsgType                  msgType,
-		    const QMessageLogContext & context,
-		    const QString            & msg )
+                    const QMessageLogContext & context,
+                    const QString            & msg )
     {
 	const QStringList lines = msg.split( u'\n' );
 	for ( QString line : lines )
@@ -118,13 +118,12 @@ namespace
      * Prefix each line of a multi-line text with 'prefix'.
      */
     QString prefixLines( const QString & prefix,
-			 const QString & multiLineText )
+                         const QString & multiLineText )
     {
 	const QStringList lines = multiLineText.split( u'\n' );
-	QString result = lines.isEmpty() ? QString() : prefix;
-	result += lines.join( '\n' % prefix );
+	const QString result = lines.join( '\n' % prefix );
 
-	return result;
+	return result.isEmpty() ? result : prefix % result;
     }
 
 
@@ -132,11 +131,9 @@ namespace
      * Indent each line of a multi-line text with 'indentWith' blanks.
      */
     QString indentLines( int             indentWidth,
-			 const QString & multiLineText )
+                         const QString & multiLineText )
     {
-	const QString prefix( indentWidth, u' ' );
-
-	return prefixLines( prefix, multiLineText );
+	return prefixLines( QString{ indentWidth, u' ' }, multiLineText );
     }
 #endif
 
@@ -164,8 +161,8 @@ namespace
      **/
     QString createLogDir( const QString & rawLogDir )
     {
-	QString logDir( rawLogDir );
-	const QDir rootDir( "/" );
+	QString logDir{ rawLogDir };
+	const QDir rootDir{ "/" };
 	bool created = false;
 
 	if ( !rootDir.exists( logDir ) )
@@ -174,12 +171,12 @@ namespace
 	    created = true;
 	}
 
-	const QFileInfo dirInfo( logDir );
-	if ( (uid_t)dirInfo.ownerId() != getuid() )
+	const QFileInfo dirInfo{ logDir };
+	if ( dirInfo.ownerId() != getuid() )
 	{
 	    logError() << "ERROR: Directory " << logDir << " is not owned by " << userName() << Qt::endl;
 
-	    QByteArray nameTemplate( QString( logDir % "-XXXXXX" ).toUtf8() );
+	    QByteArray nameTemplate{ QString{ logDir % "-XXXXXX" }.toUtf8() };
 	    const char * result = mkdtemp( nameTemplate.data() );
 	    if ( result )
 	    {
@@ -189,7 +186,7 @@ namespace
 	    else
 	    {
 		logError() << "Could not create log dir " << nameTemplate
-			   << ": " << formatErrno() << Qt::endl;
+		           << ": " << formatErrno() << Qt::endl;
 
 		logDir = "/";
 		// No permissions to write to /,
@@ -199,7 +196,7 @@ namespace
 
 	if ( created )
 	{
-	    QFile dir( logDir );
+	    QFile dir{ logDir };
 	    dir.setPermissions( QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner );
 	}
 
@@ -213,9 +210,9 @@ namespace
      **/
     QString oldName( const QString & filename, int no )
     {
-	QString oldName = filename;
-	oldName.remove( QRegularExpression( "\\.log$" ) );
-	oldName += QString( "-%1.old" ).arg( no, 2, 10, QChar( u'0' ) );
+	QString oldName{ filename };
+	oldName.remove( QRegularExpression{ "\\.log$" } );
+	oldName += QString{ "-%1.old" }.arg( no, 2, 10, QChar{ u'0' } );
 
 	return oldName;
     }
@@ -227,8 +224,8 @@ namespace
      **/
     QString oldNamePattern( const QString & filename )
     {
-	QString pattern = filename;
-	pattern.remove( QRegularExpression( "\\.log$" ) );
+	QString pattern{ filename };
+	pattern.remove( QRegularExpression{ "\\.log$" } );
 	pattern += "-??.old";
 
 	return pattern;
@@ -241,17 +238,17 @@ namespace
      * delete all other old logs.
      **/
     void logRotate( const QString & logDir,
-		    const QString & filename,
-		    int             logRotateCount )
+                    const QString & filename,
+                    int             logRotateCount )
     {
-	QDir dir( logDir );
+	QDir dir{ logDir };
 	QStringList keepers;
 	keepers << filename;
 
 	for ( int i = logRotateCount - 1; i >= 0; --i )
 	{
 	    const QString currentName = i > 0 ? oldName( filename, i-1 ) : filename;
-	    const QString newName           = oldName( filename, i );
+	    const QString newName = oldName( filename, i );
 
 	    if ( dir.exists( newName ) )
 	    {
@@ -268,15 +265,15 @@ namespace
 		Q_UNUSED( success );
     #if VERBOSE_ROTATE
 		logDebug() << "Renaming " << currentName << " to " << newName
-			   << ( success ? "" : " FAILED" )
-			   << Qt::endl;
+		           << ( success ? "" : " FAILED" )
+		           << Qt::endl;
     #endif
 
 		keepers << newName;
 	    }
 	}
 
-	const QStringList matches = dir.entryList( QStringList( oldNamePattern( filename ) ), QDir::Files );
+	const auto matches = dir.entryList( QStringList{ oldNamePattern( filename ) }, QDir::Files );
 	for ( const QString & match : matches )
 	{
 	    if ( !keepers.contains( match ) )
@@ -299,7 +296,7 @@ namespace
      **/
     QString expandVariables( const QString & unexpanded )
     {
-	QString expanded = unexpanded;
+	QString expanded{ unexpanded };
 	expanded.replace( "$USER"_L1, userName() );
 	expanded.replace( "$UID"_L1 , QString::number( getuid() ) );
 
@@ -313,8 +310,8 @@ Logger * Logger::_defaultLogger = nullptr;
 
 
 Logger::Logger( const QString & filename ):
-    _logStream { stderr, QIODevice::WriteOnly },
-    _nullStream { stderr, QIODevice::WriteOnly }
+    _logStream{ stderr, QIODevice::WriteOnly },
+    _nullStream{ stderr, QIODevice::WriteOnly }
 {
     init();
     createNullStream();
@@ -323,17 +320,17 @@ Logger::Logger( const QString & filename ):
 
 
 Logger::Logger( const QString & rawLogDir,
-		const QString & rawFilename,
-		bool            doRotate,
-		int             logRotateCount ):
-    _logStream { stderr, QIODevice::WriteOnly },
-    _nullStream { stderr, QIODevice::WriteOnly }
+                const QString & rawFilename,
+                bool            doRotate,
+                int             logRotateCount ):
+    _logStream{ stderr, QIODevice::WriteOnly },
+    _nullStream{ stderr, QIODevice::WriteOnly }
 {
     init();
     createNullStream();
 
     const QString filename = expandVariables( rawFilename );
-    QString logDir         = expandVariables( rawLogDir   );
+    QString logDir = expandVariables( rawLogDir );
     logDir = createLogDir( logDir );
 
     if ( doRotate )
@@ -415,12 +412,12 @@ void Logger::setDefaultLogger()
 
 
 QTextStream & Logger::log( Logger        * logger,
-			   const QString & srcFile,
-			   int             srcLine,
-			   const QString & srcFunction,
-			   LogSeverity     severity )
+                           const QString & srcFile,
+                           int             srcLine,
+                           const QString & srcFunction,
+                           LogSeverity     severity )
 {
-    static QTextStream stderrStream( stderr, QIODevice::WriteOnly );
+    static QTextStream stderrStream{ stderr, QIODevice::WriteOnly };
 
     if ( !logger )
 	logger = Logger::defaultLogger();
@@ -433,9 +430,9 @@ QTextStream & Logger::log( Logger        * logger,
 
 
 QTextStream & Logger::log( const QString & srcFile,
-			   int             srcLine,
-			   const QString & srcFunction,
-			   LogSeverity     severity )
+                           int             srcLine,
+                           const QString & srcFunction,
+                           LogSeverity     severity )
 {
     if ( severity < _logLevel )
 	return _nullStream;
@@ -449,8 +446,8 @@ QTextStream & Logger::log( const QString & srcFile,
 	    case LogSeverityInfo:    return "<Info>   ";
 	    case LogSeverityWarning: return "<WARNING>";
 	    case LogSeverityError:   return "<ERROR>  ";
-		// Intentionally omitting 'default' branch so the compiler can
-		// complain about unhandled enum values
+	    // Intentionally omitting 'default' branch so the compiler can
+	    // complain about unhandled enum values
 	}
 	return "";
     }();

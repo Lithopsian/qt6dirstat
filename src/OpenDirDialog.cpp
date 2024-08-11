@@ -16,7 +16,6 @@
 #include "OpenDirDialog.h"
 #include "ExistingDir.h"
 #include "Logger.h"
-#include "MountPoints.h"
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -28,16 +27,14 @@ using namespace QDirStat;
 
 
 OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
-    QDialog { parent },
-    _ui { new Ui::OpenDirDialog },
-    _filesystemModel { new QFileSystemModel( this ) }
+    QDialog{ parent },
+    _ui{ new Ui::OpenDirDialog },
+    _filesystemModel{ new QFileSystemModel{ this } }
 {
     _ui->setupUi( this );
 
-    MountPoints::reload();
-
     _ui->pathSelector->addHomeDir();
-    _ui->pathSelector->addMountPoints( MountPoints::normalMountPoints() );
+    _ui->pathSelector->addNormalMountPoints();
     _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
 
     initPathComboBox();
@@ -67,7 +64,7 @@ void OpenDirDialog::initPathComboBox()
     if ( lineEdit )
         lineEdit->setClearButtonEnabled( true );
 
-    _validator = new ExistingDirValidator( this );
+    _validator = new ExistingDirValidator{ this };
     _ui->pathComboBox->setValidator( _validator );
 }
 
@@ -252,7 +249,7 @@ QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
     if ( dialog.exec() == QDialog::Rejected )
     {
         //logInfo() << "[Cancel]" << Qt::endl;
-        return QString();
+        return QString{};
     }
 
     // Remember the flag just for the next time the dialog is opened

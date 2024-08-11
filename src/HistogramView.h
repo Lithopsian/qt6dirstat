@@ -74,7 +74,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	HistogramView( QWidget * parent = nullptr ):
-	    QGraphicsView { parent }
+	    QGraphicsView{ parent }
 	{}
 
 	/**
@@ -320,19 +320,19 @@ namespace QDirStat
 	//
 
 	// Collected statistics data
-	const FileSizeStats * _stats { nullptr };
+	const FileSizeStats * _stats{ nullptr };
 
 	// Flags not currently configurable
-	const bool _showMedian			{ true };
-	const bool _showQuartiles		{ true };
-	const int  _leftMarginPercentiles	{ 0 };
-	const int  _rightMarginPercentiles	{ 5 };
+	const bool _showMedian{ true };
+	const bool _showQuartiles{ true };
+	const int  _leftMarginPercentiles{ 0 };
+	const int  _rightMarginPercentiles{ 5 };
 
 	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
 	bool _useLogHeightScale;
-	int  _percentileStep { 0 };
+	int  _percentileStep{ 0 };
 
 	// Brushes and pens
 	QBrush _panelBackground;

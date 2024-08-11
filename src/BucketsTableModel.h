@@ -38,7 +38,7 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	BucketsTableModel( QObject * parent ):
-	    QAbstractTableModel { parent }
+	    QAbstractTableModel{ parent }
 	{}
 
 	/**
@@ -92,7 +92,7 @@ namespace QDirStat
 
     private:
 
-        const FileSizeStats * _stats { nullptr };
+	const FileSizeStats * _stats{ nullptr };
 
     }; // class BucketsTableModel
 

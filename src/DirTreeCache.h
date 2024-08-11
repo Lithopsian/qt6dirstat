@@ -41,7 +41,7 @@ namespace QDirStat
 	 * Check CacheWriter::ok() to see if writing the cache file went OK.
 	 **/
 	CacheWriter( const QString & fileName, DirTree * tree ):
-	    _ok { writeCache( fileName, tree ) }
+	    _ok{ writeCache( fileName, tree ) }
 	{}
 
 	/**
@@ -78,9 +78,9 @@ namespace QDirStat
 	 * a valid cache file.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree       * tree,
-		     DirInfo       * parent,
-		     bool            markFromCache );
+	             DirTree       * tree,
+	             DirInfo       * parent,
+	             bool            markFromCache );
 
     public:
 
@@ -89,8 +89,8 @@ namespace QDirStat
 	 * the cache file will be placed at the root of the tree.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree       * tree ):
-	    CacheReader { fileName, tree, nullptr, false }
+	             DirTree       * tree ):
+	    CacheReader{ fileName, tree, nullptr, false }
 	{}
 
 	/**
@@ -101,9 +101,9 @@ namespace QDirStat
 	 * can be made aware of what has happened.
 	 **/
 	CacheReader( const QString & fileName,
-		     DirTree       * tree,
-		     DirInfo       * dir,
-		     DirInfo       * parent );
+	             DirTree       * tree,
+	             DirInfo       * dir,
+	             DirInfo       * parent );
 
 	/**
 	 * Destructor
@@ -189,14 +189,14 @@ namespace QDirStat
 	 * being cut off because it looks like a URL protocol.
 	 **/
 	QString unescapedPath( const QString & rawPath ) const
-	    { return QUrl( "foo:"_L1 % cleanPath( rawPath ) ).path(); }
+	    { return QUrl{ "foo:"_L1 % cleanPath( rawPath ) }.path(); }
 
 	/**
 	 * Clean a path: Replace duplicate (or triplicate or more) slashes with
 	 * just one. QUrl doesn't seem to handle those well.
 	 **/
 	QString cleanPath( const QString & rawPath ) const
-	    { return QString( rawPath ).replace( _multiSlash, "/" ); }
+	    { return QString{ rawPath }.replace( _multiSlash, "/" ); }
 
 	/**
 	 * Recursively set the read status of all dirs from 'dir' on, send tree
@@ -220,20 +220,20 @@ namespace QDirStat
 
 	gzFile    _cache;
 	char      _buffer[ MAX_CACHE_LINE_LEN + 1 ];
-	char    * _line		{ _buffer };
-	int       _lineNo	{ 0 };
+	char    * _line{ _buffer };
+	int       _lineNo{ 0 };
 	char    * _fields[ MAX_FIELDS_PER_LINE ];
 	int       _fieldsCount;
 	bool      _markFromCache;
-	bool      _ok		{ false };
-	int       _errorCount	{ 0 };
+	bool      _ok{ false };
+	int       _errorCount{ 0 };
 
 	DirTree * _tree;
 	DirInfo * _parent; // parent directory if there is one
-	DirInfo * _toplevel	{ nullptr }; // the parent if there is one, otherwise the top level of the cache file
-	DirInfo * _latestDir	{ nullptr }; // the latest drectory read from the cache file, parent to subsequent file children
+	DirInfo * _toplevel{ nullptr }; // the parent if there is one, otherwise the top level of the cache file
+	DirInfo * _latestDir{ nullptr }; // the latest drectory read from the cache file, parent to subsequent file children
 
-	QRegularExpression	_multiSlash { "//+" };
+	QRegularExpression _multiSlash{ "//+" };
 
     }; // CacheReader
 

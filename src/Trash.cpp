@@ -32,7 +32,7 @@ namespace
      **/
     void ensureDirExists( const QString & path )
     {
-	const QDir dir( path );
+	const QDir dir{ path };
 
 	if ( !dir.exists() )
 	{
@@ -41,9 +41,8 @@ namespace
 	    const int result = mkdir( path.toUtf8(), 0700 );
 	    if ( result < 0 )
 	    {
-		THROW( FileException( path,
-				      QString( "Could not create directory %1: %2" )
-				      .arg( path ).arg( formatErrno() ) ) );
+		const QString what{ "Could not create directory %1: %2" };
+		THROW( ( FileException{ path, what.arg( path ).arg( formatErrno() ) } ) );
 	    }
 	}
     }
@@ -73,7 +72,7 @@ namespace
      **/
     QString toplevel( const QString & rawPath, dev_t dev )
     {
-	const QFileInfo fileInfo( rawPath );
+	const QFileInfo fileInfo{ rawPath };
 	QString path = fileInfo.canonicalPath();
 	QStringList components = path.split( u'/', Qt::SkipEmptyParts );
 
@@ -141,7 +140,7 @@ namespace
 	TrashDir * newTrashDir;
 	try
 	{
-	    newTrashDir = new TrashDir( trashPath, dev );
+	    newTrashDir = new TrashDir{ trashPath, dev };
 	}
 	catch ( const FileException & ex )
 	{
@@ -164,14 +163,14 @@ Trash::Trash()
     const dev_t homeDevice  = device( homePath );
     const QString homeTrash = [ &homePath ]()
     {
-	const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString() );
+	const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString{} );
 	return xdgHome.isEmpty() ? homePath % "/.local/share"_L1 : xdgHome;
     }() % "/Trash"_L1;
 
     // new TrashDir can throw, although very unlikely for the home device
     try
     {
-	_homeTrashDir = new TrashDir( homeTrash, homeDevice );
+	_homeTrashDir = new TrashDir{ homeTrash, homeDevice };
     }
     catch ( const FileException & ex )
     {
@@ -253,8 +252,8 @@ void Trash::empty()
 
 
 TrashDir::TrashDir( const QString & path, dev_t device ):
-    _path { path },
-    _device { device }
+    _path{ path },
+    _device{ device }
 {
     // Will throw if a directory doesn't exist and cannot be created
     ensureDirExists( path        );
@@ -267,16 +266,16 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
 
 QString TrashDir::uniqueName( const QString & path )
 {
-    const QDir filesDir( filesPath() );
+    const QDir filesDir{ filesPath() };
 
-    const QFileInfo file( path );
+    const QFileInfo file{ path };
     QString name = file.fileName();
 
     for ( int i = 1; filesDir.exists( name ); ++i )
     {
 	const QString baseName = file.baseName();
 	const QString suffix   = file.completeSuffix();
-	name = QString( "%1_%2" ).arg( baseName ).arg( i );
+	name = QString{ "%1_%2" }.arg( baseName ).arg( i );
 	if ( !suffix.isEmpty() )
 	    name += '.' % suffix;
     }
@@ -288,12 +287,12 @@ QString TrashDir::uniqueName( const QString & path )
 void TrashDir::createTrashInfo( const QString & path,
 				const QString & targetName )
 {
-    QFile trashInfo( infoPath() % '/' % targetName % ".trashinfo"_L1 );
+    QFile trashInfo{ infoPath() % '/' % targetName % ".trashinfo"_L1 };
 
     if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
-	THROW( FileException( trashInfo.fileName(), "Can't open "_L1 % trashInfo.fileName() ) );
+	THROW( ( FileException{ trashInfo.fileName(), "Can't open "_L1 % trashInfo.fileName() } ) );
 
-    QTextStream str( &trashInfo );
+    QTextStream str{ &trashInfo };
     str << "[Trash Info]" << Qt::endl;
     str << "Path=" << path << Qt::endl;
     str << "DeletionDate=" << QDateTime::currentDateTime().toString( Qt::ISODate ) << Qt::endl;
@@ -303,11 +302,11 @@ void TrashDir::createTrashInfo( const QString & path,
 void TrashDir::move( const QString & path,
 		     const QString & targetName )
 {
-    QFile file( path );
+    QFile file{ path };
     const QString targetPath = filesPath() % '/' % targetName;
 
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
     const bool success = file.rename( targetPath );
     if ( !success )
-	THROW( FileException( path, QString( "Could not move %1 to %2" ).arg( path, targetPath ) ) );
+	THROW( ( FileException{ path, QString{ "Could not move %1 to %2" }.arg( path, targetPath ) } ) );
 }

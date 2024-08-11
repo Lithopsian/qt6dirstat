@@ -35,9 +35,9 @@ namespace QDirStat
          * Constructor.
          **/
         ProcessStarter( int maxParallel, bool autoDelete, QObject * parent = nullptr ):
-            QObject { parent },
-            _maxParallel { maxParallel },
-            _autoDelete { autoDelete }
+            QObject{ parent },
+            _maxParallel{ maxParallel },
+            _autoDelete{ autoDelete }
         {}
 
         /**
@@ -101,7 +101,7 @@ namespace QDirStat
 
         int               _maxParallel;
         bool              _autoDelete;
-        bool              _started	{ false };
+        bool              _started{ false };
         QList<QProcess *> _running;
         QList<QProcess *> _waiting;
 

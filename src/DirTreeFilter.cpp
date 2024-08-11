@@ -28,15 +28,15 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
     if ( pattern.startsWith( "*."_L1 ) )
     {
 	// Remove the leading "*"
-	const QString suffix = QString( pattern ).remove( 0, 1 );
+	const QString suffix = QString{ pattern }.remove( 0, 1 );
 
 	// Use a suffix filter if the suffix contains only "word" characters
-	if ( QRegularExpression( "\\A\\.(?:\\w+)\\z" ).match( suffix ).hasMatch() )
-	    return new DirTreeSuffixFilter( suffix );
+	if ( QRegularExpression{ "\\A\\.(?:\\w+)\\z" }.match( suffix ).hasMatch() )
+	    return new DirTreeSuffixFilter{ suffix };
     }
 
     // Create a more general pattern filter if the pattern wasn't suitable for suffix matching
-    return new DirTreePatternFilter( pattern );
+    return new DirTreePatternFilter{ pattern };
 }
 
 
@@ -72,8 +72,8 @@ bool DirTreeSuffixFilter::ignore( const QString & path ) const
 
 
 DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager ):
-    DirTreeFilter {},
-    _fileListCache { pkgManager->createFileListCache( PkgFileListCache::LookupGlobal ) }
+    DirTreeFilter{},
+    _fileListCache{ pkgManager->createFileListCache( PkgFileListCache::LookupGlobal ) }
 {
     //logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;
     //logInfo() << "Done." << Qt::endl;

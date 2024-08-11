@@ -20,8 +20,8 @@ using namespace QDirStat;
 
 
 GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
-    QWidget { parent },
-    _ui { new Ui::GeneralConfigPage }
+    QWidget{ parent },
+    _ui{ new Ui::GeneralConfigPage }
 {
     _ui->setupUi( this );
 

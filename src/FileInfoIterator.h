@@ -72,7 +72,7 @@ namespace QDirStat
 	 * corresponds to a position past the last child.
 	 **/
 	FileInfoIterator( nullptr_t ):
-	    _current { nullptr }
+	    _current{ nullptr }
 	{}
 
 	/**
@@ -81,7 +81,7 @@ namespace QDirStat
 	 * returned in no particular order.
 	 **/
 	FileInfoIterator( const FileInfo * parent ):
-	    _current { parent->firstChild() }
+	    _current{ parent->firstChild() }
 	{}
 
 	/**
@@ -141,10 +141,10 @@ namespace QDirStat
 	using reference = DirInfo *;
 
 	DirInfoIterator( nullptr_t ):
-	    _current { nullptr }
+	    _current{ nullptr }
 	{}
 	DirInfoIterator( const FileInfo * parent ):
-	    _current { nextDirInfo( parent->firstChild() ) }
+	    _current{ nextDirInfo( parent->firstChild() ) }
 	{}
 
 	reference operator*() const { return _current; }
@@ -194,12 +194,12 @@ namespace QDirStat
 	using reference = FileInfo *;
 
 	DotEntryIterator( nullptr_t ):
-	    _dotEntry { nullptr },
-	    _current { nullptr }
+	    _dotEntry{ nullptr },
+	    _current{ nullptr }
 	{}
 	DotEntryIterator( const FileInfo * parent ):
-	    _dotEntry { parent->dotEntry() },
-	    _current { parent->firstChild() ? parent->firstChild() : _dotEntry }
+	    _dotEntry{ parent->dotEntry() },
+	    _current{ parent->firstChild() ? parent->firstChild() : _dotEntry }
 	{}
 
 	reference operator*() const { return _current; }
@@ -258,14 +258,14 @@ namespace QDirStat
 	using reference = FileInfo *;
 
 	AtticIterator( nullptr_t ):
-	    _dotEntry { nullptr },
-	    _attic { nullptr },
-	    _current { nullptr }
+	    _dotEntry{ nullptr },
+	    _attic{ nullptr },
+	    _current{ nullptr }
 	{}
 	AtticIterator( const FileInfo * parent ):
-	    _dotEntry { parent->dotEntry() },
-	    _attic { parent->attic() },
-	    _current { parent->firstChild() ? parent->firstChild() : _dotEntry ? _dotEntry : _attic }
+	    _dotEntry{ parent->dotEntry() },
+	    _attic{ parent->attic() },
+	    _current{ parent->firstChild() ? parent->firstChild() : _dotEntry ? _dotEntry : _attic }
 	{}
 
 	reference operator*() const { return _current; }
@@ -383,7 +383,7 @@ namespace QDirStat
 
 	BySizeIteratorList _sortedChildren;
 	BySizeIteratorPos  _currentIt;
-	FileSize           _totalSize { 0LL };
+	FileSize           _totalSize{ 0LL };
 
     }; // class BySizeIterator
 

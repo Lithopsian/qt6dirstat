@@ -16,8 +16,8 @@ using namespace QDirStat;
 
 
 OpenPkgDialog::OpenPkgDialog( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::OpenPkgDialog }
+    QDialog{ parent },
+    _ui{ new Ui::OpenPkgDialog }
 {
     // logDebug() << "init" << Qt::endl;
 

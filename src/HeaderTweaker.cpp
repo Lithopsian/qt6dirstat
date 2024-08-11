@@ -87,9 +87,9 @@ namespace
 
 
 HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
-    QObject { parent },
-    _treeView { parent },
-    _header { header }
+    QObject{ parent },
+    _treeView{ parent },
+    _header{ header }
 {
     CHECK_PTR( parent );
     CHECK_PTR( header );
@@ -126,7 +126,7 @@ void HeaderTweaker::initHeader()
 
 void HeaderTweaker::createColumnLayout( const QString & layoutName)
 {
-    _layouts[ layoutName ] = new ColumnLayout( layoutName );
+    _layouts[ layoutName ] = new ColumnLayout{ layoutName };
 }
 
 
@@ -145,7 +145,7 @@ void HeaderTweaker::createColumnLayouts()
 
 QAction * HeaderTweaker::createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) )
 {
-    QAction * action = new QAction( title, this );
+    QAction * action = new QAction{ title, this };
     menu->addAction( action );
     connect( action, &QAction::triggered, this, slot );
 
@@ -192,7 +192,7 @@ void HeaderTweaker::contextMenu( const QPoint & pos )
 QMenu * HeaderTweaker::createHiddenColMenu( QWidget * parent )
 {
     int actionCount = 0;
-    QMenu * hiddenColMenu = new QMenu( tr( "Hidden &Columns" ), parent );
+    QMenu * hiddenColMenu = new QMenu{ tr( "Hidden &Columns" ), parent };
 
     for ( int section = 0; section < _header->count(); ++section )
     {

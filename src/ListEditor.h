@@ -28,19 +28,12 @@ namespace QDirStat
      * list items, and optionally moving the current item up, down, to the
      * top, and to the bottom of the list.
      *
-     * This class does not own, create or destroy any widgets; it only uses
-     * widgets that have been created elsewhere, typically via a Qt Designer
-     * .ui file. The widgets should be set with any of the appropriate setter
-     * methods.
-     *
      * This class contains pure virtual methods; derived classes are required
      * to implement them.
      *
      * This class was first designed as a template class, but since even in
      * 2016 Qt's moc cannot handle templates, ugly void * and nightmarish
-     * type casts had to be used. This is due to deficiencies of the underlying
-     * tools, not by design. Yes, this is ugly. But it's the best that can be
-     * done with that moc preprocessor that dates back to 1995 or so.
+     * type casts had to be used.
      **/
     class ListEditor: public QWidget
     {
@@ -52,24 +45,39 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	ListEditor( QWidget * parent ):
-	    QWidget { parent }
+	    QWidget{ parent }
 	{}
 
 	/**
-	 * Destructor.
+	 * Destructor.  Just declared here for clarity.
 	 **/
 	~ListEditor() override = default;
 
 
     protected:
 
-	//
-	// Pure virtual methods that are required to be implemented by a
-	// derived class
-	//
+	/**
+	 * Return the list widget for this page.
+	 *
+	 * Derived classes are required to implement this.
+	 **/
+	virtual QListWidget * listWidget() const = 0;
 
 	/**
-	 * Fill the list widget: Create a ListEditorItem for each value.
+	 * Return a tool button for the derived class page.
+	 *
+	 * The default implementations return 0.  Derived classes can
+	 * reimplement if they have that button.
+	 **/
+	virtual QToolButton * toTopButton()    const { return nullptr; };
+	virtual QToolButton * moveUpButton()   const { return nullptr; };
+	virtual QToolButton * addButton()      const { return nullptr; };
+	virtual QToolButton * removeButton()   const { return nullptr; };
+	virtual QToolButton * moveDownButton() const { return nullptr; };
+	virtual QToolButton * toBottomButton() const { return nullptr; };
+
+	/**
+	 * Fill the list widget: create a QListWidgetItem for each value.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
@@ -90,26 +98,26 @@ namespace QDirStat
 	virtual void load( void * value ) = 0;
 
 	/**
-	 * Create a new Value_t item with default values and add it to the
+	 * Create a new value item with default values and add it to the
 	 * internal list.
 	 *
 	 * This is called when the 'Add' button is clicked.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
-	virtual void * createValue() = 0;
+	virtual void * newValue() = 0;
 
 	/**
-	 * Remove a value from the internal list and delete it.
+	 * Delete a value from the internal list.
 	 *
 	 * This is called when the 'Remove' button is clicked.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
-	virtual void removeValue( void * value ) = 0;
+	virtual void deleteValue( void * value ) = 0;
 
 	/**
-	 * Return a text for the list item of 'value'.
+	 * Return the text for the list item of 'value'.
 	 *
 	 * Derived classes are required to implement this.
 	 **/
@@ -149,120 +157,77 @@ namespace QDirStat
 	void toBottom();
 
 	/**
-	 * Enable or disable buttons depending on internal status.
-	 **/
-	virtual void updateActions();
-
-	/**
 	 * Notification that the current item in the list widget changed.
 	 **/
 	virtual void currentItemChanged( QListWidgetItem * current,
-					 QListWidgetItem * previous);
+	                                 QListWidgetItem * previous);
 
 
     protected:
 
 	/**
-	 * Set the QListWidget to work on.
+	 * Connect the list widget and toolbutton actions.  This can't
+	 * be done in the ListEditor constructor because the page UI
+	 * isn't set up yet.
 	 **/
-	void setListWidget( QListWidget * listWidget );
+	void connectActions();
 
 	/**
-	 * Return the QListWidget.
+	 * Create an action for a QToolButton.  Actions are only
+	 * created for pages that set the corresponding button.
+	 *
+	 * The new action is connected to the button and slot
+	 * function, and a hotkey set based on the settings and
+	 * the given default value.
 	 **/
-	QListWidget * listWidget() const { return _listWidget; }
+	void createAction( const QString      & actionName,
+	                   const QString      & icon,
+	                   const QString      & text,
+	                   const QKeySequence & keySequence,
+	                   QToolButton        * button,
+	                   void( ListEditor::*actee )( void ) );
 
 	/**
-	 * Return 'true' if updates are currently locked. save() and load()
-	 * should check this and do nothing if updates are locked.
+	 * Create a QListWidgetItem and add it to the list widget.
 	 **/
-	bool updatesLocked() const { return _updatesLocked; }
+	QListWidgetItem * createItem( const QString & valueText, void * value );
 
 	/**
-	 * Lock or unlock updates.
+	 * Enable or disable buttons depending on internal status.
 	 **/
-	void setUpdatesLocked( bool locked ) { _updatesLocked = locked; }
+	virtual void updateActions();
 
 	/**
-	 * Convert 'item' to a ListEditorItem<void *> and return its value.
+	 * Return the value (void *) for 'item'.
 	 **/
 	void * value( QListWidgetItem * item );
 
 	/**
+	 * Moves the current item to a new position in the list.
+	 **/
+	void moveCurrentItem( int newRow );
+
+	/**
 	 * Handle a right click.
+	 *
+	 * The default implementation opens context menu with the six
+	 * button actions.  Derived classes can override this.
 	 *
 	 * Reimplemented from QWidget.
 	 **/
 	void contextMenuEvent( QContextMenuEvent * event ) override;
 
-	//
-	// Set the various buttons and connect them to the appropriate action.
-	//
-
-	void setToTopButton   ( QToolButton * button );
-	void setMoveUpButton  ( QToolButton * button );
-	void setAddButton     ( QToolButton * button );
-	void setRemoveButton  ( QToolButton * button );
-	void setMoveDownButton( QToolButton * button );
-	void setToBottomButton( QToolButton * button );
-
-	QAction * toTopAction()    { return &_toTopAction; }
-	QAction * moveUpAction()   { return &_moveUpAction; }
-	QAction * addAction()      { return &_addAction; }
-	QAction * removeAction()   { return &_removeAction; }
-	QAction * moveDownAction() { return &_moveDownAction; }
-	QAction * toBottomAction() { return &_toBottomAction; }
-
-
-    private:
-
-	//
-	// Data members
-	//
-
-	bool _updatesLocked	{ false };
-
-	QListWidget * _listWidget	{ nullptr };
-	QToolButton * _toTopButton	{ nullptr };
-	QToolButton * _moveUpButton	{ nullptr };
-	QToolButton * _addButton	{ nullptr };
-	QToolButton * _removeButton	{ nullptr };
-	QToolButton * _moveDownButton	{ nullptr };
-	QToolButton * _toBottomButton	{ nullptr };
-
-	QAction _toTopAction    { QIcon( ":/icons/move-top.png" ),    tr( "Move to &top" ),           this };
-	QAction _moveUpAction   { QIcon( ":/icons/move-up.png" ),     tr( "Move &up" ),               this };
-	QAction _addAction      { QIcon( ":/icons/add.png" ),         tr( "&Create a new category" ), this };
-	QAction _removeAction   { QIcon( ":/icons/remove.png" ),      tr( "&Remove category" ),       this };
-	QAction _moveDownAction { QIcon( ":/icons/move-down.png" ),   tr( "Move &down" ),             this };
-	QAction _toBottomAction { QIcon( ":/icons/move-bottom.png" ), tr( "Move to &bottom" ),        this };
+	/**
+	 * Getters for the actions
+	 **/
+	QAction * actionToTop()    const { return toTopButton()->defaultAction();    }
+	QAction * actionMoveUp()   const { return moveUpButton()->defaultAction();   }
+	QAction * actionAdd()      const { return addButton()->defaultAction();      }
+	QAction * actionRemove()   const { return removeButton()->defaultAction();   }
+	QAction * actionMoveDown() const { return moveDownButton()->defaultAction(); }
+	QAction * actionToBottom() const { return toBottomButton()->defaultAction(); }
 
     };	// class ListEditor
-
-
-    /**
-     * Item class for the QListWidget in a ListEditor. This connects the
-     * QListWidgetItem with the void * pointer.
-     **/
-    class ListEditorItem: public QListWidgetItem
-    {
-    public:
-	/**
-	 * Create a new item with the specified text and store the value.
-	 **/
-	ListEditorItem( const QString & text, void * value ):
-	    QListWidgetItem { text },
-	    _value { value }
-	{}
-
-	/**
-	 * Return the associated value.
-	 **/
-	void * value() const { return _value; }
-
-    private:
-	void * _value;
-    };
 
 }	// namespace QDirStat
 

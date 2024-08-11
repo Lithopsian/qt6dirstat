@@ -51,21 +51,20 @@ using namespace QDirStat;
 
 
 MainWindow::MainWindow( bool slowUpdate ):
-    QMainWindow {},
-    _ui { new Ui::MainWindow },
-    _sortCol { DataColumns::toViewCol( SizeCol ) },
-    _sortOrder { Qt::DescendingOrder }
+    QMainWindow{},
+    _ui{ new Ui::MainWindow },
+    _sortCol{ DataColumns::toViewCol( SizeCol ) },
+    _sortOrder{ Qt::DescendingOrder }
 {
-//    logDebug() << sizeof( FileInfo ) << " " << sizeof( DirInfo ) << Qt::endl;
     _ui->setupUi( this );
-    _ui->menubar->setCornerWidget( new QLabel( MENUBAR_VERSION ) );
+    _ui->menubar->setCornerWidget( new QLabel{ MENUBAR_VERSION } );
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
     // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
     // Before this, the app() getters will return 0
     // After this (ie. once MainWindow is constructed), they will always return a non-zero pointer
-    DirTreeModel   * dirTreeModel   = new DirTreeModel( this );
-    SelectionModel * selectionModel = new SelectionModel( dirTreeModel, this );
+    DirTreeModel * dirTreeModel = new DirTreeModel{ this };
+    SelectionModel * selectionModel = new SelectionModel{ dirTreeModel, this };
     QDirStatApp::setModels( this, dirTreeModel, selectionModel );
 
     if ( slowUpdate )
@@ -80,7 +79,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     _futureSelection.setTree( dirTreeModel->tree() );
     _futureSelection.setUseParentFallback( true );
 
-    _historyButtons = new HistoryButtons( _ui->actionGoBack, _ui->actionGoForward, this );
+    _historyButtons = new HistoryButtons{ _ui->actionGoBack, _ui->actionGoForward, this };
 
     ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
 
@@ -419,7 +418,7 @@ namespace
 	for ( int row=0; row < rowCount; row++ )
 	{
 	    const QModelIndex childIndex = model->index( row, 0, index );
-	    dumpModelTree( model, childIndex, indent + QString( 4, ' ' ) );
+	    dumpModelTree( model, childIndex, indent + QString{ 4, ' ' } );
 	}
     }
 
@@ -452,7 +451,7 @@ void MainWindow::readingFinished()
     if ( firstToplevel && firstToplevel->errSubDirs() > 0 )
 	showDirPermissionsWarning();
 
-    //dumpModelTree( app()->dirTreeModel(), QModelIndex(), "" );
+    //dumpModelTree( app()->dirTreeModel(), QModelIndex{}, "" );
 }
 
 
@@ -677,7 +676,7 @@ void MainWindow::refreshSelected()
 
 	try
 	{
-	    sel->tree()->refresh( FileInfoSet { sel } );
+	    sel->tree()->refresh( FileInfoSet{ sel } );
 	}
 	catch ( const SysCallFailedException & ex )
 	{
@@ -801,7 +800,7 @@ void MainWindow::showCurrent( FileInfo * item )
 {
     if ( item )
     {
-	QString msg = QString( "%1  (%2%3)" )
+	QString msg = QString{ "%1  (%2%3)" }
 	    .arg( item->debugUrl(), item->sizePrefix(), formatSize( item->totalSize() ) );
 
 	if ( item->readState() == DirPermissionDenied || item->readState() == DirError )

@@ -56,62 +56,61 @@ namespace QDirStat
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
+	//-----------------------------------------------------------------
+	//                     Optional Features
+	//-----------------------------------------------------------------
 
-        //-----------------------------------------------------------------
-        //                     Optional Features
-        //-----------------------------------------------------------------
-
-        /**
-         * Return 'true' if this package manager supports getting the list of
-         * installed packages.
-         *
+	/**
+	 * Return 'true' if this package manager supports getting the list of
+	 * installed packages.
+	 *
 	 * Reimplemented from PkgManager.
-         **/
-        bool supportsGetInstalledPkg() const override
-            { return true; }
+	 **/
+	bool supportsGetInstalledPkg() const override
+	    { return true; }
 
-        /**
-         * Return the list of installed packages.
-         *
-         * Ownership of the list elements is transferred to the caller.
-         *
+	/**
+	 * Return the list of installed packages.
+	 *
+	 * Ownership of the list elements is transferred to the caller.
+	 *
 	 * Reimplemented from PkgManager.
-         **/
-        PkgInfoList installedPkg() const override;
+	 **/
+	PkgInfoList installedPkg() const override;
 
-        /**
-         * Return 'true' if this package manager supports getting the file list
-         * for a package.
-         *
+	/**
+	 * Return 'true' if this package manager supports getting the file list
+	 * for a package.
+	 *
 	 * Reimplemented from PkgManager.
-         **/
-        bool supportsFileList() const override
-            { return true; }
+	 **/
+	bool supportsFileList() const override
+	    { return true; }
 
-        /**
-         * Return the command for getting the list of files and directories
-         * owned by a package.
-         *
+	/**
+	 * Return the command for getting the list of files and directories
+	 * owned by a package.
+	 *
 	 * Reimplemented from PkgManager.
-         **/
-        QString fileListCommand( const PkgInfo * pkg ) const override
+	 **/
+	QString fileListCommand( const PkgInfo * pkg ) const override
 	    { return "/usr/bin/pacman -Qlq " + pkg->baseName(); }
 
-        /**
-         * Parse the output of the file list command.
-         *
+	/**
+	 * Parse the output of the file list command.
+	 *
 	 * Reimplemented from PkgManager.
-         **/
-        QStringList parseFileList( const QString & output ) const override
+	 **/
+	QStringList parseFileList( const QString & output ) const override
 	    { return output.split( u'\n' ); }
 
 
     protected:
 
-        /**
-         * Parse a package list as output by "dpkg-query --show --showformat".
-         **/
-        PkgInfoList parsePkgList( const QString & output ) const;
+	/**
+	 * Parse a package list as output by "dpkg-query --show --showformat".
+	 **/
+	PkgInfoList parsePkgList( const QString & output ) const;
 
     }; // class PacManPkgManager
 

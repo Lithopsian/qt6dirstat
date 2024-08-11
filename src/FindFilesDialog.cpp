@@ -29,8 +29,8 @@ QString FindFilesDialog::_lastPath;
 
 
 FindFilesDialog::FindFilesDialog( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FindFilesDialog }
+    QDialog{ parent },
+    _ui{ new Ui::FindFilesDialog }
 {
     // logDebug() << "init" << Qt::endl;
 

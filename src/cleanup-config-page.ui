@@ -406,8 +406,8 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>256</width>
-               <height>128</height>
+               <width>183</width>
+               <height>91</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -467,8 +467,8 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>256</width>
-               <height>128</height>
+               <width>238</width>
+               <height>120</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -603,8 +603,8 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>256</width>
-               <height>128</height>
+               <width>224</width>
+               <height>82</height>
               </rect>
              </property>
              <property name="toolTip">

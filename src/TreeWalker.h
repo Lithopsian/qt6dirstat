@@ -192,8 +192,8 @@ namespace QDirStat
     public:
 
         FilesFromYearTreeWalker( short year ):
-            TreeWalker {},
-            _year { year }
+            TreeWalker{},
+            _year{ year }
         {}
 
         bool check( const FileInfo * item ) override;
@@ -212,9 +212,9 @@ namespace QDirStat
     public:
 
         FilesFromMonthTreeWalker( short year, short month ):
-            TreeWalker {},
-            _year { year },
-            _month { month }
+            TreeWalker{},
+            _year{ year },
+            _month{ month }
         {}
 
         bool check( const FileInfo * item ) override;
@@ -233,8 +233,8 @@ namespace QDirStat
     {
     public:
         FindFilesTreeWalker( const FileSearchFilter & filter ):
-            TreeWalker {},
-            _filter { filter }
+            TreeWalker{},
+            _filter{ filter }
         {}
 
         void prepare( FileInfo * subtree ) override;

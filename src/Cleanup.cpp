@@ -30,12 +30,12 @@ namespace
      **/
     const QString loginShell()
     {
-	const QString shell = QProcessEnvironment::systemEnvironment().value( "SHELL", QString() );
+	const QString shell = QProcessEnvironment::systemEnvironment().value( "SHELL", QString{} );
 
 	if ( !SysUtil::haveCommand( shell ) )
 	{
 	    logError() << "ERROR: Shell \"" << shell << "\" is not executable" << Qt::endl;
-	    return QString();
+	    return QString{};
 	}
 
 	return shell;
@@ -50,7 +50,7 @@ namespace
 	if ( app.isEmpty() )
 	    return false;
 
-	const QString path = QProcessEnvironment::systemEnvironment().value( "PATH", QString() );
+	const QString path = QProcessEnvironment::systemEnvironment().value( "PATH", QString{} );
 	const QStringList paths = path.split( ':', Qt::SkipEmptyParts );
 
 	// If we don't have a PATH, just assume the program exists although it will probably never run
@@ -136,7 +136,7 @@ namespace
     QString envDesktop()
     {
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-	const QString desktop = env.value( "QDIRSTAT_DESKTOP", QString() );
+	const QString desktop = env.value( "QDIRSTAT_DESKTOP", QString{} );
 	if ( !desktop.isEmpty() )
 	{
 	    //logDebug() << "Overriding $XDG_CURRENT_DESKTOP with $QDIRSTAT_DESKTOP (\"" << desktop << "\")" << Qt::endl;
@@ -144,13 +144,13 @@ namespace
 	    return desktop.toLower();
 	}
 
-	const QString xdgDesktop = env.value( "XDG_CURRENT_DESKTOP", QString() );
+	const QString xdgDesktop = env.value( "XDG_CURRENT_DESKTOP", QString{} );
 	if ( !xdgDesktop.isEmpty() )
 	    return xdgDesktop.toLower();
 
 	//logWarning() << "$XDG_CURRENT_DESKTOP is not set" << Qt::endl;
 
-	return QString();
+	return QString{};
     }
 
 
@@ -212,7 +212,7 @@ namespace
 	}
 
 	// We didn't find anything positive, will look again next time
-	return QString();
+	return QString{};
     }
 
 
@@ -267,7 +267,7 @@ namespace
 	}
 
 	// We didn't find anything positive, will look again next time
-	return QString();
+	return QString{};
     }
 
 
@@ -376,7 +376,7 @@ namespace
 	    if ( item->parent() )
 		return item->parent()->path();
 
-	    return QString();
+	    return QString{};
 	}();
 
 	if ( !dirName.isEmpty() )
@@ -395,7 +395,7 @@ namespace
 	QString dir = item->path();
 
 	if ( !item->isDir() && !item->isPseudoDir() )
-	    dir.remove( QRegularExpression( "/[^/]*$" ) );
+	    dir.remove( QRegularExpression{ "/[^/]*$" } );
 
 	return dir;
     }
@@ -418,7 +418,7 @@ namespace
 	}
 
 	// Deliberately create with no parent so they aren't destroyed untidily at shutdown
-	QProcess * process = new QProcess();
+	QProcess * process = new QProcess{};
 	process->setProgram( shell );
 	process->setArguments( { "-c", expandVariables( item, command ) } );
 	process->setWorkingDirectory( itemDir( item ) );
@@ -453,7 +453,7 @@ void Cleanup::execute( FileInfo * item, OutputWindow * outputWindow )
     if ( _recurse )
     {
 	// Recursively process any children, including dot entries
-	for ( DotEntryIterator it { item }; *it; ++it )
+	for ( DotEntryIterator it{ item }; *it; ++it )
 	    execute( *it, outputWindow );
     }
 
@@ -468,7 +468,7 @@ const QStringList & Cleanup::defaultShells()
     static const QStringList shells = []()
     {
 	QStringList shells;
-	const QStringList candidates { loginShell(), "/bin/bash", "/bin/sh" };
+	const QStringList candidates{ loginShell(), "/bin/bash", "/bin/sh" };
 	for ( const QString & shell : candidates )
 	{
 	    if ( SysUtil::haveCommand( shell ) )

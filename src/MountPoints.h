@@ -15,9 +15,6 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include "Typedefs.h" // FileSize, MountPointList, _L1
-
-
 #if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
 #  define HAVE_Q_STORAGE_INFO 0
 typedef void * QStorageInfo;
@@ -25,6 +22,8 @@ typedef void * QStorageInfo;
 #  define HAVE_Q_STORAGE_INFO 1
 #  include <QStorageInfo>
 #endif
+
+#include "Typedefs.h" // FileSize, _L1
 
 
 namespace QDirStat
@@ -41,13 +40,13 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	MountPoint( const QString & device,
-		    const QString & path,
-		    const QString & filesystemType,
-		    const QString & mountOptions ):
-	    _device { device },
-	    _path { path },
-	    _filesystemType { filesystemType },
-	    _mountOptions { mountOptions.split( ',' ) }
+	            const QString & path,
+	            const QString & filesystemType,
+	            const QString & mountOptions ):
+	    _device{ device },
+	    _path{ path },
+	    _filesystemType{ filesystemType },
+	    _mountOptions{ mountOptions.split( ',' ) }
 	{}
 
 	/**
@@ -57,25 +56,35 @@ namespace QDirStat
 	const QString & device() const { return _device; }
 
 	/**
-	 * Return the path where the device is mounted to.
+	 * Return the path the device is mounted at.
 	 **/
 	const QString & path() const { return _path; }
 
 	/**
-	 * Return the filesystem type as string ("ext4", "btrfs", "none").
+	 * Return the filesystem type as a string (eg. "ext4", "btrfs",
+	 * or "none").
 	 **/
 	const QString & filesystemType() const { return _filesystemType; }
 
 	/**
-	 * Return the individual mount options as a list of strings
-	 * ["rw", "nosuid", "nodev", "relatime", "rsize=32768"].
+	 * Return the individual mount options as a list of strings (eg.
+	 * { "rw", "nosuid", "nodev", "relatime", "rsize=32768" }.
 	 **/
 	const QStringList & mountOptions() const { return _mountOptions; }
 
 	/**
-	 * Return the mount options as one comma-separated string.
+	 * Return the mount options as one comma-separated string.  (eg.
+	 * "rw, nosuid, nodev, relatime, rsize=32768").
 	 **/
-	QString mountOptionsStr() const { return _mountOptions.join( u',' ); }
+//	QString mountOptionsStr() const { return _mountOptions.join( u',' ); }
+
+	/**
+	 * Return 'true' if the filesystem is a "normal mount point: that
+	 * is, not a system mount, duplicate mount, autofs mount, or Snap
+	 * package.
+	 **/
+	bool isNormalMountPoint()
+	    { return !isSystemMount() && !isDuplicate() && !isUnmountedAutofs() && !isSnapPackage(); }
 
 	/**
 	 * Return 'true' if the filesystem is mounted read-only.
@@ -211,25 +220,36 @@ namespace QDirStat
 	QString     _path;
 	QString     _filesystemType;
 	QStringList _mountOptions;
-	bool        _isDuplicate { false };
+	bool        _isDuplicate{ false };
 
     }; // class MountPoint
 
 
+//    typedef QList<MountPoint *>           MountPointList;
+    typedef QMap<QString, MountPoint *>   MountPointMap;
+//    typedef MountPointMap::const_iterator MountPointMapIterator;
+
+
     /**
-     * Singleton class to access the current mount points.
+     * Singleton class to access the current mount points.  Access through
+     * the public static methods.
+     *
+     * The class is instantiated when it is first accessed and the map
+     * of mount points is populated.
      **/
-    class MountPoints
+    class MountPoints: public MountPointMap
     {
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
 	 **/
-	MountPoints() { init(); }
+	MountPoints()
+	    { init(); }
 
 	/**
 	 * Destructor.
 	 **/
-	~MountPoints() { clear(); }
+	~MountPoints()
+	    { clear(); }
 
 	/**
 	 * Suppress copy and assignment constructors (this is a singleton)
@@ -239,9 +259,9 @@ namespace QDirStat
 
 	/**
 	 * Return the singleton object for this class. The first use will
-	 * create the singleton. Most of the static methods access
-	 * the singleton, so the first call to those static
-	 * methods will create the singleton.
+	 * create the singleton. Most of the static methods access the
+	 * singleton, so the first call to those static methods will
+	 * create the singleton.
 	 **/
 	static MountPoints * instance();
 
@@ -251,9 +271,10 @@ namespace QDirStat
 	void init();
 
 	/**
-	 * Clear the data structures used internally.
+	 * Clear the map and delete all the mountpoints.
 	 **/
-	void clear();
+	void clear()
+	    { qDeleteAll( *this ); MountPointMap::clear(); }
 
 
     public:
@@ -264,7 +285,8 @@ namespace QDirStat
 	 * caller, i.e. the caller should not delete it. The pointer remains
 	 * valid until the next call to clear().
 	 **/
-	static const MountPoint * findByPath( const QString & path );
+	static const MountPoint * findByPath( const QString & path )
+	    { return instance()->value( path, nullptr ); }
 
 	/**
 	 * Find the nearest mount point upwards in the directory hierarchy
@@ -295,20 +317,20 @@ namespace QDirStat
 	/**
 	 * Return a list of "normal" mount points, i.e. those that are not
 	 * system mounts, bind mounts or duplicate mounts.
-	 *
-	 * The result is sorted by the order in which the filesystems were
-	 * mounted (the same as in /proc/mounts or in /etc/mtab).
 	 **/
-	static MountPointList normalMountPoints();
+//	static MountPointList normalMountPoints();
 
 	/**
-	 * Return a list of "normal" mount points, i.e. those that are not
-	 * system mounts, bind mounts or duplicate mounts.
-	 *
-	 * The result is sorted by the order in which the filesystems were
-	 * mounted (the same as in /proc/mounts or in /etc/mtab).
+	 * Return a list of all mount points.
 	 **/
-	static const MountPointList & allMountPoints() { return instance()->_mountPointList; }
+//	static MountPointList allMountPoints()
+//	    { return instance()->values(); }
+
+	/**
+	 * Return begin and end iterators for the mount point map.
+	 **/
+	static MountPointMap::const_iterator cbegin() { return instance()->MountPointMap::cbegin(); }
+	static MountPointMap::const_iterator cend()   { return instance()->MountPointMap::cend();   }
 
 	/**
 	 * Return 'true' if size information for mount points is available.
@@ -325,7 +347,8 @@ namespace QDirStat
 	 *
 	 * This invalidates ALL MountPoint pointers!
 	 **/
-	static void reload() { instance()->init(); instance()->ensurePopulated(); }
+	static void reload()
+	    { instance()->init(); }
 
 
     protected:
@@ -335,48 +358,33 @@ namespace QDirStat
 	 * /proc/mounts, falling back to /etc/mtab if /proc/mounts cannot be
 	 * read.
 	 **/
-	void ensurePopulated();
+	void populate();
 
 	/**
 	 * Read 'filename' (in /proc/mounts or /etc/mnt syntax) and populate
 	 * the mount points with the content. Return 'true' on success, 'false'
 	 * on failure.
 	 **/
-	bool read( const QString & filename );
+	bool read( const QString & filename, const QStringList & ntfsDevices );
 
 #if HAVE_Q_STORAGE_INFO
 	/**
 	 * Fallback method if neither /proc/mounts nor /etc/mtab is available:
 	 * Try using QStorageInfo. Return 'true' if any mount point was found.
 	 **/
-	bool readStorageInfo();
+	void readStorageInfo( const QStringList & ntfsDevices );
 #endif
 
 	/**
-	 * Post-process a mount point and add it to the internal list and map.
+	 * Post-process a mount point and add it to the map.
 	 **/
 	void postProcess( MountPoint * mountPoint );
 
 	/**
-	 * Add a mount point to the internal list and map.
+	 * Add a mount point to the map.
 	 **/
-	void add( MountPoint * mountPoint );
-
-	/**
-	 * Check if any of the mount points has filesystem type "btrfs".
-	 **/
-	bool checkForBtrfs();
-
-	/**
-	 * Try to check with the external "lsblk" command (if available) what
-	 * block devices use NTFS and populate _ntfsDevices with them.
-	 **/
-	void findNtfsDevices();
-
-	/**
-	 * Return 'true' if 'device' is mounted.
-	 **/
-	bool isDeviceMounted( const QString & device ) const;
+	void add( MountPoint * mountPoint )
+	    { insert( mountPoint->path(), mountPoint ); }
 
 
     private:
@@ -385,24 +393,69 @@ namespace QDirStat
 	// Data members
 	//
 
-	MountPointList                     _mountPointList;
-	QHash<QString, const MountPoint *> _mountPointMap;
-	QStringList                        _ntfsDevices;
-	bool                               _isPopulated;
-	bool                               _hasBtrfs;
-	bool                               _checkedForBtrfs;
+	bool          _hasBtrfs;
+	bool          _checkedForBtrfs;
 
     }; // class MountPoints
 
 
-    inline QTextStream & operator<< ( QTextStream & stream, MountPoint * mp )
+
+
+    /**
+     * Iterator for MountPoints.  The constructor accepts a flag which
+     * indicates whether to iterator through all mount points, or just
+     * "normal" ones.
+     *
+     * Note that this iterator follows the standard QDirStat format,
+     * but is not STL-compliant and can't be used in range for loops
+     * or algorithms, not least because the sinlgeton object is not
+     * public.
+     **/
+    class MountPointIterator
+    {
+    public:
+	MountPointIterator( bool all ):
+	    _all{ all },
+	    _end{ MountPoints::cend() },
+	    _current{ find( MountPoints::cbegin() ) }
+	{}
+
+	MountPoint * operator*() const { return _current == _end ? nullptr : _current.value(); }
+	MountPoint * operator->() const { return _current.value(); }
+
+	MountPointIterator & operator++() { _current = find( ++_current ); return *this; }
+	MountPointIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
+
+    protected:
+	/**
+	 * Find the next mount point that is "normal", starting
+	 * from 'item', or any mount point if '_all' is true.
+	 **/
+	MountPointMap::const_iterator find( MountPointMap::const_iterator current )
+	{
+	    while ( !_all && current != _end && !current.value()->isNormalMountPoint() )
+		++current;
+	    return current;
+	}
+
+    private:
+	bool _all;
+	MountPointMap::const_iterator _end;
+	MountPointMap::const_iterator _current;
+
+    }; // class MountPointIterator
+
+
+
+
+    inline QTextStream & operator<<( QTextStream & stream, MountPoint * mp )
     {
 	if ( mp )
 	{
 	    stream << "<mount point for " << mp->device()
-		   << " at " << mp->path()
-		   << " type " << mp->filesystemType()
-		   << ">";
+	           << " at " << mp->path()
+	           << " type " << mp->filesystemType()
+	           << ">";
 	}
 	else
 	    stream << "<NULL MountPoint*>";

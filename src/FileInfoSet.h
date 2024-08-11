@@ -31,16 +31,22 @@ namespace QDirStat
 	 * Constructor, creates an empty QSet.  This is the default constructor,
 	 * only specified here for clarity.
 	 **/
-	FileInfoSet():
-	    QSet<FileInfo *> {}
-	{}
+	FileInfoSet() = default;
 
 	/**
 	 * Constructor, initialises the set from a list.
 	 **/
 	FileInfoSet( std::initializer_list<FileInfo *> list ):
-	    QSet<FileInfo *> { list }
+	    QSet<FileInfo *>{ list }
 	{}
+
+	/**
+	 * Return the number of items in the set.  This overload is provided
+	 * to consistently return an int where QSet::size() in Qt6 would
+	 * return a qsizetype (not available before 5.10).  We are limited
+	 * to 2 billion FileInfo objects anyway.
+	 **/
+	int size() const { return QSet::size(); }
 
 	/**
 	 * Return the first item in this set or 0 if the set is empty.

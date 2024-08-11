@@ -331,11 +331,11 @@ namespace QDirStat
         std::unique_ptr<Ui::OutputWindow > _ui;
 
         QVector<QProcess *> _processList;
-        bool                _showOnStderr	{ false };
-        bool                _noMoreProcesses	{ false };
-        bool                _closed		{ false };
-        bool                _killedAll		{ false };
-        int                 _errorCount		{ 0 };
+        bool                _showOnStderr{ false };
+        bool                _noMoreProcesses{ false };
+        bool                _closed{ false };
+        bool                _killedAll{ false };
+        int                 _errorCount{ 0 };
         QString             _lastWorkingDir;
         QColor              _terminalBackground;
         QColor              _commandTextColor;
@@ -346,7 +346,7 @@ namespace QDirStat
     };  // class OutputWindow
 
 
-    inline QTextStream & operator<< ( QTextStream & stream, QProcess * process )
+    inline QTextStream & operator<<( QTextStream & stream, QProcess * process )
     {
         if ( process )
         stream << OutputWindow::command( process );

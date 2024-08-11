@@ -103,7 +103,7 @@ namespace
 				int             col,
 				const QString & text )
     {
-	QTableWidgetItem * item = new QTableWidgetItem( text );
+	QTableWidgetItem * item = new QTableWidgetItem{ text };
 	table->setItem( row, col, item );
 
 	return item;
@@ -138,12 +138,12 @@ namespace
 	table->clear();
 	table->setRowCount( 101 );
 
-	const QStringList headers = { QObject::tr( "Percentile"  ),
-				      QObject::tr( "Size cutoff" ),
-				      QObject::tr( "Name" ),
-				      QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix, namePrefix ),
-				      QObject::tr( "Cumulative sum" ),
-				    };
+	const QStringList headers{ QObject::tr( "Percentile"  ),
+	                           QObject::tr( "Size cutoff" ),
+	                           QObject::tr( "Name" ),
+	                           QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix, namePrefix ),
+	                           QObject::tr( "Cumulative sum" ),
+	                         };
 	table->setColumnCount( headers.size() );
 	table->setHorizontalHeaderLabels( headers );
 
@@ -171,7 +171,7 @@ namespace
 		    case  50: return QObject::tr( "Median" );
 		    case  75: return QObject::tr( "3rd quartile" );
 		    case 100: return QObject::tr( "Max" );
-		    default:  return QString();
+		    default:  return QString{};
 		}
 	    }();
 
@@ -183,7 +183,7 @@ namespace
 	    else if ( i % 10 == 0 && step == 1 )
 	    {
 		// Fill the empty cell or the background won't show
-		addItem( table, row, NameCol, QString() );
+		addItem( table, row, NameCol, QString{} );
 
 		// Derive a color with some contrast in light or dark themes.
 		QColor base = table->palette().color( QPalette::Base );
@@ -211,8 +211,8 @@ namespace
 
 
 FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FileSizeStatsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FileSizeStatsWindow }
 {
     //logDebug() << "init" << Qt::endl;
 
@@ -220,7 +220,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    _ui->bucketsTable->setModel( new BucketsTableModel( this ) );
+    _ui->bucketsTable->setModel( new BucketsTableModel{ this } );
 
     initWidgets();
 
@@ -243,7 +243,7 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
     static QPointer<FileSizeStatsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FileSizeStatsWindow( mainWindow );
+	_sharedInstance = new FileSizeStatsWindow{ mainWindow };
 
     return _sharedInstance;
 }
@@ -310,9 +310,9 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     resizeEvent( nullptr );
 
     if ( suffix.isEmpty() )
-	_stats.reset( new FileSizeStats( fileInfo ) );
+	_stats.reset( new FileSizeStats{ fileInfo } );
     else
-	_stats.reset( new FileSizeStats( fileInfo, suffix ) );
+	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
     _stats->calculatePercentiles();
 
     bucketsTableModel()->setStats( _stats.get() );

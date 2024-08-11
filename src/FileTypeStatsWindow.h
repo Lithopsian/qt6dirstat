@@ -113,6 +113,11 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Read the window and hotkey settings.
+	 **/
+	void readSettings();
+
+	/**
 	 * One-time initialization of the widgets in this window.
 	 **/
 	void initWidgets();
@@ -247,8 +252,8 @@ namespace QDirStat
 	                    int             count,
 	                    FileSize        totalSize,
 	                    float           percentage ):
-	    FileTypeItem { itemName( otherCategory, suffix ), count, totalSize, percentage },
-	    _suffix { suffix }
+	    FileTypeItem{ itemName( otherCategory, suffix ), count, totalSize, percentage },
+	    _suffix{ suffix }
 	{}
 
 	/**

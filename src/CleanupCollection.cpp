@@ -94,9 +94,9 @@ namespace
 		    item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
 		const QString itemLine = itemType % ": "_L1 % name;
 		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
-		const QString title = cleanTitle + QString( itemSpaces - titleWidth, u' ' );
+		const QString title = cleanTitle + QString{ itemSpaces - titleWidth, u' ' };
 
-		return QString( "<h3>%1</h3>%2<br/>" ).arg( title, itemLine );
+		return QString{ "<h3>%1</h3>%2<br/>" }.arg( title, itemLine );
 	    }
 
 	    const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
@@ -120,9 +120,9 @@ namespace
 		    longestLine = lineLength;
 	    }
 	    const int spaces = longestLine / spaceWidth - titleWidth;
-	    const QString title = cleanTitle + QString( spaces, u' ' );
+	    const QString title = cleanTitle + QString{ spaces, u' ' };
 
-	    return QString( "<h3>%1</h3>%2<br>" ).arg( title, urls.join( "<br>"_L1 ) );
+	    return QString{ "<h3>%1</h3>%2<br>" }.arg( title, urls.join( "<br>"_L1 ) );
 	}();
 
 	const int ret = QMessageBox::question( qApp->activeWindow(),
@@ -167,11 +167,11 @@ CleanupCollection::CleanupCollection( QObject        * parent,
                                       SelectionModel * selectionModel,
                                       QToolBar       * toolBar,
                                       QMenu          * menu ):
-    QObject { parent },
-    _trash { new Trash() },
-    _selectionModel { selectionModel },
-    _toolBar { toolBar },
-    _menu { menu }
+    QObject{ parent },
+    _trash{ new Trash },
+    _selectionModel{ selectionModel },
+    _toolBar{ toolBar },
+    _menu{ menu }
 {
     readSettings();
 }
@@ -269,7 +269,7 @@ void CleanupCollection::execute()
 	return;
     }
 
-    OutputWindow * outputWindow = new OutputWindow( activeWindow, cleanup->outputWindowAutoClose() );
+    OutputWindow * outputWindow = new OutputWindow{ activeWindow, cleanup->outputWindowAutoClose() };
     if ( cleanup->refreshPolicy() != Cleanup::NoRefresh )
 	_activeOutputWindow = outputWindow;
     emit startingCleanup( cleanup->cleanTitle() );
@@ -410,13 +410,13 @@ void CleanupCollection::readSettings()
 	}
 	else
 	{
-	    Cleanup * cleanup = new Cleanup( this, active, title, command,
+	    Cleanup * cleanup = new Cleanup{ this, active, title, command,
 	                                     recurse, askForConfirmation,
 	                                     static_cast<Cleanup::RefreshPolicy>( refreshPolicy ),
 	                                     worksForDir, worksForFile, worksForDotEntry,
 	                                     static_cast<Cleanup::OutputWindowPolicy>( outputWindowPolicy ),
 	                                     outputWindowTimeout, outputWindowAutoClose,
-	                                     shell );
+	                                     shell };
 	    add( cleanup );
 
 	    if ( !iconName.isEmpty() )
@@ -511,7 +511,7 @@ void CleanupCollection::moveToTrash()
     const FileInfoSet selectedItems = _selectionModel->selectedItems();
 
     // Prepare output window
-    OutputWindow * outputWindow = new OutputWindow( qApp->activeWindow(), true );
+    OutputWindow * outputWindow = new OutputWindow{ qApp->activeWindow(), true };
 
     // Prepare refresher
     createRefresher( outputWindow, selectedItems.parents() );
@@ -539,7 +539,7 @@ void CleanupCollection::moveToTrash()
 void CleanupCollection::createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet )
 {
     _selectionModel->prepareForRefresh( refreshSet );
-    Refresher * refresher = new Refresher( this, refreshSet );
+    Refresher * refresher = new Refresher{ this, refreshSet };
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,
              refresher,    &Refresher::refresh );

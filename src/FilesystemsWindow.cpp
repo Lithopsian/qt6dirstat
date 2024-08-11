@@ -14,8 +14,8 @@
 
 #include "FilesystemsWindow.h"
 #include "DirTreeModel.h"
-#include "Exception.h"
 #include "FormatUtil.h"
+#include "Logger.h"
 #include "MountPoints.h"
 #include "HeaderTweaker.h"
 #include "MainWindow.h"
@@ -48,43 +48,42 @@ namespace
 
 
 FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
-    QDialog { parent },
-    _ui { new Ui::FilesystemsWindow }
+    QDialog{ parent },
+    _ui{ new Ui::FilesystemsWindow }
 {
     setAttribute( Qt::WA_DeleteOnClose );
 
     _ui->setupUi( this );
 
-    MountPoints::reload();
     initWidgets();
-    Settings::readWindowSettings( this, "FilesystemsWindow" );
+    readSettings();
 
     connect( this,                &FilesystemsWindow::readFilesystem,
-	     app()->mainWindow(), &MainWindow::readFilesystem );
+             app()->mainWindow(), &MainWindow::readFilesystem );
 
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
-	     this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::populate );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
-	     this,                &FilesystemsWindow::refresh );
+             this,                &FilesystemsWindow::populate );
 
     connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
-	      this,               &FilesystemsWindow::contextMenu);
+              this,               &FilesystemsWindow::contextMenu);
 
     connect( _ui->fsTree,         &QTreeWidget::itemDoubleClicked,
-	     _ui->actionRead,     &QAction::triggered );
+             _ui->actionRead,     &QAction::triggered );
 
     connect( _ui->readButton,     &QAbstractButton::clicked,
-	     _ui->actionRead,     &QAction::triggered );
+             _ui->actionRead,     &QAction::triggered );
 
     connect( _ui->actionRead,     &QAction::triggered,
-	     this,                &FilesystemsWindow::readSelectedFilesystem );
+             this,                &FilesystemsWindow::readSelectedFilesystem );
 
     connect( _ui->actionCopy,     &QAction::triggered,
-	     this,                &FilesystemsWindow::copyDeviceToClipboard );
+             this,                &FilesystemsWindow::copyDeviceToClipboard );
 
     connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
-	     this,                &FilesystemsWindow::enableActions );
+             this,                &FilesystemsWindow::enableActions );
 }
 
 
@@ -99,9 +98,21 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
     static QPointer<FilesystemsWindow> _sharedInstance;
 
     if ( !_sharedInstance )
-	_sharedInstance = new FilesystemsWindow( parent );
+	_sharedInstance = new FilesystemsWindow{ parent };
 
     return _sharedInstance;
+}
+
+
+void FilesystemsWindow::readSettings()
+{
+    Settings::readWindowSettings( this, "FilesystemsWindow" );
+
+    Settings settings;
+    settings.beginGroup( "FilesystemsWindow" );
+    settings.applyActionHotkey( _ui->actionRead );
+    settings.applyActionHotkey( _ui->actionCopy );
+    settings.endGroup();
 }
 
 
@@ -110,23 +121,16 @@ void FilesystemsWindow::showBtrfsFreeSizeWarning()
     PanelMessage::showFilesystemsMsg( this, _ui->vBox );
 }
 
-
-void FilesystemsWindow::refresh()
-{
-    MountPoints::reload();
-    populate();
-}
-
-
+/*
 void FilesystemsWindow::clear()
 {
     _ui->fsTree->clear();
 }
-
+*/
 
 void FilesystemsWindow::initWidgets()
 {
-    QStringList headers { tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
+    QStringList headers{ tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
 
     if ( MountPoints::hasSizeInfo() )
 	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
@@ -165,14 +169,13 @@ void FilesystemsWindow::populate()
 {
     clear();
 
-    const bool showAll = !_ui->normalCheckBox->isChecked();
-    const auto mountPoints = showAll ? MountPoints::allMountPoints() : MountPoints::normalMountPoints();
-    for ( MountPoint * mountPoint : mountPoints )
-    {
-	CHECK_PTR( mountPoint);
+    MountPoints::reload();
 
-	FilesystemItem * item = new FilesystemItem( mountPoint, _ui->fsTree );
-	item->setIcon( 0, QIcon( app()->dirTreeModel()->treeIconDir() + icon( mountPoint ) ) );
+    const bool showAll = !_ui->normalCheckBox->isChecked();
+    for ( MountPointIterator it{ showAll }; *it; ++it )
+    {
+	FilesystemItem * item = new FilesystemItem{ *it, _ui->fsTree };
+	item->setIcon( FS_DeviceCol, QIcon( app()->dirTreeModel()->treeIconDir() + icon( *it ) ) );
     }
 
     if ( MountPoints::hasBtrfs() )
@@ -207,7 +210,7 @@ QString FilesystemsWindow::selectedPath() const
 	    return item->mountPath();
     }
 
-    return QString();
+    return QString{};
 }
 
 
@@ -246,16 +249,16 @@ void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 
 
 FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
-    QTreeWidgetItem { parent },
-    _device         { mountPoint->device()          },
-    _mountPath      { mountPoint->path()            },
-    _fsType         { mountPoint->filesystemType()  },
-    _totalSize      { mountPoint->totalSize()       },
-    _usedSize       { mountPoint->usedSize()        },
-    _reservedSize   { mountPoint->reservedSize()    },
-    _freeSize       { mountPoint->freeSizeForUser() },
-    _isNetworkMount { mountPoint->isNetworkMount()  },
-    _isReadOnly     { mountPoint->isReadOnly()      }
+    QTreeWidgetItem{ parent },
+    _device        { mountPoint->device()          },
+    _mountPath     { mountPoint->path()            },
+    _fsType        { mountPoint->filesystemType()  },
+    _totalSize     { mountPoint->totalSize()       },
+    _usedSize      { mountPoint->usedSize()        },
+    _reservedSize  { mountPoint->reservedSize()    },
+    _freeSize      { mountPoint->freeSizeForUser() },
+    _isNetworkMount{ mountPoint->isNetworkMount()  },
+    _isReadOnly    { mountPoint->isReadOnly()      }
 {
     QString dev = _device;
 

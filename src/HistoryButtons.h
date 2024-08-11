@@ -32,12 +32,15 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	HistoryButtons(	QAction * actionGoBack,
-			QAction * actionGoForward,
-			QWidget * parent );
+	HistoryButtons( QAction * actionGoBack,
+	                QAction * actionGoForward,
+	                QWidget * parent );
 
 	/**
 	 * Destructor.
+	 *
+	 * Note that this is the default destructor, but is defined in
+	 * the cpp file because of the smart pointer.
 	 **/
 	~HistoryButtons() override;
 
@@ -59,39 +62,15 @@ namespace QDirStat
 	void lock() { _locked = true; }
 
 	/**
-	 * Returns whether the history is locked.
-	 **/
-//        void locked() const { return _locked; }
-
-	/**
 	 * Unlocked the history so that changes to the current item are
 	 * recorded in the history.  If the given current item url does not
 	 * match the current history position, it is recorded as the most
 	 * most recent.
 	 **/
-	void unlock( const FileInfo * currentItem );
-
-	/**
-	 * Remove items from the history list that can no longer be found in
-	 * the tree and make sure that there are not duplicate urls in
-	 * successive positions.
-	 **/
-//	 void clean( const FileInfo * currentItem );
+	void unlock( const FileInfo * newCurrentItem );
 
 
     public slots:
-
-	/**
-	 * Handle the browser-like "Go Back" button (action):
-	 * Move one entry back in the history of visited directories.
-	 **/
-	void historyGoBack();
-
-	/**
-	 * Handle the browser-like "Go Forward" button (action):
-	 * Move one entry back in the history of visited directories.
-	 **/
-	void historyGoForward();
 
 	/**
 	 * Add a FileInfo item to the history if it's a directory and its URL
@@ -112,6 +91,18 @@ namespace QDirStat
     protected slots:
 
 	/**
+	 * Handle the browser-like "Go Back" button (action):
+	 * Move one entry back in the history of visited directories.
+	 **/
+	void historyGoBack();
+
+	/**
+	 * Handle the browser-like "Go Forward" button (action):
+	 * Move one entry back in the history of visited directories.
+	 **/
+	void historyGoForward();
+
+	/**
 	 * Clear the old history menu and add all current history items to it.
 	 **/
 	void updateHistoryMenu();
@@ -123,15 +114,6 @@ namespace QDirStat
 	void historyMenuAction( QAction * action );
 
 
-    protected:
-
-	/**
-	 * Initialize the history buttons: Change the tool buttons to handle a
-	 * menu upon long click.
-	 **/
-	void initHistoryButtons();
-
-
     private:
 
 	//
@@ -139,9 +121,10 @@ namespace QDirStat
 	//
 
 	std::unique_ptr<History> _history;
+
 	QAction * _actionGoBack;
 	QAction * _actionGoForward;
-	bool      _locked { false };
+	bool      _locked{ false };
 
     };	// class HistoryButtons
 

@@ -50,8 +50,8 @@ namespace QDirStat
     {
     public:
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
-	    QVector<double> ( 10 ), // ten elements, not onex10.0
-	    _constLast { cend() - 1 }
+	    QVector<double>( 10 ), // ten elements, not onex10.0
+	    _constLast{ cend() - 1 }
 	{
 	    // Start with the given cushion height, times 4 from the coefficients
 	    double height = 4.0 * cushionHeight;
@@ -92,11 +92,11 @@ namespace QDirStat
 	 * height to the start of the configured sequence.
 	 **/
 	CushionSurface( const CushionHeightSequence & heights ):
-	    _xx2 { 0.0 },
-	    _xx1 { 0.0 },
-	    _yy2 { 0.0 },
-	    _yy1 { 0.0 },
-	    _height { heights.cbegin() }
+	    _xx2{ 0.0 },
+	    _xx1{ 0.0 },
+	    _yy2{ 0.0 },
+	    _yy1{ 0.0 },
+	    _height{ heights.cbegin() }
 	{}
 
 	/**
@@ -105,11 +105,11 @@ namespace QDirStat
 	 * in the sequence.
 	 **/
 	CushionSurface( const CushionSurface & parent, const CushionHeightSequence & heights ):
-	    _xx2 { parent._xx2 },
-	    _xx1 { parent._xx1 },
-	    _yy2 { parent._yy2 },
-	    _yy1 { parent._yy1 },
-	    _height { parent._height == heights.constLast() ? parent._height : parent._height + 1 }
+	    _xx2{ parent._xx2 },
+	    _xx1{ parent._xx1 },
+	    _yy2{ parent._yy2 },
+	    _yy1{ parent._yy1 },
+	    _height{ parent._height == heights.constLast() ? parent._height : parent._height + 1 }
 	{}
 
 	/**
@@ -452,19 +452,19 @@ namespace QDirStat
 
 	// Data members
 
-	TreemapView             * _parentView;
-	FileInfo                * _orig;
+	TreemapView * _parentView;
+	FileInfo    * _orig;
 
 #if PAINT_DEBUGGING
-	bool _firstTile;
-	bool _lastTile;
+	bool          _firstTile;
+	bool          _lastTile;
 	QElapsedTimer _stopwatch;
 #endif
 
-	CushionSurface            _cushionSurface;
-	QPixmap                   _cushion;
+	CushionSurface _cushionSurface;
+	QPixmap        _cushion;
 
-	SelectedTileHighlighter * _highlighter { nullptr };
+	SelectedTileHighlighter * _highlighter{ nullptr };
 
     }; // class TreemapTile
 
@@ -476,9 +476,7 @@ namespace QDirStat
      **/
     class HorizontalTreemapTile: private TreemapTile
     {
-    friend class TreemapTile;
-
-    private:
+	friend class TreemapTile;
 
 	/**
 	 * Constructor for tiles in the simple layout being laid out in the
@@ -497,8 +495,6 @@ namespace QDirStat
     {
 	friend class TreemapTile;
 
-    private:
-
 	/**
 	 * Constructor for tiles in the simple layout being laid out in the
 	 * vertical direction.
@@ -506,7 +502,7 @@ namespace QDirStat
 	VerticalTreemapTile( TreemapTile * parentTile, FileInfo * orig, const QRectF & rect );
     };
 
-    inline QTextStream & operator<< ( QTextStream & stream, TreemapTile * tile )
+    inline QTextStream & operator<<( QTextStream & stream, TreemapTile * tile )
     {
 	if ( tile )
 	    stream << tile->orig();

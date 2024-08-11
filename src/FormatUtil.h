@@ -84,7 +84,7 @@ namespace QDirStat
      * number of links is less than 2, an empty string is returned.
      **/
     inline QString formatLinksInline( nlink_t numLinks )
-	{ return numLinks > 1 ? QObject::tr( " / %1 links" ).arg( numLinks) : QString(); }
+	{ return numLinks > 1 ? QObject::tr( " / %1 links" ).arg( numLinks) : QString{}; }
 
     /**
      * Format a string of the form "<br/>3 links" for describing hard links on a
@@ -92,7 +92,7 @@ namespace QDirStat
      * an empty string is returned.
      **/
     inline QString formatLinksRichText( nlink_t numLinks )
-	{ return numLinks > 1 ? QObject::tr( "<br/>%1 hard links" ).arg( numLinks ) : QString(); }
+	{ return numLinks > 1 ? QObject::tr( "<br/>%1 hard links" ).arg( numLinks ) : QString{}; }
 
     /**
      * Wraps the text in html formatting to prevent line breaks except at explicit
@@ -115,7 +115,7 @@ namespace QDirStat
      * Format a percentage.
      **/
     inline QString formatPercent( float percent )
-	{ return percent < 0.0f ? QString() : QString::number( percent, 'f', 1 ) % '%'; }
+	{ return percent < 0.0f ? QString{} : QString::number( percent, 'f', 1 ) % '%'; }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the
@@ -161,7 +161,7 @@ namespace QDirStat
      * Returns the height in pixels of the given font.
      **/
     inline int fontHeight( const QFont & font )
-	{ return QFontMetrics( font ).height(); }
+	{ return QFontMetrics{ font }.height(); }
 
     /**
      * Returns the width in pixels of the given text rendered using
@@ -169,9 +169,9 @@ namespace QDirStat
      **/
     inline int textWidth( const QFont & font, const QString & text )
 #if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
-	{ return QFontMetrics( font ).width( text ); }
+	{ return QFontMetrics{ font }.width( text ); }
 #else
-	{ return QFontMetrics( font ).horizontalAdvance( text ); }
+	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
 #endif
 
     /**
@@ -193,7 +193,7 @@ namespace QDirStat
      * and qsizetype (and potentially other long long ints).  Use
      * formatSize() explicitly if you need this.
      **/
-//    inline QTextStream & operator<< ( QTextStream & stream, FileSize lSize )
+//    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
 //	{ return stream << formatSize( lSize ); }
 
 }       // namespace QDirStat

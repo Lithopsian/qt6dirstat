@@ -27,7 +27,7 @@ FileInfo * Attic::locate( const QString & url )
 	return dotEntry();
 
    // Recursively search all children including dot entries
-    for ( DotEntryIterator it { this }; *it; ++it )
+    for ( DotEntryIterator it{ this }; *it; ++it )
     {
 	FileInfo * foundChild = it->locate( url );
 	if ( foundChild )

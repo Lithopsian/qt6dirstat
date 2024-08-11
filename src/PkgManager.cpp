@@ -28,6 +28,6 @@ QStringList PkgManager::fileList( const PkgInfo * pkg ) const
             return parseFileList( output );
     }
 
-    return QStringList();
+    return QStringList{};
 }
 

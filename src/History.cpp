@@ -11,22 +11,39 @@
 #include "Logger.h"
 
 
+#define VERBOSE_HISTORY 0
+
+
 using namespace QDirStat;
 
-/*
-History::History()
-{
-    _items.reserve( HISTORY_MAX );
-}
-*/
 
-void History::clear()
+namespace
 {
-    //logDebug() << "Clearing history" << Qt::endl;
-    _items.clear();
-    _current = -1;
-}
+    /**
+     * Dump the current history stack to the log.
+     * This is meant for debugging.
+     **/
+    [[gnu::unused]] void dump( const QStringList & items, int current )
+    {
+        if ( items.isEmpty() )
+        {
+            logDebug() << "Empty history" << Qt::endl;
+            return;
+        }
 
+        logNewline();
+
+        for ( int i = 0; i < items.size(); ++i )
+        {
+            logDebug() << ( i == current ? " ---> " : QString{ 6, u' ' } )
+                       << "#" << i
+                       << ": \"" << items.at( i ) << '"' << Qt::endl;
+        }
+
+        logNewline();
+    }
+
+}
 
 
 QString History::goBack()
@@ -34,11 +51,14 @@ QString History::goBack()
     if ( !canGoBack() )
     {
         logWarning() << "Can't go back any more";
-        return "";
+        return QString{};
     }
 
     _current--;
-    // dump();
+
+#if VERBOSE_HISTORY
+    dump( _items, _current );
+#endif
 
     return currentItem();
 }
@@ -49,74 +69,55 @@ QString History::goForward()
     if ( !canGoForward() )
     {
         logWarning() << "Can't go forward any more";
-        return "";
+        return QString{};
     }
 
     ++_current;
-    // dump();
+
+#if VERBOSE_HISTORY
+    dump( _items, _current );
+#endif
 
     return currentItem();
 }
 
 
-bool History::setCurrentIndex( int index )
+QString History::goTo( int index )
 {
-    if ( index >= 0 && index < _items.size() )
-    {
-        _current = index;
-        // dump();
-
-        return true;
-    }
-    else
+    if ( !isValidIndex( index ) )
     {
         logWarning() << "Index " << index << " out of range" << Qt::endl;
-        dump();
 
-        return false;
+        return QString{};
     }
+
+    _current = index;
+#if VERBOSE_HISTORY
+    dump( _items, _current );
+#endif
+
+    return currentItem();
 }
 
 
 void History::add( const QString & item )
 {
     // Remove all items after the current one
-
     while ( canGoForward() )
-        _items.removeLast();  // _current remains the same!
+        _items.removeLast();
 
-    // If the history capacity is reached, remove the oldest item until there is space
-    while ( _items.size() >= capacity() )
-    {
+    // If the history capacity is reached, remove the oldest item
+    if ( _items.size() >= capacity() )
         _items.removeFirst();
-        _current = _items.size() - 1;
-    }
 
-    // Add the new item
+    // Add the new item to the list
     _items << item;
-    ++_current;
 
-    // logDebug() << "After add():" << Qt::endl;
-    // dump();
-}
+    // The new current is always the item just added
+    _current = _items.size() - 1;
 
-
-void History::dump() const
-{
-    if ( _items.isEmpty() )
-    {
-        logDebug() << "Empty history" << Qt::endl;
-        return;
-    }
-
-    logNewline();
-
-    for ( int i = 0; i < _items.size(); ++i )
-    {
-        logDebug() << ( i == _current ? " ---> " : QString( 6, u' ' ) )
-                   << "#" << i
-                   << ": \"" << _items.at( i ) << '"' << Qt::endl;
-    }
-
-    logNewline();
+#if VERBOSE_HISTORY
+    logDebug() << "After add():" << Qt::endl;
+    dump( _items, _current );
+#endif
 }

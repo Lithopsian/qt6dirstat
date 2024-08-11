@@ -35,13 +35,7 @@ namespace QDirStat
         /**
          * Constructor.
          **/
-        History() { _items.reserve( HISTORY_MAX ); }
-
-        /**
-         * Replaces the entire history list.
-         **/
-        void set( QStringList & newItems, int newCurrentIndex )
-            { _items = newItems; _current = newCurrentIndex; }
+        History() { _items.reserve( capacity() ); }
 
         /**
          * Add an item to the history stack. If the stack's capacity is
@@ -52,14 +46,6 @@ namespace QDirStat
          * forward again after an item was just added.
          **/
         void add( const QString & item );
-
-        /**
-         * Clear the complete history.
-         *
-         * In the context of QDirStat, this is necessary after a new directory
-         * was opened for reading.
-         **/
-        void clear();
 
         /**
          * Go back one item in the history and return the new current item.
@@ -78,6 +64,15 @@ namespace QDirStat
         QString goForward();
 
         /**
+         * Go to item number 'index' in the history and return the new current
+         * item.
+         *
+         * Note that an empty string will be return if index is not a valid
+         * entry in the history.
+         **/
+        QString goTo( int index );
+
+        /**
          * Check if it is possible to go one item back in the history.
          * Use this to enable or disable the history "Back" button.
          **/
@@ -90,9 +85,14 @@ namespace QDirStat
         bool canGoForward() const { return _current >= 0 && _current < _items.size() - 1; }
 
         /**
-         * Return the current item in the history.
+         * Return whether 'url' is the current item in the history stack.
+         *
+         * Note that it isn't safe to call this function when _current is
+         * not a valid index in the history list (eg. when the list is
+         * empty).
          **/
-        QString currentItem() const { return item( _current ); }
+        bool isCurrentItem( const QString & url ) const
+            { return isValidIndex( _current ) ? url == _items.at( _current ) : false; }
 
         /**
          * Return the index (from 0 on) of the current history item or -1 if
@@ -106,16 +106,6 @@ namespace QDirStat
         int currentIndex() const { return _current; }
 
         /**
-         * Move to any valid history item by index directly.
-         * Return 'true' if successful, 'false' if error.
-         *
-         * This is intended for a history menu where the user can navigate
-         * directly to any item in that menu. The effect is the same as
-         * multiple goBack() or goForward() calls until that item is reached.
-         **/
-        bool setCurrentIndex( int index );
-
-        /**
          * Return 'true' if the history is empty, 'false' otherwise.
          **/
         bool isEmpty() const { return _items.isEmpty(); }
@@ -124,8 +114,8 @@ namespace QDirStat
          * Return the history item with the specified 'index' (from 0 on) or an
          * empty string if there is no item with that index.
          **/
-        QString item( int index ) const
-            { return index >= 0 && index < _items.size() ? _items.at( index ) : QString(); }
+        const QString & item( int index ) const
+            { return _items.at( index ); }
 
         /**
          * The size of the history stack, i.e. the number of items that are
@@ -137,6 +127,20 @@ namespace QDirStat
         int size() const { return _items.size(); }
 
         /**
+         * Return the list of all items on the history stack.
+         **/
+//        const QStringList & allItems() const { return _items; }
+
+        /**
+         * Return begin and end iterators for the internal list.
+         **/
+        QStringList::const_iterator begin() const { return _items.begin(); }
+        QStringList::const_iterator end()   const { return _items.end();   }
+
+
+    protected:
+
+        /**
          * The capacity of the history stack, i.e. the maximum number of items
          * that it will keep. Once the capacity is reached, each 'add()' first
          * discards the oldest item (i.e. item( 0 )).
@@ -144,20 +148,25 @@ namespace QDirStat
         int capacity() const { return HISTORY_MAX; }
 
         /**
-         * Return all items of the history stack at once.
-         **/
-        const QStringList & allItems() const { return _items; }
-
-        /**
          * Dump the current history stack to the log.
          * This is meant for debugging.
          **/
-        void dump() const;
+        bool isValidIndex( int index ) const
+            { return index >= 0 && index < _items.size(); }
+
+        /**
+         * Return the current item in the history stack.
+         *
+         * Not that it isn't safe to call this function when _current is
+         * not a valid index in the history list (eg. when the list is
+         * empty).
+         **/
+        const QString & currentItem() const { return _items.at( _current ); }
 
 
     private:
 
-        int         _current { -1 };
+        int         _current{ -1 };
         QStringList _items;
 
     };  // class History
