@@ -13,7 +13,6 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MimeCategorizer.h"
-#include "MimeCategory.h"
 
 
 #define VERBOSE_STATS 0
@@ -123,14 +122,13 @@ void FileTypeStats::collect( const FileInfo * dir )
 	    // First attempt: try the MIME categorizer.
 	    QString suffix;
 	    const MimeCategory * category = categorizer->category( *it, &suffix );
-
 	    if ( category )
 	    {
 		// The suffixes the MIME categorizer returns are the exact ones
 		// used to match a category.  That could be one of multiple
 		// possible suffixies.  When the category is matched using a
-		// non-suffix rule, there may be no suffix even though the file
-		// has a suffix.
+		// non-suffix rule, there may be no suffix here even though the
+		// file has a suffix.
 		addCategorySum( category, *it );
 		addSuffixSum( suffix, category, *it );
 	    }
@@ -218,10 +216,10 @@ void FileTypeStats::removeCruft()
     if ( cruftSuffixes.size() > 0 )
     {
 	logDebug() << "Merged " << cruftSuffixes.size() << " suffixes to <no extension>: "
-		   << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
+	           << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
 
 	logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
-		   << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
+	           << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
     }
 #endif
 

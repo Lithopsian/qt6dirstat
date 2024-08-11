@@ -105,7 +105,7 @@ namespace
 	QString text = patternList.join( u'\n' );
 
 	if ( !text.isEmpty() )
-	    text += u'\n';	   // Let the user begin writing on a new line
+	    text += u'\n'; // Let the user begin writing on a new line
 
 	textEdit->setPlainText( text );
     }
@@ -302,9 +302,9 @@ void MimeCategoryConfigPage::updateActions()
     const QListWidgetItem * currentItem = _ui->listWidget->currentItem();
 
     const bool isSymlink =
-	currentItem && currentItem->text() == MimeCategorizer::instance()->symlinkCategoryName();
+	currentItem && currentItem->text() == MimeCategorizer::symlinkCategoryName();
     const bool isExecutable =
-	currentItem && currentItem->text() == MimeCategorizer::instance()->executableCategoryName();
+	currentItem && currentItem->text() == MimeCategorizer::executableCategoryName();
 
     // Name can't be changed for symlinks and executables
     _ui->nameLineEdit->setEnabled( currentItem && !isSymlink && !isExecutable );

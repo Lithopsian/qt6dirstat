@@ -247,8 +247,8 @@ namespace QDirStat
 	/**
 	 * Suppress copy and assignment constructors (wouldn't do a deep copy)
 	 **/
-//	ExcludeRules( const ExcludeRules & ) = delete;
-//	ExcludeRules & operator=( const ExcludeRules & ) = delete;
+	ExcludeRules( const ExcludeRules & ) = delete;
+	ExcludeRules & operator=( const ExcludeRules & ) = delete;
 
 	/**
 	 * Check a file name against the exclude rules. Each exclude rule

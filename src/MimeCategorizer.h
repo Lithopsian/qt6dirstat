@@ -98,12 +98,6 @@ namespace QDirStat
 	 **/
 	~MimeCategorizer() override;
 
-	/**
-	 * Suppress copy and assignment constructors (this is a singleton)
-	 **/
-	MimeCategorizer( const MimeCategorizer & ) = delete;
-	MimeCategorizer & operator=( const MimeCategorizer & ) = delete;
-
 
     public:
 
@@ -157,12 +151,12 @@ namespace QDirStat
 	/**
 	 * Return the (translated) name of the fixed category for executables.
 	 **/
-	QString executableCategoryName() const { return tr( "executable" ); }
+	static QString executableCategoryName() { return tr( "executable" ); }
 
 	/**
 	 * Return the (translated) name of the fixed category for symlinks.
 	 **/
-	QString symlinkCategoryName() const { return tr( "symlink" ); }
+	static QString symlinkCategoryName() { return tr( "symlink" ); }
 
 
     protected:

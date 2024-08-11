@@ -98,9 +98,9 @@ namespace QDirStat
 
         // Data members
 
-        int               _maxParallel;
-        bool              _autoDelete;
-        bool              _started{ false };
+        int  _maxParallel;
+        bool _autoDelete;
+        bool _started{ false };
 
         QVector<QProcess *> _running;
         QVector<QProcess *> _waiting;
