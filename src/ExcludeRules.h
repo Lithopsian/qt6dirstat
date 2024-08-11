@@ -10,7 +10,6 @@
 #ifndef ExcludeRules_h
 #define ExcludeRules_h
 
-#include <QList>
 #include <QTextStream>
 
 #include "Wildcard.h"
@@ -193,6 +192,7 @@ namespace QDirStat
     private:
 
 	QRegularExpression _regExp;
+
 	PatternSyntax _patternSyntax;
 	QString       _pattern;
 	bool          _useFullPath;
@@ -200,7 +200,7 @@ namespace QDirStat
     };
 
 
-    typedef QList<const ExcludeRule *> ExcludeRuleList;
+    typedef QVector<const ExcludeRule *> ExcludeRuleList;
     typedef ExcludeRuleList::const_iterator ExcludeRuleListIterator;
 
 
@@ -211,7 +211,7 @@ namespace QDirStat
      * rules list.  The config dialog maintains a working list of ExcludeRule
      * instances, but not an instance of this class.
      **/
-    class ExcludeRules
+    class ExcludeRules: public ExcludeRuleList
     {
 
     public:
@@ -242,13 +242,13 @@ namespace QDirStat
 	 * Destructor.
 	 **/
 	~ExcludeRules()
-	    { qDeleteAll( _rules ); }
+	    { qDeleteAll( *this ); }
 
 	/**
 	 * Suppress copy and assignment constructors (wouldn't do a deep copy)
 	 **/
-	ExcludeRules( const ExcludeRules & ) = delete;
-	ExcludeRules & operator=( const ExcludeRules & ) = delete;
+//	ExcludeRules( const ExcludeRules & ) = delete;
+//	ExcludeRules & operator=( const ExcludeRules & ) = delete;
 
 	/**
 	 * Check a file name against the exclude rules. Each exclude rule
@@ -274,19 +274,19 @@ namespace QDirStat
 	 * Return 'true' if the exclude rules are empty, i.e. if there are no
 	 * exclue rules, 'false' otherwise.
 	 **/
-	bool isEmpty() const { return _rules.isEmpty(); }
+//	bool isEmpty() const { return _rules.isEmpty(); }
 
 	/**
 	 * Return a const iterator for the first exclude rule.
 	 **/
-	ExcludeRuleListIterator begin() const { return cbegin(); }
-	ExcludeRuleListIterator cbegin() const { return _rules.cbegin(); }
+//	ExcludeRuleListIterator begin() const { return cbegin(); }
+//	ExcludeRuleListIterator cbegin() const { return _rules.cbegin(); }
 
 	/**
 	 * Return a const iterator for past the last exclude rule.
 	 **/
-	ExcludeRuleListIterator end() const { return cend(); }
-	ExcludeRuleListIterator cend() const { return _rules.cend(); }
+//	ExcludeRuleListIterator end() const { return cend(); }
+//	ExcludeRuleListIterator cend() const { return _rules.cend(); }
 
 	/**
 	 * Write all exclude rules to the settings file.
@@ -316,10 +316,6 @@ namespace QDirStat
 	 **/
 	void addDefaultRules();
 
-
-    private:
-
-	ExcludeRuleList _rules;
     };
 
 
