@@ -27,7 +27,9 @@ FileAgeStats::FileAgeStats( const FileInfo * subtree ):
     initMonthStats( thisYear() );
     initMonthStats( lastYear() );
 
-    collect( subtree );
+    collectRecursive( subtree );
+    calcPercentages();
+    collectYears();
 }
 
 
@@ -39,14 +41,6 @@ void FileAgeStats::initMonthStats( short year )
         if ( stats )
             *stats = YearStats( year, month );
     }
-}
-
-
-void FileAgeStats::collect( const FileInfo * subtree )
-{
-    collectRecursive( subtree );
-    calcPercentages();
-    collectYears();
 }
 
 
@@ -133,15 +127,6 @@ void FileAgeStats::collectYears()
 {
     _yearsList = _yearStats.keys();
     std::sort( _yearsList.begin(), _yearsList.end() );
-}
-
-
-YearStats * FileAgeStats::yearStats( short year )
-{
-    if ( _yearStats.contains( year ) )
-        return &( _yearStats[ year ] );
-
-    return nullptr;
 }
 
 

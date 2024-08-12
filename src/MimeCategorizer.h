@@ -259,8 +259,12 @@ namespace QDirStat
 
 	/**
 	 * Create a new category and add it to the live list held in this class.
+	 * The patterns are passed as QStringLists.
 	 **/
-	MimeCategory * create( const QString & name, const QColor & color );
+	const MimeCategory * addCategory ( const QString     & name,
+	                                   const QColor      & color,
+	                                   const QStringList & caseInsensitivePatterns,
+	                                   const QStringList & caseSensitivePatterns );
 
 	/**
 	 * Add a category from a name, colour, and comma-delimited patterns
@@ -268,8 +272,12 @@ namespace QDirStat
 	 **/
 	const MimeCategory * addCategory( const QString & name,
 	                                  const QColor  & color,
-	                                  const QString & caseSensitivePatterns,
-	                                  const QString & caseInsensitivePatterns );
+	                                  const QString & caseInsensitivePatterns,
+	                                  const QString & caseSensitivePatterns )
+	    { return addCategory( name,
+                                  color,
+                                  caseInsensitivePatterns.split( u',' ),
+                                  caseSensitivePatterns.split  ( u',' ) ); }
 
 	/**
 	 * Add default categories in case none were read from the settings.

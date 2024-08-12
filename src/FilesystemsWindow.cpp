@@ -58,9 +58,6 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     initWidgets();
     readSettings();
 
-    connect( this,                &FilesystemsWindow::readFilesystem,
-             app()->mainWindow(), &MainWindow::readFilesystem );
-
     connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
              this,                &FilesystemsWindow::populate );
 
@@ -121,12 +118,6 @@ void FilesystemsWindow::showBtrfsFreeSizeWarning()
     PanelMessage::showFilesystemsMsg( this, _ui->vBox );
 }
 
-/*
-void FilesystemsWindow::clear()
-{
-    _ui->fsTree->clear();
-}
-*/
 
 void FilesystemsWindow::initWidgets()
 {
@@ -195,7 +186,7 @@ void FilesystemsWindow::readSelectedFilesystem()
     if ( !path.isEmpty() )
     {
 	//logDebug() << "Read " << path << Qt::endl;
-	emit readFilesystem( path );
+	app()->mainWindow()->readFilesystem( path );
     }
 }
 
@@ -262,7 +253,7 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
 {
     QString dev = _device;
 
-    // Cut off insanely long generated device mapper names
+    // Columns are not resizeable, so cut off insanely long generated device mapper names
     const int limit = sizeof( "/dev/mapper/luks-123456" );
     if ( dev.size() > limit )
     {

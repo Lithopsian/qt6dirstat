@@ -40,11 +40,8 @@ void ProcessStarter::add( QProcess * process )
 
 void ProcessStarter::startProcesses()
 {
-    while ( _running.size() < _maxParallel )
+    while ( _running.size() < _maxParallel && !_waiting.isEmpty() )
     {
-        if ( _waiting.isEmpty() )
-            return;
-
         QProcess * process = _waiting.takeFirst();
         if ( process )
         {

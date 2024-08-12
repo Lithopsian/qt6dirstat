@@ -54,16 +54,6 @@ namespace QDirStat
 	{}
 
 	/**
-	 * Return the color for this category.
-	 **/
-	const QColor & color() const { return _color; }
-
-	/**
-	 * Set the color for this category.
-	 **/
-	void setColor( const QColor & color ) { _color = color; }
-
-	/**
 	 * Return the name of this category.
 	 **/
 	const QString & name() const { return _name; }
@@ -72,6 +62,16 @@ namespace QDirStat
 	 * Set the name of this category.
 	 **/
 	void setName( const QString & newName ) { _name = newName; }
+
+	/**
+	 * Return the color for this category.
+	 **/
+	const QColor & color() const { return _color; }
+
+	/**
+	 * Set the color for this category.
+	 **/
+	void setColor( const QColor & color ) { _color = color; }
 
 	/**
 	 * Add a list of patterns. See addPattern() for details.
@@ -145,7 +145,13 @@ namespace QDirStat
 	 * readable form, i.e. prepend suffixes with "*.":
 	 * "tar.bz2" -> "*.tar.bz2".
 	 *
-	 * This is useful for populating widgets.
+	 * The patterns are grouped: exact matches first, then wildcard
+	 * suffixes, then suffixes, and lastly any non-suffix wildcard
+	 * patterns.
+	 *
+	 * This is relatively expensive; the individual pattern lists are
+	 * not stored sorted and must be sorted by this function.  However,
+	 * this will be used relatively infrequently, by the config dialog.
 	 **/
 	QStringList humanReadablePatternList( Qt::CaseSensitivity caseSensitivity ) const;
 
@@ -155,7 +161,7 @@ namespace QDirStat
 	/**
 	 * Add a pattern that contains no wildcard characters.
 	 **/
-	void addExactMatch( const QString & suffix, Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive );
+	void addExactMatch( const QString & suffix, Qt::CaseSensitivity caseSensitivity );
 
 	/**
 	 * Add a filename suffix (extension) to this category.
