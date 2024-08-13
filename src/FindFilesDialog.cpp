@@ -59,14 +59,14 @@ FileSearchFilter FindFilesDialog::fileSearchFilter()
     FileInfo * fileInfo = _ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
     const bool findDirs = _ui->findDirectoriesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked();
 
-    FileSearchFilter filter( fileInfo ? fileInfo->toDirInfo() : nullptr,
+    FileSearchFilter filter{ fileInfo ? fileInfo->toDirInfo() : nullptr,
                              _ui->patternField->text(),
                              static_cast<FilterMode>( _ui->filterModeComboBox->currentIndex() ),
                              _ui->caseSensitiveCheckBox->isChecked(),
                              _ui->findFilesRadioButton->isChecked() || _ui->findBothRadioButton->isChecked(),
                              findDirs,
                              _ui->findSymLinksCheckBox->isChecked(),
-                             findDirs );
+                             findDirs };
 
     return filter;
 }
@@ -103,7 +103,7 @@ DirInfo * FindFilesDialog::currentSubtree()
 
 void FindFilesDialog::askFindFiles( QWidget * parent )
 {
-    FindFilesDialog dialog( parent );
+    FindFilesDialog dialog{ parent };
 
     const int result = dialog.exec();
     const bool cancelled = ( result == QDialog::Rejected );

@@ -23,6 +23,10 @@ using SysUtil::tryRunCommand;
 using SysUtil::haveCommand;
 
 
+#define VERBOSE_DIVERSIONS 0
+#define VERBOSE_PACKAGES   0
+
+
 namespace
 {
     /**
@@ -37,7 +41,10 @@ namespace
 	if ( fileInfo.dir().isRoot() && fileInfo.isDir() ) // first test doesn't access the filesystem
 	{
 	    const QString realpath = fileInfo.canonicalFilePath();
-	    //logDebug() << pathname << " " << realpath << Qt::endl;
+
+#if VERBOSE_PACKAGES
+	    logDebug() << pathname << " " << realpath << Qt::endl;
+#endif
 	    return realpath.isEmpty() ? pathname : realpath;
 	}
 
@@ -46,7 +53,10 @@ namespace
 	const QString pathInfo = fileInfo.path();
 	const QString realpath = QFileInfo{ pathInfo }.canonicalFilePath();
 
-	//logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
+#if VERBOSE_PACKAGES
+	logDebug() << pathname << " " << realpath << " " << filename << Qt::endl;
+#endif
+
 	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath % '/' % filename : pathname;
     }
 
@@ -107,7 +117,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
 QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & output ) const
 {
     const QStringList lines = output.trimmed().split( u'\n' );
-    for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
+    for ( auto line = lines.begin(); line != lines.end(); ++line )
     {
 	if ( line->isEmpty() )
 	    continue;
@@ -207,7 +217,10 @@ QString DpkgPkgManager::searchOwningPkg( const QString & path, const QString & o
 	const QString pkgFilename = pkgFileInfo.fileName();
 	if ( !pkgRealpath.isEmpty() && !pkgFilename.isNull() )
 	{
-	    //logDebug() << " " << pkgRealpath << Qt::endl;
+#if VERBOSE_PACKAGES
+	    logDebug() << " " << pkgRealpath << Qt::endl;
+#endif
+
 	    // Is this the exact file we were looking for?
 	    if ( pkgRealpath % '/' % pkgFilename == path )
 		return packages.first();
@@ -238,20 +251,23 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 	return QString{};
 
     const QStringList lines = output.trimmed().split( u'\n' );
-    for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
+    for ( auto line = lines.begin(); line != lines.end(); ++line )
     {
 	// Fast-forward to a diversion line
 	while ( line != lines.end() && !isDiversionFrom( *line ) )
 	    ++line;
 
-	//logDebug() << *line << Qt::endl;
-
+#if VERBOSE_DIVERSIONS
+	logDebug() << *line << Qt::endl;
+#endif
 	// The next line should be a diversion to line
 	if ( ++line != lines.end() && isDiversionTo( *line ) )
 	{
 	    const QString & divertingPkg = line->split( u' ' ).at( 2 );
-	    //logDebug() << *line << Qt::endl;
 
+#if VERBOSE_DIVERSIONS
+	    logDebug() << *line << Qt::endl;
+#endif
 	    if ( ++line != lines.end() )
 	    {
 		// Might now have the (third) line with the list of packages for the original file
@@ -260,7 +276,10 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 		{
 		    // Pick any one which isn't the diverting package
 		    const QStringList packages = fields.first().split( ", "_L1 );
-//		    logDebug() << " diverted file owned by " << packages << Qt::endl;
+
+#if VERBOSE_DIVERSIONS
+		    logDebug() << " diverted file owned by " << packages << Qt::endl;
+#endif
 		    for ( const QString & package : packages )
 			if ( package != divertingPkg )
 			    return package;
@@ -276,14 +295,15 @@ QString DpkgPkgManager::originalOwningPkg( const QString & path ) const
 PkgInfoList DpkgPkgManager::installedPkg() const
 {
     int exitCode = -1;
-    const QString output = runCommand( "/usr/bin/dpkg-query",
-                               { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
-                               &exitCode );
+    const QString output =
+	runCommand( "/usr/bin/dpkg-query",
+	            { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
+	            &exitCode );
 
     if ( exitCode == 0 )
 	return parsePkgList( output );
 
-    return PkgInfoList();
+    return PkgInfoList{};
 }
 
 
@@ -311,10 +331,12 @@ PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
 		{
 		    pkgList << new PkgInfo{ name, version, arch, this };
 		}
+#if VERBOSE_PACKAGES
 		else
 		{
-		    // logDebug() << "Ignoring " << line << Qt::endl;
+		    logDebug() << "Ignoring " << line << Qt::endl;
 		}
+#endif
 	    }
 	}
     }
@@ -381,7 +403,9 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	return nullptr;
 
     const QStringList lines = output.split( u'\n' );
-    //logDebug() << lines.size() << " output lines" << Qt::endl;
+#if VERBOSE_PACKAGES
+    logDebug() << lines.size() << " output lines" << Qt::endl;
+#endif
 
     PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
 
@@ -390,7 +414,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     //	   zip: /usr/bin/zip
     //	   zlib1g-dev:amd64: /usr/include/zlib.h
     //	   zlib1g:i386, zlib1g:amd64: /usr/share/doc/zlib1g
-    for ( QStringList::const_iterator line = lines.begin(); line != lines.end(); ++line )
+    for ( auto line = lines.begin(); line != lines.end(); ++line )
     {
 	if ( line->isEmpty() )
 	    continue;
@@ -453,8 +477,9 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 		if ( !divertingPkg.isEmpty() && packagesList.contains( divertingPkg ) )
 		{
 		    cache->add( divertingPkg, resolvePath( path3 ) );
-		    //logDebug() << divertingPkg << " diverted " << resolvePath(path3) << Qt::endl;
-
+#if VERBOSE_DIVERSIONS
+		    logDebug() << divertingPkg << " diverted " << resolvePath(path3) << Qt::endl;
+#endif
 		    // remove the diverting package from list, which might now be empty
 		    packagesList.removeAt( packagesList.indexOf( divertingPkg ) );
 		    packages = packagesList.join( ", "_L1 );
@@ -462,8 +487,11 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 
 		// associate renamed file only with its original packages
 		pathname = resolvePath( path2 );
-//		if ( !packagesList.isEmpty() )
-//		    logDebug() << path1 << " from " << packages << " diverted by " << divertingPkg << " to " << pathname << Qt::endl;
+#if VERBOSE_DIVERSIONS
+		if ( !packagesList.isEmpty() )
+		    logDebug() << path1 << " from " << packages
+		               << " diverted by " << divertingPkg << " to " << pathname << Qt::endl;
+#endif
 	    }
 	}
 	else

@@ -64,10 +64,10 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
     Settings::readWindowSettings( this, "LocateFilesWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
-	     this,               &LocateFilesWindow::refresh );
+             this,               &LocateFilesWindow::refresh );
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
-	     this,               &locateInMainWindow );
+             this,               &locateInMainWindow );
 
     connect( _ui->treeWidget,    &QTreeWidget::customContextMenuRequested,
              this,               &LocateFilesWindow::itemContextMenu );
@@ -120,10 +120,10 @@ void LocateFilesWindow::initWidgets()
 
 
 void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
-						FileInfo      * fileInfo,
-						const QString & headingText,
-						int             sortCol,
-						Qt::SortOrder   sortOrder )
+                                                FileInfo      * fileInfo,
+                                                const QString & headingText,
+                                                int             sortCol,
+                                                Qt::SortOrder   sortOrder )
 {
     if ( !treeWalker || !fileInfo )
         return;
@@ -248,7 +248,7 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const LocateListItem & other = dynamic_cast<const LocateListItem &>( rawOther );
 
-    switch ( (LocateListColumns)treeWidget()->sortColumn() )
+    switch ( static_cast<LocateListColumns>( treeWidget()->sortColumn() ) )
     {
 	case LocateListSizeCol:  return _size  < other.size();
 	case LocateListMTimeCol: return _mtime < other.mtime();

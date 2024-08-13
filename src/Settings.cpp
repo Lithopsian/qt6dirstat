@@ -251,7 +251,7 @@ int Settings::enumValue( const char                * key,
     if ( !contains( key ) )
 	return fallback;
 
-    const QLatin1String str = QLatin1String( value( key ).toByteArray() );
+    const QLatin1String str = QLatin1String{ value( key ).toByteArray() };
     const int enumKey = enumMapping.key( str, -1 );
     if ( enumKey >= 0 )
 	return enumKey;

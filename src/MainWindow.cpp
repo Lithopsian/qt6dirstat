@@ -1,4 +1,4 @@
-/*
+    /*
  *   File name: MainWindow.cpp
  *   Summary:   QDirStat main window
  *   License:   GPL V2 - See file LICENSE for details.
@@ -107,7 +107,7 @@ MainWindow::~MainWindow()
 
     writeSettings();
 
-    // Reset the model pointers
+    // Reset (ie. delete ) the model pointers
     QDirStatApp::resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
@@ -337,7 +337,7 @@ void MainWindow::busyDisplay()
     _updateTimer.start();
 
     // Sort by ReadJobsCol (aka PercentBarCol) during the read
-    SignalBlocker signalBlocker( app()->dirTreeModel() );
+    SignalBlocker signalBlocker{ app()->dirTreeModel() };
     const int sortCol = DataColumns::toViewCol( ReadJobsCol );
     _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
 }
@@ -525,8 +525,8 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     updateWindowTitle( "" );
     app()->dirTree()->sendFinished();
 
-    QMessageBox errorPopup( QMessageBox::Warning, tr( "Error" ),
-                            pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) );
+    QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ),
+                            pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) };
     errorPopup.setDetailedText( ex.what() );
     errorPopup.exec();
 }
@@ -575,7 +575,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
     pkgQuerySetup();
-    BusyPopup msg( tr( "Reading package database..." ) );
+    BusyPopup msg{ tr( "Reading package database..." ) };
 
     app()->dirTree()->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
@@ -740,8 +740,8 @@ void MainWindow::readCache( const QString & cacheFileName )
 void MainWindow::askReadCache()
 {
     const QString fileName = QFileDialog::getOpenFileName( this, // parent
-							   tr( "Select QDirStat cache file" ),
-							   DEFAULT_CACHE_NAME );
+                                                           tr( "Select QDirStat cache file" ),
+                                                           DEFAULT_CACHE_NAME );
     if ( fileName.isEmpty() )
 	return;
 
@@ -757,8 +757,8 @@ void MainWindow::askReadCache()
 void MainWindow::askWriteCache()
 {
     const QString fileName = QFileDialog::getSaveFileName( this, // parent
-							   tr( "Enter name for QDirStat cache file"),
-							   DEFAULT_CACHE_NAME );
+                                                           tr( "Enter name for QDirStat cache file"),
+                                                           DEFAULT_CACHE_NAME );
     if ( fileName.isEmpty() )
 	return;
 

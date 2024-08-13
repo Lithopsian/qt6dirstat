@@ -93,7 +93,7 @@ PkgInfoList RpmPkgManager::installedPkg() const
     if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
 	rebuildRpmDbWarning();
 
-    return exitCode == 0 ? parsePkgList( output ) : PkgInfoList();
+    return exitCode == 0 ? parsePkgList( output ) : PkgInfoList{};
 }
 
 

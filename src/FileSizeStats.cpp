@@ -17,7 +17,7 @@ using namespace QDirStat;
 
 
 FileSizeStats::FileSizeStats( FileInfo * subtree ):
-    PercentileStats {}
+    PercentileStats{}
 {
     CHECK_PTR( subtree );
 

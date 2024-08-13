@@ -251,10 +251,10 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _ui->headingUrl->setStatusTip( _subtree.url() );
     resizeEvent( nullptr );
 
-    // Keep a map of toplevel items for finding suffix item parents
+    // Create a map of toplevel items for finding suffix item parents
     QHash<const MimeCategory *, FileTypeItem *> categoryItem;
 
-    FileTypeStats stats( _subtree() );
+    FileTypeStats stats{ _subtree() };
 
     for ( auto it = stats.categoriesBegin(); it != stats.categoriesEnd(); ++it )
     {
@@ -432,7 +432,7 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
     // error which should not be silently ignored.
     const FileTypeItem & other = dynamic_cast<const FileTypeItem &>( rawOther );
 
-    switch ( (FileTypeColumns)treeWidget()->sortColumn() )
+    switch ( static_cast<FileTypeColumns>( treeWidget()->sortColumn() ) )
     {
 	case FT_CountCol:      return count()      < other.count();
 	case FT_TotalSizeCol:  return totalSize()  < other.totalSize();

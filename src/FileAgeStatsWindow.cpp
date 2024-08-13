@@ -216,7 +216,7 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 
 void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 {
-    FileAgeStats stats( fileInfo );
+    FileAgeStats stats{ fileInfo };
 
     for ( short year : stats.years() )
     {

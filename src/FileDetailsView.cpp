@@ -280,9 +280,8 @@ void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 	else if ( isSystemFile )
 	{
 	    // Submit a timed query to find the owning package, if any
-	    const QString delayHint = QString{ _pkgUpdateTimer->delayStage(), u'.' }
-	                              .replace( u'.', ". "_L1 );
-	    _ui->filePackageLabel->setText( delayHint );
+	    QString delayHint{ _pkgUpdateTimer->delayStage(), u'.' };
+	    _ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
 	    // Caspture url by value because the FileInfo may be gone by the time the timer expires
 	    const QString url = file->url();

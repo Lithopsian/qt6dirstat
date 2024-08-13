@@ -233,7 +233,7 @@ void CleanupConfigPage::load( void * value )
 
 void * CleanupConfigPage::newValue()
 {
-    return new Cleanup {};
+    return new Cleanup{};
 }
 
 

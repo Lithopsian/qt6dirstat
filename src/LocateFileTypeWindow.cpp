@@ -211,8 +211,6 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 
 
 
-
-
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
                                                 int             count,
                                                 FileSize        totalSize ):
@@ -239,7 +237,7 @@ bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const SuffixSearchResultItem & other = dynamic_cast<const SuffixSearchResultItem &>( rawOther );
 
-    switch ( (SuffixSearchResultColumns)treeWidget()->sortColumn() )
+    switch ( static_cast<SuffixSearchResultColumns>( treeWidget()->sortColumn() ) )
     {
 	case SSR_CountCol:     return _count     < other.count();
 	case SSR_TotalSizeCol: return _totalSize < other.totalSize();

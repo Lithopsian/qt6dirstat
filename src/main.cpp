@@ -103,7 +103,7 @@ namespace
      **/
     void mainLoop( bool slowUpdate, bool openCache, bool dontAsk, const QStringList & argList )
     {
-	QDirStat::MainWindow mainWin( slowUpdate );
+	QDirStat::MainWindow mainWin{ slowUpdate };
 	mainWin.show();
 
 	if ( !argList.isEmpty() )
@@ -127,7 +127,7 @@ namespace
 
 int main( int argc, char * argv[] )
 {
-    QDirStat::QDirStatApp qDirStatApp( argc, argv );
+    QDirStat::QDirStatApp qDirStatApp{ argc, argv };
     QStringList argList = QCoreApplication::arguments();
     argList.removeFirst(); // Remove program name
 
@@ -164,7 +164,7 @@ int main( int argc, char * argv[] )
     }
 
     // We are definitely going to start the application now
-    Logger logger( "/tmp/qdirstat-$USER", "qdirstat.log" );
+    Logger logger{ "/tmp/qdirstat-$USER", "qdirstat.log" };
     logVersion();
 
     // Set org/app name for QSettings

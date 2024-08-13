@@ -99,9 +99,9 @@ namespace
      * Add an item to a table.
      **/
     QTableWidgetItem * addItem( QTableWidget  * table,
-				int             row,
-				int             col,
-				const QString & text )
+                                int             row,
+                                int             col,
+                                const QString & text )
     {
 	QTableWidgetItem * item = new QTableWidgetItem{ text };
 	table->setItem( row, col, item );
@@ -255,38 +255,38 @@ void FileSizeStatsWindow::initWidgets()
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
 	connect( helpButton, &QAbstractButton::clicked,
-		 this,       &FileSizeStatsWindow::showHelp );
+	         this,       &FileSizeStatsWindow::showHelp );
     }
 
     _ui->optionsPanel->hide();
 
     connect( _ui->closeOptionsButton,       &QPushButton::clicked,
-	     this,                          &FileSizeStatsWindow::closeOptions );
+             this,                          &FileSizeStatsWindow::closeOptions );
 
     connect( _ui->openOptionsButton,        &QPushButton::clicked,
-	     this,                          &FileSizeStatsWindow::openOptions );
+             this,                          &FileSizeStatsWindow::openOptions );
 
     connect( _ui->autoButton,               &QPushButton::clicked,
-	     this,                          &FileSizeStatsWindow::autoPercentiles );
+             this,                          &FileSizeStatsWindow::autoPercentiles );
 
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
-	     this,                          &FileSizeStatsWindow::startValueChanged );
+             this,                          &FileSizeStatsWindow::startValueChanged );
 
     connect( _ui->endPercentileSlider,      &QSlider::valueChanged,
-	     this,                          &FileSizeStatsWindow::endValueChanged );
+             this,                          &FileSizeStatsWindow::endValueChanged );
 
     connect( _ui->markersComboBox,          QOverload<int>::of( &QComboBox::currentIndexChanged ),
-	     this,                          &FileSizeStatsWindow::markersChanged );
+             this,                          &FileSizeStatsWindow::markersChanged );
 
     connect( _ui->percentileFilterCheckBox, &QCheckBox::stateChanged,
-	     this,                          &FileSizeStatsWindow::fillPercentileTable );
+             this,                          &FileSizeStatsWindow::fillPercentileTable );
 }
 
 
 void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
-						  FileInfo      * fileInfo,
-						  const QString & suffix  )
+                                                  FileInfo      * fileInfo,
+                                                  const QString & suffix  )
 {
     if ( !fileInfo )
 	return;
@@ -304,7 +304,7 @@ BucketsTableModel * FileSizeStatsWindow::bucketsTableModel() const
 
 void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
-    const Subtree subtree( fileInfo );
+    const Subtree subtree{ fileInfo };
     const QString & url = subtree.url();
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
     resizeEvent( nullptr );

@@ -35,11 +35,11 @@ FileAgeStats::FileAgeStats( const FileInfo * subtree ):
 
 void FileAgeStats::initMonthStats( short year )
 {
-    for ( int month = 1; month <= 12; month++ )
+    for ( short month = 1; month <= 12; month++ )
     {
         YearStats * stats = monthStats( year, month );
         if ( stats )
-            *stats = YearStats( year, month );
+            *stats = YearStats{ year, month };
     }
 }
 

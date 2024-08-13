@@ -24,7 +24,7 @@ BySizeIterator::BySizeIterator( const FileInfo * parent )
 	_totalSize += it->itemTotalSize();
     }
 
-    auto sorter = FileInfoSorter( SizeCol, Qt::DescendingOrder );
+    auto sorter = FileInfoSorter{ SizeCol, Qt::DescendingOrder };
     std::stable_sort( _sortedChildren.begin(), _sortedChildren.end(), sorter );
 
     _currentIt = _sortedChildren.cbegin();

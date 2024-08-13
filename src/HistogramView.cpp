@@ -230,7 +230,7 @@ void HistogramView::fitToViewport()
 		   << " fits into visible size " << visibleSize
 		   << Qt::endl;
 #endif
-	setTransform( QTransform{} ); // Reset scaling
+	resetTransform(); // Reset scaling
     }
 }
 
@@ -422,10 +422,10 @@ void HistogramView::addQuartileText()
 
 void HistogramView::addHistogramBars()
 {
-    auto applyLogHeight = [ this ]( int height ) -> double
+    const auto applyLogHeight = [ this ]( int height )
     {
 	if ( !_useLogHeightScale )
-	    return height;
+	    return static_cast<double>( height );
 
 	return height > 1 ? std::log2( height ) : height / 2.0;
     };
@@ -569,10 +569,11 @@ void HistogramView::addOverflowPanel()
 
     // Lower pie chart: disk space disregarded
     const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
-    FileSize cutoffDiskSpace          = percentileSum( _stats, 0, _startPercentile );
-
-    if ( _endPercentile < 100 )
-        cutoffDiskSpace += percentileSum( _stats, _endPercentile, 100 );
+    const FileSize cutoffDiskSpace = [ this ]()
+	{
+	    const FileSize space = percentileSum( _stats, 0, _startPercentile );
+	    return _endPercentile < 100 ? space : space + percentileSum( _stats, _endPercentile, 100 );
+	}();
 
     nextPos.setY( nextPos.y() + pieSliceOffset() );
     pieRect = QRectF{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } };

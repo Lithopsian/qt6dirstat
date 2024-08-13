@@ -258,7 +258,7 @@ namespace
      **/
     void splitPath( const QString & fileNameWithPath, QString & pathRet, QString & nameRet )
     {
-	QStringList components   = fileNameWithPath.split( u'/', Qt::SkipEmptyParts );
+	QStringList components = fileNameWithPath.split( u'/', Qt::SkipEmptyParts );
 	if ( !components.isEmpty() )
 	{
 	    nameRet = components.takeLast();

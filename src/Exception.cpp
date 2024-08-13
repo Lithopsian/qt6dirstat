@@ -14,12 +14,9 @@
 QString SysCallFailedException::errMsg( const QString & sysCall,
                                         const QString & resourceName ) const
 {
-    QString msg = QString{ "%1( \"%2\" ) failed" }.arg( sysCall, resourceName );
+    const QString msg = QString{ "%1( \"%2\" ) failed" }.arg( sysCall, resourceName );
 
-    if ( errno != 0 )
-	msg += ": "_L1 + formatErrno();
-
-    return msg;
+    return errno == 0 ? msg : ( msg + ": "_L1 + formatErrno() );
 }
 
 

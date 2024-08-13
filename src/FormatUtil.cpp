@@ -54,7 +54,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 
 QString QDirStat::formatTime( time_t rawTime )
 {
-    if ( rawTime == (time_t)0 )
+    if ( rawTime == 0 )
 	return QString{};
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
@@ -157,6 +157,6 @@ QString QDirStat::elideMiddle( const QString & text, int maxLen )
 void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    const QFontMetrics metrics( label->font() );
+    const QFontMetrics metrics{ label->font() };
     label->setText( metrics.elidedText( text, Qt::ElideMiddle, maxSize ) );
 }

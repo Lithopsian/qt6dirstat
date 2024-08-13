@@ -166,7 +166,7 @@ void FilesystemsWindow::populate()
     for ( MountPointIterator it{ showAll }; *it; ++it )
     {
 	FilesystemItem * item = new FilesystemItem{ *it, _ui->fsTree };
-	item->setIcon( FS_DeviceCol, QIcon( app()->dirTreeModel()->treeIconDir() + icon( *it ) ) );
+	item->setIcon( FS_DeviceCol, QIcon{ app()->dirTreeModel()->treeIconDir() + icon( *it ) } );
     }
 
     if ( MountPoints::hasBtrfs() )

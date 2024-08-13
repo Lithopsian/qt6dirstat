@@ -465,7 +465,7 @@ void * MimeCategoryConfigPage::newValue()
     // ListEditor is making a new row in the category list
     _dirty = true;
 
-    return new MimeCategory {};
+    return new MimeCategory{};
 }
 
 

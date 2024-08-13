@@ -314,13 +314,10 @@ namespace
      *   %terminal	  "konsole" or "gnome-terminal" or "xfce4-terminal" ...
      *   %filemanager "konqueror" or "nautilus" or "thunar" ...
      **/
-    QString expandDesktopSpecificApps( const QString & unexpanded )
+    void expandDesktopSpecificApps( QString & apps )
     {
-	QString expanded = unexpanded;
-	expanded.replace( "%terminal"_L1, terminalApp() );
-	expanded.replace( "%filemanager"_L1, fileManagerApp() );
-
-	return expanded;
+	apps.replace( "%terminal"_L1, terminalApp() );
+	apps.replace( "%filemanager"_L1, fileManagerApp() );
     }
 
 
@@ -361,12 +358,12 @@ namespace
      *     "xdg-open %p"
      *     "tar cjvf %n.tar.bz2 && rm -rf %n"
      **/
-    QString expandVariables( const FileInfo * item, const QString  & unexpanded )
+    QString expandVariables( const FileInfo * item, QString command )
     {
-	QString expanded = expandDesktopSpecificApps( unexpanded );
+	expandDesktopSpecificApps( command );
 
-	expanded.replace( "%p"_L1, SysUtil::shellQuoted( item->path() ) );
-	expanded.replace( "%n"_L1, SysUtil::shellQuoted( item->name() ) );
+	command.replace( "%p"_L1, SysUtil::shellQuoted( item->path() ) );
+	command.replace( "%n"_L1, SysUtil::shellQuoted( item->name() ) );
 
 	const QString dirName = [ item ]()
 	{
@@ -380,10 +377,10 @@ namespace
 	}();
 
 	if ( !dirName.isEmpty() )
-	    expanded.replace( "%d"_L1, SysUtil::shellQuoted( dirName ) );
+	    command.replace( "%d"_L1, SysUtil::shellQuoted( dirName ) );
 
 	// logDebug() << "Expanded: \"" << expanded << '"' << Qt::endl;
-	return expanded;
+	return command;
     }
 
 

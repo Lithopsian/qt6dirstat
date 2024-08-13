@@ -89,7 +89,7 @@ void DiscoverActions::discoverHardLinkedFiles()
 
 void DiscoverActions::discoverBrokenSymLinks()
 {
-    BusyPopup msg( QObject::tr( "Checking symlinks..." ) );
+    BusyPopup msg{ QObject::tr( "Checking symlinks..." ) };
     discoverFiles( new BrokenSymLinksTreeWalker{},
                    LocateListPathCol,
                    Qt::AscendingOrder,

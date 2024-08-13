@@ -37,10 +37,10 @@ DirTreeView::DirTreeView( QWidget * parent ):
     readSettings();
 
     connect( verticalScrollBar(), &QScrollBar::valueChanged,
-	     this,                &DirTreeView::scrolled );
+             this,                &DirTreeView::scrolled );
 
     connect( this,                &QTreeView::customContextMenuRequested,
-	     this,                &DirTreeView::contextMenu );
+             this,                &DirTreeView::contextMenu );
 }
 
 

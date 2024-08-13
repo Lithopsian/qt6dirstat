@@ -19,7 +19,6 @@
 #include <QDateTime>
 #include <QDir>
 #include <QRegularExpression>
-#include <QStringList>
 
 #include "Logger.h"
 #include "SysUtil.h"
@@ -113,29 +112,6 @@ namespace
 	return QDateTime::currentDateTime().toString( "yyyy-MM-dd hh:mm:ss.zzz" );
     }
 
-#if 0
-    /**
-     * Prefix each line of a multi-line text with 'prefix'.
-     */
-    QString prefixLines( const QString & prefix,
-                         const QString & multiLineText )
-    {
-	const QStringList lines = multiLineText.split( u'\n' );
-	const QString result = lines.join( '\n' % prefix );
-
-	return result.isEmpty() ? result : prefix % result;
-    }
-
-
-    /**
-     * Indent each line of a multi-line text with 'indentWith' blanks.
-     */
-    QString indentLines( int             indentWidth,
-                         const QString & multiLineText )
-    {
-	return prefixLines( QString{ indentWidth, u' ' }, multiLineText );
-    }
-#endif
 
     /**
      * Return the user name (the login name) of the user owning this process.
@@ -143,13 +119,6 @@ namespace
      **/
     QString userName()
     {
-	// Not using getuid() because that function relies on the user owning the
-	// controlling terminal which is wrong in many aspects:
-	//
-	// - There might not be a controlling terminal at all.
-	// - The user owning the controlling terminal may or may not be the one
-	//	 starting this program.
-
 	return QDirStat::SysUtil::userName( getuid() );
     }
 
@@ -208,13 +177,12 @@ namespace
      * Return the name for an old log file based on 'filename' for old log
      * no. 'no'.
      **/
-    QString oldName( const QString & filename, int no )
+    QString oldName( QString filename, int no )
     {
-	QString oldName{ filename };
-	oldName.remove( QRegularExpression{ "\\.log$" } );
-	oldName += QString{ "-%1.old" }.arg( no, 2, 10, QChar{ u'0' } );
+	filename.remove( QRegularExpression{ "\\.log$" } );
+	filename += QString{ "-%1.old" }.arg( no, 2, 10, QChar{ u'0' } );
 
-	return oldName;
+	return filename;
     }
 
 
@@ -222,13 +190,12 @@ namespace
      * Return the glob pattern for old log files based on 'filename'.
      * This pattern can be used for QDir matches.
      **/
-    QString oldNamePattern( const QString & filename )
+    QString oldNamePattern( QString filename )
     {
-	QString pattern{ filename };
-	pattern.remove( QRegularExpression{ "\\.log$" } );
-	pattern += "-??.old";
+	filename.remove( QRegularExpression{ "\\.log$" } );
+	filename += "-??.old";
 
-	return pattern;
+	return filename;
     }
 
 
@@ -254,20 +221,19 @@ namespace
 	    {
 		const bool success = dir.remove( newName );
 		Q_UNUSED( success );
-    #if VERBOSE_ROTATE
+#if VERBOSE_ROTATE
 		logDebug() << "Removing " << newName << ( success ? "" : " FAILED" ) << Qt::endl;
-    #endif
+#endif
 	    }
 
 	    if ( dir.exists( currentName ) )
 	    {
 		const bool success = dir.rename( currentName, newName );
 		Q_UNUSED( success );
-    #if VERBOSE_ROTATE
+#if VERBOSE_ROTATE
 		logDebug() << "Renaming " << currentName << " to " << newName
-		           << ( success ? "" : " FAILED" )
-		           << Qt::endl;
-    #endif
+		           << ( success ? "" : " FAILED" ) << Qt::endl;
+#endif
 
 		keepers << newName;
 	    }
@@ -280,9 +246,9 @@ namespace
 	    {
 		const bool success = dir.remove( match );
 		Q_UNUSED( success );
-    #if VERBOSE_ROTATE
+#if VERBOSE_ROTATE
 		logDebug() << "Removing leftover " << match << ( success ? "" : " FAILED" ) << Qt::endl;
-    #endif
+#endif
 	    }
 	}
     }
@@ -294,13 +260,12 @@ namespace
      *   $USER  the login user name of the current user
      *   $UID   the numeric user ID of the current user
      **/
-    QString expandVariables( const QString & unexpanded )
+    QString expandVariables( QString unexpanded )
     {
-	QString expanded{ unexpanded };
-	expanded.replace( "$USER"_L1, userName() );
-	expanded.replace( "$UID"_L1 , QString::number( getuid() ) );
+	unexpanded.replace( "$USER"_L1, userName() );
+	unexpanded.replace( "$UID"_L1 , QString::number( getuid() ) );
 
-	return expanded;
+	return unexpanded;
     }
 
 } // namespace
@@ -309,12 +274,9 @@ namespace
 Logger * Logger::_defaultLogger = nullptr;
 
 
-Logger::Logger( const QString & filename ):
-    _logStream{ stderr, QIODevice::WriteOnly },
-    _nullStream{ stderr, QIODevice::WriteOnly }
+Logger::Logger( const QString & filename )
 {
     init();
-    createNullStream();
     openLogFile( filename );
 }
 
@@ -322,12 +284,9 @@ Logger::Logger( const QString & filename ):
 Logger::Logger( const QString & rawLogDir,
                 const QString & rawFilename,
                 bool            doRotate,
-                int             logRotateCount ):
-    _logStream{ stderr, QIODevice::WriteOnly },
-    _nullStream{ stderr, QIODevice::WriteOnly }
+                int             logRotateCount )
 {
     init();
-    createNullStream();
 
     const QString filename = expandVariables( rawFilename );
     QString logDir = expandVariables( rawLogDir );
@@ -358,8 +317,8 @@ Logger::~Logger()
 
 void Logger::init()
 {
-    _logLevel = LogSeverityVerbose;
     _nullDevice.setFileName( "/dev/null" );
+    createNullStream();
 }
 
 
@@ -501,10 +460,3 @@ void Logger::setLogLevel( Logger * logger, LogSeverity newLevel )
     if ( logger )
 	logger->setLogLevel( newLevel );
 }
-
-#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
-QString formatErrno()
-{
-    return QString::fromUtf8( strerror( errno ) );
-}
-#endif

@@ -84,8 +84,8 @@ namespace
 	}
 
 	const bool doCross = !mountPoint->isSystemMount() &&	//  /dev, /proc, /sys, ...
-			     !mountPoint->isDuplicate()   &&	//  bind mount or multiple mounted
-			     !mountPoint->isNetworkMount();	//  NFS or CIFS (Samba)
+	                     !mountPoint->isDuplicate()   &&	//  bind mount or multiple mounted
+	                     !mountPoint->isNetworkMount();	//  NFS or CIFS (Samba)
 
 //        logDebug() << ( doCross ? "Reading" : "Not reading" )
 //	             << " mounted filesystem " << mountPoint->path() << Qt::endl;
@@ -156,8 +156,8 @@ void DirReadJob::finished()
 
 
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
-				  DirInfo * dir,
-				  bool      applyFileChildExcludeRules ):
+                                  DirInfo * dir,
+                                  bool      applyFileChildExcludeRules ):
     DirReadJob{ tree, dir },
     _applyFileChildExcludeRules{ applyFileChildExcludeRules }
 {
@@ -242,7 +242,7 @@ void LocalDirReadJob::startReading()
 		}
 		else  // non-directory child
 		{
-		    if ( entryName == QLatin1String( DEFAULT_CACHE_NAME ) )	// .qdirstat.cache.gz found
+		    if ( entryName == QLatin1String{ DEFAULT_CACHE_NAME } )	// .qdirstat.cache.gz found
 		    {
 			logDebug() << "Found cache file " << DEFAULT_CACHE_NAME << Qt::endl;
 
@@ -347,7 +347,7 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
     const bool isToplevel = dir() && tree()->root() == dir()->parent();
     DirInfo * parent = isToplevel ? nullptr : dir()->parent();
 
-    CacheReadJob * cacheReadJob = new CacheReadJob{tree(), dir(), parent, cacheFullName };
+    CacheReadJob * cacheReadJob = new CacheReadJob{ tree(), dir(), parent, cacheFullName };
 
     if ( cacheReadJob->reader() ) // Does this cache file match this directory?
     {
@@ -452,7 +452,7 @@ bool LocalDirReadJob::checkForNtfs()
 
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
-			    const QString & cacheFileName ):
+                            const QString & cacheFileName ):
     DirReadJob{ tree, nullptr },
     _reader{ new CacheReader{ cacheFileName, tree } }
 {
@@ -461,9 +461,9 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 
 
 CacheReadJob::CacheReadJob( DirTree       * tree,
-			    DirInfo       * dir,
-			    DirInfo       * parent,
-			    const QString & cacheFileName ):
+                            DirInfo       * dir,
+                            DirInfo       * parent,
+                            const QString & cacheFileName ):
     DirReadJob{ tree, parent },
     _reader{ new CacheReader{ cacheFileName, tree, dir, parent } }
 {
@@ -498,7 +498,7 @@ DirReadJobQueue::DirReadJobQueue():
     QObject {}
 {
     connect( &_timer, &QTimer::timeout,
-	     this,    &DirReadJobQueue::timeSlicedRead );
+             this,    &DirReadJobQueue::timeSlicedRead );
 }
 
 

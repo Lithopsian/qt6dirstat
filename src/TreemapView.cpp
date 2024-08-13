@@ -671,7 +671,7 @@ void TreemapView::setCurrentTile( const TreemapTile * tile )
     {
         //logDebug() << "Sending currentItemChanged " << tile << Qt::endl;
 
-        SignalBlocker sigBlocker( _selectionModelProxy ); // Prevent signal ping-pong
+        SignalBlocker sigBlocker{ _selectionModelProxy }; // Prevent signal ping-pong
         emit currentItemChanged( tile->orig() );
     }
 }
@@ -711,7 +711,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 
     //logDebug() << newSelection.size() << " items selected (after " << _stopwatch.restart() << "ms) " << Qt::endl;
 
-    SignalBlocker sigBlocker( this );
+    SignalBlocker sigBlocker{ this };
     scene()->clearSelection();
 
     QHash<const FileInfo *, TreemapTile *> map;
@@ -750,7 +750,7 @@ void TreemapView::sendSelection( const TreemapTile * tile)
     if ( !_selectionModel )
         return;
 
-    SignalBlocker sigBlocker( _selectionModelProxy );
+    SignalBlocker sigBlocker{ _selectionModelProxy };
     const QList<QGraphicsItem *> selectedTiles = scene()->selectedItems();
 
     if ( selectedTiles.size() == 1 && selectedTiles.first() == tile )
@@ -780,7 +780,7 @@ void TreemapView::updateCurrentItem( FileInfo * currentItem )
 {
     //logDebug() << currentItem << " " << _stopwatch.restart() << "ms" << Qt::endl;
 
-    SignalBlocker sigBlocker( this );
+    SignalBlocker sigBlocker{ this };
     setCurrentItem( currentItem );
 }
 
@@ -863,7 +863,7 @@ HighlightRect::HighlightRect( const TreemapTile * tile,
                               qreal               zValue ):
     QGraphicsRectItem{ tile->rect() }
 {
-    setPen( QPen( color, lineWidth, lineStyle ) );
+    setPen( QPen{ color, static_cast<qreal>( lineWidth ), lineStyle } );
     setZValue( zValue );
 
     tile->scene()->addItem( this );

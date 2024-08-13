@@ -125,7 +125,7 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
 	return;
 
     _ui->terminal->moveCursor( QTextCursor::End );
-    QTextCursor cursor( _ui->terminal->textCursor() );
+    QTextCursor cursor{ _ui->terminal->textCursor() };
 
     QTextCharFormat format;
     format.setForeground( QBrush{ textColor } );
@@ -421,7 +421,7 @@ void OutputWindow::showAfterTimeout( int timeoutMillisec )
     // Shiw after the configured timeout if processes are still running
     QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
                         this,
-			&OutputWindow::timeoutShow );
+                        &OutputWindow::timeoutShow );
 }
 
 

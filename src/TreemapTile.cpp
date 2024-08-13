@@ -431,7 +431,7 @@ void TreemapTile::layoutRow( Orientation      dir,
 
     // All the row tiles have the same coefficients on the short axis of the row
     // .. so just calculate them once on a hypothetical row cushion
-    CushionSurface rowCushionSurface = CushionSurface( _cushionSurface, _parentView->cushionHeights() );
+    CushionSurface rowCushionSurface{ _cushionSurface, _parentView->cushionHeights() };
     if ( dir == TreemapHorizontal )
     {
         const double newY = rectY + height;

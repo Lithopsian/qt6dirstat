@@ -106,17 +106,9 @@ public:
     Logger & operator=( const Logger & ) = delete;
 
     /**
-     * Internal logging function. In most cases, better use the logDebug(),
-     * logWarning() etc. macros instead.
-     */
-    QTextStream & log( const QString & srcFile,
-                       int             srcLine,
-                       const QString & srcFunction,
-                       LogSeverity     severity );
-
-    /**
-     * Static version of the internal logging function.
-     * Use the logDebug(), logWarning() etc. macros instead.
+     * Static version of the internal logging function. Use the
+     * logDebug(), logWarning() etc. macros instead of calling
+     * this directly.
      *
      * If 'logger' is 0, the default logger is used.
      */
@@ -130,8 +122,26 @@ public:
      * Log a plain newline without any prefix (timestamp, source file name,
      * line number).
      */
-    void newline() { _logStream << Qt::endl; }
     static void newline( Logger * logger );
+
+
+protected:
+
+    /**
+     * Common initialization for all constructors.
+     **/
+    void init();
+
+    /**
+     * Create the null log stream to suppress messages below the current log
+     * level.
+     **/
+    void createNullStream();
+
+    /**
+     * Actually open the log file.
+     **/
+    void openLogFile( const QString & filename );
 
     /**
      * Set this as the default logger. That one will be used whenever log() is
@@ -151,7 +161,7 @@ public:
     static Logger * defaultLogger() { return _defaultLogger; }
 
     /**
-     * Return the QTextStream associated with this logger. Not for general use.
+     * Return the QTextStream associated with this logger.
      */
     QTextStream & logStream() { return _logStream; }
 
@@ -192,35 +202,31 @@ public:
      */
     static void setLogLevel( Logger * logger, LogSeverity newLevel );
 
-
-
-protected:
+    /**
+     * Internal logging function.  Use the static function or the
+     * logDebug(), etc. macros.
+     */
+    QTextStream & log( const QString & srcFile,
+                       int             srcLine,
+                       const QString & srcFunction,
+                       LogSeverity     severity );
 
     /**
-     * Common initialization for all constructors.
-     **/
-    void init();
-
-    /**
-     * Create the null log stream to suppress messages below the current log
-     * level.
-     **/
-    void createNullStream();
-
-    /**
-     * Actually open the log file.
-     **/
-    void openLogFile( const QString & filename );
+     * Log a plain newline without any prefix (timestamp, source filename,
+     * line number).  This is the interval version; use the static
+     * version instead.
+     */
+    void newline() { _logStream << Qt::endl; }
 
 
 private:
 
     static Logger * _defaultLogger;
     QFile           _logFile;
-    QTextStream     _logStream;
+    QTextStream     _logStream{ stderr, QIODevice::WriteOnly };
     QFile           _nullDevice;
-    QTextStream     _nullStream;
-    LogSeverity     _logLevel;
+    QTextStream     _nullStream{ stderr, QIODevice::WriteOnly };
+    LogSeverity     _logLevel{ LogSeverityVerbose };
 
 };
 
@@ -248,13 +254,12 @@ inline QTextStream & operator<<( QTextStream & str, QSize size )
 
 /**
  * Format errno as text.  In Qt5, const char * is treated as Latin1 in,
- * for example, QTextstream::operator<<, so convert it to QString.  The
- * text is explicitly converted, although this should happen by default
- * in Qt5 and Qt6.  In Qt6, QTextStream treats const char * as UTF-8, so
- * this can just return the plain const char * text.
+ * for example, QTextstream::operator<<, so convert it to QString.  In
+ * Qt6, QTextStream treats const char * as UTF-8, so this can just
+ * return the plain const char * text.
  **/
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
-    QString formatErrno();
+    inline QString formatErrno() { return QString::fromUtf8( strerror( errno ) ); }
 #else
     inline const char * formatErrno() { return strerror( errno ); }
 #endif

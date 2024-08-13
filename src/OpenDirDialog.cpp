@@ -124,7 +124,7 @@ void OpenDirDialog::setPath( const QString & path )
     // Can't block signals of the dirTreeView's selection model:
     // This would mean that the dirTreeView also isn't notified,
     // so any change would not become visible in the tree.
-    const SignalBlocker sigBlockerValidator( _validator );
+    const SignalBlocker sigBlockerValidator{ _validator };
 
     const QModelIndex currentIndex = _filesystemModel->index( path );
     populatePathComboBox( currentIndex );
@@ -141,7 +141,7 @@ void OpenDirDialog::pathSelected( const QString & path )
 #endif
 
     // Can block selection model here as we manually select and scroll in the tree
-    const SignalBlocker sigBlockerSelection( _ui->dirTreeView->selectionModel() );
+    const SignalBlocker sigBlockerSelection{ _ui->dirTreeView->selectionModel() };
 
     setPath( path );
 
@@ -243,7 +243,7 @@ void OpenDirDialog::writeSettings()
 
 QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
 {
-    OpenDirDialog dialog( parent, crossFilesystems );
+    OpenDirDialog dialog{ parent, crossFilesystems };
     //logDebug() << "Waiting for user selection" << Qt::endl;
 
     if ( dialog.exec() == QDialog::Rejected )
