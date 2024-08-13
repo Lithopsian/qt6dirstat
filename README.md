@@ -16,7 +16,7 @@ Updated: 2024-04-03
 
 [<img width="900" src="https://github.com/Lithopsian/qt6dirstat/blob/main/screenshots/QDirStat-main-win.png">](https://github.com/Lithopsian/qt6dirstat/blob/main/screenshots/QDirStat-main-win.png)
 
-_Main window screenshot - notice the multi-selection in the tree and the treemap_
+_Main window screenshot - note the multi-selection in the tree and the treemap_
 
 
 ## Overview
@@ -33,20 +33,21 @@ The main changes:
 with the rest of the application, and overall a lot faster;
 - the Mime categorizer is faster and follows better precedence rules for files which match
 multiple patterns;
-- the program is ported to Qt6, while still being conpatible with Qt5, but not Qt4;
+- the program is ported to Qt6, while still being compatible with Qt5, but not Qt4;
 - symbolic links are now supported for dpkg packages, essential for many Debian and Ubuntu
 installations with merged /usr directories, and the fairly uncommon diversions are also
 supported;
 - a number of crashes and freezes have been fixed, as well as lot of less serious problems;
-- there is an extra tab in the settings dialog for the Treemap, and the settings on the general
-tab now take effect without having to restart the program;
+- configurability is much improved with: an extra tab in the settings dialog for the Treemap; the
+settings on the general tab taking effect without having to restart the program; the toolbars can
+be hidden; hotkeys for toolbar and menu actions are all confgurable via the main config file;
 - the cache mechanism has been expanded to include the full mode, uid, gid, and file
 allocations, so it captures essentially everything used in the program;
 - better behaviour with dark themes: font colours follow the theme better or are configurable;
 icons are generally colourful although a specific dark theme icon set might be better;
 - the file details panel has been improved and there are literally hundreds of other small
 interface improvements or just plain changes that I liked;
-- the footprint is noticeably reduced with the use of newer compiler features and minor
+- the footprint is significantly reduced with the use of newer compiler features and minor
 streamlining of many code branches.
 
 I've probably broken some things along the way, so my apologies in advance.  I'm testing now and
@@ -125,7 +126,7 @@ in the Wiki.
 
 Make sure you have a working Qt5 or Qt6 build environment installed. This includes:
 
-- C++11-compatible compiler (gcc recommended, C++17-compatible required for compiling under Qt6)
+- C++-compatible compiler (gcc recommended)
 - Qt runtime environment
 - Qt header files
 - libz (compression lib) runtime and header file
