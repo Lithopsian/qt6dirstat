@@ -771,6 +771,7 @@ namespace QDirStat
     };
 
 
+
     /**
      * Semi-transparent mask that covers the complete scene except for one
      * tile.
@@ -780,7 +781,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor: Create a semi-transparent mask that covers the complete
+	 * Constructor: create a semi-transparent mask that covers the complete
 	 * scene (the complete treemap), but leaves 'tile' uncovered.
 	 *
 	 * 'opacity' (0.0 .. 1.0) indicates how transparent the mask is:

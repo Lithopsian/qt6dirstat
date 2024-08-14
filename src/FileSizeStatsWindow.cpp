@@ -155,7 +155,7 @@ namespace
 		continue;
 
 	    addItem( table, row, NumberCol, namePrefix + QString::number( i ) );
-	    addItem( table, row, ValueCol,  formatSize( std::floor( stats->percentileBoundary( i ) ) ) );
+	    addItem( table, row, ValueCol,  formatSize( stats->percentileValue( i ) ) );
 	    if ( i > 0 )
 	    {
 		addItem( table, row, SumCol,           formatSize( stats->percentileSum( i ) ) );

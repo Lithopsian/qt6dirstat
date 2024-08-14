@@ -8,7 +8,6 @@
  */
 
 #include <algorithm> // std::sort()
-#include <cmath>     // cbrt(), floor()
 
 #include "PercentileStats.h"
 #include "Exception.h"
@@ -46,23 +45,16 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
     if ( number > order )
 	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
 
-    if ( number == 0 )
-	return first();
+    // Calculate the data point rank for the number and order
+    const double             rank     = ( size() - 1.0 ) * number / order;
+    const int                index    = std::floor( rank );
+    const double             fraction = rank - index;
+    const PercentileBoundary result   = at( index ); // rank 1 is list index 0
+    const PercentileBoundary diff     = at( index + 1 ) - result; // qint64 stored as long double
 
-    if ( number == order )
-	return last();
-
-    // Calculate the data point position for the number and order
-    const double          pos    = 1.0 * size() * number / order;
-    const int             index  = std::floor( pos ); // floor because pos 1 is list index 0
-    const PercentileValue result = at( index );
-
-    // If the boundary is on an element, return its value
-    if ( pos != index )
-	return result;
-
-    // The boundary is between two elements, return the average of their values
-    return ( result + at( index - 1 ) ) / 2;
+    // Interpolate with the next value
+    // - this formula will collapse to simply result if the rank is an exact integer
+    return result + fraction * diff;
 
 }
 
@@ -112,7 +104,7 @@ void PercentileStats::calculatePercentiles()
 }
 
 
-PercentileValue PercentileStats::percentileBoundary( int index ) const
+PercentileBoundary PercentileStats::percentileBoundary( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
 
@@ -138,18 +130,20 @@ PercentileValue PercentileStats::cumulativeSum( int index ) const
 
 void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
 {
+    // Validate as much as possible, but the percentiles list might still not match the stats
     CHECK_PERCENTILE_INDEX( startPercentile );
     CHECK_PERCENTILE_INDEX( endPercentile   );
 
     if ( startPercentile >= endPercentile )
-        THROW( Exception{ "startPercentile must be less than endPercentile" } );
+	THROW( Exception{ "startPercentile must be less than endPercentile" } );
 
     if ( bucketCount < 1 )
-        THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
+	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
     // Create a new list for bucketCount, filled with zeroes
     _buckets = BucketList( bucketCount );
 
+    // Can only do this if the percentiles are already calculated
     if ( isEmpty() || _percentiles.isEmpty() )
         return;
 
@@ -168,26 +162,25 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
                << Qt::endl;
 #endif
 
-    // Skip to the first percentile that we're using
-    auto it = cbegin();
-    while ( it != cend() && *it < _bucketsStart )
-	++it;
+    // Find the first data point that we want for the buckets
+    auto beginIt = cbegin();
+    while ( beginIt != cend() && *beginIt < _bucketsStart )
+	++beginIt;
 
     // Fill buckets up to the last requested percentile
     int index = 0;
     PercentileBoundary nextBucket = _bucketsStart + bucketWidth;
-    while ( it != cend() && *it <= _bucketsEnd )
+    for ( auto it = beginIt; it != cend() && *it <= _bucketsEnd; ++it )
     {
-	// Increment the bucket index when we hit the next bucket boundary
+	// Increment the bucket index when we hit the next bucket boundary, skipping empty buckets
 	while ( *it > nextBucket )
 	{
 	    index = qMin( index + 1, bucketCount - 1 ); // avoid rounding errors tipping us past the last bucket
 	    nextBucket += bucketWidth;
 	}
 
-        ++_buckets[ index ];
-
-	++it;
+	// Fill this bucket
+	++_buckets[ index ];
     }
 }
 
@@ -197,7 +190,7 @@ int PercentileStats::bestBucketCount( FileCount n, int max )
     if ( n < 2 )
 	return 1;
 
-    // Using the "Rice Rule" which gives more reasonable values for the numbers
+    // Using the "Rice Rule" which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
     const int result = qRound( 2 * std::cbrt( n ) );
 

@@ -59,7 +59,6 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 {
     FileSizeStats stats{ subtree };
 
-    // Implicit conversion from double, only valid up to 2^53
     _threshold = std::floor( upperPercentileThreshold( stats ) );
 }
 
@@ -76,7 +75,6 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 {
     FileMTimeStats stats{ subtree };
 
-    // Implicit conversion from double, only valid up to 2^53
     _threshold = std::floor( upperPercentileThreshold( stats ) );
 }
 
@@ -93,7 +91,6 @@ void OldFilesTreeWalker::prepare( FileInfo * subtree )
 {
     FileMTimeStats stats{ subtree };
 
-    // Implicit conversion from double, only valid up to 2^53
     _threshold = std::ceil( lowerPercentileThreshold( stats ) );
 }
 

@@ -173,14 +173,14 @@ namespace QDirStat
 	 * the FileInfo * based one
 	 **/
 	void propagateCurrentChanged( const QModelIndex & newCurrent,
-				      const QModelIndex & oldCurrent );
+	                              const QModelIndex & oldCurrent );
 
 	/**
 	 * Propagate the QModelIndex based selectionChanged() signal to
 	 * the FileInfo * based one
 	 **/
 	void propagateSelectionChanged( const QItemSelection &,
-					const QItemSelection & );
+	                                const QItemSelection & );
 
 	/**
 	 * Notification that a child is about to be deleted.

@@ -42,8 +42,8 @@ namespace QDirStat
      * Provide a qreal literal suffix.  qreal is not always
      * a double (although it almost always is).
      **/
-    constexpr qreal operator""_qr( long double x )
-        { return qreal( x ); }
+    constexpr inline qreal operator""_qr( long double x ) noexcept
+        { return static_cast<qreal>( x ); }
 }
 
 namespace Qt

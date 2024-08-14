@@ -78,7 +78,8 @@ namespace QDirStat
 
         // Data members
 
-        /** These can be set manually in the [Pkg] section of the config file at
+        /**
+         * These can be set manually in the [Pkg] section of the config file at
          * ~/.config/QDirStat/QDirStat.config.
          **/
         int  _maxParallelProcesses;

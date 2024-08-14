@@ -58,7 +58,7 @@ void PkgFileListCache::remove( const QString & pkgName )
 
 
 void PkgFileListCache::add( const QString & pkgName,
-			    const QString & fileName )
+                            const QString & fileName )
 {
     if ( _lookupType & LookupByPkg )
 	_pkgFileNames.insert( pkgName, fileName );

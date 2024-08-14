@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <cmath> // log2()
+#include <cmath> // log2(), round()
 #include <algorithm> // std::max_element
 
 #include <QGraphicsItem>
@@ -15,10 +15,10 @@
 #include <QTextDocument>
 
 #include "HistogramView.h"
-#include "HistogramItems.h"
 #include "Exception.h"
 #include "FileSizeStats.h"
 #include "FormatUtil.h"
+#include "HistogramItems.h"
 
 
 #define VERBOSE_HISTOGRAM 0
@@ -75,7 +75,7 @@ void HistogramView::init( const FileSizeStats * stats )
 
 FileSize HistogramView::percentile( int index ) const
 {
-    return std::floor( _stats->percentileBoundary( index ) );
+    return _stats->percentileValue( index );
 }
 
 

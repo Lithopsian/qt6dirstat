@@ -10,8 +10,8 @@
 #ifndef SysUtil_h
 #define SysUtil_h
 
-#include <unistd.h>	// access(), getuid(), geteduid(), readlink()
-#include <sys/types.h>	// uid_t
+#include <unistd.h>    // access(), getuid(), geteduid(), readlink()
+#include <sys/types.h> // uid_t
 
 #include <QProcessEnvironment>
 #include <QStringBuilder>
@@ -76,7 +76,7 @@ namespace QDirStat
 	 * into "/bin/sh -c".
 	 **/
 	QString runCommand( const QString & commandLine,
-	                    int           * exitCode_ret = 0,
+	                    int           * exitCode_ret = nullptr,
 	                    int             timeout_sec  = COMMAND_TIMEOUT_SEC,
 	                    bool            logCommand   = LOG_COMMANDS,
 	                    bool            logOutput    = LOG_OUTPUT,
@@ -103,7 +103,7 @@ namespace QDirStat
 	 **/
 	QString runCommand( const QString     & command,
 	                    const QStringList & args,
-	                    int               * exitCode_ret = 0,
+	                    int               * exitCode_ret = nullptr,
 	                    int                 timeout_sec  = COMMAND_TIMEOUT_SEC,
 	                    bool                logCommand   = LOG_COMMANDS,
 	                    bool                logOutput    = LOG_OUTPUT,

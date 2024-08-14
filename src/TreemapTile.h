@@ -51,7 +51,7 @@ namespace QDirStat
     public:
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
 	    QVector<double>( 10 ), // ten elements, not onex10.0
-	    _constLast{ cend() - 1 }
+	    _constLast{ cend() - 1 } // iterator to last list entry
 	{
 	    // Start with the given cushion height, times 4 from the coefficients
 	    double height = 4.0 * cushionHeight;
@@ -142,7 +142,8 @@ namespace QDirStat
 	double xx2() const { return _xx2; }
 
 	/**
-	 * Returns the polynomial coefficient of the first order for X direction.
+	 * Returns the polynomial coefficient of the first order for X
+	 * direction.
 	 **/
 	double xx1() const { return _xx1; }
 
@@ -153,7 +154,8 @@ namespace QDirStat
 	double yy2() const { return _yy2; }
 
 	/**
-	 * Returns the polynomial coefficient of the first order for Y direction.
+	 * Returns the polynomial coefficient of the first order for Y
+	 * direction.
 	 **/
 	double yy1() const { return _yy1; }
 

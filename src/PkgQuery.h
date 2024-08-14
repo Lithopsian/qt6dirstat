@@ -60,7 +60,7 @@ namespace QDirStat
 	 * Return 'true' if any of the supported package managers was found.
 	 **/
 	static bool foundSupportedPkgManager()
-	    { return ! instance()->_pkgManagers.isEmpty(); }
+	    { return !instance()->_pkgManagers.isEmpty(); }
 
 	/**
 	 * Return the (first) primary package manager if there is one or 0 if
