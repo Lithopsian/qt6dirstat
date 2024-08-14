@@ -128,7 +128,8 @@ namespace QDirStat
 	 * To keep that definition, the floating point boundary
 	 * is rounded down to an integer.
 	 **/
-	PercentileValue percentileValue( int index ) const;
+	PercentileValue percentileValue( int index ) const
+	    { return std::floor( percentileBoundary( index ) ); }
 
 	/**
 	 * Fill 'bucketCount' buckets of equal width (data value range)
