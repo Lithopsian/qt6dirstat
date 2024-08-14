@@ -254,14 +254,14 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	time_t latestMtime() override;
+	time_t latestMTime() override;
 
 	/**
 	 * Returns the oldest modification time of any file in this subtree.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	time_t oldestFileMtime() override;
+	time_t oldestFileMTime() override;
 
 	/**
 	 * Returns 'true' if this had been excluded while reading.
@@ -738,8 +738,8 @@ namespace QDirStat
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
 	FileSize       _totalBlocks;
-	time_t         _latestMtime;
-	time_t         _oldestFileMtime;
+	time_t         _latestMTime;
+	time_t         _oldestFileMTime;
 
     };	// class DirInfo
 

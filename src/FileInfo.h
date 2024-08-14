@@ -574,7 +574,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual time_t latestMtime() { return _mtime; }
+	virtual time_t latestMTime() { return _mtime; }
 
 	/**
 	 * Returns the oldest modification time of any file in this subtree.
@@ -583,7 +583,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual time_t oldestFileMtime() { return isFile() ? _mtime : 0; }
+	virtual time_t oldestFileMTime() { return isFile() ? _mtime : 0; }
 
 	/**
 	 * Return the percentage of this subtree in regard to its parent

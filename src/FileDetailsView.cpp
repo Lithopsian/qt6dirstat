@@ -385,7 +385,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
 	setLabel( _ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
 	setLabel( _ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
-	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMtime() ) );
+	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
 	_ui->dirAllocatedLabel->setBold( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
@@ -481,7 +481,7 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
 	_ui->pkgSubDirCountLabel->clear();
     }
 
-    _ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMtime() ) );
+    _ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
 
     setCurrentPage( _ui->pkgDetailsPage );
 }
@@ -521,7 +521,7 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
 	_ui->pkgSummarySubDirCountLabel->clear();
     }
 
-    _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMtime() ) );
+    _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
 
     setCurrentPage( _ui->pkgSummaryPage );
 }

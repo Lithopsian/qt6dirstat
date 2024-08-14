@@ -130,8 +130,8 @@ void DirInfo::initCounts()
     _totalUnignoredItems = 0;
     _childCount          = 0;
     _errSubDirs          = 0;
-    _latestMtime         = mtime();
-    _oldestFileMtime     = 0;
+    _latestMTime         = mtime();
+    _oldestFileMTime     = 0;
 }
 
 
@@ -297,15 +297,15 @@ void DirInfo::recalc()
 		++_totalFiles;
 	}
 
-	time_t childLatestMtime = it->latestMtime();
-	if ( childLatestMtime > _latestMtime )
-	    _latestMtime = childLatestMtime;
+	time_t childLatestMTime = it->latestMTime();
+	if ( childLatestMTime > _latestMTime )
+	    _latestMTime = childLatestMTime;
 
-	time_t childOldestFileMTime = it->oldestFileMtime();
+	time_t childOldestFileMTime = it->oldestFileMTime();
 	if ( childOldestFileMTime > 0 )
 	{
-	    if ( _oldestFileMtime == 0 || childOldestFileMTime < _oldestFileMtime )
-		_oldestFileMtime = childOldestFileMTime;
+	    if ( _oldestFileMTime == 0 || childOldestFileMTime < _oldestFileMTime )
+		_oldestFileMTime = childOldestFileMTime;
 	}
     }
 
@@ -388,17 +388,17 @@ FileCount DirInfo::errSubDirs()
 }
 
 
-time_t DirInfo::latestMtime()
+time_t DirInfo::latestMTime()
 {
     ensureClean();
-    return _latestMtime;
+    return _latestMTime;
 }
 
 
-time_t DirInfo::oldestFileMtime()
+time_t DirInfo::oldestFileMTime()
 {
     ensureClean();
-    return _oldestFileMtime;
+    return _oldestFileMTime;
 }
 
 
@@ -522,8 +522,8 @@ void DirInfo::childAdded( FileInfo * newChild )
 		    THROW( FilesystemTooBigException{} );
 	    }
 
-	    if ( newChild->mtime() > _latestMtime )
-		_latestMtime = newChild->mtime();
+	    if ( newChild->mtime() > _latestMTime )
+		_latestMTime = newChild->mtime();
 
 	    _totalSize          += newChild->size();
 	    _totalAllocatedSize += newChild->allocatedSize();
@@ -547,11 +547,11 @@ void DirInfo::childAdded( FileInfo * newChild )
 	    {
 		++_totalFiles;
 
-		const time_t childOldestFileMTime = newChild->oldestFileMtime();
+		const time_t childOldestFileMTime = newChild->oldestFileMTime();
 		if ( childOldestFileMTime > 0 )
 		{
-		    if ( _oldestFileMtime == 0 || childOldestFileMTime < _oldestFileMtime )
-			_oldestFileMtime = childOldestFileMTime;
+		    if ( _oldestFileMTime == 0 || childOldestFileMTime < _oldestFileMTime )
+			_oldestFileMTime = childOldestFileMTime;
 		}
 	    }
 	}

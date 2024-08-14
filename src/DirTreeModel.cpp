@@ -248,7 +248,7 @@ namespace
 
 	    case NameCol:             return item->name();
 	    case SizeCol:             return sizeColText( item );
-	    case LatestMTimeCol:      return formatTime( item->latestMtime() );
+	    case LatestMTimeCol:      return formatTime( item->latestMTime() );
 	    case UserCol:             return item->userName();
 	    case GroupCol:            return item->groupName();
 	    case PermissionsCol:      return item->symbolicPermissions();
@@ -280,7 +280,7 @@ namespace
 		case TotalSubDirsCol:
 		    return QString{ item->sizePrefix() % QString::number( item->totalSubDirs() ) };
 		case OldestFileMTimeCol:
-		    return formatTime( item->oldestFileMtime() );
+		    return formatTime( item->oldestFileMTime() );
 	    }
 	}
 
