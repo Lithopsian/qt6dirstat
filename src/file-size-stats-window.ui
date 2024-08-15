@@ -112,7 +112,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QGridLayout" name="gridLayout">
+           <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0,1,0">
             <item row="1" column="1">
              <widget class="QLabel" name="startPercentileLabel">
               <property name="text">
@@ -125,12 +125,6 @@
             </item>
             <item row="1" column="0">
              <widget class="QSpinBox" name="startPercentileSpinBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
               <property name="prefix">
                <string>P</string>
               </property>
@@ -154,12 +148,6 @@
             </item>
             <item row="0" column="3">
              <widget class="QPushButton" name="autoButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
               <property name="text">
                <string>&amp;Auto</string>
               </property>
@@ -170,12 +158,6 @@
             </item>
             <item row="1" column="6">
              <widget class="QSpinBox" name="endPercentileSpinBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
               <property name="prefix">
                <string>P</string>
               </property>
@@ -472,12 +454,6 @@
            </item>
            <item>
             <spacer name="excessSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Expanding</enum>
-             </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>0</width>
