@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>529</width>
-    <height>425</height>
+    <width>522</width>
+    <height>323</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,12 +52,6 @@
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <property name="minimumSize">
-      <size>
-       <width>513</width>
-       <height>353</height>
-      </size>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -68,6 +62,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QDirStat::HistogramView" name="histogramView">
+         <property name="minimumSize">
+          <size>
+           <width>486</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
@@ -332,7 +332,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>476</width>
+            <width>469</width>
             <height>546</height>
            </rect>
           </property>
