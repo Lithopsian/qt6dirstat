@@ -68,7 +68,7 @@ QString QDirStat::formatTime( time_t rawTime )
 
 QString QDirStat::symbolicMode( mode_t mode )
 {
-    const QChar sticky = [ mode ]()
+    const QChar type = [ mode ]()
     {
 	if ( S_ISDIR ( mode ) ) return 'd';
 	if ( S_ISCHR ( mode ) ) return 'c';
@@ -94,7 +94,7 @@ QString QDirStat::symbolicMode( mode_t mode )
     const QChar oWrite   = ( mode & S_IWOTH ) ? 'w' : '-';
     const QChar oExecute = ( mode & S_ISVTX ) ? 't' : ( mode & S_IXOTH ) ? 'x' : '-';
 
-    return sticky % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
+    return type % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
 }
 
 

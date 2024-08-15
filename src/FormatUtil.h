@@ -12,7 +12,7 @@
 
 #include <cmath>       // llround()
 #include <sys/types.h> // mode_t
-#include <sys/stat.h>  // ALLPERMS
+#include <sys/stat.h>  // ALLPERMS, S_IRUSR, S_ISUID, etc
 
 #include <QFontMetrics>
 #include <QStringBuilder>

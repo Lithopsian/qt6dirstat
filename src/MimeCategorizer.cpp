@@ -151,8 +151,14 @@ const QColor & MimeCategorizer::color( const FileInfo * item )
 
 const MimeCategory * MimeCategorizer::category( const FileInfo * item, QString * suffix_ret )
 {
+    if ( suffix_ret )
+	*suffix_ret = QString{};
+
     if ( item )
     {
+	if ( item->isSymLink() )
+	    return _symlinkCategory;
+
 	const QReadLocker locker{ &_lock };
 
 	const MimeCategory * matchedCategory = category( item->name(), suffix_ret );
@@ -189,9 +195,6 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item ) const
 const MimeCategory * MimeCategorizer::category( const QString & filename,
                                                 QString       * suffix_ret ) const
 {
-    if ( suffix_ret )
-	*suffix_ret = QString{};
-
     if ( filename.isEmpty() )
 	return nullptr;
 

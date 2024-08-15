@@ -54,7 +54,7 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
         {
             collectRecursive( item );
         }
-        else if ( item->isFile() )
+        else if ( item->isFile() || item->isSymLink() )
         {
             const auto  yearAndMonth = item->yearAndMonth();
             const short year         = yearAndMonth.year;

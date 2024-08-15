@@ -127,6 +127,10 @@ namespace QDirStat
 	 * category was found by a suffix rule. If the category was not found
 	 * or if a wildcard (rather than a suffix rule) matched, this returns an
 	 * empty string.
+	 *
+	 * Extra checks are made for symlinks and executable files.  These always
+	 * return an empty string for the suffix even if the file has an
+	 * extension.
 	 **/
 	const MimeCategory * category( const FileInfo * item, QString * suffix_ret );
 
@@ -174,6 +178,8 @@ namespace QDirStat
 	/**
 	 * Return the MimeCategory for a FileInfo item or an empty dummy category
 	 * if it doesn't fit into any of the available categories.
+	 *
+	 * Extra checks are made for symlinks and executable files.
 	 **/
 	const MimeCategory * category( const FileInfo * item ) const;
 
@@ -183,8 +189,9 @@ namespace QDirStat
 	 *
 	 * If 'suffix_ret' is non-null, it returns the suffix used if the
 	 * category was found by a suffix rule. If the category was not found
-	 * or if a wildcard (rather than a suffix rule) matched, this returns an
-	 * empty string.
+	 * or if a wildcard (rather than a suffix rule) matched, the suffix
+	 * is not set; the caller is responsible for initialising the suffix
+	 * to a suitable default value.
 	 **/
 	const MimeCategory * category( const QString & filename, QString * suffix_ret ) const;
 
