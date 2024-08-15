@@ -131,7 +131,7 @@ PercentileValue PercentileStats::cumulativeSum( int index ) const
 
 void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
 {
-    // Validate as much as possible, but the percentiles list might still not match the stats
+    // Validate as much as possible, although the percentiles list still might not match the stats
     CHECK_PERCENTILE_INDEX( startPercentile );
     CHECK_PERCENTILE_INDEX( endPercentile   );
 
@@ -141,16 +141,12 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
     if ( bucketCount < 1 )
 	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
-    // Create a new list for bucketCount, filled with zeroes
+    // Create a new list of bucketCount zeroes, discarding any existing list
     _buckets = BucketList( bucketCount );
 
-    // Can only do this if the percentiles are already calculated
-    if ( isEmpty() || _percentiles.isEmpty() )
-        return;
-
     // Remember the validated start and end percentiles that match this bucket list
-    _bucketsStart = _percentiles[ startPercentile ];
-    _bucketsEnd   = _percentiles[ endPercentile   ];
+    _bucketsStart = percentileBoundary( startPercentile );
+    _bucketsEnd   = percentileBoundary( endPercentile   );
 
     const PercentileBoundary bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
 
@@ -170,14 +166,15 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
     // Fill buckets up to the last requested percentile
     int index = 0;
-    PercentileBoundary nextBucket = _bucketsStart + bucketWidth;
+    PercentileBoundary bucketEnd = _bucketsStart + bucketWidth;
     for ( auto it = beginIt; it != cend() && *it <= _bucketsEnd; ++it )
     {
 	// Increment the bucket index when we hit the next bucket boundary, skipping empty buckets
-	while ( *it > nextBucket )
+	while ( *it > bucketEnd )
 	{
-	    index = qMin( index + 1, bucketCount - 1 ); // avoid rounding errors tipping us past the last bucket
-	    nextBucket += bucketWidth;
+	    if ( index < bucketCount - 1 ) // avoid rounding errors tipping us past the last bucket
+		++index;
+	    bucketEnd += bucketWidth;
 	}
 
 	// Fill this bucket
@@ -191,7 +188,7 @@ int PercentileStats::bestBucketCount( FileCount n, int max )
     if ( n < 2 )
 	return 1;
 
-    // Using the "Rice Rule" which gives reasonable values for the numbers
+    // Using the Rice Rule which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
     const int result = qRound( 2 * std::cbrt( n ) );
 

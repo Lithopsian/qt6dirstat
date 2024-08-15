@@ -23,8 +23,8 @@
 
 #define VERBOSE_HISTOGRAM 0
 
-#define MinHistogramWidth	 500.0_qr
-#define MinHistogramHeight	 300.0_qr
+#define MinHistogramWidth	500.0_qr // don't need this because the width is constrained in the .ui file
+#define MinHistogramHeight	300.0_qr // about the height of the overflow panel
 
 
 using namespace QDirStat;
@@ -67,9 +67,7 @@ void HistogramView::init( const FileSizeStats * stats )
 
     _geometryDirty  = true;
 
-    _startPercentile   = 0;    // data min
-    _endPercentile     = 100;  // data max
-    _useLogHeightScale = false;
+    autoStartEndPercentiles();
 }
 
 
@@ -105,8 +103,8 @@ void HistogramView::setEndPercentile( int index )
     if ( _startPercentile >= _endPercentile )
     {
 	logError() << "startPercentile must be less than endPercentile: "
-		   << _startPercentile << ".." << _endPercentile
-		   << Qt::endl;
+	           << _startPercentile << ".." << _endPercentile
+	           << Qt::endl;
     }
 #endif
 }
@@ -126,27 +124,27 @@ void HistogramView::autoStartEndPercentiles()
     const bool oldNeedOverflowPanel = needOverflowPanel();
 
     for ( _startPercentile = 0;
-	  _startPercentile < 25 && percentile( _startPercentile ) < minVal;
-	  ++_startPercentile );
+          _startPercentile < 25 && percentile( _startPercentile ) < minVal;
+          ++_startPercentile );
 
     for ( _endPercentile = 100;
-	  _endPercentile > 75 && percentile( _endPercentile ) > maxVal;
-	  --_endPercentile );
+          _endPercentile > 75 && percentile( _endPercentile ) > maxVal;
+          --_endPercentile );
 
     if ( oldNeedOverflowPanel != needOverflowPanel() )
         _geometryDirty = true;
 
 #if VERBOSE_HISTOGRAM
     logInfo() << "Q1: " << formatSize( q1 )
-	      << "  Q3: " << formatSize( q3 )
-	      << "  minVal: " << formatSize( minVal )
-	      << "  maxVal: " << formatSize( maxVal )
-	      << Qt::endl;
+              << "  Q3: " << formatSize( q3 )
+              << "  minVal: " << formatSize( minVal )
+              << "  maxVal: " << formatSize( maxVal )
+              << Qt::endl;
     logInfo() << "startPercentile: " << _startPercentile
-	      << "  " << formatSize( percentile( _startPercentile ) )
-	      << "  endPercentile: " << _endPercentile
-	      << "  " << formatSize( percentile( _endPercentile	 ) )
-	      << Qt::endl;
+              << "  " << formatSize( percentile( _startPercentile ) )
+              << "  endPercentile: " << _endPercentile
+              << "  " << formatSize( percentile( _endPercentile ) )
+              << Qt::endl;
 #endif
 }
 
@@ -169,9 +167,9 @@ void HistogramView::autoLogHeightScale()
 
 #if VERBOSE_HISTOGRAM
 	logInfo() << "Largest bucket: " << largest
-		  << " bucket P85: " << referencePercentileValue
-		  << "	 -> use log height scale: " << _useLogHeightScale
-		  << Qt::endl;
+	          << " bucket P85: " << referencePercentileValue
+	          << "	 -> use log height scale: " << _useLogHeightScale
+	          << Qt::endl;
 #endif
     }
 }
@@ -188,21 +186,20 @@ void HistogramView::calcGeometry( QSize newSize )
         _histogramWidth -= 2 * overflowBorder();
     }
 
-    if ( _histogramWidth < MinHistogramWidth )
-	_histogramWidth = MinHistogramWidth;
-
     _histogramHeight  = newSize.height();
     _histogramHeight -= bottomBorder() + topBorder() + 2 * viewMargin();
     _histogramHeight -= topTextHeight(); // compensate for text above
 
-    _histogramHeight  = qBound( MinHistogramHeight, _histogramHeight, 1.5 * _histogramWidth );
-    _geometryDirty    = false;
+    // Constrain to at least the minimum overflow panel height and no more than the histogram width
+    _histogramHeight  = qBound( MinHistogramHeight, _histogramHeight, _histogramWidth );
 
 #if VERBOSE_HISTOGRAM
     logDebug() << "Histogram width: " << _histogramWidth
-	       << " height: " << _histogramHeight
-	       << Qt::endl;
+               << " height: " << _histogramHeight
+               << Qt::endl;
 #endif
+
+    _geometryDirty    = false;
 }
 
 
@@ -217,8 +214,8 @@ void HistogramView::fitToViewport()
     {
 #if VERBOSE_HISTOGRAM
 	logDebug() << "Scaling down histogram in " << rect.size()
-		   << " to fit into visible size " << visibleSize
-		   << Qt::endl;
+	           << " to fit into visible size " << visibleSize
+	           << Qt::endl;
 #endif
 	fitInView( rect, Qt::KeepAspectRatio );
     }
@@ -227,8 +224,8 @@ void HistogramView::fitToViewport()
 	// The histogram has already been sized to fit any large enough viewport
 #if VERBOSE_HISTOGRAM
 	logDebug() << "Histogram in " << rect.size()
-		   << " fits into visible size " << visibleSize
-		   << Qt::endl;
+	           << " fits into visible size " << visibleSize
+	           << Qt::endl;
 #endif
 	resetTransform(); // Reset scaling
     }
@@ -246,8 +243,8 @@ void HistogramView::rebuild()
 {
      //logInfo() << "Building histogram" << Qt::endl;
 
-    // Don't try this if the viewport geometry isn't set yet
-    if ( !isVisible() )
+    // Don't try this if the viewport geometry isn't set yet or we don't have any stats
+    if ( !window()->isVisible() || !_stats )
 	return;
 
     if ( _geometryDirty )
@@ -256,9 +253,11 @@ void HistogramView::rebuild()
     delete scene();
     setScene( new QGraphicsScene{ this } );
 
+    // Get the palette in case the theme changed
     const QPalette palette = scene()->palette();
     scene()->setBackgroundBrush( palette.base() );
 
+    // Keep all the brushes and pens together, even the ones that don't depend on the palette
     _panelBackground    = palette.alternateBase();
     _barBrush           = QColor{ 0xB0, 0xB0, 0xD0 };
     _barPen             = QColor{ 0x40, 0x40, 0x50 };
@@ -525,9 +524,9 @@ void HistogramView::addOverflowPanel()
 
     // Create the panel area
     const QRectF rect{ _histogramWidth + rightBorder() + overflowSpacing(),
-		       -( topBorder() + _histogramHeight ),
-		       overflowWidth() + 2 * overflowBorder(),
-		       topBorder() + _histogramHeight + bottomBorder() };
+                       -( topBorder() + _histogramHeight ),
+                       overflowWidth() + 2 * overflowBorder(),
+                       topBorder() + _histogramHeight + bottomBorder() };
     QGraphicsRectItem * cutoffPanel = scene()->addRect( rect, QPen{ Qt::NoPen }, _panelBackground );
 
     const auto cutoffLines = [ this ]()

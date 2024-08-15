@@ -319,7 +319,7 @@ namespace QDirStat
 	// Data Members
 	//
 
-	// Collected statistics data
+	// Statistics data to represent
 	const FileSizeStats * _stats{ nullptr };
 
 	// Flags not currently configurable
@@ -328,7 +328,7 @@ namespace QDirStat
 	const int  _leftMarginPercentiles{ 0 };
 	const int  _rightMarginPercentiles{ 5 };
 
-	// Configurable settings
+	// Configurable settings; will be set for every build (except _percentileStep)
 	int  _startPercentile;
 	int  _endPercentile;
 	bool _useLogHeightScale;

@@ -351,7 +351,6 @@ void FileSizeStatsWindow::fillHistogram()
 {
     HistogramView * histogram = _ui->histogramView;
     histogram->init( _stats.get() );
-    histogram->autoStartEndPercentiles();
     updateOptions();
     loadHistogram();
 }
