@@ -246,7 +246,7 @@ void HistogramView::rebuild()
      //logInfo() << "Building histogram" << Qt::endl;
 
     // Don't try this if the viewport geometry isn't set yet
-    if ( !isVisible() )
+    if ( !window()->isVisible() )
 	return;
 
     if ( _geometryDirty )
