@@ -46,15 +46,16 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
 	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
 
     // Calculate the data point rank for the number and order
-    const double             rank     = ( size() - 1.0 ) * number / order;
-    const int                index    = std::floor( rank );
-    const double             fraction = rank - index;
-    const PercentileBoundary result   = at( index ); // rank 1 is list index 0
-    const PercentileBoundary diff     = at( index + 1 ) - result; // qint64 stored as long double
+    const double rank   = ( size() - 1.0 ) * number / order;
+    const int    index  = std::floor( rank );
+    const double modulo = rank - index;
 
-    // Interpolate with the next value
-    // - this formula will collapse to simply result if the rank is an exact integer
-    return result + fraction * diff;
+    // Get the value at 'rank' and the next to interpolate with
+    const PercentileBoundary result   = at( index ); // rank 1 is list index 0
+    const PercentileBoundary fraction = modulo ? at( index + 1 ) - result : 0; // qint64 stored as long double
+
+    // This interplation will collapse to simply result if the rank is an exact integer
+    return result + fraction;
 
 }
 
