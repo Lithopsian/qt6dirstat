@@ -107,7 +107,7 @@ MainWindow::~MainWindow()
 
     writeSettings();
 
-    // Reset (ie. delete ) the model pointers
+    // Reset the model pointers since the models will be destroyed
     QDirStatApp::resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
@@ -402,8 +402,8 @@ void MainWindow::startingReading()
 namespace
 {
     [[gnu::unused]] void dumpModelTree(	const QAbstractItemModel * model,
-					const QModelIndex        & index,
-					const QString            & indent )
+                                        const QModelIndex        & index,
+                                        const QString            & indent )
     {
 	const int rowCount = model->rowCount( index );
 	const QVariant data = model->data( index, Qt::DisplayRole );
@@ -772,7 +772,7 @@ void MainWindow::askWriteCache()
 
 void MainWindow::updateWindowTitle( const QString & url )
 {
-    QString windowTitle = "Qt6DirStat";
+    QString windowTitle = app()->applicationName();
 
     if ( SysUtil::runningAsRoot() )
 	windowTitle += " [root]";

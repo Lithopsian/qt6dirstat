@@ -22,7 +22,7 @@ using namespace QDirStat;
 
 void MainWindow::showAboutDialog()
 {
-    const QString text = "<h2>Qt6DirStat " QDIRSTAT_VERSION "</h2><p>" %
+    const QString text = "<h2>" QDIRSTAT_APP " " QDIRSTAT_VERSION "</h2><p>" %
         tr( "Qt-based directory statistics -- showing where all your disk space has gone "
             "and trying to help you to clean it up." ) %
         "</p><p>" %
@@ -40,7 +40,7 @@ void MainWindow::showAboutDialog()
             "be held responsible for anything like that. Use this program at your own risk." ) %
         "</p>";
 
-    QMessageBox::about( this, tr( "About Qt6DirStat" ), text );
+    QMessageBox::about( this, tr( "About " QDIRSTAT_APP ), text );
 }
 
 
@@ -48,7 +48,7 @@ void MainWindow::showDonateDialog()
 {
     const QString text = tr( "<h2>Donate</h2>" ) %
         "<p><nobr>" %
-        tr( "Qt6DirStat is Free Open Source Software." ) %
+        tr( QDIRSTAT_APP " is Free Open Source Software." ) %
         "</nobr></p><p><nobr>" %
         tr( "If you find it useful, please consider donating." ) %
         "</nobr>\n<nobr>" %
