@@ -52,20 +52,6 @@ namespace
 	}
     }
 
-#if 0
-    /**
-     * Set the foreground (the text color) for all items in a table row.
-     **/
-    void setRowForeground( QTableWidget * table, int row, const QBrush & brush )
-    {
-	for ( int col=0; col < table->columnCount(); ++col )
-	{
-	    QTableWidgetItem * item = table->item( row, col );
-	    if ( item )
-		item->setForeground( brush );
-	}
-    }
-#endif
 
     /**
      * Set the background for all items in a table row.
@@ -136,7 +122,6 @@ namespace
 	};
 
 	table->clear();
-	table->setRowCount( 101 );
 
 	const QStringList headers{ QObject::tr( "Percentile"  ),
 	                           QObject::tr( "Size cutoff" ),
@@ -147,11 +132,14 @@ namespace
 	table->setColumnCount( headers.size() );
 	table->setHorizontalHeaderLabels( headers );
 
-	int row = 0;
+	const int min = stats->minPercentile();
+	const int max = stats->maxPercentile();
+	table->setRowCount( max - min + 1 );
 
-	for ( int i=0; i <= 100; ++i )
+	int row = 0;
+	for ( int i = min; i <= max; ++i )
 	{
-	    if ( step > 1 && i > extremesMargin && i < 100 - extremesMargin && i % step != 0 )
+	    if ( step > 1 && i > min + extremesMargin && i < max - extremesMargin && i % step != 0 )
 		continue;
 
 	    addItem( table, row, NumberCol, namePrefix + QString::number( i ) );

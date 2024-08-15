@@ -66,19 +66,29 @@ namespace QDirStat
     public:
 
 	/**
+	 * Return the minimum and maximum valid percentile values, as well
+	 * as the percentiles for corresponding to the median and quartiles.
+	 **/
+	int minPercentile() const { return 0; }
+	int maxPercentile() const { return 100; }
+	int median() const { return maxPercentile() / 2; }
+	int quartile1() const { return maxPercentile() / 4; }
+	int quartile3() const { return quartile1() * 3; }
+
+	/**
 	 * Find the minimum value.
 	 **/
-//	PercentileValue min() const { return quantile( 2, 0 ); }
+//	PercentileValue minValue() const { return quantile( 2, 0 ); }
 
 	/**
 	 * Find the maximum value.
 	 **/
-//	PercentileValue max() const { return quantile( 2, 2 ); }
+//	PercentileValue maxValue() const { return quantile( 2, 2 ); }
 
 	/**
 	 * Calculate the median.
 	 **/
-//	PercentileValue median() const { return quantile( 2, 1 ); }
+//	PercentileValue medianValue() const { return quantile( 2, 1 ); }
 
 	/**
 	 * Calculate a quartile.
@@ -140,7 +150,8 @@ namespace QDirStat
 
 	/**
 	 * Calculate the best bucket count according to the Rice Rule for n
-	 * data points, but limited to 'max' buckets.
+	 * data points.  The number of buckets is limited to 'max' for
+	 * on-screen display.
 	 *
 	 * See also https://en.wikipedia.org/wiki/Histogram
 	 **/

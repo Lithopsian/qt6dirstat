@@ -9,6 +9,8 @@
 
 #include <algorithm> // std::sort()
 
+#include <QtMath> // qCeil
+
 #include "PercentileStats.h"
 #include "Exception.h"
 #include "FormatUtil.h"
@@ -36,26 +38,29 @@ void PercentileStats::sort()
 
 PercentileBoundary PercentileStats::quantile( int order, int number ) const
 {
+    // Try to validate everything so the calculation will be valid
     if ( isEmpty() )
 	return 0;
 
-    if ( order < 2 || order > 100 )
+    if ( order < 2 || order > maxPercentile() )
 	THROW( Exception{ QString{ "Invalid quantile order %1" }.arg( order ) } );
 
     if ( number > order )
 	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
 
-    // Calculate the data point rank for the number and order
-    const double rank   = ( size() - 1.0 ) * number / order;
-    const int    index  = std::floor( rank );
-    const double modulo = rank - index;
+    // Calculate the data point rank for the number and order (C=1 algorithm, rank 1 is list index 0)
+    const double indexRank = ( size() - 1.0 ) * number / order;
 
-    // Get the value at 'rank' and the next to interpolate with
-    const PercentileBoundary result   = at( index ); // rank 1 is list index 0
-    const PercentileBoundary fraction = modulo ? at( index + 1 ) - result : 0; // qint64 stored as long double
+    // Separate the rank into its base integer to index the list and fraction part for interpolation
+    const int    index  = std::floor( indexRank );
+    const double modulo = indexRank - index;
 
-    // This interplation will collapse to simply result if the rank is an exact integer
-    return result + fraction;
+    // Get the value at 'index' and the next to interpolate with if necessary
+    PercentileBoundary result = at( index );
+    if ( modulo )
+	result += modulo * ( at( index + 1 ) - result );
+
+    return result;
 
 }
 
@@ -65,10 +70,10 @@ void PercentileStats::calculatePercentiles()
     _percentiles.clear(); // just in case anyone calls this more than once
 
     // Store all the percentile boundaries
-    for ( int i=0; i <= 100; ++i )
+    for ( int i = minPercentile(); i <= maxPercentile(); ++i )
 	_percentiles.append( percentile( i ) );
 
-    _percentileSums = PercentileList( 101 ); // new list, 101 items, all zero
+    _percentileSums = PercentileList( maxPercentile() + 1 ); // new list, 101 items, all zero
 
     // Iterate all the data points - should be in order, so add to each percentile in turn
     int currentPercentile = 1;
@@ -76,7 +81,7 @@ void PercentileStats::calculatePercentiles()
     for ( PercentileValue value : *this )
     {
 	// Have we gone past this percentile upper boundary?
-	while ( value > *it && currentPercentile < 100 )
+	while ( value > *it && currentPercentile < maxPercentile() )
 	{
 	    ++currentPercentile;
 	    ++it;
@@ -185,27 +190,25 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
 int PercentileStats::bestBucketCount( FileCount n, int max )
 {
-    if ( n < 2 )
-	return 1;
-
-    // Using the Rice Rule which gives reasonable values for the numbers
+    // Use the Rice Rule which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
-    const int result = qRound( 2 * std::cbrt( n ) );
+    const int bucketCount = qCeil( 2 * std::cbrt( n ) );
 
     // Enforce an upper limit so each histogram bar remains wide enough
     // for tooltips and to be seen
-    if ( result > max )
+    if ( bucketCount > max )
     {
 #if VERBOSE_LOGGING
 	logInfo() << "Limiting bucket count to " << max
-	          << " instead of " << result
+	          << " instead of " << bucketCount
 	          << Qt::endl;
 #endif
 
 	return max;
     }
 
-    return result;
+    // Don't return zero, bad things will happen
+    return bucketCount > 0 ? bucketCount : 1;
 }
 
 

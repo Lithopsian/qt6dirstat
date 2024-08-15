@@ -210,8 +210,8 @@ namespace QDirStat
 	 * displayed, i.e. if it is between _startPercentile and
 	 * _endPercentile.
 	 **/
-	bool percentileDisplayed( int index ) const
-	    { return index >= _startPercentile && index <= _endPercentile; }
+//	bool percentileDisplayed( int index ) const
+//	    { return index >= _startPercentile && index <= _endPercentile; }
 
 	/**
 	 * Automatically determine if a logarithmic height scale should be

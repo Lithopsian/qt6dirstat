@@ -112,31 +112,36 @@ void HistogramView::setEndPercentile( int index )
 
 void HistogramView::autoStartEndPercentiles()
 {
-    const FileSize q1    = percentile( 25 );
-    const FileSize q3    = percentile( 75 );
-    const FileSize qDist = q3 - q1;
+    const int min = _stats->minPercentile();
+    const int max = _stats->maxPercentile();
+    const int q1  = _stats->quartile1();
+    const int q3  = _stats->quartile3();
+
+    const FileSize q1Size = percentile( q1 );
+    const FileSize q3Size = percentile( q3 );
+    const FileSize qDist  = q3Size - q1Size;
 
     // Outliers are classed as more than three times the IQR beyond the 3rd quartile
     // Just use the IQR beyond the 1st quartile to match the typical skewed file size distribution
-    const FileSize minVal = qMax( q1 - qDist, 0LL );
-    const FileSize maxVal = qMin( q3 + qDist * 3, percentile( 100 ) );
+    const FileSize minVal = qMax( q1Size - qDist, 0LL );
+    const FileSize maxVal = qMin( q3Size + qDist * 3, percentile( max ) );
 
     const bool oldNeedOverflowPanel = needOverflowPanel();
 
-    for ( _startPercentile = 0;
-          _startPercentile < 25 && percentile( _startPercentile ) < minVal;
+    for ( _startPercentile = min;
+          _startPercentile < q1 && percentile( _startPercentile ) < minVal;
           ++_startPercentile );
 
-    for ( _endPercentile = 100;
-          _endPercentile > 75 && percentile( _endPercentile ) > maxVal;
+    for ( _endPercentile = max;
+          _endPercentile > q3 && percentile( _endPercentile ) > maxVal;
           --_endPercentile );
 
     if ( oldNeedOverflowPanel != needOverflowPanel() )
         _geometryDirty = true;
 
 #if VERBOSE_HISTOGRAM
-    logInfo() << "Q1: " << formatSize( q1 )
-              << "  Q3: " << formatSize( q3 )
+    logInfo() << "Q1: " << formatSize( q1Size )
+              << "  Q3: " << formatSize( q3Size )
               << "  minVal: " << formatSize( minVal )
               << "  maxVal: " << formatSize( maxVal )
               << Qt::endl;
@@ -338,10 +343,12 @@ void HistogramView::addXAxisLabel()
 
 void HistogramView::addXStartEndLabels()
 {
-    QString startLabel = _startPercentile == 0 ? tr( "Min" ) : 'P' % QString::number( _startPercentile );
+    QString startLabel =
+	_startPercentile == _stats->minPercentile() ? tr( "Min" ) : 'P' % QString::number( _startPercentile );
     startLabel += '\n' % formatSize( percentile( _startPercentile ) );
 
-    QString endLabel = _endPercentile == 100 ? tr( "Max" ) : 'P' % QString::number( _endPercentile );
+    QString endLabel =
+	_endPercentile == _stats->maxPercentile() ? tr( "Max" ) : 'P' % QString::number( _endPercentile );
     endLabel += '\n' % formatSize( percentile( _endPercentile ) );
 
     QGraphicsTextItem * startItem = scene()->addText( startLabel );
@@ -368,9 +375,9 @@ void HistogramView::addQuartileText()
 
     if ( n > 0 ) // Only useful if there is any data at all
     {
-	const QString q1Text     = tr( "Q1: "     ) % formatSize( percentile( 25 ) );
-	const QString medianText = tr( "Median: " ) % formatSize( percentile( 50 ) );
-	const QString q3Text     = tr( "Q3: "     ) % formatSize( percentile( 75 ) );
+	const QString q1Text     = tr( "Q1: "     ) % formatSize( percentile( _stats->quartile1() ) );
+	const QString medianText = tr( "Median: " ) % formatSize( percentile( _stats->median() ) );
+	const QString q3Text     = tr( "Q3: "     ) % formatSize( percentile( _stats->quartile3() ) );
 
 	QGraphicsTextItem * q1Item     = scene()->addText( q1Text     );
 	QGraphicsTextItem * medianItem = scene()->addText( medianText );
@@ -453,16 +460,35 @@ void HistogramView::addMarkers()
     if ( totalWidth < 1 )
 	return;
 
+    const int min       = _stats->minPercentile();
+    const int quartile1 = _stats->quartile1();
+    const int median    = _stats->median();
+    const int quartile3 = _stats->quartile3();
+    const int max       = _stats->maxPercentile();
+
     // Show ordinary percentiles (all except Q1, Median, Q3)
     for ( int i = _startPercentile + 1; i < _endPercentile; ++i )
     {
-	if ( _percentileStep == 0 || i == 0 || i == 100 )
+	if ( i == median && _showMedian )
+	{
+	    addLine( median, tr( "Median" ), _medianPen );
 	    continue;
+	}
 
-	if ( i == 50 && _showMedian )
+	if ( i == quartile1 && _showQuartiles )
+	{
+	    addLine( quartile1, tr( "Q1 (1st quartile)" ), _quartilePen );
 	    continue;
+	}
 
-	if ( ( i == 25 || i == 75 ) && _showQuartiles )
+	if ( i == quartile3 && _showQuartiles )
+	{
+	    addLine( quartile3, tr( "Q3 (3rd quartile)" ), _quartilePen );
+	    continue;
+	}
+
+	// Skip start and end percentiles, and if configured for no percentile lines
+	if ( _percentileStep == 0 || i == min || i == max )
 	    continue;
 
 	// Skip markers that aren't in percentileStep increments ...
@@ -476,18 +502,6 @@ void HistogramView::addMarkers()
 
 	addLine( i, tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? _decilePen : _percentilePen );
     }
-
-    if ( _showQuartiles )
-    {
-	if ( percentileDisplayed( 25 ) )
-	    addLine( 25, tr( "Q1 (1st quartile)" ), _quartilePen );
-
-	if ( percentileDisplayed( 75 ) )
-	    addLine( 75, tr( "Q3 (3rd quartile)" ), _quartilePen );
-    }
-
-    if ( _showMedian && percentileDisplayed( 50 ) )
-	addLine( 50, tr( "Median" ), _medianPen );
 }
 
 
@@ -529,18 +543,21 @@ void HistogramView::addOverflowPanel()
                        topBorder() + _histogramHeight + bottomBorder() };
     QGraphicsRectItem * cutoffPanel = scene()->addRect( rect, QPen{ Qt::NoPen }, _panelBackground );
 
-    const auto cutoffLines = [ this ]()
+    const int min = _stats->minPercentile();
+    const int max = _stats->maxPercentile();
+
+    const auto cutoffLines = [ this, min, max ]()
     {
 	return QStringList
 	    { tr( "Min (P0) ... P%1" ).arg( _startPercentile ),
-	      _startPercentile == 0 ?
+	      _startPercentile == min ?
 		    tr( "no files cut off" ) :
-		    formatSize( percentile( 0 ) ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
+		    formatSize( percentile( min ) ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
 	      "",
 	      tr( "P%1 ... Max (P100)" ).arg( _endPercentile ),
-	      _endPercentile == 100 ?
+	      _endPercentile == max ?
 		    tr( "no files cut off" ) :
-		    formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( percentile( 100 ) ),
+		    formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( percentile( max ) ),
 	      "",
 	    };
     };
@@ -554,8 +571,8 @@ void HistogramView::addOverflowPanel()
     nextPos.setY( nextPos.y() + pieSliceOffset() );
     QRectF pieRect{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } };
 
-    const int cutoff = _startPercentile + 100 - _endPercentile;
-    nextPos = addPie( pieRect, 100 - cutoff, cutoff, _barBrush, _overflowSliceBrush );
+    const int cutoff = _startPercentile + max - _endPercentile;
+    nextPos = addPie( pieRect, max - cutoff, cutoff, _barBrush, _overflowSliceBrush );
 
     // Caption for the upper pie chart
     const FileCount histogramFiles = _stats->bucketsTotalSum();
@@ -568,10 +585,11 @@ void HistogramView::addOverflowPanel()
 
     // Lower pie chart: disk space disregarded
     const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
-    const FileSize cutoffDiskSpace = [ this ]()
+    const FileSize cutoffDiskSpace = [ this, min, max ]()
 	{
-	    const FileSize space = percentileSum( _stats, 0, _startPercentile );
-	    return _endPercentile < 100 ? space : space + percentileSum( _stats, _endPercentile, 100 );
+	    const FileSize startSpace = percentileSum( _stats, min, _startPercentile-1 );
+	    const FileSize endSpace   = percentileSum( _stats, _endPercentile+1, max );
+	    return startSpace + endSpace;
 	}();
 
     nextPos.setY( nextPos.y() + pieSliceOffset() );
