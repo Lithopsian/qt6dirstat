@@ -68,32 +68,30 @@ namespace QDirStat
 	/**
 	 * Return the minimum and maximum valid percentile values, as well
 	 * as the percentiles for corresponding to the median and quartiles.
+	 * These values are trivial but defining them here helps to avoid
+	 * indexing errors and avoids scattering hard-coded values throughout
+	 * the code.
 	 **/
-	int minPercentile() const { return 0; }
-	int maxPercentile() const { return 100; }
-	int median() const { return maxPercentile() / 2; }
-	int quartile1() const { return maxPercentile() / 4; }
-	int quartile3() const { return quartile1() * 3; }
+	constexpr static int minPercentile() { return 0;                   }
+	constexpr static int maxPercentile() { return 100;                 }
+	constexpr static int median()        { return maxPercentile() / 2; }
+	constexpr static int quartile1()     { return maxPercentile() / 4; }
+	constexpr static int quartile3()     { return quartile1()     * 3; }
 
 	/**
-	 * Find the minimum value.
+	 * Return the values for the minimum (ie. 0) and maximum (ie. 100)
+	 * percentiles, and for the median and quartiles.
+	 *
+	 * Note that these functions return pre-calculated percentile boundary
+	 * values from the _percentiles list (rounded down).  They require the
+	 * percentiles list to be fully populated and will throw an exception
+	 * if they are not.
 	 **/
-//	PercentileValue minValue() const { return quantile( 2, 0 ); }
-
-	/**
-	 * Find the maximum value.
-	 **/
-//	PercentileValue maxValue() const { return quantile( 2, 2 ); }
-
-	/**
-	 * Calculate the median.
-	 **/
-//	PercentileValue medianValue() const { return quantile( 2, 1 ); }
-
-	/**
-	 * Calculate a quartile.
-	 **/
-//	PercentileValue quartile( int number ) const { return quantile( 4, number ); }
+	PercentileValue minValue()    const { return percentileValue( minPercentile() ); }
+	PercentileValue maxValue()    const { return percentileValue( maxPercentile() ); }
+	PercentileValue medianValue() const { return percentileValue( median()        ); }
+	PercentileValue q1Value()     const { return percentileValue( quartile1()     ); }
+	PercentileValue q3Value()     const { return percentileValue( quartile3()     ); }
 
 	/**
 	 * Calculate a percentile directly, without creating or using
@@ -123,6 +121,9 @@ namespace QDirStat
 	/**
 	 * Returns a particular percentile boundary or sum, for the
 	 * given 'index'.
+	 *
+	 * Note that these functions require the percentiles lists to be
+	 * fully populated and will throw an exception if they are not.
 	 **/
 	PercentileBoundary percentileBoundary( int index ) const;
 	PercentileValue percentileSum( int index ) const;
@@ -137,6 +138,9 @@ namespace QDirStat
 	 * and greater than the boundary for the previous percentile.
 	 * To keep that definition, the floating point boundary
 	 * is rounded down to an integer.
+	 *
+	 * Note that this function require the percentiles lists to be
+	 * fully populated and will throw an exception if they are not.
 	 **/
 	PercentileValue percentileValue( int index ) const
 	    { return std::floor( percentileBoundary( index ) ); }
@@ -260,4 +264,3 @@ namespace QDirStat
 }	// namespace QDirStat
 
 #endif // ifndef PercentileStats_h
-

@@ -134,7 +134,21 @@ namespace QDirStat
 	int endPercentile() const { return _endPercentile; }
 
 	/**
-	 * Automatically determine the best start and end percentile
+	 * Automatically determine the best start and end percentiles.  This is
+	 * done by identifying the percentiles corresponding to outliers at the
+	 * top and bottom end of the distribution.
+	 *
+	 * Outliers are statistically defined as being more than three times the
+	 * inter-quartile range (IQR) below the first quartile or above the third
+	 * quartile.  File size distributions are heavily weighted to small files
+	 * and there are effectively never outliers at the small end by this
+	 * definition, so low size outliers are defined as being the IQR beyond
+	 * the 1st quartile.
+	 *
+	 * The high end outlier calculation can theoretically overflow a (64 bit!)
+	 * FileSize integer, so this is first calculated as a floating point value
+	 * and only calculated as an integer if it is less than the maximum
+	 * FileSize value in the statistics.
 	 **/
 	void autoStartEndPercentiles();
 
@@ -225,9 +239,10 @@ namespace QDirStat
 	 **/
 	void addHistogramBackground();
 	void addAxes();
-	void addYAxisLabel();
 	void addXAxisLabel();
+	void addYAxisLabel();
 	void addXStartEndLabels();
+	void addYStartEndLabels();
 	void addQuartileText();
 	void addHistogramBars();
 	void addMarkers();
@@ -237,19 +252,13 @@ namespace QDirStat
 	 * Add a text item at 'pos' and return the bottom left of its bounding
 	 * rect.
 	 **/
-	QGraphicsTextItem * addText( QPointF pos, const QString & text );
-
-	/**
-	 * Add a text item at 'pos' and return the bottom left of its bounding
-	 * rect.
-	 **/
 	QPointF addText( QPointF pos, const QStringList & lines );
 
 	/**
-	 * Add a bold font text item at 'pos' and return the bottom left of its
-	 * bounding rect.
+	 * Create a text item and make it bold.  The text is added to the scene
+	 * but not positioned.
 	 **/
-	QPointF addBoldText( QPointF pos, const QString & text );
+	QGraphicsTextItem * createBoldItem( const QString & text );
 
 	/**
 	 * Add a line.
@@ -289,7 +298,7 @@ namespace QDirStat
 	 * the histogram window. Not static since there will only ever
 	 * be one HistogramView and most of the time none.
 	 **/
-	qreal leftBorder()        const { return  40.0_qr; }
+	qreal leftBorder()        const { return  30.0_qr; }
 	qreal rightBorder()       const { return  10.0_qr; }
 	qreal topBorder()         const { return  30.0_qr; }
 	qreal bottomBorder()      const { return  50.0_qr; }

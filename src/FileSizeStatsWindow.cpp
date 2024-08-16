@@ -132,14 +132,16 @@ namespace
 	table->setColumnCount( headers.size() );
 	table->setHorizontalHeaderLabels( headers );
 
-	const int min = stats->minPercentile();
-	const int max = stats->maxPercentile();
-	table->setRowCount( max - min + 1 );
+	table->setRowCount( stats->maxPercentile() - stats->minPercentile() + 1 );
+
+	const int minMargin = stats->minPercentile() + extremesMargin;
+	const int maxMargin = stats->maxPercentile() - extremesMargin;
 
 	int row = 0;
-	for ( int i = min; i <= max; ++i )
+	for ( int i = stats->minPercentile(); i <= stats->maxPercentile(); ++i )
 	{
-	    if ( step > 1 && i > min + extremesMargin && i < max - extremesMargin && i % step != 0 )
+	    // Skip rows that aren't in the specified 'step' interval or the "margins"
+	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
 		continue;
 
 	    addItem( table, row, NumberCol, namePrefix + QString::number( i ) );
@@ -154,12 +156,12 @@ namespace
 	    {
 		switch ( i )
 		{
-		    case   0: return QObject::tr( "Min" );
-		    case  25: return QObject::tr( "1st quartile" );
-		    case  50: return QObject::tr( "Median" );
-		    case  75: return QObject::tr( "3rd quartile" );
-		    case 100: return QObject::tr( "Max" );
-		    default:  return QString{};
+		    case PercentileStats::minPercentile(): return QObject::tr( "Min" );
+		    case PercentileStats::quartile1():     return QObject::tr( "1st quartile" );
+		    case PercentileStats::median():        return QObject::tr( "Median" );
+		    case PercentileStats::quartile3():     return QObject::tr( "3rd quartile" );
+		    case PercentileStats::maxPercentile(): return QObject::tr( "Max" );
+		    default: return QString{};
 		}
 	    }();
 
