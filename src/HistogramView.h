@@ -12,7 +12,7 @@
 
 #include <QGraphicsView>
 
-#include "Typedefs.h" // _qr
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat
@@ -27,26 +27,19 @@ namespace QDirStat
      *
      * The histogram can be displayed in a traditional way, i.e. from the
      * minimum data value (percentile 0 or P0) to the maximum data value
-     * (percentile 100 or P100). But in many cases, this greatly distorts the
-     * display because of outliers (data points way outside the range of
-     * "normal" data points), so this histogram can also display from a given
+     * (percentile 100 or P100). But in many cases this greatly distorts the
+     * display because of outliers (data points far outside the range of the
+     * bulk of data points), so the histogram can also display from a given
      * percentile (startPercentile) to another given percentile
      * (endPercentile).
      *
-     * In many cases, those outliers are only a very small percentage, so
-     * displaying not from P0..P100, but from P3..P97 instead gives a much more
-     * meaningful histogram, while still displaying 96% of all data: By
-     * definition, each percentile contains 1% of all data points, so you lose
-     * one percent at the left and one percent at the right for each percentile
-     * omitted like this.
+     * The "cutoff" data is clearly communicated to the user so he does not get
+     * the impression that the histogram in that mode displays all data; it
+     * does not. It does display the most meaningful part of the data, though.
      *
-     * That "cutoff" should be clearly communicated to the user so he does not
-     * get the impression that this histogram in that mode displays all data;
-     * it does not. It does display the meaningful part of the data, though.
-     *
-     * In addition to that, the percentiles (or at least every 5th of them,
-     * depending on configuration) as well as the median, the 1st and the 3rd
-     * quartile (Q1 and Q3) can be displayed as an overlay to the histogram.
+     * In addition to that, some or all of the percentiles, as well as the
+     * median and the 1st and the 3rd quartiles (Q1 and Q3) can be displayed as
+     * overlays on the histogram.
      **/
     class HistogramView: public QGraphicsView
     {
@@ -55,7 +48,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * zValue (altitude) for the different graphics elements
+	 * z-value (altitude) for the different graphics elements
 	 **/
 	enum GraphicsItemLayer
 	{
@@ -237,14 +230,14 @@ namespace QDirStat
 	/**
 	 * Functions to create the graphical elements.
 	 **/
-	void addHistogramBackground();
+	void addBackground();
 	void addAxes();
 	void addXAxisLabel();
 	void addYAxisLabel();
 	void addXStartEndLabels();
 	void addYStartEndLabels();
 	void addQuartileText();
-	void addHistogramBars();
+	void addBars();
 	void addMarkers();
 	void addOverflowPanel();
 
@@ -283,9 +276,19 @@ namespace QDirStat
 	void fitToViewport();
 
 	/**
-	 * Calculate the content geometry to fit into 'newSize'.
+	 * Return or set whether the geometry of the histogram needs
+	 * to be re-caclulated.
 	 **/
-	void calcGeometry( QSize newSize );
+	bool geometryDirty() { return !_size.isValid(); }
+	void setGeometryDirty() { _size = QSize{}; }
+
+	/**
+	 * Calculate the content geometry to try and fit the viewport.
+	 * The histogram may be over-sized (it is always built to a
+	 * minimum height, to fit the overflow panel contents) and
+	 * will then be scaled down to fit the viewport.
+	 **/
+	void calcGeometry();
 
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.
@@ -295,24 +298,23 @@ namespace QDirStat
 
 	/**
 	 * A whole bunch of fixed values describing the geometry of
-	 * the histogram window. Not static since there will only ever
-	 * be one HistogramView and most of the time none.
+	 * the histogram window.
 	 **/
-	qreal leftBorder()        const { return  30.0_qr; }
-	qreal rightBorder()       const { return  10.0_qr; }
-	qreal topBorder()         const { return  30.0_qr; }
-	qreal bottomBorder()      const { return  50.0_qr; }
-	qreal viewMargin()        const { return  10.0_qr; };
-	qreal textBorder()        const { return  10.0_qr; };
-	qreal textSpacing()       const { return  30.0_qr; };
-	qreal topTextHeight()     const { return  34.0_qr; };
-	qreal axisExtraLength()   const { return   5.0_qr; };
-	qreal markerExtraHeight() const { return  15.0_qr; };
-	qreal overflowWidth()     const { return 140.0_qr; };
-	qreal overflowBorder()    const { return  10.0_qr; };
-	qreal overflowSpacing()   const { return  15.0_qr; }; // between histogram and overflow area
-	qreal pieDiameter()       const { return  60.0_qr; };
-	qreal pieSliceOffset()    const { return  10.0_qr; };
+	constexpr static qreal leftBorder()        { return  30; }
+	constexpr static qreal rightBorder()       { return  10; }
+	constexpr static qreal topBorder()         { return  30; }
+	constexpr static qreal bottomBorder()      { return  50; }
+	constexpr static qreal viewMargin()        { return  10; };
+	constexpr static qreal textBorder()        { return  10; };
+	constexpr static qreal textSpacing()       { return  30; };
+	constexpr static qreal topTextHeight()     { return  34; };
+	constexpr static qreal axisExtraLength()   { return   5; };
+	constexpr static qreal markerExtraHeight() { return  15; };
+	constexpr static qreal overflowWidth()     { return 140; };
+	constexpr static qreal overflowBorder()    { return  10; };
+	constexpr static qreal overflowSpacing()   { return  15; };
+	constexpr static qreal pieDiameter()       { return  60; };
+	constexpr static qreal pieSliceOffset()    { return  10; };
 
 	/**
 	 * Resize the view.
@@ -355,9 +357,8 @@ namespace QDirStat
 	QBrush _overflowSliceBrush;
 
 	// Geometry
-	qreal _histogramWidth;
-	qreal _histogramHeight;
-	bool  _geometryDirty;
+	qreal  _minHeight{ 200 }; // will dynamically increase to fit the overflow panel
+	QSizeF _size;
 
     }; // class HistogramView
 

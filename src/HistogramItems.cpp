@@ -54,7 +54,7 @@ void HistogramBar::adjustBar( qreal adjustment )
     {
 	QGraphicsRectItem * filledBar = dynamic_cast<QGraphicsRectItem *>( children.first() );
 	if ( filledBar )
-	    filledBar->setRect( filledBar->rect().adjusted( adjustment, 0.0_qr, -adjustment, 0.0_qr ) );
+	    filledBar->setRect( filledBar->rect().adjusted( adjustment, 0, -adjustment, 0 ) );
     }
 }
 
