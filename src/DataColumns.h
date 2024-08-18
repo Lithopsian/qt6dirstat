@@ -12,6 +12,7 @@
 
 #include <QStringList>
 #include <QTextStream>
+#include <QVector>
 
 #include "Typedefs.h" // _L1
 

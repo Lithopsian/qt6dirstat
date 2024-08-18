@@ -11,6 +11,7 @@
 #define ExcludeRules_h
 
 #include <QTextStream>
+#include <QVector>
 
 #include "Wildcard.h"
 

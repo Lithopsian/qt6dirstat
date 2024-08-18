@@ -13,6 +13,7 @@
 #include <QBitArray>
 #include <QObject>
 #include <QReadWriteLock>
+#include <QVector>
 
 #include "MimeCategory.h"
 #include "Wildcard.h"

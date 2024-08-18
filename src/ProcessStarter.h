@@ -12,6 +12,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QVector>
 
 
 namespace QDirStat

@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <QObject>
+#include <QVector>
 
 
 class QMenu;

@@ -15,6 +15,7 @@
 #include <QDialog>
 #include <QProcess>
 #include <QTextStream>
+#include <QVector>
 
 #include "ui_output-window.h"
 

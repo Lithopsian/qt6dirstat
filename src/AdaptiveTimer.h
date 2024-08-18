@@ -12,6 +12,7 @@
 
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QVector>
 
 
 namespace QDirStat
