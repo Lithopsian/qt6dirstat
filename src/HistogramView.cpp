@@ -65,6 +65,19 @@ namespace
 	return item;
     }
 
+
+    /**
+     * Create a text item and make it bold.  The text is added to 'scene'
+     * but not positioned.
+     **/
+    QGraphicsTextItem * createBoldItem( QGraphicsScene * scene, const QString & text )
+    {
+	QGraphicsTextItem * textItem = createTextItem( scene, text );
+	setBold( textItem );
+
+	return textItem;
+    }
+
 } // namespace
 
 
@@ -130,7 +143,7 @@ void HistogramView::autoStartEndPercentiles()
     const FileSize maxValue = _stats->maxValue();
 
     // Find the threashold values for the low and high outliers
-    const FileSize minVal = qMax( q1Value - iqr, 0LL );
+    const FileSize minVal = qMax( q1Value - iqr, _stats->minValue() );
     const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
 
     // Find the highest percentile that has a value less than minVal
@@ -167,18 +180,17 @@ void HistogramView::autoLogHeightScale()
 
     if ( _stats->bucketCount() > 3 )
     {
-	const int largest = *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() );
+	const int largestBucket = *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() );
 
-	// We compare the largest bucket with the P85 percentile of the buckets
-	// (not to be confused with the P85 percentile of the data the buckets
-	// were collected from)
+	// We compare the largest bucket with the P85 percentile of the buckets,
+	// but make sure we're not comparing with an empty bucket
 	const int referencePercentileValue =
-	    _stats->bucket( qRound( _stats->bucketCount() * 85.0 / 100.0 ) );
+	    qMax( _stats->bucket( qRound( _stats->bucketCount() * 85.0 / 100.0 ) ), 1 );
 
-	_useLogHeightScale = largest > referencePercentileValue * 10;
+	_useLogHeightScale = largestBucket > referencePercentileValue * 20;
 
 #if VERBOSE_HISTOGRAM
-	logInfo() << "Largest bucket: " << largest
+	logInfo() << "Largest bucket: " << largestBucket
 	          << " bucket P85: " << referencePercentileValue
 	          << "	 -> use log height scale: " << _useLogHeightScale
 	          << Qt::endl;
@@ -257,20 +269,7 @@ void HistogramView::rebuild()
     delete scene();
     setScene( new QGraphicsScene{ this } );
 
-    // Get the palette in case the theme changed
-    const QPalette & palette = this->palette();
-    scene()->setBackgroundBrush( palette.base() );
-
-    // Keep all the brushes and pens together, even the ones that don't depend on the palette
-    _panelBackground    = palette.alternateBase();
-    _barBrush           = QColor{ 0xB0, 0xB0, 0xD0 };
-    _barPen             = QColor{ 0x40, 0x40, 0x50 };
-    _medianPen          = QPen{ palette.linkVisited().color(), 2 };
-    _quartilePen        = QPen{ palette.link().color(), 2 };
-    _percentilePen      = palette.color( QPalette::Disabled, QPalette::ButtonText );
-    _decilePen          = palette.buttonText().color();
-    _piePen             = palette.text().color();
-    _overflowSliceBrush = QColor{ 0xD0, 0x40, 0x20 };
+    scene()->setBackgroundBrush( background() );
 
     addBackground();
     addAxes();
@@ -292,17 +291,17 @@ void HistogramView::addBackground()
     const QPointF pos{ -leftBorder(), -topBorder() - _size.height() };
     const QSizeF size{ _size + QSizeF{ leftBorder() + rightBorder(), topBorder() + bottomBorder() } };
     const QRectF rect{ pos, size };
-    QGraphicsRectItem * panel = scene()->addRect( rect, Qt::NoPen, _panelBackground );
+    QGraphicsRectItem * panel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
     panel->setZValue( PanelBackgroundLayer );
 }
 
 
 void HistogramView::addAxes()
 {
-    QPen pen{ scene()->palette().text().color(), 2 };
-
-    QGraphicsItem * xAxis = scene()->addLine( 0, 0, _size.width() + axisExtraLength(), 0, pen );
-    QGraphicsItem * yAxis = scene()->addLine( 0, 0, 0, -_size.height() - axisExtraLength(), pen );
+    QGraphicsItem * xAxis =
+	scene()->addLine( 0, 0, _size.width() + axisExtraLength(), 0, linePen() );
+    QGraphicsItem * yAxis =
+	scene()->addLine( 0, 0, 0, -_size.height() - axisExtraLength(), linePen() );
 
     xAxis->setZValue( AxisLayer );
     yAxis->setZValue( AxisLayer );
@@ -311,7 +310,7 @@ void HistogramView::addAxes()
 
 void HistogramView::addXAxisLabel()
 {
-    QGraphicsTextItem * item = createBoldItem( tr( "File Size  -->" ) );
+    QGraphicsTextItem * item = createBoldItem( scene(), tr( "File Size  -->" ) );
 
     const qreal textWidth   = item->boundingRect().width();
     const qreal textHeight  = item->boundingRect().height();
@@ -322,8 +321,9 @@ void HistogramView::addXAxisLabel()
 
 void HistogramView::addYAxisLabel()
 {
-    QGraphicsTextItem * item = createBoldItem( "" );
-    item->setHtml( (_useLogHeightScale ? "log<sub>2</sub>(n)   -->" : "n   -->") );
+    QGraphicsTextItem * item = createBoldItem( scene(), "n   -->" );
+    if ( _useLogHeightScale )
+	item->setHtml( "log<sub>2</sub>(n)   -->" );
 
     const qreal textWidth  = item->boundingRect().width();
     const qreal textHeight = item->boundingRect().height();
@@ -379,13 +379,13 @@ void HistogramView::addQuartileText()
 	const QString medianText = tr( "Median: " ) % formatSize( _stats->medianValue() );
 	const QString q3Text     = tr( "Q3: "     ) % formatSize( _stats->q3Value()     );
 
-	QGraphicsTextItem * q1Item     = createBoldItem( q1Text     );
-	QGraphicsTextItem * medianItem = createBoldItem( medianText );
-	QGraphicsTextItem * q3Item     = createBoldItem( q3Text     );
+	QGraphicsTextItem * q1Item     = createBoldItem( scene(), q1Text     );
+	QGraphicsTextItem * medianItem = createBoldItem( scene(), medianText );
+	QGraphicsTextItem * q3Item     = createBoldItem( scene(), q3Text     );
 
-	q1Item->setDefaultTextColor    ( _quartilePen.color() );
-	medianItem->setDefaultTextColor( _medianPen.color()   );
-	q3Item->setDefaultTextColor    ( _quartilePen.color() );
+	q1Item->setDefaultTextColor    ( quartilePen() );
+	medianItem->setDefaultTextColor( medianPen()   );
+	q3Item->setDefaultTextColor    ( quartilePen() );
 
 	pos.ry() -= medianItem->boundingRect().height();
 
@@ -398,13 +398,11 @@ void HistogramView::addQuartileText()
     }
 
     // Add text for the total number of files
-    QGraphicsTextItem * nTextItem = createBoldItem( tr( "Files (n): %L1" ).arg( n ) );
-
-    // Change the text to use the sigma character if it is available in the configured font
-    const QFontMetrics metrics{ nTextItem->font() };
+    const QFontMetrics metrics{ font() };
     const QChar sigma{ 0x2211 };
-    if ( metrics.inFont( sigma ) )
-	nTextItem->setPlainText( QString{ "%1n: %L2" }.arg( sigma ).arg( n ) );
+    const QString nTextTemplate =
+	metrics.inFont( sigma ) ? QString{ "%1n: %L2" }.arg( sigma ) : tr( "Files (n): %L1" );
+    QGraphicsTextItem * nTextItem = createBoldItem( scene(), nTextTemplate.arg( n ) );
 
     // Position the text line if it wasn't already done for the quartile
     if ( n == 0 )
@@ -421,11 +419,12 @@ void HistogramView::addBars()
 	if ( !_useLogHeightScale )
 	    return static_cast<double>( height );
 
-	return height > 1 ? std::log2( height ) : height;
+	return height > 1 ? std::log2( height ) : height / 2.0;
     };
 
-    const qreal  barWidth = _size.width() / _stats->bucketCount();
-    const double maxVal   = applyLogHeight( *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() ) );
+    const qreal barWidth = _size.width() / _stats->bucketCount();
+    const double maxVal =
+	applyLogHeight( *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() ) );
 
     for ( int i=0; i < _stats->bucketCount(); ++i )
     {
@@ -453,19 +452,19 @@ void HistogramView::addMarkers()
     {
 	if ( i == _stats->median() && _showMedian )
 	{
-	    addLine( _stats->median(), tr( "Median" ), _medianPen );
+	    addLine( _stats->median(), tr( "Median" ), QPen{ medianPen(), 2 } );
 	    continue;
 	}
 
 	if ( i == _stats->quartile1() && _showQuartiles )
 	{
-	    addLine( _stats->quartile1(), tr( "Q1 (1st quartile)" ), _quartilePen );
+	    addLine( _stats->quartile1(), tr( "Q1 (1st quartile)" ), QPen{ quartilePen(), 2} );
 	    continue;
 	}
 
 	if ( i == _stats->quartile3() && _showQuartiles )
 	{
-	    addLine( _stats->quartile3(), tr( "Q3 (3rd quartile)" ), _quartilePen );
+	    addLine( _stats->quartile3(), tr( "Q3 (3rd quartile)" ), QPen{ quartilePen(), 2 } );
 	    continue;
 	}
 
@@ -482,7 +481,7 @@ void HistogramView::addMarkers()
 	    continue;
         }
 
-	addLine( i, tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? _decilePen : _percentilePen );
+	addLine( i, tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? decilePen() : percentilePen() );
     }
 }
 
@@ -491,19 +490,22 @@ QPointF HistogramView::addText( QPointF pos, const QStringList & lines )
 {
     QGraphicsTextItem * textItem = createTextItem( scene(), lines.join( u'\n' ) );
     textItem->setPos( pos );
+    textItem->setTextWidth( overflowWidth() );
+    textItem->document()->setDefaultTextOption( QTextOption{ Qt::AlignHCenter } );
 
     return { pos.x(), pos.y() + textItem->boundingRect().height() };
 }
 
 
-QGraphicsTextItem * HistogramView::createBoldItem( const QString & text )
+qreal HistogramView::overflowWidth()
 {
-    QGraphicsTextItem * textItem = createTextItem( scene(), text );
-    setBold( textItem );
-//    textItem->setDefaultTextColor( scene()->palette().text().color() );
+    QFont font;
+    font.setBold( true);
+    const qreal headlineWidth = textWidth( font, ' ' % overflowHeadline() % ' ' );
 
-    return textItem;
+    return qMax( pieDiameter() + pieSliceOffset() * 2, headlineWidth );
 }
+
 
 void HistogramView::addOverflowPanel()
 {
@@ -515,13 +517,13 @@ void HistogramView::addOverflowPanel()
                        -topBorder() - _size.height(),
                        overflowWidth() + 2 * overflowBorder(),
                        topBorder() + _size.height() + bottomBorder() };
-    QGraphicsRectItem * overflowPanel = scene()->addRect( rect, Qt::NoPen, _panelBackground );
+    QGraphicsRectItem * overflowPanel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
+    QPointF nextPos{ rect.x() + overflowBorder(), rect.y() };
 
     // Headline
-    QPointF nextPos{ rect.x() + overflowBorder(), rect.y() };
-    QGraphicsTextItem * textItem = createBoldItem( tr( "Cut off percentiles" ) );
-    textItem->setPos( nextPos );
-    nextPos.ry() += textItem->boundingRect().height() + 4;
+    QGraphicsTextItem * headline = createBoldItem( scene(), overflowHeadline() );
+    headline->setPos( nextPos + QPointF{ ( overflowWidth() - headline->boundingRect().width() ) / 2, 0 } );
+    nextPos.ry() += headline->boundingRect().height() + 4;
 
     const auto cutoffLines = [ this ]()
     {
@@ -536,42 +538,28 @@ void HistogramView::addOverflowPanel()
 		    tr( "no files cut off" ) :
 		    formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
 	      "",
+	      "",
 	    };
     };
     nextPos = addText( nextPos, cutoffLines() );
 
     // Upper pie chart: number of files cut off
-    nextPos.ry() += pieSliceOffset();
-    QRectF pieRect{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } };
-
-    const int cutoff = _startPercentile + _stats->maxPercentile() - _endPercentile;
-    nextPos = addPie( pieRect, _stats->maxPercentile() - cutoff, cutoff, _barBrush, _overflowSliceBrush );
+    const FileCount histogramFiles = _stats->bucketsTotalSum();
+    const FileCount missingFiles   = _stats->size() - histogramFiles;
+    nextPos = addPie( nextPos, missingFiles, histogramFiles );
 
     // Caption for the upper pie chart
-    const FileCount histogramFiles = _stats->bucketsTotalSum();
-    const FileCount totalFiles     = std::round( histogramFiles * 100.0 / ( _endPercentile - _startPercentile ) );
-    const FileCount missingFiles   = totalFiles - histogramFiles;
-    const QString cutoffCaption = missingFiles == 1 ?
-                                  tr( "1 file cut off" ) :
-                                  tr( "%L1 files cut off" ).arg( missingFiles );
-    nextPos = addText( nextPos, { cutoffCaption, tr( "%1% of all files" ).arg( cutoff ), "" } );
+    const int       missingPercent = qRound( 100.0 * missingFiles / _stats->size() );
+    const QString   cutoffCaption  = missingFiles == 1 ?
+                                     tr( "1 file cut off" ) :
+                                     tr( "%L1 files cut off" ).arg( missingFiles );
+    nextPos = addText( nextPos, { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ), "" } );
 
-    // Lower pie chart: disk space disregarded
+    // Lower pie chart: disk space in outlier percentiles
     const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
-    const FileSize cutoffDiskSpace = [ this ]()
-	{
-	    const FileSize startSpace = percentileSum( _stats, _stats->minPercentile(), _startPercentile-1 );
-	    const FileSize endSpace   = percentileSum( _stats, _endPercentile+1, _stats->maxPercentile() );
-	    return startSpace + endSpace;
-	}();
-
-    nextPos.ry() += pieSliceOffset();
-    pieRect = QRectF{ nextPos, QSizeF{ pieDiameter(), pieDiameter() } };
-
-    if ( cutoffDiskSpace > histogramDiskSpace )
-	nextPos = addPie( pieRect, cutoffDiskSpace, histogramDiskSpace, _overflowSliceBrush, _barBrush );
-    else
-	nextPos = addPie( pieRect, histogramDiskSpace, cutoffDiskSpace, _barBrush, _overflowSliceBrush );
+    const FileSize cutoffDiskSpace = percentileSum( _stats, _stats->minPercentile(), _startPercentile-1 ) +
+                                     percentileSum( _stats, _endPercentile+1, _stats->maxPercentile() );
+    nextPos = addPie( nextPos, cutoffDiskSpace, histogramDiskSpace );
 
     // Caption for the lower pie chart
     const double cutoffSpacePercent = 100.0 * cutoffDiskSpace / ( histogramDiskSpace + cutoffDiskSpace );
@@ -581,15 +569,13 @@ void HistogramView::addOverflowPanel()
                                  };
     nextPos = addText( nextPos, pieCaption2 );
 
-    // Make sure the panel is tall enough to fit everything in
-    if ( nextPos.y() > overflowPanel->rect().bottom() )
-    {
-	QRectF rect{ overflowPanel->rect() };
-	rect.setBottom( nextPos.y() );
-	overflowPanel->setRect( rect );
+    // Remember the height of the panel contents as a minimum for the histogran
+    QRectF overflowPanelRect = overflowPanel->rect();
+    _minHeight = nextPos.y() - overflowPanelRect.y() - topBorder() - bottomBorder();
 
-	// Remember this height and force an immediate rebuild with it
-	_minHeight = rect.height() - topBorder() - bottomBorder();
+    // Rebuild if the panel needs to be expand so that the geometry will match
+    if ( nextPos.y() > overflowPanelRect.bottom() )
+    {
 	setGeometryDirty();
 	rebuild();
 
@@ -620,42 +606,58 @@ void HistogramView::addLine( int             percentileIndex,
 }
 
 
-QPointF HistogramView::addPie( const QRectF & rect,
-                               FileSize       val1,
-                               FileSize       val2,
-                               const QBrush & brush1,
-                               const QBrush & brush2 )
+QPointF HistogramView::addPie( const QPointF & pos,
+                               FileSize        valSlice,
+                               FileSize        valPie )
 {
-    if ( val1 == 0 && val2 == 0 )
-	return rect.topLeft();
+    if ( valPie == 0 && valSlice == 0 )
+	return pos;
+
+    QBrush brushSlice = overflowSliceBrush();
+    QBrush brushPie   = barBrush();
+
+    // If pie is bgger than slice swap them including the brushes
+    if ( valSlice > valPie )
+    {
+	FileSize val = valSlice;
+	valSlice = valPie;
+	valPie = val;
+	brushPie.swap( brushSlice );
+    }
+
+    // Position the pie in the centre of the overflow panel
+    const qreal pieX = pos.x() + ( overflowWidth() - pieDiameter() ) / 2;
+    const QRectF rect{ QPointF{ pieX, pos.y() }, QSizeF{ pieDiameter(), pieDiameter() } };
 
     const int fullCircle = 360 * 16; // Qt uses units of 1/16 degree
-    const int angle1     = qRound( 1.0 * val1 / ( val1 + val2 ) * fullCircle );
-    const int angle2     = fullCircle - angle1;
+    const int segment    = qRound( 1.0 * valSlice / ( valPie + valSlice ) * fullCircle );
 
-    QGraphicsEllipseItem * slice1 = scene()->addEllipse( rect );
-    slice1->setStartAngle( angle2 / 2 );
-    slice1->setSpanAngle( angle1 );
-    slice1->setBrush( brush1 );
-    slice1->setPen( _piePen );
+    // Create a circle with a segment missing
+    QGraphicsEllipseItem * ellipsePie = scene()->addEllipse( pieX, pos.y(), pieDiameter(), pieDiameter() );
+    ellipsePie->setStartAngle( segment / 2 );
+    ellipsePie->setSpanAngle( fullCircle - segment );
+    ellipsePie->setBrush( brushPie );
+    ellipsePie->setPen( Qt::NoPen );
 
-    const QRectF rect2{ rect.x() + pieSliceOffset(), rect.y(), rect.height(), rect.width() };
-    QGraphicsEllipseItem * slice2 = scene()->addEllipse( rect2 );
-    slice2->setStartAngle( -angle2 / 2 );
-    slice2->setSpanAngle( angle2 );
-    slice2->setBrush( brush2 );
-    slice2->setPen( _piePen );
+    // Construct a segment of a circle, offset by pieSliceOffset() pixels to the right
+    QGraphicsEllipseItem * ellipseSlice = scene()->addEllipse( rect.translated( pieSliceOffset(), 0 ) );
+    ellipseSlice->setStartAngle( -segment / 2 );
+    ellipseSlice->setSpanAngle( segment );
+    ellipseSlice->setBrush( brushSlice );
+    ellipseSlice->setPen( Qt::NoPen );
 
-    QGraphicsItemGroup * pie = scene()->createItemGroup( { slice1, slice2 } );
+    // Add the circle and segment to a group so we can rotate them together
+    QGraphicsItemGroup * pie = scene()->createItemGroup( { ellipsePie, ellipseSlice } );
     const QPointF pieCenter = rect.center();
 
+    // Rotate the group by 45 degrees so the segment is positioned at top right
     QTransform transform;
     transform.translate( pieCenter.x(), pieCenter.y() );
-    transform.rotate( -45 );
+    transform.rotate( -45 ); // degrees, not 1/16th of degrees!
     transform.translate( -pieCenter.x(), -pieCenter.y() );
     pie->setTransform( transform );
 
-    return { rect.x(), rect.y() + pie->boundingRect().height() };
+    return { pos.x(), rect.y() + pie->boundingRect().height() };
 }
 
 

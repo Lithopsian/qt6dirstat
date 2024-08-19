@@ -196,8 +196,8 @@ namespace QDirStat
 	/**
 	 * Pen and brush for HistogramBar.
 	 **/
-	QBrush barBrush() const { return _barBrush; }
-	QPen   barPen()   const { return _barPen;   }
+	QBrush barBrush() const { return QColor{ 0xB0, 0xB0, 0xD0 }; }
+	QPen   barPen()   const { return QColor{ 0x40, 0x40, 0x50 }; }
 
 	/**
 	 * Build the histogram based on a new set of data.
@@ -248,27 +248,32 @@ namespace QDirStat
 	QPointF addText( QPointF pos, const QStringList & lines );
 
 	/**
-	 * Create a text item and make it bold.  The text is added to the scene
-	 * but not positioned.
-	 **/
-	QGraphicsTextItem * createBoldItem( const QString & text );
-
-	/**
-	 * Add a line.
+	 * Add a vertical line, from slightly below the x-axis (zero)
+	 * to slightly above the top of the histogram.  It is given
+	 * a tooltip giving the name and the value it marks.
 	 **/
 	void addLine( int             percentileIndex,
 	              const QString & name,
 	              const QPen    & pen );
 
 	/**
-	 * Add a pie diagram with two values val1 and val2.
+	 * Add a pie diagram with two values valPie and valSlice.
+	 * A segment of the pie proportional to valSlice is drawn
+	 * offset from the main pie and in a different colour.  The
+	 * smaller value (and its brush) is always used for the
+	 * offset segment.
+	 *
+	 * The pie is constructed with the segment extracted towards
+	 * the right and then rotated 45 degrees anti-clockwise.
+	 * This keeps the bounding rectangle a constant height so
+	 * that it doesn't move about as the cutoff percentiles are
+	 * changed.
+	 *
 	 * Return the bottom left of the bounding rect.
 	 **/
-	QPointF addPie( const QRectF & rect,
-	                FileSize       val1,
-	                FileSize       val2,
-	                const QBrush & brush1,
-	                const QBrush & brush2 );
+	QPointF addPie( const QPointF & pos,
+	                FileSize        valSlice,
+	                FileSize        valPie );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -306,20 +311,52 @@ namespace QDirStat
 	constexpr static qreal bottomBorder()      { return  50; }
 	constexpr static qreal viewMargin()        { return  10; };
 	constexpr static qreal textBorder()        { return  10; };
-	constexpr static qreal textSpacing()       { return  30; };
+	constexpr static qreal textSpacing()       { return  25; };
 	constexpr static qreal topTextHeight()     { return  34; };
 	constexpr static qreal axisExtraLength()   { return   5; };
 	constexpr static qreal markerExtraHeight() { return  15; };
-	constexpr static qreal overflowWidth()     { return 140; };
 	constexpr static qreal overflowBorder()    { return  10; };
 	constexpr static qreal overflowSpacing()   { return  15; };
-	constexpr static qreal pieDiameter()       { return  60; };
+	constexpr static qreal pieDiameter()       { return  75; };
 	constexpr static qreal pieSliceOffset()    { return  10; };
+
+	/**
+	 * Calculate the width of the overflow panel based on the
+	 * width of the headline text, which may vary depending
+	 * on the theme font (and possibly a translation).  Any text
+	 * line longer than the headline will wrap.  If the headline
+	 * is shorter than the pie diameter, then pieDiameter() is
+	 * returned.
+	 **/
+	static qreal overflowWidth();
+	static QString overflowHeadline() { return tr( "Cut off percentiles" ); }
+
+	/**
+	 * Return a brush for a background area.
+	 **/
+	const QBrush & background()      const { return palette().base(); }
+	const QBrush & panelBackground() const { return palette().alternateBase(); }
+
+	/**
+	 * Return a pen colour for items in the histogram.
+	 **/
+	const QColor & linePen()       const { return palette().color( QPalette::ButtonText ); }
+	const QColor & medianPen()     const { return palette().color( QPalette::LinkVisited ); }
+	const QColor & quartilePen()   const { return palette().color( QPalette::Link ); }
+	const QColor & decilePen()     const { return linePen(); }
+	const QColor & percentilePen() const
+	    { return palette().color( QPalette::Disabled, QPalette::ButtonText ); }
+
+	/**
+	 * Return a brush for part of a cut-off pie.
+	 **/
+	QBrush pieBrush()           const { return barBrush(); }
+	QBrush overflowSliceBrush() const { return QColor{ 0xD0, 0x40, 0x20 }; }
 
 	/**
 	 * Resize the view.
 	 *
-	 * Reimplemented from QFrame.
+	 * Reimplemented from QGraphicsView (from QWidget).
 	 **/
 	void resizeEvent( QResizeEvent * event ) override;
 
@@ -337,27 +374,16 @@ namespace QDirStat
 	const bool _showMedian{ true };
 	const bool _showQuartiles{ true };
 	const int  _leftMarginPercentiles{ 0 };
-	const int  _rightMarginPercentiles{ 5 };
+	const int  _rightMarginPercentiles{ 0 };
 
-	// Configurable settings; will be set for every build (except _percentileStep)
+	// Configurable settings; determined for every build (except _percentileStep)
 	int  _startPercentile;
 	int  _endPercentile;
 	bool _useLogHeightScale;
 	int  _percentileStep{ 0 };
 
-	// Brushes and pens
-	QBrush _panelBackground;
-	QBrush _barBrush;
-	QPen   _barPen;
-	QPen   _medianPen;
-	QPen   _quartilePen;
-	QPen   _percentilePen;
-	QPen   _decilePen;
-	QPen   _piePen;
-	QBrush _overflowSliceBrush;
-
 	// Geometry
-	qreal  _minHeight{ 200 }; // will dynamically increase to fit the overflow panel
+	qreal  _minHeight{ 0 };
 	QSizeF _size;
 
     }; // class HistogramView
