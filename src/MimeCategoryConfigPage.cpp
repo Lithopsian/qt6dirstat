@@ -271,7 +271,7 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     const qreal shadingStart  = ( width - 20 ) / width;
     const qreal shadingMiddle = ( width - 10 ) / width;
 
-    const QPalette palette       = _ui->listWidget->palette();
+    const QPalette & palette     = _ui->listWidget->palette();
     const bool current           = item == _ui->listWidget->currentItem();
     const QColor backgroundColor = current ? Qt::lightGray : palette.color( QPalette::Active, QPalette::Base );
 

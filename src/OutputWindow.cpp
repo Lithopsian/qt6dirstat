@@ -452,7 +452,7 @@ void OutputWindow::readSettings()
 
     settings.endGroup();
 
-    QPalette newPalette( _ui->terminal->palette() );
+    QPalette newPalette{ _ui->terminal->palette() };
     newPalette.setBrush( QPalette::Base, _terminalBackground );
     _ui->terminal->setPalette( newPalette );
     _ui->terminal->setFont( _terminalDefaultFont );
