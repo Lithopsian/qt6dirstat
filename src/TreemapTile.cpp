@@ -655,7 +655,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
     return QPixmap::fromImage( image );
 }
 
-const QColor & TreemapTile::tileColor( const FileInfo * file ) const
+inline const QColor & TreemapTile::tileColor( const FileInfo * file ) const
 {
     return _parentView->fixedColor().isValid() ?
         _parentView->fixedColor() :

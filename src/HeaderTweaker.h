@@ -85,9 +85,9 @@ namespace QDirStat
 	/**
 	 * Return the names of the three layouts.
 	 **/
-	inline static QLatin1String l1Name() { return "L1"_L1; }
-	inline static QLatin1String l2Name() { return "L2"_L1; }
-	inline static QLatin1String l3Name() { return "L3"_L1; }
+	constexpr static QLatin1String l1Name() { return "L1"_L1; }
+	constexpr static QLatin1String l2Name() { return "L2"_L1; }
+	constexpr static QLatin1String l3Name() { return "L3"_L1; }
 
 	/**
 	 * Save the current status in 'layout'.

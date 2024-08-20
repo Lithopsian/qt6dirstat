@@ -442,7 +442,7 @@ namespace QDirStat
 	 * Returns a suitable color for 'file' based on a set of internal rules
 	 * (according to filename extension, MIME type or permissions).
 	 **/
-	inline const QColor & tileColor( const FileInfo * file ) const;
+	const QColor & tileColor( const FileInfo * file ) const;
 
 	/**
 	 * Initialization common to all constructors.
