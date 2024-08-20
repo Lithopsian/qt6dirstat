@@ -202,14 +202,22 @@ void HistogramView::autoLogHeightScale()
 void HistogramView::calcGeometry()
 {
     _size = viewport()->size();
-    _size.rwidth()  -= leftBorder() + rightBorder() + 2 * viewMargin();
-    _size.rheight() -= bottomBorder() + topBorder() + 2 * viewMargin() + topTextHeight();
+    const qreal verticalPadding = bottomBorder() + topBorder() + 2 * viewMargin() + topTextHeight();
 
+    if ( _size.height() < _minHeight + verticalPadding )
+    {
+	// Will be scaled down to fit the viewport height, so up-scale the width to compensate
+	_size.rwidth() *= ( _minHeight + verticalPadding ) / _size.height();
+	_size.rheight() = _minHeight;
+    }
+    else
+    {
+	_size.rheight() -= verticalPadding;
+    }
+
+    _size.rwidth() -= leftBorder() + rightBorder() + 2 * viewMargin();
     if ( needOverflowPanel() )
 	_size.rwidth() -= overflowSpacing() + overflowWidth() + 2 * overflowBorder();
-
-    if ( _size.height() < _minHeight )
-	_size.rheight() = _minHeight;
 
 #if VERBOSE_HISTOGRAM
     logDebug() << "Histogram width: " << _size.width()
@@ -222,7 +230,7 @@ void HistogramView::calcGeometry()
 void HistogramView::fitToViewport()
 {
     const QSize visibleSize = viewport()->size();
-    QRectF rect =
+    const QRectF rect =
 	scene()->sceneRect().adjusted( -viewMargin(), -viewMargin(), viewMargin(), viewMargin() );
 
     // Scale everything down if the minimum item sizes are still too big
@@ -269,7 +277,7 @@ void HistogramView::rebuild()
     delete scene();
     setScene( new QGraphicsScene{ this } );
 
-    scene()->setBackgroundBrush( background() );
+    setBackgroundBrush( background() );
 
     addBackground();
     addAxes();
@@ -298,13 +306,14 @@ void HistogramView::addBackground()
 
 void HistogramView::addAxes()
 {
-    QGraphicsItem * xAxis =
-	scene()->addLine( 0, 0, _size.width() + axisExtraLength(), 0, linePen() );
-    QGraphicsItem * yAxis =
-	scene()->addLine( 0, 0, 0, -_size.height() - axisExtraLength(), linePen() );
+    auto drawLine = [ this ]( qreal x, qreal y )
+	{
+	    QGraphicsItem * line = scene()->addLine( 0, 0, x, y, linePen() );
+	    line->setZValue( AxisLayer );
+	};
 
-    xAxis->setZValue( AxisLayer );
-    yAxis->setZValue( AxisLayer );
+    drawLine( _size.width() + axisExtraLength(), 0 );
+    drawLine( 0, -_size.height() - axisExtraLength() );
 }
 
 
@@ -486,17 +495,6 @@ void HistogramView::addMarkers()
 }
 
 
-QPointF HistogramView::addText( QPointF pos, const QStringList & lines )
-{
-    QGraphicsTextItem * textItem = createTextItem( scene(), lines.join( u'\n' ) );
-    textItem->setPos( pos );
-    textItem->setTextWidth( overflowWidth() );
-    textItem->document()->setDefaultTextOption( QTextOption{ Qt::AlignHCenter } );
-
-    return { pos.x(), pos.y() + textItem->boundingRect().height() };
-}
-
-
 qreal HistogramView::overflowWidth()
 {
     QFont font;
@@ -509,73 +507,152 @@ qreal HistogramView::overflowWidth()
 
 void HistogramView::addOverflowPanel()
 {
-    if ( ! needOverflowPanel() )
+    if ( !needOverflowPanel() )
 	return;
 
     // Create the panel area
+    const qreal panelWidth = overflowWidth();
     const QRectF rect{ _size.width() + rightBorder() + overflowSpacing(),
                        -topBorder() - _size.height(),
-                       overflowWidth() + 2 * overflowBorder(),
+                       panelWidth + 2 * overflowBorder(),
                        topBorder() + _size.height() + bottomBorder() };
     QGraphicsRectItem * overflowPanel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
     QPointF nextPos{ rect.x() + overflowBorder(), rect.y() };
 
     // Headline
     QGraphicsTextItem * headline = createBoldItem( scene(), overflowHeadline() );
-    headline->setPos( nextPos + QPointF{ ( overflowWidth() - headline->boundingRect().width() ) / 2, 0 } );
+    headline->setPos( nextPos + QPointF{ ( panelWidth - headline->boundingRect().width() ) / 2, 0 } );
     nextPos.ry() += headline->boundingRect().height() + 4;
 
-    const auto cutoffLines = [ this ]()
+    /**
+     * Add multiple text items on separate lines starting at 'nextPos',
+     * then add a margin at the bottom.  Each line is aligned in the
+     * centre of the overflow panel.  nextPos is updated to the bottom
+     * left of the margin.
+     **/
+    auto addText = [ this, panelWidth, &nextPos ]( const QStringList & lines, qreal margin = 0 )
     {
-	return QStringList
-	    { tr( "Min (P0) ... P%1" ).arg( _startPercentile ),
-	      _startPercentile == _stats->minPercentile() ?
-		    tr( "no files cut off" ) :
-		    formatSize( _stats->minValue() ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
-	      "",
-	      tr( "P%1 ... Max (P100)" ).arg( _endPercentile ),
-	      _endPercentile == _stats->maxPercentile() ?
-		    tr( "no files cut off" ) :
-		    formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
-	      "",
-	      "",
-	    };
+	QGraphicsTextItem * textItem = createTextItem( scene(), lines.join( u'\n' ) );
+	textItem->setPos( nextPos );
+	textItem->setTextWidth( panelWidth );
+	textItem->document()->setDefaultTextOption( QTextOption{ Qt::AlignHCenter } );
+
+	nextPos.ry() += textItem->boundingRect().height() + margin;
     };
-    nextPos = addText( nextPos, cutoffLines() );
+
+    /**
+     * Add a pie diagram with two values valPie and valSlice, aligned
+     * in the centre of the overflow panel. A segment of the pie
+     * proportional to valSlice is drawn offset from the main pie and
+     * in a different colour.  The smaller value (and its brush) is
+     * always used for the offset segment.
+     *
+     * The pie is constructed with the segment extracted towards
+     * the right and then rotated 45 degrees anti-clockwise.
+     * This keeps the bounding rectangle a constant height so
+     * that it doesn't move about as the cutoff percentiles are
+     * changed.
+     *
+     * nextPos is updated to the bottom left corner of the bounding
+     * rectangle.
+     **/
+    auto addPie = [ this, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
+    {
+	if ( valPie == 0 && valSlice == 0 )
+	    return;
+
+	QBrush brushSlice = overflowSliceBrush();
+	QBrush brushPie   = barBrush();
+
+	// If pie is bgger than slice swap them including the brushes
+	if ( valSlice > valPie )
+	{
+	    FileSize val = valSlice;
+	    valSlice = valPie;
+	    valPie = val;
+	    brushPie.swap( brushSlice );
+	}
+
+	// Position the pie in the centre of the overflow panel
+	const qreal pieX = nextPos.x() + ( panelWidth - pieDiameter() ) / 2;
+	const QRectF rect{ QPointF{ pieX, nextPos.y() }, QSizeF{ pieDiameter(), pieDiameter() } };
+
+	const int fullCircle = 360 * 16; // Qt uses units of 1/16 degree
+	const int segment    = qRound( 1.0 * valSlice / ( valPie + valSlice ) * fullCircle );
+
+	// Create a circle with a segment missing
+	QGraphicsEllipseItem * ellipsePie = scene()->addEllipse( rect );
+	ellipsePie->setStartAngle( segment / 2 );
+	ellipsePie->setSpanAngle( fullCircle - segment );
+	ellipsePie->setBrush( brushPie );
+	ellipsePie->setPen( Qt::NoPen );
+
+	// Construct a segment of a circle, offset by pieSliceOffset() pixels to the right
+	QGraphicsEllipseItem * ellipseSlice = scene()->addEllipse( rect.translated( pieSliceOffset(), 0 ) );
+	ellipseSlice->setStartAngle( -segment / 2 );
+	ellipseSlice->setSpanAngle( segment );
+	ellipseSlice->setBrush( brushSlice );
+	ellipseSlice->setPen( Qt::NoPen );
+
+	// Add the circle and segment to a group so we can rotate them together
+	QGraphicsItemGroup * pie = scene()->createItemGroup( { ellipsePie, ellipseSlice } );
+	const QPointF pieCenter = rect.center();
+
+	// Rotate the group by 45 degrees so the segment is positioned at top right
+	QTransform transform;
+	transform.translate( pieCenter.x(), pieCenter.y() );
+	transform.rotate( -45 ); // degrees, not 1/16th of degrees!
+	transform.translate( -pieCenter.x(), -pieCenter.y() );
+	pie->setTransform( transform );
+
+	nextPos.ry() += pie->boundingRect().height();
+    };
+
+    const QStringList cutoffLines
+	{ tr( "Min (P%1) ... P%2" ).arg( _stats->minPercentile() ).arg( _startPercentile ),
+	  _startPercentile == _stats->minPercentile() ?
+		tr( "no files cut off" ) :
+		formatSize( _stats->minValue() ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
+	  "",
+	  tr( "P%1 ... Max (P%2)" ).arg( _endPercentile ).arg( _stats->maxPercentile() ),
+	  _endPercentile == _stats->maxPercentile() ?
+		tr( "no files cut off" ) :
+		formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
+	};
+    addText( cutoffLines, 20 );
 
     // Upper pie chart: number of files cut off
     const FileCount histogramFiles = _stats->bucketsTotalSum();
     const FileCount missingFiles   = _stats->size() - histogramFiles;
-    nextPos = addPie( nextPos, missingFiles, histogramFiles );
+    addPie( missingFiles, histogramFiles );
 
     // Caption for the upper pie chart
-    const int       missingPercent = qRound( 100.0 * missingFiles / _stats->size() );
-    const QString   cutoffCaption  = missingFiles == 1 ?
-                                     tr( "1 file cut off" ) :
-                                     tr( "%L1 files cut off" ).arg( missingFiles );
-    nextPos = addText( nextPos, { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ), "" } );
+    const int missingPercent = qRound( 100.0 * missingFiles / _stats->size() );
+    const QString cutoffCaption  = missingFiles == 1 ?
+                                   tr( "1 file cut off" ) :
+                                   tr( "%L1 files cut off" ).arg( missingFiles );
+    addText( { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ) }, 10 );
 
     // Lower pie chart: disk space in outlier percentiles
     const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
     const FileSize cutoffDiskSpace = percentileSum( _stats, _stats->minPercentile(), _startPercentile-1 ) +
                                      percentileSum( _stats, _endPercentile+1, _stats->maxPercentile() );
-    nextPos = addPie( nextPos, cutoffDiskSpace, histogramDiskSpace );
+    addPie( cutoffDiskSpace, histogramDiskSpace );
 
     // Caption for the lower pie chart
     const double cutoffSpacePercent = 100.0 * cutoffDiskSpace / ( histogramDiskSpace + cutoffDiskSpace );
     const QStringList pieCaption2{ formatSize( cutoffDiskSpace ) % " cut off"_L1,
                                    tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
-                                   ""
                                  };
-    nextPos = addText( nextPos, pieCaption2 );
+    addText( pieCaption2 );
 
-    // Remember the height of the panel contents as a minimum for the histogran
-    QRectF overflowPanelRect = overflowPanel->rect();
-    _minHeight = nextPos.y() - overflowPanelRect.y() - topBorder() - bottomBorder();
-
-    // Rebuild if the panel needs to be expand so that the geometry will match
-    if ( nextPos.y() > overflowPanelRect.bottom() )
+    // Remember the panel contents height as a minimum for building the histogram
+    const qreal contentsHeight = nextPos.y() - overflowPanel->rect().y() - topBorder() - bottomBorder();
+    if ( contentsHeight != _minHeight )
     {
+	// Rebuild now if the height of the contents is different from the cached value
+	// -so it is critical that the height of the panel contents does not depend on _minHeight
+	_minHeight = contentsHeight;
 	setGeometryDirty();
 	rebuild();
 
@@ -586,9 +663,7 @@ void HistogramView::addOverflowPanel()
 }
 
 
-void HistogramView::addLine( int             percentileIndex,
-                             const QString & name,
-                             const QPen    & pen )
+void HistogramView::addLine( int percentileIndex, const QString & name, const QPen & pen )
 {
     const FileSize xValue       = percentile( percentileIndex  );
     const FileSize axisStartVal = percentile( _startPercentile );
@@ -603,61 +678,6 @@ void HistogramView::addLine( int             percentileIndex,
     line->setPen( pen );
 
     scene()->addItem( line );
-}
-
-
-QPointF HistogramView::addPie( const QPointF & pos,
-                               FileSize        valSlice,
-                               FileSize        valPie )
-{
-    if ( valPie == 0 && valSlice == 0 )
-	return pos;
-
-    QBrush brushSlice = overflowSliceBrush();
-    QBrush brushPie   = barBrush();
-
-    // If pie is bgger than slice swap them including the brushes
-    if ( valSlice > valPie )
-    {
-	FileSize val = valSlice;
-	valSlice = valPie;
-	valPie = val;
-	brushPie.swap( brushSlice );
-    }
-
-    // Position the pie in the centre of the overflow panel
-    const qreal pieX = pos.x() + ( overflowWidth() - pieDiameter() ) / 2;
-    const QRectF rect{ QPointF{ pieX, pos.y() }, QSizeF{ pieDiameter(), pieDiameter() } };
-
-    const int fullCircle = 360 * 16; // Qt uses units of 1/16 degree
-    const int segment    = qRound( 1.0 * valSlice / ( valPie + valSlice ) * fullCircle );
-
-    // Create a circle with a segment missing
-    QGraphicsEllipseItem * ellipsePie = scene()->addEllipse( pieX, pos.y(), pieDiameter(), pieDiameter() );
-    ellipsePie->setStartAngle( segment / 2 );
-    ellipsePie->setSpanAngle( fullCircle - segment );
-    ellipsePie->setBrush( brushPie );
-    ellipsePie->setPen( Qt::NoPen );
-
-    // Construct a segment of a circle, offset by pieSliceOffset() pixels to the right
-    QGraphicsEllipseItem * ellipseSlice = scene()->addEllipse( rect.translated( pieSliceOffset(), 0 ) );
-    ellipseSlice->setStartAngle( -segment / 2 );
-    ellipseSlice->setSpanAngle( segment );
-    ellipseSlice->setBrush( brushSlice );
-    ellipseSlice->setPen( Qt::NoPen );
-
-    // Add the circle and segment to a group so we can rotate them together
-    QGraphicsItemGroup * pie = scene()->createItemGroup( { ellipsePie, ellipseSlice } );
-    const QPointF pieCenter = rect.center();
-
-    // Rotate the group by 45 degrees so the segment is positioned at top right
-    QTransform transform;
-    transform.translate( pieCenter.x(), pieCenter.y() );
-    transform.rotate( -45 ); // degrees, not 1/16th of degrees!
-    transform.translate( -pieCenter.x(), -pieCenter.y() );
-    pie->setTransform( transform );
-
-    return { pos.x(), rect.y() + pie->boundingRect().height() };
 }
 
 

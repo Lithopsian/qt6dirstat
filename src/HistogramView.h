@@ -83,7 +83,7 @@ namespace QDirStat
 	 * The interval between one percentile and the next contains exactly 1%
 	 * of the data points.
 	 *
-	 * HistogramView does now take ownership of the stats object.
+	 * HistogramView does not take ownership of the stats object.
 	 **/
 	void init( const FileSizeStats * stats );
 
@@ -91,10 +91,6 @@ namespace QDirStat
 	 * Return the stored value for percentile no. 'index' (0..100).  This
 	 * directly accesses the percentile list with the assumption that it is
 	 * already populated with 101 entries.
-	 *
-	 * Note that the floating point boundary value from the stats is
-	 * truncated to the floor integer to match the > or <= definition for
-	 * being in that percentile.
 	 **/
 	FileSize percentile( int index ) const;
 
@@ -154,8 +150,8 @@ namespace QDirStat
 	void setPercentileStep( int step ) { _percentileStep = step; }
 
 	/**
-	 * Set how many percentiles to display as an overlay at the left margin
-	 * in addition to those shown with showPercentiles().
+	 * Set how many percentiles to display as an overlay at the left
+	 * margin in addition to those shown based on _percentileStep.
 	 *
 	 * A value of 2 with a histogram showing data from min to max means
 	 * show also P1 and P2.
@@ -175,7 +171,7 @@ namespace QDirStat
 
 	/**
 	 * Set how many percentiles to display as an overlay at the right
-	 * margin in addition to those shown with showPercentiles().
+	 * margin in addition to those shown based on _percentileStep.
 	 *
 	 * A value of 2 with a histogram showing data from min to max means
 	 * show also P98 and P99.
@@ -242,38 +238,11 @@ namespace QDirStat
 	void addOverflowPanel();
 
 	/**
-	 * Add a text item at 'pos' and return the bottom left of its bounding
-	 * rect.
-	 **/
-	QPointF addText( QPointF pos, const QStringList & lines );
-
-	/**
 	 * Add a vertical line, from slightly below the x-axis (zero)
 	 * to slightly above the top of the histogram.  It is given
 	 * a tooltip giving the name and the value it marks.
 	 **/
-	void addLine( int             percentileIndex,
-	              const QString & name,
-	              const QPen    & pen );
-
-	/**
-	 * Add a pie diagram with two values valPie and valSlice.
-	 * A segment of the pie proportional to valSlice is drawn
-	 * offset from the main pie and in a different colour.  The
-	 * smaller value (and its brush) is always used for the
-	 * offset segment.
-	 *
-	 * The pie is constructed with the segment extracted towards
-	 * the right and then rotated 45 degrees anti-clockwise.
-	 * This keeps the bounding rectangle a constant height so
-	 * that it doesn't move about as the cutoff percentiles are
-	 * changed.
-	 *
-	 * Return the bottom left of the bounding rect.
-	 **/
-	QPointF addPie( const QPointF & pos,
-	                FileSize        valSlice,
-	                FileSize        valPie );
+	void addLine( int percentileIndex, const QString & name, const QPen & pen );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -284,14 +253,17 @@ namespace QDirStat
 	 * Return or set whether the geometry of the histogram needs
 	 * to be re-caclulated.
 	 **/
-	bool geometryDirty() { return !_size.isValid(); }
+	bool geometryDirty() const { return !_size.isValid(); }
 	void setGeometryDirty() { _size = QSize{}; }
 
 	/**
 	 * Calculate the content geometry to try and fit the viewport.
 	 * The histogram may be over-sized (it is always built to a
 	 * minimum height, to fit the overflow panel contents) and
-	 * will then be scaled down to fit the viewport.
+	 * will then be scaled down to fit the viewport.  If the
+	 * histogram is forced to a minimum height then the width is
+	 * increased proportionally so that it will scale down to
+	 * fill the viewport width.
 	 **/
 	void calcGeometry();
 
@@ -323,10 +295,13 @@ namespace QDirStat
 	/**
 	 * Calculate the width of the overflow panel based on the
 	 * width of the headline text, which may vary depending
-	 * on the theme font (and possibly a translation).  Any text
-	 * line longer than the headline will wrap.  If the headline
-	 * is shorter than the pie diameter, then pieDiameter() is
-	 * returned.
+	 * on the theme font (and possibly a translation).  The
+	 * width may be set to fit the pie if that is wider then
+	 * the headline.
+	 *
+	 * Note that any text line longer than the headline will
+	 * wrap and not affect the required width, although it will
+	 * increase the height required for the overflow panel.
 	 **/
 	static qreal overflowWidth();
 	static QString overflowHeadline() { return tr( "Cut off percentiles" ); }
@@ -383,7 +358,7 @@ namespace QDirStat
 	int  _percentileStep{ 0 };
 
 	// Geometry
-	qreal  _minHeight{ 0 };
+	qreal  _minHeight{ 100 };
 	QSizeF _size;
 
     }; // class HistogramView
