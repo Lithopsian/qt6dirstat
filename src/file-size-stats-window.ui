@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
+    <width>540</width>
     <height>323</height>
    </rect>
   </property>
@@ -125,6 +125,9 @@
             </item>
             <item row="1" column="0">
              <widget class="QSpinBox" name="startPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile down is cut off the histogram</string>
+              </property>
               <property name="prefix">
                <string>P</string>
               </property>
@@ -148,6 +151,9 @@
             </item>
             <item row="0" column="3">
              <widget class="QPushButton" name="autoButton">
+              <property name="toolTip">
+               <string>Automatically set the start and end percentiles to reasonable values</string>
+              </property>
               <property name="text">
                <string>&amp;Auto</string>
               </property>
@@ -158,6 +164,9 @@
             </item>
             <item row="1" column="6">
              <widget class="QSpinBox" name="endPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile up is cut off the histogram</string>
+              </property>
               <property name="prefix">
                <string>P</string>
               </property>
@@ -174,8 +183,14 @@
             </item>
             <item row="1" column="2" colspan="3" alignment="Qt::AlignHCenter">
              <widget class="QComboBox" name="markersComboBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="toolTip">
-               <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;br/&gt;- the last few individual percentile markers will also be shown&lt;/p&gt;</string>
+               <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;/p&gt;</string>
               </property>
               <property name="currentIndex">
                <number>0</number>
@@ -313,9 +328,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>469</width>
-            <height>546</height>
+            <y>-327</y>
+            <width>487</width>
+            <height>532</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -454,6 +469,9 @@
            </item>
            <item>
             <spacer name="excessSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>0</width>

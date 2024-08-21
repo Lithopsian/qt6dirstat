@@ -548,7 +548,7 @@ void HistogramView::addOverflowPanel()
 	textItem->setTextWidth( panelWidth );
 	textItem->document()->setDefaultTextOption( QTextOption{ Qt::AlignHCenter } );
 
-	nextPos.ry() += textItem->boundingRect().height();
+	nextPos.ry() += textItem->boundingRect().height() + overflowSpacing();
     };
 
     /**
@@ -624,7 +624,7 @@ void HistogramView::addOverflowPanel()
 		formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
 	};
     addText( cutoffLines );
-    nextPos.ry() += overflowSpacing() * 2;
+    nextPos.ry() += overflowSpacing();
 
     // Upper pie chart: number of files cut off
     const FileCount histogramFiles = _stats->bucketsTotalSum();
@@ -637,11 +637,10 @@ void HistogramView::addOverflowPanel()
                                    tr( "1 file cut off" ) :
                                    tr( "%L1 files cut off" ).arg( missingFiles );
     addText( { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ) } );
-    nextPos.ry() += overflowSpacing();
 
     // Lower pie chart: disk space in outlier percentiles
-    const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
-    const FileSize cutoffDiskSpace = percentileSum( _stats, _stats->minPercentile(), _startPercentile-1 ) +
+    const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile+1, _endPercentile );
+    const FileSize cutoffDiskSpace = percentileSum( _stats, _stats->minPercentile(), _startPercentile ) +
                                      percentileSum( _stats, _endPercentile+1, _stats->maxPercentile() );
     addPie( cutoffDiskSpace, histogramDiskSpace );
 
@@ -651,7 +650,6 @@ void HistogramView::addOverflowPanel()
                                    tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
                                  };
     addText( pieCaption2 );
-    nextPos.ry() += overflowSpacing();
 
     // Remember the panel contents height as a minimum for building the histogram
     const qreal contentsHeight = nextPos.y() - overflowPanel->rect().y() - topBorder() - bottomBorder();
