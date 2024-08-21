@@ -646,7 +646,7 @@ void HistogramView::addOverflowPanel()
     addPie( cutoffDiskSpace, histogramDiskSpace );
 
     // Caption for the lower pie chart
-    const double cutoffSpacePercent = percent( cutoffDiskSpace, histogramDiskSpace );
+    const double cutoffSpacePercent = percent( cutoffDiskSpace, histogramDiskSpace + cutoffDiskSpace );
     const QStringList pieCaption2{ formatSize( cutoffDiskSpace ) % " cut off"_L1,
                                    tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
                                  };
