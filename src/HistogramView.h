@@ -287,8 +287,9 @@ namespace QDirStat
 	constexpr static qreal topTextHeight()     { return  34; };
 	constexpr static qreal axisExtraLength()   { return   5; };
 	constexpr static qreal markerExtraHeight() { return  15; };
-	constexpr static qreal overflowBorder()    { return  10; };
-	constexpr static qreal overflowSpacing()   { return  15; };
+	constexpr static qreal overflowBorder()    { return  12; };
+	constexpr static qreal overflowGap()       { return  15; };
+	constexpr static qreal overflowSpacing()   { return  10; };
 	constexpr static qreal pieDiameter()       { return  75; };
 	constexpr static qreal pieSliceOffset()    { return  10; };
 
@@ -299,12 +300,18 @@ namespace QDirStat
 	 * width may be set to fit the pie if that is wider then
 	 * the headline.
 	 *
-	 * Note that any text line longer than the headline will
-	 * wrap and not affect the required width, although it will
-	 * increase the height required for the overflow panel.
+	 * The width returned from this function includes a border
+	 * on both sides.  The border is not expected to normally
+	 * contain any text or graphics, but does allow for, for
+	 * example, the margin around graphics text items.
+	 *
+	 * Note that any text line (including its margins) longer
+	 * than the headline (plus the borders) will wrap and not
+	 * affect the required width, although it will increase
+	 * the height required for the overflow panel.
 	 **/
 	static qreal overflowWidth();
-	static QString overflowHeadline() { return tr( "Cut off percentiles" ); }
+	static QString overflowHeadline() { return tr( "Cut-off percentiles" ); }
 
 	/**
 	 * Return a brush for a background area.

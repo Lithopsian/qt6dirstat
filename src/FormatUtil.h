@@ -168,11 +168,7 @@ namespace QDirStat
      * the given font.
      **/
     inline int textWidth( const QFont & font, const QString & text )
-#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
-	{ return QFontMetrics{ font }.width( text ); }
-#else
-	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
-#endif
+	{ return QFontMetrics{ font }.boundingRect( text ).width(); }
 
     /**
      * Elide a long string, remnoving characters from the middle to fit

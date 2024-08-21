@@ -217,7 +217,7 @@ void HistogramView::calcGeometry()
 
     _size.rwidth() -= leftBorder() + rightBorder() + 2 * viewMargin();
     if ( needOverflowPanel() )
-	_size.rwidth() -= overflowSpacing() + overflowWidth() + 2 * overflowBorder();
+	_size.rwidth() -= overflowGap() + overflowWidth();
 
 #if VERBOSE_HISTOGRAM
     logDebug() << "Histogram width: " << _size.width()
@@ -265,7 +265,7 @@ void HistogramView::build()
 
 void HistogramView::rebuild()
 {
-     //logInfo() << "Building histogram" << Qt::endl;
+     logInfo() << "Building histogram for " << _stats << Qt::endl;
 
     // Don't try this if the viewport geometry isn't set yet or we don't have any stats
     if ( !window()->isVisible() || !_stats )
@@ -499,30 +499,31 @@ qreal HistogramView::overflowWidth()
 {
     QFont font;
     font.setBold( true);
-    const qreal headlineWidth = textWidth( font, ' ' % overflowHeadline() % ' ' );
+    const qreal headlineWidth = textWidth( font, overflowHeadline() );
 
-    return qMax( pieDiameter() + pieSliceOffset() * 2, headlineWidth );
+    return qMax( pieDiameter() + pieSliceOffset() * 2, headlineWidth ) + 2 * overflowBorder();
 }
 
 
 void HistogramView::addOverflowPanel()
 {
-    if ( !needOverflowPanel() )
+    if ( !needOverflowPanel() || percentileSum( _stats, _startPercentile, _endPercentile ) == 0 )
 	return;
 
     // Create the panel area
     const qreal panelWidth = overflowWidth();
-    const QRectF rect{ _size.width() + rightBorder() + overflowSpacing(),
+    const QRectF rect{ _size.width() + rightBorder() + overflowGap(),
                        -topBorder() - _size.height(),
-                       panelWidth + 2 * overflowBorder(),
+                       panelWidth,
                        topBorder() + _size.height() + bottomBorder() };
     QGraphicsRectItem * overflowPanel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
-    QPointF nextPos{ rect.x() + overflowBorder(), rect.y() };
+    QPointF nextPos{ rect.x(), rect.y() };
 
     // Headline
     QGraphicsTextItem * headline = createBoldItem( scene(), overflowHeadline() );
-    headline->setPos( nextPos + QPointF{ ( panelWidth - headline->boundingRect().width() ) / 2, 0 } );
-    nextPos.ry() += headline->boundingRect().height() + 4;
+    const qreal xAlign = ( panelWidth - headline->boundingRect().width() ) / 2;
+    headline->setPos( nextPos + QPointF{ xAlign, overflowSpacing() / 2 } );
+    nextPos.ry() += headline->boundingRect().height() + overflowSpacing();
 
     /**
      * Add multiple text items on separate lines starting at 'nextPos',
@@ -530,7 +531,7 @@ void HistogramView::addOverflowPanel()
      * centre of the overflow panel.  nextPos is updated to the bottom
      * left of the margin.
      **/
-    auto addText = [ this, panelWidth, &nextPos ]( const QStringList & lines, qreal margin = 0 )
+    auto addText = [ this, panelWidth, &nextPos ]( const QStringList & lines, qreal margin )
     {
 	QGraphicsTextItem * textItem = createTextItem( scene(), lines.join( u'\n' ) );
 	textItem->setPos( nextPos );
@@ -561,23 +562,22 @@ void HistogramView::addOverflowPanel()
 	if ( valPie == 0 && valSlice == 0 )
 	    return;
 
-	QBrush brushSlice = overflowSliceBrush();
-	QBrush brushPie   = barBrush();
-
 	// If pie is bgger than slice swap them including the brushes
-	if ( valSlice > valPie )
+	const bool swapped = valSlice > valPie;
+	if ( swapped )
 	{
 	    FileSize val = valSlice;
 	    valSlice = valPie;
 	    valPie = val;
-	    brushPie.swap( brushSlice );
 	}
+	const QBrush brushSlice = swapped ? barBrush() : overflowSliceBrush();
+	const QBrush brushPie   = swapped ? overflowSliceBrush() : barBrush();
 
-	// Position the pie in the centre of the overflow panel
-	const qreal pieX = nextPos.x() + ( panelWidth - pieDiameter() ) / 2;
-	const QRectF rect{ QPointF{ pieX, nextPos.y() }, QSizeF{ pieDiameter(), pieDiameter() } };
+	// Position the pie at the origin, so it can be rotated and then positioned afterwards
+	const QRectF rect{ -pieDiameter() / 2, -pieDiameter() / 2, pieDiameter(), pieDiameter() };
 
-	const int fullCircle = 360 * 16; // Qt uses units of 1/16 degree
+	// Convert the slice value to a segment in Qt units of 1/16th degrees
+	const int fullCircle = 360 * 16;
 	const int segment    = qRound( 1.0 * valSlice / ( valPie + valSlice ) * fullCircle );
 
 	// Create a circle with a segment missing
@@ -596,16 +596,11 @@ void HistogramView::addOverflowPanel()
 
 	// Add the circle and segment to a group so we can rotate them together
 	QGraphicsItemGroup * pie = scene()->createItemGroup( { ellipsePie, ellipseSlice } );
-	const QPointF pieCenter = rect.center();
+	pie->setRotation( -45 );
 
-	// Rotate the group by 45 degrees so the segment is positioned at top right
-	QTransform transform;
-	transform.translate( pieCenter.x(), pieCenter.y() );
-	transform.rotate( -45 ); // degrees, not 1/16th of degrees!
-	transform.translate( -pieCenter.x(), -pieCenter.y() );
-	pie->setTransform( transform );
-
-	nextPos.ry() += pie->boundingRect().height();
+	// Move the group to its position in the overflow panel
+	pie->setPos( nextPos + QPointF{ panelWidth / 2, pieDiameter() / 2 + pieSliceOffset() } );
+	nextPos.ry() += pieDiameter() + pieSliceOffset();
     };
 
     const QStringList cutoffLines
@@ -619,7 +614,7 @@ void HistogramView::addOverflowPanel()
 		tr( "no files cut off" ) :
 		formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
 	};
-    addText( cutoffLines, 20 );
+    addText( cutoffLines, overflowSpacing() );
 
     // Upper pie chart: number of files cut off
     const FileCount histogramFiles = _stats->bucketsTotalSum();
@@ -631,7 +626,7 @@ void HistogramView::addOverflowPanel()
     const QString cutoffCaption  = missingFiles == 1 ?
                                    tr( "1 file cut off" ) :
                                    tr( "%L1 files cut off" ).arg( missingFiles );
-    addText( { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ) }, 10 );
+    addText( { cutoffCaption, tr( "%1% of all files" ).arg( missingPercent ) }, 0 );
 
     // Lower pie chart: disk space in outlier percentiles
     const FileSize histogramDiskSpace = percentileSum( _stats, _startPercentile, _endPercentile );
@@ -640,11 +635,13 @@ void HistogramView::addOverflowPanel()
     addPie( cutoffDiskSpace, histogramDiskSpace );
 
     // Caption for the lower pie chart
-    const double cutoffSpacePercent = 100.0 * cutoffDiskSpace / ( histogramDiskSpace + cutoffDiskSpace );
+    const double cutoffSpacePercent = histogramDiskSpace ?
+                                      100.0 * cutoffDiskSpace / ( histogramDiskSpace + cutoffDiskSpace ) :
+                                      0;
     const QStringList pieCaption2{ formatSize( cutoffDiskSpace ) % " cut off"_L1,
                                    tr( "%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 ),
                                  };
-    addText( pieCaption2 );
+    addText( pieCaption2, overflowSpacing() );
 
     // Remember the panel contents height as a minimum for building the histogram
     const qreal contentsHeight = nextPos.y() - overflowPanel->rect().y() - topBorder() - bottomBorder();
