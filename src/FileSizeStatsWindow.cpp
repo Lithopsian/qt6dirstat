@@ -99,16 +99,13 @@ namespace
     /**
      * Fill the percentile table 'table' from the given stat.
      *
-     * 'namePrefix is an abbreviation for percentile in some
-     * headers and row. 'step' is the step width, expected to
-     * be 1 or 5 although other values are supported;
-     * 'extremesMargin' specifies how far from the extremes
-     * (min, max) the step width should be 1 instead of the
-     * given step.
+     * 'step' is the step width, expected to be 1 or 5 although
+     * other values are supported; * 'extremesMargin' specifies
+     * how far from the extremes (min, max) the step width
+     * should be 1 instead of the given step.
      **/
     void fillTable( const FileSizeStats * stats,
                     QTableWidget        * table,
-                    const QString       & namePrefix,
                     int                   step,
                     int                   extremesMargin )
     {
@@ -123,11 +120,14 @@ namespace
 
 	table->clear();
 
-	const QStringList headers{ QObject::tr( "Percentile"  ),
+	const QString percentilePrefix = QObject::tr( "P" );
+
+	const QStringList headers{ QString{},
 	                           QObject::tr( "Name" ),
-	                           QObject::tr( "Size cutoff" ),
-	                           QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix, namePrefix ),
-	                           QObject::tr( "Cumulative sum" ),
+	                           QObject::tr( "Size limit" ),
+	                           QObject::tr( "Sum %01(n-1)...%01(n)" ).arg( percentilePrefix ),
+	                           QObject::tr( "Sum %010...%01(n)" ).arg( percentilePrefix ),
+//	                           QObject::tr( "Cumulative sum" ),
 	                         };
 	table->setColumnCount( headers.size() );
 	table->setHorizontalHeaderLabels( headers );
@@ -144,7 +144,7 @@ namespace
 	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
 		continue;
 
-	    addItem( table, row, NumberCol, namePrefix % QString::number( i ) );
+	    addItem( table, row, NumberCol, percentilePrefix % QString::number( i ) );
 	    addItem( table, row, ValueCol,  formatSize( stats->percentileValue( i ) ) );
 	    if ( i > 0 )
 	    {
@@ -315,7 +315,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 void FileSizeStatsWindow::fillPercentileTable()
 {
     const int step = _ui->percentileFilterCheckBox->isChecked() ? 1 : FILTERED_STEP;
-    fillTable( _stats.get(), _ui->percentileTable, tr( "P" ), step, EXTREMES_MARGIN );
+    fillTable( _stats.get(), _ui->percentileTable, step, EXTREMES_MARGIN );
 }
 
 
