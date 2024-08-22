@@ -115,8 +115,8 @@ namespace
 	enum TableColumns
 	{
 	    NumberCol,
-	    ValueCol,
 	    NameCol,
+	    ValueCol,
 	    SumCol,
 	    CumulativeSumCol
 	};
@@ -124,8 +124,8 @@ namespace
 	table->clear();
 
 	const QStringList headers{ QObject::tr( "Percentile"  ),
-	                           QObject::tr( "Size cutoff" ),
 	                           QObject::tr( "Name" ),
+	                           QObject::tr( "Size cutoff" ),
 	                           QObject::tr( "Sum %1(n-1)..%2(n)" ).arg( namePrefix, namePrefix ),
 	                           QObject::tr( "Cumulative sum" ),
 	                         };
