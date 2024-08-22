@@ -318,7 +318,7 @@ void HistogramView::addAxes()
 {
     auto drawLine = [ this ]( qreal x, qreal y )
 	{
-	    QGraphicsItem * line = scene()->addLine( 0, 0, x, y, linePen() );
+	    QGraphicsItem * line = scene()->addLine( 0, 0, x, y, lineColor() );
 	    line->setZValue( AxisLayer );
 	};
 
@@ -402,9 +402,9 @@ void HistogramView::addQuartileText()
 	QGraphicsTextItem * medianItem = createBoldItem( scene(), medianText );
 	QGraphicsTextItem * q3Item     = createBoldItem( scene(), q3Text     );
 
-	q1Item->setDefaultTextColor    ( quartilePen() );
-	medianItem->setDefaultTextColor( medianPen()   );
-	q3Item->setDefaultTextColor    ( quartilePen() );
+	q1Item->setDefaultTextColor    ( quartileColor() );
+	medianItem->setDefaultTextColor( medianColor()   );
+	q3Item->setDefaultTextColor    ( quartileColor() );
 
 	pos.ry() -= medianItem->boundingRect().height();
 
@@ -420,7 +420,7 @@ void HistogramView::addQuartileText()
     const QFontMetrics metrics{ font() };
     const QChar sigma{ 0x2211 };
     const QString nTextTemplate =
-	metrics.inFont( sigma ) ? QString{ "%1n: %L2" }.arg( sigma ) : tr( "Files (n): %L1" );
+	metrics.inFont( sigma ) ? sigma % "n: %L2"_L1 : tr( "Files (n): %L1" );
     QGraphicsTextItem * nTextItem = createBoldItem( scene(), nTextTemplate.arg( n ) );
 
     // Position the text line if it wasn't already done for the quartile
@@ -433,28 +433,25 @@ void HistogramView::addQuartileText()
 
 void HistogramView::addBars()
 {
-    const auto applyLogHeight = [ this ]( int height )
+    const auto logHeight = [ this ]( FileCount value )
     {
 	if ( !_useLogHeightScale )
-	    return static_cast<double>( height );
+	    return static_cast<double>( value );
 
-	return height > 1 ? std::log2( height ) : height / 2.0;
+	return value > 1 ? std::log2( value ) : value / 2.0;
     };
 
     const qreal barWidth = _size.width() / _stats->bucketCount();
-    const double maxVal =
-	applyLogHeight( *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() ) );
+    const double maxVal = logHeight( *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() ) );
 
     for ( int i=0; i < _stats->bucketCount(); ++i )
     {
 	// logDebug() << "Adding bar #" << i << " with value " << _stats->bucket( i ) << Qt::endl;
 
-	const double val = applyLogHeight( _stats->bucket( i ) );
-	const QRectF rect{ i * barWidth,
-	                   topBorder() + viewMargin(),
-	                   barWidth,
-	                   -_size.height() - axisExtraLength() };
-	const qreal fillHeight = maxVal == 0 ? 0 : _size.height() * val / maxVal;
+	const qreal fillHeight =
+	    maxVal == 0 ? 0 : _size.height() * logHeight( _stats->bucket( i ) ) / maxVal;
+
+	const QRectF rect{ i * barWidth, 0, barWidth, -_size.height() };
 	scene()->addItem( new HistogramBar{ this, _stats, i, rect, fillHeight } );
     }
 }
@@ -471,19 +468,19 @@ void HistogramView::addMarkers()
     {
 	if ( i == _stats->median() && _showMedian )
 	{
-	    addLine( _stats->median(), tr( "Median" ), QPen{ medianPen(), 2 } );
+	    addMarker( _stats->median(), tr( "Median" ), medianPen(), MedianLayer );
 	    continue;
 	}
 
 	if ( i == _stats->quartile1() && _showQuartiles )
 	{
-	    addLine( _stats->quartile1(), tr( "Q1 (1st quartile)" ), QPen{ quartilePen(), 2} );
+	    addMarker( _stats->quartile1(), tr( "Q1 (1st quartile)" ), quartilePen(), QuartileLayer );
 	    continue;
 	}
 
 	if ( i == _stats->quartile3() && _showQuartiles )
 	{
-	    addLine( _stats->quartile3(), tr( "Q3 (3rd quartile)" ), QPen{ quartilePen(), 2 } );
+	    addMarker( _stats->quartile3(), tr( "Q3 (3rd quartile)" ), quartilePen(), QuartileLayer );
 	    continue;
 	}
 
@@ -500,7 +497,7 @@ void HistogramView::addMarkers()
 	    continue;
         }
 
-	addLine( i, tr( "Percentile P%1" ).arg( i ), i % 10 == 0 ? decilePen() : percentilePen() );
+	addMarker( i, tr( "Percentile P%1" ).arg( i ), percentilePen( i ), PercentileLayer );
     }
 }
 
@@ -617,7 +614,7 @@ void HistogramView::addOverflowPanel()
 	  _startPercentile == _stats->minPercentile() ?
 		tr( "no files cut off" ) :
 		formatSize( _stats->minValue() ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
-	  "",
+	  QString{},
 	  tr( "P%1 ... Max (P%2)" ).arg( _endPercentile ).arg( _stats->maxPercentile() ),
 	  _endPercentile == _stats->maxPercentile() ?
 		tr( "no files cut off" ) :
@@ -668,21 +665,31 @@ void HistogramView::addOverflowPanel()
 }
 
 
-void HistogramView::addLine( int percentileIndex, const QString & name, const QPen & pen )
+void HistogramView::addMarker( int                 index,
+                               const QString     & name,
+                               const QPen        & pen,
+                               GraphicsItemLayer   layer )
 {
-    const FileSize xValue       = percentile( percentileIndex  );
+    const FileSize xValue       = percentile( index  );
     const FileSize axisStartVal = percentile( _startPercentile );
     const FileSize axisEndVal   = percentile( _endPercentile   );
-    const FileSize totalWidth   = axisEndVal - axisStartVal;
-    const qreal    x            = _size.width() * ( xValue - axisStartVal ) / totalWidth;
+    const FileSize axisRange    = axisEndVal - axisStartVal;
+    const qreal    x            = _size.width() * ( xValue - axisStartVal ) / axisRange;
 
-    QGraphicsLineItem * line =
-	new QGraphicsLineItem{ x, markerExtraHeight(), x, -_size.height() - markerExtraHeight() };
-    line->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( xValue ) ) );
-    line->setZValue( name.isEmpty() ? MarkerLayer : SpecialMarkerLayer );
-    line->setPen( pen );
+    // Visible line as requested
+    QLineF line{ x, markerExtraHeight(), x, -_size.height() - markerExtraHeight() };
+    QGraphicsLineItem * visibleLine = new QGraphicsLineItem{ line };
+    visibleLine->setZValue( layer );
+    visibleLine->setPen( pen );
 
-    scene()->addItem( line );
+    // Wider transparent line to make the tooltip easier to trigger
+    QGraphicsLineItem * tooltipLine = new QGraphicsLineItem{ line };
+    tooltipLine->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( xValue ) ) );
+    tooltipLine->setZValue( layer + 1 );
+    tooltipLine->setPen( { Qt::transparent, pen.widthF() + 2 } );
+
+    scene()->addItem( visibleLine );
+    scene()->addItem( tooltipLine );
 }
 
 

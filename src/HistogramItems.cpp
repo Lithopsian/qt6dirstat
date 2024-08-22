@@ -31,7 +31,7 @@ HistogramBar::HistogramBar( HistogramView       * parent,
     setZValue( HistogramView::BarLayer );
 
     const int numFiles = stats->bucket( number );
-    const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4 ... %5" )
+    const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4...%5" )
 	.arg( number + 1 )
 	.arg( numFiles )
 	.arg( numFiles == 1 ? QObject::tr( "file" ) : QObject::tr( "files" ) )

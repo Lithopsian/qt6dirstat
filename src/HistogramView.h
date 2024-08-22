@@ -57,8 +57,12 @@ namespace QDirStat
 	    BarLayer,
 	    AxisLayer,
 	    HoverBarLayer,
-	    MarkerLayer,
-	    SpecialMarkerLayer,
+	    PercentileLayer,
+	    ToolTipPercentileLayer,
+	    QuartileLayer,
+	    TooltipQuartileLayer,
+	    MedianLayer,
+	    TooltipMedianLayer,
 	    TextLayer,
 	};
 
@@ -239,10 +243,17 @@ namespace QDirStat
 
 	/**
 	 * Add a vertical line, from slightly below the x-axis (zero)
-	 * to slightly above the top of the histogram.  It is given
-	 * a tooltip giving the name and the value it marks.
+	 * to slightly above the top of the histogram.  Two lines are
+	 * actually created: one visible line and a wider transparent
+	 * line to make the tooltip easier to trigger.  The tooltip
+	 * shows the name and the value it marks.  The z-value of the
+	 * visible line is set to 'layer' and the transparent line one
+	 * higher.
 	 **/
-	void addLine( int percentileIndex, const QString & name, const QPen & pen );
+	void addMarker( int                 index,
+	                const QString     & name,
+	                const QPen        & pen,
+	                GraphicsItemLayer   layer );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -286,7 +297,7 @@ namespace QDirStat
 	constexpr static qreal textSpacing()       { return  25; };
 	constexpr static qreal topTextHeight()     { return  34; };
 	constexpr static qreal axisExtraLength()   { return   5; };
-	constexpr static qreal markerExtraHeight() { return  15; };
+	constexpr static qreal markerExtraHeight() { return  10; };
 	constexpr static qreal overflowBorder()    { return  12; };
 	constexpr static qreal overflowGap()       { return  15; };
 	constexpr static qreal overflowSpacing()   { return  10; };
@@ -320,14 +331,19 @@ namespace QDirStat
 	const QBrush & panelBackground() const { return palette().alternateBase(); }
 
 	/**
-	 * Return a pen colour for items in the histogram.
+	 * Return colours and pens for items in the histogram.
 	 **/
-	const QColor & linePen()       const { return palette().color( QPalette::ButtonText ); }
-	const QColor & medianPen()     const { return palette().color( QPalette::LinkVisited ); }
-	const QColor & quartilePen()   const { return palette().color( QPalette::Link ); }
-	const QColor & decilePen()     const { return linePen(); }
-	const QColor & percentilePen() const
+	const QColor & lineColor()       const { return palette().color( QPalette::ButtonText ); }
+	const QColor & medianColor()     const { return palette().color( QPalette::LinkVisited ); }
+	const QColor & quartileColor()   const { return palette().color( QPalette::Link ); }
+	const QColor & decileColor()     const { return lineColor(); }
+	const QColor & percentileColor() const
 	    { return palette().color( QPalette::Disabled, QPalette::ButtonText ); }
+
+	const QPen medianPen()            const { return QPen{ medianColor(), 2 }; }
+	const QPen quartilePen()          const { return QPen{ quartileColor(), 2 }; }
+	const QPen percentilePen( int i ) const
+	    { return i % 10 == 0 ? decileColor() : percentileColor(); }
 
 	/**
 	 * Return a brush for part of a cut-off pie.
