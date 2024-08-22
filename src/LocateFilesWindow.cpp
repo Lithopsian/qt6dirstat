@@ -111,7 +111,7 @@ void LocateFilesWindow::initWidgets()
     _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
     _ui->treeWidget->headerItem()->setTextAlignment( LocateListPathCol, Qt::AlignLeft | Qt::AlignVCenter);
 
-    _ui->resultsLabel->setText( "" );
+    _ui->resultsLabel->setText( QString{} );
 
     HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 

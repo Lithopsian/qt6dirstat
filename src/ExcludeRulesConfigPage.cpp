@@ -168,7 +168,7 @@ void * ExcludeRulesConfigPage::newValue()
 {
     // "Empty" rule, but set the options that we want to start with:
     // wildcard, case-sensitive, and directory name without path
-    return new ExcludeRule{ ExcludeRule::Wildcard, "", true, false, false };
+    return new ExcludeRule{ ExcludeRule::Wildcard, QString{}, true, false, false };
 }
 
 

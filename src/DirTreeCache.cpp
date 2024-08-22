@@ -128,7 +128,7 @@ namespace
 	    gzprintf( cache, "\tlinks: %u", (unsigned)item->links() );
 
 	// One item per line
-	gzputc( cache, u'\n' );
+	gzputc( cache, '\n' );
     }
 
 
@@ -204,7 +204,7 @@ namespace
 	if ( cptr == nullptr )
 	    return nullptr;
 
-	while ( *cptr != u'\0' && isspace( *cptr ) )
+	while ( *cptr != '\0' && isspace( *cptr ) )
 	    ++cptr;
 
 	return cptr;
@@ -222,10 +222,10 @@ namespace
 	if ( cptr == nullptr )
 	    return nullptr;
 
-	while ( *cptr != u'\0' && !isspace( *cptr ) )
+	while ( *cptr != '\0' && !isspace( *cptr ) )
 	    ++cptr;
 
-	return *cptr == u'\0' ? nullptr : cptr;
+	return *cptr == '\0' ? nullptr : cptr;
     }
 
 
@@ -244,7 +244,7 @@ namespace
 	cptr += strlen( start ) - 1;
 
 	while ( cptr >= start && isspace( *cptr ) )
-	    *cptr-- = u'\0';
+	    *cptr-- = '\0';
     }
 
 
@@ -417,7 +417,7 @@ void CacheReader::addItem()
 
     // Adjust for the current file version with uid, gid, and mode before mtime
     bool hasUidGidPerm = false;
-    if ( *mtime_str && !( *mtime_str == u'0' && *mtime_str+1 == u'x' ) )
+    if ( *mtime_str && !( *mtime_str == '0' && *mtime_str+1 == 'x' ) )
     {
 	hasUidGidPerm = true;
 	uid_str   = mtime_str;
@@ -462,19 +462,19 @@ void CacheReader::addItem()
 	    switch ( toupper( *type ) )
 	    {
 		// 'F' is ambiguous unfortunately
-		case u'F': return *(mode_str+1) == u'\0' ? S_IFREG : S_IFIFO;
-		case u'D': return S_IFDIR;
-		case u'L': return S_IFLNK;
-		case u'B': return S_IFBLK;
-		case u'C': return S_IFCHR;
-		case u'S': return S_IFSOCK;
+		case 'F': return *(mode_str+1) == '\0' ? S_IFREG : S_IFIFO;
+		case 'D': return S_IFDIR;
+		case 'L': return S_IFLNK;
+		case 'B': return S_IFBLK;
+		case 'C': return S_IFCHR;
+		case 'S': return S_IFSOCK;
 		default:  return S_IFREG;
 	    }
 	}();
     }
 
     // Path
-    if ( *raw_path == u'/' )
+    if ( *raw_path == '/' )
 	_latestDir = nullptr;
 
     const QString fullPath = unescapedPath( raw_path );
@@ -603,16 +603,16 @@ void CacheReader::addItem()
 
 		switch ( tolower( *unread_str ) )
 		{
-		    case u'e':
+		    case 'e':
 			dir->setExcluded();
 			dir->setReadState( DirOnRequestOnly );
 			break;
 
-		    case u'p':
+		    case 'p':
 			dir->setReadState( DirPermissionDenied );
 			break;
 
-		    case u'm':
+		    case 'm':
 			dir->setReadState( DirOnRequestOnly );
 			break;
 		}
@@ -637,7 +637,7 @@ void CacheReader::addItem()
 	    if ( parentUrl == "/"_L1 )
 		return parentUrl % name;
 
-	    return parentUrl % u'/' % name;
+	    return parentUrl % '/' % name;
 	}();
 
 	logDebug() << "Creating FileInfo for " << debugPath << Qt::endl;
@@ -755,9 +755,9 @@ bool CacheReader::readLine()
 	++_lineNo;
 
 	const char * buf = gzgets( _cache, _buffer, MAX_CACHE_LINE_LEN );
-	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != u'\n' )
+	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != '\n' )
 	{
-	    _buffer[0] = u'\0';
+	    _buffer[0] = '\0';
 	    _line      = _buffer;
 
 	    if ( !gzeof( _cache ) )
@@ -776,8 +776,8 @@ bool CacheReader::readLine()
 	// logDebug() << "line[ " << _lineNo << "]: \"" << _line << '"' << Qt::endl;
 
     } while ( !gzeof( _cache ) &&
-	      ( *_line == u'\0' ||	// empty line
-	        *_line == u'#' ) );	// comment line
+	      ( *_line == '\0' ||	// empty line
+	        *_line == '#' ) );	// comment line
 
     return true;
 }
@@ -800,7 +800,7 @@ void CacheReader::splitLine()
 
 	if ( current && current < end )
 	{
-	    *current++ = u'\0';
+	    *current++ = '\0';
 	    current = skipWhiteSpace( current );
 	}
     }

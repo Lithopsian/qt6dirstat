@@ -71,7 +71,7 @@ namespace QDirStat
 	         OutputWindowPolicy   outputWindowPolicy = ShowAfterTimeout,
 	         int                  outputWindowTimeout = 500,
 	         bool                 outputWindowAutoClose = false,
-	         QString              shell = "" ):
+	         QString              shell = QString{} ):
 	    QAction{ title, parent },
 	    _active{ active },
 	    _title{ title },
@@ -93,7 +93,7 @@ namespace QDirStat
 	 * with the default settings and no parent.
 	 **/
 	Cleanup():
-	    Cleanup{ nullptr, true, "", "", false, false, RefreshThis, true, true, false }
+	    Cleanup{ nullptr, true, QString{}, QString{}, false, false, RefreshThis, true, true, false }
 	{}
 
 	/**

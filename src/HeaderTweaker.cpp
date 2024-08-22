@@ -22,6 +22,15 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Return a settings key for the width of a column.
+     **/
+    QString colWidthKey( DataColumn col )
+    {
+	return "Width_"_L1 % DataColumns::toString( col );
+    }
+
+
+    /**
      * Write the settings for a layout.
      **/
     void writeLayoutSettings( const ColumnLayout * layout )
@@ -355,7 +364,7 @@ void HeaderTweaker::readSettings()
 	{
 	    const DataColumn col = DataColumns::fromViewCol( section );
 
-	    const int width = settings.value( "Width_" + DataColumns::toString( col ), -1 ).toInt();
+	    const int width = settings.value( colWidthKey( col ), -1 ).toInt();
 	    if ( width > 0 )
 	    {
 		// Fixed width, can be changed by the user
@@ -383,7 +392,7 @@ void HeaderTweaker::writeSettings()
     settings.beginGroup( "TreeViewColumns" );
 
     // Remove any leftovers from old config file versions
-    settings.remove( "" ); // Remove all keys in this settings group
+    settings.remove( QString{} ); // Remove all keys in this settings group
 
     // Save column widths
     for ( int visualIndex = 0; visualIndex < _header->count(); ++visualIndex )
@@ -392,7 +401,7 @@ void HeaderTweaker::writeSettings()
 	if ( DataColumns::isValidCol( logicalIndex ) )
 	{
 	    const DataColumn col   = DataColumns::fromViewCol( logicalIndex );
-	    const QString widthKey = "Width_" + DataColumns::toString( col );
+	    const QString widthKey = colWidthKey( col );
 
 	    if ( autoSizeCol( logicalIndex ) )
 		settings.setValue( widthKey, "auto" );

@@ -137,7 +137,7 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
     const QString heading = tr( " with %1 files below %2" ).arg( displaySuffix(), _subtree.url() );
-    _ui->heading->setStatusTip( intro + heading );
+    _ui->heading->setStatusTip( intro % heading );
 
     // Force a redraw of the header from the status tip
     resizeEvent( nullptr );

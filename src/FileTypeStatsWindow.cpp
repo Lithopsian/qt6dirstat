@@ -319,7 +319,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
     // Use the shared LocateFileTypeWindow instance.  Let it pick its own parent
     // so it doesn't get closed along with this window.
-    LocateFileTypeWindow::populateSharedInstance( u'.' + suffix, _subtree() );
+    LocateFileTypeWindow::populateSharedInstance( '.' % suffix, _subtree() );
 }
 
 
@@ -332,7 +332,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 
     //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
 
-    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, u'.' + suffix );
+    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, '.' % suffix );
 }
 
 
@@ -367,8 +367,8 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
     if ( suffix.isEmpty() )
 	return;
 
-    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) + suffix );
-    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) + suffix );
+    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) % suffix );
+    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) % suffix );
 
     QMenu menu;
     menu.addAction( _ui->actionLocate );
@@ -418,7 +418,7 @@ FileTypeItem::FileTypeItem( const QString & name,
     set( FT_NameCol,       Qt::AlignLeft,  name );
     set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );
     set( FT_TotalSizeCol,  Qt::AlignRight, formatSize( totalSize ) );
-    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) + '%' );
+    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) % '%' );
 }
 
 

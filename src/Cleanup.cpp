@@ -51,7 +51,7 @@ namespace
 	    return false;
 
 	const QString path = QProcessEnvironment::systemEnvironment().value( "PATH", QString{} );
-	const QStringList paths = path.split( ':', Qt::SkipEmptyParts );
+	const QStringList paths = path.split( u':', Qt::SkipEmptyParts );
 
 	// If we don't have a PATH, just assume the program exists although it will probably never run
 	if ( paths.isEmpty() )

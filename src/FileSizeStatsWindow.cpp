@@ -26,7 +26,7 @@
 
 
 #define MAX_BUCKET_COUNT 100
-#define EXTREMES_MARGIN    2
+#define EXTREMES_MARGIN    4
 #define FILTERED_STEP      5
 
 
@@ -144,7 +144,7 @@ namespace
 	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
 		continue;
 
-	    addItem( table, row, NumberCol, namePrefix + QString::number( i ) );
+	    addItem( table, row, NumberCol, namePrefix % QString::number( i ) );
 	    addItem( table, row, ValueCol,  formatSize( stats->percentileValue( i ) ) );
 	    if ( i > 0 )
 	    {
@@ -427,7 +427,8 @@ void FileSizeStatsWindow::showHelp()
     if ( !button )
 	return;
 
-    const QString helpUrl = "https://github.com/shundhammer/qdirstat/blob/master/doc/stats/" + button->statusTip();
+    const QString helpUrl =
+	"https://github.com/shundhammer/qdirstat/blob/master/doc/stats/"_L1 % button->statusTip();
     QDesktopServices::openUrl( helpUrl );
 }
 

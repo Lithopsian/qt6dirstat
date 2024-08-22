@@ -25,7 +25,7 @@ PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
     QListWidgetItem{ parent },
     _path{ mountPoint->path() }
 {
-    QString text = _path % u'\n';
+    QString text = _path % '\n';
 
     if ( mountPoint->hasSizeInfo() && mountPoint->totalSize() > 0 )
 	text += formatSize( mountPoint->totalSize() ) % "  "_L1;

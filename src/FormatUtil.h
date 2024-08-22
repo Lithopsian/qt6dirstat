@@ -171,7 +171,7 @@ namespace QDirStat
 	{ return QFontMetrics{ font }.boundingRect( text ).width(); }
 
     /**
-     * Elide a long string, remnoving characters from the middle to fit
+     * Elide a string, removing characters from the middle to fit
      * with maxLen characters.
      **/
     QString elideMiddle( const QString & text, int maxLen );

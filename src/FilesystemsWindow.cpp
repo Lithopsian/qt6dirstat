@@ -166,7 +166,7 @@ void FilesystemsWindow::populate()
     for ( MountPointIterator it{ showAll }; *it; ++it )
     {
 	FilesystemItem * item = new FilesystemItem{ *it, _ui->fsTree };
-	item->setIcon( FS_DeviceCol, QIcon{ app()->dirTreeModel()->treeIconDir() + icon( *it ) } );
+	item->setIcon( FS_DeviceCol, QIcon{ app()->dirTreeModel()->treeIconDir() % icon( *it ) } );
     }
 
     if ( MountPoints::hasBtrfs() )
@@ -220,7 +220,7 @@ void FilesystemsWindow::contextMenu( const QPoint & pos )
 	return;
 
     // The clicked item will always be the current item now
-    _ui->actionRead->setText( tr( "Read at " ) + selectedPath() );
+    _ui->actionRead->setText( tr( "Read at " ) % selectedPath() );
 
     QMenu menu;
     menu.addAction( _ui->actionRead );
@@ -257,7 +257,7 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
     const int limit = sizeof( "/dev/mapper/luks-123456" );
     if ( dev.size() > limit )
     {
-	dev = dev.left( limit - 1 ) + "…"; // ellipsis
+	dev = dev.left( limit - 1 ) % "…"; // ellipsis
 	setToolTip( FS_DeviceCol, _device );
     }
 

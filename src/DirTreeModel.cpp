@@ -1128,7 +1128,7 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 	logDebug() << "Clicked row " << index.row()
 	           << " col " << index.column()
 	           << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
-	           << '\t' << item
+	           << "\t" << item
 	            << " data(0): " << index.model()->data( index, 0 ).toString()
 	           << Qt::endl;
 	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( " -> "_L1 ) << Qt::endl;

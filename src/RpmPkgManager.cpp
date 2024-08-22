@@ -150,10 +150,10 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
     QString name = pkg->baseName();
 
     if ( !pkg->version().isEmpty() )
-	name += u'-' % pkg->version();
+	name += '-' % pkg->version();
 
     if ( !pkg->arch().isEmpty() )
-	name += u'.' % pkg->arch();
+	name += '.' % pkg->arch();
 
     return name;
 }

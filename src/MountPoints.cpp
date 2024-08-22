@@ -94,7 +94,7 @@ namespace
         QStringList ntfsDevices;
         for ( const QString & line : lines )
         {
-            const QString device = "/dev/" + line.split( QRegularExpression{ "\\s+" } ).first();
+            const QString device = "/dev/"_L1 % line.split( QRegularExpression{ "\\s+" } ).first();
             logDebug() << "NTFS on " << device << Qt::endl;
             ntfsDevices << device;
         }
@@ -220,7 +220,7 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
         {
             // Try one level upwards
             pathComponents.removeLast();
-            path = u'/' + pathComponents.join( u'/' );
+            path = '/' % pathComponents.join( u'/' );
 
             mountPoint = findByPath( path );
         }

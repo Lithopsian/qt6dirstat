@@ -94,7 +94,7 @@ namespace
 		    item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
 		const QString itemLine = itemType % ": "_L1 % name;
 		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
-		const QString title = cleanTitle + QString{ itemSpaces - titleWidth, u' ' };
+		const QString title = cleanTitle % QString{ itemSpaces - titleWidth, u' ' };
 
 		return QString{ "<h3>%1</h3>%2<br/>" }.arg( title, itemLine );
 	    }
@@ -120,7 +120,7 @@ namespace
 		    longestLine = lineLength;
 	    }
 	    const int spaces = longestLine / spaceWidth - titleWidth;
-	    const QString title = cleanTitle + QString{ spaces, u' ' };
+	    const QString title = cleanTitle % QString{ spaces, u' ' };
 
 	    return QString{ "<h3>%1</h3>%2<br>" }.arg( title, urls.join( "<br>"_L1 ) );
 	}();
@@ -523,9 +523,9 @@ void CleanupCollection::moveToTrash()
     for ( const FileInfo * item : selectedItems )
     {
 	if ( _trash->trash( item->path() ) )
-	    outputWindow->addStdout( tr( "Moved to trash: " ) + item->path() );
+	    outputWindow->addStdout( tr( "Moved to trash: " ) % item->path() );
 	else
-	    outputWindow->addStderr( tr( "Move to trash failed for " ) + item->path() );
+	    outputWindow->addStderr( tr( "Move to trash failed for " ) % item->path() );
 
 	// Give the output window a chance to display before this loop completes
 	QEventLoop eventLoop;

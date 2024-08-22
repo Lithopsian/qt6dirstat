@@ -60,7 +60,7 @@ namespace QDirStat
          * empty search pattern.
          **/
         FileSearchFilter():
-            FileSearchFilter{ nullptr, "", Auto, true, true, true, true, true }
+            FileSearchFilter{ nullptr, QString{}, Auto, true, true, true, true, true }
         {}
 
         /**

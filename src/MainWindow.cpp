@@ -418,7 +418,7 @@ namespace
 	for ( int row=0; row < rowCount; row++ )
 	{
 	    const QModelIndex childIndex = model->index( row, 0, index );
-	    dumpModelTree( model, childIndex, indent + QString{ 4, ' ' } );
+	    dumpModelTree( model, childIndex, indent + QString{ 4, u' ' } );
 	}
     }
 
@@ -522,7 +522,7 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     _historyButtons->clear();
     app()->selectionModel()->clear();
     _ui->breadcrumbNavigator->clear();
-    updateWindowTitle( "" );
+    updateWindowTitle( QString() );
     app()->dirTree()->sendFinished();
 
     QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ),

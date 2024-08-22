@@ -43,10 +43,10 @@ namespace QDirStat
     {
 	/**
 	 * Try running a command and compare it against an expected result.
-	 * Return 'true' if ok, 'false' if not.
+	 * Return true if ok, false if not.
 	 *
-	 * Log the command that is executed if 'logCommand' is 'true',
-	 * log the command's output if 'logOutput' is 'true'.
+	 * Log the command that is executed if 'logCommand' is true,
+	 * log the command's output if 'logOutput' is true.
 	 **/
 	bool tryRunCommand( const QString & commandLine,
 	                    const QString & expectedResult,
@@ -57,11 +57,11 @@ namespace QDirStat
 	 * Run a command line and return its output. If exitCode_ret is
 	 * non-null, return the command's exit code in exitCode_ret.
 	 *
-	 * Log the command that is executed if 'logCommand' is 'true',
-	 * log the command's output if 'logOutput' is 'true'.
+	 * Log the command that is executed if 'logCommand' is true,
+	 * log the command's output if 'logOutput' is true.
 	 *
 	 * If the command exits with a non-zero exit code, both the command and
-	 * the output are logged anyway unless 'ignoreErrCode' is 'true'.
+	 * the output are logged anyway unless 'ignoreErrCode' is true.
 	 *
 	 * This function uses a very basic command line parser; it simply
 	 * splits the command up wherever whitespace might occur. If any of
@@ -90,11 +90,11 @@ namespace QDirStat
 	 * Use this version to avoid any side effects due to command line
 	 * parsing.
 	 *
-	 * Log the command that is executed if 'logCommand' is 'true',
-	 * log the command's output if 'logOutput' is 'true'.
+	 * Log the command that is executed if 'logCommand' is true,
+	 * log the command's output if 'logOutput' is true.
 	 *
 	 * If the command exits with a non-zero exit code, both the command and
-	 * the output are logged anyway unless 'ignoreErrCode' is 'true'.
+	 * the output are logged anyway unless 'ignoreErrCode' is true.
 	 *
 	 * The command is not executed in a shell; the command is run directly
 	 * so only binaries can be executed, no shell scripts or scripts of
@@ -110,7 +110,7 @@ namespace QDirStat
 	                    bool                logError     = true );
 
 	/**
-	 * Return 'true' if the specified command is available and executable.
+	 * Return true if the specified command is available and executable.
 	 **/
 	inline bool haveCommand( const QString & command )
 	    { return access( command.toUtf8(), X_OK ) == 0; }
@@ -129,14 +129,14 @@ namespace QDirStat
 	    { return geteuid() == 0; }
 
 	/**
-	 * Check if this program runs with 'sudo'.
+	 * Check if this program runs with sudo.
 	 **/
 	inline bool runningWithSudo()
 	    { return !QProcessEnvironment::systemEnvironment().value( "SUDO_USER", QString{} ).isEmpty(); }
 
 	/**
 	 * Check if this program runs as the real root user, with root
-	 * permissions, but not with 'sudo'.
+	 * permissions, but not with sudo.
 	 **/
 	inline bool runningAsTrueRoot()
 	    { return runningAsRoot() && !runningWithSudo(); }
@@ -147,7 +147,7 @@ namespace QDirStat
 	QString homeDir( uid_t uid );
 
 	/**
-	 * Return 'true' if a symbolic link is broken, i.e. the (first level)
+	 * Return true if a symbolic link is broken, i.e. the (first level)
 	 * target of the symlink does not exist in the filesystem.
 	 **/
 //        bool isBrokenSymLink( const QString & path );

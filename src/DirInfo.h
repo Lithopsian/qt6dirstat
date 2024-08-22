@@ -129,7 +129,7 @@ namespace QDirStat
 	 * is created.
 	 **/
 	DirInfo( DirTree * tree ):
-	    DirInfo{ nullptr, tree, "" }
+	    DirInfo{ nullptr, tree, QString{} }
 	{}
 
 	/**

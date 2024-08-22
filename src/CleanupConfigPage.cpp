@@ -150,7 +150,7 @@ void CleanupConfigPage::save( void * value )
     cleanup->setShortcut( _ui->keySequenceEdit->keySequence().toString() );
 
     if ( _ui->shellComboBox->currentText().startsWith( "$SHELL"_L1 ) )
-	cleanup->setShell( "" );
+	cleanup->setShell( QString{} );
     else
 	cleanup->setShell( _ui->shellComboBox->currentText() );
 

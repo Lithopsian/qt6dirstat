@@ -130,7 +130,7 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     QTextCharFormat format;
     format.setForeground( QBrush{ textColor } );
     cursor.setCharFormat( format );
-    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText + u'\n' );
+    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
 }
 
 
@@ -361,7 +361,7 @@ QProcess * OutputWindow::startNextProcess()
 	const QString dir = process->workingDirectory();
 	if ( dir != _lastWorkingDir )
 	{
-	    addCommandLine( "cd " + dir );
+	    addCommandLine( "cd "_L1 % dir );
 	    _lastWorkingDir = dir;
 	}
 

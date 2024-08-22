@@ -145,7 +145,7 @@ namespace
 	{
 	    logError() << "ERROR: Directory " << logDir << " is not owned by " << userName() << Qt::endl;
 
-	    QByteArray nameTemplate{ QString{ logDir % "-XXXXXX" }.toUtf8() };
+	    QByteArray nameTemplate{ QString{ logDir % "-XXXXXX"_L1 }.toUtf8() };
 	    const char * result = mkdtemp( nameTemplate.data() );
 	    if ( result )
 	    {
@@ -193,7 +193,7 @@ namespace
     QString oldNamePattern( QString filename )
     {
 	filename.remove( QRegularExpression{ "\\.log$" } );
-	filename += "-??.old";
+	filename += "-??.old"_L1;
 
 	return filename;
     }
@@ -295,7 +295,7 @@ Logger::Logger( const QString & rawLogDir,
     if ( doRotate )
 	logRotate( logDir, filename, logRotateCount );
 
-    openLogFile( logDir % u'/' % filename );
+    openLogFile( logDir % '/' % filename );
 }
 
 
@@ -411,16 +411,16 @@ QTextStream & Logger::log( const QString & srcFile,
 	return "";
     }();
 
-    _logStream << timeStamp() << " " << "[" << getpid() << "] " << sev << " ";
+    _logStream << timeStamp() << ' ' << '[' << getpid() << "] " << sev << ' ';
 
     if ( !srcFile.isEmpty() )
     {
 	_logStream << srcFile;
 
 	if ( srcLine > 0 )
-	    _logStream << ":" << srcLine;
+	    _logStream << ':' << srcLine;
 
-	_logStream << " ";
+	_logStream << ' ';
 
 	if ( !srcFunction.isEmpty() )
 	    _logStream << srcFunction << "():  ";

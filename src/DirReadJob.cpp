@@ -11,8 +11,6 @@
 #include <fcntl.h>  // AT_ constants (fstatat() flags)
 #include <unistd.h> // access(), R_OK, X_OK
 
-#include <QStringBuilder>
-
 #include "DirReadJob.h"
 #include "DirTree.h"
 #include "DirTreeCache.h"
@@ -184,8 +182,8 @@ void LocalDirReadJob::startReading()
 		break;
 
 	    default:
-		const QString msg = "Unable to read directory %1 (errno=%2)";
-		logWarning() << msg.arg( _dirName, errno ) << Qt::endl;
+		const QString msg{ "Unable to read directory %1 (errno=%2)" };
+		logWarning() << msg.arg( _dirName ).arg( errno ) << Qt::endl;
 		dir()->finishReading( DirError );
 		break;
 	}
@@ -429,9 +427,9 @@ QString LocalDirReadJob::fullName( const QString & entryName ) const
 {
     // Avoid leading // when in root dir
     if ( _dirName == "/"_L1 )
-	return u'/' % entryName;
+	return '/' % entryName;
 
-    return _dirName % u'/' % entryName;
+    return _dirName % '/' % entryName;
 }
 
 

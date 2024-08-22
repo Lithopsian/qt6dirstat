@@ -112,19 +112,23 @@ void HistoryButtons::unlock( const FileInfo * newCurrentItem )
 {
     _locked = false;
 
-    const DirTree * tree = newCurrentItem->tree();
-
     // Create a "cleaned" history list without items that are no longer in the tree
     History * cleanedHistory = new History;
     int currentIndex = _history->currentIndex();
 
-    for ( const QString & item : *_history )
+    // No current item, no tree, no history
+    if ( newCurrentItem )
     {
-        // Remove stale items and merge duplicates that are now contiguous
-        if ( tree->locate( item ) && !cleanedHistory->isCurrentItem( item ) )
-            cleanedHistory->add( item );
-        else if ( currentIndex >= cleanedHistory->size() )
-            --currentIndex; // adjust the index for items not included before it
+        const DirTree * tree = newCurrentItem->tree();
+
+        for ( const QString & item : *_history )
+        {
+            // Remove stale items and merge duplicates that are now contiguous
+            if ( tree->locate( item ) && !cleanedHistory->isCurrentItem( item ) )
+                cleanedHistory->add( item );
+            else if ( currentIndex >= cleanedHistory->size() )
+                --currentIndex; // adjust the index for items not included before it
+        }
     }
 
     // Replace the current history with the cleaned history

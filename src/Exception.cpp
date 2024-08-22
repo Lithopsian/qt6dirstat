@@ -16,11 +16,11 @@ QString SysCallFailedException::errMsg( const QString & sysCall,
 {
     const QString msg = QString{ "%1( \"%2\" ) failed" }.arg( sysCall, resourceName );
 
-    return errno == 0 ? msg : ( msg + ": "_L1 + formatErrno() );
+    return errno == 0 ? msg : ( msg % ": "_L1 % formatErrno() );
 }
 
 
 QString FilesystemTooBigException::errMsg() const
 {
-    return "filesystem larger than " + QDirStat::formatSize( FileSizeMax );
+    return "filesystem larger than "_L1 % QDirStat::formatSize( FileSizeMax );
 }

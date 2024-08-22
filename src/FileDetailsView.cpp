@@ -324,7 +324,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
 {
     // logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % u'/' );
+    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();

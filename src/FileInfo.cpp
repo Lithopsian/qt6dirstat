@@ -175,7 +175,7 @@ QString FileInfo::url() const
 QString FileInfo::path() const
 {
     if ( isPkgInfo() )
-	return "";
+	return QString{};
 
     if ( !_parent )
 	return _name;
