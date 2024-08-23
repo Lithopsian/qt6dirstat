@@ -7,9 +7,9 @@
  *              Ian Nartowicz
  */
 
+#include <QApplication>
 #include <QPainter>
 #include <QPalette>
-#include <QApplication>
 
 #include "SizeColDelegate.h"
 #include "DirTreeModel.h"

@@ -195,7 +195,6 @@ namespace
 } // namespace
 
 
-// constructor with no parent tile, only used for the root tile
 TreemapTile::TreemapTile( TreemapView  * parentView,
                           FileInfo     * orig,
                           const QRectF & rect ):
@@ -209,6 +208,8 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
     _cushionSurface{ _parentView->cushionHeights() } // initial cushion surface
 {
     //logDebug() << "Creating root tile " << orig << "    " << rect << Qt::endl;
+
+    // constructor with no parent tile, only used for the root tile
     init();
 
     if ( _parentView->squarify() )
@@ -261,7 +262,6 @@ VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
         createChildrenVertical( rect );
 }
 
-// constructor for squarified layout, with the cushion specified explicitly to allow for a row cushion
 TreemapTile::TreemapTile( TreemapTile          * parentTile,
                           FileInfo             * orig,
                           const QRectF         & rect,
@@ -277,6 +277,7 @@ TreemapTile::TreemapTile( TreemapTile          * parentTile,
 {
     //logDebug() << "Creating squarified tile for " << orig << "  " << rect << Qt::endl;
 
+    // constructor for squarified layout, with the cushion specified explicitly to allow for a row cushion
     init();
 
     if ( orig->isDirInfo() )

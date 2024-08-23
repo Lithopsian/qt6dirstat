@@ -204,22 +204,6 @@ namespace QDirStat
      **/
     class TreemapTile: public QGraphicsRectItem
     {
-    public:
-
-	/**
-	 * Constructor: create a root treemap tile from 'orig' that fits into a
-	 * rectangle 'rect'.
-	 **/
-	TreemapTile( TreemapView  * parentView,
-	             FileInfo     * orig,
-	             const QRectF & rect );
-
-	/**
-	 * Destructor.  Note that the highlighter is owned by the scene/view
-	 * so nothing to do here.
-	 **/
-//	~TreemapTile() override = default;
-
 
     protected:
 
@@ -233,7 +217,7 @@ namespace QDirStat
 	             const QRectF & rect );
 
 	/**
-	 * Constructor used for squarified children
+	 * Constructor used for squarified children.
 	 **/
 	TreemapTile( TreemapTile          * parentTile,
 	             FileInfo             * orig,
@@ -241,6 +225,21 @@ namespace QDirStat
 	             const CushionSurface & cushionSurface );
 
     public:
+
+	/**
+	 * Constructor: create a root treemap tile from 'orig' that fits into a
+	 * rectangle 'rect'.  This is used for the root tile and is the only
+	 * public constructor.
+	 **/
+	TreemapTile( TreemapView  * parentView,
+	             FileInfo     * orig,
+	             const QRectF & rect );
+
+	/**
+	 * Destructor.  Note that the highlighter is owned by the scene/view
+	 * so nothing to do here.
+	 **/
+//	~TreemapTile() override = default;
 
 	/**
 	 * Returns a pointer to the original FileInfo item that corresponds to

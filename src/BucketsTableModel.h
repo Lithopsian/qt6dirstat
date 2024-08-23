@@ -33,6 +33,7 @@ namespace QDirStat
 	    ColCount
 	};
 
+
     public:
 
 	/**

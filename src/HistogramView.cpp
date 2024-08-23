@@ -306,9 +306,11 @@ void HistogramView::rebuild()
 
 void HistogramView::addBackground()
 {
-    const QPointF pos{ -leftBorder(), -topBorder() - _size.height() };
-    const QSizeF size{ _size + QSizeF{ leftBorder() + rightBorder(), topBorder() + bottomBorder() } };
-    const QRectF rect{ pos, size };
+    const QRectF rect{ -leftBorder(),
+                       -topBorder() - _size.height(),
+                       _size.width() + leftBorder() + rightBorder(),
+                       _size.height() + topBorder() + bottomBorder() };
+
     QGraphicsRectItem * panel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
     panel->setZValue( PanelBackgroundLayer );
 }
@@ -459,8 +461,7 @@ void HistogramView::addBars()
 
 void HistogramView::addMarkers()
 {
-    const FileSize totalWidth = percentile( _endPercentile ) - percentile( _startPercentile );
-    if ( totalWidth < 1 )
+    if ( percentile( _endPercentile ) - percentile( _startPercentile ) < 1 )
 	return;
 
     // Show percentile marker lines
@@ -468,24 +469,24 @@ void HistogramView::addMarkers()
     {
 	if ( i == _stats->median() && _showMedian )
 	{
-	    addMarker( _stats->median(), tr( "Median" ), medianPen(), MedianLayer );
+	    addMarker( i, tr( "Median" ), medianPen(), MedianLayer );
 	    continue;
 	}
 
 	if ( i == _stats->quartile1() && _showQuartiles )
 	{
-	    addMarker( _stats->quartile1(), tr( "Q1 (1st quartile)" ), quartilePen(), QuartileLayer );
+	    addMarker( i, tr( "Q1 (1st quartile)" ), quartilePen(), QuartileLayer );
 	    continue;
 	}
 
 	if ( i == _stats->quartile3() && _showQuartiles )
 	{
-	    addMarker( _stats->quartile3(), tr( "Q3 (3rd quartile)" ), quartilePen(), QuartileLayer );
+	    addMarker( i, tr( "Q3 (3rd quartile)" ), quartilePen(), QuartileLayer );
 	    continue;
 	}
 
-	// Skip start and end percentiles, and if configured for no percentile lines
-	if ( _percentileStep == 0 || i == _stats->minPercentile() || i == _stats->maxPercentile() )
+	// Skip if configured for no percentile markers
+	if ( _percentileStep == 0 )
 	    continue;
 
 	// Skip markers that aren't in percentileStep increments ...

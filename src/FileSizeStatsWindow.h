@@ -71,8 +71,8 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Fill the percentiles table depending on the content of the filter
-	 * combo box in the same tab.
+	 * Fill the percentiles table depending on the content of the
+	 * checkbox in the same tab.
 	 **/
 	void fillPercentileTable();
 
@@ -91,7 +91,7 @@ namespace QDirStat
 
 	/**
 	 * Calculate automatic values for the start and end percentiles, apply
-	 * them and rebuild the histogram.
+	 * them, and rebuild the histogram.
 	 **/
 	void autoPercentiles();
 
