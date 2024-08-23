@@ -25,7 +25,6 @@ namespace QDirStat
     {
         Q_OBJECT
 
-    public:
 	enum Column
 	{
 	    StartCol,
@@ -33,6 +32,8 @@ namespace QDirStat
 	    ValueCol,
 	    ColCount
 	};
+
+    public:
 
 	/**
 	 * Constructor.
@@ -85,9 +86,12 @@ namespace QDirStat
 	/**
 	 * Return item flags for the specified model index. This specifies if
 	 * the item can be selected, edited etc.
+	 *
+	 * The base implementation returns flags indicating that the item is
+	 * enabled and selectable, which is acceptable here.
 	 **/
-	Qt::ItemFlags flags( const QModelIndex & index ) const override
-	    { return QAbstractTableModel::flags( index ) | Qt::ItemIsSelectable; }
+//	Qt::ItemFlags flags( const QModelIndex & ) const override
+//	    { return Qt::ItemIsEnabled; }
 
 
     private:
