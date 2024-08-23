@@ -32,7 +32,10 @@ namespace QDirStat
      * The delay in delivering a request is configurable as a multiple of the
      * time that it took the previous request to complete.  This avoids pointlessly
      * penalising users with fast hardware or when lookups are coming from cache,
-     * but reduces lockups with real lookups on slower hardware.
+     * but reduces lockups with real lookups on slower hardware.  The timer
+     * intervals are stored as signed ints, so valid up to about 596 hours.  The
+     * configurable factor is stored as a single-precision float, so accurate to
+     * about 1 second in 2.8 hours.
      **/
     class AdaptiveTimer: public QObject
     {
@@ -61,6 +64,7 @@ namespace QDirStat
          * The delays will typically be longer for higher stages, while the cooldowns
          * will be shorter so that the longer delays are only used for repidly-repeated
          * requests while shorter delays will be used for less frequent requests.
+         *
          **/
         AdaptiveTimer( QObject * parent, Delays delays, Cooldowns cooldowns );
 
@@ -85,10 +89,6 @@ namespace QDirStat
          * Returns the number of milliseconds that should be used for the delay timer.
          * This is the value from the delays list corresponding to the current stage, or
          * a default value if the delays list is empty.
-         *
-         * Note that this function narrows the result calculated from a float and a
-         * 64-bit integer to a (usually) 32-bit integer.  This is only valid up to
-         * about 596 hours.
          **/
         int currentDelay() const
             { return _delays.isEmpty() ? 0 : _payloadTime * _delays[ _delayStage ]; }
@@ -122,17 +122,15 @@ namespace QDirStat
 
         // Data members
 
-        Payload       _payload;
+        Payload   _payload;
+        int       _payloadTime{ 0 };
 
-        QElapsedTimer _payloadStopwatch;
-        qint64        _payloadTime{ 0 };
+        int       _delayStage{ 0 };
+        Delays    _delays;
+        Cooldowns _cooldowns;
 
-        int           _delayStage{ 0 };
-        Delays        _delays;
-        Cooldowns     _cooldowns;
-
-        QTimer        _deliveryTimer;
-        QTimer        _cooldownTimer;
+        QTimer    _deliveryTimer;
+        QTimer    _cooldownTimer;
 
     }; // class AdaptiveTimer
 
