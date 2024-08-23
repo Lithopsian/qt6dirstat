@@ -85,18 +85,27 @@ namespace QDirStat
          * Returns the number of milliseconds that should be used for the delay timer.
          * This is the value from the delays list corresponding to the current stage, or
          * a default value if the delays list is empty.
+         *
+         * Note that this function narrows the result calculated from a float and a
+         * 64-bit integer to a (usually) 32-bit integer.  This is only valid up to
+         * about 596 hours.
          **/
-        int currentDelay() const;
+        int currentDelay() const
+            { return _delays.isEmpty() ? 0 : _payloadTime * _delays[ _delayStage ]; }
 
         /**
-         * Returns the cooldown period for the current stage.
+         * Returns the cooldown period for the current stage, in milliseconds.
          **/
-        int cooldownPeriod() const;
+        int cooldownPeriod() const
+            { return _cooldowns.isEmpty() ? 0 : _cooldowns[ qMin( _cooldowns.size() - 1, _delayStage ) ]; }
 
         /**
          * Increase the delivery delay.
          **/
         void increaseDelay();
+
+
+    protected slots:
 
         /**
          * Decrease the delivery delay.

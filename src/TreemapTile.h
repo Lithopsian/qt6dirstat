@@ -439,12 +439,6 @@ namespace QDirStat
 	void renderChildCushions();
 
 	/**
-	 * Returns a suitable color for 'file' based on a set of internal rules
-	 * (according to filename extension, MIME type or permissions).
-	 **/
-	const QColor & tileColor( const FileInfo * file ) const;
-
-	/**
 	 * Initialization common to all constructors.
 	 **/
 	void init();

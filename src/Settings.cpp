@@ -127,7 +127,7 @@ namespace
      * Change the owner of the config file to the user in the $SUDO_UID /
      * $SUDO_GID environment variables (if set).
      **/
-    inline void fixFileOwner( const UsedFileList & filenames )
+    void fixFileOwner( const UsedFileList & filenames )
     {
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 	const QString sudoUid = env.value( "SUDO_UID", QString{} );

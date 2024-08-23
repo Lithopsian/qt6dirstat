@@ -41,25 +41,25 @@ namespace
      * colour of the cell, to account for both dark themes and whether the item
      * is selected.
      **/
-    inline QColor highlightedText( const QStyleOptionViewItem & option,
-				   bool sparseFile,
-				   bool disabled )
+    QColor highlightedText( const QStyleOptionViewItem & option,
+                            bool                         sparseFile,
+                            bool                         disabled )
     {
 	// Pick a suitable color for the special text, based on the theme settings, whether
 	// it is for a sparse file, and whether the item should be rendered as disabled
 	const bool selected = option.state & QStyle::State_Selected;
-	const QColor & background = selected ? option.palette.highlight().color() : option.palette.base().color();
+	const QBrush & background = selected ? option.palette.highlight() : option.palette.base();
 
-       if ( background.lightness() < LIGHTNESS_THRESHOLD )
-       {
+	if ( background.color().lightness() < LIGHTNESS_THRESHOLD )
+	{
 	   const QColor color = sparseFile ? SPARSE_COLOR_DARK : ALLOC_COLOR_DARK;
 	   return disabled ? color.darker( 125 ) : color;
-       }
-       else
-       {
+	}
+	else
+	{
 	   const QColor color = sparseFile ? SPARSE_COLOR_NORMAL : ALLOC_COLOR_NORMAL;
 	   return disabled ? color.lighter( 125 ) : color;
-       }
+	}
     }
 
 } // namespace

@@ -61,26 +61,6 @@ void AdaptiveTimer::deliveryTimeout()
 }
 
 
-int AdaptiveTimer::currentDelay() const
-{
-    if ( _delays.isEmpty() )
-        return 0;
-
-    return _payloadTime * _delays[ _delayStage ]; // hope this is less than 596 hours!
-}
-
-
-int AdaptiveTimer::cooldownPeriod() const
-{
-    if ( _cooldowns.isEmpty() )
-        return 0;
-
-    // Might be more delays than cooldowns
-    const int cooldownStage = qMin( _cooldowns.size() - 1, _delayStage );
-    return _cooldowns[ cooldownStage ];
-}
-
-
 void AdaptiveTimer::increaseDelay()
 {
     if ( _delayStage >= _delays.size() - 1 )

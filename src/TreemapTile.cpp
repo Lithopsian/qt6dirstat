@@ -31,6 +31,21 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns a suitable color for 'file' based on a set of internal rules
+     * (according to filename extension, MIME type or permissions).
+     *
+     * This function is defined here primarily to let the compiler inline
+     * it as a performance-critical call.
+     **/
+    const QColor & tileColor( const TreemapView * parentView, const FileInfo * file )
+    {
+	if ( parentView->fixedColor().isValid() )
+	    return parentView->fixedColor();
+
+	return MimeCategorizer::instance()->color( file );
+    }
+
+    /**
      * Try to include members referred to by 'it' into 'rect' so that they achieve
      * the most "square" appearance.  Items are added until the aspect ratio of the
      * first and last items doesn't get better any more.  Returns the total size of
@@ -527,7 +542,7 @@ void TreemapTile::renderChildCushions()
             tile->_cushion = tile->renderCushion( tile->rect() );
         else
             //tile->_pixmap = tile->renderPlainTile( tile->rect() );
-            tile->setBrush( tileColor( tile->_orig ) );
+            tile->setBrush( tileColor( _parentView, tile->_orig ) );
     }
 }
 
@@ -583,7 +598,7 @@ void TreemapTile::paint( QPainter                       * painter,
     else
     {
         if ( brush().style() == Qt::NoBrush )
-            setBrush( tileColor( _orig ) );
+            setBrush( tileColor( _parentView, _orig ) );
         QGraphicsRectItem::paint( painter, option, widget );
 
         // Always try to draw an outline since there is no other indication of the tiles
@@ -619,7 +634,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 {
     //logDebug() << rect << Qt::endl;
 
-    const QColor & color = tileColor( _orig );
+    const QColor & color = tileColor( _parentView, _orig );
 
     // These don't need rounding, they're already whole pixels, but make the narrowing explicit
     const int width = static_cast<int>( rect.width() );
@@ -654,14 +669,6 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 
     return QPixmap::fromImage( image );
 }
-
-inline const QColor & TreemapTile::tileColor( const FileInfo * file ) const
-{
-    return _parentView->fixedColor().isValid() ?
-        _parentView->fixedColor() :
-        MimeCategorizer::instance()->color( file );
-}
-
 
 void TreemapTile::invalidateCushions()
 {
