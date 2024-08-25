@@ -11,6 +11,7 @@
 #define AdaptiveTimer_h
 
 #include <QElapsedTimer>
+#include <QObject>
 #include <QTimer>
 #include <QVector>
 
