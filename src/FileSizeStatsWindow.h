@@ -17,9 +17,6 @@
 #include "ui_file-size-stats-window.h"
 
 
-class QTableWidget;
-
-
 namespace QDirStat
 {
     class BucketsTableModel;
@@ -77,52 +74,11 @@ namespace QDirStat
 	void fillPercentileTable();
 
 	/**
-	 * Make the histogram options visible or invisible.
-	 **/
-	void openOptions();
-	void closeOptions();
-
-	/**
 	 * Respond to changes in the slider values or markers combobox.
 	 **/
 	void startValueChanged( int newStart );
 	void endValueChanged( int newEnd );
-	void markersChanged( int markersIndex );
-
-	/**
-	 * Calculate automatic values for the start and end percentiles, apply
-	 * them, and rebuild the histogram.
-	 **/
-//	void autoPercentiles();
-
-	/**
-	 * Show help for a topic determined by the sender of this signal.
-	 **/
-	void showHelp();
-
-
-    protected:
-
-	/**
-	 * One-time initialization of the widgets in this window
-	 **/
-	void initWidgets();
-
-	/**
-	 * Return the abstract model (cast as BucketsTableModel) for
-	 * the QTableView.
-	 **/
-	BucketsTableModel * bucketsTableModel() const;
-
-	/**
-	 * Populate with new content.
-	 **/
-	void populate( FileInfo * fileInfo, const QString & suffix );
-
-	/**
-	 * Initialise the histogram data.
-	 **/
-	void initHistogram();
+	void markersChanged();
 
 	/**
 	 * Automatically determine the best start and end percentiles.  This is
@@ -144,6 +100,54 @@ namespace QDirStat
 	void autoStartEndPercentiles();
 
 	/**
+	 * Toggle the histogram y-axis scale between log and linear and disable
+	 * the automatic selection of the log scale setting.
+	 **/
+	void logScale();
+
+	/**
+	 * Set the histogram y-axis scale to log or linear depending on the
+	 * bucket size distribution and continue to automatically set the
+	 * scaling.
+	 **/
+	void autoLogScale();
+
+	/**
+	 * Show help for a topic determined by the sender of this signal.
+	 **/
+	void showHelp();
+
+
+    protected:
+
+	/**
+	 * One-time initialization of the widgets in this window
+	 **/
+	void initWidgets();
+
+	/**
+	 * Configure a percentile marker action, including setting
+	 * it in the markers combo box and connecting the action.
+	 **/
+	void markerAction( QActionGroup * group, QAction * action, int index );
+
+	/**
+	 * Return the abstract model (cast as BucketsTableModel) for
+	 * the QTableView.
+	 **/
+	BucketsTableModel * bucketsTableModel() const;
+
+	/**
+	 * Populate with new content.
+	 **/
+	void populate( FileInfo * fileInfo, const QString & suffix );
+
+	/**
+	 * Initialise the histogram data.
+	 **/
+	void initHistogram();
+
+	/**
 	 * Update the values for the option widgets from the current ones from
 	 * the histogram
 	 **/
@@ -155,15 +159,23 @@ namespace QDirStat
 	void loadHistogram();
 
 	/**
-	 * Resize event, reimplemented from QWidget.
-	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
 	 * the dialog.  A little extra room is left for the user to
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
+	 *
+	 * Reimplemented from QDialog/QWidget.
 	 **/
 	void resizeEvent( QResizeEvent * ) override;
+
+	/**
+	 * Context menu event.  If the histogram tab is open, build and
+	 * show a context menu.
+	 *
+	 * Reimplemented from QDialog/QWidget.
+	 **/
+	void contextMenuEvent( QContextMenuEvent * event ) override;
 
 
     private:

@@ -181,6 +181,19 @@ namespace QDirStat
 	QPen   barPen()   const { return QColor{ 0x40, 0x40, 0x50 }; }
 
 	/**
+	 * Set whether to automatically determine the type of y-axis
+	 * scaling.
+	 **/
+	void enableAutoLogScale() { _autoLogScale = true; }
+	void disableAutoLogScale() { _autoLogScale = false; }
+
+	/**
+	 * Return whether the y-axis is currently showing as a log scale.
+	 **/
+	bool logScale() { return _useLogScale; }
+	void toggleLogScale() { _useLogScale = !_useLogScale; }
+
+	/**
 	 * Build the histogram based on a new set of data.
 	 **/
 	void build();
@@ -203,10 +216,10 @@ namespace QDirStat
 
 	/**
 	 * Automatically determine if a logarithmic height scale should be
-	 * used. Set the internal _useLogHeightScale variable accordingly and
+	 * used. Set the internal _useLogScale variable accordingly and
 	 * return it.
 	 **/
-	void autoLogHeightScale();
+	void autoLogScale();
 
 	/**
 	 * Functions to create the graphical elements.
@@ -355,10 +368,11 @@ namespace QDirStat
 	const int  _leftMarginPercentiles{ 0 };
 	const int  _rightMarginPercentiles{ 0 };
 
-	// Configurable settings; determined for every build (except _percentileStep)
+	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
-	bool _useLogHeightScale;
+	bool _useLogScale;
+	bool _autoLogScale{ true };
 	int  _percentileStep{ 0 };
 
 	// Geometry

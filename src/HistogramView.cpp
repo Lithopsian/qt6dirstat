@@ -139,9 +139,12 @@ void HistogramView::setEndPercentile( int index )
 }
 
 
-void HistogramView::autoLogHeightScale()
+void HistogramView::autoLogScale()
 {
-    _useLogHeightScale = false;
+    if ( !_autoLogScale )
+	return;
+
+    _useLogScale = false;
 
     if ( _stats->bucketCount() > 3 )
     {
@@ -152,12 +155,12 @@ void HistogramView::autoLogHeightScale()
 	const int referencePercentileValue =
 	    qMax( _stats->bucket( qRound( _stats->bucketCount() * 85.0 / 100.0 ) ), 1 );
 
-	_useLogHeightScale = largestBucket > referencePercentileValue * 20;
+	_useLogScale = largestBucket > referencePercentileValue * 20;
 
 #if VERBOSE_HISTOGRAM
 	logInfo() << "Largest bucket: " << largestBucket
 	          << " bucket P85: " << referencePercentileValue
-	          << "	 -> use log height scale: " << _useLogHeightScale
+	          << "	 -> use log height scale: " << _useLogScale
 	          << Qt::endl;
 #endif
     }
@@ -223,7 +226,7 @@ void HistogramView::fitToViewport()
 
 void HistogramView::build()
 {
-    autoLogHeightScale();
+    autoLogScale();
     rebuild();
 }
 
@@ -299,7 +302,7 @@ void HistogramView::addXAxisLabel()
 void HistogramView::addYAxisLabel()
 {
     QGraphicsTextItem * item = createBoldItem( scene(), "n   -->" );
-    if ( _useLogHeightScale )
+    if ( _useLogScale )
 	item->setHtml( "log<sub>2</sub>(n)   -->" );
 
     const qreal textWidth  = item->boundingRect().width();
@@ -393,7 +396,7 @@ void HistogramView::addBars()
 {
     const auto logHeight = [ this ]( FileCount value )
     {
-	if ( !_useLogHeightScale )
+	if ( !_useLogScale )
 	    return static_cast<double>( value );
 
 	return value > 1 ? std::log2( value ) : value / 2.0;

@@ -7,6 +7,7 @@
  *              Ian Nartowicz
  */
 
+#include <QActionGroup>
 #include <QDesktopServices>
 #include <QPointer>
 #include <QResizeEvent>
@@ -36,6 +37,27 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Read hotkey settings and apply to the existing actions found
+     * within 'tree'.  The ui file hotkeys are used as default values.
+     **/
+    void readHotkeySettings( QWidget * tree )
+    {
+	Settings settings;
+
+	settings.beginGroup( "FileSizeStatsWindow" );
+
+	const auto actions = tree->findChildren<QAction *>( nullptr, Qt::FindDirectChildrenOnly );
+	for ( QAction * action : actions )
+	{
+	    tree->addAction( action );
+	    settings.applyActionHotkey( action );
+	}
+
+	settings.endGroup();
+    }
+
+
     /**
      * Set the font to bold for all items in a table row.
      **/
@@ -128,7 +150,6 @@ namespace
 	                           QObject::tr( "Size limit" ),
 	                           QObject::tr( "Sum %01(n-1)...%01(n)" ).arg( percentilePrefix ),
 	                           QObject::tr( "Sum %010...%01(n)" ).arg( percentilePrefix ),
-//	                           QObject::tr( "Cumulative sum" ),
 	                         };
 	table->setColumnCount( headers.size() );
 	table->setHorizontalHeaderLabels( headers );
@@ -216,6 +237,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     initWidgets();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
+    readHotkeySettings( this );
 }
 
 
@@ -251,6 +273,18 @@ void FileSizeStatsWindow::initWidgets()
     _ui->endPercentileSpinBox->setMaximum( PercentileStats::maxPercentile() );
     _ui->endPercentileSlider->setMinimum( PercentileStats::quartile3() + 1 );
     _ui->endPercentileSlider->setMaximum( PercentileStats::maxPercentile() );
+    _ui->actionStartMin->setText( _ui->actionStartMin->text().arg( PercentileStats::minPercentile() ) );
+    _ui->actionEndMax->setText( _ui->actionEndMax->text().arg( PercentileStats::maxPercentile() ) );
+
+    // Put the percentile marker actions in a group so only one is ever checked
+    QActionGroup * actionGroup = new QActionGroup{ this };
+    markerAction( actionGroup, _ui->actionNoPercentiles, 0 );
+    markerAction( actionGroup, _ui->actionEvery20th, 20 );
+    markerAction( actionGroup, _ui->actionEvery10th, 10 );
+    markerAction( actionGroup, _ui->actionEvery5th, 5 );
+    markerAction( actionGroup, _ui->actionEvery2nd, 2 );
+    markerAction( actionGroup, _ui->actionEveryPercentile, 1 );
+    _ui->actionNoPercentiles->setChecked( true );
 
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
@@ -260,15 +294,6 @@ void FileSizeStatsWindow::initWidgets()
     }
 
     _ui->optionsPanel->hide();
-
-    connect( _ui->closeOptionsButton,       &QPushButton::clicked,
-             this,                          &FileSizeStatsWindow::closeOptions );
-
-    connect( _ui->openOptionsButton,        &QPushButton::clicked,
-             this,                          &FileSizeStatsWindow::openOptions );
-
-    connect( _ui->autoButton,               &QPushButton::clicked,
-             this,                          &FileSizeStatsWindow::autoStartEndPercentiles );
 
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
@@ -282,6 +307,52 @@ void FileSizeStatsWindow::initWidgets()
 
     connect( _ui->percentileFilterCheckBox, &QCheckBox::stateChanged,
              this,                          &FileSizeStatsWindow::fillPercentileTable );
+
+    connect( _ui->actionLogScale,           &QAction::triggered,
+             this,                          &FileSizeStatsWindow::logScale );
+
+    connect( _ui->actionAutoScale,          &QAction::triggered,
+             this,                          &FileSizeStatsWindow::autoLogScale );
+
+    connect( _ui->actionStartPlus1,         &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->startPercentileSlider->setValue( _ui->startPercentileSlider->value() + 1 ); } );
+
+    connect( _ui->actionStartMinus1,        &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->startPercentileSlider->setValue( _ui->startPercentileSlider->value() - 1 ); } );
+
+    connect( _ui->actionStartMin,           &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->startPercentileSlider->setValue( PercentileStats::minPercentile() ); } );
+
+    connect( _ui->actionEndPlus1,           &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->endPercentileSlider->setValue( _ui->endPercentileSlider->value() + 1 ); } );
+
+    connect( _ui->actionEndMinus1,          &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->endPercentileSlider->setValue( _ui->endPercentileSlider->value() - 1 ); } );
+
+    connect( _ui->actionEndMax,             &QAction::triggered,
+             this,                          [ this ]()
+       { _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() ); } );
+
+    connect( _ui->actionAutoPercentiles,    &QAction::triggered,
+             this,                          &FileSizeStatsWindow::autoStartEndPercentiles );
+}
+
+
+void FileSizeStatsWindow::markerAction( QActionGroup * group, QAction * action, int step )
+{
+    action->setCheckable( true );
+    action->setData( step );
+    group->addAction( action );
+    _ui->markersComboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
+
+    const int index = _ui->markersComboBox->count() - 1;
+    connect( action, &QAction::triggered,
+             this,   [ this, index ](){ _ui->markersComboBox->setCurrentIndex( index ); } );
 }
 
 
@@ -331,7 +402,7 @@ void FileSizeStatsWindow::initHistogram()
     _ui->histogramView->init( _stats.get() );
     autoStartEndPercentiles();
 
-    // Now we have to set the percentiles and build it explicitly because there were no signals
+    // We have to set the percentiles and build it explicitly because there were no signals
     _ui->histogramView->setStartPercentile( _ui->startPercentileSlider->value() );
     _ui->histogramView->setEndPercentile( _ui->endPercentileSlider->value() );
     loadHistogram();
@@ -363,60 +434,30 @@ void FileSizeStatsWindow::loadHistogram()
 }
 
 
-void FileSizeStatsWindow::openOptions()
-{
-    _ui->optionsPanel->show();
-    _ui->openOptionsButton->hide();
-}
-
-
-void FileSizeStatsWindow::closeOptions()
-{
-    _ui->optionsPanel->hide();
-    _ui->openOptionsButton->show();
-}
-
-
 void FileSizeStatsWindow::startValueChanged( int newStart )
 {
-//    if ( newStart != _ui->histogramView->startPercentile() )
-    {
-	//logDebug() << "New start: " << newStart << Qt::endl;
+    //logDebug() << "New start: " << newStart << Qt::endl;
 
-	_ui->histogramView->setStartPercentile( newStart );
-	loadHistogram();
-    }
+    _ui->histogramView->setStartPercentile( newStart );
+    loadHistogram();
 }
 
 
 void FileSizeStatsWindow::endValueChanged( int newEnd )
 {
-//    if ( newEnd != _ui->histogramView->endPercentile() )
-    {
-	//logDebug() << "New end: " << newEnd << Qt::endl;
+    //logDebug() << "New end: " << newEnd << Qt::endl;
 
-	_ui->histogramView->setEndPercentile( newEnd );
-	loadHistogram();
-    }
+    _ui->histogramView->setEndPercentile( newEnd );
+    loadHistogram();
 }
 
 
-void FileSizeStatsWindow::markersChanged( int markersIndex )
+void FileSizeStatsWindow::markersChanged()
 {
-    const int step = [ markersIndex ]()
-    {
-	switch ( markersIndex )
-	{
-	    case 1:  return 20;
-	    case 2:  return 10;
-	    case 3:  return 5;
-	    case 4:  return 2;
-	    case 5:  return 1;
-	    default: return 0;
-	}
-    }();
+    QAction * action = _ui->markersComboBox->currentData().value<QAction *>();
+    action->setChecked( true );
 
-    _ui->histogramView->setPercentileStep( step );
+    _ui->histogramView->setPercentileStep( action->data().toInt() );
     _ui->histogramView->build();
 }
 
@@ -430,7 +471,7 @@ void FileSizeStatsWindow::autoStartEndPercentiles()
     const FileSize iqr      = q3Value - q1Value;
     const FileSize maxValue = _stats->maxValue();
 
-    // Find the threashold values for the low and high outliers
+    // Find the threshold values for the low and high outliers
     const FileSize minVal = qMax( q1Value - iqr, _stats->minValue() );
     const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
 
@@ -441,51 +482,50 @@ void FileSizeStatsWindow::autoStartEndPercentiles()
     _ui->startPercentileSpinBox->setValue( startPercentile );
 
     // Find the lowest percentile that has a value greater than maxVal
-    PercentileValue  endPercentile = _stats->maxPercentile();
+    PercentileValue endPercentile = _stats->maxPercentile();
     while ( _stats->percentileValue( endPercentile ) > maxVal )
 	--endPercentile;
     _ui->endPercentileSpinBox->setValue( endPercentile );
 
-#if VERBOSE_HISTOGRAM
+#if 0
     logInfo() << "Q1: " << formatSize( q1Value )
               << "  Q3: " << formatSize( q3Value )
               << "  minVal: " << formatSize( minVal )
               << "  maxVal: " << formatSize( maxVal )
               << Qt::endl;
-    logInfo() << "startPercentile: " << _startPercentile
-              << "  " << formatSize( percentile( _startPercentile ) )
-              << "  endPercentile: " << _endPercentile
-              << "  " << formatSize( percentile( _endPercentile ) )
+    logInfo() << "startPercentile: " << startPercentile
+              << "  " << formatSize( _stats->percentileValue( startPercentile ) )
+              << "  endPercentile: " << endPercentile
+              << "  " << formatSize( _stats->percentileValue( endPercentile ) )
               << Qt::endl;
 #endif
 }
 
-/*
-void FileSizeStatsWindow::autoPercentiles()
+
+void FileSizeStatsWindow::logScale()
 {
-    autoStartEndPercentiles();
-//    updateOptions();
-//    loadHistogram();
+    _ui->histogramView->disableAutoLogScale();
+    _ui->histogramView->toggleLogScale();
+    _ui->histogramView->build();
 }
-*/
-/*
-void FileSizeStatsWindow::updateOptions()
+
+
+void FileSizeStatsWindow::autoLogScale()
 {
-    // just set the sliders, let signals set the spinboxes
-    _ui->startPercentileSlider->setValue ( _ui->histogramView->startPercentile() );
-    _ui->endPercentileSlider->setValue ( _ui->histogramView->endPercentile() );
+    _ui->histogramView->enableAutoLogScale();
+    _ui->histogramView->build();
 }
-*/
+
 
 void FileSizeStatsWindow::showHelp()
 {
     const QWidget * button = qobject_cast<QWidget *>( sender() );
-    if ( !button )
-	return;
-
-    const QString helpUrl =
-	"https://github.com/shundhammer/qdirstat/blob/master/doc/stats/"_L1 % button->statusTip();
-    QDesktopServices::openUrl( helpUrl );
+    if ( button )
+    {
+	const QString helpUrl =
+	    "https://github.com/shundhammer/qdirstat/blob/master/doc/stats/"_L1 % button->statusTip();
+	QDesktopServices::openUrl( helpUrl );
+    }
 }
 
 
@@ -493,4 +533,54 @@ void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
     elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+}
+
+
+void FileSizeStatsWindow::contextMenuEvent( QContextMenuEvent * event )
+{
+    // This context menu would be confusing anywhere except on the histogram tab
+    if ( _ui->tabWidget->currentWidget() != _ui->histogramPage )
+	return;
+
+    // Build a new menu from scratch every time
+    QMenu * menu = new QMenu{ this };
+    menu->addAction( _ui->actionAutoScale );
+    menu->addAction( _ui->actionLogScale );
+    _ui->actionLogScale->setChecked( _ui->histogramView->logScale() );
+    menu->addSeparator();
+
+    QMenu * startPercentile = menu->addMenu( tr( "Start percentile" ) );
+    for ( QAction * action : { _ui->actionStartPlus1, _ui->actionStartMinus1, _ui->actionStartMin } )
+	startPercentile->addAction( action );
+    const auto startValue = _ui->startPercentileSlider->value();
+    _ui->actionStartPlus1->setEnabled( startValue < PercentileStats::quartile1() - 1 );
+    _ui->actionStartMinus1->setEnabled( startValue > PercentileStats::minPercentile() );
+    _ui->actionStartMin->setEnabled( startValue > PercentileStats::minPercentile() );
+
+    QMenu * endPercentile = menu->addMenu( tr( "End percentile"   ) );
+    for ( QAction * action : { _ui->actionEndMinus1, _ui->actionEndMinus1, _ui->actionEndMax } )
+	endPercentile->addAction( action );
+    const auto endValue = _ui->endPercentileSlider->value();
+    _ui->actionEndMinus1->setEnabled( endValue > PercentileStats::quartile3() + 1 );
+    _ui->actionEndPlus1->setEnabled( endValue < PercentileStats::maxPercentile() );
+    _ui->actionEndMax->setEnabled( endValue < PercentileStats::maxPercentile() );
+
+    menu->addAction( _ui->actionAllPercentiles );
+    const bool allPercentiles =
+	startValue == PercentileStats::minPercentile() && endValue == PercentileStats::maxPercentile();
+    _ui->actionAllPercentiles->setEnabled( !allPercentiles );
+    menu->addAction( _ui->actionAutoPercentiles );
+    menu->addSeparator();
+
+    for ( QAction * action : { _ui->actionNoPercentiles, _ui->actionEvery20th, _ui->actionEvery10th,
+                               _ui->actionEvery5th, _ui->actionEvery2nd, _ui->actionEveryPercentile } )
+	menu->addAction( action );
+
+    menu->exec( event->globalPos() );
+
+    // Enable all the actions again, they are safe to be triggered at any time
+    for ( QAction * action : { _ui->actionStartPlus1, _ui->actionStartMinus1, _ui->actionStartMin,
+                               _ui->actionEndPlus1,   _ui->actionEndMinus1,   _ui->actionEndMax,
+                               _ui->actionAllPercentiles } )
+	action->setEnabled( true );
 }

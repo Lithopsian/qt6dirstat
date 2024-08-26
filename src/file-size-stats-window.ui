@@ -128,36 +128,6 @@
               <property name="toolTip">
                <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;/p&gt;</string>
               </property>
-              <item>
-               <property name="text">
-                <string>No percentile markers</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 20th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 10th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 5th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 2nd percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Show every percentile</string>
-               </property>
-              </item>
              </widget>
             </item>
             <item row="1" column="1">
@@ -447,6 +417,119 @@
     </widget>
    </item>
   </layout>
+  <action name="actionNoPercentiles">
+   <property name="text">
+    <string>&amp;No percentile markers</string>
+   </property>
+  </action>
+  <action name="actionEvery20th">
+   <property name="text">
+    <string>Every &amp;20th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery10th">
+   <property name="text">
+    <string>Every &amp;10th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery5th">
+   <property name="text">
+    <string>Every &amp;5th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery2nd">
+   <property name="text">
+    <string>Every 2n&amp;d percentile</string>
+   </property>
+  </action>
+  <action name="actionEveryPercentile">
+   <property name="text">
+    <string>Show &amp;every percentile</string>
+   </property>
+  </action>
+  <action name="actionAutoScale">
+   <property name="text">
+    <string>Auto &amp;scale</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLogScale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Log scale</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionAutoPercentiles">
+   <property name="text">
+    <string>Auto &amp;percentiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionStartPlus1">
+   <property name="text">
+    <string>+1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionStartMinus1">
+   <property name="text">
+    <string>-1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionStartMin">
+   <property name="text">
+    <string>Min (P%1)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Home</string>
+   </property>
+  </action>
+  <action name="actionEndPlus1">
+   <property name="text">
+    <string>+1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionEndMinus1">
+   <property name="text">
+    <string>-1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionEndMax">
+   <property name="text">
+    <string>Max (P%1)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+End</string>
+   </property>
+  </action>
+  <action name="actionAllPercentiles">
+   <property name="text">
+    <string>&amp;All percentiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -557,6 +640,118 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAllPercentiles</sender>
+   <signal>triggered()</signal>
+   <receiver>actionStartMin</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAllPercentiles</sender>
+   <signal>triggered()</signal>
+   <receiver>actionEndMax</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionAutoPercentiles</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>278</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsPanel</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openOptionsButton</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openOptionsButton</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsPanel</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
