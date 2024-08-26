@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
+    <width>540</width>
     <height>372</height>
    </rect>
   </property>
@@ -113,55 +113,6 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0,1,0">
-            <item row="1" column="1">
-             <widget class="QLabel" name="startPercentileLabel">
-              <property name="text">
-               <string>&amp;Start percentile</string>
-              </property>
-              <property name="buddy">
-               <cstring>startPercentileSpinBox</cstring>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QSpinBox" name="startPercentileSpinBox">
-              <property name="toolTip">
-               <string>Data from this percentile down is cut off the histogram</string>
-              </property>
-              <property name="prefix">
-               <string>P</string>
-              </property>
-              <property name="maximum">
-               <number>24</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="5">
-             <widget class="QLabel" name="endPercentileLabel">
-              <property name="text">
-               <string>&amp;End percentile</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="buddy">
-               <cstring>endPercentileSpinBox</cstring>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="autoButton">
-              <property name="toolTip">
-               <string>Automatically set the start and end percentiles to reasonable values</string>
-              </property>
-              <property name="text">
-               <string>&amp;Auto</string>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="6">
              <widget class="QSpinBox" name="endPercentileSpinBox">
               <property name="toolTip">
@@ -170,27 +121,12 @@
               <property name="prefix">
                <string>P</string>
               </property>
-              <property name="minimum">
-               <number>76</number>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
              </widget>
             </item>
             <item row="1" column="2" colspan="3" alignment="Qt::AlignHCenter">
              <widget class="QComboBox" name="markersComboBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
               <property name="toolTip">
                <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;/p&gt;</string>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
               </property>
               <item>
                <property name="text">
@@ -224,24 +160,61 @@
               </item>
              </widget>
             </item>
-            <item row="0" column="4" colspan="3">
-             <widget class="QSlider" name="endPercentileSlider">
-              <property name="minimum">
-               <number>76</number>
+            <item row="1" column="1">
+             <widget class="QLabel" name="startPercentileLabel">
+              <property name="text">
+               <string>&amp;Start percentile</string>
               </property>
-              <property name="maximum">
-               <number>100</number>
+              <property name="buddy">
+               <cstring>startPercentileSpinBox</cstring>
               </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="autoButton">
+              <property name="toolTip">
+               <string>Automatically set the start and end percentiles to reasonable values</string>
+              </property>
+              <property name="text">
+               <string>&amp;Auto</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLabel" name="endPercentileLabel">
+              <property name="text">
+               <string>&amp;End percentile</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>endPercentileSpinBox</cstring>
               </property>
              </widget>
             </item>
             <item row="0" column="0" colspan="3">
              <widget class="QSlider" name="startPercentileSlider">
-              <property name="maximum">
-               <number>24</number>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QSpinBox" name="startPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile down is cut off the histogram</string>
+              </property>
+              <property name="prefix">
+               <string>P</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4" colspan="3">
+             <widget class="QSlider" name="endPercentileSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -307,7 +280,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>483</width>
+            <width>487</width>
             <height>532</height>
            </rect>
           </property>

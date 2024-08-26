@@ -23,6 +23,7 @@
 #include "Logger.h"
 #include "MainWindow.h"
 #include "Settings.h"
+#include "SignalBlocker.h"
 
 
 #define MAX_BUCKET_COUNT 100
@@ -241,6 +242,16 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 
 void FileSizeStatsWindow::initWidgets()
 {
+    // Set these here so they can be based on the PercentileStats values
+    _ui->startPercentileSpinBox->setMinimum( PercentileStats::minPercentile() );
+    _ui->startPercentileSpinBox->setMaximum( PercentileStats::quartile1() - 1 );
+    _ui->startPercentileSlider->setMinimum( PercentileStats::minPercentile() );
+    _ui->startPercentileSlider->setMaximum( PercentileStats::quartile1() - 1 );
+    _ui->endPercentileSpinBox->setMinimum( PercentileStats::quartile3() + 1 );
+    _ui->endPercentileSpinBox->setMaximum( PercentileStats::maxPercentile() );
+    _ui->endPercentileSlider->setMinimum( PercentileStats::quartile3() + 1 );
+    _ui->endPercentileSlider->setMaximum( PercentileStats::maxPercentile() );
+
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
@@ -257,7 +268,7 @@ void FileSizeStatsWindow::initWidgets()
              this,                          &FileSizeStatsWindow::openOptions );
 
     connect( _ui->autoButton,               &QPushButton::clicked,
-             this,                          &FileSizeStatsWindow::autoPercentiles );
+             this,                          &FileSizeStatsWindow::autoStartEndPercentiles );
 
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
@@ -281,8 +292,9 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
     if ( !fileInfo )
 	return;
 
-    sharedInstance( mainWindow )->populate( fileInfo, suffix );
+    // Show the window first, or it will trigger extra histogram rebuilds
     sharedInstance( mainWindow )->show();
+    sharedInstance( mainWindow )->populate( fileInfo, suffix );
 }
 
 
@@ -297,7 +309,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     const Subtree subtree{ fileInfo };
     const QString & url = subtree.url();
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
-    resizeEvent( nullptr );
+    resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
     if ( suffix.isEmpty() )
 	_stats.reset( new FileSizeStats{ fileInfo } );
@@ -305,10 +317,24 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
     _stats->calculatePercentiles();
 
-    bucketsTableModel()->setStats( _stats.get() );
-
-    fillHistogram();
+    initHistogram();
     fillPercentileTable();
+    bucketsTableModel()->setStats( _stats.get() );
+}
+
+
+void FileSizeStatsWindow::initHistogram()
+{
+    // Block the slider signals so the histogram doesn't get built multiple (or zero!) times
+    SignalBlocker startBlocker( _ui->startPercentileSlider );
+    SignalBlocker endBlocker( _ui->endPercentileSlider );
+    _ui->histogramView->init( _stats.get() );
+    autoStartEndPercentiles();
+
+    // Now we have to set the percentiles and build it explicitly because there were no signals
+    _ui->histogramView->setStartPercentile( _ui->startPercentileSlider->value() );
+    _ui->histogramView->setEndPercentile( _ui->endPercentileSlider->value() );
+    loadHistogram();
 }
 
 
@@ -321,8 +347,8 @@ void FileSizeStatsWindow::fillPercentileTable()
 
 void FileSizeStatsWindow::loadHistogram()
 {
-    const int startPercentile = _ui->histogramView->startPercentile();
-    const int endPercentile   = _ui->histogramView->endPercentile();
+    const int startPercentile = _ui->startPercentileSlider->value();
+    const int endPercentile   = _ui->endPercentileSlider->value();
     const int percentileCount = endPercentile - startPercentile;
     const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
@@ -337,20 +363,10 @@ void FileSizeStatsWindow::loadHistogram()
 }
 
 
-void FileSizeStatsWindow::fillHistogram()
-{
-    HistogramView * histogram = _ui->histogramView;
-    histogram->init( _stats.get() );
-    updateOptions();
-    loadHistogram();
-}
-
-
 void FileSizeStatsWindow::openOptions()
 {
     _ui->optionsPanel->show();
     _ui->openOptionsButton->hide();
-    updateOptions();
 }
 
 
@@ -363,7 +379,7 @@ void FileSizeStatsWindow::closeOptions()
 
 void FileSizeStatsWindow::startValueChanged( int newStart )
 {
-    if ( newStart != _ui->histogramView->startPercentile() )
+//    if ( newStart != _ui->histogramView->startPercentile() )
     {
 	//logDebug() << "New start: " << newStart << Qt::endl;
 
@@ -375,7 +391,7 @@ void FileSizeStatsWindow::startValueChanged( int newStart )
 
 void FileSizeStatsWindow::endValueChanged( int newEnd )
 {
-    if ( newEnd != _ui->histogramView->endPercentile() )
+//    if ( newEnd != _ui->histogramView->endPercentile() )
     {
 	//logDebug() << "New end: " << newEnd << Qt::endl;
 
@@ -401,25 +417,65 @@ void FileSizeStatsWindow::markersChanged( int markersIndex )
     }();
 
     _ui->histogramView->setPercentileStep( step );
-    loadHistogram();
+    _ui->histogramView->build();
 }
 
 
+void FileSizeStatsWindow::autoStartEndPercentiles()
+{
+    // Outliers are classed as more than three times the IQR beyond the 3rd quartile
+    // Just use the IQR beyond the 1st quartile because of the usual skewed file size distribution
+    const FileSize q1Value  = _stats->q1Value();
+    const FileSize q3Value  = _stats->q3Value();
+    const FileSize iqr      = q3Value - q1Value;
+    const FileSize maxValue = _stats->maxValue();
+
+    // Find the threashold values for the low and high outliers
+    const FileSize minVal = qMax( q1Value - iqr, _stats->minValue() );
+    const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
+
+    // Find the highest percentile that has a value less than minVal
+    PercentileValue startPercentile = _stats->minPercentile();
+    while ( _stats->percentileValue( startPercentile ) < minVal )
+	++startPercentile;
+    _ui->startPercentileSpinBox->setValue( startPercentile );
+
+    // Find the lowest percentile that has a value greater than maxVal
+    PercentileValue  endPercentile = _stats->maxPercentile();
+    while ( _stats->percentileValue( endPercentile ) > maxVal )
+	--endPercentile;
+    _ui->endPercentileSpinBox->setValue( endPercentile );
+
+#if VERBOSE_HISTOGRAM
+    logInfo() << "Q1: " << formatSize( q1Value )
+              << "  Q3: " << formatSize( q3Value )
+              << "  minVal: " << formatSize( minVal )
+              << "  maxVal: " << formatSize( maxVal )
+              << Qt::endl;
+    logInfo() << "startPercentile: " << _startPercentile
+              << "  " << formatSize( percentile( _startPercentile ) )
+              << "  endPercentile: " << _endPercentile
+              << "  " << formatSize( percentile( _endPercentile ) )
+              << Qt::endl;
+#endif
+}
+
+/*
 void FileSizeStatsWindow::autoPercentiles()
 {
-    _ui->histogramView->autoStartEndPercentiles();
-    updateOptions();
-    loadHistogram();
+    autoStartEndPercentiles();
+//    updateOptions();
+//    loadHistogram();
 }
-
-
+*/
+/*
 void FileSizeStatsWindow::updateOptions()
 {
     // just set the sliders, let signals set the spinboxes
     _ui->startPercentileSlider->setValue ( _ui->histogramView->startPercentile() );
     _ui->endPercentileSlider->setValue ( _ui->histogramView->endPercentile() );
 }
-
+*/
 
 void FileSizeStatsWindow::showHelp()
 {

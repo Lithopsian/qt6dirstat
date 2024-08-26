@@ -110,7 +110,7 @@ namespace QDirStat
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
-	int startPercentile() const { return _startPercentile; }
+//	int startPercentile() const { return _startPercentile; }
 
 	/**
 	 * Set the percentile (0..100) until which on to display data, i.e. set
@@ -124,26 +124,7 @@ namespace QDirStat
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
-	int endPercentile() const { return _endPercentile; }
-
-	/**
-	 * Automatically determine the best start and end percentiles.  This is
-	 * done by identifying the percentiles corresponding to outliers at the
-	 * top and bottom end of the distribution.
-	 *
-	 * Outliers are statistically defined as being more than three times the
-	 * inter-quartile range (IQR) below the first quartile or above the third
-	 * quartile.  File size distributions are heavily weighted to small files
-	 * and there are effectively never outliers at the small end by this
-	 * definition, so low size outliers are defined as being the IQR beyond
-	 * the 1st quartile.
-	 *
-	 * The high end outlier calculation can theoretically overflow a (64 bit!)
-	 * FileSize integer, so this is first calculated as a floating point value
-	 * and only calculated as an integer if it is less than the maximum
-	 * FileSize value in the statistics.
-	 **/
-	void autoStartEndPercentiles();
+//	int endPercentile() const { return _endPercentile; }
 
 	/**
 	 * Enable or disable showing percentiles as an overlay over the

@@ -97,8 +97,6 @@ void HistogramView::init( const FileSizeStats * stats )
     _stats = stats;
 
     setGeometryDirty();
-
-    autoStartEndPercentiles();
 }
 
 
@@ -137,49 +135,6 @@ void HistogramView::setEndPercentile( int index )
 	           << _startPercentile << ".." << _endPercentile
 	           << Qt::endl;
     }
-#endif
-}
-
-
-void HistogramView::autoStartEndPercentiles()
-{
-    const bool oldNeedOverflowPanel = needOverflowPanel();
-
-    // Outliers are classed as more than three times the IQR beyond the 3rd quartile
-    // Just use the IQR beyond the 1st quartile because of the usual skewed file size distribution
-    const FileSize q1Value  = _stats->q1Value();
-    const FileSize q3Value  = _stats->q3Value();
-    const FileSize iqr      = q3Value - q1Value;
-    const FileSize maxValue = _stats->maxValue();
-
-    // Find the threashold values for the low and high outliers
-    const FileSize minVal = qMax( q1Value - iqr, _stats->minValue() );
-    const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
-
-    // Find the highest percentile that has a value less than minVal
-    _startPercentile = _stats->minPercentile();
-    while ( percentile( _startPercentile ) < minVal )
-	++_startPercentile;
-
-    // Find the lowest percentile that has a value greater than maxVal
-    _endPercentile = _stats->maxPercentile();
-    while ( percentile( _endPercentile ) > maxVal )
-	--_endPercentile;
-
-    if ( oldNeedOverflowPanel != needOverflowPanel() )
-	setGeometryDirty();
-
-#if VERBOSE_HISTOGRAM
-    logInfo() << "Q1: " << formatSize( q1Value )
-              << "  Q3: " << formatSize( q3Value )
-              << "  minVal: " << formatSize( minVal )
-              << "  maxVal: " << formatSize( maxVal )
-              << Qt::endl;
-    logInfo() << "startPercentile: " << _startPercentile
-              << "  " << formatSize( percentile( _startPercentile ) )
-              << "  endPercentile: " << _endPercentile
-              << "  " << formatSize( percentile( _endPercentile ) )
-              << Qt::endl;
 #endif
 }
 
@@ -275,11 +230,12 @@ void HistogramView::build()
 
 void HistogramView::rebuild()
 {
-     //logInfo() << "Building histogram" << Qt::endl;
+    //logInfo() << "Building histogram" << " " << window()->isVisible() << " " << _stats << Qt::endl;
 
-    // Don't try this if the viewport geometry isn't set yet or we don't have any stats
-    if ( !window()->isVisible() || !_stats )
+    if ( !_stats )
 	return;
+
+    //logInfo() << "Really building histogram" << Qt::endl;
 
     if ( geometryDirty() )
 	calcGeometry();
@@ -696,7 +652,8 @@ void HistogramView::addMarker( int                 index,
 
 void HistogramView::resizeEvent( QResizeEvent * event )
 {
-    // logDebug() << "Event size: " << event->size() << Qt::endl;
+    //logDebug() << "Event size: " << event->size() << Qt::endl;
+    //logDebug() << "Event size: " << event->oldSize() << Qt::endl;
 
     QGraphicsView::resizeEvent( event );
     setGeometryDirty();

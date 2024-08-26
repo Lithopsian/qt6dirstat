@@ -93,7 +93,7 @@ namespace QDirStat
 	 * Calculate automatic values for the start and end percentiles, apply
 	 * them, and rebuild the histogram.
 	 **/
-	void autoPercentiles();
+//	void autoPercentiles();
 
 	/**
 	 * Show help for a topic determined by the sender of this signal.
@@ -120,20 +120,39 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo, const QString & suffix );
 
 	/**
+	 * Initialise the histogram data.
+	 **/
+	void initHistogram();
+
+	/**
+	 * Automatically determine the best start and end percentiles.  This is
+	 * done by identifying the percentiles corresponding to outliers at the
+	 * top and bottom end of the distribution.
+	 *
+	 * Outliers are statistically defined as being more than three times the
+	 * inter-quartile range (IQR) below the first quartile or above the third
+	 * quartile.  File size distributions are heavily weighted to small files
+	 * and there are effectively never outliers at the small end by this
+	 * definition, so low size outliers are defined as being the IQR beyond
+	 * the 1st quartile.
+	 *
+	 * The high end outlier calculation can theoretically overflow a (64 bit!)
+	 * FileSize integer, so this is first calculated as a floating point value
+	 * and only calculated as an integer if it is less than the maximum
+	 * FileSize value in the statistics.
+	 **/
+	void autoStartEndPercentiles();
+
+	/**
 	 * Update the values for the option widgets from the current ones from
 	 * the histogram
 	 **/
-	void updateOptions();
+//	void updateOptions();
 
 	/**
 	 * Fill the buckets and histogram, and build the tables.
 	 **/
 	void loadHistogram();
-
-	/**
-	 * Fill the histogram with content
-	 **/
-	void fillHistogram();
 
 	/**
 	 * Resize event, reimplemented from QWidget.
