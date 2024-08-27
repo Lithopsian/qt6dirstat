@@ -51,8 +51,9 @@ namespace QDirStat
 	    { _stats = stats; }
 
 	/**
-	 * Wrappers around beginResetModel() and endResetModel() when the
-	 * buckets contents are being replaced.
+	 * Wrappers around the protected beginResetModel() and
+	 * endResetModel() functions for when the buckets contents are
+	 * being replaced.
 	 **/
 	void beginReset() { beginResetModel(); }
 	void endReset() { endResetModel(); }

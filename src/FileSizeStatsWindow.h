@@ -19,7 +19,6 @@
 
 namespace QDirStat
 {
-    class BucketsTableModel;
     class FileInfo;
     class FileSizeStats;
 
@@ -129,13 +128,7 @@ namespace QDirStat
 	 * Configure a percentile marker action, including setting
 	 * it in the markers combo box and connecting the action.
 	 **/
-	void markerAction( QActionGroup * group, QAction * action, int index );
-
-	/**
-	 * Return the abstract model (cast as BucketsTableModel) for
-	 * the QTableView.
-	 **/
-	BucketsTableModel * bucketsTableModel() const;
+	void markersAction( QActionGroup * group, QAction * action, int index );
 
 	/**
 	 * Populate with new content.
@@ -148,15 +141,9 @@ namespace QDirStat
 	void initHistogram();
 
 	/**
-	 * Update the values for the option widgets from the current ones from
-	 * the histogram
+	 * Fill the buckets and rebuild the histogram.
 	 **/
-//	void updateOptions();
-
-	/**
-	 * Fill the buckets and histogram, and build the tables.
-	 **/
-	void loadHistogram();
+	void loadBuckets();
 
 	/**
 	 * Elide the title to fit inside the current dialog width, so that
