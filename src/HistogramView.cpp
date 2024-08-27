@@ -8,7 +8,6 @@
  */
 
 #include <cmath> // log2(), round()
-#include <algorithm> // std::max_element
 
 #include <QGraphicsItem>
 #include <QResizeEvent>
@@ -148,7 +147,7 @@ void HistogramView::autoLogScale()
 
     if ( _stats->bucketCount() > 3 )
     {
-	const int largestBucket = *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() );
+	const int largestBucket = _stats->largestBucket();
 
 	// We compare the largest bucket with the P85 percentile of the buckets,
 	// but make sure we're not comparing with an empty bucket
@@ -339,7 +338,7 @@ void HistogramView::addYStartEndLabels()
     startItem->setRotation( 270 );
     startItem->setPos( ( leftBorder() + startRect.height() ) / -2, startRect.width() / 2 );
 
-    const FileCount max = *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() );
+    const FileCount max = _stats->largestBucket();
     QGraphicsTextItem * endItem = createTextItem( scene(), QString{ "%L1" }.arg( max ) );
     const QRectF endRect = endItem->boundingRect();
     endItem->setRotation( 270 );
@@ -403,7 +402,7 @@ void HistogramView::addBars()
     };
 
     const qreal barWidth = _size.width() / _stats->bucketCount();
-    const double maxVal = logHeight( *std::max_element( _stats->bucketsBegin(), _stats->bucketsEnd() ) );
+    const double maxVal = logHeight( _stats->largestBucket() );
 
     for ( int i=0; i < _stats->bucketCount(); ++i )
     {

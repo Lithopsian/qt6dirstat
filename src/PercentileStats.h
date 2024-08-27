@@ -10,6 +10,7 @@
 #ifndef PercentileStats_h
 #define PercentileStats_h
 
+#include <algorithm> // std::max_element
 #include <cmath>     // cbrt(), floor()
 
 #include <QVector>
@@ -185,15 +186,15 @@ namespace QDirStat
 	    { return std::accumulate( _buckets.cbegin(), _buckets.cend(), 0 ); }
 
 	/**
+	 * Return the maximum number of data points in a single bucket.
+	 **/
+	FileCount largestBucket() const
+	    { return *std::max_element( _buckets.begin(), _buckets.end() ); }
+
+	/**
 	 * Return the number of data points in bucket 'index'.
 	 **/
 	FileCount bucket( int index ) const;
-
-	/**
-	 * Iterators for the buckets list.
-	 **/
-	BucketList::const_iterator bucketsBegin() const { return _buckets.cbegin(); }
-	BucketList::const_iterator bucketsEnd()   const { return _buckets.cend();   }
 
 
     protected:
