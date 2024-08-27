@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <cmath> // log2(), round()
+#include <cmath> // log2()
 
 #include <QGraphicsItem>
 #include <QResizeEvent>
@@ -147,7 +147,7 @@ void HistogramView::autoLogScale()
 
     if ( _stats->bucketCount() > 3 )
     {
-	const int largestBucket = _stats->largestBucket();
+	const FileCount largestBucket = _stats->largestBucket();
 
 	// We compare the largest bucket with the P85 percentile of the buckets,
 	// but make sure we're not comparing with an empty bucket
@@ -220,13 +220,6 @@ void HistogramView::fitToViewport()
 #endif
 	resetTransform(); // Reset scaling
     }
-}
-
-
-void HistogramView::build()
-{
-    autoLogScale();
-    rebuild();
 }
 
 

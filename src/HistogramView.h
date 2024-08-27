@@ -132,7 +132,8 @@ namespace QDirStat
 	 * example, '5' will display P5, P10, P15 etc.; step = 0 disables
 	 * them completely.
 	 **/
-	void setPercentileStep( int step ) { _percentileStep = step; }
+	void setPercentileStep( int step )
+	    { _percentileStep = step; rebuild(); }
 
 	/**
 	 * Set how many percentiles to display as an overlay at the left
@@ -194,15 +195,18 @@ namespace QDirStat
 	void toggleLogScale() { _useLogScale = !_useLogScale; }
 
 	/**
-	 * Build the histogram based on a new set of data.
+	 * Build the histogram, probably based on a new set of data.
+	 * The preferred y-axis scaling will be recalculated.
 	 **/
-	void build();
+	void build()
+	    { autoLogScale(); rebuild(); }
 
 
     protected:
 
 	/**
-	 * Rebuild the histogram based on the current data.
+	 * Rebuild the histogram based on the current data.  The geometry
+	 * may be recalculated, for example if the window has been resized.
 	 **/
 	void rebuild();
 

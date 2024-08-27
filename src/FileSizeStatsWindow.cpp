@@ -17,7 +17,6 @@
 #include "FileSizeStatsWindow.h"
 #include "FileSizeStats.h"
 #include "BucketsTableModel.h"
-#include "DirTree.h"
 #include "FormatUtil.h"
 #include "HeaderTweaker.h"
 #include "HistogramView.h"
@@ -37,6 +36,16 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Return the abstract item model (cast as BucketsTableModel) for
+     * 'bucketsTable'.
+     **/
+    BucketsTableModel * bucketsTableModel( const QTableView * bucketsTable )
+    {
+	return qobject_cast<BucketsTableModel *>( bucketsTable->model() );
+    }
+
+
     /**
      * Read hotkey settings and apply to the existing actions found
      * within 'tree'.  The ui file hotkeys are used as default values.
@@ -91,36 +100,18 @@ namespace
 
 
     /**
-     * Set the text alignment for all items in a table column.
-     **/
-    void setColAlignment( QTableWidget * table, int col, Qt::Alignment alignment )
-    {
-	for ( int row=0; row < table->rowCount(); ++row )
-	{
-	    QTableWidgetItem * item = table->item( row, col );
-	    if ( item )
-		item->setTextAlignment( alignment | Qt::AlignVCenter );
-	}
-    }
-
-
-    /**
      * Add an item to a table.
      **/
-    QTableWidgetItem * addItem( QTableWidget  * table,
-                                int             row,
-                                int             col,
-                                const QString & text )
+    void addItem( QTableWidget * table, int row, int col, Qt::Alignment alignment, const QString & text )
     {
 	QTableWidgetItem * item = new QTableWidgetItem{ text };
+	item->setTextAlignment( alignment | Qt::AlignVCenter );
 	table->setItem( row, col, item );
-
-	return item;
     }
 
 
     /**
-     * Fill the percentile table 'table' from the given stat.
+     * Fill the percentile table 'table' from the given stats.
      *
      * 'step' is the step width, expected to be 1 or 5 although
      * other values are supported; * 'extremesMargin' specifies
@@ -138,13 +129,12 @@ namespace
 	    NameCol,
 	    ValueCol,
 	    SumCol,
-	    CumulativeSumCol
+	    CumSumCol
 	};
 
 	table->clear();
 
 	const QString percentilePrefix = QObject::tr( "P" );
-
 	const QStringList headers{ QString{},
 	                           QObject::tr( "Name" ),
 	                           QObject::tr( "Size limit" ),
@@ -162,16 +152,16 @@ namespace
 	int row = 0;
 	for ( int i = stats->minPercentile(); i <= stats->maxPercentile(); ++i )
 	{
-	    // Skip rows that aren't in the specified 'step' interval or the "margins"
+	    // Skip rows that aren't in the 'step' interval or the "margins"
 	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
 		continue;
 
-	    addItem( table, row, NumberCol, percentilePrefix % QString::number( i ) );
-	    addItem( table, row, ValueCol,  formatSize( stats->percentileValue( i ) ) );
+	    addItem( table, row, NumberCol, Qt::AlignRight, percentilePrefix % QString::number( i ) );
+	    addItem( table, row, ValueCol,  Qt::AlignRight, formatSize( stats->percentileValue( i ) ) );
 	    if ( i > 0 )
 	    {
-		addItem( table, row, SumCol,           formatSize( stats->percentileSum( i ) ) );
-		addItem( table, row, CumulativeSumCol, formatSize( stats->cumulativeSum( i ) ) );
+		addItem( table, row, SumCol,    Qt::AlignRight, formatSize( stats->percentileSum( i ) ) );
+		addItem( table, row, CumSumCol, Qt::AlignRight, formatSize( stats->cumulativeSum( i ) ) );
 	    }
 
 	    const QString rowName = [ i ]()
@@ -186,34 +176,29 @@ namespace
 		    default: return QString{};
 		}
 	    }();
-
 	    if ( !rowName.isEmpty() )
 	    {
-		addItem( table, row, NameCol, rowName );
+		addItem( table, row, NameCol, Qt::AlignCenter, rowName );
 		setRowBold( table, row );
 	    }
-	    else if ( i % 10 == 0 && step == 1 )
+
+	    if ( i > 0 && i % 10 == 0 && step == 1 )
 	    {
 		// Fill the empty cell or the background won't show
-		addItem( table, row, NameCol, QString{} );
+		if ( !table->item( row, NameCol ) )
+		    addItem( table, row, NameCol, Qt::AlignLeft, QString{} );
 
 		// Derive a color with some contrast in light or dark themes.
-		QColor base = table->palette().color( QPalette::Base );
+		const QColor & base = table->palette().base().color();
 		const int lightness = base.lightness();
-		base.setHsl( base.hue(), base.saturation(), lightness > 128 ? lightness - 64 : lightness + 64 );
-		setRowBackground( table, row, base );
+		const int newLightness = lightness > 128 ? lightness - 32 : lightness + 32;
+		setRowBackground( table, row, QColor::fromHsl( base.hue(), base.saturation(), newLightness ) );
 	    }
 
 	    ++row;
 	}
 
-	table->setRowCount( row );
-
-	setColAlignment( table, NumberCol,        Qt::AlignRight );
-	setColAlignment( table, ValueCol,         Qt::AlignRight );
-	setColAlignment( table, NameCol,          Qt::AlignCenter);
-	setColAlignment( table, SumCol,           Qt::AlignRight );
-	setColAlignment( table, CumulativeSumCol, Qt::AlignRight );
+	table->setRowCount( row ); // truncate the table to just the rows we added
 
 	HeaderTweaker::resizeToContents( table->horizontalHeader() );
     }
@@ -264,7 +249,9 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 
 void FileSizeStatsWindow::initWidgets()
 {
-    // Set these here so they can be based on the PercentileStats values
+    _ui->optionsPanel->hide();
+
+    // Set these here so they can be based on the PercentileStats constants
     _ui->startPercentileSpinBox->setMinimum( PercentileStats::minPercentile() );
     _ui->startPercentileSpinBox->setMaximum( PercentileStats::quartile1() - 1 );
     _ui->startPercentileSlider->setMinimum( PercentileStats::minPercentile() );
@@ -278,22 +265,13 @@ void FileSizeStatsWindow::initWidgets()
 
     // Put the percentile marker actions in a group so only one is ever checked
     QActionGroup * actionGroup = new QActionGroup{ this };
-    markerAction( actionGroup, _ui->actionNoPercentiles, 0 );
-    markerAction( actionGroup, _ui->actionEvery20th, 20 );
-    markerAction( actionGroup, _ui->actionEvery10th, 10 );
-    markerAction( actionGroup, _ui->actionEvery5th, 5 );
-    markerAction( actionGroup, _ui->actionEvery2nd, 2 );
-    markerAction( actionGroup, _ui->actionEveryPercentile, 1 );
+    markersAction( actionGroup, _ui->actionNoPercentiles, 0 );
+    markersAction( actionGroup, _ui->actionEvery20th, 20 );
+    markersAction( actionGroup, _ui->actionEvery10th, 10 );
+    markersAction( actionGroup, _ui->actionEvery5th, 5 );
+    markersAction( actionGroup, _ui->actionEvery2nd, 2 );
+    markersAction( actionGroup, _ui->actionEveryPercentile, 1 );
     _ui->actionNoPercentiles->setChecked( true );
-
-    const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
-    for ( const QCommandLinkButton * helpButton : helpButtons )
-    {
-	connect( helpButton, &QAbstractButton::clicked,
-	         this,       &FileSizeStatsWindow::showHelp );
-    }
-
-    _ui->optionsPanel->hide();
 
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
@@ -305,7 +283,7 @@ void FileSizeStatsWindow::initWidgets()
     connect( _ui->markersComboBox,          QOverload<int>::of( &QComboBox::currentIndexChanged ),
              this,                          &FileSizeStatsWindow::markersChanged );
 
-    connect( _ui->percentileFilterCheckBox, &QCheckBox::stateChanged,
+    connect( _ui->percentileFilterCheckBox, &QCheckBox::toggled,
              this,                          &FileSizeStatsWindow::fillPercentileTable );
 
     connect( _ui->actionLogScale,           &QAction::triggered,
@@ -314,36 +292,25 @@ void FileSizeStatsWindow::initWidgets()
     connect( _ui->actionAutoScale,          &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoLogScale );
 
-    connect( _ui->actionStartPlus1,         &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->startPercentileSlider->setValue( _ui->startPercentileSlider->value() + 1 ); } );
-
-    connect( _ui->actionStartMinus1,        &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->startPercentileSlider->setValue( _ui->startPercentileSlider->value() - 1 ); } );
-
     connect( _ui->actionStartMin,           &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->startPercentileSlider->setValue( PercentileStats::minPercentile() ); } );
-
-    connect( _ui->actionEndPlus1,           &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->endPercentileSlider->setValue( _ui->endPercentileSlider->value() + 1 ); } );
-
-    connect( _ui->actionEndMinus1,          &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->endPercentileSlider->setValue( _ui->endPercentileSlider->value() - 1 ); } );
+             [ this ](){ _ui->startPercentileSlider->setValue( PercentileStats::minPercentile() ); } );
 
     connect( _ui->actionEndMax,             &QAction::triggered,
-             this,                          [ this ]()
-       { _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() ); } );
+             [ this ](){ _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() ); } );
 
     connect( _ui->actionAutoPercentiles,    &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoStartEndPercentiles );
+
+    const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
+    for ( const QCommandLinkButton * helpButton : helpButtons )
+    {
+	connect( helpButton, &QAbstractButton::clicked,
+	         this,       &FileSizeStatsWindow::showHelp );
+    }
 }
 
 
-void FileSizeStatsWindow::markerAction( QActionGroup * group, QAction * action, int step )
+void FileSizeStatsWindow::markersAction( QActionGroup * group, QAction * action, int step )
 {
     action->setCheckable( true );
     action->setData( step );
@@ -352,7 +319,7 @@ void FileSizeStatsWindow::markerAction( QActionGroup * group, QAction * action, 
 
     const int index = _ui->markersComboBox->count() - 1;
     connect( action, &QAction::triggered,
-             this,   [ this, index ](){ _ui->markersComboBox->setCurrentIndex( index ); } );
+             [ this, index ](){ _ui->markersComboBox->setCurrentIndex( index ); } );
 }
 
 
@@ -366,12 +333,6 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
     // Show the window first, or it will trigger extra histogram rebuilds
     sharedInstance( mainWindow )->show();
     sharedInstance( mainWindow )->populate( fileInfo, suffix );
-}
-
-
-BucketsTableModel * FileSizeStatsWindow::bucketsTableModel() const
-{
-    return qobject_cast<BucketsTableModel *>( _ui->bucketsTable->model() );
 }
 
 
@@ -390,7 +351,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
     initHistogram();
     fillPercentileTable();
-    bucketsTableModel()->setStats( _stats.get() );
+    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
 }
 
 
@@ -405,7 +366,7 @@ void FileSizeStatsWindow::initHistogram()
     // We have to set the percentiles and build it explicitly because there were no signals
     _ui->histogramView->setStartPercentile( _ui->startPercentileSlider->value() );
     _ui->histogramView->setEndPercentile( _ui->endPercentileSlider->value() );
-    loadHistogram();
+    loadBuckets();
 }
 
 
@@ -416,7 +377,7 @@ void FileSizeStatsWindow::fillPercentileTable()
 }
 
 
-void FileSizeStatsWindow::loadHistogram()
+void FileSizeStatsWindow::loadBuckets()
 {
     const int startPercentile = _ui->startPercentileSlider->value();
     const int endPercentile   = _ui->endPercentileSlider->value();
@@ -424,9 +385,9 @@ void FileSizeStatsWindow::loadHistogram()
     const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
 
-    bucketsTableModel()->beginReset();
+    bucketsTableModel( _ui->bucketsTable )->beginReset();
     _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
-    bucketsTableModel()->endReset();
+    bucketsTableModel( _ui->bucketsTable )->endReset();
 
     HeaderTweaker::resizeToContents( _ui->bucketsTable->horizontalHeader() );
 
@@ -439,7 +400,7 @@ void FileSizeStatsWindow::startValueChanged( int newStart )
     //logDebug() << "New start: " << newStart << Qt::endl;
 
     _ui->histogramView->setStartPercentile( newStart );
-    loadHistogram();
+    loadBuckets();
 }
 
 
@@ -448,7 +409,7 @@ void FileSizeStatsWindow::endValueChanged( int newEnd )
     //logDebug() << "New end: " << newEnd << Qt::endl;
 
     _ui->histogramView->setEndPercentile( newEnd );
-    loadHistogram();
+    loadBuckets();
 }
 
 
@@ -458,7 +419,6 @@ void FileSizeStatsWindow::markersChanged()
     action->setChecked( true );
 
     _ui->histogramView->setPercentileStep( action->data().toInt() );
-    _ui->histogramView->build();
 }
 
 
@@ -531,7 +491,7 @@ void FileSizeStatsWindow::showHelp()
 
 void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
-    // Calculate a width from the dialog less margins, less a bit more
+    // Elide a label to the width of the dialog less margins, less a bit more
     elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
 }
 
@@ -558,7 +518,7 @@ void FileSizeStatsWindow::contextMenuEvent( QContextMenuEvent * event )
     _ui->actionStartMin->setEnabled( startValue > PercentileStats::minPercentile() );
 
     QMenu * endPercentile = menu->addMenu( tr( "End percentile"   ) );
-    for ( QAction * action : { _ui->actionEndMinus1, _ui->actionEndMinus1, _ui->actionEndMax } )
+    for ( QAction * action : { _ui->actionEndMinus1, _ui->actionEndPlus1, _ui->actionEndMax } )
 	endPercentile->addAction( action );
     const auto endValue = _ui->endPercentileSlider->value();
     _ui->actionEndMinus1->setEnabled( endValue > PercentileStats::quartile3() + 1 );
