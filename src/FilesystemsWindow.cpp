@@ -58,7 +58,7 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     initWidgets();
     readSettings();
 
-    connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
+    connect( _ui->normalCheckBox, &QCheckBox::toggled,
              this,                &FilesystemsWindow::populate );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,

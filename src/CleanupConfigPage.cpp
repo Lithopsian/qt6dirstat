@@ -42,7 +42,7 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
              this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
-    connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
+    connect( _ui->outputWindowDefaultTimeout, &QCheckBox::toggled,
              this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,

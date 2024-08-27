@@ -136,10 +136,10 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     connect( _ui->tileColorButton,          &QPushButton::clicked,
              this,                          &MimeCategoryConfigPage::pickTileColor );
 
-    connect( _ui->squarifiedCheckBox,       &QCheckBox::stateChanged,
+    connect( _ui->squarifiedCheckBox,       &QCheckBox::toggled,
              this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->cushionShadingCheckBox,   &QCheckBox::stateChanged,
+    connect( _ui->cushionShadingCheckBox,   &QCheckBox::toggled,
              this,                          &MimeCategoryConfigPage::cushionShadingChanged );
 
     connect( _ui->cushionHeightSpinBox,     QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
