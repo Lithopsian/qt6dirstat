@@ -13,7 +13,6 @@
 
 #include "PercentileStats.h"
 #include "Exception.h"
-#include "FormatUtil.h"
 
 
 #define VERBOSE_LOGGING 0
@@ -103,8 +102,8 @@ void PercentileStats::calculatePercentiles()
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[ i ] ) << Qt::endl;
-	logDebug() << "cum_sum[ " << i << " ] : " << formatSize( _cumulativeSums[ i ] ) << Qt::endl;
+	logDebug() << "sum["     << i << "] : " << QLocale{}.toString( _percentileSums[ i ] ) << Qt::endl;
+	logDebug() << "cum_sum[" << i << "] : " << QLocale{}.toString( _cumulativeSums[ i ] ) << Qt::endl;
     }
 #endif
 }
@@ -158,9 +157,9 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << formatSize( _bucketsStart )
-               << " endVal: " << formatSize( _bucketsEnd )
-               << " bucketWidth: " << formatSize( bucketWidth )
+               << " startVal: " << QLocale{}.toString( static_cast<double>( _bucketsStart ) )
+               << " endVal: " << QLocale{}.toString( static_cast<double>( _bucketsEnd ) )
+               << " bucketWidth: " << QLocale{}.toString( static_cast<double>( bucketWidth ) )
                << Qt::endl;
 #endif
 
