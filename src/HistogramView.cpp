@@ -63,6 +63,7 @@ namespace
 	item->setFont( font );
     }
 
+
     /**
      * Create a text item in the given scene and set its Z-value.
      **/
@@ -105,6 +106,31 @@ FileSize HistogramView::percentile( int index ) const
 }
 
 
+void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
+{
+    PercentileStats::validatePercentileRange( startPercentile, endPercentile );
+
+    const bool oldNeedOverflowPanel = needOverflowPanel();
+
+    _startPercentile = startPercentile;
+    _endPercentile   = endPercentile;
+
+    if ( oldNeedOverflowPanel != needOverflowPanel() )
+        setGeometryDirty();
+
+    build();
+
+#if VERBOSE_HISTOGRAM
+    if ( _startPercentile >= _endPercentile )
+    {
+	logError() << "startPercentile must be less than endPercentile: "
+	           << _startPercentile << ".." << _endPercentile
+	           << Qt::endl;
+    }
+#endif
+}
+
+/*
 void HistogramView::setStartPercentile( int index )
 {
     CHECK_PERCENTILE_INDEX( index );
@@ -136,7 +162,7 @@ void HistogramView::setEndPercentile( int index )
     }
 #endif
 }
-
+*/
 
 void HistogramView::autoLogScale()
 {
@@ -251,18 +277,6 @@ void HistogramView::rebuild()
     addOverflowPanel();
 
     fitToViewport();
-}
-
-
-void HistogramView::addBackground()
-{
-    const QRectF rect{ -leftBorder(),
-                       -topBorder() - _size.height(),
-                       _size.width() + leftBorder() + rightBorder(),
-                       _size.height() + topBorder() + bottomBorder() };
-
-    QGraphicsRectItem * panel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
-    panel->setZValue( PanelBackgroundLayer );
 }
 
 
@@ -467,12 +481,9 @@ void HistogramView::addOverflowPanel()
 
     // Create the panel area
     const qreal panelWidth = overflowWidth();
-    const QRectF rect{ _size.width() + rightBorder() + overflowGap(),
-                       -topBorder() - _size.height(),
-                       panelWidth,
-                       topBorder() + _size.height() + bottomBorder() };
-    QGraphicsRectItem * overflowPanel = scene()->addRect( rect, Qt::NoPen, panelBackground() );
-    QPointF nextPos{ rect.x(), rect.y() };
+    QPointF nextPos{ _size.width() + rightBorder() + overflowGap(), -topBorder() - _size.height() };
+    const QRectF rect{ nextPos.x(), nextPos.y(), panelWidth, fullHeight() };
+    createPanel( rect );
 
     // Headline
     QGraphicsTextItem * headline = createBoldItem( scene(), overflowHeadline() );
@@ -557,18 +568,16 @@ void HistogramView::addOverflowPanel()
 	nextPos.ry() += pieDiameter();
     };
 
-    auto cutOffText = []( FileSize start, FileSize end )
-	{ return formatSize( start ) % "..."_L1 % formatSize( end ); };
     const QStringList cutoffLines
 	{ tr( "Min (P%1) ... P%2" ).arg( _stats->minPercentile() ).arg( _startPercentile ),
 	  _startPercentile == _stats->minPercentile() ?
-	                      tr( "no files cut off" ) :
-	                      cutOffText( _stats->minValue(), percentile( _startPercentile ) ),
+		tr( "no files cut off" ) :
+		formatSize( _stats->minValue() ) % "..."_L1 % formatSize( percentile( _startPercentile ) ),
 	  QString{},
 	  tr( "P%1 ... Max (P%2)" ).arg( _endPercentile ).arg( _stats->maxPercentile() ),
 	  _endPercentile == _stats->maxPercentile() ?
-	                    tr( "no files cut off" ) :
-	                    cutOffText( percentile( _endPercentile ), _stats->maxValue() ),
+		tr( "no files cut off" ) :
+		formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ),
 	};
     addText( cutoffLines );
     nextPos.ry() += overflowSpacing();
@@ -599,7 +608,7 @@ void HistogramView::addOverflowPanel()
     addText( pieCaption );
 
     // Remember the panel contents height as a minimum for building the histogram
-    const qreal contentsHeight = nextPos.y() - overflowPanel->rect().y() - topBorder() - bottomBorder();
+    const qreal contentsHeight = nextPos.y() - rect.y() - topBorder() - bottomBorder();
     if ( contentsHeight != _minHeight )
     {
 	// Rebuild now if the height of the contents is different from the cached value
@@ -640,6 +649,13 @@ void HistogramView::addMarker( int                 index,
 
     scene()->addItem( visibleLine );
     scene()->addItem( tooltipLine );
+}
+
+
+void HistogramView::createPanel( const QRectF & rect )
+{
+    QGraphicsRectItem * item = scene()->addRect( rect, Qt::NoPen, panelBackground() );
+    item->setZValue( HistogramView::PanelBackgroundLayer );
 }
 
 

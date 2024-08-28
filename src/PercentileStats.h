@@ -147,6 +147,14 @@ namespace QDirStat
 	    { return std::floor( percentileBoundary( index ) ); }
 
 	/**
+	 * Validate 'startPercentile' and 'endPercentile'; they must
+	 * both be between 0 and 100, and the end must be higher
+	 * then the start.  This function will throw if it encounters
+	 * an invalid value.
+	 **/
+	static void validatePercentileRange( int startPercentile, int endPercentile );
+
+	/**
 	 * Fill 'bucketCount' buckets of equal width (data value range)
 	 * from 'startPercentile' to 'endPercentile'. Each bucket
 	 * contains the number of data points (not their value!).

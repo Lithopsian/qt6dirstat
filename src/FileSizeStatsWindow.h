@@ -75,8 +75,8 @@ namespace QDirStat
 	/**
 	 * Respond to changes in the slider values or markers combobox.
 	 **/
-	void startValueChanged( int newStart );
-	void endValueChanged( int newEnd );
+//	void startValueChanged( int newStart );
+//	void endValueChanged( int newEnd );
 	void markersChanged();
 
 	/**
@@ -95,8 +95,20 @@ namespace QDirStat
 	 * FileSize integer, so this is first calculated as a floating point value
 	 * and only calculated as an integer if it is less than the maximum
 	 * FileSize value in the statistics.
+	 *
+	 * Noe that this function may trigger up to two histogram rebuilds, through
+	 * the slider signals, as the start and end percentiles are changed.  Or it
+	 * may do nothing if both values are unchanged.
 	 **/
-	void autoStartEndPercentiles();
+	void autoPercentileRange();
+
+	/**
+	 * Fill the buckets with the start and end percentiles currently
+	 * set on the options widgets, then pass the values to the
+	 * histogram.  HistogramView will automatically regenerate the
+	 * histogram with the new values.
+	 **/
+	void setPercentileRange();
 
 	/**
 	 * Toggle the histogram y-axis scale between log and linear and disable
@@ -139,11 +151,6 @@ namespace QDirStat
 	 * Initialise the histogram data.
 	 **/
 	void initHistogram();
-
-	/**
-	 * Fill the buckets and rebuild the histogram.
-	 **/
-	void loadBuckets();
 
 	/**
 	 * Elide the title to fit inside the current dialog width, so that

@@ -99,11 +99,16 @@ namespace QDirStat
 	FileSize percentile( int index ) const;
 
 	/**
+	 * Set the percentile range (0..100) for which to display data.
+	 **/
+	void setPercentileRange( int startPercentile, int endPercentile );
+
+	/**
 	 * Set the percentile (0..100) from which on to display data, i.e. set
 	 * the left border of the histogram. The real value to use is taken
 	 * from the stored percentiles.
 	 **/
-	void setStartPercentile( int index );
+//	void setStartPercentile( int index );
 
 	/**
 	 * Return the percentile from which on to display data, i.e. the left
@@ -117,10 +122,10 @@ namespace QDirStat
 	 * the right border of the histogram. The real value to use is taken
 	 * from the stored percentiles.
 	 **/
-	void setEndPercentile( int index );
+//	void setEndPercentile( int index );
 
 	/**
-	 * Return the percentile until which to display data, i.e. the right
+	 * Return the percentile up to which to display data, i.e. the right
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
@@ -178,8 +183,8 @@ namespace QDirStat
 	/**
 	 * Pen and brush for HistogramBar.
 	 **/
-	QBrush barBrush() const { return QColor{ 0xB0, 0xB0, 0xD0 }; }
-	QPen   barPen()   const { return QColor{ 0x40, 0x40, 0x50 }; }
+	static QBrush barBrush() { return QColor{ 0xB0, 0xB0, 0xD0 }; }
+	static QPen   barPen()   { return QColor{ 0x40, 0x40, 0x50 }; }
 
 	/**
 	 * Set whether to automatically determine the type of y-axis
@@ -211,14 +216,6 @@ namespace QDirStat
 	void rebuild();
 
 	/**
-	 * Return 'true' if percentile no. 'index' is in range for being
-	 * displayed, i.e. if it is between _startPercentile and
-	 * _endPercentile.
-	 **/
-//	bool percentileDisplayed( int index ) const
-//	    { return index >= _startPercentile && index <= _endPercentile; }
-
-	/**
 	 * Automatically determine if a logarithmic height scale should be
 	 * used. Set the internal _useLogScale variable accordingly and
 	 * return it.
@@ -228,7 +225,8 @@ namespace QDirStat
 	/**
 	 * Functions to create the graphical elements.
 	 **/
-	void addBackground();
+	void addBackground()
+	    { createPanel( { -leftBorder(), -topBorder() - _size.height(), fullWidth(), fullHeight() } ); }
 	void addAxes();
 	void addXAxisLabel();
 	void addYAxisLabel();
@@ -303,6 +301,13 @@ namespace QDirStat
 	constexpr static qreal pieSliceOffset()    { return  10; };
 
 	/**
+	 * Convenience functions for the height and width of the
+	 * histogram including borders.
+	 **/
+	qreal fullWidth()  const { return _size.width()  + leftBorder() + rightBorder();  }
+	qreal fullHeight() const { return _size.height() + topBorder()  + bottomBorder(); }
+
+	/**
 	 * Calculate the width of the overflow panel based on the
 	 * width of the headline text, which may vary depending
 	 * on the theme font (and possibly a translation).  The
@@ -346,8 +351,14 @@ namespace QDirStat
 	/**
 	 * Return a brush for part of a cut-off pie.
 	 **/
-	QBrush pieBrush()           const { return barBrush(); }
-	QBrush overflowSliceBrush() const { return QColor{ 0xD0, 0x40, 0x20 }; }
+	static QBrush pieBrush()           { return barBrush(); }
+	static QBrush overflowSliceBrush() { return QColor{ 0xD0, 0x40, 0x20 }; }
+
+	/**
+	 * Create a panel item in the current scene, set its Z-value, and
+	 * give it a background.
+	 **/
+	void createPanel( const QRectF & rect );
 
 	/**
 	 * Resize the view.

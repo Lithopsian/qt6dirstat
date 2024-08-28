@@ -133,7 +133,7 @@ PercentileValue PercentileStats::cumulativeSum( int index ) const
 }
 
 
-void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+void PercentileStats::validatePercentileRange( int startPercentile, int endPercentile )
 {
     // Validate as much as possible, although the percentiles list still might not match the stats
     CHECK_PERCENTILE_INDEX( startPercentile );
@@ -141,7 +141,12 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
     if ( startPercentile >= endPercentile )
 	THROW( Exception{ "startPercentile must be less than endPercentile" } );
+}
 
+
+void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+{
+    validatePercentileRange( startPercentile, endPercentile );
     if ( bucketCount < 1 )
 	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 

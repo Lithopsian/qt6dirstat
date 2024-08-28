@@ -275,10 +275,10 @@ void FileSizeStatsWindow::initWidgets()
 
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
-             this,                          &FileSizeStatsWindow::startValueChanged );
+             this,                          &FileSizeStatsWindow::setPercentileRange );
 
     connect( _ui->endPercentileSlider,      &QSlider::valueChanged,
-             this,                          &FileSizeStatsWindow::endValueChanged );
+             this,                          &FileSizeStatsWindow::setPercentileRange );
 
     connect( _ui->markersComboBox,          QOverload<int>::of( &QComboBox::currentIndexChanged ),
              this,                          &FileSizeStatsWindow::markersChanged );
@@ -299,7 +299,7 @@ void FileSizeStatsWindow::initWidgets()
              [ this ](){ _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() ); } );
 
     connect( _ui->actionAutoPercentiles,    &QAction::triggered,
-             this,                          &FileSizeStatsWindow::autoStartEndPercentiles );
+             this,                          &FileSizeStatsWindow::autoPercentileRange );
 
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
@@ -361,12 +361,10 @@ void FileSizeStatsWindow::initHistogram()
     SignalBlocker startBlocker( _ui->startPercentileSlider );
     SignalBlocker endBlocker( _ui->endPercentileSlider );
     _ui->histogramView->init( _stats.get() );
-    autoStartEndPercentiles();
+    autoPercentileRange();
 
-    // We have to set the percentiles and build it explicitly because there were no signals
-    _ui->histogramView->setStartPercentile( _ui->startPercentileSlider->value() );
-    _ui->histogramView->setEndPercentile( _ui->endPercentileSlider->value() );
-    loadBuckets();
+    // We have to set the percentiles and reload the bickets explicitly because there were no signals
+    setPercentileRange();
 }
 
 
@@ -377,7 +375,7 @@ void FileSizeStatsWindow::fillPercentileTable()
 }
 
 
-void FileSizeStatsWindow::loadBuckets()
+void FileSizeStatsWindow::setPercentileRange()
 {
     const int startPercentile = _ui->startPercentileSlider->value();
     const int endPercentile   = _ui->endPercentileSlider->value();
@@ -391,10 +389,10 @@ void FileSizeStatsWindow::loadBuckets()
 
     HeaderTweaker::resizeToContents( _ui->bucketsTable->horizontalHeader() );
 
-    _ui->histogramView->build();
+    _ui->histogramView->setPercentileRange( startPercentile, endPercentile );
 }
 
-
+/*
 void FileSizeStatsWindow::startValueChanged( int newStart )
 {
     //logDebug() << "New start: " << newStart << Qt::endl;
@@ -411,7 +409,7 @@ void FileSizeStatsWindow::endValueChanged( int newEnd )
     _ui->histogramView->setEndPercentile( newEnd );
     loadBuckets();
 }
-
+*/
 
 void FileSizeStatsWindow::markersChanged()
 {
@@ -422,7 +420,7 @@ void FileSizeStatsWindow::markersChanged()
 }
 
 
-void FileSizeStatsWindow::autoStartEndPercentiles()
+void FileSizeStatsWindow::autoPercentileRange()
 {
     // Outliers are classed as more than three times the IQR beyond the 3rd quartile
     // Just use the IQR beyond the 1st quartile because of the usual skewed file size distribution
