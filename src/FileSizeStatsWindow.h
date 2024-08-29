@@ -135,6 +135,7 @@ namespace QDirStat
 	 * One-time initialization of the widgets in this window
 	 **/
 	void initWidgets();
+	void connectActions();
 
 	/**
 	 * Configure a percentile marker action, including setting

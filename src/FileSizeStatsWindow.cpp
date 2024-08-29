@@ -86,6 +86,19 @@ namespace
 
 
     /**
+     * Add an item to a table.
+     **/
+    QTableWidgetItem * addItem( QTableWidget * table, int row, int col, Qt::Alignment alignment, const QString & text )
+    {
+	QTableWidgetItem * item = new QTableWidgetItem{ text };
+	item->setTextAlignment( alignment | Qt::AlignVCenter );
+	table->setItem( row, col, item );
+
+	return item;
+    }
+
+
+    /**
      * Set the background for all items in a table row.
      **/
     void setRowBackground( QTableWidget * table, int row, const QBrush & brush )
@@ -93,20 +106,13 @@ namespace
 	for ( int col=0; col < table->columnCount(); ++col )
 	{
 	    QTableWidgetItem * item = table->item( row, col );
-	    if ( item )
-		item->setBackground( brush );
+
+	    // Fill empty cells or the background won't show
+	    if ( !item )
+		item = addItem( table, row, col, Qt::AlignLeft, QString{} );
+
+	    item->setBackground( brush );
 	}
-    }
-
-
-    /**
-     * Add an item to a table.
-     **/
-    void addItem( QTableWidget * table, int row, int col, Qt::Alignment alignment, const QString & text )
-    {
-	QTableWidgetItem * item = new QTableWidgetItem{ text };
-	item->setTextAlignment( alignment | Qt::AlignVCenter );
-	table->setItem( row, col, item );
     }
 
 
@@ -132,29 +138,22 @@ namespace
 	    CumSumCol
 	};
 
-	table->clear();
-
-	const QString percentilePrefix = QObject::tr( "P" );
-	const QStringList headers{ QString{},
-	                           QObject::tr( "Name" ),
-	                           QObject::tr( "Size limit" ),
-	                           QObject::tr( "Sum %01(n-1)...%01(n)" ).arg( percentilePrefix ),
-	                           QObject::tr( "Sum %010...%01(n)" ).arg( percentilePrefix ),
-	                         };
-	table->setColumnCount( headers.size() );
-	table->setHorizontalHeaderLabels( headers );
-
-	table->setRowCount( stats->maxPercentile() - stats->minPercentile() + 1 );
+	// Keep the header, but truncate the table rows
+	table->setRowCount( 0 );
 
 	const int minMargin = stats->minPercentile() + extremesMargin;
 	const int maxMargin = stats->maxPercentile() - extremesMargin;
+	const QString percentilePrefix = QObject::tr( "P" );
 
-	int row = 0;
 	for ( int i = stats->minPercentile(); i <= stats->maxPercentile(); ++i )
 	{
 	    // Skip rows that aren't in the 'step' interval or the "margins"
 	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
 		continue;
+
+	    // Add a row
+	    const int row = table->rowCount();
+	    table->setRowCount( row + 1);
 
 	    addItem( table, row, NumberCol, Qt::AlignRight, percentilePrefix % QString::number( i ) );
 	    addItem( table, row, ValueCol,  Qt::AlignRight, formatSize( stats->percentileValue( i ) ) );
@@ -184,21 +183,13 @@ namespace
 
 	    if ( i > 0 && i % 10 == 0 && step == 1 )
 	    {
-		// Fill the empty cell or the background won't show
-		if ( !table->item( row, NameCol ) )
-		    addItem( table, row, NameCol, Qt::AlignLeft, QString{} );
-
 		// Derive a color with some contrast in light or dark themes.
 		const QColor & base = table->palette().base().color();
 		const int lightness = base.lightness();
 		const int newLightness = lightness > 128 ? lightness - 32 : lightness + 32;
 		setRowBackground( table, row, QColor::fromHsl( base.hue(), base.saturation(), newLightness ) );
 	    }
-
-	    ++row;
 	}
-
-	table->setRowCount( row ); // truncate the table to just the rows we added
 
 	HeaderTweaker::resizeToContents( table->horizontalHeader() );
     }
@@ -220,6 +211,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     _ui->bucketsTable->setModel( new BucketsTableModel{ this } );
 
     initWidgets();
+    connectActions();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
     readHotkeySettings( this );
@@ -249,6 +241,7 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 
 void FileSizeStatsWindow::initWidgets()
 {
+    // Start with the options panel closed
     _ui->optionsPanel->hide();
 
     // Set these here so they can be based on the PercentileStats constants
@@ -273,6 +266,21 @@ void FileSizeStatsWindow::initWidgets()
     markersAction( actionGroup, _ui->actionEveryPercentile, 1 );
     _ui->actionNoPercentiles->setChecked( true );
 
+    // Create the header row on the percentiles table, which will never change
+    const QString percentilePrefix = QObject::tr( "P" );
+    const QStringList headers{ QString{},
+                               QObject::tr( "Name" ),
+                               QObject::tr( "Size limit" ),
+                               QObject::tr( "Sum %01(n-1)...%01(n)" ).arg( percentilePrefix ),
+                               QObject::tr( "Sum %010...%01(n)" ).arg( percentilePrefix ),
+                             };
+    _ui->percentileTable->setColumnCount( headers.size() );
+    _ui->percentileTable->setHorizontalHeaderLabels( headers );
+}
+
+
+void FileSizeStatsWindow::connectActions()
+{
     // The spin boxes are linked to the sliders inside the ui file
     connect( _ui->startPercentileSlider,    &QSlider::valueChanged,
              this,                          &FileSizeStatsWindow::setPercentileRange );
