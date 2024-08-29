@@ -9,7 +9,6 @@
 
 #include <cmath> // log2()
 
-#include <QGraphicsItem>
 #include <QResizeEvent>
 #include <QTextDocument>
 
@@ -130,39 +129,6 @@ void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
 #endif
 }
 
-/*
-void HistogramView::setStartPercentile( int index )
-{
-    CHECK_PERCENTILE_INDEX( index );
-
-    const bool oldNeedOverflowPanel = needOverflowPanel();
-    _startPercentile = index;
-
-    if ( oldNeedOverflowPanel != needOverflowPanel() )
-        setGeometryDirty();
-}
-
-
-void HistogramView::setEndPercentile( int index )
-{
-    CHECK_PERCENTILE_INDEX( index );
-
-    const bool oldNeedOverflowPanel = needOverflowPanel();
-    _endPercentile = index;
-
-    if ( oldNeedOverflowPanel != needOverflowPanel() )
-	setGeometryDirty();
-
-#if VERBOSE_HISTOGRAM
-    if ( _startPercentile >= _endPercentile )
-    {
-	logError() << "startPercentile must be less than endPercentile: "
-	           << _startPercentile << ".." << _endPercentile
-	           << Qt::endl;
-    }
-#endif
-}
-*/
 
 void HistogramView::autoLogScale()
 {
@@ -282,14 +248,11 @@ void HistogramView::rebuild()
 
 void HistogramView::addAxes()
 {
-    auto drawLine = [ this ]( qreal x, qreal y )
-	{
-	    QGraphicsItem * line = scene()->addLine( 0, 0, x, y, lineColor() );
-	    line->setZValue( AxisLayer );
-	};
+    const auto drawAxis = [ this ]( qreal x, qreal y )
+	{ scene()->addLine( 0, 0, x, y, lineColor() )->setZValue( AxisLayer ); };
 
-    drawLine( _size.width() + axisExtraLength(), 0 );
-    drawLine( 0, -_size.height() - axisExtraLength() );
+    drawAxis( _size.width() + axisExtraLength(), 0 );
+    drawAxis( 0, -_size.height() - axisExtraLength() );
 }
 
 
@@ -406,16 +369,15 @@ void HistogramView::addBars()
 
     const qreal barWidth = _size.width() / _stats->bucketCount();
     const double maxVal = logHeight( _stats->largestBucket() );
+    const double scaling = maxVal == 0 ? 0 : _size.height() / maxVal;
 
     for ( int i=0; i < _stats->bucketCount(); ++i )
     {
 	// logDebug() << "Adding bar #" << i << " with value " << _stats->bucket( i ) << Qt::endl;
 
-	const qreal fillHeight =
-	    maxVal == 0 ? 0 : _size.height() * logHeight( _stats->bucket( i ) ) / maxVal;
-
+	const qreal fillHeight = scaling * logHeight( _stats->bucket( i ) );
 	const QRectF rect{ i * barWidth, 0, barWidth, -_size.height() };
-	scene()->addItem( new HistogramBar{ this, _stats, i, rect, fillHeight } );
+	scene()->addItem( new HistogramBar{ _stats, i, rect, fillHeight, barPen(), barBrush() } );
     }
 }
 
@@ -425,7 +387,34 @@ void HistogramView::addMarkers()
     if ( percentile( _endPercentile ) - percentile( _startPercentile ) < 1 )
 	return;
 
+    const FileSize axisStartVal = percentile( _startPercentile );
+    const FileSize axisEndVal   = percentile( _endPercentile   );
+    const FileSize axisRange    = axisEndVal - axisStartVal;
+    const qreal    scaling      = _size.width() / axisRange;
+    const qreal    y2           = -_size.height() - markerExtraHeight();
+
+    // Lambda to create a single marker line and add it to the scene
+    const auto addMarker = [ this, axisStartVal, scaling, y2 ]
+	( int index, const QString & name, const QPen & pen, GraphicsItemLayer layer )
+    {
+	const FileSize xValue = percentile( index );
+	const qreal    x      = scaling * ( xValue - axisStartVal );
+
+	// Visible line as requested
+	QLineF line{ x, markerExtraHeight(), x, y2 };
+	QGraphicsLineItem * visibleLine = scene()->addLine( line, pen );
+	visibleLine->setZValue( layer );
+
+	// Wider transparent line to make the tooltip easier to trigger, child of the visible line
+	const QPen transparentPen{ Qt::transparent, pen.widthF() + 2 };
+	QGraphicsLineItem * tooltipLine = scene()->addLine( line, transparentPen );
+	tooltipLine->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( xValue ) ) );
+	tooltipLine->setParentItem( visibleLine );
+    };
+
     // Show percentile marker lines
+    const int extraStartMarkers = _startPercentile + _leftExtraPercentiles;
+    const int extraEndMarkers   = _endPercentile - _rightExtraPercentiles;
     for ( int i = _startPercentile + 1; i < _endPercentile; ++i )
     {
 	if ( i == _stats->median() && _showMedian )
@@ -451,13 +440,9 @@ void HistogramView::addMarkers()
 	    continue;
 
 	// Skip markers that aren't in percentileStep increments ...
-	// ... unless they are within the "margin" of the start or end percentile
-	if ( _percentileStep != 1 && i % _percentileStep != 0 &&
-	     i > _startPercentile + _leftMarginPercentiles &&
-             i < _endPercentile - _rightMarginPercentiles )
-	{
+	// ... unless they are within the percentile "margin" at the start or end
+	if ( i % _percentileStep != 0 && i > extraStartMarkers && i < extraEndMarkers )
 	    continue;
-        }
 
 	addMarker( i, tr( "Percentile P%1" ).arg( i ), percentilePen( i ), PercentileLayer );
     }
@@ -497,7 +482,7 @@ void HistogramView::addOverflowPanel()
      * centre of the overflow panel.  nextPos is updated to the bottom
      * left of the margin.
      **/
-    auto addText = [ this, panelWidth, &nextPos ]( const QStringList & lines )
+    const auto addText = [ this, panelWidth, &nextPos ]( const QStringList & lines )
     {
 	QGraphicsTextItem * textItem = createTextItem( scene(), lines.join( u'\n' ) );
 	textItem->setPos( nextPos );
@@ -522,7 +507,7 @@ void HistogramView::addOverflowPanel()
      *
      * nextPos is updated by the height of the pie.
      **/
-    auto addPie = [ this, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
+    const auto addPie = [ this, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
     {
 	if ( valPie == 0 && valSlice == 0 )
 	    return;
@@ -621,41 +606,6 @@ void HistogramView::addOverflowPanel()
 	logDebug() << "Reset minimum histogram height to: " << _minHeight << Qt::endl;
 #endif
     }
-}
-
-
-void HistogramView::addMarker( int                 index,
-                               const QString     & name,
-                               const QPen        & pen,
-                               GraphicsItemLayer   layer )
-{
-    const FileSize xValue       = percentile( index  );
-    const FileSize axisStartVal = percentile( _startPercentile );
-    const FileSize axisEndVal   = percentile( _endPercentile   );
-    const FileSize axisRange    = axisEndVal - axisStartVal;
-    const qreal    x            = _size.width() * ( xValue - axisStartVal ) / axisRange;
-
-    // Visible line as requested
-    QLineF line{ x, markerExtraHeight(), x, -_size.height() - markerExtraHeight() };
-    QGraphicsLineItem * visibleLine = new QGraphicsLineItem{ line };
-    visibleLine->setZValue( layer );
-    visibleLine->setPen( pen );
-
-    // Wider transparent line to make the tooltip easier to trigger
-    QGraphicsLineItem * tooltipLine = new QGraphicsLineItem{ line };
-    tooltipLine->setToolTip( whitespacePre( name % "<br/>"_L1 % formatSize( xValue ) ) );
-    tooltipLine->setZValue( layer + 1 );
-    tooltipLine->setPen( { Qt::transparent, pen.widthF() + 2 } );
-
-    scene()->addItem( visibleLine );
-    scene()->addItem( tooltipLine );
-}
-
-
-void HistogramView::createPanel( const QRectF & rect )
-{
-    QGraphicsRectItem * item = scene()->addRect( rect, Qt::NoPen, panelBackground() );
-    item->setZValue( HistogramView::PanelBackgroundLayer );
 }
 
 

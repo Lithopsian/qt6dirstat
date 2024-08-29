@@ -10,6 +10,7 @@
 #ifndef HistogramView_h
 #define HistogramView_h
 
+#include <QGraphicsItem>
 #include <QGraphicsView>
 
 #include "Typedefs.h" // FileSize
@@ -58,11 +59,8 @@ namespace QDirStat
 	    AxisLayer,
 	    HoverBarLayer,
 	    PercentileLayer,
-	    ToolTipPercentileLayer,
 	    QuartileLayer,
-	    TooltipQuartileLayer,
 	    MedianLayer,
-	    TooltipMedianLayer,
 	    TextLayer,
 	};
 
@@ -152,13 +150,13 @@ namespace QDirStat
 	 *
 	 * A value of 0 means show no additional percentiles.
 	 **/
-//	void setLeftMarginPercentiles( int number = 0 )
-//	    { _leftMarginPercentiles = number; }
+//	void setLeftExtraPercentiles( int number = 0 )
+//	    { _leftExtraPercentiles = number; }
 
 	/**
-	 * Return the left margin percentiles or 0 if none are shown.
+	 * Return the left extra percentiles or 0 if none are shown.
 	 **/
-//	int leftMarginPercentiles() { return _leftMarginPercentiles; }
+//	int leftExtraPercentiles() { return _leftExtraPercentiles; }
 
 	/**
 	 * Set how many percentiles to display as an overlay at the right
@@ -172,19 +170,13 @@ namespace QDirStat
 	 *
 	 * A value of 0 means show no additional percentiles.
 	 **/
-//	void setRightMarginPercentiles( int number= 2 )
-//	    { _leftMarginPercentiles = number; }
+//	void setRightExtraPercentiles( int number= 2 )
+//	    { _leftExtraPercentiles = number; }
 
 	/**
-	 * Return the right margin percentiles or 0 if none are shown.
+	 * Return the right extra percentiles or 0 if none are shown.
 	 **/
-//	int rightMarginPercentiles() { return _rightMarginPercentiles; }
-
-	/**
-	 * Pen and brush for HistogramBar.
-	 **/
-	static QBrush barBrush() { return QColor{ 0xB0, 0xB0, 0xD0 }; }
-	static QPen   barPen()   { return QColor{ 0x40, 0x40, 0x50 }; }
+//	int rightExtraPercentiles() { return _rightExtraPercentiles; }
 
 	/**
 	 * Set whether to automatically determine the type of y-axis
@@ -225,6 +217,8 @@ namespace QDirStat
 	/**
 	 * Functions to create the graphical elements.
 	 **/
+	void createPanel( const QRectF & rect )
+		{ scene()->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); }
 	void addBackground()
 	    { createPanel( { -leftBorder(), -topBorder() - _size.height(), fullWidth(), fullHeight() } ); }
 	void addAxes();
@@ -347,18 +341,14 @@ namespace QDirStat
 	const QPen quartilePen()          const { return QPen{ quartileColor(), 2 }; }
 	const QPen percentilePen( int i ) const
 	    { return i % 10 == 0 ? decileColor() : percentileColor(); }
+	static QPen barPen() { return QColor{ 0x40, 0x40, 0x50 }; }
 
 	/**
-	 * Return a brush for part of a cut-off pie.
+	 * Return a brush for part of the histogram
 	 **/
+	static QBrush barBrush()           { return QColor{ 0xB0, 0xB0, 0xD0 }; }
 	static QBrush pieBrush()           { return barBrush(); }
 	static QBrush overflowSliceBrush() { return QColor{ 0xD0, 0x40, 0x20 }; }
-
-	/**
-	 * Create a panel item in the current scene, set its Z-value, and
-	 * give it a background.
-	 **/
-	void createPanel( const QRectF & rect );
 
 	/**
 	 * Resize the view.
@@ -378,20 +368,20 @@ namespace QDirStat
 	const FileSizeStats * _stats{ nullptr };
 
 	// Flags not currently configurable
-	const bool _showMedian{ true };
-	const bool _showQuartiles{ true };
-	const int  _leftMarginPercentiles{ 0 };
-	const int  _rightMarginPercentiles{ 0 };
+	const bool _showMedian{ true }; // always show median marker line
+	const bool _showQuartiles{ true }; // always show quartiles marker lines
+	const int  _leftExtraPercentiles{ 0 }; // no left extra percentile markers
+	const int  _rightExtraPercentiles{ 0 }; // no right extra percentile markers
 
 	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
 	bool _useLogScale;
-	bool _autoLogScale{ true };
-	int  _percentileStep{ 0 };
+	bool _autoLogScale{ true }; // start with the log scale determined automatically
+	int  _percentileStep{ 0 }; // no markers initially
 
 	// Geometry
-	qreal  _minHeight{ 100 };
+	qreal  _minHeight{ 100 }; // at least 100 pixels high in case there is no overflow panel
 	QSizeF _size;
 
     }; // class HistogramView
