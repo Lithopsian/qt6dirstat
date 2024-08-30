@@ -89,7 +89,7 @@ void DiscoverActions::discoverHardLinkedFiles()
 
 void DiscoverActions::discoverBrokenSymLinks()
 {
-    BusyPopup msg( QObject::tr( "Checking symlinks..." ) );
+    BusyPopup msg{ QObject::tr( "Checking symlinks..." ) };
     discoverFiles( new BrokenSymLinksTreeWalker{},
                    LocateListPathCol,
                    Qt::AscendingOrder,
@@ -121,7 +121,7 @@ void DiscoverActions::discoverFilesFromMonth( const QString & path, short year, 
     discoverFiles( new FilesFromMonthTreeWalker{ year, month },
                    LocateListMTimeCol,
                    Qt::DescendingOrder,
-                   QObject::tr( "Files from %1 %2 in %3" ).arg( monthAbbreviation( month ), year),
+                   QObject::tr( "Files from %1 %2 in %3" ).arg( monthAbbreviation( month ) ).arg( year ),
                    app()->dirTree()->locate( path ) );
 }
 
