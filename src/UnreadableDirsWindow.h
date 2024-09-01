@@ -95,11 +95,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
 	 * Populate the window: Locate unreadable directories.
 	 *
 	 * This clears the old search results first, then searches the subtree

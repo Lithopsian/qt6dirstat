@@ -60,7 +60,7 @@ namespace
 	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
     }
 
-}
+} // namespace
 
 
 FileInfo::FileInfo( DirInfo           * parent,

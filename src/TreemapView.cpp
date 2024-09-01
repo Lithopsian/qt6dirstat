@@ -671,7 +671,8 @@ void TreemapView::setCurrentTile( const TreemapTile * tile )
     {
         //logDebug() << "Sending currentItemChanged " << tile << Qt::endl;
 
-        SignalBlocker sigBlocker{ _selectionModelProxy }; // Prevent signal ping-pong
+        // Prevent signal ping-pong from sending us the current item again
+        SignalBlocker sigBlocker{ _selectionModelProxy };
         emit currentItemChanged( tile->orig() );
     }
 }
@@ -711,6 +712,7 @@ void TreemapView::updateSelection( const FileInfoSet & newSelection )
 
     //logDebug() << newSelection.size() << " items selected (after " << _stopwatch.restart() << "ms) " << Qt::endl;
 
+    // Don't send a signal that we changed the selection when someone else did it
     SignalBlocker sigBlocker{ this };
     scene()->clearSelection();
 
@@ -750,9 +752,9 @@ void TreemapView::sendSelection( const TreemapTile * tile)
     if ( !_selectionModel )
         return;
 
-    SignalBlocker sigBlocker{ _selectionModelProxy };
-    const QList<QGraphicsItem *> selectedTiles = scene()->selectedItems();
+//    SignalBlocker sigBlocker{ _selectionModelProxy };
 
+    const QList<QGraphicsItem *> selectedTiles = scene()->selectedItems();
     if ( selectedTiles.size() == 1 && selectedTiles.first() == tile )
     {
         // For just one selected tile that is the current item, only send one signal
@@ -780,6 +782,7 @@ void TreemapView::updateCurrentItem( FileInfo * currentItem )
 {
     //logDebug() << currentItem << " " << _stopwatch.restart() << "ms" << Qt::endl;
 
+    // Don't send a signal that we changed the current item when someone else did it
     SignalBlocker sigBlocker{ this };
     setCurrentItem( currentItem );
 }

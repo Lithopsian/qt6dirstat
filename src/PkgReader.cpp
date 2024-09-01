@@ -456,13 +456,12 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
                                   PkgInfo   * pkg,
                                   bool        verboseMissingPkgFiles,
                                   QProcess  * readFileListProcess ):
-    PkgReadJob{ tree, pkg, verboseMissingPkgFiles },
-    _readFileListProcess{ readFileListProcess }
+    PkgReadJob{ tree, pkg, verboseMissingPkgFiles }
 {
-    CHECK_PTR( _readFileListProcess );
+    CHECK_PTR( readFileListProcess );
 
-    connect( _readFileListProcess, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
-             this,                 &AsyncPkgReadJob::readFileListFinished );
+    connect( readFileListProcess, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
+             this,                &AsyncPkgReadJob::readFileListFinished );
 }
 
 
@@ -471,7 +470,8 @@ void AsyncPkgReadJob::readFileListFinished( int                  exitCode,
 {
     // Always get this job out of the blocked queue and clean up the file list process
     tree()->unblock( this );
-    _readFileListProcess->deleteLater();
+    QProcess * senderProcess = qobject_cast<QProcess *>( sender() );
+    senderProcess->deleteLater();
 
     if ( exitStatus != QProcess::NormalExit )
     {
@@ -483,7 +483,7 @@ void AsyncPkgReadJob::readFileListFinished( int                  exitCode,
     }
     else // ok
     {
-	const QString output = QString::fromUtf8( _readFileListProcess->readAll() );
+	const QString output = QString::fromUtf8( senderProcess->readAll() );
 	_fileList = pkg()->pkgManager()->parseFileList( output );
 
 	return;

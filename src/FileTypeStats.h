@@ -123,16 +123,6 @@ namespace QDirStat
 	void addSuffixSum  ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
 
 	/**
-	 * Move entries that have a '.' in the name but do not have
-	 * meaningful extensions into the "no extension" category map
-	 * for the "Other" category". This includes extremely long
-	 * extensions, those with no letters, uncommon extensions with
-	 * a low proportion of letters, and anything at all with a
-	 * space in it.
-	 **/
-	void removeCruft();
-
-	/**
 	 * Check if the sums add up and how much is unaccounted for.
 	 *
 	 * Note that this will never match exactly, because the map sizes don't

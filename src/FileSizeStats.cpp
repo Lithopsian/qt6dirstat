@@ -27,7 +27,7 @@ namespace
         return item->isFile() || item->isSymLink();
     }
 
-}
+} // namespace
 
 
 FileSizeStats::FileSizeStats( FileInfo * subtree ):

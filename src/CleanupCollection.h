@@ -161,12 +161,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Add all Cleanups that have an icon to the specified tool bar and keep
-	 * it updated when the collections changes.
-	 **/
-	void addToToolBar( QToolBar * toolBar );
-
-	/**
 	 * Return 'true' if this collection is empty.
 	 **/
 	bool isEmpty() const { return _cleanupList.isEmpty(); }

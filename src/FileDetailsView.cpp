@@ -133,9 +133,9 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
     _ui{ new Ui::FileDetailsView },
     _pkgUpdateTimer{ new AdaptiveTimer{ this,
                                         { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
-                                        { 3000, 1000, 500, 250, 150 }
+                                        { 3000, 1000, 500, 250, 150 },  // cooldown stages
                                       }
-                    } // cooldown stages
+                    }
 {
     _ui->setupUi( this );
 
@@ -334,8 +334,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
     _ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !dir->readError() );
 
     _ui->dirTypeLabel->setText( dir->isMountPoint() ? tr( "mount point" ) :
-                                dir->isPseudoDir() ?  tr( "pseudo directory" ) :
-		                                      tr( "directory" ) );
+                                dir->isPseudoDir() ? tr( "pseudo directory" ) : tr( "directory" ) );
     _ui->dirTypeLabel->setStyleSheet( dir->isPseudoDir() ? QString{} : "QToolTip { max-width: 0px }" );
 
     _ui->dirFromCacheIcon->setVisible( dir->isFromCache() );

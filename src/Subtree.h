@@ -176,14 +176,6 @@ namespace QDirStat
         void setUrl( const QString & newUrl ) { _url = newUrl; }
 
 
-    protected:
-
-        /**
-         * Locate the FileInfo item with the stored URL in the stored tree.
-         **/
-        FileInfo * locate() const;
-
-
     private:
 
         //

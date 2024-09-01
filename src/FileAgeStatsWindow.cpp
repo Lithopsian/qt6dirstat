@@ -67,7 +67,30 @@ namespace
 	return gaps;
     }
 
-}
+
+    /**
+     * One-time initialization of the widgets in this window.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	// Set the row height based on the configured DirTree icon height
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+	const QStringList headers{ QObject::tr( "Year"    ),
+	                           QObject::tr( "Files"   ),
+	                           QObject::tr( "Files %" ),  // percent bar
+	                           QObject::tr( "%"       ),  // percent value
+	                           QObject::tr( "Size"    ),
+	                           QObject::tr( "Size %"  ),  // percent bar
+	                           QObject::tr( "%"       ),  // percent value
+	                         };
+	tree->setHeaderLabels( headers );
+	tree->header()->setDefaultAlignment( Qt::AlignCenter );
+
+	HeaderTweaker::resizeToContents( tree->header() );
+    }
+
+} // namespace
 
 
 FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
@@ -80,7 +103,8 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->treeWidget );
+
     readSettings();
 
     const DirTree        * dirTree        = app()->dirTree();
@@ -106,10 +130,6 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
 
     connect( _ui->treeWidget,    &QTreeWidget::itemSelectionChanged,
              this,               &FileAgeStatsWindow::enableActions );
-
-    connect( this, &FileAgeStatsWindow::locateFilesFromYear,  &DiscoverActions::discoverFilesFromYear );
-
-    connect( this, &FileAgeStatsWindow::locateFilesFromMonth, &DiscoverActions::discoverFilesFromMonth );
 }
 
 
@@ -129,25 +149,6 @@ FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FileAgeStatsWindow{ parent };
 
     return _sharedInstance;
-}
-
-
-void FileAgeStatsWindow::initWidgets()
-{
-    // Set the row height based on the configured DirTree icon height
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
-
-    const QStringList headers{ tr( "Year"    ),
-                               tr( "Files"   ),
-                               tr( "Files %" ),  // percent bar
-                               tr( "%"       ),  // percent value
-                               tr( "Size"    ),
-                               tr( "Size %"  ),  // percent bar
-                               tr( "%"       ),  // percent value
-                             };
-    _ui->treeWidget->setHeaderLabels( headers );
-    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignCenter );
-    HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 
 
@@ -277,9 +278,9 @@ void FileAgeStatsWindow::locateFiles()
 	const short year  = item->year();
 
 	if ( month > 0 && year > 0 )
-	    emit locateFilesFromMonth( _subtree.url(), year, month );
+	    emit DiscoverActions::discoverFilesFromMonth( _subtree.url(), year, month );
 	else if ( year > 0 )
-	    emit locateFilesFromYear( _subtree.url(), year );
+	    emit DiscoverActions::discoverFilesFromYear( _subtree.url(), year );
     }
 }
 

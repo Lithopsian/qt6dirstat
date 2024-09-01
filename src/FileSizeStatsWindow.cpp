@@ -88,7 +88,11 @@ namespace
     /**
      * Add an item to a table.
      **/
-    QTableWidgetItem * addItem( QTableWidget * table, int row, int col, Qt::Alignment alignment, const QString & text )
+    QTableWidgetItem * addItem( QTableWidget  * table,
+                                int             row,
+                                int             col,
+                                Qt::Alignment   alignment,
+                                const QString & text )
     {
 	QTableWidgetItem * item = new QTableWidgetItem{ text };
 	item->setTextAlignment( alignment | Qt::AlignVCenter );
@@ -107,7 +111,7 @@ namespace
 	{
 	    QTableWidgetItem * item = table->item( row, col );
 
-	    // Fill empty cells or the background won't show
+	    // Can't set the background on an empty cell
 	    if ( !item )
 		item = addItem( table, row, col, Qt::AlignLeft, QString{} );
 
@@ -181,13 +185,15 @@ namespace
 		setRowBold( table, row );
 	    }
 
+	    // Shade the background of every 10th row if all percentiles are shown
 	    if ( i > 0 && i % 10 == 0 && step == 1 )
 	    {
 		// Derive a color with some contrast in light or dark themes.
 		const QColor & base = table->palette().base().color();
 		const int lightness = base.lightness();
 		const int newLightness = lightness > 128 ? lightness - 32 : lightness + 32;
-		setRowBackground( table, row, QColor::fromHsl( base.hue(), base.saturation(), newLightness ) );
+		const QColor shade = QColor::fromHsl( base.hue(), base.saturation(), newLightness );
+		setRowBackground( table, row, shade );
 	    }
 	}
 
@@ -351,15 +357,16 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
+    // Existing stats are invalidated; be sure the model and histogram get new ones promptly
     if ( suffix.isEmpty() )
 	_stats.reset( new FileSizeStats{ fileInfo } );
     else
 	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
     _stats->calculatePercentiles();
 
+    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
     initHistogram();
     fillPercentileTable();
-    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
 }
 
 
@@ -371,7 +378,7 @@ void FileSizeStatsWindow::initHistogram()
     _ui->histogramView->init( _stats.get() );
     autoPercentileRange();
 
-    // We have to set the percentiles and reload the bickets explicitly because there were no signals
+    // There are no signals, so we have to set the percentiles and reload the buckets explicitly
     setPercentileRange();
 }
 
@@ -400,24 +407,6 @@ void FileSizeStatsWindow::setPercentileRange()
     _ui->histogramView->setPercentileRange( startPercentile, endPercentile );
 }
 
-/*
-void FileSizeStatsWindow::startValueChanged( int newStart )
-{
-    //logDebug() << "New start: " << newStart << Qt::endl;
-
-    _ui->histogramView->setStartPercentile( newStart );
-    loadBuckets();
-}
-
-
-void FileSizeStatsWindow::endValueChanged( int newEnd )
-{
-    //logDebug() << "New end: " << newEnd << Qt::endl;
-
-    _ui->histogramView->setEndPercentile( newEnd );
-    loadBuckets();
-}
-*/
 
 void FileSizeStatsWindow::markersChanged()
 {

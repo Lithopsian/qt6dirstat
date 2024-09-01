@@ -43,7 +43,7 @@ namespace
         logNewline();
     }
 
-}
+} // namespace
 
 
 QString History::goBack()

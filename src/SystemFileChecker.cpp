@@ -61,7 +61,7 @@ namespace
          *   /tmp
          *   /var
          *
-         * Some of those might be debatable: While it is true that no mere user
+         * Some of those might be debatable: while it is true that no mere user
          * should mess with anything outside his home directory, some might work on
          * web projects below /srv, some might write or use software that does
          * things below /run, some might be in the process of cleaning up a mess

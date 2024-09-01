@@ -94,7 +94,6 @@ namespace QDirStat
 	 **/
 	virtual QString owningPkg( const QString & path ) const = 0;
 
-
 	//-----------------------------------------------------------------
 	//		       Optional Features
 	//-----------------------------------------------------------------

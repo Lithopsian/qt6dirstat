@@ -32,7 +32,21 @@ namespace QDirStat
     {
 	Q_OBJECT
 
+	/**
+	 * Internal constructor.
+	 *
+	 * Private, use the static askOpenDir() instead.
+	 **/
+	OpenDirDialog( QWidget * parent, bool crossFilesystems );
+
+	/**
+	 * Destructor.
+	 **/
+	~OpenDirDialog() override;
+
+
     public:
+
 	/**
 	 * Open an "open directory" dialog, wait for the user to select one and
 	 * return that path. If the user cancelled the dialog, this returns an
@@ -42,41 +56,6 @@ namespace QDirStat
 	 * flag of the dialog.
 	 **/
 	static QString askOpenDir( QWidget * parent, bool & crossFilesystems );
-
-
-    protected:
-	/**
-	 * Internal constructor.
-	 *
-	 * Use the static askOpenDir() instead.
-	 **/
-	OpenDirDialog( QWidget * parent, bool crossFilesystems );
-
-	/**
-	 * Destructor.
-	 **/
-	~OpenDirDialog() override;
-
-	/**
-	 * The path of the directory the user selected.
-	 **/
-	QString selectedPath() const { return _ui->pathComboBox->currentText(); }
-
-	/**
-	 * The "cross filesystems" flag of this dialog (overriding the global
-	 * "cross filesystems" setting" from the config dialog).
-	 **/
-	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
-
-	/**
-	 * Read settings from the config file
-	 **/
-	void readSettings();
-
-	/**
-	 * Set a path in the dirTree.
-	 **/
-	void setPath( const QString & path );
 
 
     protected slots:
@@ -115,9 +94,49 @@ namespace QDirStat
 
     protected:
 
+	/**
+	 * The path of the directory the user selected.
+	 **/
+	QString selectedPath() const { return _ui->pathComboBox->currentText(); }
+
+	/**
+	 * The "cross filesystems" flag of this dialog (overriding the global
+	 * "cross filesystems" setting" from the config dialog).
+	 **/
+	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
+
+	/**
+	 * Read settings from the config file
+	 **/
+	void readSettings();
+
+	/**
+	 * Set a path in the dirTree.
+	 **/
+	void setPath( const QString & path );
+
+	/**
+	 * Create and apply an ExistingDirValidator, enable the clear
+	 * button, and set the current combo-box text in the line edit.
+	 **/
 	void initPathComboBox();
+
+	/**
+	 * Initialise the QFileSystemModel and DirTreeView.
+	 **/
 	void initDirTree();
+
+	/**
+	 * Connect to signals.
+	 **/
 	void initConnections();
+
+	/**
+	 * Populate the path combo-box with a new path.  If the path
+	 * is already in the list, then set it as the current item,
+	 * otherwise build a new list with the path and all its
+	 * ancestors.
+	 **/
 	void populatePathComboBox( const QModelIndex & currentIndex );
 
 

@@ -43,8 +43,8 @@ namespace
 
 
 void PercentBarDelegate::paint( QPainter                   * painter,
-				const QStyleOptionViewItem & option,
-				const QModelIndex          & index ) const
+                                const QStyleOptionViewItem & option,
+                                const QModelIndex          & index ) const
 {
     // Let the default delegate draw what it can, which should be the appropriate background for us
     QStyledItemDelegate::paint( painter, option, index );
@@ -54,7 +54,7 @@ void PercentBarDelegate::paint( QPainter                   * painter,
 	bool ok = true;
 	const float percent = index.data( PercentRole ).toFloat( &ok );
 	if ( ok && percent >= 0.0f )
-	    PercentBarDelegate::paintPercentBar( painter, option, index, qMin( percent, 100.0f ) );
+	    paintPercentBar( painter, option, index, qMin( percent, 100.0f ) );
     }
 }
 
@@ -75,9 +75,9 @@ QSize PercentBarDelegate::sizeHint( const QStyleOptionViewItem & option,
 
 
 void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
-					  const QStyleOptionViewItem & option,
-					  const QModelIndex          & index,
-					  float                        percent ) const
+                                          const QStyleOptionViewItem & option,
+                                          const QModelIndex          & index,
+                                          float                        percent ) const
 {
     const int depth       = index.data( TreeLevelRole ).toInt();
     const int indentPixel = depth * _indentation / 2;
@@ -98,8 +98,8 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 
 	// Fill bar background
 	painter->fillRect( x + penWidth, y + penWidth,
-			   w - 2 * penWidth + 1, h - 2 * penWidth + 1,
-			   _barBackground );
+	                   w - 2 * penWidth + 1, h - 2 * penWidth + 1,
+	                   _barBackground );
 
 	/**
 	 * The Xlib XDrawRectangle() function always fills one pixel less

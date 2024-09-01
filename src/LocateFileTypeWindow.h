@@ -92,11 +92,6 @@ namespace QDirStat
 	QString displaySuffix() const { return '*' + _suffix; }
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
 	 * Populate the window: Locate files with 'suffix' in 'fileInfo'.
 	 *
 	 * This clears the old search results first, then searches the subtree

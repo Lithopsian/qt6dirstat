@@ -87,7 +87,81 @@ namespace
 	return false;
     }
 
-}
+
+    /**
+     * Move entries that have a '.' in the name but do not have
+     * meaningful extensions into the "no extension" category map
+     * for the "Other" category". This includes extremely long
+     * extensions, those with no letters, uncommon extensions with
+     * a low proportion of letters, and anything at all with a
+     * space in it.
+     **/
+    void removeCruft( CategoryMap & categories, SuffixMap & suffixes, const MimeCategory * otherCategory)
+    {
+	// Might be nothing at all in "Other"
+	if ( !categories.contains( otherCategory ) )
+	    return;
+
+	// Just get this once, isCruft needs it each time
+	const int otherCategoryCount = categories[ otherCategory ].count;
+
+	// QHash will default-construct (ie. zeroes) the entry if it don't exist yet
+	CountSum & noExtension = suffixes[ { QString{}, otherCategory } ];
+
+#if VERBOSE_STATS
+	FileSize totalMergedSum   = 0LL;
+	int      totalMergedCount = 0;
+#endif
+
+	QStringList cruftSuffixes;
+	for ( auto it = suffixes.cbegin(); it != suffixes.cend(); ++it )
+	{
+	    const QString      & suffix   = it.key().suffix;
+	    const MimeCategory * category = it.key().category;
+
+	    // Identify apparent suffixes with no category that are not sensible file extensions
+	    if ( category == otherCategory && !suffix.isEmpty() )
+	    {
+		const int suffixCount = it.value().count;
+
+		if ( isCruft( suffix, suffixCount, otherCategoryCount ) )
+		{
+		    // copy the cruft values to the "no extension" entry in the "Other" category
+		    const FileSize suffixSum = it.value().sum;
+		    noExtension.count += suffixCount;
+		    noExtension.sum   += suffixSum;
+		    cruftSuffixes << suffix;
+
+#if VERBOSE_STATS
+		    totalMergedCount += suffixCount;
+		    totalMergedSum   += suffixSum ;
+#endif
+		}
+	    }
+	}
+
+	// Remove the merged suffixes
+	for ( const QString & cruftSuffix : asConst( cruftSuffixes ) )
+	    suffixes.remove( { cruftSuffix, otherCategory } );
+
+#if VERBOSE_STATS
+	if ( cruftSuffixes.size() > 0 )
+	{
+	    logDebug() << "Merged " << cruftSuffixes.size() << " suffixes to <no extension>: "
+	               << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
+
+	    logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
+	               << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
+	}
+#endif
+
+	// The price of finding the cruft entry just once is having to delete it ...
+	// ... if it was default-constructed and is still empty
+	if ( noExtension.count == 0 )
+	    suffixes.remove( { QString{}, otherCategory } );
+    }
+
+} // namespace
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
@@ -97,7 +171,7 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
     {
         collect( subtree );
         _totalSize = subtree->totalSize();
-        removeCruft();
+        removeCruft( _categories, _suffixes, otherCategory() );
 #if VERBOSE_STATS
         sanityCheck();
 #endif
@@ -139,7 +213,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 		addSuffixSum( filenameExtension( it->name() ), otherCategory(), *it );
 	    }
 
-	    // Disregard symlinks, block devices and other special files
+	    // Disregard block devices and other special files
 	}
     }
 }
@@ -157,87 +231,18 @@ void FileTypeStats::addCategorySum( const MimeCategory * category, const FileInf
 void FileTypeStats::addSuffixSum( const QString & suffix, const MimeCategory * category, const FileInfo * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
-    const SuffixCategory suffixCategory{ suffix, category };
-    CountSum & countSum = _suffixes[ suffixCategory ];
+    CountSum & countSum = _suffixes[ { suffix, category } ];
     ++countSum.count;
     countSum.sum += item->size();
-}
-
-
-void FileTypeStats::removeCruft()
-{
-    // Might be nothing at all in "Other"
-    if ( !_categories.contains( otherCategory() ) )
-	return;
-
-    // Just get this once, isCruft needs it each time
-    const int otherCategoryCount = _categories[ otherCategory() ].count;
-
-    // QHash will default-construct (ie. zeroes) the entry if it don't exist yet
-    CountSum & noExtension = _suffixes[ { QString{}, otherCategory() } ];
-
-#if VERBOSE_STATS
-    FileSize totalMergedSum   = 0LL;
-    int      totalMergedCount = 0;
-#endif
-
-    QStringList cruftSuffixes;
-    for ( auto it = _suffixes.cbegin(); it != _suffixes.cend(); ++it )
-    {
-	const QString      & suffix   = it.key().suffix;
-	const MimeCategory * category = it.key().category;
-
-	// Identify apparent suffixes with no category that are not sensible file extensions
-	if ( category == otherCategory() && !suffix.isEmpty() )
-	{
-	    const int suffixCount = it.value().count;
-
-	    if ( isCruft( suffix, suffixCount, otherCategoryCount ) )
-	    {
-		// copy the cruft values to the "no extension" entry in the "Other" category
-		const FileSize suffixSum = it.value().sum;
-		noExtension.count += suffixCount;
-		noExtension.sum   += suffixSum;
-		cruftSuffixes << suffix;
-
-#if VERBOSE_STATS
-		totalMergedCount += suffixCount;
-		totalMergedSum   += suffixSum ;
-#endif
-	    }
-	}
-    }
-
-    // Remove the merged suffixes
-    for ( const QString & cruftSuffix : cruftSuffixes )
-	_suffixes.remove( { cruftSuffix, otherCategory() } );
-
-#if VERBOSE_STATS
-    if ( cruftSuffixes.size() > 0 )
-    {
-	logDebug() << "Merged " << cruftSuffixes.size() << " suffixes to <no extension>: "
-	           << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
-
-	logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
-	           << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
-    }
-#endif
-
-    // The price of finding the cruft entry just once is having to delete it ...
-    // ... if it was default-constructed and is still empty
-    if ( noExtension.count == 0 )
-	_suffixes.remove( { QString{}, otherCategory() } );
 }
 
 
 #if VERBOSE_STATS
 void FileTypeStats::sanityCheck()
 {
-    const FileSize diff = std::accumulate( _categories.cbegin(),
-                                           _categories.cend(),
-                                           _totalSize,
-                                           []( FileSize sum, const CountSum & cat )
-                                               { return sum - cat.sum; } );
+    const FileSize diff =
+	std::accumulate( _categories.cbegin(), _categories.cend(), _totalSize,
+                        []( FileSize sum, const CountSum & cat ) { return sum - cat.sum; } );
 
     logDebug() << "Unaccounted in categories: "
                << formatSize( diff ) << " of " << formatSize( _totalSize )

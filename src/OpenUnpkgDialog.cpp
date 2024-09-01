@@ -19,6 +19,32 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Get the content of a QPlainTextEdit widget as QStringList with
+     * leading and trailing whitespace removed from each line and without
+     * empty lines.
+     **/
+    QStringList cleanedLines( const QPlainTextEdit * widget )
+    {
+	QStringList lines = widget->toPlainText().split( u'\n', Qt::SkipEmptyParts );
+
+	QMutableListIterator<QString> it{ lines };
+	while ( it.hasNext() )
+	{
+	    const QString & line = it.next();
+	    it.setValue( line.trimmed() );
+	    if ( it.value().isEmpty() )
+		it.remove();
+	}
+
+	return lines;
+    }
+
+} // namespace
+
+
 OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     QDialog{ parent },
     _ui{ new Ui::OpenUnpkgDialog }
@@ -56,29 +82,6 @@ OpenUnpkgDialog::~OpenUnpkgDialog()
 }
 
 
-QString OpenUnpkgDialog::startingDir() const
-{
-    return result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString{};
-}
-
-
-QStringList OpenUnpkgDialog::cleanedLines( const QPlainTextEdit * widget )
-{
-    QStringList lines = widget->toPlainText().split( u'\n', Qt::SkipEmptyParts );
-
-    QMutableListIterator<QString> it{ lines };
-    while ( it.hasNext() )
-    {
-	const QString & line = it.next();
-	it.setValue( line.trimmed() );
-	if ( it.value().isEmpty() )
-	    it.remove();
-    }
-
-    return lines;
-}
-
-
 void OpenUnpkgDialog::restoreDefaults()
 {
     setValues( UnpkgSettings::defaultSettings() );
@@ -87,7 +90,12 @@ void OpenUnpkgDialog::restoreDefaults()
 
 UnpkgSettings OpenUnpkgDialog::values() const
 {
-    UnpkgSettings settings{ startingDir(), excludeDirs(), ignorePatterns(), crossFilesystems() };
+    const QString startingDir =
+	result() == QDialog::Accepted ? _ui->startingDirComboBox->currentText() : QString{};
+    const QStringList excludeDirs = cleanedLines( _ui->excludeDirsTextEdit );
+    const QStringList ignoredPatterns = cleanedLines( _ui->ignorePatternsTextEdit );
+    const bool crossFilesystems = _ui->crossFilesystemsCheckBox->isChecked();
+    UnpkgSettings settings{ startingDir, excludeDirs, ignoredPatterns, crossFilesystems };
     settings.dump();
 
     return settings;

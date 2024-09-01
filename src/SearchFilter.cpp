@@ -50,7 +50,7 @@ namespace
         return defaultFilterMode;
     }
 
-}
+} // namespace
 
 
 SearchFilter::SearchFilter( const QString & pattern,

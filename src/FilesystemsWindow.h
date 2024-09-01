@@ -88,6 +88,11 @@ namespace QDirStat
 	 **/
 	void copyDeviceToClipboard();
 
+	/**
+	 * Custom context menu signalled.
+	 **/
+	void contextMenu( const QPoint & pos );
+
 
     protected:
 
@@ -108,25 +113,10 @@ namespace QDirStat
 	void clear() { _ui->fsTree->clear(); }
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
-	 * Show panel message warning about Btrfs and how it reports free sizes
-	 **/
-	void showBtrfsFreeSizeWarning();
-
-	/**
 	 * Read the path of the currently selected filesystem or an empty
 	 * string if there is none.
 	 **/
 	QString selectedPath() const;
-
-	/**
-	 * Custom context menu signalled.
-	 **/
-	void contextMenu( const QPoint & pos );
 
 	/**
 	 * Key press event for detecting evnter/return.

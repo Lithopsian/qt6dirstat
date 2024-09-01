@@ -102,7 +102,7 @@ namespace QDirStat
 	/**
 	 * Enable or disable the actions depending on the current item.
 	 **/
-	void enableActions( const QTreeWidgetItem * currentItem );
+	void enableActions();
 
 	/**
 	 * Custom context menu signalled.
@@ -118,14 +118,14 @@ namespace QDirStat
 	void readSettings();
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
 	 * Populate the widgets for a subtree.
 	 **/
 	void populate( FileInfo * subtree );
+
+	/**
+	 * Enable or disable the actions.
+	 **/
+	void enableActions( bool enable );
 
 	/**
 	 * Return the suffix of the currently selected file type or an empty

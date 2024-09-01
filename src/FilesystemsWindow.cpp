@@ -44,7 +44,41 @@ namespace
 	return "mount-point.png";
     }
 
-}
+
+    /**
+     * One-time initialization of the tree widget.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	QStringList headers{ QObject::tr( "Device" ), QObject::tr( "Mount Point" ), QObject::tr( "Type" ) };
+
+	if ( MountPoints::hasSizeInfo() )
+	{
+	    headers << QObject::tr( "Size" )
+	            << QObject::tr( "Used" )
+	            << QObject::tr( "Reserved" )
+	            << QObject::tr( "Free" )
+	            << QObject::tr( "Free %" );
+	}
+
+	tree->setHeaderLabels( headers );
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+	// Center the column headers except the first two
+	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );
+
+	QTreeWidgetItem * hItem = tree->headerItem();
+	hItem->setTextAlignment( FS_DeviceCol,    Qt::AlignVCenter | Qt::AlignLeft );
+	hItem->setTextAlignment( FS_MountPathCol, Qt::AlignVCenter | Qt::AlignLeft );
+
+	hItem->setToolTip( FS_ReservedSizeCol, QObject::tr( "Reserved for root" ) );
+	hItem->setToolTip( FS_FreeSizeCol,     QObject::tr( "Free for unprivileged users" ) );
+
+	HeaderTweaker::resizeToContents( tree->header() );
+	tree->sortItems( FS_DeviceCol, Qt::AscendingOrder );
+    }
+
+} // namespace
 
 
 FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
@@ -55,7 +89,8 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->fsTree );
+    enableActions();
     readSettings();
 
     connect( _ui->normalCheckBox, &QCheckBox::toggled,
@@ -113,39 +148,6 @@ void FilesystemsWindow::readSettings()
 }
 
 
-void FilesystemsWindow::showBtrfsFreeSizeWarning()
-{
-    PanelMessage::showFilesystemsMsg( this, _ui->vBox );
-}
-
-
-void FilesystemsWindow::initWidgets()
-{
-    QStringList headers{ tr( "Device" ), tr( "Mount Point" ), tr( "Type" ) };
-
-    if ( MountPoints::hasSizeInfo() )
-	headers << tr( "Size" ) << tr( "Used" ) << tr( "Reserved" ) << tr( "Free" ) << tr( "Free %" );
-
-    _ui->fsTree->setHeaderLabels( headers );
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->fsTree );
-
-    // Center the column headers except the first two
-    _ui->fsTree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );
-
-    QTreeWidgetItem * hItem = _ui->fsTree->headerItem();
-    hItem->setTextAlignment( FS_DeviceCol,    Qt::AlignVCenter | Qt::AlignLeft );
-    hItem->setTextAlignment( FS_MountPathCol, Qt::AlignVCenter | Qt::AlignLeft );
-
-    hItem->setToolTip( FS_ReservedSizeCol, tr( "Reserved for root" ) );
-    hItem->setToolTip( FS_FreeSizeCol,     tr( "Free for unprivileged users" ) );
-
-    HeaderTweaker::resizeToContents( _ui->fsTree->header() );
-    _ui->fsTree->sortItems( FS_DeviceCol, Qt::AscendingOrder );
-
-    enableActions();
-}
-
-
 FilesystemsWindow * FilesystemsWindow::populateSharedInstance( QWidget * parent )
 {
     FilesystemsWindow * instance = sharedInstance( parent );
@@ -170,7 +172,7 @@ void FilesystemsWindow::populate()
     }
 
     if ( MountPoints::hasBtrfs() )
-	showBtrfsFreeSizeWarning();
+	PanelMessage::showFilesystemsMsg( this, _ui->vBox );
 }
 
 
