@@ -10,6 +10,8 @@
 #ifndef AdaptiveTimer_h
 #define AdaptiveTimer_h
 
+#include <functional>
+
 #include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
@@ -19,7 +21,7 @@
 namespace QDirStat
 {
     /**
-     * Timer for delivering signals that each obsolete each previous one, for
+     * Timer for delivering signals that obsolete each previous one, for
      * example for an expensive blocking operation to retrieve the contents of
      * a widget.
      *
