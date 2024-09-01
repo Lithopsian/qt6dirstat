@@ -127,7 +127,7 @@ namespace
      * Change the owner of the config file to the user in the $SUDO_UID /
      * $SUDO_GID environment variables (if set).
      **/
-    inline void fixFileOwner( const UsedFileList & filenames )
+    void fixFileOwner( const UsedFileList & filenames )
     {
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 	const QString sudoUid = env.value( "SUDO_UID", QString{} );
@@ -251,7 +251,7 @@ int Settings::enumValue( const char                * key,
     if ( !contains( key ) )
 	return fallback;
 
-    const QLatin1String str = QLatin1String( value( key ).toByteArray() );
+    const QLatin1String str = QLatin1String{ value( key ).toByteArray() };
     const int enumKey = enumMapping.key( str, -1 );
     if ( enumKey >= 0 )
 	return enumKey;

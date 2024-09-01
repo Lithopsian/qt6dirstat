@@ -280,9 +280,8 @@ void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 	else if ( isSystemFile )
 	{
 	    // Submit a timed query to find the owning package, if any
-	    const QString delayHint = QString{ _pkgUpdateTimer->delayStage(), u'.' }
-	                              .replace( u'.', ". "_L1 );
-	    _ui->filePackageLabel->setText( delayHint );
+	    QString delayHint{ _pkgUpdateTimer->delayStage(), u'.' };
+	    _ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
 	    // Caspture url by value because the FileInfo may be gone by the time the timer expires
 	    const QString url = file->url();
@@ -325,7 +324,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
 {
     // logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % u'/' );
+    const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
     setLabelLimited(_ui->dirNameLabel, name );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();
@@ -386,7 +385,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
 	setLabel( _ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
 	setLabel( _ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
-	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMtime() ) );
+	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
 	_ui->dirAllocatedLabel->setBold( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
@@ -482,7 +481,7 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
 	_ui->pkgSubDirCountLabel->clear();
     }
 
-    _ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMtime() ) );
+    _ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
 
     setCurrentPage( _ui->pkgDetailsPage );
 }
@@ -522,7 +521,7 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
 	_ui->pkgSummarySubDirCountLabel->clear();
     }
 
-    _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMtime() ) );
+    _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
 
     setCurrentPage( _ui->pkgSummaryPage );
 }

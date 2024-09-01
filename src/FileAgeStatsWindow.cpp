@@ -216,7 +216,7 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 
 void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 {
-    FileAgeStats stats( fileInfo );
+    FileAgeStats stats{ fileInfo };
 
     for ( short year : stats.years() )
     {
@@ -389,7 +389,7 @@ YearListItem::YearListItem( const YearStats & stats ) :
     {
 	set( YearListFilesCountCol,   Qt::AlignRight, QString::number( _filesCount   ) );
 	set( YearListFilesPercentCol, Qt::AlignRight, formatPercent  ( _filesPercent ) );
-	set( YearListSizeCol,         Qt::AlignRight, "    " + formatSize( _size     ) );
+	set( YearListSizeCol,         Qt::AlignRight, "    "_L1 % formatSize( _size     ) );
 	set( YearListSizePercentCol,  Qt::AlignRight, formatPercent  ( _sizePercent  ) );
 
 	setData( YearListFilesPercentBarCol, PercentRole, _filesPercent );

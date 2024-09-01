@@ -22,7 +22,34 @@ class QMenu;
 namespace QDirStat
 {
     class DirTreeView;
-    class ColumnLayout;
+
+    /**
+     * Helper class to store information about different column layouts.
+     **/
+    struct ColumnLayout
+    {
+	ColumnLayout( const QString & name ):
+	    name{ name }
+	{}
+
+	QString        name;
+	DataColumnList columns;
+
+	/**
+	 * Return the default column list for this layout.
+	 **/
+	DataColumnList defaultColumns() const { return defaultColumns( name ); }
+
+	/**
+	 * Return the default column list for a layout.
+	 **/
+	static DataColumnList defaultColumns( const QString & layoutName );
+
+    };	// struct ColumnLayout
+
+
+    typedef QHash<QString, ColumnLayout *> ColumnLayoutList;
+
 
     /**
      * Decorator class for a DirTreeView's QHeaderView that takes care about
@@ -58,9 +85,9 @@ namespace QDirStat
 	/**
 	 * Return the names of the three layouts.
 	 **/
-	inline static QLatin1String l1Name() { return "L1"_L1; }
-	inline static QLatin1String l2Name() { return "L2"_L1; }
-	inline static QLatin1String l3Name() { return "L3"_L1; }
+	constexpr static QLatin1String l1Name() { return "L1"_L1; }
+	constexpr static QLatin1String l2Name() { return "L2"_L1; }
+	constexpr static QLatin1String l3Name() { return "L3"_L1; }
 
 	/**
 	 * Save the current status in 'layout'.
@@ -132,26 +159,15 @@ namespace QDirStat
 	QAction * createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) );
 
 	/**
-	 * Create internally used actions and connect them to the appropriate
-	 * slots.
-	 **/
-//	void createActions();
-
-	/**
 	 * Create one column layout.
 	 **/
-	void createColumnLayout( const QString & layoutName );
+	void createColumnLayout( const QString & layoutName )
+	    { _layouts[ layoutName ] = new ColumnLayout{ layoutName }; }
 
 	/**
 	 * Create the column layouts.
 	 **/
 	void createColumnLayouts();
-
-	/**
-	 * Update all actions for a context menu for logical section
-	 * 'section'.
-	 **/
-//	void updateActions( int section );
 
 	/**
 	 * Create a submenu for the currently hidden columns.
@@ -184,16 +200,6 @@ namespace QDirStat
 	 * Apply the settings from 'layout'.
 	 **/
 	void applyLayout( ColumnLayout * layout );
-
-	/**
-	 * Order the columns according to 'colOrderList'.
-	 **/
-	void setColumnOrder( const DataColumnList & colOrderList);
-
-	/**
-	 * Show the columns that are in 'columns'.
-	 **/
-	void setColumnVisibility( const DataColumnList & columns );
 
 	/**
 	 * Return the column name for the specified logical section number.
@@ -230,38 +236,13 @@ namespace QDirStat
 	// Data members
 	//
 
-	DirTreeView                    * _treeView;
-	QHeaderView                    * _header;
-	int                              _currentSection{ -1 };
-	QHash<QString, ColumnLayout *>   _layouts;
-	ColumnLayout                   * _currentLayout{ nullptr };
+	DirTreeView      * _treeView;
+	QHeaderView      * _header;
+	int                _currentSection{ -1 };
+	ColumnLayoutList   _layouts;
+	ColumnLayout     * _currentLayout{ nullptr };
 
     };	// class HeaderTweaker
-
-
-    /**
-     * Helper class to store information about different column layouts.
-     **/
-    struct ColumnLayout
-    {
-	ColumnLayout( const QString & name ):
-	    name{ name }
-	{}
-
-	QString        name;
-	DataColumnList columns;
-
-	/**
-	 * Return the default column list for this layout.
-	 **/
-	DataColumnList defaultColumns() const { return defaultColumns( name ); }
-
-	/**
-	 * Return the default column list for a layout.
-	 **/
-	static DataColumnList defaultColumns( const QString & layoutName );
-
-    };	// struct ColumnLayout
 
 }	// namespace QDirStat
 

@@ -25,7 +25,6 @@ namespace QDirStat
     {
         Q_OBJECT
 
-    public:
 	enum Column
 	{
 	    StartCol,
@@ -33,6 +32,9 @@ namespace QDirStat
 	    ValueCol,
 	    ColCount
 	};
+
+
+    public:
 
 	/**
 	 * Constructor.
@@ -49,8 +51,9 @@ namespace QDirStat
 	    { _stats = stats; }
 
 	/**
-	 * Wrappers around beginResetModel() and endResetModel() when the
-	 * buckets contents are being replaced.
+	 * Wrappers around the protected beginResetModel() and
+	 * endResetModel() functions for when the buckets contents are
+	 * being replaced.
 	 **/
 	void beginReset() { beginResetModel(); }
 	void endReset() { endResetModel(); }
@@ -85,9 +88,12 @@ namespace QDirStat
 	/**
 	 * Return item flags for the specified model index. This specifies if
 	 * the item can be selected, edited etc.
+	 *
+	 * The base implementation returns flags indicating that the item is
+	 * enabled and selectable, which is acceptable here.
 	 **/
-	Qt::ItemFlags flags( const QModelIndex & index ) const override
-	    { return QAbstractTableModel::flags( index ) | Qt::ItemIsSelectable; }
+//	Qt::ItemFlags flags( const QModelIndex & ) const override
+//	    { return Qt::ItemIsEnabled; }
 
 
     private:

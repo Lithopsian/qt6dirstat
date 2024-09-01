@@ -16,8 +16,22 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Return whether to add this item to the statistics.  Currently
+     * returns true for regular files and symbolic links.
+     **/
+    bool collectItem( const FileInfo * item )
+    {
+        return item->isFile() || item->isSymLink();
+    }
+
+}
+
+
 FileSizeStats::FileSizeStats( FileInfo * subtree ):
-    PercentileStats {}
+    PercentileStats{}
 {
     CHECK_PTR( subtree );
 
@@ -40,7 +54,7 @@ FileSizeStats::FileSizeStats( const FileInfo * subtree, const QString & suffix )
 
 void FileSizeStats::collect( const FileInfo * subtree )
 {
-    if ( subtree->isFile() )
+    if ( collectItem( subtree ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
@@ -50,7 +64,7 @@ void FileSizeStats::collect( const FileInfo * subtree )
 
 void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
 {
-    if ( subtree->isFile() && subtree->name().toLower().endsWith( suffix ) )
+    if ( collectItem( subtree ) && subtree->name().toLower().endsWith( suffix ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )

@@ -10,9 +10,9 @@
 #ifndef DataColumns_h
 #define DataColumns_h
 
-#include <QList>
 #include <QStringList>
 #include <QTextStream>
+#include <QVector>
 
 #include "Typedefs.h" // _L1
 
@@ -49,7 +49,7 @@ namespace QDirStat
 	ReadJobsCol,		// Dummy column only for sorting by pending read jobs
     };
 
-    typedef QList<DataColumn> DataColumnList;
+    typedef QVector<DataColumn> DataColumnList;
 
     namespace DataColumns
     {

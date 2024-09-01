@@ -53,7 +53,6 @@ namespace QDirStat
 	 * Recurse through all file elements in the subtree and append the own
 	 * size for each file with the specified suffix to the data
 	 * collection. Note that the data are unsorted after this.
-	 *
 	 **/
 	void collect( const FileInfo * subtree, const QString & suffix );
 

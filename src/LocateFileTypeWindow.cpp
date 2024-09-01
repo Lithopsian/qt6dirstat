@@ -137,7 +137,7 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
     const QString heading = tr( " with %1 files below %2" ).arg( displaySuffix(), _subtree.url() );
-    _ui->heading->setStatusTip( intro + heading );
+    _ui->heading->setStatusTip( intro % heading );
 
     // Force a redraw of the header from the status tip
     resizeEvent( nullptr );
@@ -211,8 +211,6 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 
 
 
-
-
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
                                                 int             count,
                                                 FileSize        totalSize ):
@@ -239,7 +237,7 @@ bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const SuffixSearchResultItem & other = dynamic_cast<const SuffixSearchResultItem &>( rawOther );
 
-    switch ( (SuffixSearchResultColumns)treeWidget()->sortColumn() )
+    switch ( static_cast<SuffixSearchResultColumns>( treeWidget()->sortColumn() ) )
     {
 	case SSR_CountCol:     return _count     < other.count();
 	case SSR_TotalSizeCol: return _totalSize < other.totalSize();

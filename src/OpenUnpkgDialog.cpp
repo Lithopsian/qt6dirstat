@@ -38,13 +38,13 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
     const QPushButton * okButton    = _ui->buttonBox->button( QDialogButtonBox::Ok );
 
     connect( resetButton, &QPushButton::clicked,
-	     this,        &OpenUnpkgDialog::restoreDefaults );
+             this,        &OpenUnpkgDialog::restoreDefaults );
 
     connect( validator, &ExistingDirValidator::isOk,
-	     okButton, &QPushButton::setEnabled );
+             okButton, &QPushButton::setEnabled );
 
     connect( this, &OpenUnpkgDialog::accepted,
-	     this, &OpenUnpkgDialog::writeSettings );
+             this, &OpenUnpkgDialog::writeSettings );
 
     readSettings();
 }
@@ -87,7 +87,7 @@ void OpenUnpkgDialog::restoreDefaults()
 
 UnpkgSettings OpenUnpkgDialog::values() const
 {
-    UnpkgSettings settings( startingDir(), excludeDirs(), ignorePatterns(), crossFilesystems() );
+    UnpkgSettings settings{ startingDir(), excludeDirs(), ignorePatterns(), crossFilesystems() };
     settings.dump();
 
     return settings;

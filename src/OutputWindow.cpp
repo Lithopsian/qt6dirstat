@@ -125,12 +125,12 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
 	return;
 
     _ui->terminal->moveCursor( QTextCursor::End );
-    QTextCursor cursor( _ui->terminal->textCursor() );
+    QTextCursor cursor{ _ui->terminal->textCursor() };
 
     QTextCharFormat format;
     format.setForeground( QBrush{ textColor } );
     cursor.setCharFormat( format );
-    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText + u'\n' );
+    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
 }
 
 
@@ -361,7 +361,7 @@ QProcess * OutputWindow::startNextProcess()
 	const QString dir = process->workingDirectory();
 	if ( dir != _lastWorkingDir )
 	{
-	    addCommandLine( "cd " + dir );
+	    addCommandLine( "cd "_L1 % dir );
 	    _lastWorkingDir = dir;
 	}
 
@@ -421,7 +421,7 @@ void OutputWindow::showAfterTimeout( int timeoutMillisec )
     // Shiw after the configured timeout if processes are still running
     QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
                         this,
-			&OutputWindow::timeoutShow );
+                        &OutputWindow::timeoutShow );
 }
 
 
@@ -452,7 +452,7 @@ void OutputWindow::readSettings()
 
     settings.endGroup();
 
-    QPalette newPalette( _ui->terminal->palette() );
+    QPalette newPalette{ _ui->terminal->palette() };
     newPalette.setBrush( QPalette::Base, _terminalBackground );
     _ui->terminal->setPalette( newPalette );
     _ui->terminal->setFont( _terminalDefaultFont );

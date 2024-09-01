@@ -11,7 +11,6 @@
 
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
-#include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfoIterator.h"
 #include "HeaderTweaker.h"
@@ -154,7 +153,7 @@ UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
     QTreeWidgetItem{ QTreeWidgetItem::UserType },
     _dir{ dir }
 {
-    set( UD_Path,        dir->url() + "    ",        Qt::AlignLeft  );
+    set( UD_Path,        dir->url(),                 Qt::AlignLeft  );
     set( UD_User,        dir->userName(),            Qt::AlignLeft  );
     set( UD_Group,       dir->groupName(),           Qt::AlignLeft  );
     set( UD_Permissions, dir->symbolicPermissions(), Qt::AlignRight );

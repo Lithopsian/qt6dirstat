@@ -70,11 +70,6 @@ namespace QDirStat
 	static FilesystemsWindow * populateSharedInstance( QWidget * parent );
 
 
-    signals:
-
-	void readFilesystem( const QString & path );
-
-
     protected slots:
 
 	/**
@@ -198,10 +193,7 @@ namespace QDirStat
 	 * Set the text and text alignment for a column.
 	 **/
 	void set( int col, Qt::Alignment alignment, const QString & text )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, alignment | Qt::AlignVCenter );
-	}
+	    { setText( col, text ); setTextAlignment( col, alignment | Qt::AlignVCenter ); }
 
 	/**
 	 * Less-than operator for sorting.

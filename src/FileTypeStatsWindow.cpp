@@ -251,10 +251,10 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _ui->headingUrl->setStatusTip( _subtree.url() );
     resizeEvent( nullptr );
 
-    // Keep a map of toplevel items for finding suffix item parents
+    // Create a map of toplevel items for finding suffix item parents
     QHash<const MimeCategory *, FileTypeItem *> categoryItem;
 
-    FileTypeStats stats( _subtree() );
+    FileTypeStats stats{ _subtree() };
 
     for ( auto it = stats.categoriesBegin(); it != stats.categoriesEnd(); ++it )
     {
@@ -319,7 +319,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
     // Use the shared LocateFileTypeWindow instance.  Let it pick its own parent
     // so it doesn't get closed along with this window.
-    LocateFileTypeWindow::populateSharedInstance( u'.' + suffix, _subtree() );
+    LocateFileTypeWindow::populateSharedInstance( '.' % suffix, _subtree() );
 }
 
 
@@ -332,7 +332,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 
     //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
 
-    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, u'.' + suffix );
+    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, '.' % suffix );
 }
 
 
@@ -367,8 +367,8 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
     if ( suffix.isEmpty() )
 	return;
 
-    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) + suffix );
-    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) + suffix );
+    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) % suffix );
+    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) % suffix );
 
     QMenu menu;
     menu.addAction( _ui->actionLocate );
@@ -418,7 +418,7 @@ FileTypeItem::FileTypeItem( const QString & name,
     set( FT_NameCol,       Qt::AlignLeft,  name );
     set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );
     set( FT_TotalSizeCol,  Qt::AlignRight, formatSize( totalSize ) );
-    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) + '%' );
+    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) % '%' );
 }
 
 
@@ -432,7 +432,7 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
     // error which should not be silently ignored.
     const FileTypeItem & other = dynamic_cast<const FileTypeItem &>( rawOther );
 
-    switch ( (FileTypeColumns)treeWidget()->sortColumn() )
+    switch ( static_cast<FileTypeColumns>( treeWidget()->sortColumn() ) )
     {
 	case FT_CountCol:      return count()      < other.count();
 	case FT_TotalSizeCol:  return totalSize()  < other.totalSize();

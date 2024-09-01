@@ -19,31 +19,32 @@
 using namespace QDirStat;
 
 
-HistogramBar::HistogramBar( HistogramView       * parent,
-                            const FileSizeStats * stats,
-                            int                   number,
+HistogramBar::HistogramBar( const FileSizeStats * stats,
+                            int                   bucketIndex,
                             const QRectF        & rect,
-                            qreal                 fillHeight ):
+                            qreal                 fillHeight,
+                            const QPen          & pen,
+                            const QBrush        & brush ):
     QGraphicsRectItem{ rect.normalized() }
 {
     setFlags( ItemHasNoContents );
     setAcceptHoverEvents( true );
     setZValue( HistogramView::BarLayer );
 
-    const int numFiles = stats->bucket( number );
-    const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4 ... %5" )
-	.arg( number + 1 )
+    const int numFiles = stats->bucket( bucketIndex );
+    const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4...%5" )
+	.arg( bucketIndex + 1 )
 	.arg( numFiles )
 	.arg( numFiles == 1 ? QObject::tr( "file" ) : QObject::tr( "files" ) )
-	.arg( formatSize( stats->bucketStart( number ) ) )
-	.arg( formatSize( stats->bucketEnd  ( number ) ) );
+	.arg( formatSize( stats->bucketStart( bucketIndex ) ) )
+	.arg( formatSize( stats->bucketEnd  ( bucketIndex ) ) );
     setToolTip( whitespacePre( tooltip ) );
 
     // Filled rectangle is relative to its parent
-    QRectF filledRect{ rect.x(), 0, rect.width(), -fillHeight};
+    QRectF filledRect{ rect.x(), 0, rect.width(), -fillHeight };
     QGraphicsRectItem * filledBar = new QGraphicsRectItem{ filledRect.normalized(), this };
-    filledBar->setPen( parent->barPen() );
-    filledBar->setBrush( parent->barBrush() );
+    filledBar->setPen( pen );
+    filledBar->setBrush( brush );
 }
 
 
@@ -54,7 +55,7 @@ void HistogramBar::adjustBar( qreal adjustment )
     {
 	QGraphicsRectItem * filledBar = dynamic_cast<QGraphicsRectItem *>( children.first() );
 	if ( filledBar )
-	    filledBar->setRect( filledBar->rect().adjusted( adjustment, 0.0_qr, -adjustment, 0.0_qr ) );
+	    filledBar->setRect( filledBar->rect().adjusted( adjustment, 0, -adjustment, 0 ) );
     }
 }
 

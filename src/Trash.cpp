@@ -229,10 +229,8 @@ bool Trash::trash( const QString & path )
 }
 
 /*
-bool Trash::restore( const QString & path )
+bool Trash::restore( const QString & )
 {
-    Q_UNUSED( path )
-
     // TO DO
     // TO DO
     // TO DO

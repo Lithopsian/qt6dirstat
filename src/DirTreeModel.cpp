@@ -130,7 +130,7 @@ namespace
      **/
     QString linksSizeText( FileInfo * item )
     {
-	return QString{ formatSize( item->rawByteSize() ) % formatLinksInline( item->links() ) };
+	return formatSize( item->rawByteSize() ) % formatLinksInline( item->links() );
     }
 
 
@@ -229,8 +229,8 @@ namespace
 		// Leave to delegate except for special cases
 		if ( item->isBusy() )
 		    return item->pendingReadJobs() == 1 ?
-			   QObject::tr( "[1 read job]" ) :
-			   QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
+		           QObject::tr( "[1 read job]" ) :
+		           QObject::tr( "[%1 read jobs]" ).arg( item->pendingReadJobs() );
 
 		if ( item->isExcluded() )
 		    return QObject::tr( "[excluded]" );
@@ -248,7 +248,7 @@ namespace
 
 	    case NameCol:             return item->name();
 	    case SizeCol:             return sizeColText( item );
-	    case LatestMTimeCol:      return formatTime( item->latestMtime() );
+	    case LatestMTimeCol:      return formatTime( item->latestMTime() );
 	    case UserCol:             return item->userName();
 	    case GroupCol:            return item->groupName();
 	    case PermissionsCol:      return item->symbolicPermissions();
@@ -280,7 +280,7 @@ namespace
 		case TotalSubDirsCol:
 		    return QString{ item->sizePrefix() % QString::number( item->totalSubDirs() ) };
 		case OldestFileMTimeCol:
-		    return formatTime( item->oldestFileMtime() );
+		    return formatTime( item->oldestFileMTime() );
 	    }
 	}
 
@@ -325,15 +325,15 @@ namespace
      * Return the column font for the data() override function.
      **/
     QVariant columnFont( const QFont & baseFont,
-			 FileInfo    * item,
-			 int           col,
-			 bool          useBoldForDominantItems )
+                         FileInfo    * item,
+                         int           col,
+                         bool          useBoldForDominantItems )
     {
 	switch ( col )
 	{
 	    case PermissionsCol:
 	    {
-		QFont font( baseFont );
+		QFont font{ baseFont };
 		font.setFamily( QStringLiteral( "monospace" ) );
 		return font;
 	    }
@@ -343,7 +343,7 @@ namespace
 	    {
 		if ( useBoldForDominantItems && item && item->isDominant() )
 		{
-		    QFont font( baseFont );
+		    QFont font{ baseFont };
 		    font.setWeight( QFont::Bold );
 		    return font;
 		}
@@ -363,7 +363,6 @@ namespace
 	    return 0;
 
 	return item->childCount();
-//	return item->attic() ? count + 1 : count;
     }
 
 
@@ -457,7 +456,7 @@ DirTreeModel::DirTreeModel( QObject * parent ):
     _updateTimer.setInterval( _updateTimerMillisec );
 
     connect( &_updateTimer, &QTimer::timeout,
-	     this,          &DirTreeModel::sendPendingUpdates );
+             this,          &DirTreeModel::sendPendingUpdates );
 }
 
 
@@ -522,8 +521,8 @@ void DirTreeModel::writeSettings()
 
 void DirTreeModel::updateSettings( bool crossFilesystems,
                                    bool useBoldForDominant,
-				   DirTreeItemSize dirTreeItemSize,
-				   int updateTimerMillisec )
+                                   DirTreeItemSize dirTreeItemSize,
+                                   int updateTimerMillisec )
 {
     // layoutChanged() is used just to refresh the display, the indexes and order don't change
     // a matching layoutAboutToBechanged() is supposed to be sent, but nobody is actually listening for it
@@ -566,37 +565,37 @@ void DirTreeModel::createTree()
     _tree = new DirTree{ this };
 
     connect( _tree, &DirTree::startingReading,
-	     this,  &DirTreeModel::startingRead );
+             this,  &DirTreeModel::startingRead );
 
     connect( _tree, &DirTree::startingRefresh,
-	     this,  &DirTreeModel::startingRead );
+             this,  &DirTreeModel::startingRead );
 
     connect( _tree, &DirTree::finished,
-	     this,  &DirTreeModel::readingFinished );
+             this,  &DirTreeModel::readingFinished );
 
     connect( _tree, &DirTree::aborted,
-	     this,  &DirTreeModel::readingFinished );
+             this,  &DirTreeModel::readingFinished );
 
     connect( _tree, &DirTree::readJobFinished,
-	     this,  &DirTreeModel::readJobFinished );
+             this,  &DirTreeModel::readJobFinished );
 
     connect( _tree, &DirTree::deletingChildren,
-	     this,  &DirTreeModel::deletingChildren );
+             this,  &DirTreeModel::deletingChildren );
 
     connect( _tree, &DirTree::childrenDeleted,
-	     this,  &DirTreeModel::endRemoveRows );
+             this,  &DirTreeModel::endRemoveRows );
 
     connect( _tree, &DirTree::clearing,
-	     this,  &DirTreeModel::beginResetModel );
+             this,  &DirTreeModel::beginResetModel );
 
     connect( _tree, &DirTree::cleared,
-	     this,  &DirTreeModel::endResetModel );
+             this,  &DirTreeModel::endResetModel );
 
     connect( _tree, &DirTree::clearingSubtree,
-	     this,  &DirTreeModel::clearingSubtree );
+             this,  &DirTreeModel::clearingSubtree );
 
     connect( _tree, &DirTree::subtreeCleared,
-	     this,  &DirTreeModel::endRemoveRows );
+             this,  &DirTreeModel::endRemoveRows );
 }
 
 
@@ -790,8 +789,8 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 
 
 QVariant DirTreeModel::headerData( int             section,
-				   Qt::Orientation orientation,
-				   int             role ) const
+                                   Qt::Orientation orientation,
+                                   int             role ) const
 {
     // Vertical header should never be visible, but ...
     if ( orientation != Qt::Horizontal )
@@ -1127,11 +1126,11 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 	const FileInfo * item = internalPointerCast( index );
 
 	logDebug() << "Clicked row " << index.row()
-		   << " col " << index.column()
-		   << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
-		   << '\t' << item
-	 	   << " data(0): " << index.model()->data( index, 0 ).toString()
-		   << Qt::endl;
+	           << " col " << index.column()
+	           << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
+	           << "\t" << item
+	            << " data(0): " << index.model()->data( index, 0 ).toString()
+	           << Qt::endl;
 	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( " -> "_L1 ) << Qt::endl;
     }
     else
@@ -1169,7 +1168,7 @@ int DirTreeModel::rowNumber( const FileInfo * child ) const
     {
 	// Not found, should never happen
 	logError() << "Child " << child << " (" << (void *)child << ")"
-		   << " not found in " << parent << Qt::endl;
+	           << " not found in " << parent << Qt::endl;
 
 	dumpChildren( parent );
     }

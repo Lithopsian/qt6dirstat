@@ -10,6 +10,7 @@
 #ifndef PkgFileListCache_h
 #define PkgFileListCache_h
 
+#include <QMultiHash>
 #include <QSet>
 
 

@@ -31,7 +31,7 @@ namespace QDirStat
      *	   FileInfoList childrenList;
      *	   std::sort( childrenList.begin(),
      *		      childrenList.end(),
-     *		      FileInfoSorter( LatestMtimeCol, Qt::DescendingOrder ) );
+     *		      FileInfoSorter( LatestMTimeCol, Qt::DescendingOrder ) );
      *
      * For each element pair to compare, the FileInfoSorter's operator() will
      * be called with that pair as arguments.

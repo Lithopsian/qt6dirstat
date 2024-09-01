@@ -82,7 +82,7 @@ namespace QDirStat
          * Convert a filter mode to a string.  Only used for logging stream
          * operators in the various classes derived from this one.
          **/
-        inline static QString toString( FilterMode filterMode )
+        static QString toString( FilterMode filterMode )
         {
             switch ( filterMode )
             {

@@ -48,7 +48,7 @@ PkgFilter OpenPkgDialog::pkgFilter()
     }
 
     const auto mode = FilterMode( _ui->filterModeComboBox->currentIndex() );
-    PkgFilter filter( _ui->pkgPatternField->text(), mode );
+    PkgFilter filter{ _ui->pkgPatternField->text(), mode };
     // logDebug() << filter << Qt::endl;
 
     return filter;
@@ -58,12 +58,12 @@ PkgFilter OpenPkgDialog::pkgFilter()
 PkgFilter OpenPkgDialog::askPkgFilter( bool    * cancelled_ret,
                                        QWidget * parent )
 {
-    OpenPkgDialog dialog( parent );
+    OpenPkgDialog dialog{ parent };
     const int result = dialog.exec();
 
     const bool cancelled = (result == QDialog::Rejected );
 
-    const PkgFilter pkgFilter = cancelled ? PkgFilter() : dialog.pkgFilter();
+    const PkgFilter pkgFilter = cancelled ? PkgFilter{} : dialog.pkgFilter();
 
     if ( cancelled_ret )
         *cancelled_ret = cancelled;

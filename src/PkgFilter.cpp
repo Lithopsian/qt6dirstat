@@ -20,7 +20,7 @@ using namespace QDirStat;
 QString PkgFilter::normalizedPattern( const QString & pattern )
 {
     QString normalizedPattern{ pattern };
-    const QString pkgPrefix = u'^' % PkgInfo::pkgSummaryUrl() % u'*';
+    const QString pkgPrefix = '^' % PkgInfo::pkgSummaryUrl() % '*';
     normalizedPattern.remove( QRegularExpression{ pkgPrefix, QRegularExpression::CaseInsensitiveOption } );
     normalizedPattern.remove( QRegularExpression{ "/.*$" } );
 

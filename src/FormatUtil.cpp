@@ -54,7 +54,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 
 QString QDirStat::formatTime( time_t rawTime )
 {
-    if ( rawTime == (time_t)0 )
+    if ( rawTime == 0 )
 	return QString{};
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
@@ -68,33 +68,33 @@ QString QDirStat::formatTime( time_t rawTime )
 
 QString QDirStat::symbolicMode( mode_t mode )
 {
-    const QChar sticky = [ mode ]()
+    const QChar type = [ mode ]()
     {
-	if ( S_ISDIR ( mode ) ) return 'd';
-	if ( S_ISCHR ( mode ) ) return 'c';
-	if ( S_ISBLK ( mode ) ) return 'b';
-	if ( S_ISFIFO( mode ) ) return 'p';
-	if ( S_ISLNK ( mode ) ) return 'l';
-	if ( S_ISSOCK( mode ) ) return 's';
-	return ' ';
+	if ( S_ISDIR ( mode ) ) return u'd';
+	if ( S_ISCHR ( mode ) ) return u'c';
+	if ( S_ISBLK ( mode ) ) return u'b';
+	if ( S_ISFIFO( mode ) ) return u'p';
+	if ( S_ISLNK ( mode ) ) return u'l';
+	if ( S_ISSOCK( mode ) ) return u's';
+	return u' ';
     }();
 
     // User
-    const QChar uRead    = ( mode & S_IRUSR ) ? 'r' : '-';
-    const QChar uWrite   = ( mode & S_IWUSR ) ? 'w' : '-';
-    const QChar uExecute = ( mode & S_ISUID ) ? 's' : ( mode & S_IXUSR ) ? 'x' : '-';
+    const QChar uRead    = ( mode & S_IRUSR ) ? u'r' : u'-';
+    const QChar uWrite   = ( mode & S_IWUSR ) ? u'w' : u'-';
+    const QChar uExecute = ( mode & S_ISUID ) ? u's' : ( mode & S_IXUSR ) ? u'x' : u'-';
 
     // Group
-    const QChar gRead    = ( mode & S_IRGRP ) ? 'r' : '-';
-    const QChar gWrite   = ( mode & S_IWGRP ) ? 'w' : '-';
-    const QChar gExecute = ( mode & S_ISGID ) ? 's' : ( mode & S_IXGRP ) ? 'x' : '-';
+    const QChar gRead    = ( mode & S_IRGRP ) ? u'r' : u'-';
+    const QChar gWrite   = ( mode & S_IWGRP ) ? u'w' : u'-';
+    const QChar gExecute = ( mode & S_ISGID ) ? u's' : ( mode & S_IXGRP ) ? u'x' : u'-';
 
     // Other
-    const QChar oRead    = ( mode & S_IROTH ) ? 'r' : '-';
-    const QChar oWrite   = ( mode & S_IWOTH ) ? 'w' : '-';
-    const QChar oExecute = ( mode & S_ISVTX ) ? 't' : ( mode & S_IXOTH ) ? 'x' : '-';
+    const QChar oRead    = ( mode & S_IROTH ) ? u'r' : u'-';
+    const QChar oWrite   = ( mode & S_IWOTH ) ? u'w' : u'-';
+    const QChar oExecute = ( mode & S_ISVTX ) ? u't' : ( mode & S_IXOTH ) ? u'x' : u'-';
 
-    return sticky % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
+    return type % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
 }
 
 
@@ -157,6 +157,6 @@ QString QDirStat::elideMiddle( const QString & text, int maxLen )
 void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    const QFontMetrics metrics( label->font() );
+    const QFontMetrics metrics{ label->font() };
     label->setText( metrics.elidedText( text, Qt::ElideMiddle, maxSize ) );
 }

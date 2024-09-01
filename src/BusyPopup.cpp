@@ -28,8 +28,7 @@ namespace
      **/
     void processEvents()
     {
-	QEventLoop eventLoop;
-	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents, PROCESS_EVENTS_MILLISEC );
+	QEventLoop{}.processEvents( QEventLoop::ExcludeUserInputEvents, PROCESS_EVENTS_MILLISEC );
     }
 } // namespace
 

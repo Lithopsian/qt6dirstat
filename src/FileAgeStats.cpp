@@ -27,26 +27,20 @@ FileAgeStats::FileAgeStats( const FileInfo * subtree ):
     initMonthStats( thisYear() );
     initMonthStats( lastYear() );
 
-    collect( subtree );
+    collectRecursive( subtree );
+    calcPercentages();
+    collectYears();
 }
 
 
 void FileAgeStats::initMonthStats( short year )
 {
-    for ( int month = 1; month <= 12; month++ )
+    for ( short month = 1; month <= 12; month++ )
     {
         YearStats * stats = monthStats( year, month );
         if ( stats )
-            *stats = YearStats( year, month );
+            *stats = YearStats{ year, month };
     }
-}
-
-
-void FileAgeStats::collect( const FileInfo * subtree )
-{
-    collectRecursive( subtree );
-    calcPercentages();
-    collectYears();
 }
 
 
@@ -60,7 +54,7 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
         {
             collectRecursive( item );
         }
-        else if ( item->isFile() )
+        else if ( item->isFile() || item->isSymLink() )
         {
             const auto  yearAndMonth = item->yearAndMonth();
             const short year         = yearAndMonth.year;
@@ -133,15 +127,6 @@ void FileAgeStats::collectYears()
 {
     _yearsList = _yearStats.keys();
     std::sort( _yearsList.begin(), _yearsList.end() );
-}
-
-
-YearStats * FileAgeStats::yearStats( short year )
-{
-    if ( _yearStats.contains( year ) )
-        return &( _yearStats[ year ] );
-
-    return nullptr;
 }
 
 

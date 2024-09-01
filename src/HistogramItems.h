@@ -10,7 +10,9 @@
 #ifndef HistogramItems_h
 #define HistogramItems_h
 
-#include <QGraphicsRectItem>
+#include <QGraphicsItem>
+
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat
@@ -19,8 +21,8 @@ namespace QDirStat
     class HistogramView;
 
     /**
-     * QGraphicsItem class for a histogram bar: solely to be able
-     * to pick up hover events.
+     * QGraphicsItem class for a histogram bar: a class to be able
+     * to pick up hover events and easily adjust the bar size.
      *
      * This creates an invisible full-height item so it is easy to
      * highlight a bucket and get a tooltip, and a visible child
@@ -30,15 +32,15 @@ namespace QDirStat
     {
     public:
 	/**
-	 * Constructor: 'number' is the number of the bar (0 being the
-	 * leftmost) in the histogram
+	 * Constructor: 'bucketIndex' is the number of the bar (0
+	 * being the leftmost) in the histogram.
 	 **/
-	HistogramBar( HistogramView       * parent,
-		      const FileSizeStats * stats,
-		      int                   number,
-		      const QRectF        & rect,
-		      qreal                 fillHeight );
-
+	HistogramBar( const FileSizeStats * stats,
+	              int                   bucketIndex,
+	              const QRectF        & rect,
+	              qreal                 fillHeight,
+	              const QPen          & pen,
+	              const QBrush        & brush );
 
     protected:
 	/**

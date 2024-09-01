@@ -36,7 +36,7 @@ void MainWindow::askOpenUnpkg()
 	return;
     }
 
-    OpenUnpkgDialog dialog( this );
+    OpenUnpkgDialog dialog{ this };
 
     if ( dialog.exec() == QDialog::Accepted )
     {
@@ -64,7 +64,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     }
 
     pkgQuerySetup();
-    BusyPopup msg( tr( "Reading package database..." ) );
+    BusyPopup msg{ tr( "Reading package database..." ) };
 
     setUnpkgExcludeRules( unpkgSettings );
     setUnpkgFilters( unpkgSettings, pkgManager );

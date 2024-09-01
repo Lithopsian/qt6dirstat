@@ -10,15 +10,18 @@
 #ifndef AdaptiveTimer_h
 #define AdaptiveTimer_h
 
+#include <functional>
+
 #include <QElapsedTimer>
-#include <QList>
+#include <QObject>
 #include <QTimer>
+#include <QVector>
 
 
 namespace QDirStat
 {
     /**
-     * Timer for delivering signals that each obsolete each previous one, for
+     * Timer for delivering signals that obsolete each previous one, for
      * example for an expensive blocking operation to retrieve the contents of
      * a widget.
      *
@@ -32,14 +35,17 @@ namespace QDirStat
      * The delay in delivering a request is configurable as a multiple of the
      * time that it took the previous request to complete.  This avoids pointlessly
      * penalising users with fast hardware or when lookups are coming from cache,
-     * but reduces lockups with real lookups on slower hardware.
+     * but reduces lockups with real lookups on slower hardware.  The timer
+     * intervals are stored as signed ints, so valid up to about 596 hours.  The
+     * configurable factor is stored as a single-precision float, so accurate to
+     * about 1 second in 2.8 hours.
      **/
     class AdaptiveTimer: public QObject
     {
         Q_OBJECT
 
-        typedef QList<float>          Delays;
-        typedef QList<int>            Cooldowns;
+        typedef QVector<float>        Delays;
+        typedef QVector<int>          Cooldowns;
         typedef std::function<void()> Payload;
 
     public:
@@ -61,6 +67,7 @@ namespace QDirStat
          * The delays will typically be longer for higher stages, while the cooldowns
          * will be shorter so that the longer delays are only used for repidly-repeated
          * requests while shorter delays will be used for less frequent requests.
+         *
          **/
         AdaptiveTimer( QObject * parent, Delays delays, Cooldowns cooldowns );
 
@@ -86,17 +93,22 @@ namespace QDirStat
          * This is the value from the delays list corresponding to the current stage, or
          * a default value if the delays list is empty.
          **/
-        int currentDelay() const;
+        int currentDelay() const
+            { return _delays.isEmpty() ? 0 : _payloadTime * _delays[ _delayStage ]; }
 
         /**
-         * Returns the cooldown period for the current stage.
+         * Returns the cooldown period for the current stage, in milliseconds.
          **/
-        int cooldownPeriod() const;
+        int cooldownPeriod() const
+            { return _cooldowns.isEmpty() ? 0 : _cooldowns[ qMin( _cooldowns.size() - 1, _delayStage ) ]; }
 
         /**
          * Increase the delivery delay.
          **/
         void increaseDelay();
+
+
+    protected slots:
 
         /**
          * Decrease the delivery delay.
@@ -113,17 +125,15 @@ namespace QDirStat
 
         // Data members
 
-        Payload       _payload;
+        Payload   _payload;
+        int       _payloadTime{ 0 };
 
-        QElapsedTimer _payloadStopwatch;
-        qint64        _payloadTime{ 0 };
+        int       _delayStage{ 0 };
+        Delays    _delays;
+        Cooldowns _cooldowns;
 
-        int           _delayStage{ 0 };
-        Delays        _delays;
-        Cooldowns     _cooldowns;
-
-        QTimer        _deliveryTimer;
-        QTimer        _cooldownTimer;
+        QTimer    _deliveryTimer;
+        QTimer    _cooldownTimer;
 
     }; // class AdaptiveTimer
 

@@ -11,7 +11,6 @@
 #define FileAgeStats_h
 
 #include <QHash>
-#include <QList>
 
 #include "Typedefs.h" // FileSize
 
@@ -69,7 +68,8 @@ namespace QDirStat
          * Return year statistics for the specified year or 0 if there are
          * none.
          **/
-        YearStats * yearStats( short year );
+        YearStats * yearStats( short year )
+                { return _yearStats.contains( year ) ? &( _yearStats[ year ] ) : nullptr; }
 
         /**
          * Return the month statistics for the specified year and month
@@ -104,12 +104,6 @@ namespace QDirStat
 
 
     protected:
-
-        /**
-         * Recurse through all file elements in the subtree and calculate the
-         * data for that subtree.
-         **/
-        void collect( const FileInfo * subtree );
 
         /**
          * Initialise all month stats for this or the last year.

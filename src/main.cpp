@@ -48,12 +48,12 @@ namespace
 
     void logVersion()
     {
-	logInfo() << "Qt6DirStat-" << QDIRSTAT_VERSION
+	logInfo() << QDIRSTAT_APP "-" QDIRSTAT_VERSION
 	          << " built with Qt " << QT_VERSION_STR
 	          << Qt::endl;
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
-	logWarning() << "The supported Qt version for Qt6DirStat is Qt 5.12 or newer."
+	logWarning() << "The supported Qt version for " QDIRSTAT_APP " is Qt 5.12 or newer."
 	             << " You are using Qt " << QT_VERSION_STR
 	             << ". This may or may not work." << Qt::endl;
 #endif
@@ -103,7 +103,7 @@ namespace
      **/
     void mainLoop( bool slowUpdate, bool openCache, bool dontAsk, const QStringList & argList )
     {
-	QDirStat::MainWindow mainWin( slowUpdate );
+	QDirStat::MainWindow mainWin{ slowUpdate };
 	mainWin.show();
 
 	if ( !argList.isEmpty() )
@@ -127,7 +127,7 @@ namespace
 
 int main( int argc, char * argv[] )
 {
-    QDirStat::QDirStatApp qDirStatApp( argc, argv );
+    QDirStat::QDirStatApp qDirStatApp{ argc, argv };
     QStringList argList = QCoreApplication::arguments();
     argList.removeFirst(); // Remove program name
 
@@ -164,12 +164,12 @@ int main( int argc, char * argv[] )
     }
 
     // We are definitely going to start the application now
-    Logger logger( "/tmp/qdirstat-$USER", "qdirstat.log" );
+    Logger logger{ "/tmp/qdirstat-$USER", "qdirstat.log" };
     logVersion();
 
     // Set org/app name for QSettings
-    QCoreApplication::setOrganizationName( "Qt6DirStat" );
-    QCoreApplication::setApplicationName ( "Qt6DirStat" );
+    QCoreApplication::setOrganizationName( QDIRSTAT_APP );
+    QCoreApplication::setApplicationName ( QDIRSTAT_APP );
 //    QCoreApplication::setApplicationVersion( QDIRSTAT_VERSION );
 
     mainLoop( slowUpdate, openCache, dontAsk, argList );

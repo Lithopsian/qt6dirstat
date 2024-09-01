@@ -31,6 +31,21 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns a suitable color for 'file' based on a set of internal rules
+     * (according to filename extension, MIME type or permissions).
+     *
+     * This function is defined here primarily to let the compiler inline
+     * it as a performance-critical call.
+     **/
+    const QColor & tileColor( const TreemapView * parentView, const FileInfo * file )
+    {
+	if ( parentView->fixedColor().isValid() )
+	    return parentView->fixedColor();
+
+	return MimeCategorizer::instance()->color( file );
+    }
+
+    /**
      * Try to include members referred to by 'it' into 'rect' so that they achieve
      * the most "square" appearance.  Items are added until the aspect ratio of the
      * first and last items doesn't get better any more.  Returns the total size of
@@ -180,7 +195,6 @@ namespace
 } // namespace
 
 
-// constructor with no parent tile, only used for the root tile
 TreemapTile::TreemapTile( TreemapView  * parentView,
                           FileInfo     * orig,
                           const QRectF & rect ):
@@ -194,6 +208,8 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
     _cushionSurface{ _parentView->cushionHeights() } // initial cushion surface
 {
     //logDebug() << "Creating root tile " << orig << "    " << rect << Qt::endl;
+
+    // constructor with no parent tile, only used for the root tile
     init();
 
     if ( _parentView->squarify() )
@@ -246,7 +262,6 @@ VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
         createChildrenVertical( rect );
 }
 
-// constructor for squarified layout, with the cushion specified explicitly to allow for a row cushion
 TreemapTile::TreemapTile( TreemapTile          * parentTile,
                           FileInfo             * orig,
                           const QRectF         & rect,
@@ -262,6 +277,7 @@ TreemapTile::TreemapTile( TreemapTile          * parentTile,
 {
     //logDebug() << "Creating squarified tile for " << orig << "  " << rect << Qt::endl;
 
+    // constructor for squarified layout, with the cushion specified explicitly to allow for a row cushion
     init();
 
     if ( orig->isDirInfo() )
@@ -431,7 +447,7 @@ void TreemapTile::layoutRow( Orientation      dir,
 
     // All the row tiles have the same coefficients on the short axis of the row
     // .. so just calculate them once on a hypothetical row cushion
-    CushionSurface rowCushionSurface = CushionSurface( _cushionSurface, _parentView->cushionHeights() );
+    CushionSurface rowCushionSurface{ _cushionSurface, _parentView->cushionHeights() };
     if ( dir == TreemapHorizontal )
     {
         const double newY = rectY + height;
@@ -527,7 +543,7 @@ void TreemapTile::renderChildCushions()
             tile->_cushion = tile->renderCushion( tile->rect() );
         else
             //tile->_pixmap = tile->renderPlainTile( tile->rect() );
-            tile->setBrush( tileColor( tile->_orig ) );
+            tile->setBrush( tileColor( _parentView, tile->_orig ) );
     }
 }
 
@@ -583,7 +599,7 @@ void TreemapTile::paint( QPainter                       * painter,
     else
     {
         if ( brush().style() == Qt::NoBrush )
-            setBrush( tileColor( _orig ) );
+            setBrush( tileColor( _parentView, _orig ) );
         QGraphicsRectItem::paint( painter, option, widget );
 
         // Always try to draw an outline since there is no other indication of the tiles
@@ -619,7 +635,7 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 {
     //logDebug() << rect << Qt::endl;
 
-    const QColor & color = tileColor( _orig );
+    const QColor & color = tileColor( _parentView, _orig );
 
     // These don't need rounding, they're already whole pixels, but make the narrowing explicit
     const int width = static_cast<int>( rect.width() );
@@ -654,14 +670,6 @@ QPixmap TreemapTile::renderCushion( const QRectF & rect )
 
     return QPixmap::fromImage( image );
 }
-
-const QColor & TreemapTile::tileColor( const FileInfo * file ) const
-{
-    return _parentView->fixedColor().isValid() ?
-        _parentView->fixedColor() :
-        MimeCategorizer::instance()->color( file );
-}
-
 
 void TreemapTile::invalidateCushions()
 {

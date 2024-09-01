@@ -10,7 +10,7 @@
 #ifndef PkgInfo_h
 #define PkgInfo_h
 
-#include <QList>
+#include <QStringBuilder>
 
 #include "DirInfo.h"
 
@@ -127,7 +127,7 @@ namespace QDirStat
          * Reimplemented - inherited from FileInfo.
          **/
         QString url() const override
-            { return pkgScheme() + ( isPkgUrl( name() ) ? QString{} : name() ); }
+            { return pkgScheme() % ( isPkgUrl( name() ) ? QString{} : name() ); }
 
         /**
          * Return 'true' if this is a package URL, i.e. it starts with "Pkg:".
@@ -140,7 +140,7 @@ namespace QDirStat
          * just return 'path'.
          **/
         QString pkgUrl( const QString & path ) const
-            { return isPkgUrl( path ) ? path : url() + path; }
+            { return isPkgUrl( path ) ? path : url() % path; }
 
         /**
          * Locate a path that within this subtree.
@@ -154,24 +154,10 @@ namespace QDirStat
         /**
          * Returns the name of the "root" package summary item url (ie. "Pkg:/").
          **/
-        static QString pkgSummaryUrl() { return pkgScheme(); }
+        static QLatin1String pkgSummaryUrl() { return pkgScheme(); }
 
 
     protected:
-
-        /**
-         * Locate a path in this PkgInfo subtree:
-         * Return the corresponding FileInfo or 0 if not found.
-         **/
-//        FileInfo * locate( const QString & path );
-
-        /**
-         * Locate a path that is already split up into its components in this
-         * PkgInfo subtree: Return the corresponding FileInfo or 0 if not
-         * found.
-         **/
-//        FileInfo * locate( const QStringList & pathComponents )
-//            { return locate( this, pathComponents ); }
 
         /**
          * Returns the package scheme prefix.

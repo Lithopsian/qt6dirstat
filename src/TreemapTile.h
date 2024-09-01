@@ -51,7 +51,7 @@ namespace QDirStat
     public:
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
 	    QVector<double>( 10 ), // ten elements, not onex10.0
-	    _constLast{ cend() - 1 }
+	    _constLast{ cend() - 1 } // iterator to last list entry
 	{
 	    // Start with the given cushion height, times 4 from the coefficients
 	    double height = 4.0 * cushionHeight;
@@ -142,7 +142,8 @@ namespace QDirStat
 	double xx2() const { return _xx2; }
 
 	/**
-	 * Returns the polynomial coefficient of the first order for X direction.
+	 * Returns the polynomial coefficient of the first order for X
+	 * direction.
 	 **/
 	double xx1() const { return _xx1; }
 
@@ -153,7 +154,8 @@ namespace QDirStat
 	double yy2() const { return _yy2; }
 
 	/**
-	 * Returns the polynomial coefficient of the first order for Y direction.
+	 * Returns the polynomial coefficient of the first order for Y
+	 * direction.
 	 **/
 	double yy1() const { return _yy1; }
 
@@ -202,22 +204,6 @@ namespace QDirStat
      **/
     class TreemapTile: public QGraphicsRectItem
     {
-    public:
-
-	/**
-	 * Constructor: create a root treemap tile from 'orig' that fits into a
-	 * rectangle 'rect'.
-	 **/
-	TreemapTile( TreemapView  * parentView,
-	             FileInfo     * orig,
-	             const QRectF & rect );
-
-	/**
-	 * Destructor.  Note that the highlighter is owned by the scene/view
-	 * so nothing to do here.
-	 **/
-//	~TreemapTile() override = default;
-
 
     protected:
 
@@ -231,7 +217,7 @@ namespace QDirStat
 	             const QRectF & rect );
 
 	/**
-	 * Constructor used for squarified children
+	 * Constructor used for squarified children.
 	 **/
 	TreemapTile( TreemapTile          * parentTile,
 	             FileInfo             * orig,
@@ -239,6 +225,21 @@ namespace QDirStat
 	             const CushionSurface & cushionSurface );
 
     public:
+
+	/**
+	 * Constructor: create a root treemap tile from 'orig' that fits into a
+	 * rectangle 'rect'.  This is used for the root tile and is the only
+	 * public constructor.
+	 **/
+	TreemapTile( TreemapView  * parentView,
+	             FileInfo     * orig,
+	             const QRectF & rect );
+
+	/**
+	 * Destructor.  Note that the highlighter is owned by the scene/view
+	 * so nothing to do here.
+	 **/
+//	~TreemapTile() override = default;
 
 	/**
 	 * Returns a pointer to the original FileInfo item that corresponds to
@@ -435,12 +436,6 @@ namespace QDirStat
 	 * of any leaf-level tiles.
 	 **/
 	void renderChildCushions();
-
-	/**
-	 * Returns a suitable color for 'file' based on a set of internal rules
-	 * (according to filename extension, MIME type or permissions).
-	 **/
-	inline const QColor & tileColor( const FileInfo * file ) const;
 
 	/**
 	 * Initialization common to all constructors.

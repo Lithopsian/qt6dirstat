@@ -151,8 +151,14 @@ const QColor & MimeCategorizer::color( const FileInfo * item )
 
 const MimeCategory * MimeCategorizer::category( const FileInfo * item, QString * suffix_ret )
 {
+    if ( suffix_ret )
+	*suffix_ret = QString{};
+
     if ( item )
     {
+	if ( item->isSymLink() )
+	    return _symlinkCategory;
+
 	const QReadLocker locker{ &_lock };
 
 	const MimeCategory * matchedCategory = category( item->name(), suffix_ret );
@@ -189,9 +195,6 @@ const MimeCategory * MimeCategorizer::category( const FileInfo * item ) const
 const MimeCategory * MimeCategorizer::category( const QString & filename,
                                                 QString       * suffix_ret ) const
 {
-    if ( suffix_ret )
-	*suffix_ret = QString{};
-
     if ( filename.isEmpty() )
 	return nullptr;
 
@@ -208,7 +211,9 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	    return category;
     }
 
-    if ( length < _caseInsensitiveLengths.size() && _caseInsensitiveLengths.testBit( length ) && !filename.isLower() )
+    if ( length < _caseInsensitiveLengths.size() &&
+         _caseInsensitiveLengths.testBit( length ) &&
+         !filename.isLower() )
     {
 	// A lowercased filename will have been detected already because there is a pattern
 	// in the case-sensitive map, so only filenames which are not lowercase are of
@@ -300,9 +305,15 @@ const MimeCategory * MimeCategorizer::findCategoryByName( const QString & catego
 }
 
 
-MimeCategory * MimeCategorizer::create( const QString & name, const QColor & color )
+const MimeCategory * MimeCategorizer::addCategory ( const QString     & name,
+                                                    const QColor      & color,
+                                                    const QStringList & caseSensitivePatterns,
+                                                    const QStringList & caseInsensitivePatterns )
 {
     MimeCategory * category = new MimeCategory{ name, color };
+    category->addPatterns( caseInsensitivePatterns, Qt::CaseInsensitive );
+    category->addPatterns( caseSensitivePatterns,   Qt::CaseSensitive   );
+
     _categories << category;
 
     return category;
@@ -363,7 +374,7 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
     for ( const QString & pattern : category->caseInsensitiveWildcardSuffixList() )
     {
 	const QString suffix = pattern.section( "*."_L1, -1 ).toLower();
-	const auto pair = WildcardPair{ CaseInsensitiveWildcard( pattern ), category };
+	const auto pair = WildcardPair{ CaseInsensitiveWildcard{ pattern }, category };
 	_caseInsensitiveSuffixes.insert( suffix, pair );
 	_caseSensitiveSuffixes.insert( suffix, pair );
     }
@@ -372,7 +383,7 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
     for ( const QString & pattern : category->caseSensitiveWildcardSuffixList() )
     {
 	const QString suffix = pattern.section( "*."_L1, -1 );
-	_caseSensitiveSuffixes.insert( suffix, { CaseSensitiveWildcard( pattern ), category } );
+	_caseSensitiveSuffixes.insert( suffix, { CaseSensitiveWildcard{ pattern }, category } );
     }
 }
 
@@ -404,10 +415,10 @@ void MimeCategorizer::buildWildcardLists( const MimeCategory * category )
 {
     //logDebug() << "adding " << keyList << " to " << category << Qt::endl;
     for ( const QString & pattern : category->caseSensitiveWildcardList() )
-	_wildcards << WildcardPair{ CaseSensitiveWildcard( pattern ), category };
+	_wildcards << WildcardPair{ CaseSensitiveWildcard{ pattern }, category };
 
     for ( const QString & pattern : category->caseInsensitiveWildcardList() )
-	_wildcards << WildcardPair{ CaseInsensitiveWildcard( pattern ), category };
+	_wildcards << WildcardPair{ CaseInsensitiveWildcard{ pattern }, category };
 }
 
 
@@ -429,9 +440,7 @@ void MimeCategorizer::readSettings()
 	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
 
 	//logDebug() << name << Qt::endl;
-	MimeCategory * category = create( name, color );
-	category->addPatterns( patternsCaseInsensitive, Qt::CaseInsensitive );
-	category->addPatterns( patternsCaseSensitive,   Qt::CaseSensitive   );
+	addCategory( name, color, patternsCaseInsensitive, patternsCaseSensitive );
     }
 
     if ( _categories.isEmpty() )
@@ -474,22 +483,11 @@ void MimeCategorizer::ensureMandatoryCategories()
     if ( !_symlinkCategory )
     {
 	// Special category for symlinks regardless of the filename, must exist
-	_symlinkCategory = create( symlinkCategoryName(), Qt::blue );
+	_symlinkCategory = addCategory( symlinkCategoryName(), Qt::blue, QStringList{}, QStringList{} );
 	writeSettings( _categories );
     }
 }
 
-
-const MimeCategory * MimeCategorizer::addCategory( const QString & name,
-                                                   const QColor  & color,
-                                                   const QString & caseInsensitivePatterns,
-                                                   const QString & caseSensitivePatterns )
-{
-    MimeCategory * category = create( name, color );
-    category->addPatterns( caseInsensitivePatterns.split( u',' ), Qt::CaseInsensitive );
-    category->addPatterns( caseSensitivePatterns.split  ( u',' ), Qt::CaseSensitive   );
-    return category;
-}
 
 void MimeCategorizer::addDefaultCategories()
 {

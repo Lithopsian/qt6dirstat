@@ -10,9 +10,10 @@
 #ifndef HistogramView_h
 #define HistogramView_h
 
+#include <QGraphicsItem>
 #include <QGraphicsView>
 
-#include "Typedefs.h" // _qr
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat
@@ -27,26 +28,19 @@ namespace QDirStat
      *
      * The histogram can be displayed in a traditional way, i.e. from the
      * minimum data value (percentile 0 or P0) to the maximum data value
-     * (percentile 100 or P100). But in many cases, this greatly distorts the
-     * display because of outliers (data points way outside the range of
-     * "normal" data points), so this histogram can also display from a given
+     * (percentile 100 or P100). But in many cases this greatly distorts the
+     * display because of outliers (data points far outside the range of the
+     * bulk of data points), so the histogram can also display from a given
      * percentile (startPercentile) to another given percentile
      * (endPercentile).
      *
-     * In many cases, those outliers are only a very small percentage, so
-     * displaying not from P0..P100, but from P3..P97 instead gives a much more
-     * meaningful histogram, while still displaying 96% of all data: By
-     * definition, each percentile contains 1% of all data points, so you lose
-     * one percent at the left and one percent at the right for each percentile
-     * omitted like this.
+     * The "cutoff" data is clearly communicated to the user so he does not get
+     * the impression that the histogram in that mode displays all data; it
+     * does not. It does display the most meaningful part of the data, though.
      *
-     * That "cutoff" should be clearly communicated to the user so he does not
-     * get the impression that this histogram in that mode displays all data;
-     * it does not. It does display the meaningful part of the data, though.
-     *
-     * In addition to that, the percentiles (or at least every 5th of them,
-     * depending on configuration) as well as the median, the 1st and the 3rd
-     * quartile (Q1 and Q3) can be displayed as an overlay to the histogram.
+     * In addition to that, some or all of the percentiles, as well as the
+     * median and the 1st and the 3rd quartiles (Q1 and Q3) can be displayed as
+     * overlays on the histogram.
      **/
     class HistogramView: public QGraphicsView
     {
@@ -55,7 +49,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * zValue (altitude) for the different graphics elements
+	 * z-value (altitude) for the different graphics elements
 	 **/
 	enum GraphicsItemLayer
 	{
@@ -64,8 +58,9 @@ namespace QDirStat
 	    BarLayer,
 	    AxisLayer,
 	    HoverBarLayer,
-	    MarkerLayer,
-	    SpecialMarkerLayer,
+	    PercentileLayer,
+	    QuartileLayer,
+	    MedianLayer,
 	    TextLayer,
 	};
 
@@ -90,7 +85,7 @@ namespace QDirStat
 	 * The interval between one percentile and the next contains exactly 1%
 	 * of the data points.
 	 *
-	 * HistogramView does now take ownership of the stats object.
+	 * HistogramView does not take ownership of the stats object.
 	 **/
 	void init( const FileSizeStats * stats );
 
@@ -98,45 +93,41 @@ namespace QDirStat
 	 * Return the stored value for percentile no. 'index' (0..100).  This
 	 * directly accesses the percentile list with the assumption that it is
 	 * already populated with 101 entries.
-	 *
-	 * Note that the floating point boundary value from the stats is
-	 * truncated to the floor integer to match the > or <= definition for
-	 * being in that percentile.
 	 **/
 	FileSize percentile( int index ) const;
+
+	/**
+	 * Set the percentile range (0..100) for which to display data.
+	 **/
+	void setPercentileRange( int startPercentile, int endPercentile );
 
 	/**
 	 * Set the percentile (0..100) from which on to display data, i.e. set
 	 * the left border of the histogram. The real value to use is taken
 	 * from the stored percentiles.
 	 **/
-	void setStartPercentile( int index );
+//	void setStartPercentile( int index );
 
 	/**
 	 * Return the percentile from which on to display data, i.e. the left
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
-	int startPercentile() const { return _startPercentile; }
+//	int startPercentile() const { return _startPercentile; }
 
 	/**
 	 * Set the percentile (0..100) until which on to display data, i.e. set
 	 * the right border of the histogram. The real value to use is taken
 	 * from the stored percentiles.
 	 **/
-	void setEndPercentile( int index );
+//	void setEndPercentile( int index );
 
 	/**
-	 * Return the percentile until which to display data, i.e. the right
+	 * Return the percentile up to which to display data, i.e. the right
 	 * border of the histogram. Use percentile() with the result of this to
 	 * get the numeric value.
 	 **/
-	int endPercentile() const { return _endPercentile; }
-
-	/**
-	 * Automatically determine the best start and end percentile
-	 **/
-	void autoStartEndPercentiles();
+//	int endPercentile() const { return _endPercentile; }
 
 	/**
 	 * Enable or disable showing percentiles as an overlay over the
@@ -144,11 +135,12 @@ namespace QDirStat
 	 * example, '5' will display P5, P10, P15 etc.; step = 0 disables
 	 * them completely.
 	 **/
-	void setPercentileStep( int step ) { _percentileStep = step; }
+	void setPercentileStep( int step )
+	    { _percentileStep = step; rebuild(); }
 
 	/**
-	 * Set how many percentiles to display as an overlay at the left margin
-	 * in addition to those shown with showPercentiles().
+	 * Set how many percentiles to display as an overlay at the left
+	 * margin in addition to those shown based on _percentileStep.
 	 *
 	 * A value of 2 with a histogram showing data from min to max means
 	 * show also P1 and P2.
@@ -158,17 +150,17 @@ namespace QDirStat
 	 *
 	 * A value of 0 means show no additional percentiles.
 	 **/
-//	void setLeftMarginPercentiles( int number = 0 )
-//	    { _leftMarginPercentiles = number; }
+//	void setLeftExtraPercentiles( int number = 0 )
+//	    { _leftExtraPercentiles = number; }
 
 	/**
-	 * Return the left margin percentiles or 0 if none are shown.
+	 * Return the left extra percentiles or 0 if none are shown.
 	 **/
-//	int leftMarginPercentiles() { return _leftMarginPercentiles; }
+//	int leftExtraPercentiles() { return _leftExtraPercentiles; }
 
 	/**
 	 * Set how many percentiles to display as an overlay at the right
-	 * margin in addition to those shown with showPercentiles().
+	 * margin in addition to those shown based on _percentileStep.
 	 *
 	 * A value of 2 with a histogram showing data from min to max means
 	 * show also P98 and P99.
@@ -178,95 +170,80 @@ namespace QDirStat
 	 *
 	 * A value of 0 means show no additional percentiles.
 	 **/
-//	void setRightMarginPercentiles( int number= 2 )
-//	    { _leftMarginPercentiles = number; }
+//	void setRightExtraPercentiles( int number= 2 )
+//	    { _leftExtraPercentiles = number; }
 
 	/**
-	 * Return the right margin percentiles or 0 if none are shown.
+	 * Return the right extra percentiles or 0 if none are shown.
 	 **/
-//	int rightMarginPercentiles() { return _rightMarginPercentiles; }
+//	int rightExtraPercentiles() { return _rightExtraPercentiles; }
 
 	/**
-	 * Pen and brush for HistogramBar.
+	 * Set whether to automatically determine the type of y-axis
+	 * scaling.
 	 **/
-	QBrush barBrush() const { return _barBrush; }
-	QPen   barPen()   const { return _barPen;   }
+	void enableAutoLogScale() { _autoLogScale = true; }
+	void disableAutoLogScale() { _autoLogScale = false; }
 
 	/**
-	 * Build the histogram based on a new set of data.
+	 * Return whether the y-axis is currently showing as a log scale.
 	 **/
-	void build();
+	bool logScale() { return _useLogScale; }
+	void toggleLogScale() { _useLogScale = !_useLogScale; }
+
+	/**
+	 * Build the histogram, probably based on a new set of data.
+	 * The preferred y-axis scaling will be recalculated.
+	 **/
+	void build()
+	    { autoLogScale(); rebuild(); }
 
 
     protected:
 
 	/**
-	 * Rebuild the histogram based on the current data.
+	 * Rebuild the histogram based on the current data.  The geometry
+	 * may be recalculated, for example if the window has been resized.
 	 **/
 	void rebuild();
 
 	/**
-	 * Return 'true' if percentile no. 'index' is in range for being
-	 * displayed, i.e. if it is between _startPercentile and
-	 * _endPercentile.
-	 **/
-	bool percentileDisplayed( int index ) const
-	    { return index >= _startPercentile && index <= _endPercentile; }
-
-	/**
 	 * Automatically determine if a logarithmic height scale should be
-	 * used. Set the internal _useLogHeightScale variable accordingly and
+	 * used. Set the internal _useLogScale variable accordingly and
 	 * return it.
 	 **/
-	void autoLogHeightScale();
+	void autoLogScale();
 
 	/**
 	 * Functions to create the graphical elements.
 	 **/
-	void addHistogramBackground();
+	void createPanel( const QRectF & rect )
+		{ scene()->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); }
+	void addBackground()
+	    { createPanel( { -leftBorder(), -topBorder() - _size.height(), fullWidth(), fullHeight() } ); }
 	void addAxes();
-	void addYAxisLabel();
 	void addXAxisLabel();
+	void addYAxisLabel();
 	void addXStartEndLabels();
+	void addYStartEndLabels();
 	void addQuartileText();
-	void addHistogramBars();
+	void addBars();
 	void addMarkers();
 	void addOverflowPanel();
 
 	/**
-	 * Add a text item at 'pos' and return the bottom left of its bounding
-	 * rect.
+	 * Add a vertical line, from slightly below the x-axis (zero)
+	 * to slightly above the top of the histogram.  Two lines are
+	 * actually created: one visible line and a wider transparent
+	 * line to make the tooltip easier to trigger.  The tooltip
+	 * shows the name and the value it marks.  The z-value of the
+	 * visible line is set to 'layer' and the transparent line one
+	 * higher.
 	 **/
-	QGraphicsTextItem * addText( QPointF pos, const QString & text );
-
-	/**
-	 * Add a text item at 'pos' and return the bottom left of its bounding
-	 * rect.
-	 **/
-	QPointF addText( QPointF pos, const QStringList & lines );
-
-	/**
-	 * Add a bold font text item at 'pos' and return the bottom left of its
-	 * bounding rect.
-	 **/
-	QPointF addBoldText( QPointF pos, const QString & text );
-
-	/**
-	 * Add a line.
-	 **/
-	void addLine( int             percentileIndex,
-	              const QString & name,
-	              const QPen    & pen );
-
-	/**
-	 * Add a pie diagram with two values val1 and val2.
-	 * Return the bottom left of the bounding rect.
-	 **/
-	QPointF addPie( const QRectF & rect,
-	                FileSize       val1,
-	                FileSize       val2,
-	                const QBrush & brush1,
-	                const QBrush & brush2 );
+	void addMarker( int                 index,
+	                const QString     & name,
+	                const QPen        & pen,
+	                GraphicsItemLayer   layer );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -274,9 +251,22 @@ namespace QDirStat
 	void fitToViewport();
 
 	/**
-	 * Calculate the content geometry to fit into 'newSize'.
+	 * Return or set whether the geometry of the histogram needs
+	 * to be re-caclulated.
 	 **/
-	void calcGeometry( QSize newSize );
+	bool geometryDirty() const { return !_size.isValid(); }
+	void setGeometryDirty() { _size = QSize{}; }
+
+	/**
+	 * Calculate the content geometry to try and fit the viewport.
+	 * The histogram may be over-sized (it is always built to a
+	 * minimum height, to fit the overflow panel contents) and
+	 * will then be scaled down to fit the viewport.  If the
+	 * histogram is forced to a minimum height then the width is
+	 * increased proportionally so that it will scale down to
+	 * fill the viewport width.
+	 **/
+	void calcGeometry();
 
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.
@@ -286,29 +276,84 @@ namespace QDirStat
 
 	/**
 	 * A whole bunch of fixed values describing the geometry of
-	 * the histogram window. Not static since there will only ever
-	 * be one HistogramView and most of the time none.
+	 * the histogram window.
 	 **/
-	qreal leftBorder()        const { return  40.0_qr; }
-	qreal rightBorder()       const { return  10.0_qr; }
-	qreal topBorder()         const { return  30.0_qr; }
-	qreal bottomBorder()      const { return  50.0_qr; }
-	qreal viewMargin()        const { return  10.0_qr; };
-	qreal textBorder()        const { return  10.0_qr; };
-	qreal textSpacing()       const { return  30.0_qr; };
-	qreal topTextHeight()     const { return  34.0_qr; };
-	qreal axisExtraLength()   const { return   5.0_qr; };
-	qreal markerExtraHeight() const { return  15.0_qr; };
-	qreal overflowWidth()     const { return 140.0_qr; };
-	qreal overflowBorder()    const { return  10.0_qr; };
-	qreal overflowSpacing()   const { return  15.0_qr; }; // between histogram and overflow area
-	qreal pieDiameter()       const { return  60.0_qr; };
-	qreal pieSliceOffset()    const { return  10.0_qr; };
+	constexpr static qreal leftBorder()        { return  30; }
+	constexpr static qreal rightBorder()       { return  10; }
+	constexpr static qreal topBorder()         { return  30; }
+	constexpr static qreal bottomBorder()      { return  50; }
+	constexpr static qreal viewMargin()        { return  10; };
+	constexpr static qreal textBorder()        { return  10; };
+	constexpr static qreal textSpacing()       { return  25; };
+	constexpr static qreal topTextHeight()     { return  34; };
+	constexpr static qreal axisExtraLength()   { return   5; };
+	constexpr static qreal markerExtraHeight() { return  10; };
+	constexpr static qreal overflowBorder()    { return  12; };
+	constexpr static qreal overflowGap()       { return  15; };
+	constexpr static qreal overflowSpacing()   { return  10; };
+	constexpr static qreal pieDiameter()       { return  75; };
+	constexpr static qreal pieSliceOffset()    { return  10; };
+
+	/**
+	 * Convenience functions for the height and width of the
+	 * histogram including borders.
+	 **/
+	qreal fullWidth()  const { return _size.width()  + leftBorder() + rightBorder();  }
+	qreal fullHeight() const { return _size.height() + topBorder()  + bottomBorder(); }
+
+	/**
+	 * Calculate the width of the overflow panel based on the
+	 * width of the headline text, which may vary depending
+	 * on the theme font (and possibly a translation).  The
+	 * width may be set to fit the pie if that is wider then
+	 * the headline.
+	 *
+	 * The width returned from this function includes a border
+	 * on both sides.  The border is not expected to normally
+	 * contain any text or graphics, but does allow for, for
+	 * example, the margin around graphics text items.
+	 *
+	 * Note that any text line (including its margins) longer
+	 * than the headline (plus the borders) will wrap and not
+	 * affect the required width, although it will increase
+	 * the height required for the overflow panel.
+	 **/
+	static qreal overflowWidth();
+	static QString overflowHeadline() { return tr( "Cut-off percentiles" ); }
+
+	/**
+	 * Return a brush for a background area.
+	 **/
+	const QBrush & background()      const { return palette().base(); }
+	const QBrush & panelBackground() const { return palette().alternateBase(); }
+
+	/**
+	 * Return colours and pens for items in the histogram.
+	 **/
+	const QColor & lineColor()       const { return palette().color( QPalette::ButtonText ); }
+	const QColor & medianColor()     const { return palette().color( QPalette::LinkVisited ); }
+	const QColor & quartileColor()   const { return palette().color( QPalette::Link ); }
+	const QColor & decileColor()     const { return lineColor(); }
+	const QColor & percentileColor() const
+	    { return palette().color( QPalette::Disabled, QPalette::ButtonText ); }
+
+	const QPen medianPen()            const { return QPen{ medianColor(), 2 }; }
+	const QPen quartilePen()          const { return QPen{ quartileColor(), 2 }; }
+	const QPen percentilePen( int i ) const
+	    { return i % 10 == 0 ? decileColor() : percentileColor(); }
+	static QPen barPen() { return QColor{ 0x40, 0x40, 0x50 }; }
+
+	/**
+	 * Return a brush for part of the histogram
+	 **/
+	static QBrush barBrush()           { return QColor{ 0xB0, 0xB0, 0xD0 }; }
+	static QBrush pieBrush()           { return barBrush(); }
+	static QBrush overflowSliceBrush() { return QColor{ 0xD0, 0x40, 0x20 }; }
 
 	/**
 	 * Resize the view.
 	 *
-	 * Reimplemented from QFrame.
+	 * Reimplemented from QGraphicsView (from QWidget).
 	 **/
 	void resizeEvent( QResizeEvent * event ) override;
 
@@ -319,36 +364,25 @@ namespace QDirStat
 	// Data Members
 	//
 
-	// Collected statistics data
+	// Statistics data to represent
 	const FileSizeStats * _stats{ nullptr };
 
 	// Flags not currently configurable
-	const bool _showMedian{ true };
-	const bool _showQuartiles{ true };
-	const int  _leftMarginPercentiles{ 0 };
-	const int  _rightMarginPercentiles{ 5 };
+	const bool _showMedian{ true }; // always show median marker line
+	const bool _showQuartiles{ true }; // always show quartiles marker lines
+	const int  _leftExtraPercentiles{ 0 }; // no left extra percentile markers
+	const int  _rightExtraPercentiles{ 0 }; // no right extra percentile markers
 
 	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
-	bool _useLogHeightScale;
-	int  _percentileStep{ 0 };
-
-	// Brushes and pens
-	QBrush _panelBackground;
-	QBrush _barBrush;
-	QPen   _barPen;
-	QPen   _medianPen;
-	QPen   _quartilePen;
-	QPen   _percentilePen;
-	QPen   _decilePen;
-	QPen   _piePen;
-	QBrush _overflowSliceBrush;
+	bool _useLogScale;
+	bool _autoLogScale{ true }; // start with the log scale determined automatically
+	int  _percentileStep{ 0 }; // no markers initially
 
 	// Geometry
-	qreal _histogramWidth;
-	qreal _histogramHeight;
-	bool  _geometryDirty;
+	qreal  _minHeight{ 100 }; // at least 100 pixels high in case there is no overflow panel
+	QSizeF _size;
 
     }; // class HistogramView
 

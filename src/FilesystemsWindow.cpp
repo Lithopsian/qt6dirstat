@@ -58,10 +58,7 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     initWidgets();
     readSettings();
 
-    connect( this,                &FilesystemsWindow::readFilesystem,
-             app()->mainWindow(), &MainWindow::readFilesystem );
-
-    connect( _ui->normalCheckBox, &QCheckBox::stateChanged,
+    connect( _ui->normalCheckBox, &QCheckBox::toggled,
              this,                &FilesystemsWindow::populate );
 
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
@@ -121,12 +118,6 @@ void FilesystemsWindow::showBtrfsFreeSizeWarning()
     PanelMessage::showFilesystemsMsg( this, _ui->vBox );
 }
 
-/*
-void FilesystemsWindow::clear()
-{
-    _ui->fsTree->clear();
-}
-*/
 
 void FilesystemsWindow::initWidgets()
 {
@@ -175,7 +166,7 @@ void FilesystemsWindow::populate()
     for ( MountPointIterator it{ showAll }; *it; ++it )
     {
 	FilesystemItem * item = new FilesystemItem{ *it, _ui->fsTree };
-	item->setIcon( FS_DeviceCol, QIcon( app()->dirTreeModel()->treeIconDir() + icon( *it ) ) );
+	item->setIcon( FS_DeviceCol, QIcon{ app()->dirTreeModel()->treeIconDir() % icon( *it ) } );
     }
 
     if ( MountPoints::hasBtrfs() )
@@ -195,7 +186,7 @@ void FilesystemsWindow::readSelectedFilesystem()
     if ( !path.isEmpty() )
     {
 	//logDebug() << "Read " << path << Qt::endl;
-	emit readFilesystem( path );
+	app()->mainWindow()->readFilesystem( path );
     }
 }
 
@@ -229,7 +220,7 @@ void FilesystemsWindow::contextMenu( const QPoint & pos )
 	return;
 
     // The clicked item will always be the current item now
-    _ui->actionRead->setText( tr( "Read at " ) + selectedPath() );
+    _ui->actionRead->setText( tr( "Read at " ) % selectedPath() );
 
     QMenu menu;
     menu.addAction( _ui->actionRead );
@@ -262,11 +253,11 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent ):
 {
     QString dev = _device;
 
-    // Cut off insanely long generated device mapper names
+    // Columns are not resizeable, so cut off insanely long generated device mapper names
     const int limit = sizeof( "/dev/mapper/luks-123456" );
     if ( dev.size() > limit )
     {
-	dev = dev.left( limit - 1 ) + "…"; // ellipsis
+	dev = dev.left( limit - 1 ) % "…"; // ellipsis
 	setToolTip( FS_DeviceCol, _device );
     }
 

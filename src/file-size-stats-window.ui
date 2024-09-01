@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>323</height>
+    <width>540</width>
+    <height>372</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,6 +113,23 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0,1,0">
+            <item row="1" column="6">
+             <widget class="QSpinBox" name="endPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile up is cut off the histogram</string>
+              </property>
+              <property name="prefix">
+               <string>P</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" colspan="3" alignment="Qt::AlignHCenter">
+             <widget class="QComboBox" name="markersComboBox">
+              <property name="toolTip">
+               <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;/p&gt;</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="1">
              <widget class="QLabel" name="startPercentileLabel">
               <property name="text">
@@ -123,13 +140,16 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QSpinBox" name="startPercentileSpinBox">
-              <property name="prefix">
-               <string>P</string>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="autoButton">
+              <property name="toolTip">
+               <string>Automatically set the start and end percentiles to reasonable values</string>
               </property>
-              <property name="maximum">
-               <number>24</number>
+              <property name="text">
+               <string>&amp;Auto</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -146,93 +166,25 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="autoButton">
-              <property name="text">
-               <string>&amp;Auto</string>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="6">
-             <widget class="QSpinBox" name="endPercentileSpinBox">
-              <property name="prefix">
-               <string>P</string>
-              </property>
-              <property name="minimum">
-               <number>76</number>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>90</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2" colspan="3" alignment="Qt::AlignHCenter">
-             <widget class="QComboBox" name="markersComboBox">
-              <property name="toolTip">
-               <string>&lt;p style='white-space: pre'&gt;Control which percentile markers are shown&lt;br/&gt;- the median and quartile markers are always shown&lt;br/&gt;- the last few individual percentile markers will also be shown&lt;/p&gt;</string>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <item>
-               <property name="text">
-                <string>No percentile markers</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 20th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 10th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 5th percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Every 2nd percentile</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Show every percentile</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="0" column="4" colspan="3">
-             <widget class="QSlider" name="endPercentileSlider">
-              <property name="minimum">
-               <number>76</number>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>90</number>
-              </property>
+            <item row="0" column="0" colspan="3">
+             <widget class="QSlider" name="startPercentileSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
-            <item row="0" column="0" colspan="3">
-             <widget class="QSlider" name="startPercentileSlider">
-              <property name="maximum">
-               <number>24</number>
+            <item row="1" column="0">
+             <widget class="QSpinBox" name="startPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile down is cut off the histogram</string>
               </property>
+              <property name="prefix">
+               <string>P</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4" colspan="3">
+             <widget class="QSlider" name="endPercentileSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -266,12 +218,6 @@
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
-         </property>
-         <attribute name="horizontalHeaderHighlightSections">
-          <bool>false</bool>
-         </attribute>
          <attribute name="verticalHeaderVisible">
           <bool>false</bool>
          </attribute>
@@ -285,17 +231,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="bucketsPageLayout">
        <item>
-        <widget class="QTableView" name="bucketsTable">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
-         </property>
-         <attribute name="horizontalHeaderHighlightSections">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="verticalHeaderHighlightSections">
-          <bool>false</bool>
-         </attribute>
-        </widget>
+        <widget class="QTableView" name="bucketsTable"/>
        </item>
       </layout>
      </widget>
@@ -314,8 +250,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>469</width>
-            <height>546</height>
+            <width>487</width>
+            <height>532</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -454,6 +390,9 @@
            </item>
            <item>
             <spacer name="excessSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>0</width>
@@ -478,6 +417,119 @@
     </widget>
    </item>
   </layout>
+  <action name="actionNoPercentiles">
+   <property name="text">
+    <string>&amp;No percentile markers</string>
+   </property>
+  </action>
+  <action name="actionEvery20th">
+   <property name="text">
+    <string>Every &amp;20th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery10th">
+   <property name="text">
+    <string>Every &amp;10th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery5th">
+   <property name="text">
+    <string>Every &amp;5th percentile</string>
+   </property>
+  </action>
+  <action name="actionEvery2nd">
+   <property name="text">
+    <string>Every 2n&amp;d percentile</string>
+   </property>
+  </action>
+  <action name="actionEveryPercentile">
+   <property name="text">
+    <string>Show &amp;every percentile</string>
+   </property>
+  </action>
+  <action name="actionAutoScale">
+   <property name="text">
+    <string>Auto &amp;scale</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLogScale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Log scale</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionAutoPercentiles">
+   <property name="text">
+    <string>Auto &amp;percentiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionStartPlus1">
+   <property name="text">
+    <string>+1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionStartMinus1">
+   <property name="text">
+    <string>-1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionStartMin">
+   <property name="text">
+    <string>Min (P%1)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Home</string>
+   </property>
+  </action>
+  <action name="actionEndPlus1">
+   <property name="text">
+    <string>+1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionEndMinus1">
+   <property name="text">
+    <string>-1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionEndMax">
+   <property name="text">
+    <string>Max (P%1)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+End</string>
+   </property>
+  </action>
+  <action name="actionAllPercentiles">
+   <property name="text">
+    <string>&amp;All percentiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -588,6 +640,118 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAllPercentiles</sender>
+   <signal>triggered()</signal>
+   <receiver>actionStartMin</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAllPercentiles</sender>
+   <signal>triggered()</signal>
+   <receiver>actionEndMax</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionAutoPercentiles</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>278</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsPanel</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openOptionsButton</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openOptionsButton</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeOptionsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>optionsPanel</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>

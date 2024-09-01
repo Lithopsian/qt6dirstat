@@ -42,11 +42,11 @@ bool FileInfoSorter::operator() ( FileInfo * a, FileInfo * b ) const
 	case TotalItemsCol:       return a->totalItems()      < b->totalItems();
 	case TotalFilesCol:       return a->totalFiles()      < b->totalFiles();
 	case TotalSubDirsCol:     return a->totalSubDirs()    < b->totalSubDirs();
-	case LatestMTimeCol:      return a->latestMtime()     < b->latestMtime();
+	case LatestMTimeCol:      return a->latestMTime()     < b->latestMTime();
 	case OldestFileMTimeCol:
 	    {
-		time_t a_time = a->oldestFileMtime();
-		time_t b_time = b->oldestFileMtime();
+		time_t a_time = a->oldestFileMTime();
+		time_t b_time = b->oldestFileMTime();
 
 		if ( a_time == 0 ) return false;
 		if ( b_time == 0 ) return true;

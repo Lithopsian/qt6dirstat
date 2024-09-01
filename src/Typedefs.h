@@ -12,7 +12,6 @@
 #include <limits>
 
 #include <QColor>
-#include <QList>
 #include <QTextStream> // endl
 
 
@@ -37,14 +36,14 @@ namespace QDirStat
     using DirSize   = qint32;
     using FileCount = qint32;
 
-    using ColorList = QList<QColor>;
+    using ColorList = QVector<QColor>;
 
     /**
      * Provide a qreal literal suffix.  qreal is not always
      * a double (although it almost always is).
      **/
-    constexpr qreal operator""_qr( long double x )
-        { return qreal( x ); }
+    constexpr inline qreal operator""_qr( long double x ) noexcept
+        { return static_cast<qreal>( x ); }
 }
 
 namespace Qt

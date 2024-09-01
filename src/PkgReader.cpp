@@ -62,13 +62,13 @@ namespace
 
 	    if ( !sameVersion )
 	    {
-		name += u'-' + pkg->version();
+		name += '-' % pkg->version();
 		pkg->setMultiVersion();
 	    }
 
 	    if ( !sameArch )
 	    {
-		name += u':' + pkg->arch();
+		name += ':' % pkg->arch();
 		pkg->setMultiArch();
 	    }
 
@@ -426,7 +426,7 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 	const QStringList components = fileListPath.split( u'/', Qt::SkipEmptyParts );
 	for ( const QString & currentComponent : components )
 	{
-	    currentPath += u'/' + currentComponent;
+	    currentPath += '/' % currentComponent;
 
 	    FileInfo * newParent = locateChild( parent, currentComponent );
 	    if ( !newParent )

@@ -8,11 +8,11 @@
  */
 
 #include <algorithm> // std::sort()
-#include <cmath>     // cbrt(), floor()
+
+#include <QtMath> // qCeil
 
 #include "PercentileStats.h"
 #include "Exception.h"
-#include "FormatUtil.h"
 
 
 #define VERBOSE_LOGGING 0
@@ -37,32 +37,29 @@ void PercentileStats::sort()
 
 PercentileBoundary PercentileStats::quantile( int order, int number ) const
 {
+    // Try to validate everything so the calculation will be valid
     if ( isEmpty() )
 	return 0;
 
-    if ( order < 2 || order > 100 )
+    if ( order < 2 || order > maxPercentile() )
 	THROW( Exception{ QString{ "Invalid quantile order %1" }.arg( order ) } );
 
     if ( number > order )
 	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
 
-    if ( number == 0 )
-	return first();
+    // Calculate the data point rank for the number and order (C=1 algorithm, rank 1 is list index 0)
+    const double indexRank = ( size() - 1.0 ) * number / order;
 
-    if ( number == order )
-	return last();
+    // Separate the rank into its base integer to index the list and fraction part for interpolation
+    const int    index  = std::floor( indexRank );
+    const double modulo = indexRank - index;
 
-    // Calculate the data point position for the number and order
-    const double          pos    = 1.0 * size() * number / order;
-    const int             index  = std::floor( pos ); // floor because pos 1 is list index 0
-    const PercentileValue result = at( index );
+    // Get the value at 'index' and the next to interpolate with if necessary
+    PercentileBoundary result = at( index );
+    if ( modulo )
+	result += modulo * ( at( index + 1 ) - result );
 
-    // If the boundary is on an element, return its value
-    if ( pos != index )
-	return result;
-
-    // The boundary is between two elements, return the average of their values
-    return ( result + at( index - 1 ) ) / 2;
+    return result;
 
 }
 
@@ -72,10 +69,10 @@ void PercentileStats::calculatePercentiles()
     _percentiles.clear(); // just in case anyone calls this more than once
 
     // Store all the percentile boundaries
-    for ( int i=0; i <= 100; ++i )
+    for ( int i = minPercentile(); i <= maxPercentile(); ++i )
 	_percentiles.append( percentile( i ) );
 
-    _percentileSums = PercentileList( 101 ); // new list, 101 items, all zero
+    _percentileSums = PercentileList( maxPercentile() + 1 ); // new list, 101 items, all zero
 
     // Iterate all the data points - should be in order, so add to each percentile in turn
     int currentPercentile = 1;
@@ -83,7 +80,7 @@ void PercentileStats::calculatePercentiles()
     for ( PercentileValue value : *this )
     {
 	// Have we gone past this percentile upper boundary?
-	while ( value > *it && currentPercentile < 100 )
+	while ( value > *it && currentPercentile < maxPercentile() )
 	{
 	    ++currentPercentile;
 	    ++it;
@@ -105,14 +102,14 @@ void PercentileStats::calculatePercentiles()
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "sum[ "     << i << " ] : " << formatSize( _percentileSums[ i ] ) << Qt::endl;
-	logDebug() << "cum_sum[ " << i << " ] : " << formatSize( _cumulativeSums[ i ] ) << Qt::endl;
+	logDebug() << "sum["     << i << "] : " << QLocale{}.toString( _percentileSums[ i ] ) << Qt::endl;
+	logDebug() << "cum_sum[" << i << "] : " << QLocale{}.toString( _cumulativeSums[ i ] ) << Qt::endl;
     }
 #endif
 }
 
 
-PercentileValue PercentileStats::percentileBoundary( int index ) const
+PercentileBoundary PercentileStats::percentileBoundary( int index ) const
 {
     CHECK_PERCENTILE_INDEX( index );
 
@@ -136,85 +133,86 @@ PercentileValue PercentileStats::cumulativeSum( int index ) const
 }
 
 
-void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+void PercentileStats::validatePercentileRange( int startPercentile, int endPercentile )
 {
+    // Validate as much as possible, although the percentiles list still might not match the stats
     CHECK_PERCENTILE_INDEX( startPercentile );
     CHECK_PERCENTILE_INDEX( endPercentile   );
 
     if ( startPercentile >= endPercentile )
-        THROW( Exception{ "startPercentile must be less than endPercentile" } );
+	THROW( Exception{ "startPercentile must be less than endPercentile" } );
+}
 
+
+void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+{
+    validatePercentileRange( startPercentile, endPercentile );
     if ( bucketCount < 1 )
-        THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
+	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
-    // Create a new list for bucketCount, filled with zeroes
+    // Create a new list of bucketCount zeroes, discarding any existing list
     _buckets = BucketList( bucketCount );
 
-    if ( isEmpty() || _percentiles.isEmpty() )
-        return;
-
     // Remember the validated start and end percentiles that match this bucket list
-    _bucketsStart = _percentiles[ startPercentile ];
-    _bucketsEnd   = _percentiles[ endPercentile   ];
+    _bucketsStart = percentileBoundary( startPercentile );
+    _bucketsEnd   = percentileBoundary( endPercentile   );
 
     const PercentileBoundary bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
 
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << formatSize( _bucketsStart )
-               << " endVal: " << formatSize( _bucketsEnd )
-               << " bucketWidth: " << formatSize( bucketWidth )
+               << " startVal: " << QLocale{}.toString( static_cast<double>( _bucketsStart ) )
+               << " endVal: " << QLocale{}.toString( static_cast<double>( _bucketsEnd ) )
+               << " bucketWidth: " << QLocale{}.toString( static_cast<double>( bucketWidth ) )
                << Qt::endl;
 #endif
 
-    // Skip to the first percentile that we're using
-    auto it = cbegin();
-    while ( it != cend() && *it < _bucketsStart )
-	++it;
+    // Find the first data point that we want for the buckets
+    auto beginIt = cbegin();
+    while ( beginIt != cend() && *beginIt < _bucketsStart )
+	++beginIt;
 
     // Fill buckets up to the last requested percentile
     int index = 0;
-    PercentileBoundary nextBucket = _bucketsStart + bucketWidth;
-    while ( it != cend() && *it <= _bucketsEnd )
+    PercentileBoundary bucketEnd = _bucketsStart + bucketWidth;
+    for ( auto it = beginIt; it != cend() && *it <= _bucketsEnd; ++it )
     {
-	// Increment the bucket index when we hit the next bucket boundary
-	while ( *it > nextBucket )
+	// Increment the bucket index when we hit the next bucket boundary, skipping empty buckets
+	while ( *it > bucketEnd )
 	{
-	    index = qMin( index + 1, bucketCount - 1 ); // avoid rounding errors tipping us past the last bucket
-	    nextBucket += bucketWidth;
+	    if ( index < bucketCount - 1 ) // avoid rounding errors tipping us past the last bucket
+		++index;
+	    bucketEnd += bucketWidth;
 	}
 
-        ++_buckets[ index ];
-
-	++it;
+	// Fill this bucket
+	++_buckets[ index ];
     }
 }
 
 
 int PercentileStats::bestBucketCount( FileCount n, int max )
 {
-    if ( n < 2 )
-	return 1;
-
-    // Using the "Rice Rule" which gives more reasonable values for the numbers
+    // Use the Rice Rule which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
-    const int result = qRound( 2 * std::cbrt( n ) );
+    const int bucketCount = qCeil( 2 * std::cbrt( n ) );
 
     // Enforce an upper limit so each histogram bar remains wide enough
     // for tooltips and to be seen
-    if ( result > max )
+    if ( bucketCount > max )
     {
 #if VERBOSE_LOGGING
 	logInfo() << "Limiting bucket count to " << max
-	          << " instead of " << result
+	          << " instead of " << bucketCount
 	          << Qt::endl;
 #endif
 
 	return max;
     }
 
-    return result;
+    // Don't return zero, bad things will happen
+    return bucketCount > 0 ? bucketCount : 1;
 }
 
 

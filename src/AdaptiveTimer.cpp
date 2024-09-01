@@ -49,35 +49,17 @@ void AdaptiveTimer::deliveryTimeout()
 {
     //logDebug() << "Delivering request" << Qt::endl;
 
-    _payloadStopwatch.start();
+    QElapsedTimer payloadStopwatch;
+    payloadStopwatch.start();
+
     _payload();
 
     // Average the payload time to smooth out any stray spikes
-    _payloadTime = ( _payloadTime + _payloadStopwatch.elapsed() ) / 2;
+    _payloadTime = ( _payloadTime + payloadStopwatch.elapsed() ) / 2;
 
     //logDebug() << "deliveryTime=" << _deliveryTime << Qt::endl;
 
     _cooldownTimer.start( cooldownPeriod() );
-}
-
-
-int AdaptiveTimer::currentDelay() const
-{
-    if ( _delays.isEmpty() )
-        return 0;
-
-    return _payloadTime * _delays[ _delayStage ]; // hope this is less than 596 hours!
-}
-
-
-int AdaptiveTimer::cooldownPeriod() const
-{
-    if ( _cooldowns.isEmpty() )
-        return 0;
-
-    // Might be more delays than cooldowns
-    const int cooldownStage = qMin( _cooldowns.size() - 1, _delayStage );
-    return _cooldowns[ cooldownStage ];
 }
 
 

@@ -21,9 +21,9 @@ using namespace QDirStat;
 
 
 bool SysUtil::tryRunCommand( const QString & commandLine,
-			     const QString & expectedResult,
-			     bool            logCommand,
-			     bool            logOutput )
+                             const QString & expectedResult,
+                             bool            logCommand,
+                             bool            logOutput )
 {
     int exitCode = -1;
     QString output = runCommand( commandLine,

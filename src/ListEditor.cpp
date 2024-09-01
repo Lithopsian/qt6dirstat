@@ -94,7 +94,6 @@ void ListEditor::connectActions()
                   &ListEditor::toBottom );
 
     fillListWidget();
-//    updateActions();
 }
 
 

@@ -238,7 +238,9 @@ namespace QDirStat
 	// Data members
 
 	static UsedFileList _usedConfigFiles;
-    };
+
+    }; // class Settings
+
 
 
     /**
@@ -263,7 +265,8 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "Cleanup"_L1; }
 
-    };
+    }; // class CleanupSettings
+
 
 
     /**
@@ -288,7 +291,8 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "ExcludeRule"_L1; }
 
-    };
+    }; // class ExcludeRuleSettings
+
 
 
     /**
@@ -313,8 +317,8 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
 
-    };	// class MimeCategorySettings
+    }; // class MimeCategorySettings
 
-}	// namespace QDirStat
+} // namespace QDirStat
 
 #endif	// Settings_h

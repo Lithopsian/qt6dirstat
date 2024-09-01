@@ -13,6 +13,7 @@
 #include <QBitArray>
 #include <QObject>
 #include <QReadWriteLock>
+#include <QVector>
 
 #include "MimeCategory.h"
 #include "Wildcard.h"
@@ -41,8 +42,9 @@ namespace QDirStat
      **/
     typedef QHash<QString, const MimeCategory *>  ExactMatches;
     typedef QMultiHash<QString, WildcardPair>     SuffixMatches;
-    typedef QList<const MimeCategory *>           MimeCategoryList;
+    typedef QVector<const MimeCategory *>         MimeCategoryList;
     typedef MimeCategoryList::const_iterator      MimeCategoryIterator;
+    typedef QVector<WildcardPair>                 WildcardList;
 
     /**
      * Class to determine the MimeCategory of filenames.
@@ -97,12 +99,6 @@ namespace QDirStat
 	 **/
 	~MimeCategorizer() override;
 
-	/**
-	 * Suppress copy and assignment constructors (this is a singleton)
-	 **/
-	MimeCategorizer( const MimeCategorizer & ) = delete;
-	MimeCategorizer & operator=( const MimeCategorizer & ) = delete;
-
 
     public:
 
@@ -132,6 +128,10 @@ namespace QDirStat
 	 * category was found by a suffix rule. If the category was not found
 	 * or if a wildcard (rather than a suffix rule) matched, this returns an
 	 * empty string.
+	 *
+	 * Extra checks are made for symlinks and executable files.  These always
+	 * return an empty string for the suffix even if the file has an
+	 * extension.
 	 **/
 	const MimeCategory * category( const FileInfo * item, QString * suffix_ret );
 
@@ -156,12 +156,12 @@ namespace QDirStat
 	/**
 	 * Return the (translated) name of the fixed category for executables.
 	 **/
-	QString executableCategoryName() const { return tr( "executable" ); }
+	static QString executableCategoryName() { return tr( "executable" ); }
 
 	/**
 	 * Return the (translated) name of the fixed category for symlinks.
 	 **/
-	QString symlinkCategoryName() const { return tr( "symlink" ); }
+	static QString symlinkCategoryName() { return tr( "symlink" ); }
 
 
     protected:
@@ -179,6 +179,8 @@ namespace QDirStat
 	/**
 	 * Return the MimeCategory for a FileInfo item or an empty dummy category
 	 * if it doesn't fit into any of the available categories.
+	 *
+	 * Extra checks are made for symlinks and executable files.
 	 **/
 	const MimeCategory * category( const FileInfo * item ) const;
 
@@ -188,8 +190,9 @@ namespace QDirStat
 	 *
 	 * If 'suffix_ret' is non-null, it returns the suffix used if the
 	 * category was found by a suffix rule. If the category was not found
-	 * or if a wildcard (rather than a suffix rule) matched, this returns an
-	 * empty string.
+	 * or if a wildcard (rather than a suffix rule) matched, the suffix
+	 * is not set; the caller is responsible for initialising the suffix
+	 * to a suitable default value.
 	 **/
 	const MimeCategory * category( const QString & filename, QString * suffix_ret ) const;
 
@@ -264,8 +267,12 @@ namespace QDirStat
 
 	/**
 	 * Create a new category and add it to the live list held in this class.
+	 * The patterns are passed as QStringLists.
 	 **/
-	MimeCategory * create( const QString & name, const QColor & color );
+	const MimeCategory * addCategory ( const QString     & name,
+	                                   const QColor      & color,
+	                                   const QStringList & caseInsensitivePatterns,
+	                                   const QStringList & caseSensitivePatterns );
 
 	/**
 	 * Add a category from a name, colour, and comma-delimited patterns
@@ -273,8 +280,12 @@ namespace QDirStat
 	 **/
 	const MimeCategory * addCategory( const QString & name,
 	                                  const QColor  & color,
-	                                  const QString & caseSensitivePatterns,
-	                                  const QString & caseInsensitivePatterns );
+	                                  const QString & caseInsensitivePatterns,
+	                                  const QString & caseSensitivePatterns )
+	    { return addCategory( name,
+                                  color,
+                                  caseInsensitivePatterns.split( u',' ),
+                                  caseSensitivePatterns.split  ( u',' ) ); }
 
 	/**
 	 * Add default categories in case none were read from the settings.
@@ -306,7 +317,7 @@ namespace QDirStat
 	ExactMatches        _caseSensitiveExact;
 	SuffixMatches       _caseInsensitiveSuffixes;
 	SuffixMatches       _caseSensitiveSuffixes;
-	QList<WildcardPair> _wildcards;
+	WildcardList        _wildcards;
 	QBitArray           _caseInsensitiveLengths;
 	QBitArray           _caseSensitiveLengths;
 

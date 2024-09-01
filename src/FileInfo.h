@@ -574,7 +574,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual time_t latestMtime() { return _mtime; }
+	virtual time_t latestMTime() { return _mtime; }
 
 	/**
 	 * Returns the oldest modification time of any file in this subtree.
@@ -583,7 +583,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual time_t oldestFileMtime() { return isFile() ? _mtime : 0; }
+	virtual time_t oldestFileMTime() { return isFile() ? _mtime : 0; }
 
 	/**
 	 * Return the percentage of this subtree in regard to its parent
@@ -904,51 +904,48 @@ namespace QDirStat
 	/**
 	 * Returns true if this is a directory.
 	 **/
-	bool isDir()         const { return S_ISDIR ( _mode ) ? true : false; }
+	bool isDir() const { return S_ISDIR( _mode ); }
 
 	/**
 	 * Returns true if this is a regular file.
 	 **/
-	bool isFile()        const { return S_ISREG ( _mode ) ? true : false; }
+	bool isFile() const { return S_ISREG( _mode ); }
 
 	/**
 	 * Returns true if this is a symbolic link.
 	 **/
-	bool isSymLink()     const { return S_ISLNK ( _mode ) ? true : false; }
+	bool isSymLink() const { return S_ISLNK( _mode ); }
 
 	/**
 	 * Returns true if this is a (block or character) device.
 	 **/
-	bool isDevice()      const { return S_ISBLK ( _mode ) || S_ISCHR( _mode ) ? true : false; }
+	bool isDevice() const { return S_ISBLK( _mode ) || S_ISCHR( _mode ); }
 
 	/**
 	 * Returns true if this is a block device.
 	 **/
-	bool isBlockDevice() const { return S_ISBLK ( _mode ) ? true : false; }
+	bool isBlockDevice() const { return S_ISBLK( _mode ); }
 
 	/**
 	 * Returns true if this is a block device.
 	 **/
-	bool isCharDevice()  const { return S_ISCHR ( _mode ) ? true : false; }
+	bool isCharDevice() const { return S_ISCHR( _mode ); }
 
 	/**
 	 * Returns true if this is a FIFO.
 	 **/
-	bool isFifo()        const { return S_ISFIFO( _mode ) ? true : false; }
+	bool isFifo() const { return S_ISFIFO( _mode ); }
 
 	/**
 	 * Returns true if this is a socket.
 	 **/
-	bool isSocket()      const { return S_ISSOCK( _mode ) ? true : false; }
+	bool isSocket() const { return S_ISSOCK( _mode ); }
 
 	/**
 	 * Returns true if this is a "special" file, i.e. a (block or character)
 	 * device, a FIFO (named pipe), or a socket.
 	 **/
-	bool isSpecial()     const { return  S_ISBLK ( _mode ) ||
-	                                     S_ISCHR ( _mode ) ||
-	                                     S_ISFIFO( _mode ) ||
-	                                     S_ISSOCK( _mode ) ? true : false; }
+	bool isSpecial() const { return isDevice() || isFifo() || isSocket(); }
 
 	/**
 	 * Returns true if this is a symlink, but the (direct) link target does

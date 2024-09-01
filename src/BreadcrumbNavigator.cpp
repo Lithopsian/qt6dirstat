@@ -213,7 +213,7 @@ int BreadcrumbNavigator::breadcrumbsLen() const
 
     for ( const Breadcrumb & crumb : asConst( _breadcrumbs ) )
     {
-        const QString & name{ crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName };
+        const QString & name = crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName;
 
         len += name.length();
 

@@ -225,7 +225,6 @@ namespace QDirStat
     }; // class MountPoint
 
 
-//    typedef QList<MountPoint *>           MountPointList;
     typedef QMap<QString, MountPoint *>   MountPointMap;
 //    typedef MountPointMap::const_iterator MountPointMapIterator;
 

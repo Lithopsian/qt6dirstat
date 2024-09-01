@@ -45,7 +45,7 @@ namespace
 	//	dir1
 	//	  dir11
 	//	  dir12
-	//	dir2populateTree
+	//	dir2
 	//	  dir21
 	//	    dir211
 	//	    dir212
@@ -71,21 +71,19 @@ namespace
 	DirInfo * dir212 = new DirInfo{ dir21, dirTree, "dir212", mode, dirSize };
 	dir21->insertChild( dir212 );
 
-
 	// Generate a random number of files with random sizes
 	QRandomGenerator * random = QRandomGenerator::global();
 	const FileSize maxSize = 100LL*1024*1024; // 100 MB
 	for ( DirInfo * parent : { dir1, dir11, dir11, dir11, dir12, dir2, dir21, dir211, dir211, dir212 } )
 	{
-	    const int fileCount = random->bounded( 1, 100 );
+	    const int fileCount = random->bounded( 1, 200 );
 	    for ( int i=0; i < fileCount; i++ )
 	    {
 		// Select a random file size
 		const FileSize fileSize = random->bounded( 1, maxSize );
 
 		// Create a FileInfo item and add it to the parent
-		const QString fileName = QString{ "File_%1" }.arg( i );
-		parent->insertChild( new FileInfo{ parent, dirTree, fileName, mode, fileSize } );
+		parent->insertChild( new FileInfo{ parent, dirTree, QString{}, mode, fileSize } );
 	    }
 
 	    parent->finalizeLocal(); // moves files out of DotEntries when there are no sub-directories
@@ -105,7 +103,7 @@ namespace
 	QString text = patternList.join( u'\n' );
 
 	if ( !text.isEmpty() )
-	    text += u'\n';	   // Let the user begin writing on a new line
+	    text += u'\n'; // Let the user begin writing on a new line
 
 	textEdit->setPlainText( text );
     }
@@ -121,7 +119,6 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
 
     _ui->setupUi( this );
 
-    populateTreemapTab();
     connectActions();
 
     connect( _ui->nameLineEdit,             &QLineEdit::textChanged,
@@ -139,10 +136,10 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     connect( _ui->tileColorButton,          &QPushButton::clicked,
              this,                          &MimeCategoryConfigPage::pickTileColor );
 
-    connect( _ui->squarifiedCheckBox,       &QCheckBox::stateChanged,
+    connect( _ui->squarifiedCheckBox,       &QCheckBox::toggled,
              this,                          &MimeCategoryConfigPage::configChanged );
 
-    connect( _ui->cushionShadingCheckBox,   &QCheckBox::stateChanged,
+    connect( _ui->cushionShadingCheckBox,   &QCheckBox::toggled,
              this,                          &MimeCategoryConfigPage::cushionShadingChanged );
 
     connect( _ui->cushionHeightSpinBox,     QOverload<double>::of( &QDoubleSpinBox::valueChanged ),
@@ -162,6 +159,9 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
 
     connect( parent,                        &ConfigDialog::applyChanges,
              this,                          &MimeCategoryConfigPage::applyChanges );
+
+    // Do this now so the correct settings will be sent to the mini-treemap
+    populateTreemapTab();
 }
 
 
@@ -179,9 +179,8 @@ void MimeCategoryConfigPage::populateTreemapTab()
 {
     populateTreemapView( _ui->treemapView );
 
-    _ui->treemapView->setFixedColor( Qt::white );
-
     // Get the treemap configuration settings from the main treemapView
+    // The settings in _ui->treemapView will be from diak and possibly out of date
     const MainWindow * mainWindow = app()->mainWindow();
     _ui->squarifiedCheckBox->setChecked    ( mainWindow->treemapView()->squarify() );
     _ui->cushionShadingCheckBox->setChecked( mainWindow->treemapView()->doCushionShading() );
@@ -214,7 +213,7 @@ void MimeCategoryConfigPage::applyChanges()
     // The patterns for the current category might have been modified and not yet saved to the category
     save( value( _ui->listWidget->currentItem() ) );
 
-    // If nothing has changed ...
+    // If nothing has changed, don't write the category settings file
     if ( !_dirty )
 	return;
 
@@ -272,11 +271,11 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     const qreal shadingStart  = ( width - 20 ) / width;
     const qreal shadingMiddle = ( width - 10 ) / width;
 
-    const QPalette palette       = _ui->listWidget->palette();
+    const QPalette & palette     = _ui->listWidget->palette();
     const bool current           = item == _ui->listWidget->currentItem();
     const QColor backgroundColor = current ? Qt::lightGray : palette.color( QPalette::Active, QPalette::Base );
 
-    QLinearGradient gradient( 0, 0, 1, 0 );
+    QLinearGradient gradient{ 0, 0, 1, 0 };
     gradient.setCoordinateMode( QGradient::ObjectMode );
     gradient.setColorAt( 0, backgroundColor );
     gradient.setColorAt( backgroundEnd, backgroundColor );
@@ -284,10 +283,10 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     {
 	if ( _ui->cushionShadingCheckBox->isChecked() )
 	{
-	    const QColor shadingColor = category->color().darker( 300 );
-	    gradient.setColorAt( shadingStart,  shadingColor );
+	    const QColor shadeColor = category->color().darker( 300 );
+	    gradient.setColorAt( shadingStart,  shadeColor );
 	    gradient.setColorAt( shadingMiddle, category->color() );
-	    gradient.setColorAt( 1, shadingColor );
+	    gradient.setColorAt( 1, shadeColor );
 	}
 	else
 	    gradient.setColorAt( shadingStart, category->color() );
@@ -302,9 +301,9 @@ void MimeCategoryConfigPage::updateActions()
     const QListWidgetItem * currentItem = _ui->listWidget->currentItem();
 
     const bool isSymlink =
-	currentItem && currentItem->text() == MimeCategorizer::instance()->symlinkCategoryName();
+	currentItem && currentItem->text() == MimeCategorizer::symlinkCategoryName();
     const bool isExecutable =
-	currentItem && currentItem->text() == MimeCategorizer::instance()->executableCategoryName();
+	currentItem && currentItem->text() == MimeCategorizer::executableCategoryName();
 
     // Name can't be changed for symlinks and executables
     _ui->nameLineEdit->setEnabled( currentItem && !isSymlink && !isExecutable );
@@ -343,7 +342,7 @@ void MimeCategoryConfigPage::nameChanged( const QString & newName )
 void MimeCategoryConfigPage::categoryColorChanged( const QString & newColor )
 {
     // Always set the new colour, even if empty or invalid, for the mini-treemap to rebuild
-    const QColor color( newColor );
+    const QColor color{ newColor };
     _ui->treemapView->setFixedColor( color );
 
     QListWidgetItem * currentItem = _ui->listWidget->currentItem();
@@ -377,7 +376,7 @@ void MimeCategoryConfigPage::pickCategoryColor()
 
 void MimeCategoryConfigPage::tileColorChanged( const QString & newColor )
 {
-    const QColor color( newColor );
+    const QColor color{ newColor };
     _ui->treemapView->setFixedColor( color.isValid() ? color : QColor{ _ui->categoryColorEdit->text() } );
 }
 
@@ -404,7 +403,7 @@ void MimeCategoryConfigPage::cushionShadingChanged( int state )
 void MimeCategoryConfigPage::configChanged()
 {
     // Rebuild the mini-treemap with the latest settings
-    const QColor color( _ui->tileColorEdit->text() );
+    const QColor color{ _ui->tileColorEdit->text() };
     _ui->treemapView->configChanged( color.isValid() ? color : QColor{ _ui->categoryColorEdit->text() },
                                      _ui->squarifiedCheckBox->isChecked(),
                                      _ui->cushionShadingCheckBox->isChecked(),
@@ -466,7 +465,7 @@ void * MimeCategoryConfigPage::newValue()
     // ListEditor is making a new row in the category list
     _dirty = true;
 
-    return new MimeCategory {};
+    return new MimeCategory{};
 }
 
 

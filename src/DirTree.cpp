@@ -604,7 +604,7 @@ FileInfo * DirTree::locate( const QString & url ) const
 
 bool DirTree::writeCache( const QString & cacheFileName )
 {
-    CacheWriter writer( cacheFileName, this );
+    CacheWriter writer{ cacheFileName, this };
     return writer.ok();
 }
 
@@ -633,7 +633,7 @@ void DirTree::readPkg( const PkgFilter & pkgFilter )
     sendStartingReading();
 
     // logDebug() << "Reading " << pkgFilter << Qt::endl;
-    PkgReader reader( this, pkgFilter );
+    PkgReader reader{ this, pkgFilter };
 }
 
 

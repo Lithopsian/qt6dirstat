@@ -42,7 +42,7 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
              this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
-    connect( _ui->outputWindowDefaultTimeout, &QCheckBox::stateChanged,
+    connect( _ui->outputWindowDefaultTimeout, &QCheckBox::toggled,
              this,                            &CleanupConfigPage::enableWindowPolicyWidgets );
 
     connect( _ui->titleLineEdit,              &QLineEdit::textChanged,
@@ -150,7 +150,7 @@ void CleanupConfigPage::save( void * value )
     cleanup->setShortcut( _ui->keySequenceEdit->keySequence().toString() );
 
     if ( _ui->shellComboBox->currentText().startsWith( "$SHELL"_L1 ) )
-	cleanup->setShell( "" );
+	cleanup->setShell( QString{} );
     else
 	cleanup->setShell( _ui->shellComboBox->currentText() );
 
@@ -233,7 +233,7 @@ void CleanupConfigPage::load( void * value )
 
 void * CleanupConfigPage::newValue()
 {
-    return new Cleanup {};
+    return new Cleanup{};
 }
 
 
