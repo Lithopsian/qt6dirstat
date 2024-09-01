@@ -90,7 +90,7 @@ namespace QDirStat
 	/**
 	 * Set the other widgets when the cushion shading checkbox is changed.
 	 **/
-	void cushionShadingChanged( int state );
+	void cushionShadingChanged( bool state );
 
 	/**
 	 * Updates the treemapView when something changes in the configuration.

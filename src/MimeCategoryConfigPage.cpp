@@ -389,12 +389,12 @@ void MimeCategoryConfigPage::pickTileColor()
 }
 
 
-void MimeCategoryConfigPage::cushionShadingChanged( int state )
+void MimeCategoryConfigPage::cushionShadingChanged( bool state )
 {
-    //logDebug() << state << Qt::endl;
+    logDebug() << state << Qt::endl;
 
-    _ui->cushionHeightSpinBox->setEnabled( state == Qt::Checked );
-    _ui->heightScaleFactorSpinBox->setEnabled( state == Qt::Checked );
+    _ui->cushionHeightSpinBox->setEnabled( state );
+    _ui->heightScaleFactorSpinBox->setEnabled( state );
     adjustShadingWidth();
     configChanged();
 }
