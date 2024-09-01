@@ -307,8 +307,8 @@ const MimeCategory * MimeCategorizer::findCategoryByName( const QString & catego
 
 const MimeCategory * MimeCategorizer::addCategory ( const QString     & name,
                                                     const QColor      & color,
-                                                    const QStringList & caseSensitivePatterns,
-                                                    const QStringList & caseInsensitivePatterns )
+                                                    const QStringList & caseInsensitivePatterns,
+                                                    const QStringList & caseSensitivePatterns )
 {
     MimeCategory * category = new MimeCategory{ name, color };
     category->addPatterns( caseInsensitivePatterns, Qt::CaseInsensitive );
