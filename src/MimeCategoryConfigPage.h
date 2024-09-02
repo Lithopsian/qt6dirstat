@@ -98,16 +98,6 @@ namespace QDirStat
 	void configChanged();
 
 	/**
-	 * The category list has been resized.  Adjust the colour shading.
-	 **/
-	void resizeEvent( QResizeEvent * ) override { adjustShadingWidth(); }
-
-	/**
-	 * The category list has been shown.  Adjust the colour shading.
-	 **/
-	void showEvent( QShowEvent * ) override { adjustShadingWidth(); }
-
-	/**
 	 * Process the action to toggle the colour previews.
 	 **/
 	void colourPreviewsTriggered( bool );
@@ -146,7 +136,7 @@ namespace QDirStat
 	/**
 	 * The category list has been shown.  Adjust the colour shading.
 	 **/
-	void adjustShadingWidth();
+	void setShading();
 
 	/**
 	 * Set the background shading of a list item.
@@ -210,6 +200,12 @@ namespace QDirStat
 	 **/
 	void contextMenuEvent( QContextMenuEvent * event ) override;
 
+	/**
+	 * Detect when the category list background needs to be reset
+	 * because of palette or size changes.
+	 **/
+	bool event( QEvent * event ) override;
+
 
     private:
 
@@ -217,7 +213,7 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::MimeCategoryConfigPage> _ui;
 
-	bool      _dirty{ false };
+	bool _dirty{ false };
 
     };	// class MimeCategoryConfigPage
 

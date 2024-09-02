@@ -17,7 +17,6 @@
 #include "Logger.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
-#include "MimeCategory.h"
 #include "QDirStatApp.h"
 
 
@@ -151,8 +150,11 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     connect( _ui->minTileSizeSpinBox,       QOverload<int>::of( &QSpinBox::valueChanged ),
              this,                          &MimeCategoryConfigPage::configChanged );
 
+    connect( _ui->listWidget,               &QListWidget::itemSelectionChanged,
+             this,                          &MimeCategoryConfigPage::setShading );
+
     connect( _ui->horizontalSplitter,       &QSplitter::splitterMoved,
-             this,                          &MimeCategoryConfigPage::adjustShadingWidth );
+             this,                          &MimeCategoryConfigPage::setShading );
 
     connect( _ui->actionColourPreviews,     &QAction::triggered,
              this,                          &MimeCategoryConfigPage::colourPreviewsTriggered );
@@ -271,9 +273,8 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     const qreal shadingStart  = ( width - 20 ) / width;
     const qreal shadingMiddle = ( width - 10 ) / width;
 
-    const QPalette & palette     = _ui->listWidget->palette();
-    const bool current           = item == _ui->listWidget->currentItem();
-    const QColor backgroundColor = current ? Qt::lightGray : palette.color( QPalette::Active, QPalette::Base );
+    const bool     current         = item == _ui->listWidget->currentItem();
+    const QColor & backgroundColor = current ? palette().highlight().color() : palette().base().color();
 
     QLinearGradient gradient{ 0, 0, 1, 0 };
     gradient.setCoordinateMode( QGradient::ObjectMode );
@@ -293,6 +294,7 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     }
 
     item->setBackground( gradient );
+    item->setForeground( current ? palette().highlightedText() : palette().text() );
 }
 
 
@@ -391,11 +393,11 @@ void MimeCategoryConfigPage::pickTileColor()
 
 void MimeCategoryConfigPage::cushionShadingChanged( bool state )
 {
-    logDebug() << state << Qt::endl;
+    //logDebug() << state << Qt::endl;
 
     _ui->cushionHeightSpinBox->setEnabled( state );
     _ui->heightScaleFactorSpinBox->setEnabled( state );
-    adjustShadingWidth();
+    setShading();
     configChanged();
 }
 
@@ -485,7 +487,7 @@ QString MimeCategoryConfigPage::valueText( void * value )
 }
 
 
-void MimeCategoryConfigPage::adjustShadingWidth()
+void MimeCategoryConfigPage::setShading()
 {
     // Keep the colour preview the same width always
     for ( int x = 0; x < _ui->listWidget->count(); ++x )
@@ -519,7 +521,7 @@ void MimeCategoryConfigPage::colourPreviewsTriggered( bool checked )
 {
     // Context menu colour previews toggle action
     app()->mainWindow()->treemapView()->setColourPreviews( checked );
-    adjustShadingWidth();
+    setShading();
 }
 
 
@@ -531,4 +533,16 @@ void MimeCategoryConfigPage::add()
 
     _ui->listWidget->sortItems();
     _ui->nameLineEdit->setFocus();
+}
+
+
+bool MimeCategoryConfigPage::event( QEvent * event )
+{
+    const auto type = event->type();
+    if ( type == QEvent::PaletteChange || type == QEvent::Show || type == QEvent::Resize )
+	setShading();
+
+    ListEditor::event( event );
+
+    return true;
 }
