@@ -542,7 +542,5 @@ bool MimeCategoryConfigPage::event( QEvent * event )
     if ( type == QEvent::PaletteChange || type == QEvent::Show || type == QEvent::Resize )
 	setShading();
 
-    ListEditor::event( event );
-
-    return true;
+    return ListEditor::event( event );
 }

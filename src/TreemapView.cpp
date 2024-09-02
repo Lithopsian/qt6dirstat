@@ -577,8 +577,6 @@ void TreemapView::deleteNotify( FileInfo * )
 
 void TreemapView::resizeEvent( QResizeEvent * event )
 {
-    QGraphicsView::resizeEvent( event );
-
     if ( !_tree )
         return;
 

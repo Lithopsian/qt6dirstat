@@ -8,11 +8,13 @@
  */
 
 #include <QActionGroup>
+#include <QContextMenuEvent>
 #include <QDesktopServices>
 #include <QPointer>
 #include <QResizeEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QUrl>
 
 #include "FileSizeStatsWindow.h"
 #include "FileSizeStats.h"
@@ -103,10 +105,15 @@ namespace
 
 
     /**
-     * Set the background for all items in a table row.
+     * Highlight a table row using a neutral grey based on the palette
+     * highlight color.
      **/
-    void setRowBackground( QTableWidget * table, int row, const QBrush & brush )
+    void highlightRow( QTableWidget * table, int row )
     {
+	// Use the application palette because a theme change won't have reached the table widgets yet
+	const QBrush highlight =
+	    QColor::fromHsl( 0, 0, QGuiApplication::palette().highlight().color().lightness() );
+
 	for ( int col=0; col < table->columnCount(); ++col )
 	{
 	    QTableWidgetItem * item = table->item( row, col );
@@ -115,7 +122,8 @@ namespace
 	    if ( !item )
 		item = addItem( table, row, col, Qt::AlignLeft, QString{} );
 
-	    item->setBackground( brush );
+	    item->setBackground( highlight );
+	    item->setForeground( QGuiApplication::palette().highlightedText() );
 	}
     }
 
@@ -187,14 +195,7 @@ namespace
 
 	    // Shade the background of every 10th row if all percentiles are shown
 	    if ( i > 0 && i % 10 == 0 && step == 1 )
-	    {
-		// Derive a color with some contrast in light or dark themes.
-		const QColor & base = table->palette().base().color();
-		const int lightness = base.lightness();
-		const int newLightness = lightness > 128 ? lightness - 32 : lightness + 32;
-		const QColor shade = QColor::fromHsl( base.hue(), base.saturation(), newLightness );
-		setRowBackground( table, row, shade );
-	    }
+		highlightRow( table, row );
 	}
 
 	HeaderTweaker::resizeToContents( table->horizontalHeader() );
@@ -488,6 +489,15 @@ void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Elide a label to the width of the dialog less margins, less a bit more
     elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+}
+
+
+void FileSizeStatsWindow::changeEvent( QEvent * event )
+{
+    QDialog::changeEvent( event );
+
+    if ( event->type() == QEvent::PaletteChange )
+	fillPercentileTable();
 }
 
 

@@ -11,6 +11,7 @@
 
 #include <QResizeEvent>
 #include <QTextDocument>
+#include <QTimer>
 
 #include "HistogramView.h"
 #include "Exception.h"
@@ -223,13 +224,11 @@ void HistogramView::rebuild()
 
     //logInfo() << "Really building histogram" << Qt::endl;
 
-    if ( geometryDirty() )
-	calcGeometry();
-
     delete scene();
     setScene( new QGraphicsScene{ this } );
 
-    setBackgroundBrush( background() );
+    if ( geometryDirty() )
+	calcGeometry();
 
     addBackground();
     addAxes();
@@ -243,6 +242,12 @@ void HistogramView::rebuild()
     addOverflowPanel();
 
     fitToViewport();
+}
+
+
+void HistogramView::addBackground()
+{
+    createPanel( { -leftBorder(), -topBorder() - _size.height(), fullWidth(), fullHeight() } );
 }
 
 
@@ -269,7 +274,6 @@ void HistogramView::addYAxisLabel()
     QGraphicsTextItem * item = createBoldItem( scene(), "n   -->" );
     if ( _useLogScale )
 	item->setHtml( "log<sub>2</sub>(n)   -->" );
-
 
     const QRectF rect = item->boundingRect();
     item->setRotation( 270 );
@@ -298,16 +302,18 @@ void HistogramView::addXStartEndLabels()
 
 void HistogramView::addYStartEndLabels()
 {
-    QGraphicsTextItem * startItem = createTextItem( scene(), "0" );
-    const QRectF startRect = startItem->boundingRect();
-    startItem->setRotation( 270 );
-    startItem->setPos( ( leftBorder() + startRect.height() ) / -2, startRect.width() / 2 );
+    const auto addLabel = [ this ]( qreal y, const QString & text)
+    {
+	QGraphicsTextItem * item = createTextItem( scene(), text );
+	const QRectF rect = item->boundingRect();
+	item->setRotation( 270 );
+	item->setPos( ( leftBorder() + rect.height() ) / -2, y + rect.width() / 2 );
+    };
+
+    addLabel( 0, "0" );
 
     const FileCount max = _stats->largestBucket();
-    QGraphicsTextItem * endItem = createTextItem( scene(), QString{ "%L1" }.arg( max ) );
-    const QRectF endRect = endItem->boundingRect();
-    endItem->setRotation( 270 );
-    endItem->setPos( ( endRect.height() + leftBorder() ) / -2, endRect.width() / 2 - _size.height() );
+    addLabel( -_size.height(), QString{ "%L1" }.arg( max ) );
 }
 
 
@@ -315,6 +321,14 @@ void HistogramView::addQuartileText()
 {
     QPointF pos{ 0, -_size.height() - topBorder() - textBorder() };
     const int n = _stats->bucketsTotalSum();
+
+    // Create text for the total number of files
+    const QFontMetrics metrics{ font() };
+    const QChar sigma{ 0x2211 };
+    const bool fontHasSigma = metrics.inFont( sigma );
+    const QString nTextTemplate = fontHasSigma ? sigma % "n: %L2"_L1 : tr( "Files (n): %L1" );
+    QGraphicsTextItem * nTextItem = createBoldItem( scene(), nTextTemplate.arg( n ) );
+    pos.ry() -= nTextItem->boundingRect().height();
 
     // Only add quartile labels if there is some data in the histogram
     if ( n > 0 )
@@ -332,7 +346,6 @@ void HistogramView::addQuartileText()
 	q3Item->setDefaultTextColor    ( quartileColor() );
 
 	const QRectF medianRect = medianItem->boundingRect();
-	pos.ry() -= medianRect.height();
 
 	q1Item->setPos( pos );
 	pos.rx() += q1Item->boundingRect().width() + textSpacing();
@@ -342,17 +355,7 @@ void HistogramView::addQuartileText()
 	pos.rx() += q3Item->boundingRect().width() + textSpacing();
     }
 
-    // Add text for the total number of files
-    const QFontMetrics metrics{ font() };
-    const QChar sigma{ 0x2211 };
-    const QString nTextTemplate =
-	metrics.inFont( sigma ) ? sigma % "n: %L2"_L1 : tr( "Files (n): %L1" );
-    QGraphicsTextItem * nTextItem = createBoldItem( scene(), nTextTemplate.arg( n ) );
-
-    // Position the text line if it wasn't already done for the quartile
-    if ( n == 0 )
-	pos.ry() -= nTextItem->boundingRect().height();
-
+    // Add the number of files text after any quartiles text
     nTextItem->setPos( pos );
 }
 
@@ -599,8 +602,7 @@ void HistogramView::addOverflowPanel()
 	// Rebuild now if the height of the contents is different from the cached value
 	// -so it is critical that the height of the panel contents does not depend on _minHeight
 	_minHeight = contentsHeight;
-	setGeometryDirty();
-	rebuild();
+	rebuildDirty();
 
 #if VERBOSE_HISTOGRAM
 	logDebug() << "Reset minimum histogram height to: " << _minHeight << Qt::endl;
@@ -609,12 +611,20 @@ void HistogramView::addOverflowPanel()
 }
 
 
-void HistogramView::resizeEvent( QResizeEvent * event )
+void HistogramView::resizeEvent( QResizeEvent * )
 {
     //logDebug() << "Event size: " << event->size() << Qt::endl;
     //logDebug() << "Event size: " << event->oldSize() << Qt::endl;
 
-    QGraphicsView::resizeEvent( event );
-    setGeometryDirty();
-    rebuild();
+    // Not safe to delete and create children during a recursive showChildren()
+    QTimer::singleShot( 0, this, &HistogramView::rebuildDirty );
+}
+
+
+void HistogramView::changeEvent( QEvent * event )
+{
+    QGraphicsView::changeEvent( event );
+
+    if ( event->type() == QEvent::PaletteChange )
+	rebuildDirty();
 }

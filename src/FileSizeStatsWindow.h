@@ -165,6 +165,13 @@ namespace QDirStat
 	void resizeEvent( QResizeEvent * ) override;
 
 	/**
+	 * Detect palette changes.
+	 *
+	 * Reimplemented from QDialog/QWidget.
+	 **/
+	void changeEvent( QEvent * event ) override;
+
+	/**
 	 * Context menu event.  If the histogram tab is open, build and
 	 * show a context menu.
 	 *
