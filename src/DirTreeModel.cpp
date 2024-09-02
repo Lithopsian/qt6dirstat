@@ -158,7 +158,7 @@ namespace
     bool useSmallFileSizeText( FileInfo * item )
     {
 	// Not a regular file or symlink doesn't count
-	if ( !item || item->blocks() == 0 || !( item->isFile() || item->isSymLink() ) )
+	if ( !item || item->blocks() == 0 || !item->isFileOrSymLink() )
 	    return false;
 
 	// If no cluster size has been determined yet, we can't say what is a small file

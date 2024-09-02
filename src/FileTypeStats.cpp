@@ -191,7 +191,7 @@ void FileTypeStats::collect( const FileInfo * dir )
 	{
 	    collect( *it );
 	}
-	else if ( it->isFile() || it->isSymLink() )
+	else if ( it->isFileOrSymLink() )
 	{
 	    // First attempt: try the MIME categorizer.
 	    QString suffix;

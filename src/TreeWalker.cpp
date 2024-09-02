@@ -65,7 +65,7 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool LargestFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->size() >= _threshold;
+    return item && item->isFileOrSymLink() && item->size() >= _threshold;
 }
 
 
@@ -81,7 +81,7 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool NewFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->mtime() >= _threshold;
+    return item && item->isFileOrSymLink() && item->mtime() >= _threshold;
 }
 
 
@@ -97,7 +97,7 @@ void OldFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool OldFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->mtime() <= _threshold;
+    return item && item->isFileOrSymLink() && item->mtime() <= _threshold;
 }
 
 
@@ -127,7 +127,7 @@ bool SparseFilesTreeWalker::check( const FileInfo * item )
 
 bool FilesFromYearTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFile() && item->yearAndMonth().year == _year;
+    return item && item->isFileOrSymLink() && item->yearAndMonth().year == _year;
 }
 
 
@@ -135,7 +135,7 @@ bool FilesFromYearTreeWalker::check( const FileInfo * item )
 
 bool FilesFromMonthTreeWalker::check( const FileInfo * item )
 {
-    if ( !item || !item->isFile() )
+    if ( !item || !item->isFileOrSymLink() )
         return false;
 
     const auto yearAndMonth = item->yearAndMonth();

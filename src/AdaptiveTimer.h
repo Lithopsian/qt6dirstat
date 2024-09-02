@@ -10,7 +10,7 @@
 #ifndef AdaptiveTimer_h
 #define AdaptiveTimer_h
 
-#include <functional>
+#include <functional> // std::function
 
 #include <QElapsedTimer>
 #include <QObject>

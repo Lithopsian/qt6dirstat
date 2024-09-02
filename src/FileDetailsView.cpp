@@ -192,23 +192,23 @@ void FileDetailsView::showDetails( FileInfo * file )
 void FileDetailsView::showFileInfo( FileInfo * file )
 {
     const bool isSpecial = file->isSpecial();
-    const bool isSymlink = file->isSymLink();
+    const bool isSymLink = file->isSymLink();
 
     setLabelLimited(_ui->fileNameLabel, file->baseName() );
     _ui->fileTypeLabel->setText( formatFilesystemObjectType( file ) );
 
-    _ui->symlinkIcon->setVisible( file->isSymLink() );
+    _ui->symlinkIcon->setVisible( isSymLink );
     _ui->fileIcon->setVisible( file->isFile() );
     _ui->blockIcon->setVisible( file->isBlockDevice() );
     _ui->charIcon->setVisible( file->isCharDevice() );
     _ui->specialIcon->setVisible( file->isFifo() || file->isSocket() );
 
-    _ui->fileMimeCaption->setVisible( !isSymlink );
-    _ui->fileMimeLabel->setVisible( !isSymlink );
-    _ui->fileLinkCaption->setVisible( isSymlink );
-    _ui->fileLinkLabel->setVisible( isSymlink );
+    _ui->fileMimeCaption->setVisible( !isSymLink );
+    _ui->fileMimeLabel->setVisible( !isSymLink );
+    _ui->fileLinkCaption->setVisible( isSymLink );
+    _ui->fileLinkLabel->setVisible( isSymLink );
 
-    if ( isSymlink )
+    if ( isSymLink )
     {
 	const QString fullTarget  = file->symLinkTarget();
 	QString shortTarget = fullTarget;

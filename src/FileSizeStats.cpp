@@ -24,7 +24,7 @@ namespace
      **/
     bool collectItem( const FileInfo * item )
     {
-        return item->isFile() || item->isSymLink();
+        return item->isFileOrSymLink();
     }
 
 } // namespace
@@ -36,7 +36,7 @@ FileSizeStats::FileSizeStats( FileInfo * subtree ):
     CHECK_PTR( subtree );
 
     // Avoid reallocations for potentially millions of list appends
-    reserve( subtree->totalFiles() );
+    reserve( subtree->totalNonDirItems() );
     collect( subtree );
     sort();
 }
