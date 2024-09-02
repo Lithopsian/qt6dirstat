@@ -134,14 +134,11 @@ namespace QDirStat
 	 **/
 	void setLabelLimited( QLabel * label, const QString & text );
 
-
 	// Boilerplate widget setting methods
-
 	void showFileInfo( FileInfo * file );
 	void showFilePkgInfo( const FileInfo * file );
 	void showSubtreeInfo( DirInfo * dir );
 	void showDirNodeInfo( const DirInfo * dir );
-
 	void setSystemFileWarningVisibility( bool visible );
 	void setFilePkgBlockVisibility( bool visible );
 	void setDirBlockVisibility( bool visible );

@@ -64,8 +64,6 @@ namespace QDirStat
      **/
     class DirTreePatternFilter: public DirTreeFilter
     {
-    protected:
-
 	/**
 	 * Constructor. If 'pattern' contains a slash ("/"), it is matched
 	 * against the complete path. Otherwise, it is matched only against the

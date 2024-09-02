@@ -36,6 +36,22 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Add all Cleanups that have an icon to the specified tool bar and keep
+     * it updated when the collections changes.
+     **/
+    void addToToolBar( const CleanupList & cleanupList, QToolBar * toolBar )
+    {
+	for ( Cleanup * cleanup : cleanupList )
+	{
+	    // Add only cleanups that have an icon to avoid overcrowding the
+	    // toolbar with actions that only have a text.
+	    if ( cleanup->isActive() && !cleanup->icon().isNull() )
+		toolBar->addAction( cleanup );
+	}
+    }
+
+
+    /**
      * Return the URLs for the selected item types in 'items':
      * directories (including dot entries) or files.
      **/
@@ -353,18 +369,6 @@ void CleanupCollection::addEnabled( QWidget * widget ) const
 }
 
 
-void CleanupCollection::addToToolBar( QToolBar * toolBar )
-{
-    for ( Cleanup * cleanup : asConst( _cleanupList ) )
-    {
-	// Add only cleanups that have an icon to avoid overcrowding the
-	// toolbar with actions that only have a text.
-	if ( cleanup->isActive() && !cleanup->icon().isNull() )
-	    toolBar->addAction( cleanup );
-    }
-}
-
-
 void CleanupCollection::readSettings()
 {
     clear();
@@ -436,7 +440,7 @@ void CleanupCollection::readSettings()
 
     // All Cleanups will be gone (or not yet created) from the toolbar and menu ...
     // ... so add them back
-    addToToolBar( _toolBar );
+    addToToolBar( _cleanupList, _toolBar );
     addActive( _menu );
 }
 

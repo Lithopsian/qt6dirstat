@@ -111,10 +111,11 @@ void DirTreeView::contextMenu( const QPoint & pos )
 
 const DirTreeModel * DirTreeView::dirTreeModel() const
 {
-    if ( !model() )
+    auto abstractItemModel = model();
+    if ( !abstractItemModel )
 	return nullptr;
 
-    const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( model() );
+    const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( abstractItemModel );
     if ( dirTreeModel )
 	return dirTreeModel;
 
