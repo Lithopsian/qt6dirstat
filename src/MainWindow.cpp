@@ -1094,16 +1094,14 @@ void MainWindow::updateActions()
     _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );
     _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
 
-    for ( QAction * action : _ui->menuDiscover->actions() )
+    const auto actions = _ui->menuDiscover->actions();
+    for ( QAction * action : actions )
     {
 	if ( action != _ui->actionShowFilesystems )
 	    action->setEnabled( isTree );
     }
 
     _historyButtons->updateActions();
-
-    // This has to happen *after* the actions here have been updated
-//    ActionManager::updateActions();
 }
 
 
@@ -1112,7 +1110,7 @@ void MainWindow::changeEvent( QEvent * event )
     if ( event->type() == QEvent::PaletteChange )
 	updateFileDetailsView();
 
-    event->ignore();
+    QMainWindow::changeEvent( event );
 }
 
 
