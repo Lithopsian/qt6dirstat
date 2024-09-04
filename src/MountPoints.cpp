@@ -372,20 +372,6 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
     // logDebug() << "Read " << size() << " mount points from QStorageInfo" << Qt::endl;
 }
 #endif // HAVE_Q_STORAGE_INFO
-/*
-MountPointList MountPoints::normalMountPoints()
-{
-    MountPointList result;
-
-    for ( MountPoint * mountPoint : instance() )
-    {
-        if ( mountPoint->isNormalMountPoint() )
-            result << mountPoint;
-    }
-
-    return result;
-}
-*/
 
 QString MountPoints::device( const QString & url )
 {
