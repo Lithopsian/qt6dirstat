@@ -89,7 +89,7 @@ namespace QDirStat
 	 * if they are not.
 	 **/
 	PercentileValue minValue()    const { return percentileValue( minPercentile() ); }
-	PercentileValue maxValue()    const { return percentileValue( maxPercentile() ); }
+	PercentileValue maxValue()    const { return last(); }
 	PercentileValue medianValue() const { return percentileValue( median()        ); }
 	PercentileValue q1Value()     const { return percentileValue( quartile1()     ); }
 	PercentileValue q3Value()     const { return percentileValue( quartile3()     ); }
@@ -142,7 +142,7 @@ namespace QDirStat
 	 * To keep that definition, the floating point boundary
 	 * is rounded down to an integer.
 	 *
-	 * Note that this function require the percentiles lists to be
+	 * Note that this function requires the percentiles lists to be
 	 * fully populated and will throw an exception if they are not.
 	 **/
 	PercentileValue percentileValue( int index ) const

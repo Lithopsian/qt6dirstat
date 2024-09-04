@@ -54,7 +54,7 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
     const int    index  = std::floor( indexRank );
     const double modulo = indexRank - index;
 
-    // Get the value at 'index' and the next to interpolate with if necessary
+    // Get the value at 'index' and interpolate with the next if necessary
     PercentileBoundary result = at( index );
     if ( modulo )
 	result += modulo * ( at( index + 1 ) - result );
@@ -102,8 +102,9 @@ void PercentileStats::calculatePercentiles()
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "sum["     << i << "] : " << QLocale{}.toString( _percentileSums[ i ] ) << Qt::endl;
-	logDebug() << "cum_sum[" << i << "] : " << QLocale{}.toString( _cumulativeSums[ i ] ) << Qt::endl;
+	logDebug() << "boundary[" << i << "] : " << QLocale{}.toString( (double)_percentiles[ i ] ) << Qt::endl;
+	logDebug() << "     sum[" << i << "] : " << QLocale{}.toString( _percentileSums[ i ] ) << Qt::endl;
+	logDebug() << " cum sum[" << i << "] : " << QLocale{}.toString( _cumulativeSums[ i ] ) << Qt::endl;
     }
 #endif
 }
@@ -170,8 +171,11 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
     // Find the first data point that we want for the buckets
     auto beginIt = cbegin();
-    while ( beginIt != cend() && *beginIt <= _bucketsStart )
-	++beginIt;
+    if ( startPercentile > minPercentile() )
+    {
+	while ( beginIt != cend() && *beginIt <= _bucketsStart )
+	    ++beginIt;
+    }
 
     // Fill buckets up to the last requested percentile
     int index = 0;
