@@ -170,7 +170,7 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 
     // Find the first data point that we want for the buckets
     auto beginIt = cbegin();
-    while ( beginIt != cend() && *beginIt < _bucketsStart )
+    while ( beginIt != cend() && *beginIt <= _bucketsStart )
 	++beginIt;
 
     // Fill buckets up to the last requested percentile

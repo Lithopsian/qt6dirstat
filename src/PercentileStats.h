@@ -129,6 +129,8 @@ namespace QDirStat
 	PercentileBoundary percentileBoundary( int index ) const;
 	PercentileValue percentileSum( int index ) const;
 	PercentileValue cumulativeSum( int index ) const;
+	PercentileValue percentileRangeSum( int startIndex, int endIndex ) const
+	    { return _cumulativeSums[ endIndex ] - _cumulativeSums[ startIndex ]; }
 
 	/**
 	 * Returns a particular percentile boundary as an integer
