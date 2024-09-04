@@ -108,11 +108,11 @@ namespace
      * Highlight a table row using a neutral grey based on the palette
      * highlight color.
      **/
-    void highlightRow( QTableWidget * table, int row )
+    void highlightRow( QTableWidget * table, int row, const QPalette & palette )
     {
 	// Use the application palette because a theme change won't have reached the table widgets yet
 	const QBrush highlight =
-	    QColor::fromHsl( 0, 0, QGuiApplication::palette().highlight().color().lightness() );
+	    QColor::fromHsl( 0, 0, palette.highlight().color().lightness() );
 
 	for ( int col=0; col < table->columnCount(); ++col )
 	{
@@ -123,7 +123,7 @@ namespace
 		item = addItem( table, row, col, Qt::AlignLeft, QString{} );
 
 	    item->setBackground( highlight );
-	    item->setForeground( QGuiApplication::palette().highlightedText() );
+	    item->setForeground( palette.highlightedText() );
 	}
     }
 
@@ -136,10 +136,10 @@ namespace
      * how far from the extremes (min, max) the step width
      * should be 1 instead of the given step.
      **/
-    void fillTable( const FileSizeStats * stats,
-                    QTableWidget        * table,
+    void fillTable( QTableWidget        * table,
+                    const FileSizeStats * stats,
                     int                   step,
-                    int                   extremesMargin )
+                    const QPalette      & palette )
     {
 	enum TableColumns
 	{
@@ -153,8 +153,8 @@ namespace
 	// Keep the header, but truncate the table rows
 	table->setRowCount( 0 );
 
-	const int minMargin = stats->minPercentile() + extremesMargin;
-	const int maxMargin = stats->maxPercentile() - extremesMargin;
+	const int minMargin = stats->minPercentile() + EXTREMES_MARGIN;
+	const int maxMargin = stats->maxPercentile() - EXTREMES_MARGIN;
 	const QString percentilePrefix = QObject::tr( "P" );
 
 	for ( int i = stats->minPercentile(); i <= stats->maxPercentile(); ++i )
@@ -195,7 +195,7 @@ namespace
 
 	    // Shade the background of every 10th row if all percentiles are shown
 	    if ( i > 0 && i % 10 == 0 && step == 1 )
-		highlightRow( table, row );
+		highlightRow( table, row, palette );
 	}
 
 	HeaderTweaker::resizeToContents( table->horizontalHeader() );
@@ -222,6 +222,8 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
     readHotkeySettings( this );
+
+    show();
 }
 
 
@@ -307,11 +309,12 @@ void FileSizeStatsWindow::connectActions()
     connect( _ui->actionAutoScale,          &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoLogScale );
 
+    // Percentile "all", increment, and decrement actions are connected inside the .ui file
     connect( _ui->actionStartMin,           &QAction::triggered,
-             [ this ](){ _ui->startPercentileSlider->setValue( PercentileStats::minPercentile() ); } );
+             this,                          &FileSizeStatsWindow::setMinPercentile );
 
     connect( _ui->actionEndMax,             &QAction::triggered,
-             [ this ](){ _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() ); } );
+             this,                          &FileSizeStatsWindow::setMaxPercentile );
 
     connect( _ui->actionAutoPercentiles,    &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoPercentileRange );
@@ -332,6 +335,7 @@ void FileSizeStatsWindow::markersAction( QActionGroup * group, QAction * action,
     group->addAction( action );
     _ui->markersComboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
 
+    // Each action simply selects the corresponding combo-box entry
     const int index = _ui->markersComboBox->count() - 1;
     connect( action, &QAction::triggered,
              [ this, index ](){ _ui->markersComboBox->setCurrentIndex( index ); } );
@@ -345,8 +349,6 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
     if ( !fileInfo )
 	return;
 
-    // Show the window first, or it will trigger extra histogram rebuilds
-    sharedInstance( mainWindow )->show();
     sharedInstance( mainWindow )->populate( fileInfo, suffix );
 }
 
@@ -358,7 +360,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
-    // Existing stats are invalidated; be sure the model and histogram get new ones promptly
+    // Existing stats are invalidated; be sure the model and histogram get new pointers promptly
     if ( suffix.isEmpty() )
 	_stats.reset( new FileSizeStats{ fileInfo } );
     else
@@ -387,7 +389,7 @@ void FileSizeStatsWindow::initHistogram()
 void FileSizeStatsWindow::fillPercentileTable()
 {
     const int step = _ui->percentileFilterCheckBox->isChecked() ? 1 : FILTERED_STEP;
-    fillTable( _stats.get(), _ui->percentileTable, step, EXTREMES_MARGIN );
+    fillTable( _ui->percentileTable, _stats.get(), step, palette() );
 }
 
 
@@ -396,7 +398,7 @@ void FileSizeStatsWindow::setPercentileRange()
     const int startPercentile = _ui->startPercentileSlider->value();
     const int endPercentile   = _ui->endPercentileSlider->value();
     const int percentileCount = endPercentile - startPercentile;
-    const int dataCount       = qRound( _stats->size() * percentileCount / 100.0 );
+    const FileCount dataCount = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
 
     bucketsTableModel( _ui->bucketsTable )->beginReset();
@@ -462,14 +464,24 @@ void FileSizeStatsWindow::logScale()
 {
     _ui->histogramView->disableAutoLogScale();
     _ui->histogramView->toggleLogScale();
-    _ui->histogramView->build();
 }
 
 
 void FileSizeStatsWindow::autoLogScale()
 {
     _ui->histogramView->enableAutoLogScale();
-    _ui->histogramView->build();
+}
+
+
+void FileSizeStatsWindow::setMinPercentile()
+{
+    _ui->startPercentileSlider->setValue( PercentileStats::minPercentile() );
+}
+
+
+void FileSizeStatsWindow::setMaxPercentile()
+{
+    _ui->endPercentileSlider->setValue( PercentileStats::maxPercentile() );
 }
 
 

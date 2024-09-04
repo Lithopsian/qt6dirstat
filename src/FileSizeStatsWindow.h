@@ -73,10 +73,8 @@ namespace QDirStat
 	void fillPercentileTable();
 
 	/**
-	 * Respond to changes in the slider values or markers combobox.
+	 * Respond to changes in the markers combobox or from the context menu.
 	 **/
-//	void startValueChanged( int newStart );
-//	void endValueChanged( int newEnd );
 	void markersChanged();
 
 	/**
@@ -122,6 +120,13 @@ namespace QDirStat
 	 * scaling.
 	 **/
 	void autoLogScale();
+
+	/**
+	 * Set the start percentile to the minimum (0), or set the end
+	 * percentile to the maximum (100).
+	 **/
+	void setMinPercentile();
+	void setMaxPercentile();
 
 	/**
 	 * Show help for a topic determined by the sender of this signal.
