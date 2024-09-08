@@ -38,7 +38,7 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
                 {
                     case StartCol:  return formatSize( _stats->bucketStart( row ) );
                     case EndCol:    return formatSize( _stats->bucketEnd  ( row ) );
-                    case ValueCol:  return QString::number( _stats->bucket( row ) );
+                    case ValueCol:  return formatCount( _stats->bucket( row ) );
                     default:        return QVariant{};
                 }
             }

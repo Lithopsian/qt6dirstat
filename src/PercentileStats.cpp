@@ -7,12 +7,11 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm> // std::sort()
-
 #include <QtMath> // qCeil
 
 #include "PercentileStats.h"
 #include "Exception.h"
+#include "FormatUtil.h"
 
 
 #define VERBOSE_LOGGING 0
@@ -68,79 +67,70 @@ void PercentileStats::calculatePercentiles()
 {
     _percentiles.clear(); // just in case anyone calls this more than once
 
-    // Store all the percentile boundaries
+    // Calculate and store all the percentile boundaries
     for ( int i = minPercentile(); i <= maxPercentile(); ++i )
 	_percentiles.append( percentile( i ) );
 
-    _percentileSums = PercentileList( maxPercentile() + 1 ); // new list, 101 items, all zero
+    // Initialise the first list entries to 0
+    _percentileCounts = PercentileList( 1 );
+    _percentileSums   = PercentileList( 1 );
+
+    FileCount       count = 0;
+    PercentileValue sum   = 0;
+
+    // Iterate the percentiles as we go along, starting at percentile 1
+    auto it = _percentiles.cbegin() + 1;
+    auto filledPercentile = [ this, &it, &count, &sum ]()
+    {
+	// Put the running totals into the lists
+	_percentileCounts.append( count );
+	_percentileSums.append( sum );
+
+	// Move on to the next percentile
+	++it;
+    };
 
     // Iterate all the data points - should be in order, so add to each percentile in turn
-    int currentPercentile = 1;
-    auto it = _percentiles.cbegin() + 1;
     for ( PercentileValue value : *this )
     {
 	// Have we gone past this percentile upper boundary?
-	while ( value > *it && currentPercentile < maxPercentile() )
-	{
-	    ++currentPercentile;
-	    ++it;
-	}
+	while ( value > *it )
+	    filledPercentile();
 
-	_percentileSums[ currentPercentile ] += value;
+	++count;
+	sum += value;
     }
 
-    _cumulativeSums.clear(); // just in case anyone calls this more than once
-
-    // Cumulative totals calculated in a separate iteration for clarity
-    PercentileValue runningTotal = 0;
-    for ( PercentileValue percentileSum : asConst( _percentileSums ) )
-    {
-	runningTotal += percentileSum;
-	_cumulativeSums.append( runningTotal );
-    }
+    // Fill trailing entries, percentiles after the last stats entry, including when no stats at all
+    while ( it != _percentiles.cend() )
+	filledPercentile();
 
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << "boundary[" << i << "] : " << QLocale{}.toString( (double)_percentiles[ i ] ) << Qt::endl;
-	logDebug() << "     sum[" << i << "] : " << QLocale{}.toString( _percentileSums[ i ] ) << Qt::endl;
-	logDebug() << " cum sum[" << i << "] : " << QLocale{}.toString( _cumulativeSums[ i ] ) << Qt::endl;
+	logDebug() << " boundary[" << i << "] : " << formatCount( _percentiles[ i ] ) << Qt::endl;
+	logDebug() << "    count[" << i << "] : " << formatCount( percentileCount( i ) ) << Qt::endl;
+	logDebug() << "  cum sum[" << i << "] : " << formatCount( percentileSum( i ) ) << Qt::endl;
+	logDebug() << "cum count[" << i << "] : " << formatCount( percentileSum( i ) ) << Qt::endl;
+	logDebug() << "  cum sum[" << i << "] : " << formatCount( percentileSum( i ) ) << Qt::endl;
     }
 #endif
 }
 
 
-PercentileBoundary PercentileStats::percentileBoundary( int index ) const
+void PercentileStats::validatePercentile( int index )
 {
     CHECK_PERCENTILE_INDEX( index );
-
-    return _percentiles.isEmpty() ? 0 : _percentiles[ index ];
 }
 
 
-PercentileValue PercentileStats::percentileSum( int index ) const
-{
-    CHECK_PERCENTILE_INDEX( index );
-
-    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
-}
-
-
-PercentileValue PercentileStats::cumulativeSum( int index ) const
-{
-    CHECK_PERCENTILE_INDEX( index );
-
-    return _cumulativeSums.isEmpty() ? 0 : _cumulativeSums[ index ];
-}
-
-
-void PercentileStats::validatePercentileRange( int startPercentile, int endPercentile )
+void PercentileStats::validatePercentileRange( int startIndex, int endIndex )
 {
     // Validate as much as possible, although the percentiles list still might not match the stats
-    CHECK_PERCENTILE_INDEX( startPercentile );
-    CHECK_PERCENTILE_INDEX( endPercentile   );
+    CHECK_PERCENTILE_INDEX( startIndex );
+    CHECK_PERCENTILE_INDEX( endIndex   );
 
-    if ( startPercentile >= endPercentile )
+    if ( startIndex >= endIndex )
 	THROW( Exception{ "startPercentile must be less than endPercentile" } );
 }
 
@@ -163,9 +153,9 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << QLocale{}.toString( static_cast<double>( _bucketsStart ) )
-               << " endVal: " << QLocale{}.toString( static_cast<double>( _bucketsEnd ) )
-               << " bucketWidth: " << QLocale{}.toString( static_cast<double>( bucketWidth ) )
+               << " startVal: " << formatCount( _bucketsStart )
+               << " endVal: " << formatCount( _bucketsEnd )
+               << " bucketWidth: " << formatCount( bucketWidth )
                << Qt::endl;
 #endif
 
@@ -178,20 +168,20 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
     }
 
     // Fill buckets up to the last requested percentile
-    int index = 0;
+    auto bucketIt = _buckets.begin();
     PercentileBoundary bucketEnd = _bucketsStart + bucketWidth;
     for ( auto it = beginIt; it != cend() && *it <= _bucketsEnd; ++it )
     {
-	// Increment the bucket index when we hit the next bucket boundary, skipping empty buckets
+	// Iterate to the next bucket when we hit the next bucket boundary, skipping empty buckets
 	while ( *it > bucketEnd )
 	{
-	    if ( index < bucketCount - 1 ) // avoid rounding errors tipping us past the last bucket
-		++index;
+	    if ( bucketIt + 1 != _buckets.end() ) // avoid rounding errors tipping us past the last bucket
+		++bucketIt;
 	    bucketEnd += bucketWidth;
 	}
 
-	// Fill this bucket
-	++_buckets[ index ];
+	// Add to this bucket
+	( *bucketIt )++;
     }
 }
 

@@ -47,6 +47,19 @@ class QLabel;
 namespace QDirStat
 {
     /**
+     * Format simple numbers according to the locale conventions.
+     * Overloaded for various numeric types.
+     **/
+    inline QString formatCount( qint64 size )
+        { return QLocale{}.toString( size ); }
+    inline QString formatCount( qint32 size )
+        { return QLocale{}.toString( size ); }
+    inline QString formatCount( double size, int precision = 6 )
+        { return QLocale{}.toString( size, 'f', precision ); }
+    inline QString formatCount( long double size, int precision = 6 )
+        { return QLocale{}.toString( static_cast<double>( size ), 'f', precision ); }
+
+    /**
      * Can't use a default argument when using this as a function pointer,
      * so we really need the overloaded version.
      **/

@@ -343,7 +343,7 @@ protected:
 #define CHECK_INDEX( INDEX, VALID_MIN, VALID_MAX )		\
     CHECK_INDEX_MSG( (INDEX), (VALID_MIN), (VALID_MAX), "Index out of range" )
 
-#define CHECK_PERCENTILE_INDEX( INDEX ) \
+#define CHECK_PERCENTILE_INDEX( INDEX ) 			\
     CHECK_INDEX_MSG( (INDEX), 0, 100, "Percentile index out of range" );
 
 

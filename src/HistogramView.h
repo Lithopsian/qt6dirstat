@@ -90,44 +90,9 @@ namespace QDirStat
 	void init( const FileSizeStats * stats );
 
 	/**
-	 * Return the stored value for percentile no. 'index' (0..100).  This
-	 * directly accesses the percentile list with the assumption that it is
-	 * already populated with 101 entries.
-	 **/
-	FileSize percentile( int index ) const;
-
-	/**
 	 * Set the percentile range (0..100) for which to display data.
 	 **/
 	void setPercentileRange( int startPercentile, int endPercentile );
-
-	/**
-	 * Set the percentile (0..100) from which on to display data, i.e. set
-	 * the left border of the histogram. The real value to use is taken
-	 * from the stored percentiles.
-	 **/
-//	void setStartPercentile( int index );
-
-	/**
-	 * Return the percentile from which on to display data, i.e. the left
-	 * border of the histogram. Use percentile() with the result of this to
-	 * get the numeric value.
-	 **/
-//	int startPercentile() const { return _startPercentile; }
-
-	/**
-	 * Set the percentile (0..100) until which on to display data, i.e. set
-	 * the right border of the histogram. The real value to use is taken
-	 * from the stored percentiles.
-	 **/
-//	void setEndPercentile( int index );
-
-	/**
-	 * Return the percentile up to which to display data, i.e. the right
-	 * border of the histogram. Use percentile() with the result of this to
-	 * get the numeric value.
-	 **/
-//	int endPercentile() const { return _endPercentile; }
 
 	/**
 	 * Enable or disable showing percentiles as an overlay over the
@@ -156,7 +121,7 @@ namespace QDirStat
 	/**
 	 * Return the left extra percentiles or 0 if none are shown.
 	 **/
-//	int leftExtraPercentiles() { return _leftExtraPercentiles; }
+//	int leftExtraPercentiles() const { return _leftExtraPercentiles; }
 
 	/**
 	 * Set how many percentiles to display as an overlay at the right
@@ -176,30 +141,36 @@ namespace QDirStat
 	/**
 	 * Return the right extra percentiles or 0 if none are shown.
 	 **/
-//	int rightExtraPercentiles() { return _rightExtraPercentiles; }
+//	int rightExtraPercentiles() const { return _rightExtraPercentiles; }
 
 	/**
 	 * Set whether to automatically determine the type of y-axis
 	 * scaling.
 	 **/
-	void enableAutoLogScale() { _autoLogScale = true; }
+	void enableAutoLogScale() { _autoLogScale = true; build(); }
 	void disableAutoLogScale() { _autoLogScale = false; }
 
 	/**
 	 * Return whether the y-axis is currently showing as a log scale.
 	 **/
-	bool logScale() { return _useLogScale; }
-	void toggleLogScale() { _useLogScale = !_useLogScale; }
+	bool logScale() const { return _useLogScale; }
+	void toggleLogScale() { _useLogScale = !_useLogScale; build(); }
+
+
+    protected:
+
+	/**
+	 * Return the stored value for percentile no. 'index' (0..100).  This
+	 * directly accesses the percentile list with the assumption that it is
+	 * already populated with 101 entries.
+	 **/
+	FileSize percentile( int index ) const;
 
 	/**
 	 * Build the histogram, probably based on a new set of data.
 	 * The preferred y-axis scaling will be recalculated.
 	 **/
-	void build()
-	    { autoLogScale(); rebuild(); }
-
-
-    protected:
+	void build() { autoLogScale(); rebuild(); }
 
 	/**
 	 * Rebuild the histogram based on the current data.  The geometry
@@ -223,26 +194,28 @@ namespace QDirStat
 	 * increased proportionally so that it will scale down to
 	 * fill the viewport width.
 	 **/
-	void calcGeometry();
+	inline QSizeF calcGeometry( qreal overflowWidth );
 
 	/**
-	 * Functions to create the graphical elements.
+	 * Functions to create the graphical elements.  These are simply
+	 * executed one after another to avoid having a single huge
+	 * function, so they are declared as inline.
 	 **/
-	void addBackground();
-	void addAxes();
-	void addXAxisLabel();
-	void addYAxisLabel();
-	void addXStartEndLabels();
-	void addYStartEndLabels();
-	void addQuartileText();
-	void addBars();
-	void addMarkers();
-	void addOverflowPanel();
+	inline void addBackground( QGraphicsScene * scene );
+	inline void addAxes( QGraphicsScene * scene );
+	inline void addXAxisLabel( QGraphicsScene * scene );
+	inline void addYAxisLabel( QGraphicsScene * scene );
+	inline void addXStartEndLabels( QGraphicsScene * scene );
+	inline void addYStartEndLabels( QGraphicsScene * scene );
+	inline void addQuartileText( QGraphicsScene * scene );
+	inline void addBars( QGraphicsScene * scene );
+	inline void addMarkers( QGraphicsScene * scene );
+	inline void addOverflowPanel( QGraphicsScene * scene, qreal panelWidth );
 
 	/**
 	 * Fit the graphics into the viewport.
 	 **/
-	void fitToViewport();
+	inline void fitToViewport( QGraphicsScene * scene );
 
 	/**
 	 * Return or set whether the geometry of the histogram needs
@@ -256,8 +229,8 @@ namespace QDirStat
 	 * Create a background rectangle in the scene and colour it
 	 * as a panel.
 	 **/
-	void createPanel( const QRectF & rect )
-	    { scene()->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); };
+	void createPanel(  QGraphicsScene * scene, const QRectF & rect )
+	    { scene->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); };
 
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.

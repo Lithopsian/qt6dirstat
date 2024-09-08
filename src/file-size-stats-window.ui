@@ -204,6 +204,35 @@
       <layout class="QVBoxLayout" name="percentilePageLayout">
        <item>
         <layout class="QHBoxLayout" name="topComboBoxLayout">
+         <item>
+          <widget class="QLabel" name="nominalCountLabel">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Nominal files per percentile:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="nominalCount"/>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item alignment="Qt::AlignRight">
           <widget class="QCheckBox" name="percentileFilterCheckBox">
            <property name="text">

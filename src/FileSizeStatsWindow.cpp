@@ -144,9 +144,10 @@ namespace
 	enum TableColumns
 	{
 	    NumberCol,
-	    NameCol,
 	    ValueCol,
+	    CountCol,
 	    SumCol,
+	    CumCountCol,
 	    CumSumCol
 	};
 
@@ -167,34 +168,37 @@ namespace
 	    const int row = table->rowCount();
 	    table->setRowCount( row + 1);
 
-	    addItem( table, row, NumberCol, Qt::AlignRight, percentilePrefix % QString::number( i ) );
 	    addItem( table, row, ValueCol,  Qt::AlignRight, formatSize( stats->percentileValue( i ) ) );
 	    if ( i > 0 )
 	    {
-		addItem( table, row, SumCol,    Qt::AlignRight, formatSize( stats->percentileSum( i ) ) );
-		addItem( table, row, CumSumCol, Qt::AlignRight, formatSize( stats->cumulativeSum( i ) ) );
+		const QString countText = formatCount( stats->percentileCount( i ) );
+		const QString cumText   = formatCount( stats->cumulativeCount( i ) );
+		addItem( table, row, CountCol,    Qt::AlignRight, countText );
+		addItem( table, row, SumCol,      Qt::AlignRight, formatSize( stats->percentileSum( i ) ) );
+		addItem( table, row, CumCountCol, Qt::AlignRight, cumText );
+		addItem( table, row, CumSumCol,   Qt::AlignRight, formatSize( stats->cumulativeSum( i ) ) );
 	    }
 
-	    const QString rowName = [ i ]()
+	    const QString rowName = [ i, percentilePrefix ]()
 	    {
 		switch ( i )
 		{
 		    case PercentileStats::minPercentile(): return QObject::tr( "Min" );
-		    case PercentileStats::quartile1():     return QObject::tr( "1st quartile" );
+		    case PercentileStats::quartile1():     return QObject::tr( "Quartile 1" );
 		    case PercentileStats::median():        return QObject::tr( "Median" );
-		    case PercentileStats::quartile3():     return QObject::tr( "3rd quartile" );
+		    case PercentileStats::quartile3():     return QObject::tr( "Quartile 3" );
 		    case PercentileStats::maxPercentile(): return QObject::tr( "Max" );
-		    default: return QString{};
+		    default: return QString{ percentilePrefix % QString::number( i ) };
 		}
 	    }();
-	    if ( !rowName.isEmpty() )
-	    {
-		addItem( table, row, NameCol, Qt::AlignCenter, rowName );
+	    addItem( table, row, NumberCol, Qt::AlignRight, rowName );
+
+	    // Make every 25th row, including the first and last, bold
+	    if ( i % stats->quartile1() == 0 )
 		setRowBold( table, row );
-	    }
 
 	    // Shade the background of every 10th row if all percentiles are shown
-	    if ( i > 0 && i % 10 == 0 && step == 1 )
+	    if ( i % 10 == 0 && step == 1 )
 		highlightRow( table, row, palette );
 	}
 
@@ -276,12 +280,12 @@ void FileSizeStatsWindow::initWidgets()
     _ui->actionNoPercentiles->setChecked( true );
 
     // Create the header row on the percentiles table, which will never change
-    const QString percentilePrefix = QObject::tr( "P" );
-    const QStringList headers{ QString{},
-                               QObject::tr( "Name" ),
-                               QObject::tr( "Size limit" ),
-                               QObject::tr( "Sum %01(n-1)...%01(n)" ).arg( percentilePrefix ),
-                               QObject::tr( "Sum %010...%01(n)" ).arg( percentilePrefix ),
+    const QStringList headers{ QObject::tr( "Percentile" ),
+                               QObject::tr( "Value" ),
+                               QObject::tr( "Files P(n-1...n)" ),
+                               QObject::tr( "Sum P(n-1...n)" ),
+                               QObject::tr( "Files P(%1...n)" ).arg( _stats->minPercentile() ),
+                               QObject::tr( "Sum P(%1...n)" ).arg( _stats->minPercentile() ),
                              };
     _ui->percentileTable->setColumnCount( headers.size() );
     _ui->percentileTable->setHorizontalHeaderLabels( headers );
@@ -365,6 +369,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 	_stats.reset( new FileSizeStats{ fileInfo } );
     else
 	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
+
     _stats->calculatePercentiles();
 
     bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
@@ -388,6 +393,15 @@ void FileSizeStatsWindow::initHistogram()
 
 void FileSizeStatsWindow::fillPercentileTable()
 {
+    const PercentileBoundary nominalCount = 1.0 * _stats->size() / _stats->maxPercentile();
+    const int precision = [ nominalCount ]()
+    {
+	if ( nominalCount == 0 || nominalCount >= 10 ) return 0;
+	if ( nominalCount >= 1 ) return 1;
+	return 2;
+    }();
+    _ui->nominalCount->setText( formatCount( nominalCount, precision ) );
+
     const int step = _ui->percentileFilterCheckBox->isChecked() ? 1 : FILTERED_STEP;
     fillTable( _ui->percentileTable, _stats.get(), step, palette() );
 }
