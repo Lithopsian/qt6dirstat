@@ -15,6 +15,7 @@
 #include <sys/stat.h>  // ALLPERMS, S_IRUSR, S_ISUID, etc
 
 #include <QFontMetrics>
+#include <QLocale>
 #include <QStringBuilder>
 
 #include "Typedefs.h" // FileSize
