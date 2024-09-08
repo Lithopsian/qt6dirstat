@@ -444,7 +444,7 @@
   </action>
   <action name="actionEveryPercentile">
    <property name="text">
-    <string>Show &amp;every percentile</string>
+    <string>Mark &amp;every percentile</string>
    </property>
   </action>
   <action name="actionAutoScale">
@@ -468,13 +468,17 @@
   </action>
   <action name="actionAutoPercentiles">
    <property name="text">
-    <string>Auto &amp;percentiles</string>
+    <string>Auto &amp;percentile range</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionStartPlus1">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-up.png</normaloff>:/icons/move-up.png</iconset>
+   </property>
    <property name="text">
     <string>+1</string>
    </property>
@@ -483,6 +487,10 @@
    </property>
   </action>
   <action name="actionStartMinus1">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-down.png</normaloff>:/icons/move-down.png</iconset>
+   </property>
    <property name="text">
     <string>-1</string>
    </property>
@@ -491,6 +499,10 @@
    </property>
   </action>
   <action name="actionStartMin">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-bottom.png</normaloff>:/icons/move-bottom.png</iconset>
+   </property>
    <property name="text">
     <string>Min (P%1)</string>
    </property>
@@ -499,6 +511,10 @@
    </property>
   </action>
   <action name="actionEndPlus1">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-up.png</normaloff>:/icons/move-up.png</iconset>
+   </property>
    <property name="text">
     <string>+1</string>
    </property>
@@ -507,6 +523,10 @@
    </property>
   </action>
   <action name="actionEndMinus1">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-down.png</normaloff>:/icons/move-down.png</iconset>
+   </property>
    <property name="text">
     <string>-1</string>
    </property>
@@ -515,6 +535,10 @@
    </property>
   </action>
   <action name="actionEndMax">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/move-top.png</normaloff>:/icons/move-top.png</iconset>
+   </property>
    <property name="text">
     <string>Max (P%1)</string>
    </property>
@@ -524,7 +548,7 @@
   </action>
   <action name="actionAllPercentiles">
    <property name="text">
-    <string>&amp;All percentiles</string>
+    <string>Show &amp;all percentiles</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -561,7 +585,9 @@
   <tabstop>percentilesTableHelpButton</tabstop>
   <tabstop>bucketsTableHelpButton</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>endPercentileSlider</sender>
@@ -752,6 +778,70 @@
     <hint type="destinationlabel">
      <x>269</x>
      <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStartMinus1</sender>
+   <signal>triggered()</signal>
+   <receiver>startPercentileSpinBox</receiver>
+   <slot>stepDown()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>50</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStartPlus1</sender>
+   <signal>triggered()</signal>
+   <receiver>startPercentileSpinBox</receiver>
+   <slot>stepUp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>50</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEndMinus1</sender>
+   <signal>triggered()</signal>
+   <receiver>endPercentileSpinBox</receiver>
+   <slot>stepDown()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>488</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEndPlus1</sender>
+   <signal>triggered()</signal>
+   <receiver>endPercentileSpinBox</receiver>
+   <slot>stepUp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>488</x>
+     <y>309</y>
     </hint>
    </hints>
   </connection>

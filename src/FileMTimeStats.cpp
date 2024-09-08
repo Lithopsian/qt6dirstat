@@ -20,7 +20,7 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 {
     if ( subtree )
     {
-        reserve( subtree->totalFiles() );
+        reserve( subtree->totalNonDirItems() );
         collect( subtree );
         sort();
     }
@@ -29,8 +29,8 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 
 void FileMTimeStats::collect( FileInfo * subtree )
 {
-    // Disregard symlinks, block devices and other special files
-    if ( subtree->isFile() )
+    // Disregard block devices and other special files
+    if ( subtree->isFileOrSymLink() )
         append( subtree->mtime() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )

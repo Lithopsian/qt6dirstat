@@ -17,12 +17,15 @@ using namespace QDirStat;
 
 FileInfo * Subtree::subtree() const
 {
-    FileInfo * item = locate();
+    if ( !_tree )
+	return nullptr;
 
-    if ( !item && _useParentFallback && _tree && !_parentUrl.isEmpty() )
+    FileInfo * item = _url.isEmpty() ? nullptr : _tree->locate( _url );
+
+    if ( !item && _useParentFallback && !_parentUrl.isEmpty() )
 	item = _tree->locate( _parentUrl );
 
-    if ( !item && _useRootFallback && _tree )
+    if ( !item && _useRootFallback )
 	item = _tree->firstToplevel();
 
     return item;
@@ -72,13 +75,4 @@ void Subtree::set( FileInfo * fileInfo )
     {
 	_url.clear();
     }
-}
-
-
-FileInfo * Subtree::locate() const
-{
-    if ( !_tree || _url.isEmpty() )
-	return nullptr;
-
-    return _tree->locate( _url );
 }

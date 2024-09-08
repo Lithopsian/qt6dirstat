@@ -18,15 +18,6 @@
 using namespace QDirStat;
 
 
-PanelMessage::PanelMessage( QWidget * parent ):
-    QWidget{ parent },
-    _ui{ new Ui::PanelMessage }
-{
-    _ui->setupUi( this );
-}
-
-
-
 PanelMessage * PanelMessage::createMsg( QWidget * parent, QVBoxLayout * vBox )
 {
     CHECK_PTR( vBox );

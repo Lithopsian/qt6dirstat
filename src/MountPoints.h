@@ -314,18 +314,6 @@ namespace QDirStat
 	static bool hasBtrfs();
 
 	/**
-	 * Return a list of "normal" mount points, i.e. those that are not
-	 * system mounts, bind mounts or duplicate mounts.
-	 **/
-//	static MountPointList normalMountPoints();
-
-	/**
-	 * Return a list of all mount points.
-	 **/
-//	static MountPointList allMountPoints()
-//	    { return instance()->values(); }
-
-	/**
 	 * Return begin and end iterators for the mount point map.
 	 **/
 	static MountPointMap::const_iterator cbegin() { return instance()->MountPointMap::cbegin(); }

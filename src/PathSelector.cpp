@@ -80,13 +80,15 @@ void PathSelector::addHomeDir()
 
 void PathSelector::addNormalMountPoints()
 {
+    QFileIconProvider iconProvider;
+
     MountPoints::reload();
 
     for ( MountPointIterator it{ false } ; *it ; ++it )
     {
 	PathSelectorItem * item = new PathSelectorItem{ *it, this };
 	const auto type = it->isNetworkMount() ? QFileIconProvider::Network : QFileIconProvider::Drive;
-	item->setIcon( _iconProvider.icon( type ) );
+	item->setIcon( iconProvider.icon( type ) );
     }
 }
 

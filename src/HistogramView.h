@@ -215,12 +215,20 @@ namespace QDirStat
 	void autoLogScale();
 
 	/**
+	 * Calculate the content geometry to try and fit the viewport.
+	 * The histogram may be over-sized (it is always built to a
+	 * minimum height, to fit the overflow panel contents) and
+	 * will then be scaled down to fit the viewport.  If the
+	 * histogram is forced to a minimum height then the width is
+	 * increased proportionally so that it will scale down to
+	 * fill the viewport width.
+	 **/
+	void calcGeometry();
+
+	/**
 	 * Functions to create the graphical elements.
 	 **/
-	void createPanel( const QRectF & rect )
-		{ scene()->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); }
-	void addBackground()
-	    { createPanel( { -leftBorder(), -topBorder() - _size.height(), fullWidth(), fullHeight() } ); }
+	void addBackground();
 	void addAxes();
 	void addXAxisLabel();
 	void addYAxisLabel();
@@ -230,20 +238,6 @@ namespace QDirStat
 	void addBars();
 	void addMarkers();
 	void addOverflowPanel();
-
-	/**
-	 * Add a vertical line, from slightly below the x-axis (zero)
-	 * to slightly above the top of the histogram.  Two lines are
-	 * actually created: one visible line and a wider transparent
-	 * line to make the tooltip easier to trigger.  The tooltip
-	 * shows the name and the value it marks.  The z-value of the
-	 * visible line is set to 'layer' and the transparent line one
-	 * higher.
-	 **/
-	void addMarker( int                 index,
-	                const QString     & name,
-	                const QPen        & pen,
-	                GraphicsItemLayer   layer );
 
 	/**
 	 * Fit the graphics into the viewport.
@@ -256,17 +250,14 @@ namespace QDirStat
 	 **/
 	bool geometryDirty() const { return !_size.isValid(); }
 	void setGeometryDirty() { _size = QSize{}; }
+	void rebuildDirty() { setGeometryDirty(); rebuild(); }
 
 	/**
-	 * Calculate the content geometry to try and fit the viewport.
-	 * The histogram may be over-sized (it is always built to a
-	 * minimum height, to fit the overflow panel contents) and
-	 * will then be scaled down to fit the viewport.  If the
-	 * histogram is forced to a minimum height then the width is
-	 * increased proportionally so that it will scale down to
-	 * fill the viewport width.
+	 * Create a background rectangle in the scene and colour it
+	 * as a panel.
 	 **/
-	void calcGeometry();
+	void createPanel( const QRectF & rect )
+	    { scene()->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); };
 
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.
@@ -355,7 +346,14 @@ namespace QDirStat
 	 *
 	 * Reimplemented from QGraphicsView (from QWidget).
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
+
+	/**
+	 * Detect palette changes.
+	 *
+	 * Reimplemented from QGraphicsView (from QWidget).
+	 **/
+	void changeEvent( QEvent * event ) override;
 
 
     private:

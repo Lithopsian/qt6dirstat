@@ -122,7 +122,7 @@ namespace
 	    header->setSectionHidden( section, !columns.contains( DataColumns::fromViewCol( section ) ) );
     }
 
-}
+} // namespace
 
 
 HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
@@ -276,7 +276,7 @@ void HeaderTweaker::hideCurrentCol()
 void HeaderTweaker::autoSizeCurrentCol()
 {
     if ( _currentSection >= 0 )
-	setResizeMode( _currentSection, toggleResizeMode( _header->sectionResizeMode( _currentSection ) ) );
+	setResizeMode( _currentSection, toggledResizeMode( _header->sectionResizeMode( _currentSection ) ) );
     else
 	logWarning() << "No current section" << Qt::endl;
 

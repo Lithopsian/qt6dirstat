@@ -248,10 +248,10 @@ namespace QDirStat
     signals:
 
 	// From QItemSelectionModel
-//	void selectionChanged	 ( const QItemSelection & selected, const QItemSelection & deselected );
-//	void currentChanged	 ( const QModelIndex & current, const QModelIndex & previous );
+//	void selectionChanged    ( const QItemSelection & selected, const QItemSelection & deselected );
+//	void currentChanged      ( const QModelIndex & current, const QModelIndex & previous );
 //	void currentColumnChanged( const QModelIndex & current, const QModelIndex & previous );
-//	void currentRowChanged	 ( const QModelIndex & current, const QModelIndex & previous );
+//	void currentRowChanged   ( const QModelIndex & current, const QModelIndex & previous );
 
 	// from SelectionModel
 //	void selectionChanged();

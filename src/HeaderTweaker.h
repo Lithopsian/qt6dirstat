@@ -180,15 +180,16 @@ namespace QDirStat
 	void setAllColumnsResizeMode( bool autoSize );
 
 	/**
-	 * Set auto size mode for all columns on or off.
+	 * Return the opposite resize mode to 'currentResizeMode'.
 	 **/
-	 QHeaderView::ResizeMode toggleResizeMode( QHeaderView::ResizeMode resizeMode )
-	    { return resizeMode == QHeaderView::Interactive ? QHeaderView::ResizeToContents : QHeaderView::Interactive; }
+	 static QHeaderView::ResizeMode toggledResizeMode( QHeaderView::ResizeMode currentResizeMode )
+	    { return resizeMode( currentResizeMode == QHeaderView::Interactive ); }
 
 	/**
-	 * Set auto size mode for all columns on or off.
+	 * Return the ResizeMode for either auto-size or interactive sizing,
+	 * corresponding to 'autoSize'.
 	 **/
-	QHeaderView::ResizeMode resizeMode( bool autoSize ) const
+	static QHeaderView::ResizeMode resizeMode( bool autoSize )
 	    { return autoSize ? QHeaderView::ResizeToContents : QHeaderView::Interactive; }
 
 	/**

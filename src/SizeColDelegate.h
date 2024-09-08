@@ -36,6 +36,9 @@ namespace QDirStat
 	    QStyledItemDelegate{ treeView }
 	{}
 
+
+    protected:
+
 	/**
 	 * Paint one cell in the view.
 	 * Inherited from QStyledItemDelegate.

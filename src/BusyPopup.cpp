@@ -30,6 +30,7 @@ namespace
     {
 	QEventLoop{}.processEvents( QEventLoop::ExcludeUserInputEvents, PROCESS_EVENTS_MILLISEC );
     }
+
 } // namespace
 
 

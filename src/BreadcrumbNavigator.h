@@ -32,6 +32,8 @@ namespace QDirStat
 	QString url;
     };
 
+    typedef QVector<Breadcrumb> BreadcrumbList;
+
 
     /**
      * Widget for "breadcrumb" navigation in a directory tree:
@@ -52,14 +54,12 @@ namespace QDirStat
     {
 	Q_OBJECT
 
-	typedef QVector<Breadcrumb> BreadcrumbList;
-
     public:
 
 	/**
 	 * Constructor.
 	 **/
-	BreadcrumbNavigator( QWidget * parent = nullptr );
+	BreadcrumbNavigator( QWidget * parent );
 
 	/**
 	 * Explicitly clear the path.
@@ -85,42 +85,6 @@ namespace QDirStat
 	 * the clicked directory in a view.
 	 **/
 	void pathClicked( const QString & path );
-
-
-    protected:
-
-	/**
-	 * Return the total display length of all breadcrumbs plus delimiters.
-	 **/
-	int breadcrumbsLen() const;
-
-	/**
-	 * Fill the internal _breadcrumbs with content by traversing up the
-	 * tree from 'item' to the toplevel.
-	 **/
-	void fillBreadcrumbs( const FileInfo * item );
-
-	/**
-	 * Generate HTML from _breadcrumbs
-	 **/
-	QString html() const;
-
-	/**
-	 * Shorten exessively long _breadcrumbs so they have a better chance to
-	 * fit on the screen.
-	 **/
-	void shortenBreadcrumbs();
-
-	/**
-	 * Return the longest breadcrumb that has not been
-	 * shortened yet or 0 if there are no more.
-	 **/
-	Breadcrumb * pickLongBreadcrumb();
-
-	/**
-	 * Write the internal _breadcrumbs to the log.
-	 **/
-	void logBreadcrumbs() const;
 
 
     private:

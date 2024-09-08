@@ -237,37 +237,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return whether a given dpkg query line represents a diversion
-	 *
-	 * For dpkg -S, lines may begin "diversion by ... " or "local diversion ..."
-	 *
-	 * For dpkg -L, lines may begin "locally diverted to", package diverts others to",
-	 * or "diverted by".
-	*/
-	bool isDiversion( const QString & line ) const
-	    { return line.startsWith( "diversion by"_L1 ) || line.startsWith( "local diversion"_L1 ); }
-	bool isLocalDiversion( const QString & line ) const
-	    { return line.startsWith( "local diversion"_L1 ); }
-	bool isDiversionFrom( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( "from: "_L1 ); }
-	bool isDiversionTo( const QString & line ) const
-	    { return isDiversion( line ) && line.contains( "to: "_L1 ); }
-	bool isDivertedBy( const QString & line ) const
-	    { return line.startsWith( "diverted by"_L1 ) || line.startsWith( "locally diverted"_L1 ); }
-	bool isPackageDivert( const QString & line ) const
-	    { return line.startsWith( "package diverts"_L1 ); }
-
-	/**
-	 * This searches the lines produced by a dpkg -S query.
-	 **/
-	QString searchOwningPkg( const QString & path, const QString & output ) const;
-
-	/**
-	 * Sub-query to find the original owning package of a renamed diverted file.
-	 **/
-	QString originalOwningPkg( const QString & path ) const;
-
-	/**
 	 * Parse a package list as output by "dpkg-query --show --showformat".
 	 **/
 	PkgInfoList parsePkgList( const QString & output ) const;

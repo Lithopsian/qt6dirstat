@@ -104,7 +104,7 @@ void SelectionModel::propagateCurrentChanged( const QModelIndex & newCurrentInde
 
 
 void SelectionModel::propagateSelectionChanged( const QItemSelection &,
-						const QItemSelection & )
+                                                const QItemSelection & )
 {
     _selectedItemsDirty = true;
     emit selectionChanged();
@@ -115,7 +115,7 @@ void SelectionModel::propagateSelectionChanged( const QItemSelection &,
 void SelectionModel::selectItem( FileInfo * item )
 {
     extendSelection( item,
-		     true ); // clear
+                     true ); // clear
 }
 
 
@@ -210,7 +210,7 @@ void SelectionModel::updateCurrentBranch( FileInfo * newItem )
 
     // This used be be triggered separately from the same signal
     // Order matters, so call it explicitly here
-    setCurrentItem ( newItem, true );
+    setCurrentItem( newItem, true );
 
     // See if we have actually changed to a new branch
     // Not perfect, but avoids an expensive signal for the common cases

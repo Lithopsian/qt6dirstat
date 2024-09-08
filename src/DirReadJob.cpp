@@ -111,8 +111,7 @@ namespace
 } // namespace
 
 
-DirReadJob::DirReadJob( DirTree * tree,
-			DirInfo * dir  ):
+DirReadJob::DirReadJob( DirTree * tree, DirInfo * dir  ):
     _tree{ tree },
     _dir{ dir }
 {

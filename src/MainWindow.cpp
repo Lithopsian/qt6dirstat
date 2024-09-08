@@ -50,6 +50,32 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    [[gnu::unused]] void dumpModelTree(	const QAbstractItemModel * model,
+                                        const QModelIndex        & index,
+                                        const QString            & indent )
+    {
+	const int rowCount = model->rowCount( index );
+	const QVariant data = model->data( index, Qt::DisplayRole );
+
+	if ( !data.isValid() )
+	    logDebug() << "<No data> " << rowCount << " rows" << Qt::endl;
+	else if ( rowCount > 0 )
+	    logDebug() << indent << data.toString() << ": " << rowCount << " rows" << Qt::endl;
+	else
+	    logDebug() << indent << data.toString() << Qt::endl;
+
+	for ( int row=0; row < rowCount; row++ )
+	{
+	    const QModelIndex childIndex = model->index( row, 0, index );
+	    dumpModelTree( model, childIndex, indent + QString{ 4, u' ' } );
+	}
+    }
+
+} // namespace
+
+
 MainWindow::MainWindow( bool slowUpdate ):
     QMainWindow{},
     _ui{ new Ui::MainWindow },
@@ -107,7 +133,7 @@ MainWindow::~MainWindow()
 
     writeSettings();
 
-    // Reset the model pointers since the models will be destroyed
+    // Reset the app() model pointers since the models will be destroyed
     QDirStatApp::resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
@@ -396,46 +422,6 @@ void MainWindow::startingReading()
     if ( !PkgInfo::isPkgUrl( app()->dirTree()->url() ) )
 	// After a short delay so there is a tree to open
 	QTimer::singleShot( 0, [ this ]() { expandTreeToLevel( 1 ); } );
-}
-
-
-namespace
-{
-    [[gnu::unused]] void dumpModelTree(	const QAbstractItemModel * model,
-                                        const QModelIndex        & index,
-                                        const QString            & indent )
-    {
-	const int rowCount = model->rowCount( index );
-	const QVariant data = model->data( index, Qt::DisplayRole );
-
-	if ( !data.isValid() )
-	    logDebug() << "<No data> " << rowCount << " rows" << Qt::endl;
-	else if ( rowCount > 0 )
-	    logDebug() << indent << data.toString() << ": " << rowCount << " rows" << Qt::endl;
-	else
-	    logDebug() << indent << data.toString() << Qt::endl;
-
-	for ( int row=0; row < rowCount; row++ )
-	{
-	    const QModelIndex childIndex = model->index( row, 0, index );
-	    dumpModelTree( model, childIndex, indent + QString{ 4, u' ' } );
-	}
-    }
-
-} // namespace
-
-
-void MainWindow::dumpSelectedItems()
-{
-    logDebug() << "Current item: " << app()->selectionModel()->currentItem() << Qt::endl;
-
-    const FileInfoSet items = app()->selectionModel()->selectedItems();
-    logDebug() << items.size() << " items selected" << Qt::endl;
-
-    for ( const FileInfo * item : items )
-	logDebug() << "	 Selected: " << item << Qt::endl;
-
-    logNewline();
 }
 
 
@@ -822,9 +808,8 @@ void MainWindow::showSummary()
 
     if ( count > 1 )
     {
-	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" )
-	                             .arg( count )
-				     .arg( formatSize( sel.normalized().totalSize() ) ) );
+	const QString total = formatSize( sel.normalized().totalSize() );
+	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" ).arg( count ).arg( total ) );
     }
     else
     {
@@ -1056,7 +1041,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
 
     if ( verboseSelection() )
     {
-	logDebug() << "new current: " << newCurrent << Qt::endl;
+//	logDebug() << "new current: " << newCurrent << Qt::endl; // dumpSelectedItems does this
 	logDebug() << "old current: " << oldCurrent << Qt::endl;
 	dumpSelectedItems();
     }
@@ -1109,16 +1094,14 @@ void MainWindow::updateActions()
     _ui->actionTreemapZoomOut->setEnabled    ( showingTreemap && _ui->treemapView->canZoomOut() );
     _ui->actionResetTreemapZoom->setEnabled  ( showingTreemap && _ui->treemapView->canZoomOut() );
 
-    for ( QAction * action : _ui->menuDiscover->actions() )
+    const auto actions = _ui->menuDiscover->actions();
+    for ( QAction * action : actions )
     {
 	if ( action != _ui->actionShowFilesystems )
 	    action->setEnabled( isTree );
     }
 
     _historyButtons->updateActions();
-
-    // This has to happen *after* the actions here have been updated
-//    ActionManager::updateActions();
 }
 
 
@@ -1127,7 +1110,7 @@ void MainWindow::changeEvent( QEvent * event )
     if ( event->type() == QEvent::PaletteChange )
 	updateFileDetailsView();
 
-    event->ignore();
+    QMainWindow::changeEvent( event );
 }
 
 
@@ -1151,6 +1134,20 @@ void MainWindow::toggleVerboseSelection( bool verboseSelection)
 
     logInfo() << "Verbose selection is now " << ( verboseSelection ? "on" : "off" )
 	      << ". Change this with Shift-F7." << Qt::endl;
+}
+
+
+void MainWindow::dumpSelectedItems()
+{
+    logDebug() << "Current item: " << app()->selectionModel()->currentItem() << Qt::endl;
+
+    const FileInfoSet items = app()->selectionModel()->selectedItems();
+    logDebug() << items.size() << " items selected" << Qt::endl;
+
+    for ( const FileInfo * item : items )
+	logDebug() << "	 Selected: " << item << Qt::endl;
+
+    logNewline();
 }
 
 

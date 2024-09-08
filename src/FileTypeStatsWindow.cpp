@@ -98,7 +98,25 @@ namespace
 	parent->addChild( item );
     }
 
-}
+
+    /**
+     * One-time initialization of the tree widget.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+//	tree->setColumnCount( FT_ColumnCount );
+	tree->setHeaderLabels( { QObject::tr( "Name" ),
+	                         QObject::tr( "Number" ),
+	                         QObject::tr( "Total Size" ),
+	                         QObject::tr( "Percentage" ) } );
+	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
+	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
+	HeaderTweaker::resizeToContents( tree->header() );
+    }
+
+} // namespace
 
 
 FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
@@ -111,7 +129,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->treeWidget );
     readSettings();
 
     const DirTree        * dirTree        = app()->dirTree();
@@ -127,7 +145,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
              this,                 &FileTypeStatsWindow::syncedPopulate );
 
     connect( _ui->treeWidget,      &QTreeWidget::currentItemChanged,
-             this,                 &FileTypeStatsWindow::enableActions );
+             this,                 QOverload<>::of( &FileTypeStatsWindow::enableActions ) );
 
     connect( _ui->treeWidget,      &QTreeWidget::customContextMenuRequested,
              this,                 &FileTypeStatsWindow::contextMenu);
@@ -168,18 +186,6 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FileTypeStatsWindow{ parent };
 
     return _sharedInstance;
-}
-
-
-void FileTypeStatsWindow::initWidgets()
-{
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
-
-    _ui->treeWidget->setColumnCount( FT_ColumnCount );
-    _ui->treeWidget->setHeaderLabels( { tr( "Name" ), tr( "Number" ), tr( "Total Size" ), tr( "Percentage" ) } );
-    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
-    _ui->treeWidget->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
-    HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 
 
@@ -241,7 +247,7 @@ void FileTypeStatsWindow::syncedPopulate()
 void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 {
     _ui->treeWidget->clear();
-    enableActions( nullptr );
+    enableActions( false );
 
     if ( !newSubtree )
 	return;
@@ -261,8 +267,8 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 	const MimeCategory * category = it.key();
 	if ( category )
 	{
-            // Add a category item
-            const int      count   = it.value().count;
+	    // Add a category item
+	    const int      count   = it.value().count;
 	    const FileSize sum     = it.value().sum;
 	    const float    percent = stats.percentage( sum );
 	    categoryItem[ category ] =
@@ -346,13 +352,16 @@ QString FileTypeStatsWindow::currentSuffix() const
 }
 
 
-void FileTypeStatsWindow::enableActions( const QTreeWidgetItem * currentItem )
+void FileTypeStatsWindow::enableActions()
 {
-    const SuffixFileTypeItem * item = dynamic_cast<const SuffixFileTypeItem *>( currentItem );
-    const bool enabled = item && !item->suffix().isEmpty();
+    enableActions( !currentSuffix().isEmpty() );
+}
 
-    _ui->locateButton->setEnabled( enabled );
-    _ui->sizeStatsButton->setEnabled( enabled );
+
+void FileTypeStatsWindow::enableActions( bool enable )
+{
+    _ui->locateButton->setEnabled( enable );
+    _ui->sizeStatsButton->setEnabled( enable );
 }
 
 

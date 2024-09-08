@@ -244,7 +244,6 @@ namespace QDirStat
 
         // Data members
 
-        QProcess    * _readFileListProcess;
         QStringList   _fileList;
 
     };  // class AsyncPkgReadJob

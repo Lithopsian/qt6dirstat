@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <iostream>	// cerr, endl
+#include <iostream> // cerr, endl
 
 #include "Logger.h"
 #include "MainWindow.h"

@@ -198,14 +198,6 @@ namespace QDirStat
 	FileCount totalFiles() override;
 
 	/**
-	 * Returns the total number of non-directory items in this subtree,
-	 * excluding this item.
-	 *
-	 * Reimplemented - inherited from FileInfo.
-	 **/
-//	FileCount totalNonDirItems() override { return totalItems() - totalSubDirs(); }
-
-	/**
 	 * Returns the total number of ignored (non-directory!) items in this
 	 * subtree, excluding this item.
 	 *

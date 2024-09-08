@@ -121,7 +121,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from ListEditor.
 	 **/
-	void deleteValue( void * value );
+	void deleteValue( void * value ) override;
 
 	/**
 	 * Return a text for the list item of 'value'.

@@ -37,7 +37,29 @@ namespace
 	    app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
     }
 
-}
+
+    /**
+     * One-time initialization of the widgets in this window.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+	const QStringList headerLabels{ QObject::tr( "Directory" ),
+	                                QObject::tr( "User" ),
+	                                QObject::tr( "Group" ),
+	                                QObject::tr( "Permissions" ),
+	                                QObject::tr( "Perm." ),
+	                              };
+//	tree->setColumnCount( headerLabels.size() );
+	tree->setHeaderLabels( headerLabels );
+	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	tree->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
+
+	HeaderTweaker::resizeToContents( tree->header() );
+    }
+
+} // namespace
 
 
 UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
@@ -50,7 +72,7 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->treeWidget );
     Settings::readWindowSettings( this, "UnreadableDirsWindow" );
 
     connect( _ui->treeWidget, &QTreeWidget::currentItemChanged,
@@ -73,24 +95,6 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 	_sharedInstance = new UnreadableDirsWindow{ app()->mainWindow() };
 
     return _sharedInstance;
-}
-
-
-void UnreadableDirsWindow::initWidgets()
-{
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
-
-    const QStringList headerLabels{ tr( "Directory" ),
-                                    tr( "User" ),
-                                    tr( "Group" ),
-                                    tr( "Permissions" ),
-                                    tr( "Perm." ),
-                                  };
-    _ui->treeWidget->setColumnCount( headerLabels.size() );
-    _ui->treeWidget->setHeaderLabels( headerLabels );
-    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-    _ui->treeWidget->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
-    HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 
 

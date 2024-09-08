@@ -52,8 +52,7 @@ void ProcessStarter::startProcesses()
 }
 
 
-void ProcessStarter::processFinished( int,
-                                      QProcess::ExitStatus )
+void ProcessStarter::processFinished( int, QProcess::ExitStatus )
 {
     QProcess * process = qobject_cast<QProcess *>( sender() );
     if ( !process )

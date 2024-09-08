@@ -91,9 +91,6 @@ namespace QDirStat
 	 **/
 	DirInfo * currentSubtree();
 
-
-    protected:
-
 	/**
 	 * Resize event, reimplemented from QWidget.
 	 *

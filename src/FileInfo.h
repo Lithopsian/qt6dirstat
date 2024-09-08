@@ -530,7 +530,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-//	virtual FileCount totalNonDirItems() { return 0; }
+	FileCount totalNonDirItems() { return totalItems() - totalSubDirs(); }
 
 	/**
 	 * Returns the total number of ignored (non-directory!) items in this
@@ -915,6 +915,11 @@ namespace QDirStat
 	 * Returns true if this is a symbolic link.
 	 **/
 	bool isSymLink() const { return S_ISLNK( _mode ); }
+
+	/**
+	 * Returns true if this is a regular file or a symbolic link.
+	 **/
+	bool isFileOrSymLink() const { return isFile() || isSymLink(); }
 
 	/**
 	 * Returns true if this is a (block or character) device.

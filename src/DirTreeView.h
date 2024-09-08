@@ -115,7 +115,7 @@ namespace QDirStat
 	/**
 	 * Return the default percent bar fill colors.
 	 **/
-	ColorList percentBarDefaultColors()
+	ColorList percentBarDefaultColors() const
 	{
 	    return ColorList{ QColor{   0,   0, 255 },
 	                      QColor{  34,  34, 255 },

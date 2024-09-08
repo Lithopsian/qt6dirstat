@@ -64,25 +64,6 @@ namespace QDirStat
 	                                    FileInfo * fileInfo );
 
 
-    signals:
-
-	/**
-	 * Emitted when the user clicks the "Locate" button (which is only
-	 * enabled when there are 1..10000 files for that year).
-	 *
-	 * 'path' is also sent because otherwise the main window will use the
-	 * tree's root if a file and not a directory is currently
-	 * selected. This is a common case after the user clicked on a file
-	 * result in the "locate" window.
-	 **/
-	void locateFilesFromYear( const QString & path, short year );
-
-	/**
-	 * Similar than 'locateFilesFromYear()', but with year and month (1-12).
-	 **/
-	void locateFilesFromMonth( const QString & path, short year, short month );
-
-
     protected slots:
 
 	/**
@@ -136,11 +117,6 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo );
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
 	 * Create an item in the years tree / list widget for each year
 	 **/
 	void populateListWidget( FileInfo * fileInfo );
@@ -174,6 +150,8 @@ namespace QDirStat
 	 **/
 	void resizeEvent( QResizeEvent * ) override;
 
+
+    private:
 
 	//
 	// Data members

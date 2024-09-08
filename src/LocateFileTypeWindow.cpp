@@ -48,7 +48,25 @@ namespace
 	return result;
     }
 
-}
+
+    /**
+     * One-time initialization of the tree widget.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+//	_ui->treeWidget->setColumnCount( SSR_ColumnCount );
+	tree->setHeaderLabels( { QObject::tr( "Number" ),
+	                         QObject::tr( "Total Size" ),
+	                         QObject::tr( "Directory" ) } );
+	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	tree->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
+
+	HeaderTweaker::resizeToContents( tree->header() );
+    }
+
+} // namespace
 
 
 LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
@@ -61,7 +79,7 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->treeWidget );
     Settings::readWindowSettings( this, "LocateFileTypeWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
@@ -87,19 +105,6 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
 	_sharedInstance = new LocateFileTypeWindow{ app()->mainWindow() };
 
     return _sharedInstance;
-}
-
-
-void LocateFileTypeWindow::initWidgets()
-{
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
-
-    _ui->treeWidget->setColumnCount( SSR_ColumnCount );
-    _ui->treeWidget->setHeaderLabels( { tr( "Number" ), tr( "Total Size" ), tr( "Directory" ) } );
-    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-    _ui->treeWidget->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
-
-    HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
 }
 
 

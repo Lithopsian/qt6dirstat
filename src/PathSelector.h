@@ -119,11 +119,6 @@ namespace QDirStat
 	 **/
 	void slotItemDoubleClicked( const QListWidgetItem * widgetItem );
 
-
-    private:
-
-	QFileIconProvider _iconProvider;
-
     };	// class PathSelector
 
 }	// namespace QDirStat

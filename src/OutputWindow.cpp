@@ -76,20 +76,21 @@ void OutputWindow::addProcess( QProcess * process )
     _processList << process;
 
     connect( process, &QProcess::readyReadStandardOutput,
-	     this,    &OutputWindow::readStdout );
+             this,    &OutputWindow::readStdout );
 
     connect( process, &QProcess::readyReadStandardError,
-	     this,    &OutputWindow::readStderr );
+             this,    &OutputWindow::readStderr );
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 6, 0 )
     connect( process, QOverload<QProcess::ProcessError>::of( &QProcess::error ),
+             this,    &OutputWindow::processError );
 #else
     connect( process, &QProcess::errorOccurred,
+             this,    &OutputWindow::processError );
 #endif
-	     this,    &OutputWindow::processError );
 
     connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
-	     this,    &OutputWindow::processFinishedSlot );
+             this,    &OutputWindow::processFinishedSlot );
 
     if ( !hasActiveProcess() )
 	startNextProcess();
@@ -148,7 +149,7 @@ QProcess * OutputWindow::senderProcess( const char * function ) const
 	if ( sender() )
 	{
 	    logError() << "Expecting QProcess as sender() in " << function
-		       <<" , got " << sender()->metaObject()->className() << Qt::endl;
+	               <<" , got " << sender()->metaObject()->className() << Qt::endl;
 	}
 	else
 	{
@@ -341,21 +342,19 @@ bool OutputWindow::hasActiveProcess() const
 }
 
 
-QProcess * OutputWindow::pickQueuedProcess()
-{
-    for ( QProcess * process : asConst( _processList ) )
-    {
-	if ( process->state() == QProcess::NotRunning )
-	    return process;
-    }
-
-    return nullptr;
-}
-
-
 QProcess * OutputWindow::startNextProcess()
 {
-    QProcess * process = pickQueuedProcess();
+    QProcess * process = [ this ]() -> QProcess *
+    {
+	for ( QProcess * process : asConst( _processList ) )
+	{
+	    if ( process->state() == QProcess::NotRunning )
+		return process;
+	}
+
+	return nullptr;
+    }();
+
     if ( process )
     {
 	const QString dir = process->workingDirectory();
@@ -369,10 +368,6 @@ QProcess * OutputWindow::startNextProcess()
 	logInfo() << "Starting: " << process << Qt::endl;
 
 	process->start();
-
-//	QEventLoop eventLoop;
-//	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
-//	qApp->processEvents(); // Keep GUI responsive
     }
 
     updateActions();

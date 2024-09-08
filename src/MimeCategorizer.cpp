@@ -500,12 +500,12 @@ void MimeCategorizer::addDefaultCategories()
                  "pack-*.pack" );
 
     addCategory( tr( "archive (uncompressed)" ),
-                 "#88ff88",
+                 "#aaffaa",
                  "*.cpio, *.tar",
                  QString{} );
 
     addCategory( tr( "configuration file" ),
-                 "#aabbff",
+                 "#77ddff",
                  QString{},
                  "*.alias, *.cfg, *.conf, *.conffiles, *.config, *.dep, "         \
                  "*.desktop, *.ini, *.kmap, *.lang, *.my, *.page, *.properties, " \
@@ -514,7 +514,7 @@ void MimeCategorizer::addDefaultCategories()
                  "control, gtkrc" );
 
     addCategory( tr( "database" ),
-                 "#22aaff",
+                 "#2299ff",
                  QString{},
                  "*.alias.bin, *.builtin.bin, *.dat, *.db, *.dep.bin, *.enc, " \
                  "*.hwdb, *.idx, *.lm, *.md5sums, *.odb, *.order, *.sbstore, " \
@@ -527,7 +527,7 @@ void MimeCategorizer::addDefaultCategories()
                  "*.BIN, *.img" );
 
     addCategory( tr( "document" ),
-                 "#66ccff",
+                 "#33bbff",
                  "*.css, *.csv, *.doc, *.docbook, *.docx, *.dotx, *.dvi, "         \
                  "*.dvi.bz2, *.epub, *.htm, *.html, *.json, *.latex, *.log, "      \
                  "*.ly, *.md, *.pdf, *.pod, *.potx, *.ppsx, *.ppt, *.pptx, *.ps, " \
@@ -538,29 +538,29 @@ void MimeCategorizer::addDefaultCategories()
                  "*.otc, *.otp, *.ots, *.ott" );
 
     addCategory( tr( "font" ),
-                 "#44ddff",
+                 Qt::cyan,
                  QString{},
                  "*.afm, *.bdf, *.cache-7, *.cache-8, *.otf, *.pcf, *.pcf.gz, " \
                  "*.pf1, *.pf2, *.pfa, *.pfb, *.t1, *.ttf" );
 
     addCategory( tr( "game file" ),
-                 "#ff88dd",
+                 "#ff66bb",
                  QString{},
                  "*.MHK, *.bsp, *.mdl, *.pak, *.wad" );
 
     addCategory( tr( "icon" ),
-                 "#00ddff",
+                 "#aa99ff",
                  "*.icns, *.ico, *.xpm",
                  QString{} );
 
     addCategory( tr( "image" ),
-                 Qt::cyan,
+                 "#dd88ff",
                  "*.gif, *.jpeg, *.jpg, *.jxl, *.mng, *.png, *.tga, *.tif, *.tiff, " \
                  "*.webp, *.xcf.bz2, *.xcf.gz",
                  QString{} );
 
     addCategory( tr( "image (uncompressed)" ),
-                 "#88ffff",
+                 "#eeaaff",
                  "*.bmp, *.pbm, *.pgm, *.pnm, *.ppm, *.spr, *.svg, *.xcf",
                  QString{} );
 
@@ -577,7 +577,7 @@ void MimeCategorizer::addDefaultCategories()
                  QString{} );
 
     addCategory( tr( "object file" ),
-                 "#ee8822",
+                 "#ff8811",
                  "lib*.a",
                  "*.Po, *.a.cmd, *.al, *.elc, *.go, *.gresource, *.ko, *.ko.cmd, "   \
                  "*.ko.xz, *.ko.zst, *.la, *.lo, *.mo, *.moc, *.o, *.o.cmd, *.pyc, " \
@@ -589,19 +589,19 @@ void MimeCategorizer::addDefaultCategories()
                  "*.deb, *.ja, *.jar, *.sfi, *.tm" );
 
     addCategory( tr( "script" ),
-                 "#ff8888",
+                 "#cc6688",
                  QString{},
                  "*.BAT, *.bash, *.bashrc, *.csh, *.js, *.ksh, *.m4, *.pl, *.pm, " \
                  "*.postinst, *.postrm, *.preinst, *.prerm, *.sh, *.tcl, *.tmac, " \
                  "*.xba, *.zsh" );
 
     addCategory( tr( "shared object" ),
-                 "#ff7722",
+                 "#ff6600",
                  "*.dll, *.so",
                  "*.so.*, *.so.0, *.so.1" );
 
     addCategory( tr( "source file" ),
-                 "#ffbb44",
+                 "#ffb022",
                  QString{},
                  "*.S, *.S_shipped, *.asm, *.c, *.cc, *.cmake, *.cpp, *.cxx, *.dts, "   \
                  "*.dtsi, *.el, *.f, *.fuc3, *.fuc3.h, *.fuc5, *.fuc5.h, *.gir, *.h, "  \
@@ -609,12 +609,12 @@ void MimeCategorizer::addDefaultCategories()
                  "*.pxd, *.py, *.pyi, *.pyx, *.rb, *.scm, Kbuild, Makefile" );
 
     addCategory( tr( "source file (generated)" ),
-                 "#ffaa22",
+                 "#ffcc22",
                  QString{},
                  "*.f90, *.mod.c, *.ui, moc_*.cpp, qrc_*.cpp, ui_*.h" );
 
     addCategory( tr( "video" ),
-                 "#aa44ff",
+                 "#aa00ff",
                  "*.asf, *.avi, *.divx, *.dv, *.flc, *.fli, *.flv, *.m2ts, *.m4v, *.mk3d, " \
                  "*.mkv, *.mov, *.mp2, *.mp4, *.mpeg, *.mpg, *.mts, *.ogm, *.ogv, *.rm, "   \
                  "*.vdr, *.vob, *.webm, *.wmp, *.wmv",

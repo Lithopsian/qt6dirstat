@@ -380,11 +380,6 @@ namespace QDirStat
 	void newChildrenNotify( DirInfo * dir );
 
 	/**
-	 * Notify the model about layout changes.
-	 **/
-	void idleDisplay();
-
-	/**
 	 * Update the persistent indexes with current row after sorting etc.
 	 **/
 	void updatePersistentIndexes();

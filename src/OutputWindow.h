@@ -25,6 +25,8 @@ class QCloseEvent;
 
 namespace QDirStat
 {
+    typedef QVector<QProcess *> ProcessList;
+
     /**
      * Terminal-like window to watch output of external processes started via
      * QProcess. The command invoked by the process, its stdout and stderr output
@@ -110,7 +112,7 @@ namespace QDirStat
          * user interface to this.
          **/
 //        void setDefaultShowTimeout( int newTimeoutMillisec )
-//          { _defaultShowTimeout = newTimeoutMillisec; }
+//            { _defaultShowTimeout = newTimeoutMillisec; }
 
         /**
          * Return the text color for commands in the terminal area.
@@ -121,7 +123,7 @@ namespace QDirStat
          * Set the text color for commands in the terminal area.
          **/
         void setCommandTextColor( const QColor & newColor )
-        { _commandTextColor = newColor; }
+            { _commandTextColor = newColor; }
 
         /**
          * Return the text color for stdout output in the terminal area.
@@ -132,7 +134,7 @@ namespace QDirStat
          * Set the text color for stdout output in the terminal area.
          **/
         void setStdoutColor( const QColor & newColor )
-        { _stdoutColor = newColor; }
+            { _stdoutColor = newColor; }
 
         /**
          * Return the text color for stderr output in the terminal area.
@@ -143,12 +145,12 @@ namespace QDirStat
          * Set the text color for stderr output in the terminal area.
          **/
         void setStderrColor( const QColor & newColor )
-        { _stderrColor = newColor; }
+            { _stderrColor = newColor; }
 
         /**
          * Return the internal process list.
          **/
-//        const QVector<QProcess *> & processList() const { return _processList; }
+//        const ProcessList & processList() const { return _processList; }
 
         /**
          * Return 'true' if any process in the internal process is still active.
@@ -263,7 +265,8 @@ namespace QDirStat
         /**
          * Set the auto-close checkbox to the given state.
          **/
-        void setAutoClose( bool autoClose ) { _ui->autoCloseCheckBox->setChecked( autoClose ); }
+        void setAutoClose( bool autoClose )
+            { _ui->autoCloseCheckBox->setChecked( autoClose ); }
 
         /**
          * Close event: invoked upon QDialog::close() (i.e. the "Close" button),
@@ -304,7 +307,7 @@ namespace QDirStat
          * Pick the next inactive process that can be started. Return 0 if there is
          * none.
          **/
-        QProcess * pickQueuedProcess();
+//        QProcess * pickQueuedProcess();
 
         /**
          * Try to start the next inactive process, if there is any. Return that
@@ -331,18 +334,18 @@ namespace QDirStat
 
         std::unique_ptr<Ui::OutputWindow > _ui;
 
-        QVector<QProcess *> _processList;
-        bool                _showOnStderr{ false };
-        bool                _noMoreProcesses{ false };
-        bool                _closed{ false };
-        bool                _killedAll{ false };
-        int                 _errorCount{ 0 };
-        QString             _lastWorkingDir;
-        QColor              _terminalBackground;
-        QColor              _commandTextColor;
-        QColor              _stdoutColor;
-        QColor              _stderrColor;
-        QFont               _terminalDefaultFont;
+        ProcessList _processList;
+        bool        _showOnStderr{ false };
+        bool        _noMoreProcesses{ false };
+        bool        _closed{ false };
+        bool        _killedAll{ false };
+        int         _errorCount{ 0 };
+        QString     _lastWorkingDir;
+        QColor      _terminalBackground;
+        QColor      _commandTextColor;
+        QColor      _stdoutColor;
+        QColor      _stderrColor;
+        QFont       _terminalDefaultFont;
 
     };  // class OutputWindow
 
@@ -350,9 +353,9 @@ namespace QDirStat
     inline QTextStream & operator<<( QTextStream & stream, QProcess * process )
     {
         if ( process )
-        stream << OutputWindow::command( process );
+            stream << OutputWindow::command( process );
         else
-        stream << "<NULL QProcess>";
+            stream << "<NULL QProcess>";
 
         return stream;
     }

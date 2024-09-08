@@ -272,26 +272,27 @@ namespace
     }
 
 #endif
-}
+
+} // namespace
 
 
 CleanupList StdCleanup::stdCleanups( QObject * parent )
 {
     return { openFileManagerHere( parent ),
-	     openTerminalHere   ( parent ),
-	     checkFileType      ( parent ),
-	     compressSubtree    ( parent ),
-	     makeClean          ( parent ),
-	     gitClean           ( parent ),
-	     deleteJunk         ( parent ),
-	     hardDelete         ( parent ),
-	     clearDirContents   ( parent ),
+             openTerminalHere   ( parent ),
+             checkFileType      ( parent ),
+             compressSubtree    ( parent ),
+             makeClean          ( parent ),
+             gitClean           ( parent ),
+             deleteJunk         ( parent ),
+             hardDelete         ( parent ),
+             clearDirContents   ( parent ),
 #if USE_DEBUG_ACTIONS
-	     echoargs           ( parent ),
-	     echoargsMixed      ( parent ),
-	     segfaulter         ( parent ),
-	     commandNotFound    ( parent ),
-	     sleepy             ( parent ),
+             echoargs           ( parent ),
+             echoargsMixed      ( parent ),
+             segfaulter         ( parent ),
+             commandNotFound    ( parent ),
+             sleepy             ( parent ),
 #endif
-	   };
+           };
 }

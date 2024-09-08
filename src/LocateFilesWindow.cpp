@@ -45,7 +45,36 @@ namespace
 	app()->selectionModel()->setCurrentItemPath( searchResult->path() );
     }
 
-}
+
+    /**
+     * Add the hotkeys (shortcuts) of the cleanup actions to this window.
+     **/
+    void addCleanupHotkeys( LocateFilesWindow * window )
+    {
+	ActionManager::addActions( window, { "actionMoveToTrash",
+	                                     "actionFindFiles",
+	                                     ActionManager::cleanups() } );
+    }
+
+
+    /**
+     * One-time initialization of the tree widget.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+
+//	tree->setColumnCount( LocateListColumnCount );
+	tree->setHeaderLabels( { QObject::tr( "Size" ),
+	                         QObject::tr( "Last Modified" ),
+	                         QObject::tr( "Path" ) } );
+	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	tree->headerItem()->setTextAlignment( LocateListPathCol, Qt::AlignLeft | Qt::AlignVCenter);
+
+	HeaderTweaker::resizeToContents( tree->header() );
+    }
+
+} // namespace
 
 
 LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
@@ -60,7 +89,10 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initTree( _ui->treeWidget );
+    addCleanupHotkeys( this );
+    _ui->resultsLabel->setText( QString{} );
+
     Settings::readWindowSettings( this, "LocateFilesWindow" );
 
     connect( _ui->refreshButton, &QPushButton::clicked,
@@ -99,23 +131,6 @@ void LocateFilesWindow::refresh()
 {
     populate( _subtree() );
     selectFirstItem();
-}
-
-
-void LocateFilesWindow::initWidgets()
-{
-    app()->dirTreeModel()->setTreeWidgetSizes( _ui->treeWidget );
-
-    _ui->treeWidget->setColumnCount( LocateListColumnCount );
-    _ui->treeWidget->setHeaderLabels( { tr( "Size" ), tr( "Last Modified" ), tr( "Path" ) } );
-    _ui->treeWidget->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-    _ui->treeWidget->headerItem()->setTextAlignment( LocateListPathCol, Qt::AlignLeft | Qt::AlignVCenter);
-
-    _ui->resultsLabel->setText( QString{} );
-
-    HeaderTweaker::resizeToContents( _ui->treeWidget->header() );
-
-    addCleanupHotkeys();
 }
 
 
@@ -199,12 +214,6 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
     QMenu * menu = ActionManager::createMenu( { "actionCopyPath", "actionMoveToTrash" },
                                               { ActionManager::separator(), ActionManager::cleanups() } );
     menu->exec( _ui->treeWidget->mapToGlobal( pos ) );
-}
-
-
-void LocateFilesWindow::addCleanupHotkeys()
-{
-    ActionManager::addActions( this, { "actionMoveToTrash", "actionFindFiles", ActionManager::cleanups() } );
 }
 
 

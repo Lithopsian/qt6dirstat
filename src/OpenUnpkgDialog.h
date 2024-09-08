@@ -79,28 +79,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Get the starting directory from the dialog's widgets or an empty
-	 * string if the dialog was cancelled.
-	 **/
-	QString startingDir() const;
-
-	/**
-	 * Get the directories to exclude from the dialog's widgets.
-	 **/
-	QStringList excludeDirs() const { return cleanedLines( _ui->excludeDirsTextEdit ); }
-
-	/**
-	 * Get the wildcard patterns of files to ignore from the dialog's
-	 * widgets.
-	 **/
-	QStringList ignorePatterns() const { return cleanedLines( _ui->ignorePatternsTextEdit ); }
-
-	/**
-	 * Get whether the cross filesystems checkbox is checked,
-	 **/
-	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
-
-	/**
 	 * Read settings from the config file
 	 **/
 	void readSettings();
@@ -109,13 +87,6 @@ namespace QDirStat
 	 * Set all values at once.
 	 **/
 	void setValues( const UnpkgSettings & settings );
-
-	/**
-	 * Get the content of a QPlainTextEdit widget as QStringList with
-	 * leading and trailing whitespace removed from each line and without
-	 * empty lines.
-	 **/
-	static QStringList cleanedLines( const QPlainTextEdit * widget );
 
 
     private:

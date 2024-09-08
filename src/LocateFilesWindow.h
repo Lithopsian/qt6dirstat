@@ -104,11 +104,6 @@ namespace QDirStat
 //	TreeWalker * treeWalker() const { return _treeWalker.get(); }
 
 	/**
-	 * One-time initialization of the widgets in this window.
-	 **/
-	void initWidgets();
-
-	/**
 	 * Populate the window: Use the TreeWalker to find matching tree items
 	 * in 'fileInfo'.
 	 *
@@ -122,7 +117,7 @@ namespace QDirStat
 	 * Set the sort column and sort order (Qt::AscendingOrder or
 	 * Qt::DescendingOrder), sort the list and select the first item.
 	 **/
-	//        void sortByColumn( int col, Qt::SortOrder order );
+//	void sortByColumn( int col, Qt::SortOrder order );
 
 	/**
 	 * Count the number of items in the list and display the number.
@@ -136,11 +131,6 @@ namespace QDirStat
 	 **/
 	void selectFirstItem() const
 	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
-
-	/**
-	 * Add the hotkeys (shortcuts) of the cleanup actions to this window.
-	 **/
-	void addCleanupHotkeys();
 
 	/**
 	 * Recursively locate directories that contain files matching the
