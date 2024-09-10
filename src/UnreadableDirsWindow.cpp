@@ -54,8 +54,7 @@ namespace
 	tree->setHeaderLabels( headerLabels );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
-
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace

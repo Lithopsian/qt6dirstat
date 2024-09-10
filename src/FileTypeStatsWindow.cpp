@@ -112,7 +112,7 @@ namespace
 	                         QObject::tr( "Percentage" ) } );
 	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
 	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace

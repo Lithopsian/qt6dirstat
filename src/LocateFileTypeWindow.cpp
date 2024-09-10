@@ -61,8 +61,7 @@ namespace
 	                         QObject::tr( "Directory" ) } );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
-
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace

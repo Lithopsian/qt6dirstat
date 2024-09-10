@@ -75,8 +75,8 @@ namespace QDirStat
 	/**
 	 * Resize a header view to contents.
 	 **/
-	static void resizeToContents( QHeaderView * header )
-	    { header->setSectionResizeMode( QHeaderView::ResizeToContents ); }
+//	static void resizeToContents( QHeaderView * header )
+//	    { header->setSectionResizeMode( QHeaderView::ResizeToContents ); }
 
 	/**
 	 * Switch the layout to the one with the specified name.
@@ -124,10 +124,11 @@ namespace QDirStat
 	void resetToDefaults();
 
 	/**
-	 * Initialize the header view. This makes sense only when it has
-	 * columns, i.e. when the model is set, and the parent QTreeView
+	 * Initialize the header view. This only makes sense only when it has
+	 * columns, i.e. when the model is set, and the parent QTreeView has
 	 * requested header data. It makes most sense to connect this slot with
-	 * the header's sectionCountChanged() signal.
+	 * the header's sectionCountChanged() signal, which is emitted once
+	 * when the header sections are first created.
 	 **/
 	void initHeader();
 
@@ -178,7 +179,8 @@ namespace QDirStat
 	/**
 	 * Set auto size mode for all columns on or off.
 	 **/
-	void setAllColumnsResizeMode( bool autoSize );
+	void setAllColumnsResizeMode( bool autoSize )
+	    { _header->setSectionResizeMode( resizeMode( autoSize ) ); }
 
 	/**
 	 * Return the opposite resize mode to 'currentResizeMode'.

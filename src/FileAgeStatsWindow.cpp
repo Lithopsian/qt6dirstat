@@ -86,8 +86,7 @@ namespace
 	                         };
 	tree->setHeaderLabels( headers );
 	tree->header()->setDefaultAlignment( Qt::AlignCenter );
-
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace

@@ -62,6 +62,7 @@ namespace
 	}
 
 	tree->setHeaderLabels( headers );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
 	// Center the column headers except the first two
@@ -74,7 +75,6 @@ namespace
 	hItem->setToolTip( FS_ReservedSizeCol, QObject::tr( "Reserved for root" ) );
 	hItem->setToolTip( FS_FreeSizeCol,     QObject::tr( "Free for unprivileged users" ) );
 
-	HeaderTweaker::resizeToContents( tree->header() );
 	tree->sortItems( FS_DeviceCol, Qt::AscendingOrder );
     }
 
