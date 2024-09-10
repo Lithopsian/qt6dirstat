@@ -118,17 +118,17 @@ void PercentileStats::calculatePercentiles()
 }
 
 
-void PercentileStats::validatePercentile( int index )
+void PercentileStats::validateIndex( int index )
 {
-    CHECK_PERCENTILE_INDEX( index );
+    CHECK_INDEX_MSG( index, minPercentile(), maxPercentile(), "Percentile index out of range" );
 }
 
 
-void PercentileStats::validatePercentileRange( int startIndex, int endIndex )
+void PercentileStats::validateIndexRange( int startIndex, int endIndex )
 {
     // Validate as much as possible, although the percentiles list still might not match the stats
-    CHECK_PERCENTILE_INDEX( startIndex );
-    CHECK_PERCENTILE_INDEX( endIndex   );
+    validateIndex( startIndex );
+    validateIndex( endIndex   );
 
     if ( startIndex >= endIndex )
 	THROW( Exception{ "startPercentile must be less than endPercentile" } );
@@ -137,8 +137,8 @@ void PercentileStats::validatePercentileRange( int startIndex, int endIndex )
 
 void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
 {
-    validatePercentileRange( startPercentile, endPercentile );
-    if ( bucketCount < 1 )
+    validateIndexRange( startPercentile, endPercentile );
+    if ( bucketCount < 1 || bucketCount > _percentiles.size() )
 	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
     // Create a new list of bucketCount zeroes, discarding any existing list

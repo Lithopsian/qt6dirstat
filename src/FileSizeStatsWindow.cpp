@@ -18,9 +18,8 @@
 
 #include "FileSizeStatsWindow.h"
 #include "FileSizeStats.h"
-#include "BucketsTableModel.h"
+#include "FileSizeStatsModels.h"
 #include "FormatUtil.h"
-#include "HeaderTweaker.h"
 #include "HistogramView.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -29,8 +28,6 @@
 
 
 #define MAX_BUCKET_COUNT 100
-#define EXTREMES_MARGIN    4
-#define FILTERED_STEP      5
 
 
 using namespace QDirStat;
@@ -38,6 +35,16 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Return the abstract item model (cast as PercentileTableModel) for
+     * 'percentileTable'.
+     **/
+    PercentileTableModel * percentileTableModel( const QTableView * percentileTable )
+    {
+	return qobject_cast<PercentileTableModel *>( percentileTable->model() );
+    }
+
+
     /**
      * Return the abstract item model (cast as BucketsTableModel) for
      * 'bucketsTable'.
@@ -68,143 +75,6 @@ namespace
 	settings.endGroup();
     }
 
-
-    /**
-     * Set the font to bold for all items in a table row.
-     **/
-    void setRowBold( QTableWidget * table, int row )
-    {
-	for ( int col=0; col < table->columnCount(); ++col )
-	{
-	    QTableWidgetItem * item = table->item( row, col );
-	    if ( item )
-	    {
-		QFont font = item->font();
-		font.setBold( true );
-		item->setFont( font );
-	    }
-	}
-    }
-
-
-    /**
-     * Add an item to a table.
-     **/
-    QTableWidgetItem * addItem( QTableWidget  * table,
-                                int             row,
-                                int             col,
-                                Qt::Alignment   alignment,
-                                const QString & text )
-    {
-	QTableWidgetItem * item = new QTableWidgetItem{ text };
-	item->setTextAlignment( alignment | Qt::AlignVCenter );
-	table->setItem( row, col, item );
-
-	return item;
-    }
-
-
-    /**
-     * Highlight a table row using a neutral grey based on the palette
-     * highlight color.
-     **/
-    void highlightRow( QTableWidget * table, int row, const QPalette & palette )
-    {
-	// Use the application palette because a theme change won't have reached the table widgets yet
-	const QBrush highlight =
-	    QColor::fromHsl( 0, 0, palette.highlight().color().lightness() );
-
-	for ( int col=0; col < table->columnCount(); ++col )
-	{
-	    QTableWidgetItem * item = table->item( row, col );
-
-	    // Can't set the background on an empty cell
-	    if ( !item )
-		item = addItem( table, row, col, Qt::AlignLeft, QString{} );
-
-	    item->setBackground( highlight );
-	    item->setForeground( palette.highlightedText() );
-	}
-    }
-
-
-    /**
-     * Fill the percentile table 'table' from the given stats.
-     *
-     * 'step' is the step width, expected to be 1 or 5 although
-     * other values are supported; * 'extremesMargin' specifies
-     * how far from the extremes (min, max) the step width
-     * should be 1 instead of the given step.
-     **/
-    void fillTable( QTableWidget        * table,
-                    const FileSizeStats * stats,
-                    int                   step,
-                    const QPalette      & palette )
-    {
-	enum TableColumns
-	{
-	    NumberCol,
-	    ValueCol,
-	    CountCol,
-	    SumCol,
-	    CumCountCol,
-	    CumSumCol
-	};
-
-	// Keep the header, but truncate the table rows
-	table->setRowCount( 0 );
-
-	const int minMargin = stats->minPercentile() + EXTREMES_MARGIN;
-	const int maxMargin = stats->maxPercentile() - EXTREMES_MARGIN;
-	const QString percentilePrefix = QObject::tr( "P" );
-
-	for ( int i = stats->minPercentile(); i <= stats->maxPercentile(); ++i )
-	{
-	    // Skip rows that aren't in the 'step' interval or the "margins"
-	    if ( step > 1 && i % step != 0 && i > minMargin && i < maxMargin )
-		continue;
-
-	    // Add a row
-	    const int row = table->rowCount();
-	    table->setRowCount( row + 1);
-
-	    addItem( table, row, ValueCol,  Qt::AlignRight, formatSize( stats->percentileValue( i ) ) );
-	    if ( i > 0 )
-	    {
-		const QString countText = formatCount( stats->percentileCount( i ) );
-		const QString cumText   = formatCount( stats->cumulativeCount( i ) );
-		addItem( table, row, CountCol,    Qt::AlignRight, countText );
-		addItem( table, row, SumCol,      Qt::AlignRight, formatSize( stats->percentileSum( i ) ) );
-		addItem( table, row, CumCountCol, Qt::AlignRight, cumText );
-		addItem( table, row, CumSumCol,   Qt::AlignRight, formatSize( stats->cumulativeSum( i ) ) );
-	    }
-
-	    const QString rowName = [ i, percentilePrefix ]()
-	    {
-		switch ( i )
-		{
-		    case PercentileStats::minPercentile(): return QObject::tr( "Min" );
-		    case PercentileStats::quartile1():     return QObject::tr( "Quartile 1" );
-		    case PercentileStats::median():        return QObject::tr( "Median" );
-		    case PercentileStats::quartile3():     return QObject::tr( "Quartile 3" );
-		    case PercentileStats::maxPercentile(): return QObject::tr( "Max" );
-		    default: return QString{ percentilePrefix % QString::number( i ) };
-		}
-	    }();
-	    addItem( table, row, NumberCol, Qt::AlignRight, rowName );
-
-	    // Make every 25th row, including the first and last, bold
-	    if ( i % stats->quartile1() == 0 )
-		setRowBold( table, row );
-
-	    // Shade the background of every 10th row if all percentiles are shown
-	    if ( i % 10 == 0 && step == 1 )
-		highlightRow( table, row, palette );
-	}
-
-	HeaderTweaker::resizeToContents( table->horizontalHeader() );
-    }
-
 } // namespace
 
 
@@ -218,8 +88,6 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     setAttribute( Qt::WA_DeleteOnClose );
 
     _ui->setupUi( this );
-
-    _ui->bucketsTable->setModel( new BucketsTableModel{ this } );
 
     initWidgets();
     connectActions();
@@ -279,16 +147,14 @@ void FileSizeStatsWindow::initWidgets()
     markersAction( actionGroup, _ui->actionEveryPercentile, 1 );
     _ui->actionNoPercentiles->setChecked( true );
 
-    // Create the header row on the percentiles table, which will never change
-    const QStringList headers{ QObject::tr( "Percentile" ),
-                               QObject::tr( "Value" ),
-                               QObject::tr( "Files P(n-1...n)" ),
-                               QObject::tr( "Sum P(n-1...n)" ),
-                               QObject::tr( "Files P(%1...n)" ).arg( _stats->minPercentile() ),
-                               QObject::tr( "Sum P(%1...n)" ).arg( _stats->minPercentile() ),
-                             };
-    _ui->percentileTable->setColumnCount( headers.size() );
-    _ui->percentileTable->setHorizontalHeaderLabels( headers );
+    // Set up the percentile and buckets tables
+    _ui->bucketsTable->setModel( new BucketsTableModel{ this } );
+    _ui->bucketsTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+    QTableView * table = _ui->percentileTable;
+    table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
+    table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
+    table->setModel( new PercentileTableModel{ this } );
 }
 
 
@@ -305,7 +171,7 @@ void FileSizeStatsWindow::connectActions()
              this,                          &FileSizeStatsWindow::markersChanged );
 
     connect( _ui->percentileFilterCheckBox, &QCheckBox::toggled,
-             this,                          &FileSizeStatsWindow::fillPercentileTable );
+             this,                          &FileSizeStatsWindow::setPercentileTable );
 
     connect( _ui->actionLogScale,           &QAction::triggered,
              this,                          &FileSizeStatsWindow::logScale );
@@ -372,9 +238,12 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
     _stats->calculatePercentiles();
 
-    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
     initHistogram();
-    fillPercentileTable();
+
+    percentileTableModel( _ui->percentileTable )->setStats( _stats.get() );
+    setPercentileTable();
+
+    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
 }
 
 
@@ -391,7 +260,7 @@ void FileSizeStatsWindow::initHistogram()
 }
 
 
-void FileSizeStatsWindow::fillPercentileTable()
+void FileSizeStatsWindow::setPercentileTable()
 {
     const PercentileBoundary nominalCount = 1.0 * _stats->size() / _stats->maxPercentile();
     const int precision = [ nominalCount ]()
@@ -402,8 +271,7 @@ void FileSizeStatsWindow::fillPercentileTable()
     }();
     _ui->nominalCount->setText( formatCount( nominalCount, precision ) );
 
-    const int step = _ui->percentileFilterCheckBox->isChecked() ? 1 : FILTERED_STEP;
-    fillTable( _ui->percentileTable, _stats.get(), step, palette() );
+    percentileTableModel( _ui->percentileTable )->resetModel( !_ui->percentileFilterCheckBox->isChecked() );
 }
 
 
@@ -415,11 +283,10 @@ void FileSizeStatsWindow::setPercentileRange()
     const FileCount dataCount = qRound( _stats->size() * percentileCount / 100.0 );
     const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
 
-    bucketsTableModel( _ui->bucketsTable )->beginReset();
+    BucketsTableModel * model = bucketsTableModel( _ui->bucketsTable );
+    model->beginReset();
     _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
-    bucketsTableModel( _ui->bucketsTable )->endReset();
-
-    HeaderTweaker::resizeToContents( _ui->bucketsTable->horizontalHeader() );
+    model->endReset();
 
     _ui->histogramView->setPercentileRange( startPercentile, endPercentile );
 }
@@ -523,7 +390,7 @@ void FileSizeStatsWindow::changeEvent( QEvent * event )
     QDialog::changeEvent( event );
 
     if ( event->type() == QEvent::PaletteChange )
-	fillPercentileTable();
+	setPercentileTable();
 }
 
 

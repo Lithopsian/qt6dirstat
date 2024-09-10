@@ -462,12 +462,6 @@ void HeaderTweaker::applyLayout( ColumnLayout * layout )
 }
 
 
-void HeaderTweaker::resizeToContents( QHeaderView * header )
-{
-    for ( int col = 0; col < header->count(); ++col )
-	header->setSectionResizeMode( col, QHeaderView::ResizeToContents );
-}
-
 
 
 DataColumnList ColumnLayout::defaultColumns( const QString & layoutName )

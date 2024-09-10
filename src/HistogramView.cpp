@@ -29,6 +29,26 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Return the text of ther overflow panel heasdline.
+     **/
+    QString overflowHeadline()
+    {
+	return QObject::tr( "Cut-off percentiles" );
+    }
+
+    /**
+     * Return rich text of the form "Pn". The percentile index is
+     * subscripted, but Qt subscripting can be tiny, so use a
+     * value in between the standard subscript and the full-size
+     * font.
+     **/
+    QString pText( int n )
+    {
+	return QObject::tr( "P<span style='font-size: large; vertical-align: sub;'>%1</span>" ).arg( n );
+    }
+
+
+    /**
      * Return the percentage represented by 'count' wrt 'total',
      * returning 0.0 if 'total' is 0.
      **/
@@ -54,8 +74,10 @@ namespace
      **/
     QGraphicsTextItem * createTextItem( QGraphicsScene * scene, const QString & text )
     {
-	QGraphicsTextItem * item = scene->addText( text );
+	QGraphicsTextItem * item = new QGraphicsTextItem{};
+	item->setHtml( text );
 	item->setZValue( HistogramView::TextLayer );
+	scene->addItem( item );
 
 	return item;
     }
@@ -93,7 +115,7 @@ FileSize HistogramView::percentile( int index ) const
 
 void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
 {
-    PercentileStats::validatePercentileRange( startPercentile, endPercentile );
+    PercentileStats::validateIndexRange( startPercentile, endPercentile );
 
     const bool oldNeedOverflowPanel = needOverflowPanel();
 
@@ -263,9 +285,8 @@ void HistogramView::addXAxisLabel( QGraphicsScene * scene )
 
 void HistogramView::addYAxisLabel( QGraphicsScene * scene )
 {
-    QGraphicsTextItem * item = createBoldItem( scene, "n   -->" );
-    if ( _useLogScale )
-	item->setHtml( "log<sub>2</sub>(n)   -->" );
+    const QString text = _useLogScale ? "log<sub>2</sub>(n)   -->" : "n   -->";
+    QGraphicsTextItem * item = createBoldItem( scene, text );
 
     const QRectF rect = item->boundingRect();
     item->setRotation( 270 );
@@ -275,15 +296,13 @@ void HistogramView::addYAxisLabel( QGraphicsScene * scene )
 
 void HistogramView::addXStartEndLabels( QGraphicsScene * scene )
 {
-    const bool min = _startPercentile == _stats->minPercentile();
-    const QString startLabel = ( min ? tr( "Min" ) : tr( "P%1" ).arg( _startPercentile ) ) %
-                               '\n' % formatSize( percentile( _startPercentile ) );
+    const QString min = _startPercentile == _stats->minPercentile() ? tr( "Min" ) : pText( _startPercentile );
+    const QString startLabel = min % "<br/>"_L1 % formatSize( percentile( _startPercentile ) );
     QGraphicsTextItem * startItem = createTextItem( scene, startLabel );
     startItem->setPos( 0, bottomBorder() - startItem->boundingRect().height() );
 
-    const bool max = _endPercentile == _stats->maxPercentile();
-    const QString endLabel = ( max ? tr( "Max" ) : tr( "P%1" ).arg( _endPercentile ) ) %
-                             '\n' % formatSize( percentile( _endPercentile ) );
+    const QString max = _endPercentile == _stats->maxPercentile() ? tr( "Max" ) : pText( _endPercentile );
+    const QString endLabel = max % "<br/>"_L1 % formatSize( percentile( _endPercentile ) );
     QGraphicsTextItem * endItem = createTextItem( scene, endLabel );
     const QRectF endRect = endItem->boundingRect();
     endItem->setTextWidth( endRect.width() );
@@ -437,7 +456,7 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
 	if ( i % _percentileStep != 0 && i > extraStartMarkers && i < extraEndMarkers )
 	    continue;
 
-	addMarker( i, tr( "Percentile P%1" ).arg( i ), percentilePen( i ), PercentileLayer );
+	addMarker( i, tr( "Percentile " ) % pText( i ), percentilePen( i ), PercentileLayer );
     }
 }
 
@@ -546,15 +565,21 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 	nextPos.ry() += pieDiameter();
     };
 
+    const auto cutOff = [ this ]( int limitPercentile, int limit, int minPercentile, int maxPercentile )
+    {
+	return limitPercentile == limit ?
+	       tr( "no files cut off" ) :
+	       formatSize( percentile( minPercentile ) ) % "..."_L1 % formatSize( percentile( maxPercentile ) );
+    };
+
     const QString cutoffLines =
-	tr( "Min (P%1) ... P%2\n" ).arg( _stats->minPercentile() ).arg( _startPercentile ) %
-	( _startPercentile == _stats->minPercentile() ?
-	  tr( "no files cut off" ) :
-	  formatSize( _stats->minValue() ) % "..."_L1 % formatSize( percentile( _startPercentile ) ) ) %
-	tr( "\n\nP%1 ... Max (P%2)\n" ).arg( _endPercentile ).arg( _stats->maxPercentile() ) %
-	( _endPercentile == _stats->maxPercentile() ?
-	  tr( "no files cut off" ) :
-	  formatSize( percentile( _endPercentile ) ) % "..."_L1 % formatSize( _stats->maxValue() ) );
+	tr( "Min (%1) ... " ).arg( pText( _stats->minPercentile() ) ) % pText( _startPercentile )
+	% "<br/>"_L1
+	% cutOff( _startPercentile, _stats->minPercentile(), _stats->minPercentile(), _startPercentile )
+	% "<br/><br/>"_L1
+	% pText( _endPercentile ) % tr( " ... Max (%1)" ).arg( pText( _stats->maxPercentile() ) )
+	% "<br/>"_L1
+	% cutOff( _endPercentile, _stats->maxPercentile(), _endPercentile, _stats->maxPercentile() );
     addText( cutoffLines );
     nextPos.ry() += overflowSpacing();
 
@@ -567,7 +592,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
     const int missingPercent = qRound( percent( missingFiles, _stats->size() ) );
     const QString cutoffCaption =
 	missingFiles == 1 ? tr( "1 file cut off" ) : tr( "%L1 files cut off" ).arg( missingFiles );
-    addText( cutoffCaption % tr( "\n%1% of all files" ).arg( missingPercent ) );
+    addText( cutoffCaption % tr( "<br/>%1% of all files" ).arg( missingPercent ) );
 
     // Lower pie chart: disk space in outlier percentiles
     const FileSize histogramDiskSpace = _stats->percentileRangeSum( _startPercentile, _endPercentile );
@@ -577,7 +602,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 
     // Caption for the lower pie chart
     const double cutoffSpacePercent = percent( cutoffDiskSpace, totalDiskSpace );
-    const QString pieCaption = tr( " cut off\n%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 );
+    const QString pieCaption = tr( " cut off<br/>%1% of disk space" ).arg( cutoffSpacePercent, 0, 'f', 1 );
     addText( formatSize( cutoffDiskSpace ) % pieCaption );
 
     // Remember the panel contents as a minimum height for building the histogram

@@ -67,10 +67,10 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Fill the percentiles table depending on the content of the
-	 * checkbox in the same tab.
+	 * Load the nominal percentiles label and reset the model with the
+	 * current filter setting.
 	 **/
-	void fillPercentileTable();
+	void setPercentileTable();
 
 	/**
 	 * Respond to changes in the markers combobox or from the context menu.

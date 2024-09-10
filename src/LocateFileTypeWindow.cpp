@@ -56,7 +56,6 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-//	_ui->treeWidget->setColumnCount( SSR_ColumnCount );
 	tree->setHeaderLabels( { QObject::tr( "Number" ),
 	                         QObject::tr( "Total Size" ),
 	                         QObject::tr( "Directory" ) } );

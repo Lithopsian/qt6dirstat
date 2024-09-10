@@ -106,7 +106,6 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-//	tree->setColumnCount( FT_ColumnCount );
 	tree->setHeaderLabels( { QObject::tr( "Name" ),
 	                         QObject::tr( "Number" ),
 	                         QObject::tr( "Total Size" ),

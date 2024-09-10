@@ -75,7 +75,8 @@ namespace QDirStat
 	/**
 	 * Resize a header view to contents.
 	 **/
-	static void resizeToContents( QHeaderView * header );
+	static void resizeToContents( QHeaderView * header )
+	    { header->setSectionResizeMode( QHeaderView::ResizeToContents ); }
 
 	/**
 	 * Switch the layout to the one with the specified name.

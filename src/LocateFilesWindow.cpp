@@ -64,7 +64,6 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-//	tree->setColumnCount( LocateListColumnCount );
 	tree->setHeaderLabels( { QObject::tr( "Size" ),
 	                         QObject::tr( "Last Modified" ),
 	                         QObject::tr( "Path" ) } );

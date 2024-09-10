@@ -283,7 +283,6 @@ namespace QDirStat
 	 * the height required for the overflow panel.
 	 **/
 	static qreal overflowWidth();
-	static QString overflowHeadline() { return tr( "Cut-off percentiles" ); }
 
 	/**
 	 * Return a brush for a background area.

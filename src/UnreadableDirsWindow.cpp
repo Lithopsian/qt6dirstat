@@ -51,7 +51,6 @@ namespace
 	                                QObject::tr( "Permissions" ),
 	                                QObject::tr( "Perm." ),
 	                              };
-//	tree->setColumnCount( headerLabels.size() );
 	tree->setHeaderLabels( headerLabels );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );

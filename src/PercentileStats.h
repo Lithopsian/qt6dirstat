@@ -75,11 +75,11 @@ namespace QDirStat
 	 * indexing errors and avoids scattering hard-coded values throughout
 	 * the code.
 	 **/
-	constexpr static int minPercentile() { return 0;                   }
-	constexpr static int maxPercentile() { return 100;                 }
-	constexpr static int median()        { return maxPercentile() / 2; }
-	constexpr static int quartile1()     { return maxPercentile() / 4; }
-	constexpr static int quartile3()     { return quartile1()     * 3; }
+	constexpr static unsigned short minPercentile() { return 0;                   }
+	constexpr static unsigned short maxPercentile() { return 100;                 }
+	constexpr static unsigned short median()        { return maxPercentile() / 2; }
+	constexpr static unsigned short quartile1()     { return maxPercentile() / 4; }
+	constexpr static unsigned short quartile3()     { return quartile1()     * 3; }
 
 	/**
 	 * Return the values for the minimum (ie. 0) and maximum (ie. 100)
@@ -136,7 +136,10 @@ namespace QDirStat
 	 * will throw if 'index' is not in the range of 0 to 100.
 	 **/
 	PercentileValue percentileValue( int index ) const
-	    { return std::floor( percentileBoundary( index ) ); }
+	{
+	    validateIndex( index );
+	    return std::floor( percentileBoundary( index ) );
+	}
 
 	/**
 	 * Returns a particular percentile sum, for the given 'index':
@@ -158,32 +161,32 @@ namespace QDirStat
 	 **/
 	PercentileValue percentileCount( int index ) const
 	{
-	    validatePercentile( index );
+	    validateIndex( index );
 	    return index == 0 || _percentileCounts.isEmpty() ? 0 : percentileCountDiff( index, index-1 );
 	}
 	PercentileValue cumulativeCount( int index ) const
 	{
-	    validatePercentile( index );
+	    validateIndex( index );
 	    return _percentileCounts.isEmpty() ? 0 : _percentileCounts[ index ];
 	}
 	PercentileValue percentileSum( int index ) const
 	{
-	    validatePercentile( index );
+	    validateIndex( index );
 	    return index == 0 || _percentileSums.isEmpty() ? 0 : percentileSumDiff( index, index-1 );
 	}
 	PercentileValue cumulativeSum( int index ) const
 	{
-	    validatePercentile( index );
+	    validateIndex( index );
 	    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
 	}
 	PercentileValue percentileRangeCount( int startIndex, int endIndex ) const
 	{
-	    validatePercentileRange( startIndex, endIndex );
+	    validateIndexRange( startIndex, endIndex );
 	    return _percentileCounts.isEmpty() ? 0 : percentileCountDiff( endIndex, startIndex );
 	}
 	PercentileValue percentileRangeSum( int startIndex, int endIndex ) const
 	{
-	    validatePercentileRange( startIndex, endIndex );
+	    validateIndexRange( startIndex, endIndex );
 	    return _percentileSums.isEmpty() ? 0 : percentileSumDiff( endIndex, startIndex );
 	}
 
@@ -193,8 +196,8 @@ namespace QDirStat
 	 * then the start.  This function will throw if it encounters
 	 * an invalid value.
 	 **/
-	static void validatePercentile( int index );
-	static void validatePercentileRange( int startIndex, int endIndex );
+	static void validateIndex( int index );
+	static void validateIndexRange( int startIndex, int endIndex );
 
 	/**
 	 * Fill 'bucketCount' buckets of equal width (data value range)
@@ -287,12 +290,13 @@ namespace QDirStat
 	/**
 	 * Returns a particular percentile boundary, for the given
 	 * 'index'.
+	 *
+	 * Note that this will always return 0 if the percentile
+	 * boundary table is empty, but there is no other validation
+	 * of 'index'.
 	 **/
 	PercentileBoundary percentileBoundary( int index ) const
-	{
-	    validatePercentile( index );
-	    return _percentiles.isEmpty() ? 0 : _percentiles[ index ];
-	}
+	    { return _percentiles[ index ]; }
 
 	/**
 	 * Return the difference between two percentile counts or sums.
