@@ -25,7 +25,7 @@ namespace
 	std::cerr << "\n"
 	          << "Usage: \n"
 	          << "\n"
-	          << "  " << progName << " [--slow-update|-s] [<directory-name>]\n"
+	          << "  " << progName << " [--stylesheet <css-file-name>] [--slow-update|-s] [<directory-name>]\n"
 	          << "  " << progName << " pkg:/pkgpattern\n"
 	          << "  " << progName << " unpkg:/dir\n"
 	          << "  " << progName << " --dont-ask|-d\n"

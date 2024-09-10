@@ -49,7 +49,9 @@ namespace QDirStat
         /**
          * Constructor.  This is created on the stack by main.
          **/
-        QDirStatApp( int &argc, char **argv );
+        QDirStatApp( int &argc, char **argv ):
+            QApplication{ argc, argv }
+        {}
 
         /**
          * Store pointers to the main window and models.  Access to
