@@ -11,7 +11,7 @@
 
 #include "PercentileStats.h"
 #include "Exception.h"
-#include "FormatUtil.h"
+#include "FormatUtil.h" // only needed with VERBOSE_LOGGING
 
 
 #define VERBOSE_LOGGING 0
@@ -120,7 +120,7 @@ void PercentileStats::calculatePercentiles()
 
 void PercentileStats::validateIndex( int index )
 {
-    CHECK_INDEX_MSG( index, minPercentile(), maxPercentile(), "Percentile index out of range" );
+    CHECK_INDEX( index, minPercentile(), maxPercentile(), "Percentile index out of range" );
 }
 
 
@@ -144,7 +144,7 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
     // Create a new list of bucketCount zeroes, discarding any existing list
     _buckets = BucketList( bucketCount );
 
-    // Remember the validated start and end percentiles that match this bucket list
+    // Remember the validated start and end percentile boundaries that match this bucket list
     _bucketsStart = percentileBoundary( startPercentile );
     _bucketsEnd   = percentileBoundary( endPercentile   );
 
@@ -159,10 +159,11 @@ void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int end
                << Qt::endl;
 #endif
 
-    // Find the first data point that we want for the buckets
+    // Always include files with size equal to P0 in the first percentile/bucket
     auto beginIt = cbegin();
     if ( startPercentile > minPercentile() )
     {
+	// Find the first (ie. smallest) data point that we want for the first bucket
 	while ( beginIt != cend() && *beginIt <= _bucketsStart )
 	    ++beginIt;
     }
@@ -210,9 +211,7 @@ int PercentileStats::bestBucketCount( FileCount n, int max )
 }
 
 
-FileCount PercentileStats::bucket( int index ) const
+void PercentileStats::validateBucketIndex( int index ) const
 {
-    CHECK_INDEX( index, 0, bucketCount() - 1 );
-
-    return _buckets[ index ];
+    CHECK_INDEX( index, 0, bucketCount() - 1, "Bucket index out of range" );
 }

@@ -142,7 +142,7 @@ namespace QDirStat
 	 * by a call to resetModel().
 	 **/
 	void setStats( const FileSizeStats * stats )
-	    { beginResetModel(); _stats = stats; endResetModel(); }
+	    { _stats = stats; }
 
 	/**
 	 * Reset the model, possibly with new contents, possibly
@@ -254,7 +254,6 @@ namespace QDirStat
 	    QHeaderView{ orientation, parent }
 	{
 	    setSectionsClickable( true );
-	    setSectionResizeMode( ResizeToContents );
 	}
 
 
@@ -263,13 +262,13 @@ namespace QDirStat
 	/**
 	 * Paint rich text into the header.
 	 **/
-	void paintSection(QPainter * painter, const QRect & rect, int logicalIndex) const override;
+	void paintSection( QPainter * painter, const QRect & rect, int logicalIndex ) const override;
 
 	/**
 	 * Return the size of the painted header for sizing the header and
 	 * column width.
 	 **/
-	QSize sectionSizeFromContents(int logicalIndex) const override;
+	QSize sectionSizeFromContents( int logicalIndex ) const override;
 
 	/**
 	 * Return the text for a header section, based on the header

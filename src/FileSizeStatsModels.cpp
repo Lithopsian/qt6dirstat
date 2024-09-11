@@ -75,15 +75,11 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
     {
         case Qt::DisplayRole:
         {
-            const int row = index.row();
-            if ( row < 0 || row >= _stats->bucketCount() )
-                return QVariant{};
-
             switch ( index.column() )
             {
-                case StartCol:  return formatSize( std::floor( _stats->bucketStart( row ) ) + 1 );
-                case EndCol:    return formatSize( std::floor( _stats->bucketEnd  ( row ) ) );
-                case ValueCol:  return formatCount( _stats->bucket( row ) );
+                case StartCol:  return formatSize( _stats->bucketStart( index.row() ) );
+                case EndCol:    return formatSize( _stats->bucketEnd( index.row() ) );
+                case ValueCol:  return formatCount( _stats->bucket( index.row() ) );
                 default:        return QVariant{};
             }
         }
@@ -97,8 +93,8 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
             {
                 switch ( index.column() )
                 {
-                    case StartCol:  return std::floor( _stats->bucketStart( index.row() ) ) + 1;
-                    case EndCol:    return std::floor( _stats->bucketEnd  ( index.row() ) );
+                    case StartCol:  return _stats->bucketStart( index.row() );
+                    case EndCol:    return _stats->bucketEnd( index.row() );
                     default:        return 0;
                 }
             }();
@@ -174,10 +170,10 @@ int PercentileTableModel::rowCount( const QModelIndex & parent ) const
     if ( parent.isValid() || !_stats )
         return 0;
 
-    if ( !_filterRows )
-        return PercentileStats::maxPercentile() + 1;
+    if ( _filterRows )
+        return PercentileStats::maxPercentile() / filterStep() + 2 * adjustedMargin() + 1;
 
-    return PercentileStats::maxPercentile() / filterStep() + 2 * adjustedMargin() + 1;
+    return PercentileStats::maxPercentile() + 1;
 }
 
 
@@ -193,32 +189,22 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
             const int i = mapRow( index.row() );
 
             if ( i == 0 && index.column() != ValueCol )
-                return QVariant{};
+                return QVariant{}; // no counts or sums for P0
 
             switch ( index.column() )
             {
-                case ValueCol:
-                    return formatSize( _stats->percentileValue( i ) );
-
-                case CountCol:
-                    return formatCount( _stats->percentileCount( i ) );
-
-                case SumCol:
-                    return formatSize( _stats->percentileSum( i ) );
-
-                case CumCountCol:
-                    return formatCount( _stats->cumulativeCount( i ) );
-
-                case CumSumCol:
-                    return formatSize( _stats->cumulativeSum( i ) );
-
-                default:
-                    return QVariant{};
+                case ValueCol:    return formatSize( _stats->percentileValue( i ) );
+                case CountCol:    return formatCount( _stats->percentileCount( i ) );
+                case SumCol:      return formatSize( _stats->percentileSum( i ) );
+                case CumCountCol: return formatCount( _stats->cumulativeCount( i ) );
+                case CumSumCol:   return formatSize( _stats->cumulativeSum( i ) );
+                default:          return QVariant{};
             }
         }
 
         case Qt::FontRole:
         {
+            // Show every quartile, including min and max, in bold
             if ( mapRow( index.row() ) % PercentileStats::quartile1() == 0 )
             {
                 QFont font;
@@ -233,6 +219,7 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
 
         case Qt::BackgroundRole:
         {
+            // Shade the background of deciles when all percentiles are being shown
             if ( highlightRow( index ) )
                 return QColor::fromHsl( 0, 0, QGuiApplication::palette().highlight().color().lightness() );
 
@@ -241,6 +228,7 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
 
         case Qt::ForegroundRole:
         {
+            // Highlight text color when the background is shaded
             if ( highlightRow( index ) )
                 return QGuiApplication::palette().highlightedText();
 
@@ -249,6 +237,7 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
 
         case Qt::ToolTipRole:
         {
+            // Show the exact byte size of rounded sizes in the tooltip
             const FileSize size = [ this, &index ]() -> FileSize
             {
                 const int i = mapRow( index.row() );
@@ -306,11 +295,11 @@ int PercentileTableModel::mapRow( int row ) const
     // For strict correctness, a fairly meaningless adjustment for the first percentile
     row += PercentileStats::minPercentile();
 
-    // Rows within the start margin or unfiltered coincide with percentiles
+    // Unfiltered rows or rows within the start margin map 1:1
     if ( !_filterRows || row <= filterMargin() )
         return row;
 
-    // Adjust row to account for the start margin rows
+    // Adjust row to account for the extra rows in the start margin
     row -= adjustedMargin();
 
     // Up to the end margin, map rows to percentiles using the step size
@@ -318,34 +307,36 @@ int PercentileTableModel::mapRow( int row ) const
     if ( row < filteredSteps - marginAdjustment() )
         return row * filterStep();
 
-    // Calculate as the number of rows beyond the start of the end margin
+    // Calculate a percentile as the number of rows beyond the start of the end margin
     return PercentileStats::maxPercentile() - adjustedMargin() + row - filteredSteps;
-
 }
 
 
 
 
-void PercentileTableHeader::paintSection(QPainter * painter, const QRect & rect, int logicalIndex ) const
+void PercentileTableHeader::paintSection( QPainter * painter, const QRect & rect, int logicalIndex ) const
 {
     // Paint the theme background so we can draw over it
     painter->save();
     QHeaderView::paintSection( painter, rect, logicalIndex );
     painter->restore();
 
-    // Paint aligned rich-text header labels
+    // Paint with rich text
     QStaticText text{ sectionText( logicalIndex ) };
+
+    // Align the text, which requires setting a width for it to be aligned within
     QTextOption option{ orientation() == Qt::Horizontal ? Qt::AlignHCenter : Qt::AlignRight };
     text.setTextOption( option );
-
-    // Place the text within the horizontal and vertical margins
     const qreal rectWidth = rect.width() - 2 * horizontalMargin();
     text.setTextWidth( qMax( rectWidth, text.size().width() ) );
-    painter->drawStaticText( rect.left() + horizontalMargin(), rect.top() + verticalMargin(), text );
+
+    // Explicitly place the text to be vertically centred
+    const int yCenter = ( rect.height() - text.size().height() ) / 2;
+    painter->drawStaticText( rect.left() + horizontalMargin(), rect.top() + yCenter, text );
 }
 
 
-QSize PercentileTableHeader::sectionSizeFromContents(int logicalIndex) const
+QSize PercentileTableHeader::sectionSizeFromContents( int logicalIndex ) const
 {
     QStaticText text{ sectionText( logicalIndex ) };
     return text.size().toSize() + 2 * QSize{ horizontalMargin(), verticalMargin() };

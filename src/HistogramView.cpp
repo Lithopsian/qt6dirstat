@@ -20,7 +20,7 @@
 #include "HistogramItems.h"
 
 
-#define VERBOSE_HISTOGRAM 0
+#define VERBOSE_HISTOGRAM 1
 
 
 using namespace QDirStat;
@@ -237,7 +237,12 @@ void HistogramView::rebuild()
     if ( geometryDirty() )
 	_size = calcGeometry( overflowPanelWidth );
 
+    QGraphicsScene * oldScene = scene();
+    if ( oldScene )
+	oldScene->deleteLater();
+
     QGraphicsScene * newScene = new QGraphicsScene{ this };
+    setScene( newScene );
 
     addBackground( newScene );
     addAxes( newScene );
@@ -251,11 +256,6 @@ void HistogramView::rebuild()
     addOverflowPanel( newScene, overflowPanelWidth );
 
     fitToViewport( newScene );
-
-    QGraphicsScene * oldScene = scene();
-    setScene( newScene );
-    if ( oldScene )
-	oldScene->deleteLater();
 }
 
 

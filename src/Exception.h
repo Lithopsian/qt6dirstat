@@ -148,7 +148,7 @@ public:
 
 /**
  * Exception class for "index out of range"
- * Use with CHECK_INDEX() and CHECK_PERCENTILE_INDEX()
+ * Use with CHECK_INDEX()
  **/
 class IndexOutOfRangeException : public Exception
 {
@@ -164,9 +164,9 @@ public:
     IndexOutOfRangeException( int             invalidIndex,
                               int             validMin,
                               int             validMax,
-                              const QString & prefix ):
+                              const QString & msg ):
 	Exception{ QString{ "%1: %2 valid: %3...%4" }
-	           .arg( prefix )
+	           .arg( msg )
 	           .arg( invalidIndex )
 	           .arg( validMin )
 	           .arg( validMax ) }
@@ -329,19 +329,14 @@ protected:
  *
  * Throws IndexOutOfRangeException if out of range.
  **/
-#define CHECK_INDEX_MSG( INDEX, VALID_MIN, VALID_MAX, MSG )	\
-    do								\
-    {								\
-	if ( (INDEX) < (VALID_MIN) ||				\
-	     (INDEX) > (VALID_MAX) )				\
-	{							\
-	    THROW( ( IndexOutOfRangeException{ (INDEX), (VALID_MIN), (VALID_MAX), (MSG) } ) ); \
-	}							\
+#define CHECK_INDEX( INDEX, VALID_MIN, VALID_MAX, MSG )						\
+    do												\
+    {												\
+	if ( (INDEX) < (VALID_MIN) || (INDEX) > (VALID_MAX) )					\
+	{											\
+	    THROW( ( IndexOutOfRangeException{ (INDEX), (VALID_MIN), (VALID_MAX), (MSG) } ) ); 	\
+	}											\
     } while( 0 )
-
-
-#define CHECK_INDEX( INDEX, VALID_MIN, VALID_MAX )		\
-    CHECK_INDEX_MSG( (INDEX), (VALID_MIN), (VALID_MAX), "Index out of range" )
 
 
 //

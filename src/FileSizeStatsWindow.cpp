@@ -153,6 +153,7 @@ void FileSizeStatsWindow::initWidgets()
 
     QTableView * table = _ui->percentileTable;
     table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
+    _ui->percentileTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
     table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
     table->setModel( new PercentileTableModel{ this } );
 }
@@ -238,12 +239,11 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
     _stats->calculatePercentiles();
 
-    initHistogram();
-
-    percentileTableModel( _ui->percentileTable )->setStats( _stats.get() );
-    setPercentileTable();
-
     bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
+    percentileTableModel( _ui->percentileTable )->setStats( _stats.get() );
+
+    setPercentileTable();
+    initHistogram();
 }
 
 
@@ -255,7 +255,8 @@ void FileSizeStatsWindow::initHistogram()
     _ui->histogramView->init( _stats.get() );
     autoPercentileRange();
 
-    // There are no signals, so we have to set the percentiles and reload the buckets explicitly
+    // Signals were blocked, so we have to load the buckets explicitly
+    // - this will reset the buckets table model and trigger the histogram to draw
     setPercentileRange();
 }
 
