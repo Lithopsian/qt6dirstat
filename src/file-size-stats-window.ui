@@ -82,16 +82,6 @@
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft">
-        <widget class="QPushButton" name="openOptionsButton">
-         <property name="text">
-          <string>&amp;Options &gt;&gt;</string>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QWidget" name="optionsPanel" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -101,22 +91,25 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item alignment="Qt::AlignLeft">
-           <widget class="QPushButton" name="closeOptionsButton">
-            <property name="text">
-             <string>&lt;&lt; &amp;Options</string>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item>
            <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0,1,0">
-            <item row="1" column="6">
-             <widget class="QSpinBox" name="endPercentileSpinBox">
+            <item row="0" column="3">
+             <widget class="QPushButton" name="autoButton">
               <property name="toolTip">
-               <string>Data from this percentile up is cut off the histogram</string>
+               <string>Automatically set the start and end percentiles to reasonable values</string>
+              </property>
+              <property name="text">
+               <string>&amp;Auto</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QSpinBox" name="startPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile down is cut off the histogram</string>
               </property>
               <property name="prefix">
                <string>P</string>
@@ -130,26 +123,27 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="startPercentileLabel">
-              <property name="text">
-               <string>&amp;Start percentile</string>
+            <item row="1" column="6">
+             <widget class="QSpinBox" name="endPercentileSpinBox">
+              <property name="toolTip">
+               <string>Data from this percentile up is cut off the histogram</string>
               </property>
-              <property name="buddy">
-               <cstring>startPercentileSpinBox</cstring>
+              <property name="prefix">
+               <string>P</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="autoButton">
-              <property name="toolTip">
-               <string>Automatically set the start and end percentiles to reasonable values</string>
+            <item row="0" column="0" colspan="3">
+             <widget class="QSlider" name="startPercentileSlider">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
-              <property name="text">
-               <string>&amp;Auto</string>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
+             </widget>
+            </item>
+            <item row="0" column="4" colspan="3">
+             <widget class="QSlider" name="endPercentileSlider">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -166,33 +160,29 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0" colspan="3">
-             <widget class="QSlider" name="startPercentileSlider">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+            <item row="1" column="1">
+             <widget class="QLabel" name="startPercentileLabel">
+              <property name="text">
+               <string>&amp;Start percentile</string>
               </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QSpinBox" name="startPercentileSpinBox">
-              <property name="toolTip">
-               <string>Data from this percentile down is cut off the histogram</string>
-              </property>
-              <property name="prefix">
-               <string>P</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4" colspan="3">
-             <widget class="QSlider" name="endPercentileSlider">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+              <property name="buddy">
+               <cstring>startPercentileSpinBox</cstring>
               </property>
              </widget>
             </item>
            </layout>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignLeft">
+        <widget class="QPushButton" name="openOptionsButton">
+         <property name="text">
+          <string>&amp;Options &gt;&gt;</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -598,8 +588,6 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>histogramView</tabstop>
-  <tabstop>openOptionsButton</tabstop>
-  <tabstop>closeOptionsButton</tabstop>
   <tabstop>autoButton</tabstop>
   <tabstop>startPercentileSlider</tabstop>
   <tabstop>endPercentileSlider</tabstop>
@@ -751,70 +739,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>openOptionsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>optionsPanel</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>215</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>269</x>
-     <y>278</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openOptionsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>openOptionsButton</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>215</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>61</x>
-     <y>215</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>closeOptionsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>openOptionsButton</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>69</x>
-     <y>246</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>61</x>
-     <y>215</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>closeOptionsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>optionsPanel</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>69</x>
-     <y>246</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>269</x>
-     <y>278</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionStartMinus1</sender>
    <signal>triggered()</signal>
    <receiver>startPercentileSpinBox</receiver>
@@ -875,6 +799,22 @@
     <hint type="destinationlabel">
      <x>488</x>
      <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openOptionsButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>optionsPanel</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
