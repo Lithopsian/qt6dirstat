@@ -235,8 +235,7 @@ namespace QDirStat
 	/**
 	 * Return 'true' if an overflow ("cutoff") panel is needed.
 	 **/
-	bool needOverflowPanel() const
-	    { return _startPercentile > 0 || _endPercentile < 100; }
+	bool needOverflowPanel() const;
 
 	/**
 	 * A whole bunch of fixed values describing the geometry of

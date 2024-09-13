@@ -23,41 +23,18 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return the text for a horizontal header section.
+     * Return text showing the exact size 'size; in bytes, formatted
+     * according to the local locale style.
      **/
-    QString horizontalSectionText( int logicalIndex )
+    QString sizeTooltip( FileSize size )
     {
-        switch ( logicalIndex )
-        {
-            case PercentileTableModel::ValueCol:    return QObject::tr( "Value" );
-            case PercentileTableModel::CountCol:    return QObject::tr( "Files<sub> P(n-1)...P(n)</sub>" );
-            case PercentileTableModel::SumCol:      return QObject::tr( "Sum<sub> P(n-1)...P(n)</sub>" );
-            case PercentileTableModel::CumCountCol: return QObject::tr( "Files<sub> P(0)...P(n)</sub>" );
-            case PercentileTableModel::CumSumCol:   return QObject::tr( "Sum<sub> P(0)...P(n)</sub>" );
-        }
+        if ( size < 1000 )
+            return QString{};
 
-        return QString{};
+        return formatByteSize( size );
     }
 
-
-    /**
-     * Return the text for a vertical header section.
-     **/
-    QString verticalSectionText( int percentile )
-    {
-        switch ( percentile )
-        {
-            case PercentileStats::minPercentile(): return QObject::tr( "<b>Min</b>" );
-            case PercentileStats::quartile1():     return QObject::tr( "<b>Quartile 1</b>" );
-            case PercentileStats::median():        return QObject::tr( "<b>Median</b>" );
-            case PercentileStats::quartile3():     return QObject::tr( "<b>Quartile 3</b>" );
-            case PercentileStats::maxPercentile(): return QObject::tr( "<b>Max</b>" );
-        }
-
-        return QObject::tr( "<span style='font-size: large;'>P<sub>%1</sub></span>" ).arg( percentile );
-    }
-
-} // namespace
+}
 
 
 int BucketsTableModel::rowCount( const QModelIndex & parent ) const
@@ -68,7 +45,7 @@ int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 
 QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
 {
-    if ( ! index.isValid() )
+    if ( !index.isValid() )
         return QVariant{};
 
     switch ( role )
@@ -98,10 +75,7 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
                     default:        return 0;
                 }
             }();
-            if ( size >= 1000 )
-                return formatByteSize( size );
-
-            return QVariant{};
+            return sizeTooltip( size );
         }
 
         default:
@@ -249,10 +223,7 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
                     default:        return 0;
                 }
             }();
-            if ( size >= 1000 )
-                return formatByteSize( size );
-
-            return QVariant{};
+            return sizeTooltip( size );
         }
 
         default:
@@ -346,7 +317,33 @@ QSize PercentileTableHeader::sectionSizeFromContents( int logicalIndex ) const
 QString PercentileTableHeader::sectionText( int logicalIndex ) const
 {
     if ( orientation() == Qt::Horizontal )
-        return horizontalSectionText( logicalIndex );
+    {
+        return [ logicalIndex ]()
+        {
+            switch ( logicalIndex )
+            {
+                case PercentileTableModel::ValueCol:    return tr( "Value" );
+                case PercentileTableModel::CountCol:    return tr( "Files<sub> P(n-1)...P(n)</sub>" );
+                case PercentileTableModel::SumCol:      return tr( "Sum<sub> P(n-1)...P(n)</sub>" );
+                case PercentileTableModel::CumCountCol: return tr( "Files<sub> P(0)...P(n)</sub>" );
+                case PercentileTableModel::CumSumCol:   return tr( "Sum<sub> P(0)...P(n)</sub>" );
+            }
 
-    return verticalSectionText( tableModel()->mapRow( logicalIndex ) );
+            return QString{};
+        }();
+    }
+
+    return []( int percentile )
+    {
+        switch ( percentile )
+        {
+            case PercentileStats::minPercentile(): return tr( "<b>Min</b>" );
+            case PercentileStats::quartile1():     return tr( "<b>Quartile 1</b>" );
+            case PercentileStats::median():        return tr( "<b>Median</b>" );
+            case PercentileStats::quartile3():     return tr( "<b>Quartile 3</b>" );
+            case PercentileStats::maxPercentile(): return tr( "<b>Max</b>" );
+        }
+
+        return tr( "<span style='font-size: large;'>P<sub>%1</sub></span>" ).arg( percentile );
+    }( tableModel()->mapRow( logicalIndex ) );
 }

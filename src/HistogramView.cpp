@@ -20,7 +20,7 @@
 #include "HistogramItems.h"
 
 
-#define VERBOSE_HISTOGRAM 1
+#define VERBOSE_HISTOGRAM 0
 
 
 using namespace QDirStat;
@@ -38,9 +38,8 @@ namespace
 
     /**
      * Return rich text of the form "Pn". The percentile index is
-     * subscripted, but Qt subscripting can be tiny, so use a
-     * value in between the standard subscript and the full-size
-     * font.
+     * subscripted, but Qt subscripting can be tiny so use a value
+     * in between the standard subscript and the full-size font.
      **/
     QString pText( int n )
     {
@@ -234,15 +233,16 @@ void HistogramView::rebuild()
 
     const qreal overflowPanelWidth = overflowWidth();
 
-    if ( geometryDirty() )
-	_size = calcGeometry( overflowPanelWidth );
-
+    // Delay deleting the old scene to reduce delay and avoid crashing during a show event
     QGraphicsScene * oldScene = scene();
     if ( oldScene )
 	oldScene->deleteLater();
 
     QGraphicsScene * newScene = new QGraphicsScene{ this };
     setScene( newScene );
+
+    if ( geometryDirty() )
+	_size = calcGeometry( overflowPanelWidth );
 
     addBackground( newScene );
     addAxes( newScene );
@@ -621,13 +621,19 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 }
 
 
-void HistogramView::resizeEvent( QResizeEvent * event )
+bool HistogramView::needOverflowPanel() const
+{
+    return _startPercentile > _stats->minPercentile() || _endPercentile < _stats->maxPercentile();
+}
+
+
+void HistogramView::resizeEvent( QResizeEvent * )
 {
     //logDebug() << "Event size: " << event->oldSize() << Qt::endl;
     //logDebug() << "Event size: " << event->size() << Qt::endl;
 
     // Not safe to delete and create children during the recursive showChildren() in a show event
-    if ( event->oldSize().width() > 0 && event->oldSize().height() > 0 )
+//    if ( event->oldSize().width() > 0 && event->oldSize().height() > 0 )
 	rebuildDirty();
 }
 

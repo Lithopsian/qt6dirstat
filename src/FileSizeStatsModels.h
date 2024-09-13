@@ -114,7 +114,7 @@ namespace QDirStat
     {
 	Q_OBJECT
 
-    public:
+	friend class PercentileTableHeader;
 
 	enum PercentileTableColumn
 	{
@@ -125,6 +125,8 @@ namespace QDirStat
 	    CumSumCol,
 	};
 
+
+    public:
 
 	/**
 	 * Constructor.
@@ -137,9 +139,10 @@ namespace QDirStat
 	 * Provide a pointer to the statistics to be used by
 	 * the model.
 	 *
-	 * Note that this is wrapped in begin/endResetModel() for
-	 * safety, although it is normally followed immediately
-	 * by a call to resetModel().
+	 * Note that this call is not wrapped in begin/endResetModel().
+	 * It must either be called within begin/endReset() or must be
+	 * followed by calls to begin/endReset() before the event loop
+	 * spins.
 	 **/
 	void setStats( const FileSizeStats * stats )
 	    { _stats = stats; }
@@ -150,19 +153,6 @@ namespace QDirStat
 	 **/
 	void resetModel( bool filterRows )
 	    { beginResetModel(); _filterRows = filterRows; endResetModel(); }
-
-	/**
-	 * Map a row number to a percentile index.  The mapping is
-	 * 1:1 if the rows are not being filtered.
-	 *
-	 * filterStep() gives the step size for filtering, for example
-	 * 5 shows every 5th percentile.
-	 *
-	 * filterMargin() is the number of extra percentiles to show
-	 * at the start and end.  So a margin of 1 would show
-	 * percentiles 1 and 99 in addition to every 5th percentile.
-	 **/
-	int mapRow( int row ) const;
 
 
     protected:
@@ -188,6 +178,19 @@ namespace QDirStat
 	 * defined here.
 	 **/
 	QVariant headerData( int, Qt::Orientation, int ) const override;
+
+	/**
+	 * Map a row number to a percentile index.  The mapping is
+	 * 1:1 if the rows are not being filtered.
+	 *
+	 * filterStep() gives the step size for filtering, for example
+	 * 5 shows every 5th percentile.
+	 *
+	 * filterMargin() is the number of extra percentiles to show
+	 * at the start and end.  So a margin of 1 would show
+	 * percentiles 1 and 99 in addition to every 5th percentile.
+	 **/
+	int mapRow( int row ) const;
 
 	/**
 	 * Return whether row 'index' should be highlighted.  Every 10th

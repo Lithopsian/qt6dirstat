@@ -112,7 +112,7 @@ namespace QDirStat
 	 * Toggle the histogram y-axis scale between log and linear and disable
 	 * the automatic selection of the log scale setting.
 	 **/
-	void logScale();
+	void logHeights();
 
 	/**
 	 * Set the histogram y-axis scale to log or linear depending on the
@@ -177,8 +177,9 @@ namespace QDirStat
 	void changeEvent( QEvent * event ) override;
 
 	/**
-	 * Context menu event.  If the histogram tab is open, build and
-	 * show a context menu.
+	 * Context menu event.  Build and show a context menu.
+	 * There are currently only context menus for the histogram
+	 * and buckets table tabs.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/

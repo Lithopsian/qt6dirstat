@@ -24,6 +24,7 @@ namespace QDirStat
     typedef long double                 PercentileBoundary;
     typedef QVector<PercentileBoundary> Percentiles;
     typedef QVector<PercentileValue>    PercentileList;
+    typedef QVector<PercentileBoundary> Buckets;
     typedef QVector<FileCount>          BucketList;
 
     /**
@@ -100,7 +101,7 @@ namespace QDirStat
 	 * is used for populating the _percentiles list.
 	 **/
 	PercentileBoundary percentile( int number ) const
-	    { return quantile( 100, number ); }
+	    { return quantile( maxPercentile(), number ); }
 
 	/**
 	 * Calculates the percentiles list and sums for this set of data.  Not
@@ -136,7 +137,7 @@ namespace QDirStat
 	PercentileValue percentileValue( int index ) const
 	{
 	    validateIndex( index );
-	    return std::floor( percentileBoundary( index ) );
+	    return std::floor( _percentiles[ index ] );
 	}
 
 	/**
@@ -197,11 +198,20 @@ namespace QDirStat
 	static void validateIndexRange( int startIndex, int endIndex );
 
 	/**
-	 * Fill 'bucketCount' buckets of equal width (data value range)
-	 * from 'startPercentile' to 'endPercentile'. Each bucket
-	 * contains the number of data points (not their value!).
+	 * Fill 'bucketCount' buckets with values from 'startPercentile'
+	 * to 'endPercentile'. Each bucket contains the number of data
+	 * points (not their value!).
+	 *
+	 * The size of each bucket is determined to fit the range of
+	 * values requested and 'bucketCount'.  If 'logWidths' is true
+	 * then the width of each bucket increases by the same factor
+	 * from the previous bucket.  Otherwise the buckets all have
+	 * the same width.  Log bucket widths can be useful with inverse
+	 * exponential datasets such as common file size distributions;
+	 * they give finer resolution of the small file sizes instead of
+	 * lumping everything from 0 to several MB in the first bucket.
 	 **/
-	void fillBuckets( int bucketCount, int startPercentile, int endPercentile );
+	void fillBuckets( bool logWidths, int bucketCount, int startPercentile, int endPercentile );
 
 	/**
 	 * Calculate the best bucket count according to the Rice Rule for n
@@ -215,49 +225,40 @@ namespace QDirStat
 	/**
 	 * Return the number of buckets for the current buckets list.
 	 **/
-	int bucketCount() const { return _buckets.size(); }
+	int bucketCount() const { return _bucketCounts.size(); }
 
 	/**
-	 * Return the start value of bucket 'index'.  This is
-	 * rounded down from the (possibly) fractional bucket
-	 * boundary and then incremented by 1 so that the value
-	 * indicates the smallest file size that would be included
-	 * in the bucket (but not necessarily that actual smallest
-	 * file in the bucket).
-	 *
-	 * There are special cases where the rounded bucket value
-	 * is not incremented by 1 to avoid confusing or misleading
-	 * results:
-	 * - where the bucket starts at percentile 0, which is a
-	 * special case where P0 is equal to the size of the smallest
-	 * file in the first percentile rather than "less than" as
-	 * for every other percentile (which avoids P0 ever being
-	 * less than 0);
-	 * - where the bucket width is zero, so that the end size
-	 * is the same as the start size, which if it happens for
-	 * any bucket other than one starting at percentile 0 will
-	 * also be an empty bucket - all files with that size will
-	 * have been included in a previous bucket.
+	 * Return the start value of bucket 'index'.  This is rounded
+	 * up from the (possibly) fractional bucket start value in
+	 * the _buckets list so that it indicates the smallest integer
+	 * value that would be collected in that bucket, although not
+	 * necessarily the actual smallest value in the bucket.
 	 **/
 	PercentileValue bucketStart( int index ) const
 	{
 	    validateBucketIndex( index );
-	    const PercentileBoundary width = bucketWidth();
-	    const FileSize size = std::floor( _bucketsStart + index * width );
-	    return width == 0 || size == minValue() ? size : size + 1;
+	    return std::ceil( _buckets[ index ] );
 	}
 
 	/**
-	 * Return the end value of bucket 'index'.  This is
-	 * rounded down from the (possibly) fractional bucket
-	 * boundary so that the value idicates the largest file
-	 * size that would be included in the bucket (but not
-	 * necessarily the actual largest file in the bucket).
+	 * Return the end value of bucket 'index'.  This is rounded
+	 * up from the (possibly) fractional start value for the next
+	 * bucket and then decremented by one so that it indicates the
+	 * largest integer value that would be included in the bucket,
+	 * although not necessarily the actual largest value in the
+	 * bucket.
+	 *
+	 * In the special case of zero-width buckets (where all the
+	 * data points have the same value), all buckets have the same
+	 * start and end values.  The data points are counted in the
+	 * first bucket and the rest are all empty.  One less than the
+	 * start of the next bucket is incorrect in this case, so just
+	 * return the start value for 'index'.
 	 **/
 	PercentileValue bucketEnd( int index ) const
 	{
 	    validateBucketIndex( index );
-	    return std::floor( _bucketsStart + ( index + 1 ) * bucketWidth() );
+	    return std::max( std::ceil( _buckets[ index + 1 ] ) - 1, std::ceil( _buckets[ index ] ) );
 	}
 
 	/**
@@ -266,20 +267,21 @@ namespace QDirStat
 	FileCount bucket( int index ) const
 	{
 	    validateBucketIndex( index );
-	    return _buckets[ index ];
+	    return _bucketCounts[ index ];
 	}
 
 	/**
 	 * Return the total sum of all buckets in the list.
 	 **/
 //	FileCount bucketsTotalSum() const
-//	    { return std::accumulate( _buckets.cbegin(), _buckets.cend(), 0 ); }
+//	    { return std::accumulate( _bucketCounts.cbegin(), _bucketCounts.cend(), 0 ); }
 
 	/**
-	 * Return the maximum number of data points in a single bucket.
+	 * Return the highest number of data points currently in a
+	 * single bucket.
 	 **/
 	FileCount largestBucket() const
-	    { return *std::max_element( _buckets.begin(), _buckets.end() ); }
+	    { return *std::max_element( _bucketCounts.begin(), _bucketCounts.end() ); }
 
 
     protected:
@@ -307,27 +309,17 @@ namespace QDirStat
 	 *
 	 * Rank is defined here as 'number' / 'order' * (size() - 1) (rank is
 	 * formally defined as one larger than this but this list starts at index
-	 * 0).  This corresponds to the "C = 1" interpolation and is convenient
-	 * because it is valid and safe for the entire range of percentiles and
-	 * data points.  For example, the "C = 0" method, which may be preferred
-	 * on strictly statistical grounds, has the formula 'number' / 'order' *
-	 * (size() + 1), but this formula can only be used for percentiles in
-	 * the range 1/(size() + 1) to size()/(size() + 1) and the rank must
-	 * be explicitly clamped to 1 or size() outside those limits.  The
+	 * 0).  This corresponds to the "C = 1" or R7 interpolation and is
+	 * convenient because it is valid and safe for the entire range of
+	 * percentiles and data points.  For example, the "C = 0" method, which
+	 * may be preferred on strictly statistical grounds, has the formula
+	 * 'number' / 'order' * (size() + 1), but this formula can only be used
+	 * for percentiles in the range 1/(size() + 1) to size()/(size() + 1) and
+	 * the rank must be explicitly clamped to 1 or size() outside those limits.  The
 	 * differences between most of these interpolation methods are small and
 	 * for large data sets they are negligible.
 	 **/
 	PercentileBoundary quantile( int order, int number ) const;
-
-	/**
-	 * Returns a particular percentile boundary, for the given
-	 * 'index'.
-	 *
-	 * Note that there is no validation of 'index' or that the
-	 * percentiles list is populated.
-	 **/
-	PercentileBoundary percentileBoundary( int index ) const
-	    { return _percentiles[ index ]; }
 
 	/**
 	 * Return the difference between two percentile counts or sums.
@@ -358,8 +350,8 @@ namespace QDirStat
 	 * this function. If the buckets list is empty then it will return
 	 * 0.
 	 **/
-	PercentileBoundary bucketWidth() const
-	    { return _buckets.isEmpty() ? 0 : ( _bucketsEnd - _bucketsStart ) / _buckets.size(); }
+//	PercentileBoundary bucketWidth() const
+//	    { return _bucketCounts.isEmpty() ? 0 : ( _bucketsEnd - _bucketsStart ) / _bucketCounts.size(); }
 
 	/**
 	 * Validate that 'index' is within the allowed range for
@@ -376,9 +368,8 @@ namespace QDirStat
 	PercentileList _percentileCounts;
 	PercentileList _percentileSums;
 
-	PercentileBoundary _bucketsStart{ 0 };
-	PercentileBoundary _bucketsEnd{ 0 };
-	BucketList         _buckets;
+	Buckets            _buckets;
+	BucketList         _bucketCounts;
 
     };	// class PercentileStats
 

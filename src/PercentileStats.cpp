@@ -40,8 +40,7 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
     if ( isEmpty() )
 	return 0;
 
-    if ( order < 2 || order > maxPercentile() )
-	THROW( Exception{ QString{ "Invalid quantile order %1" }.arg( order ) } );
+    CHECK_INDEX( order, 2, maxPercentile(), "Quantile order out of range" );
 
     if ( number > order )
 	THROW( Exception{ QString{ "Invalid quantile #%1 for %2-quantile" }.arg( number ).arg( order ) } );
@@ -135,55 +134,106 @@ void PercentileStats::validateIndexRange( int startIndex, int endIndex )
 }
 
 
-void PercentileStats::fillBuckets( int bucketCount, int startPercentile, int endPercentile )
+void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPercentile, int endPercentile )
 {
     validateIndexRange( startPercentile, endPercentile );
     if ( bucketCount < 1 || bucketCount > _percentiles.size() )
 	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
 
-    // Create a new list of bucketCount zeroes, discarding any existing list
-    _buckets = BucketList( bucketCount );
+    // Create an empty list of boundaries and a list of bucketCount zeroes, discarding the old lists
+    _buckets      = Buckets{};
+    _bucketCounts = BucketList( bucketCount );
 
-    // Remember the validated start and end percentile boundaries that match this bucket list
-    _bucketsStart = percentileBoundary( startPercentile );
-    _bucketsEnd   = percentileBoundary( endPercentile   );
+    // Find the first and last values to count in the buckets
+    const PercentileBoundary bucketsStart = _percentiles[ startPercentile ];
+    const PercentileBoundary bucketsEnd   = _percentiles[ endPercentile   ];
 
-    const PercentileBoundary bucketWidth = ( _bucketsEnd - _bucketsStart ) / bucketCount;
+    // Calculate the bucket width either as a linear increment, or a factor for log widths
+    const PercentileBoundary bucketWidth = [ logWidths, bucketsStart, bucketsEnd, bucketCount ]()
+    {
+	// Return a linear increment for non-log widths
+	if ( !logWidths )
+	    return ( bucketsEnd - bucketsStart ) / bucketCount;
+
+	// Avoid taking the log of 0 and smoothly transition to logs for higher values
+	const PercentileBoundary logStart = bucketsStart > 2 ? std::log2( bucketsStart ) : bucketsStart / 2;
+	const PercentileBoundary logEnd   = bucketsEnd   > 2 ? std::log2( bucketsEnd   ) : bucketsEnd   / 2;
+	const PercentileBoundary logDiff = ( logEnd - logStart ) / bucketCount;
+#if VERBOSE_LOGGING
+        logDebug() << " logEnd: " << formatCount( logEnd )
+                   << " logStart: " << formatCount( logStart )
+                   << " logDiff: " << formatCount( logDiff )
+                   << Qt::endl;
+#endif
+	return std::exp2( logDiff );
+    }();
 
 #if VERBOSE_LOGGING
     logDebug() << "startPercentile: " << startPercentile
                << " endPercentile: " << endPercentile
-               << " startVal: " << formatCount( _bucketsStart )
-               << " endVal: " << formatCount( _bucketsEnd )
+               << " startVal: " << formatCount( bucketsStart )
+               << " endVal: " << formatCount( bucketsEnd )
                << " bucketWidth: " << formatCount( bucketWidth )
                << Qt::endl;
 #endif
 
-    // Always include files with size equal to P0 in the first percentile/bucket
+    // Special case: don't skip files with size equal to P0 for the first percentile/bucket
     auto beginIt = cbegin();
     if ( startPercentile > minPercentile() )
     {
 	// Find the first (ie. smallest) data point that we want for the first bucket
-	while ( beginIt != cend() && *beginIt <= _bucketsStart )
+	while ( beginIt != cend() && *beginIt <= bucketsStart )
 	    ++beginIt;
     }
 
-    // Fill buckets up to the last requested percentile
-    auto bucketIt = _buckets.begin();
-    PercentileBoundary bucketEnd = _bucketsStart + bucketWidth;
-    for ( auto it = beginIt; it != cend() && *it <= _bucketsEnd; ++it )
+    // Set the first bucket boundary to use in the loop
+    PercentileBoundary thisBucketStart = bucketsStart;
+
+    // Find the start of the next (ie. second) bucket to use in the loop
+    PercentileBoundary nextBucketStart = thisBucketStart;
+    const auto getNextBucketStart = [ this, logWidths, bucketWidth, &nextBucketStart ]()
     {
-	// Iterate to the next bucket when we hit the next bucket boundary, skipping empty buckets
-	while ( *it > bucketEnd )
+	// Add the current bucket start value to the list and find the start of the next
+	_buckets.append( nextBucketStart );
+	return logWidths ? nextBucketStart * bucketWidth : nextBucketStart + bucketWidth;
+    };
+    nextBucketStart = getNextBucketStart();
+
+    // A log scaling factor doesn't work on zero, unless we actually have a zero bucket increment
+    if ( logWidths && nextBucketStart == 0 && bucketWidth > 1 )
+	nextBucketStart = 1;
+
+    // Fill buckets from the start we just found, up to the last requested value
+    auto bucketIt = _bucketCounts.begin();
+    for ( auto it = beginIt; it != cend() && *it <= bucketsEnd; ++it )
+    {
+	// Loop through buckets until we reach the one for this data point, skipping empty buckets
+	while ( *it >= nextBucketStart && *it > thisBucketStart )
 	{
-	    if ( bucketIt + 1 != _buckets.end() ) // avoid rounding errors tipping us past the last bucket
+	    // Handle rounding errors which could push us past the last bucket,
+	    // and handle the special case of the last bucket end value
+	    if ( bucketIt + 1 != _bucketCounts.end() )
+	    {
+		// For most buckets, just append to the boundaries and get the start of the next bucket
 		++bucketIt;
-	    bucketEnd += bucketWidth;
+		thisBucketStart = nextBucketStart;
+		nextBucketStart = getNextBucketStart();
+	    }
+	    else
+	    {
+		// The bucket start calculated after the last bucket is actually the last file size needed,
+		// so nudge it up by one, leaving the end of the last bucket equal to the last data point.
+		++nextBucketStart;
+	    }
 	}
 
 	// Add to this bucket
 	( *bucketIt )++;
     }
+
+    // Add any empty trailing buckets to the bucket boundaries list
+    while ( _buckets.size() <= _bucketCounts.size() )
+	nextBucketStart = getNextBucketStart();
 }
 
 
