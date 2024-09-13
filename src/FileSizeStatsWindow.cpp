@@ -27,9 +27,6 @@
 #include "SignalBlocker.h"
 
 
-#define MAX_BUCKET_COUNT 100
-
-
 using namespace QDirStat;
 
 
@@ -73,6 +70,76 @@ namespace
 	}
 
 	settings.endGroup();
+    }
+
+
+    /**
+     * Populate the portion of the context menu related to the
+     * percentiles range.  This is common to both the histogram
+     * and buckets table context menus.
+     **/
+    void percentilesContextMenu( QMenu * menu, Ui::FileSizeStatsWindow * ui )
+    {
+	QMenu * startPercentile = menu->addMenu( QObject::tr( "Start percentile" ) );
+	for ( QAction * action : { ui->actionStartPlus1, ui->actionStartMinus1, ui->actionStartMin } )
+	    startPercentile->addAction( action );
+	const auto startValue = ui->startPercentileSlider->value();
+	ui->actionStartPlus1->setEnabled( startValue < PercentileStats::quartile1() - 1 );
+	ui->actionStartMinus1->setEnabled( startValue > PercentileStats::minPercentile() );
+	ui->actionStartMin->setEnabled( startValue > PercentileStats::minPercentile() );
+
+	QMenu * endPercentile = menu->addMenu( QObject::tr( "End percentile"   ) );
+	for ( QAction * action : { ui->actionEndMinus1, ui->actionEndPlus1, ui->actionEndMax } )
+	    endPercentile->addAction( action );
+	const auto endValue = ui->endPercentileSlider->value();
+	ui->actionEndMinus1->setEnabled( endValue > PercentileStats::quartile3() + 1 );
+	ui->actionEndPlus1->setEnabled( endValue < PercentileStats::maxPercentile() );
+	ui->actionEndMax->setEnabled( endValue < PercentileStats::maxPercentile() );
+
+	menu->addAction( ui->actionAllPercentiles );
+	const bool allPercentiles =
+	    startValue == PercentileStats::minPercentile() && endValue == PercentileStats::maxPercentile();
+	ui->actionAllPercentiles->setEnabled( !allPercentiles );
+	menu->addAction( ui->actionAutoPercentiles );
+    }
+
+
+    /**
+     * Populate a context menu for the histogram tab.
+     **/
+    void histogramContextMenu( QMenu * menu, Ui::FileSizeStatsWindow * ui )
+    {
+	for ( QAction * action : {  ui->actionLogWidths, ui->actionAutoScale, ui->actionLogHeights } )
+	    menu->addAction( action );
+	ui->actionLogWidths->setChecked( ui->logWidthsCheckBox->isChecked() );
+	ui->actionLogHeights->setChecked( ui->histogramView->logScale() );
+	menu->addSeparator();
+
+	percentilesContextMenu( menu, ui );
+	menu->addSeparator();
+
+	for ( QAction * action : { ui->actionNoPercentiles, ui->actionEvery20th, ui->actionEvery10th,
+				   ui->actionEvery5th, ui->actionEvery2nd, ui->actionEveryPercentile } )
+	    menu->addAction( action );
+
+	// Enable all the actions again, they are safe to be triggered at any time
+	for ( QAction * action : { ui->actionStartPlus1, ui->actionStartMinus1, ui->actionStartMin,
+				   ui->actionEndPlus1,   ui->actionEndMinus1,   ui->actionEndMax,
+				   ui->actionAllPercentiles } )
+	    action->setEnabled( true );
+    }
+
+
+    /**
+     * Populate a context menu for the histogram tab.
+     **/
+    void bucketsContextMenu( QMenu * menu, Ui::FileSizeStatsWindow * ui )
+    {
+	menu->addAction( ui->actionLogWidths );
+	ui->actionLogWidths->setChecked( ui->logWidthsCheckBox->isChecked() );
+	menu->addSeparator();
+
+	percentilesContextMenu( menu, ui );
     }
 
 } // namespace
@@ -174,8 +241,11 @@ void FileSizeStatsWindow::connectActions()
     connect( _ui->percentileFilterCheckBox, &QCheckBox::toggled,
              this,                          &FileSizeStatsWindow::setPercentileTable );
 
-    connect( _ui->actionLogScale,           &QAction::triggered,
-             this,                          &FileSizeStatsWindow::logScale );
+    connect( _ui->logWidthsCheckBox,        &QCheckBox::toggled,
+             this,                          &FileSizeStatsWindow::setPercentileRange );
+
+    connect( _ui->actionLogHeights,         &QAction::triggered,
+             this,                          &FileSizeStatsWindow::logHeights );
 
     connect( _ui->actionAutoScale,          &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoLogScale );
@@ -270,7 +340,8 @@ void FileSizeStatsWindow::setPercentileTable()
 	if ( nominalCount >= 1 ) return 1;
 	return 2;
     }();
-    _ui->nominalCount->setText( formatCount( nominalCount, precision ) );
+    const QString text = tr( "Nominal files per percentile: " ) % formatCount( nominalCount, precision );
+    _ui->nominalCountLabel->setText( text );
 
     percentileTableModel( _ui->percentileTable )->resetModel( !_ui->percentileFilterCheckBox->isChecked() );
 }
@@ -278,15 +349,20 @@ void FileSizeStatsWindow::setPercentileTable()
 
 void FileSizeStatsWindow::setPercentileRange()
 {
-    const int startPercentile = _ui->startPercentileSlider->value();
-    const int endPercentile   = _ui->endPercentileSlider->value();
-    const int percentileCount = endPercentile - startPercentile;
-    const FileCount dataCount = qRound( _stats->size() * percentileCount / 100.0 );
-    const int bucketCount     = _stats->bestBucketCount( dataCount, MAX_BUCKET_COUNT );
+    const int       startPercentile = _ui->startPercentileSlider->value();
+    const int       endPercentile   = _ui->endPercentileSlider->value();
+    const FileCount dataCount       = _stats->percentileRangeCount( startPercentile, endPercentile );
+    const int       bucketCount     = _stats->bestBucketCount( dataCount, _stats->maxPercentile() );
+    const bool      logWidths       = _ui->logWidthsCheckBox->isChecked();
+
+    _ui->bucketsLabel->setText( tr( "%1 files from percentile %2 to percentile %3" )
+                                .arg( formatCount( dataCount ) )
+                                .arg( startPercentile )
+                                .arg( endPercentile ) );
 
     BucketsTableModel * model = bucketsTableModel( _ui->bucketsTable );
     model->beginReset();
-    _stats->fillBuckets( bucketCount, startPercentile, endPercentile );
+    _stats->fillBuckets( logWidths, bucketCount, startPercentile, endPercentile );
     model->endReset();
 
     _ui->histogramView->setPercentileRange( startPercentile, endPercentile );
@@ -342,7 +418,7 @@ void FileSizeStatsWindow::autoPercentileRange()
 }
 
 
-void FileSizeStatsWindow::logScale()
+void FileSizeStatsWindow::logHeights()
 {
     _ui->histogramView->disableAutoLogScale();
     _ui->histogramView->toggleLogScale();
@@ -398,42 +474,18 @@ void FileSizeStatsWindow::changeEvent( QEvent * event )
 void FileSizeStatsWindow::contextMenuEvent( QContextMenuEvent * event )
 {
     // This context menu would be confusing anywhere except on the histogram tab
-    if ( _ui->tabWidget->currentWidget() != _ui->histogramPage )
+    const QWidget * currentWidget = _ui->tabWidget->currentWidget();
+    if ( currentWidget != _ui->histogramPage && currentWidget != _ui->bucketsPage )
 	return;
 
     // Build a new menu from scratch every time
     QMenu * menu = new QMenu{ this };
-    menu->addAction( _ui->actionAutoScale );
-    menu->addAction( _ui->actionLogScale );
-    _ui->actionLogScale->setChecked( _ui->histogramView->logScale() );
-    menu->addSeparator();
 
-    QMenu * startPercentile = menu->addMenu( tr( "Start percentile" ) );
-    for ( QAction * action : { _ui->actionStartPlus1, _ui->actionStartMinus1, _ui->actionStartMin } )
-	startPercentile->addAction( action );
-    const auto startValue = _ui->startPercentileSlider->value();
-    _ui->actionStartPlus1->setEnabled( startValue < PercentileStats::quartile1() - 1 );
-    _ui->actionStartMinus1->setEnabled( startValue > PercentileStats::minPercentile() );
-    _ui->actionStartMin->setEnabled( startValue > PercentileStats::minPercentile() );
-
-    QMenu * endPercentile = menu->addMenu( tr( "End percentile"   ) );
-    for ( QAction * action : { _ui->actionEndMinus1, _ui->actionEndPlus1, _ui->actionEndMax } )
-	endPercentile->addAction( action );
-    const auto endValue = _ui->endPercentileSlider->value();
-    _ui->actionEndMinus1->setEnabled( endValue > PercentileStats::quartile3() + 1 );
-    _ui->actionEndPlus1->setEnabled( endValue < PercentileStats::maxPercentile() );
-    _ui->actionEndMax->setEnabled( endValue < PercentileStats::maxPercentile() );
-
-    menu->addAction( _ui->actionAllPercentiles );
-    const bool allPercentiles =
-	startValue == PercentileStats::minPercentile() && endValue == PercentileStats::maxPercentile();
-    _ui->actionAllPercentiles->setEnabled( !allPercentiles );
-    menu->addAction( _ui->actionAutoPercentiles );
-    menu->addSeparator();
-
-    for ( QAction * action : { _ui->actionNoPercentiles, _ui->actionEvery20th, _ui->actionEvery10th,
-                               _ui->actionEvery5th, _ui->actionEvery2nd, _ui->actionEveryPercentile } )
-	menu->addAction( action );
+    // Different context menus on different pages
+    if ( currentWidget == _ui->histogramPage )
+	histogramContextMenu( menu, _ui.get() );
+    else if ( currentWidget == _ui->bucketsPage )
+	bucketsContextMenu( menu, _ui.get() );
 
     menu->exec( event->globalPos() );
 

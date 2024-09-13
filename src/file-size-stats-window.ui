@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>372</height>
+    <width>556</width>
+    <height>382</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,32 +196,13 @@
         <layout class="QHBoxLayout" name="topComboBoxLayout">
          <item>
           <widget class="QLabel" name="nominalCountLabel">
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Nominal files per percentile:</string>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
           </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="nominalCount"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item alignment="Qt::AlignRight">
           <widget class="QCheckBox" name="percentileFilterCheckBox">
@@ -245,7 +226,28 @@
       <attribute name="title">
        <string>&amp;Buckets</string>
       </attribute>
-      <layout class="QVBoxLayout" name="bucketsPageLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="bucketsLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="logWidthsCheckBox">
+           <property name="text">
+            <string>Use log bucket widths</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QTableView" name="bucketsTable">
          <attribute name="horizontalHeaderHighlightSections">
@@ -273,8 +275,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>487</width>
-            <height>532</height>
+            <width>276</width>
+            <height>658</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -472,21 +474,21 @@
   </action>
   <action name="actionAutoScale">
    <property name="text">
-    <string>Auto &amp;scale</string>
+    <string>Auto height &amp;scale</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionLogScale">
+  <action name="actionLogHeights">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Log scale</string>
+    <string>Log &amp;height scale</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionAutoPercentiles">
@@ -575,6 +577,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionLogWidths">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Log bucket &amp;widths</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
    </property>
   </action>
  </widget>
@@ -815,6 +828,22 @@
     <hint type="destinationlabel">
      <x>269</x>
      <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLogWidths</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>logWidthsCheckBox</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>442</x>
+     <y>76</y>
     </hint>
    </hints>
   </connection>
