@@ -71,10 +71,10 @@ void PercentileStats::calculatePercentiles()
 	_percentiles.append( percentile( i ) );
 
     // Initialise the first list entries to 0
-    _percentileCounts = PercentileList( 1 );
-    _percentileSums   = PercentileList( 1 );
+    _percentileCounts = PercentileCountList( 1 );
+    _percentileSums   = PercentileValueList( 1 );
 
-    FileCount       count = 0;
+    PercentileCount count = 0;
     PercentileValue sum   = 0;
 
     // Iterate the percentiles as we go along, starting at percentile 1
@@ -142,7 +142,7 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 
     // Create an empty list of boundaries and a list of bucketCount zeroes, discarding the old lists
     _buckets      = Buckets{};
-    _bucketCounts = BucketList( bucketCount );
+    _bucketCounts = PercentileCountList( bucketCount );
 
     // Find the first and last values to count in the buckets
     const PercentileBoundary bucketsStart = _percentiles[ startPercentile ];
@@ -237,7 +237,7 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 }
 
 
-int PercentileStats::bestBucketCount( FileCount n, int max )
+int PercentileStats::bestBucketCount( PercentileCount n, int max )
 {
     // Use the Rice Rule which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
