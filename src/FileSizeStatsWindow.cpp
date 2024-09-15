@@ -112,21 +112,15 @@ namespace
 	for ( QAction * action : {  ui->actionLogWidths, ui->actionAutoScale, ui->actionLogHeights } )
 	    menu->addAction( action );
 	ui->actionLogWidths->setChecked( ui->logWidthsCheckBox->isChecked() );
-	ui->actionLogHeights->setChecked( ui->histogramView->logScale() );
+	ui->actionLogHeights->setChecked( ui->histogramView->logHeights() );
 	menu->addSeparator();
 
 	percentilesContextMenu( menu, ui );
 	menu->addSeparator();
 
 	for ( QAction * action : { ui->actionNoPercentiles, ui->actionEvery20th, ui->actionEvery10th,
-				   ui->actionEvery5th, ui->actionEvery2nd, ui->actionEveryPercentile } )
+	                           ui->actionEvery5th, ui->actionEvery2nd, ui->actionEveryPercentile } )
 	    menu->addAction( action );
-
-	// Enable all the actions again, they are safe to be triggered at any time
-	for ( QAction * action : { ui->actionStartPlus1, ui->actionStartMinus1, ui->actionStartMin,
-				   ui->actionEndPlus1,   ui->actionEndMinus1,   ui->actionEndMax,
-				   ui->actionAllPercentiles } )
-	    action->setEnabled( true );
     }
 
 
@@ -193,14 +187,10 @@ void FileSizeStatsWindow::initWidgets()
     _ui->optionsPanel->hide();
 
     // Set these here so they can be based on the PercentileStats constants
-    _ui->startPercentileSpinBox->setMinimum( PercentileStats::minPercentile() );
-    _ui->startPercentileSpinBox->setMaximum( PercentileStats::quartile1() - 1 );
-    _ui->startPercentileSlider->setMinimum( PercentileStats::minPercentile() );
-    _ui->startPercentileSlider->setMaximum( PercentileStats::quartile1() - 1 );
-    _ui->endPercentileSpinBox->setMinimum( PercentileStats::quartile3() + 1 );
-    _ui->endPercentileSpinBox->setMaximum( PercentileStats::maxPercentile() );
-    _ui->endPercentileSlider->setMinimum( PercentileStats::quartile3() + 1 );
-    _ui->endPercentileSlider->setMaximum( PercentileStats::maxPercentile() );
+    _ui->startPercentileSpinBox->setRange( PercentileStats::minPercentile(), PercentileStats::quartile1() - 1 );
+    _ui->startPercentileSlider->setRange( PercentileStats::minPercentile(), PercentileStats::quartile1() - 1 );
+    _ui->endPercentileSpinBox->setRange( PercentileStats::quartile3() + 1, PercentileStats::maxPercentile() );
+    _ui->endPercentileSlider->setRange( PercentileStats::quartile3() + 1, PercentileStats::maxPercentile() );
     _ui->actionStartMin->setText( _ui->actionStartMin->text().arg( PercentileStats::minPercentile() ) );
     _ui->actionEndMax->setText( _ui->actionEndMax->text().arg( PercentileStats::maxPercentile() ) );
 
@@ -355,7 +345,7 @@ void FileSizeStatsWindow::setPercentileRange()
     const int       bucketCount     = _stats->bestBucketCount( dataCount, _stats->maxPercentile() );
     const bool      logWidths       = _ui->logWidthsCheckBox->isChecked();
 
-    _ui->bucketsLabel->setText( tr( "%1 files from percentile %2 to percentile %3" )
+    _ui->bucketsLabel->setText( tr( "%1 files between percentiles %2 and %3" )
                                 .arg( formatCount( dataCount ) )
                                 .arg( startPercentile )
                                 .arg( endPercentile ) );
@@ -392,13 +382,13 @@ void FileSizeStatsWindow::autoPercentileRange()
     const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
 
     // Find the highest percentile that has a value less than minVal
-    PercentileValue startPercentile = _stats->minPercentile();
+    int startPercentile = _stats->minPercentile();
     while ( _stats->percentileValue( startPercentile ) < minVal )
 	++startPercentile;
     _ui->startPercentileSpinBox->setValue( startPercentile );
 
     // Find the lowest percentile that has a value greater than maxVal
-    PercentileValue endPercentile = _stats->maxPercentile();
+    int endPercentile = _stats->maxPercentile();
     while ( _stats->percentileValue( endPercentile ) > maxVal )
 	--endPercentile;
     _ui->endPercentileSpinBox->setValue( endPercentile );
@@ -420,14 +410,14 @@ void FileSizeStatsWindow::autoPercentileRange()
 
 void FileSizeStatsWindow::logHeights()
 {
-    _ui->histogramView->disableAutoLogScale();
-    _ui->histogramView->toggleLogScale();
+    _ui->histogramView->disableAutoLogHeights();
+    _ui->histogramView->toggleLogHeights();
 }
 
 
 void FileSizeStatsWindow::autoLogScale()
 {
-    _ui->histogramView->enableAutoLogScale();
+    _ui->histogramView->enableAutoLogHeights();
 }
 
 
@@ -473,15 +463,11 @@ void FileSizeStatsWindow::changeEvent( QEvent * event )
 
 void FileSizeStatsWindow::contextMenuEvent( QContextMenuEvent * event )
 {
-    // This context menu would be confusing anywhere except on the histogram tab
-    const QWidget * currentWidget = _ui->tabWidget->currentWidget();
-    if ( currentWidget != _ui->histogramPage && currentWidget != _ui->bucketsPage )
-	return;
-
     // Build a new menu from scratch every time
     QMenu * menu = new QMenu{ this };
 
-    // Different context menus on different pages
+    // Different context menus, or none, on different tabs
+    const QWidget * currentWidget = _ui->tabWidget->currentWidget();
     if ( currentWidget == _ui->histogramPage )
 	histogramContextMenu( menu, _ui.get() );
     else if ( currentWidget == _ui->bucketsPage )

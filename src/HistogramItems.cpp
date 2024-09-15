@@ -31,7 +31,7 @@ HistogramBar::HistogramBar( const FileSizeStats * stats,
     setAcceptHoverEvents( true );
     setZValue( HistogramView::BarLayer );
 
-    const int numFiles = stats->bucket( bucketIndex );
+    const int numFiles = stats->bucketCount( bucketIndex );
     const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4...%5" )
 	.arg( bucketIndex + 1 )
 	.arg( numFiles )

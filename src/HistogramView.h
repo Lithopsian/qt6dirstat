@@ -147,14 +147,14 @@ namespace QDirStat
 	 * Set whether to automatically determine the type of y-axis
 	 * scaling.
 	 **/
-	void enableAutoLogScale() { _autoLogScale = true; build(); }
-	void disableAutoLogScale() { _autoLogScale = false; }
+	void enableAutoLogHeights() { _autoLogHeights = true; build(); }
+	void disableAutoLogHeights() { _autoLogHeights = false; }
 
 	/**
 	 * Return whether the y-axis is currently showing as a log scale.
 	 **/
-	bool logScale() const { return _useLogScale; }
-	void toggleLogScale() { _useLogScale = !_useLogScale; build(); }
+	bool logHeights() const { return _logHeights; }
+	void toggleLogHeights() { _logHeights = !_logHeights; build(); }
 
 
     protected:
@@ -170,7 +170,7 @@ namespace QDirStat
 	 * Build the histogram, probably based on a new set of data.
 	 * The preferred y-axis scaling will be recalculated.
 	 **/
-	void build() { autoLogScale(); rebuild(); }
+	void build() { autoLogHeights(); rebuild(); }
 
 	/**
 	 * Rebuild the histogram based on the current data.  The geometry
@@ -180,10 +180,10 @@ namespace QDirStat
 
 	/**
 	 * Automatically determine if a logarithmic height scale should be
-	 * used. Set the internal _useLogScale variable accordingly and
+	 * used. Set the internal _logHeightScale variable accordingly and
 	 * return it.
 	 **/
-	void autoLogScale();
+	void autoLogHeights();
 
 	/**
 	 * Calculate the content geometry to try and fit the viewport.
@@ -203,8 +203,7 @@ namespace QDirStat
 	 **/
 	inline void addBackground( QGraphicsScene * scene );
 	inline void addAxes( QGraphicsScene * scene );
-	inline void addXAxisLabel( QGraphicsScene * scene );
-	inline void addYAxisLabel( QGraphicsScene * scene );
+	inline void addAxisLabels( QGraphicsScene * scene );
 	inline void addXStartEndLabels( QGraphicsScene * scene );
 	inline void addYStartEndLabels( QGraphicsScene * scene );
 	inline void addQuartileText( QGraphicsScene * scene );
@@ -345,8 +344,8 @@ namespace QDirStat
 	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
-	bool _useLogScale;
-	bool _autoLogScale{ true }; // start with the log scale determined automatically
+	bool _logHeights;
+	bool _autoLogHeights{ true }; // start with the log scale determined automatically
 	int  _percentileStep{ 0 }; // no markers initially
 
 	// Geometry

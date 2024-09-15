@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <cmath> // log2()
-
 #include <QResizeEvent>
 #include <QTextDocument>
 #include <QTimer>
@@ -44,6 +42,16 @@ namespace
     QString pText( int n )
     {
 	return QObject::tr( "P<span style='font-size: large; vertical-align: sub;'>%1</span>" ).arg( n );
+    }
+
+
+    /**
+     * Return the base-2 logarithm of 'value' if 'logWidths' is
+     * true.  Otherwise just return 'value'.
+     **/
+    qreal log2( bool logWidths, qint64 value )
+    {
+	return logWidths ? PercentileStats::log2( value ) : value;
     }
 
 
@@ -122,7 +130,7 @@ void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
     _endPercentile   = endPercentile;
 
     if ( oldNeedOverflowPanel != needOverflowPanel() )
-        setGeometryDirty();
+	setGeometryDirty();
 
     build();
 
@@ -137,28 +145,27 @@ void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
 }
 
 
-void HistogramView::autoLogScale()
+void HistogramView::autoLogHeights()
 {
-    if ( !_autoLogScale )
+    if ( !_autoLogHeights )
 	return;
 
-    _useLogScale = false;
+    _logHeights = false;
 
     // Need enough buckets for clearly distinct reference values and largest buckets
-    if ( _stats->bucketCount() > 3 )
+    if ( _stats->bucketsCount() > 3 )
     {
-	// We compare the largest bucket with the P85 percentile of the buckets,
-	// but make sure we're not comparing with an empty bucket, which would always succeed
-	const FileCount largestBucket = _stats->largestBucket();
-	const int refValue = qMax( _stats->bucket( qRound( _stats->bucketCount() * 85.0 / 100.0 ) ), 1 );
+	// We compare the largest bucket with the P85 percentile of the buckets
+	const FileCount refValue = _stats->bucketCount( qRound( _stats->bucketsCount() * 85.0 / 100.0 ) );
 
-	// More than 20x the reference value needs a log scale
-	_useLogScale = largestBucket > refValue * 20;
+	// More than 20x the reference value (or at least 1) needs a log scale
+	const FileCount highestBucketCount = _stats->highestBucketCount();
+	_logHeights = highestBucketCount > qMax( refValue, 1 ) * 20;
 
 #if VERBOSE_HISTOGRAM
-	logInfo() << "Largest bucket: " << largestBucket
+	logInfo() << "Largest bucket: " << highestBucketCount
 	          << " bucket P85: " << refValue
-	          << "	 -> use log height scale: " << _useLogScale
+	          << "	 -> use log height scale: " << _logHeights
 	          << Qt::endl;
 #endif
     }
@@ -246,8 +253,7 @@ void HistogramView::rebuild()
 
     addBackground( newScene );
     addAxes( newScene );
-    addXAxisLabel( newScene );
-    addYAxisLabel( newScene );
+    addAxisLabels( newScene );
     addXStartEndLabels( newScene );
     addYStartEndLabels( newScene );
     addQuartileText( newScene );
@@ -275,39 +281,45 @@ void HistogramView::addAxes( QGraphicsScene * scene )
 }
 
 
-void HistogramView::addXAxisLabel( QGraphicsScene * scene )
+void HistogramView::addAxisLabels( QGraphicsScene * scene )
 {
-    QGraphicsTextItem * item = createBoldItem( scene, tr( "File Size  -->" ) );
-    const QRectF rect = item->boundingRect();
-    item->setPos( ( _size.width() - rect.width() ) / 2, bottomBorder() - rect.height() );
-}
+    const auto labelItem = [ scene ]( bool logScale, const QString & text )
+    {
+	const QString labelText = logScale ? "log<sub>2</sub>(%1)  -->" : "%1  -->";
+	return createBoldItem( scene, labelText.arg( text ) );
+    };
 
+    QGraphicsTextItem * xItem = labelItem( _stats->logBucketWidths(), tr( "file size" ) );
+    const QRectF xRect = xItem->boundingRect();
+    xItem->setPos( ( _size.width() - xRect.width() ) / 2, ( bottomBorder() - xRect.height() ) / 2 );
 
-void HistogramView::addYAxisLabel( QGraphicsScene * scene )
-{
-    const QString text = _useLogScale ? "log<sub>2</sub>(n)   -->" : "n   -->";
-    QGraphicsTextItem * item = createBoldItem( scene, text );
-
-    const QRectF rect = item->boundingRect();
-    item->setRotation( 270 );
-    item->setPos( ( rect.height() + leftBorder() ) / -2, ( rect.width() - _size.height() ) / 2 );
+    QGraphicsTextItem * yItem = labelItem( _logHeights, "n" );
+    const QRectF yRect = yItem->boundingRect();
+    yItem->setRotation( 270 );
+    yItem->setPos( ( yRect.height() + leftBorder() ) / -2, ( yRect.width() - _size.height() ) / 2 );
 }
 
 
 void HistogramView::addXStartEndLabels( QGraphicsScene * scene )
 {
+    const auto addLabel =
+	[ this, scene ]( int x, const QString & prefix, int labelPercentile, Qt::Alignment alignment )
+    {
+	const QString label = prefix % "<br/>"_L1 % formatSize( percentile( labelPercentile ) );
+	QGraphicsTextItem * item = createTextItem( scene, label );
+	const QRectF rect = item->boundingRect();
+	item->setTextWidth( rect.width() );
+	item->document()->setDefaultTextOption( QTextOption{ alignment } );
+	if ( alignment == Qt::AlignRight )
+	    x -= rect.width();
+	item->setPos( x, ( bottomBorder() - rect.height() ) / 2 );
+    };
+
     const QString min = _startPercentile == _stats->minPercentile() ? tr( "Min" ) : pText( _startPercentile );
-    const QString startLabel = min % "<br/>"_L1 % formatSize( percentile( _startPercentile ) );
-    QGraphicsTextItem * startItem = createTextItem( scene, startLabel );
-    startItem->setPos( 0, bottomBorder() - startItem->boundingRect().height() );
+    addLabel( -axisExtraLength() * 2, min, _startPercentile, Qt::AlignLeft );
 
     const QString max = _endPercentile == _stats->maxPercentile() ? tr( "Max" ) : pText( _endPercentile );
-    const QString endLabel = max % "<br/>"_L1 % formatSize( percentile( _endPercentile ) );
-    QGraphicsTextItem * endItem = createTextItem( scene, endLabel );
-    const QRectF endRect = endItem->boundingRect();
-    endItem->setTextWidth( endRect.width() );
-    endItem->document()->setDefaultTextOption( QTextOption{ Qt::AlignRight } );
-    endItem->setPos( _size.width() - endRect.width(), bottomBorder() - endRect.height() );
+    addLabel( _size.width() + axisExtraLength() * 2, max, _endPercentile, Qt::AlignRight );
 }
 
 
@@ -318,11 +330,11 @@ void HistogramView::addYStartEndLabels( QGraphicsScene * scene )
 	QGraphicsTextItem * item = createTextItem( scene, text );
 	const QRectF rect = item->boundingRect();
 	item->setRotation( 270 );
-	item->setPos( ( leftBorder() + rect.height() ) / -2, y + rect.width() / 2 );
+	item->setPos( ( leftBorder() + rect.height() ) / -2, rect.width() / 2 - y );
     };
 
     addLabel( 0, "0" );
-    addLabel( -_size.height(), QString{ "%L1" }.arg( _stats->largestBucket() ) );
+    addLabel( _size.height(), QString{ "%L1" }.arg( _stats->highestBucketCount() ) );
 }
 
 
@@ -367,23 +379,15 @@ void HistogramView::addQuartileText( QGraphicsScene * scene )
 
 void HistogramView::addBars( QGraphicsScene * scene )
 {
-    const auto logHeight = [ this ]( FileCount value )
+    const qreal barWidth = _size.width() / _stats->bucketsCount();
+    const qreal maxVal   = log2( _logHeights, _stats->highestBucketCount() );
+    const qreal scaling  = maxVal == 0 ? 0 : _size.height() / maxVal;
+
+    for ( int i=0; i < _stats->bucketsCount(); ++i )
     {
-	if ( !_useLogScale )
-	    return static_cast<double>( value );
+	// logDebug() << "Adding bar #" << i << " with value " << _stats->bucketCount( i ) << Qt::endl;
 
-	return value > 1 ? std::log2( value ) : value / 2.0;
-    };
-
-    const qreal barWidth = _size.width() / _stats->bucketCount();
-    const double maxVal = logHeight( _stats->largestBucket() );
-    const double scaling = maxVal == 0 ? 0 : _size.height() / maxVal;
-
-    for ( int i=0; i < _stats->bucketCount(); ++i )
-    {
-	// logDebug() << "Adding bar #" << i << " with value " << _stats->bucket( i ) << Qt::endl;
-
-	const qreal fillHeight = scaling * logHeight( _stats->bucket( i ) );
+	const qreal fillHeight = scaling * log2( _logHeights, _stats->bucketCount( i ) );
 	const QRectF rect{ i * barWidth, 0, barWidth, -_size.height() };
 	scene->addItem( new HistogramBar{ _stats, i, rect, fillHeight, barPen(), barBrush() } );
     }
@@ -395,25 +399,29 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
     if ( percentile( _endPercentile ) - percentile( _startPercentile ) < 1 )
 	return;
 
-    const FileSize axisStartVal = percentile( _startPercentile );
-    const FileSize axisEndVal   = percentile( _endPercentile   );
-    const FileSize axisRange    = axisEndVal - axisStartVal;
-    const qreal    scaling      = _size.width() / axisRange;
-    const qreal    y2           = -_size.height() - markerExtraHeight();
+    // Find the x-axis scaling, to be applied either to the marker value or log2 of it
+    const bool  logWidths    = _stats->logBucketWidths();
+    const qreal axisStartVal = log2( logWidths, percentile( _startPercentile ) );
+    const qreal axisEndVal   = log2( logWidths, percentile( _endPercentile   ) );
+    const qreal axisRange    = axisEndVal - axisStartVal;
+    const qreal scaling      = _size.width() / axisRange;
+
+    // The top point of all the markers marker is the same
+    const qreal y2 = -_size.height() - markerExtraHeight();
 
     /**
      * Add a vertical line, drawn with 'pen' the full height of the
      * histogram plus a bit more at either end.  A second, wider,
      * transparent, line is then added with a tooltip.
      **/
-    const auto addMarker = [ this, scene, axisStartVal, scaling, y2 ]
+    const auto addMarker = [ this, scene, logWidths, axisStartVal, scaling, y2 ]
 	( int index, const QString & name, const QPen & pen, GraphicsItemLayer layer )
     {
 	const FileSize xValue = percentile( index );
-	const qreal    x      = scaling * ( xValue - axisStartVal );
+	const qreal    xPos   = scaling * ( log2( logWidths, xValue ) - axisStartVal );
 
 	// Visible line as requested
-	QLineF line{ x, markerExtraHeight(), x, y2 };
+	QLineF line{ xPos, markerExtraHeight(), xPos, y2 };
 	QGraphicsLineItem * visibleLine = scene->addLine( line, pen );
 	visibleLine->setZValue( layer );
 
@@ -477,7 +485,6 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 	return;
 
     // Create the panel area
-//    const qreal panelWidth = overflowWidth();
     QPointF nextPos{ _size.width() + rightBorder() + overflowGap(), -topBorder() - _size.height() };
     const QRectF rect{ nextPos.x(), nextPos.y(), panelWidth, fullHeight() };
     createPanel( scene, rect );
@@ -623,7 +630,13 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 
 bool HistogramView::needOverflowPanel() const
 {
-    return _startPercentile > _stats->minPercentile() || _endPercentile < _stats->maxPercentile();
+    if ( _startPercentile > PercentileStats::minPercentile() )
+	return true;
+
+    if ( _endPercentile < PercentileStats::maxPercentile() )
+	return true;
+
+    return false;
 }
 
 

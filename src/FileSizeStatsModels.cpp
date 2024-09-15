@@ -39,7 +39,7 @@ namespace
 
 int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 {
-    return parent.isValid() || !_stats ? 0 : _stats->bucketCount();
+    return parent.isValid() || !_stats ? 0 : _stats->bucketsCount();
 }
 
 
@@ -56,7 +56,7 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
             {
                 case StartCol:  return formatSize( _stats->bucketStart( index.row() ) );
                 case EndCol:    return formatSize( _stats->bucketEnd( index.row() ) );
-                case ValueCol:  return formatCount( _stats->bucket( index.row() ) );
+                case ValueCol:  return formatCount( _stats->bucketCount( index.row() ) );
                 default:        return QVariant{};
             }
         }
@@ -302,7 +302,7 @@ void PercentileTableHeader::paintSection( QPainter * painter, const QRect & rect
     text.setTextWidth( qMax( rectWidth, text.size().width() ) );
 
     // Explicitly place the text to be vertically centred
-    const int yCenter = ( rect.height() - text.size().height() ) / 2;
+    const int yCenter = qRound( ( rect.height() - text.size().height() ) / 2 );
     painter->drawStaticText( rect.left() + horizontalMargin(), rect.top() + yCenter, text );
 }
 
@@ -322,11 +322,16 @@ QString PercentileTableHeader::sectionText( int logicalIndex ) const
         {
             switch ( logicalIndex )
             {
-                case PercentileTableModel::ValueCol:    return tr( "Value" );
-                case PercentileTableModel::CountCol:    return tr( "Files<sub> P(n-1)...P(n)</sub>" );
-                case PercentileTableModel::SumCol:      return tr( "Sum<sub> P(n-1)...P(n)</sub>" );
-                case PercentileTableModel::CumCountCol: return tr( "Files<sub> P(0)...P(n)</sub>" );
-                case PercentileTableModel::CumSumCol:   return tr( "Sum<sub> P(0)...P(n)</sub>" );
+                case PercentileTableModel::ValueCol:
+                    return tr( "Value" );
+                case PercentileTableModel::CountCol:
+                    return tr( "Files<sub> P(n-1)...P(n)</sub>" );
+                case PercentileTableModel::SumCol:
+                    return tr( "Sum<sub> P(n-1)...P(n)</sub>" );
+                case PercentileTableModel::CumCountCol:
+                    return tr( "Files<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
+                case PercentileTableModel::CumSumCol:
+                    return tr( "Sum<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
             }
 
             return QString{};

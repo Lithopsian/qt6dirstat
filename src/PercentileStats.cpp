@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QtMath> // qCeil
-
 #include "PercentileStats.h"
 #include "Exception.h"
 #include "FormatUtil.h" // only needed with VERBOSE_LOGGING
@@ -36,7 +34,7 @@ void PercentileStats::sort()
 
 PercentileBoundary PercentileStats::quantile( int order, int number ) const
 {
-    // Try to validate everything so the calculation will be valid
+    // Validate everything so the calculation will be safe
     if ( isEmpty() )
 	return 0;
 
@@ -117,7 +115,7 @@ void PercentileStats::calculatePercentiles()
 }
 
 
-void PercentileStats::validateIndex( int index )
+void PercentileStats::validatePercentileIndex( int index )
 {
     CHECK_INDEX( index, minPercentile(), maxPercentile(), "Percentile index out of range" );
 }
@@ -126,8 +124,8 @@ void PercentileStats::validateIndex( int index )
 void PercentileStats::validateIndexRange( int startIndex, int endIndex )
 {
     // Validate as much as possible, although the percentiles list still might not match the stats
-    validateIndex( startIndex );
-    validateIndex( endIndex   );
+    validatePercentileIndex( startIndex );
+    validatePercentileIndex( endIndex   );
 
     if ( startIndex >= endIndex )
 	THROW( Exception{ "startPercentile must be less than endPercentile" } );
@@ -137,16 +135,19 @@ void PercentileStats::validateIndexRange( int startIndex, int endIndex )
 void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPercentile, int endPercentile )
 {
     validateIndexRange( startPercentile, endPercentile );
-    if ( bucketCount < 1 || bucketCount > _percentiles.size() )
-	THROW( Exception{ QString{ "Invalid bucket count %1" }.arg( bucketCount ) } );
-
-    // Create an empty list of boundaries and a list of bucketCount zeroes, discarding the old lists
-    _buckets      = Buckets{};
-    _bucketCounts = PercentileCountList( bucketCount );
 
     // Find the first and last values to count in the buckets
     const PercentileBoundary bucketsStart = _percentiles[ startPercentile ];
     const PercentileBoundary bucketsEnd   = _percentiles[ endPercentile   ];
+
+    // Force the bucket count to 1 for empty sets, zero-width buckets, or empty percentiless list
+    if ( bucketsEnd == bucketsStart || bucketCount == 0 || bucketCount > _percentiles.size() )
+	bucketCount = 1;
+
+    // Create an empty list of boundaries and a list of bucketCount zeroes, discarding the old lists
+    _logBucketWidths = logWidths;
+    _buckets         = Buckets{};
+    _bucketCounts    = PercentileCountList( bucketCount );
 
     // Calculate the bucket width either as a linear increment, or a factor for log widths
     const PercentileBoundary bucketWidth = [ logWidths, bucketsStart, bucketsEnd, bucketCount ]()
@@ -187,10 +188,10 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
     }
 
     // Set the first bucket boundary to use in the loop
-    PercentileBoundary thisBucketStart = bucketsStart;
+//    PercentileBoundary thisBucketStart = bucketsStart;
 
     // Find the start of the next (ie. second) bucket to use in the loop
-    PercentileBoundary nextBucketStart = thisBucketStart;
+    PercentileBoundary nextBucketStart = bucketsStart;
     const auto getNextBucketStart = [ this, logWidths, bucketWidth, &nextBucketStart ]()
     {
 	// Add the current bucket start value to the list and find the start of the next
@@ -208,7 +209,7 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
     for ( auto it = beginIt; it != cend() && *it <= bucketsEnd; ++it )
     {
 	// Loop through buckets until we reach the one for this data point, skipping empty buckets
-	while ( *it >= nextBucketStart && *it > thisBucketStart )
+	while ( *it >= nextBucketStart )
 	{
 	    // Handle rounding errors which could push us past the last bucket,
 	    // and handle the special case of the last bucket end value
@@ -216,7 +217,7 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	    {
 		// For most buckets, just append to the boundaries and get the start of the next bucket
 		++bucketIt;
-		thisBucketStart = nextBucketStart;
+//		thisBucketStart = nextBucketStart;
 		nextBucketStart = getNextBucketStart();
 	    }
 	    else
@@ -236,15 +237,14 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	nextBucketStart = getNextBucketStart();
 }
 
-
+/*
 int PercentileStats::bestBucketCount( PercentileCount n, int max )
 {
     // Use the Rice Rule which gives reasonable values for the numbers
     // we are likely to encounter in the context of filesystems
-    const int bucketCount = qCeil( 2 * std::cbrt( n ) );
+    const int bucketCount = std::ceil( 2 * std::cbrt( n ) );
 
-    // Enforce an upper limit so each histogram bar remains wide enough
-    // for tooltips and to be seen
+    // Enforce an upper limit for practicality with huge data sets
     if ( bucketCount > max )
     {
 #if VERBOSE_LOGGING
@@ -256,12 +256,11 @@ int PercentileStats::bestBucketCount( PercentileCount n, int max )
 	return max;
     }
 
-    // Don't return zero, bad things will happen
-    return bucketCount > 0 ? bucketCount : 1;
+    return bucketCount;
 }
-
+*/
 
 void PercentileStats::validateBucketIndex( int index ) const
 {
-    CHECK_INDEX( index, 0, bucketCount() - 1, "Bucket index out of range" );
+    CHECK_INDEX( index, 0, bucketsCount() - 1, "Bucket index out of range" );
 }

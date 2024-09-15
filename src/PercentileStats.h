@@ -10,8 +10,8 @@
 #ifndef PercentileStats_h
 #define PercentileStats_h
 
-#include <algorithm> // std::max_element, std::sort
-#include <cmath>     // cbrt(), floor()
+#include <algorithm> // std::max, std::max_element, std::sort
+#include <cmath>     // cbrt(), ceil(), floor(), log2()
 
 #include <QVector>
 
@@ -115,13 +115,6 @@ namespace QDirStat
 	void calculatePercentiles();
 
 	/**
-	 * Returns whether the given list is empty.
-	 **/
-//	bool percentileListEmpty()   const { return _percentiles.isEmpty();      }
-//	bool percentileCountsEmpty() const { return _percentileCounts.isEmpty(); }
-//	bool percentileSumsEmpty()   const { return _percentileSums.isEmpty();   }
-
-	/**
 	 * Returns a particular percentile boundary as an integer
 	 * value.  For most users, this is more convenient and
 	 * matches their integer data values.  The same definition
@@ -137,7 +130,7 @@ namespace QDirStat
 	 **/
 	PercentileValue percentileValue( int index ) const
 	{
-	    validateIndex( index );
+	    validatePercentileIndex( index );
 	    return std::floor( _percentiles[ index ] );
 	}
 
@@ -161,22 +154,22 @@ namespace QDirStat
 	 **/
 	PercentileCount percentileCount( int index ) const
 	{
-	    validateIndex( index );
+	    validatePercentileIndex( index );
 	    return index == 0 || _percentileCounts.isEmpty() ? 0 : percentileCountDiff( index, index-1 );
 	}
 	PercentileCount cumulativeCount( int index ) const
 	{
-	    validateIndex( index );
+	    validatePercentileIndex( index );
 	    return _percentileCounts.isEmpty() ? 0 : _percentileCounts[ index ];
 	}
 	PercentileValue percentileSum( int index ) const
 	{
-	    validateIndex( index );
+	    validatePercentileIndex( index );
 	    return index == 0 || _percentileSums.isEmpty() ? 0 : percentileSumDiff( index, index-1 );
 	}
 	PercentileValue cumulativeSum( int index ) const
 	{
-	    validateIndex( index );
+	    validatePercentileIndex( index );
 	    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
 	}
 	PercentileCount percentileRangeCount( int startIndex, int endIndex ) const
@@ -221,12 +214,13 @@ namespace QDirStat
 	 *
 	 * See also https://en.wikipedia.org/wiki/Histogram
 	 **/
-	static int bestBucketCount( PercentileCount n, int max );
+	static int bestBucketCount( PercentileCount n, double max )
+	    { return std::min( std::ceil( 2 * std::cbrt( n ) ), max ); }
 
 	/**
 	 * Return the number of buckets for the current buckets list.
 	 **/
-	int bucketCount() const { return _bucketCounts.size(); }
+	int bucketsCount() const { return _bucketCounts.size(); }
 
 	/**
 	 * Return the start value of bucket 'index'.  This is rounded
@@ -265,24 +259,33 @@ namespace QDirStat
 	/**
 	 * Return the number of data points in bucket 'index'.
 	 **/
-	PercentileCount bucket( int index ) const
+	PercentileCount bucketCount( int index ) const
 	{
 	    validateBucketIndex( index );
 	    return _bucketCounts[ index ];
 	}
 
 	/**
-	 * Return the total sum of all buckets in the list.
-	 **/
-//	PercentileCount bucketsTotalSum() const
-//	    { return std::accumulate( _bucketCounts.cbegin(), _bucketCounts.cend(), 0 ); }
-
-	/**
 	 * Return the highest number of data points currently in a
 	 * single bucket.
 	 **/
-	PercentileCount largestBucket() const
+	PercentileCount highestBucketCount() const
 	    { return *std::max_element( _bucketCounts.begin(), _bucketCounts.end() ); }
+
+	/**
+	 * Return whether the bucket widths are log-scaled or linear.
+	 **/
+	bool logBucketWidths() const
+	    { return _logBucketWidths; }
+
+	/**
+	 * If 'value' is 0, then return 0.  If 'value' is 1, then return 0.5.
+	 * Otherwise return the base-2 logarithm of 'value'.   This avoids
+	 * problems with log2(0) or with huge negative logarithms for very
+	 * small values.
+	 **/
+	static PercentileBoundary log2( PercentileBoundary value )
+	    { return value > 2 ? std::log2( value ) : value / 2; }
 
 
     protected:
@@ -340,7 +343,7 @@ namespace QDirStat
 	 * a percentiles index.  This will throw an exception
 	 * if 'index' is less than 0 or more than 100.
 	 **/
-	static void validateIndex( int index );
+	static void validatePercentileIndex( int index );
 
 	/**
 	 * Validate that 'index' is within the allowed range for
@@ -357,6 +360,7 @@ namespace QDirStat
 	PercentileCountList _percentileCounts;
 	PercentileValueList _percentileSums;
 
+	bool                _logBucketWidths{ false };
 	Buckets             _buckets;
 	PercentileCountList _bucketCounts;
 
