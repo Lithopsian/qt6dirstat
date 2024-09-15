@@ -183,9 +183,13 @@ Degenerated histogram if the last percentiles are too far spread out
 
 Just one percentile less makes all the difference: Scaled down from P100 to P99
 
-![Histogram with log buckets](QDirStat-log-buckets.png)
+![Histogram with log buckets](QDirStat-histogram-log-buckets.png)
 
 The histogram looks very different with bucket widths scaled logarithmically
+
+![Histogram with log buckets](QDirStat-histogram-markers.png)
+
+Percentile markers can also be shown on a histogram.
 
 
 
