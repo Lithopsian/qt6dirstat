@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QKeyEvent>
 #include <QMenu>
 #include <QPointer>
 

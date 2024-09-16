@@ -8,7 +8,6 @@
  */
 
 #include <QActionGroup>
-#include <QContextMenuEvent>
 
 #include "MainWindow.h"
 #include "ActionManager.h"

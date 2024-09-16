@@ -56,7 +56,6 @@ PercentileBoundary PercentileStats::quantile( int order, int number ) const
 	result += modulo * ( at( index + 1 ) - result );
 
     return result;
-
 }
 
 
@@ -140,12 +139,11 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
     const PercentileBoundary bucketsStart = _percentiles[ startPercentile ];
     const PercentileBoundary bucketsEnd   = _percentiles[ endPercentile   ];
 
-    // Force the bucket count to 1 for empty sets, zero-width buckets, or empty percentiless list
-    if ( bucketsEnd == bucketsStart || bucketCount == 0 || bucketCount > _percentiles.size() )
+    // Force the bucket count to 1 for empty sets, zero-width buckets, or empty percentiles list
+    if ( bucketsEnd == bucketsStart || bucketCount < 1 || bucketCount >= _percentiles.size() )
 	bucketCount = 1;
 
-    // Create an empty list of boundaries and a list of bucketCount zeroes, discarding the old lists
-    _logBucketWidths = logWidths;
+    // Create an empty list of boundaries and a list of bucketCount zeroes, discarding any old lists
     _buckets         = Buckets{};
     _bucketCounts    = PercentileCountList( bucketCount );
 
@@ -157,16 +155,16 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	    return ( bucketsEnd - bucketsStart ) / bucketCount;
 
 	// Avoid taking the log of 0 and smoothly transition to logs for higher values
-	const PercentileBoundary logStart = bucketsStart > 2 ? std::log2( bucketsStart ) : bucketsStart / 2;
-	const PercentileBoundary logEnd   = bucketsEnd   > 2 ? std::log2( bucketsEnd   ) : bucketsEnd   / 2;
-	const PercentileBoundary logDiff = ( logEnd - logStart ) / bucketCount;
+	const PercentileBoundary logStart = log2( bucketsStart );
+	const PercentileBoundary logEnd   = log2( bucketsEnd   );
+	const PercentileBoundary logWidth = ( logEnd - logStart ) / bucketCount;
 #if VERBOSE_LOGGING
-        logDebug() << " logEnd: " << formatCount( logEnd )
-                   << " logStart: " << formatCount( logStart )
-                   << " logDiff: " << formatCount( logDiff )
+        logDebug() << " logStart: " << formatCount( logStart )
+                   << " logEnd: " << formatCount( logEnd )
+                   << " logDiff: " << formatCount( logWidth )
                    << Qt::endl;
 #endif
-	return std::exp2( logDiff );
+	return std::exp2( logWidth );
     }();
 
 #if VERBOSE_LOGGING
@@ -186,9 +184,6 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	while ( beginIt != cend() && *beginIt <= bucketsStart )
 	    ++beginIt;
     }
-
-    // Set the first bucket boundary to use in the loop
-//    PercentileBoundary thisBucketStart = bucketsStart;
 
     // Find the start of the next (ie. second) bucket to use in the loop
     PercentileBoundary nextBucketStart = bucketsStart;
@@ -217,7 +212,6 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	    {
 		// For most buckets, just append to the boundaries and get the start of the next bucket
 		++bucketIt;
-//		thisBucketStart = nextBucketStart;
 		nextBucketStart = getNextBucketStart();
 	    }
 	    else
@@ -237,28 +231,6 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	nextBucketStart = getNextBucketStart();
 }
 
-/*
-int PercentileStats::bestBucketCount( PercentileCount n, int max )
-{
-    // Use the Rice Rule which gives reasonable values for the numbers
-    // we are likely to encounter in the context of filesystems
-    const int bucketCount = std::ceil( 2 * std::cbrt( n ) );
-
-    // Enforce an upper limit for practicality with huge data sets
-    if ( bucketCount > max )
-    {
-#if VERBOSE_LOGGING
-	logInfo() << "Limiting bucket count to " << max
-	          << " instead of " << bucketCount
-	          << Qt::endl;
-#endif
-
-	return max;
-    }
-
-    return bucketCount;
-}
-*/
 
 void PercentileStats::validateBucketIndex( int index ) const
 {

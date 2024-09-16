@@ -11,7 +11,7 @@
 #define PercentileStats_h
 
 #include <algorithm> // std::max, std::max_element, std::sort
-#include <cmath>     // cbrt(), ceil(), floor(), log2()
+#include <cmath>     // cbrt(), ceil(), floor(), log2(), exp2()
 
 #include <QVector>
 
@@ -74,6 +74,10 @@ namespace QDirStat
 	 * These values are trivial but defining them here helps to avoid
 	 * indexing errors and avoids scattering hard-coded values throughout
 	 * the code.
+	 *
+	 * Note that these are unsigned to help negative values being used,
+	 * and short so they can be assigned to a standard signed int or
+	 * float without narrowing.
 	 **/
 	constexpr static unsigned short minPercentile() { return 0;                   }
 	constexpr static unsigned short maxPercentile() { return 100;                 }
@@ -144,9 +148,12 @@ namespace QDirStat
 	 * in that percentile;
 	 * - cumulativeSum() returns a sum of the values of all entries
 	 * in percentiles from 0 up to 'index';
-	 * - percentileRangeSum() returns a sum of the values of all
+	 * - percentileSum() returns a sum of the values of all
 	 * entries in percentiles from 'startIndex' to 'endIndex'
 	 * inclusive.
+	 *
+	 * The overloads with two indexes return the sum between those two
+	 * percentiles.
 	 *
 	 * Note that these functions need the percentiles lists to be
 	 * fully populated and will always return 0 if they are not.  If
@@ -172,22 +179,21 @@ namespace QDirStat
 	    validatePercentileIndex( index );
 	    return _percentileSums.isEmpty() ? 0 : _percentileSums[ index ];
 	}
-	PercentileCount percentileRangeCount( int startIndex, int endIndex ) const
+	PercentileCount percentileCount( int startIndex, int endIndex ) const
 	{
 	    validateIndexRange( startIndex, endIndex );
 	    return _percentileCounts.isEmpty() ? 0 : percentileCountDiff( endIndex, startIndex );
 	}
-	PercentileValue percentileRangeSum( int startIndex, int endIndex ) const
+	PercentileValue percentileSum( int startIndex, int endIndex ) const
 	{
 	    validateIndexRange( startIndex, endIndex );
 	    return _percentileSums.isEmpty() ? 0 : percentileSumDiff( endIndex, startIndex );
 	}
 
 	/**
-	 * Validate 'startPercentile' and 'endPercentile'; they must
-	 * both be between 0 and 100, and the end must be higher
-	 * then the start.  This function will throw if it encounters
-	 * an invalid value.
+	 * Validate 'startIndex' and 'endIndex'; they must both be between
+	 * 0 and 100, and the end must be higher then the start.  This
+	 * function will throw if it encounters an invalid value.
 	 **/
 	static void validateIndexRange( int startIndex, int endIndex );
 
@@ -208,8 +214,8 @@ namespace QDirStat
 	void fillBuckets( bool logWidths, int bucketCount, int startPercentile, int endPercentile );
 
 	/**
-	 * Calculate the best bucket count according to the Rice Rule for n
-	 * data points.  The number of buckets is limited to 'max' for
+	 * Calculate the best bucket count according to the Rice Rule for
+	 * 'n' data points.  The number of buckets is limited to 'max' for
 	 * on-screen display.
 	 *
 	 * See also https://en.wikipedia.org/wiki/Histogram
@@ -218,7 +224,8 @@ namespace QDirStat
 	    { return std::min( std::ceil( 2 * std::cbrt( n ) ), max ); }
 
 	/**
-	 * Return the number of buckets for the current buckets list.
+	 * Return the number of buckets for the current list of bucket
+	 * counts.
 	 **/
 	int bucketsCount() const { return _bucketCounts.size(); }
 
@@ -243,17 +250,15 @@ namespace QDirStat
 	 * although not necessarily the actual largest value in the
 	 * bucket.
 	 *
-	 * In the special case of zero-width buckets (where all the
-	 * data points have the same value), all buckets have the same
-	 * start and end values.  The data points are counted in the
-	 * first bucket and the rest are all empty.  One less than the
-	 * start of the next bucket is incorrect in this case, so just
-	 * return the start value for 'index'.
+	 * The bucket end should never be smaller than the bucket start
+	 * and this special case has to be checked in case the start of
+	 * 'index +1' is the same as the start of 'index' (ie. a width
+	 * smaller than 1, possibly zero).
 	 **/
 	PercentileValue bucketEnd( int index ) const
 	{
 	    validateBucketIndex( index );
-	    return std::max( std::ceil( _buckets[ index + 1 ] ) - 1, std::ceil( _buckets[ index ] ) );
+	    return std::ceil( std::max( _buckets[ index + 1 ] - 1, _buckets[ index ] ) );
 	}
 
 	/**
@@ -271,12 +276,6 @@ namespace QDirStat
 	 **/
 	PercentileCount highestBucketCount() const
 	    { return *std::max_element( _bucketCounts.begin(), _bucketCounts.end() ); }
-
-	/**
-	 * Return whether the bucket widths are log-scaled or linear.
-	 **/
-	bool logBucketWidths() const
-	    { return _logBucketWidths; }
 
 	/**
 	 * If 'value' is 0, then return 0.  If 'value' is 1, then return 0.5.
@@ -360,7 +359,6 @@ namespace QDirStat
 	PercentileCountList _percentileCounts;
 	PercentileValueList _percentileSums;
 
-	bool                _logBucketWidths{ false };
 	Buckets             _buckets;
 	PercentileCountList _bucketCounts;
 

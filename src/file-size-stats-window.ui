@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>382</height>
+    <width>553</width>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -187,41 +187,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="percentilePage">
-      <attribute name="title">
-       <string>&amp;Percentiles</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="percentilePageLayout">
-       <item>
-        <layout class="QHBoxLayout" name="topComboBoxLayout">
-         <item>
-          <widget class="QLabel" name="nominalCountLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignRight">
-          <widget class="QCheckBox" name="percentileFilterCheckBox">
-           <property name="text">
-            <string>Show &amp;all percentiles</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="percentileTable">
-         <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="bucketsPage">
       <attribute name="title">
        <string>&amp;Buckets</string>
@@ -242,7 +207,7 @@
          <item>
           <widget class="QCheckBox" name="logWidthsCheckBox">
            <property name="text">
-            <string>Use log bucket widths</string>
+            <string>Use log bucket &amp;widths</string>
            </property>
           </widget>
          </item>
@@ -256,6 +221,41 @@
          <attribute name="verticalHeaderHighlightSections">
           <bool>false</bool>
          </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="percentilePage">
+      <attribute name="title">
+       <string>&amp;Percentiles</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="percentilePageLayout">
+       <item>
+        <layout class="QHBoxLayout" name="topComboBoxLayout">
+         <item>
+          <widget class="QLabel" name="nominalCountLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="percentileFilterCheckBox">
+           <property name="text">
+            <string>Show &amp;all percentiles</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTableView" name="percentileTable">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
         </widget>
        </item>
       </layout>
@@ -275,8 +275,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>276</width>
-            <height>658</height>
+            <width>500</width>
+            <height>532</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -379,19 +379,6 @@
               <number>20</number>
              </property>
              <item>
-              <widget class="QCommandLinkButton" name="percentilesTableHelpButton">
-               <property name="statusTip">
-                <string>Percentiles-Table.md</string>
-               </property>
-               <property name="text">
-                <string>The Percentiles Table</string>
-               </property>
-               <property name="description">
-                <string>Explanation of the table on the &quot;Percentiles&quot; page in this dialog.</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QCommandLinkButton" name="bucketsTableHelpButton">
                <property name="statusTip">
                 <string>Buckets-Table.md</string>
@@ -401,6 +388,19 @@
                </property>
                <property name="description">
                 <string>Explanation of the table on the &quot;Buckets&quot; table in this dialog.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCommandLinkButton" name="percentilesTableHelpButton">
+               <property name="statusTip">
+                <string>Percentiles-Table.md</string>
+               </property>
+               <property name="text">
+                <string>The Percentiles Table</string>
+               </property>
+               <property name="description">
+                <string>Explanation of the table on the &quot;Percentiles&quot; page in this dialog.</string>
                </property>
               </widget>
              </item>
@@ -445,11 +445,6 @@
   <action name="actionNoPercentiles">
    <property name="text">
     <string>&amp;No percentile markers</string>
-   </property>
-  </action>
-  <action name="actionEvery20th">
-   <property name="text">
-    <string>Every &amp;20th percentile</string>
    </property>
   </action>
   <action name="actionEvery10th">
@@ -616,8 +611,6 @@
   <tabstop>fileSizeHistogramHelpButton</tabstop>
   <tabstop>overflowAreaHelpButton</tabstop>
   <tabstop>histogramOptionsHelpButton</tabstop>
-  <tabstop>percentilesTableHelpButton</tabstop>
-  <tabstop>bucketsTableHelpButton</tabstop>
  </tabstops>
  <resources>
   <include location="icons.qrc"/>

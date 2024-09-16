@@ -7,22 +7,21 @@
  *              Ian Nartowicz
  */
 
-#include <QActionGroup>
-#include <QContextMenuEvent>
+#include <QCommandLinkButton>
 #include <QDesktopServices>
+#include <QMenu>
 #include <QPointer>
-#include <QResizeEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QUrl>
 
 #include "FileSizeStatsWindow.h"
+#include "FileInfo.h"
 #include "FileSizeStats.h"
 #include "FileSizeStatsModels.h"
 #include "FormatUtil.h"
 #include "HistogramView.h"
 #include "Logger.h"
-#include "MainWindow.h"
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -118,7 +117,7 @@ namespace
 	percentilesContextMenu( menu, ui );
 	menu->addSeparator();
 
-	for ( QAction * action : { ui->actionNoPercentiles, ui->actionEvery20th, ui->actionEvery10th,
+	for ( QAction * action : { ui->actionNoPercentiles, ui->actionEvery10th,
 	                           ui->actionEvery5th, ui->actionEvery2nd, ui->actionEveryPercentile } )
 	    menu->addAction( action );
     }
@@ -197,7 +196,6 @@ void FileSizeStatsWindow::initWidgets()
     // Put the percentile marker actions in a group so only one is ever checked
     QActionGroup * actionGroup = new QActionGroup{ this };
     markersAction( actionGroup, _ui->actionNoPercentiles, 0 );
-    markersAction( actionGroup, _ui->actionEvery20th, 20 );
     markersAction( actionGroup, _ui->actionEvery10th, 10 );
     markersAction( actionGroup, _ui->actionEvery5th, 5 );
     markersAction( actionGroup, _ui->actionEvery2nd, 2 );
@@ -238,7 +236,7 @@ void FileSizeStatsWindow::connectActions()
              this,                          &FileSizeStatsWindow::logHeights );
 
     connect( _ui->actionAutoScale,          &QAction::triggered,
-             this,                          &FileSizeStatsWindow::autoLogScale );
+             this,                          &FileSizeStatsWindow::autoLogHeights );
 
     // Percentile "all", increment, and decrement actions are connected inside the .ui file
     connect( _ui->actionStartMin,           &QAction::triggered,
@@ -286,8 +284,7 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
 
 void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
-    const Subtree subtree{ fileInfo };
-    const QString & url = subtree.url();
+    const QString & url = fileInfo->debugUrl();
     _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
@@ -333,7 +330,8 @@ void FileSizeStatsWindow::setPercentileTable()
     const QString text = tr( "Nominal files per percentile: " ) % formatCount( nominalCount, precision );
     _ui->nominalCountLabel->setText( text );
 
-    percentileTableModel( _ui->percentileTable )->resetModel( !_ui->percentileFilterCheckBox->isChecked() );
+    const bool filterRows = !_ui->percentileFilterCheckBox->isChecked();
+    percentileTableModel( _ui->percentileTable )->resetModel( filterRows );
 }
 
 
@@ -341,7 +339,7 @@ void FileSizeStatsWindow::setPercentileRange()
 {
     const int       startPercentile = _ui->startPercentileSlider->value();
     const int       endPercentile   = _ui->endPercentileSlider->value();
-    const FileCount dataCount       = _stats->percentileRangeCount( startPercentile, endPercentile );
+    const FileCount dataCount       = _stats->percentileCount( startPercentile, endPercentile );
     const int       bucketCount     = _stats->bestBucketCount( dataCount, _stats->maxPercentile() );
     const bool      logWidths       = _ui->logWidthsCheckBox->isChecked();
 
@@ -355,7 +353,7 @@ void FileSizeStatsWindow::setPercentileRange()
     _stats->fillBuckets( logWidths, bucketCount, startPercentile, endPercentile );
     model->endReset();
 
-    _ui->histogramView->setPercentileRange( startPercentile, endPercentile );
+    _ui->histogramView->setPercentileRange( startPercentile, endPercentile, logWidths );
 }
 
 
@@ -415,7 +413,7 @@ void FileSizeStatsWindow::logHeights()
 }
 
 
-void FileSizeStatsWindow::autoLogScale()
+void FileSizeStatsWindow::autoLogHeights()
 {
     _ui->histogramView->enableAutoLogHeights();
 }
@@ -433,7 +431,7 @@ void FileSizeStatsWindow::setMaxPercentile()
 }
 
 
-void FileSizeStatsWindow::showHelp()
+void FileSizeStatsWindow::showHelp() const
 {
     const QWidget * button = qobject_cast<QWidget *>( sender() );
     if ( button )

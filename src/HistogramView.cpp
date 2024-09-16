@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QResizeEvent>
 #include <QTextDocument>
 #include <QTimer>
 
@@ -27,7 +26,7 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return the text of ther overflow panel heasdline.
+     * Return the text of the overflow panel headline.
      **/
     QString overflowHeadline()
     {
@@ -46,12 +45,15 @@ namespace
 
 
     /**
-     * Return the base-2 logarithm of 'value' if 'logWidths' is
+     * Return the base-2 logarithm of 'value' if 'logScale' is
      * true.  Otherwise just return 'value'.
+     *
+     * Nite that the input value is a 64-but integer and the
+     * output is floating point qreal.
      **/
-    qreal log2( bool logWidths, qint64 value )
+    qreal log2( bool logScale, qint64 value )
     {
-	return logWidths ? PercentileStats::log2( value ) : value;
+	return logScale ? PercentileStats::log2( value ) : value;
     }
 
 
@@ -77,7 +79,7 @@ namespace
 
 
     /**
-     * Create a text item in the given scene and set its Z-value.
+     * Create a rich text item in the given scene and set its Z-value.
      **/
     QGraphicsTextItem * createTextItem( QGraphicsScene * scene, const QString & text )
     {
@@ -120,7 +122,7 @@ FileSize HistogramView::percentile( int index ) const
 }
 
 
-void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
+void HistogramView::setPercentileRange( int startPercentile, int endPercentile, bool logWidths )
 {
     PercentileStats::validateIndexRange( startPercentile, endPercentile );
 
@@ -128,6 +130,7 @@ void HistogramView::setPercentileRange( int startPercentile, int endPercentile )
 
     _startPercentile = startPercentile;
     _endPercentile   = endPercentile;
+    _logWidths       = logWidths;
 
     if ( oldNeedOverflowPanel != needOverflowPanel() )
 	setGeometryDirty();
@@ -289,7 +292,7 @@ void HistogramView::addAxisLabels( QGraphicsScene * scene )
 	return createBoldItem( scene, labelText.arg( text ) );
     };
 
-    QGraphicsTextItem * xItem = labelItem( _stats->logBucketWidths(), tr( "file size" ) );
+    QGraphicsTextItem * xItem = labelItem( _logWidths, tr( "file size" ) );
     const QRectF xRect = xItem->boundingRect();
     xItem->setPos( ( _size.width() - xRect.width() ) / 2, ( bottomBorder() - xRect.height() ) / 2 );
 
@@ -334,14 +337,14 @@ void HistogramView::addYStartEndLabels( QGraphicsScene * scene )
     };
 
     addLabel( 0, "0" );
-    addLabel( _size.height(), QString{ "%L1" }.arg( _stats->highestBucketCount() ) );
+    addLabel( _size.height(), formatCount( _stats->highestBucketCount() ) );
 }
 
 
 void HistogramView::addQuartileText( QGraphicsScene * scene )
 {
     QPointF pos{ 0, -_size.height() - topBorder() - textBorder() };
-    const int n = _stats->percentileRangeCount( _startPercentile, _endPercentile );
+    const int n = _stats->percentileCount( _startPercentile, _endPercentile );
 
     // Create text for the total number of files
     const QFontMetrics metrics{ font() };
@@ -396,17 +399,17 @@ void HistogramView::addBars( QGraphicsScene * scene )
 
 void HistogramView::addMarkers( QGraphicsScene * scene )
 {
+    // Don't draw markers if there is no meaningful range of data points
     if ( percentile( _endPercentile ) - percentile( _startPercentile ) < 1 )
 	return;
 
     // Find the x-axis scaling, to be applied either to the marker value or log2 of it
-    const bool  logWidths    = _stats->logBucketWidths();
-    const qreal axisStartVal = log2( logWidths, percentile( _startPercentile ) );
-    const qreal axisEndVal   = log2( logWidths, percentile( _endPercentile   ) );
+    const qreal axisStartVal = log2( _logWidths, percentile( _startPercentile ) );
+    const qreal axisEndVal   = log2( _logWidths, percentile( _endPercentile   ) );
     const qreal axisRange    = axisEndVal - axisStartVal;
     const qreal scaling      = _size.width() / axisRange;
 
-    // The top point of all the markers marker is the same
+    // The bottom point of all the markers is the same
     const qreal y2 = -_size.height() - markerExtraHeight();
 
     /**
@@ -414,11 +417,11 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
      * histogram plus a bit more at either end.  A second, wider,
      * transparent, line is then added with a tooltip.
      **/
-    const auto addMarker = [ this, scene, logWidths, axisStartVal, scaling, y2 ]
+    const auto addMarker = [ this, scene, axisStartVal, scaling, y2 ]
 	( int index, const QString & name, const QPen & pen, GraphicsItemLayer layer )
     {
 	const FileSize xValue = percentile( index );
-	const qreal    xPos   = scaling * ( log2( logWidths, xValue ) - axisStartVal );
+	const qreal    xPos   = scaling * ( log2( _logWidths, xValue ) - axisStartVal );
 
 	// Visible line as requested
 	QLineF line{ xPos, markerExtraHeight(), xPos, y2 };
@@ -591,7 +594,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
     nextPos.ry() += overflowSpacing();
 
     // Upper pie chart: number of files cut off
-    const FileCount histogramFiles = _stats->percentileRangeCount( _startPercentile, _endPercentile );
+    const FileCount histogramFiles = _stats->percentileCount( _startPercentile, _endPercentile );
     const FileCount missingFiles   = _stats->size() - histogramFiles;
     addPie( missingFiles, histogramFiles );
 
@@ -602,7 +605,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
     addText( cutoffCaption % tr( "<br/>%1% of all files" ).arg( missingPercent ) );
 
     // Lower pie chart: disk space in outlier percentiles
-    const FileSize histogramDiskSpace = _stats->percentileRangeSum( _startPercentile, _endPercentile );
+    const FileSize histogramDiskSpace = _stats->percentileSum( _startPercentile, _endPercentile );
     const FileSize totalDiskSpace     = _stats->cumulativeSum( _stats->maxPercentile() );
     const FileSize cutoffDiskSpace    = totalDiskSpace - histogramDiskSpace;
     addPie( cutoffDiskSpace, histogramDiskSpace );

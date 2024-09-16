@@ -52,13 +52,13 @@ namespace QDirStat
      * Overloaded for various numeric types.
      **/
     inline QString formatCount( qint64 size )
-        { return QLocale{}.toString( size ); }
+        { return QString{ "%L1" }.arg( size ); }
     inline QString formatCount( qint32 size )
-        { return QLocale{}.toString( size ); }
+        { return QString{ "%L1" }.arg( size ); }
     inline QString formatCount( double size, int precision = 6 )
-        { return QLocale{}.toString( size, 'f', precision ); }
+        { return QString{ "%L1" }.arg( size, 0, 'f', precision ); }
     inline QString formatCount( long double size, int precision = 6 )
-        { return QLocale{}.toString( static_cast<double>( size ), 'f', precision ); }
+        { return QString{ "%L1" }.arg( static_cast<double>( size ), 0, 'f', precision ); }
 
     /**
      * Can't use a default argument when using this as a function pointer,

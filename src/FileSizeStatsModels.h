@@ -12,6 +12,7 @@
 
 #include <QAbstractTableModel>
 #include <QHeaderView>
+#include <QPainter>
 #include <QTableView>
 
 
@@ -185,12 +186,9 @@ namespace QDirStat
 	 *
 	 * filterStep() gives the step size for filtering, for example
 	 * 5 shows every 5th percentile.
-	 *
-	 * filterMargin() is the number of extra percentiles to show
-	 * at the start and end.  So a margin of 1 would show
-	 * percentiles 1 and 99 in addition to every 5th percentile.
 	 **/
-	int mapRow( int row ) const;
+	int mapRow( int row ) const
+	    { return row * filterStep(); }
 
 	/**
 	 * Return whether row 'index' should be highlighted.  Every 10th
@@ -205,32 +203,9 @@ namespace QDirStat
 	 * Note that the program will run with any value, but should
 	 * normally be a value that divides 100 to an exact round
 	 * number: for example, 5, 10, or 25.  Values above 50 will
-	 * filter out all rows (except min and max) and leave only
-	 * the "margins".
+	 * filter out all rows except min and max.
 	 **/
-	constexpr static unsigned short filterStep() { return 5; }
-
-	/**
-	 * Return the filtered margin size.  This is the number of
-	 * percentiles to show at the start and end of the range in
-	 * addition to the min, max, and filter steps.
-	 *
-	 * Important: if this value is larger than the maximum
-	 * percentile (100) then the results are undefined; the
-	 * program will most likely crash.
-	 **/
-	constexpr static unsigned short filterMargin() { return 1; }
-
-	/**
-	 * Return the filtered margin size, adjusted for percentiles
-	 * that would have been included just because of the step size.
-	 * The expression deliberately uses integer arithmetic so that
-	 * the result is rounded down.
-	 **/
-	constexpr static unsigned short marginAdjustment()
-	    { return filterMargin() / filterStep(); }
-	constexpr static unsigned short adjustedMargin()
-	    { return filterMargin() - marginAdjustment(); }
+	unsigned short filterStep() const { return _filterRows ? 5 : 1; }
 
 
     private:

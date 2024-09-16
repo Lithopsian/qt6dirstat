@@ -12,6 +12,8 @@
 
 #include <memory>
 
+#include <QActionGroup>
+#include <QContextMenuEvent>
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"
@@ -119,7 +121,7 @@ namespace QDirStat
 	 * bucket size distribution and continue to automatically set the
 	 * scaling.
 	 **/
-	void autoLogScale();
+	void autoLogHeights();
 
 	/**
 	 * Set the start percentile to the minimum (0), or set the end
@@ -131,7 +133,7 @@ namespace QDirStat
 	/**
 	 * Show help for a topic determined by the sender of this signal.
 	 **/
-	void showHelp();
+	void showHelp() const;
 
 
     protected:

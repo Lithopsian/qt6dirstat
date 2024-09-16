@@ -12,6 +12,7 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsView>
+#include <QResizeEvent>
 
 #include "Typedefs.h" // FileSize
 
@@ -92,7 +93,7 @@ namespace QDirStat
 	/**
 	 * Set the percentile range (0..100) for which to display data.
 	 **/
-	void setPercentileRange( int startPercentile, int endPercentile );
+	void setPercentileRange( int startPercentile, int endPercentile, bool logWidths );
 
 	/**
 	 * Enable or disable showing percentiles as an overlay over the
@@ -160,9 +161,7 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return the stored value for percentile no. 'index' (0..100).  This
-	 * directly accesses the percentile list with the assumption that it is
-	 * already populated with 101 entries.
+	 * Return the stored value for percentile no. 'index' (0..100).
 	 **/
 	FileSize percentile( int index ) const;
 
@@ -222,17 +221,22 @@ namespace QDirStat
 	 **/
 	bool geometryDirty() const { return !_size.isValid(); }
 	void setGeometryDirty() { _size = QSize{}; }
+
+	/**
+	 * Set the geometry dirty and rebuild the histogram.
+	 **/
 	void rebuildDirty() { setGeometryDirty(); rebuild(); }
 
 	/**
 	 * Create a background rectangle in the scene and colour it
-	 * as a panel.
+	 * as a panel.  The z-value is set to a negative number so
+	 * that all other items appear in front of it.
 	 **/
 	void createPanel(  QGraphicsScene * scene, const QRectF & rect )
 	    { scene->addRect( rect, Qt::NoPen, panelBackground() )->setZValue( PanelBackgroundLayer ); };
 
 	/**
-	 * Return 'true' if an overflow ("cutoff") panel is needed.
+	 * Return true if an overflow ("cutoff") panel is needed.
 	 **/
 	bool needOverflowPanel() const;
 
@@ -344,6 +348,7 @@ namespace QDirStat
 	// Configurable settings
 	int  _startPercentile;
 	int  _endPercentile;
+	bool _logWidths;
 	bool _logHeights;
 	bool _autoLogHeights{ true }; // start with the log scale determined automatically
 	int  _percentileStep{ 0 }; // no markers initially

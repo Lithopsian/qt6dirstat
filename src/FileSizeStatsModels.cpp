@@ -8,13 +8,11 @@
  */
 
 #include <QGuiApplication>
-#include <QPainter>
 #include <QStaticText>
 
 #include "FileSizeStatsModels.h"
 #include "FileSizeStats.h"
 #include "FormatUtil.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -52,12 +50,14 @@ QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
     {
         case Qt::DisplayRole:
         {
+            const int row = index.row();
+
             switch ( index.column() )
             {
-                case StartCol:  return formatSize( _stats->bucketStart( index.row() ) );
-                case EndCol:    return formatSize( _stats->bucketEnd( index.row() ) );
-                case ValueCol:  return formatCount( _stats->bucketCount( index.row() ) );
-                default:        return QVariant{};
+                case StartCol:  return formatSize( _stats->bucketStart( row ) );
+                case EndCol:    return formatSize( _stats->bucketEnd( row ) );
+                case ValueCol:  return formatCount( _stats->bucketCount( row ) );
+                default:        return QVariant{}; // should never happen
             }
         }
 
@@ -144,10 +144,7 @@ int PercentileTableModel::rowCount( const QModelIndex & parent ) const
     if ( parent.isValid() || !_stats )
         return 0;
 
-    if ( _filterRows )
-        return PercentileStats::maxPercentile() / filterStep() + 2 * adjustedMargin() + 1;
-
-    return PercentileStats::maxPercentile() + 1;
+    return PercentileStats::maxPercentile() / filterStep() + 1;
 }
 
 
@@ -160,16 +157,18 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
     {
         case Qt::DisplayRole:
         {
-            const int i = mapRow( index.row() );
+            const int row = index.row();
+            const int i   = mapRow( row );
+            const int col = index.column();
 
-            if ( i == 0 && index.column() != ValueCol )
+            if ( i == 0 && col != ValueCol )
                 return QVariant{}; // no counts or sums for P0
 
-            switch ( index.column() )
+            switch ( col )
             {
                 case ValueCol:    return formatSize( _stats->percentileValue( i ) );
-                case CountCol:    return formatCount( _stats->percentileCount( i ) );
-                case SumCol:      return formatSize( _stats->percentileSum( i ) );
+                case CountCol:    return formatCount( _stats->percentileCount( mapRow( row - 1 ), i ) );
+                case SumCol:      return formatSize( _stats->percentileSum( mapRow( row - 1 ), i ) );
                 case CumCountCol: return formatCount( _stats->cumulativeCount( i ) );
                 case CumSumCol:   return formatSize( _stats->cumulativeSum( i ) );
                 default:          return QVariant{};
@@ -214,13 +213,15 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
             // Show the exact byte size of rounded sizes in the tooltip
             const FileSize size = [ this, &index ]() -> FileSize
             {
-                const int i = mapRow( index.row() );
+                const int row = index.row();
+                const int i   = mapRow( row );
+
                 switch ( index.column() )
                 {
                     case ValueCol:  return _stats->percentileValue( i );
-                    case SumCol:    return _stats->percentileSum( i );
-                    case CumSumCol: return _stats->cumulativeSum( i );
-                    default:        return 0;
+                    case SumCol:    return i == 0 ? 0 : _stats->percentileSum( mapRow( row - 1 ), i );
+                    case CumSumCol: return i == 0 ? 0 : _stats->cumulativeSum( i );
+                    default: return 0;
                 }
             }();
             return sizeTooltip( size );
@@ -243,11 +244,11 @@ QVariant PercentileTableModel::headerData( int section, Qt::Orientation orientat
         {
             case ValueCol:    return tr( "The file size at this percentile" );
 
-            case CountCol:    return tr( "The number of files larger than the previous"
-                                         "<br/>percentile and up to the size of this percentile" );
+            case CountCol:    return tr( "The number of files larger than the previous precentile"
+                                         "<br/>shown and up to the size of this percentile" );
 
             case SumCol:      return tr( "The sum of the sizes of the files larger than the previous"
-                                         "<br/>percentile and up to the size of this percentile" );
+                                         "<br/>percentile shown and up to the size of this percentile" );
 
             case CumCountCol: return tr( "The total number of files up to the size of this percentile" );
 
@@ -261,28 +262,6 @@ QVariant PercentileTableModel::headerData( int section, Qt::Orientation orientat
 }
 
 
-int PercentileTableModel::mapRow( int row ) const
-{
-    // For strict correctness, a fairly meaningless adjustment for the first percentile
-    row += PercentileStats::minPercentile();
-
-    // Unfiltered rows or rows within the start margin map 1:1
-    if ( !_filterRows || row <= filterMargin() )
-        return row;
-
-    // Adjust row to account for the extra rows in the start margin
-    row -= adjustedMargin();
-
-    // Up to the end margin, map rows to percentiles using the step size
-    const int filteredSteps = PercentileStats::maxPercentile() / filterStep();
-    if ( row < filteredSteps - marginAdjustment() )
-        return row * filterStep();
-
-    // Calculate a percentile as the number of rows beyond the start of the end margin
-    return PercentileStats::maxPercentile() - adjustedMargin() + row - filteredSteps;
-}
-
-
 
 
 void PercentileTableHeader::paintSection( QPainter * painter, const QRect & rect, int logicalIndex ) const
@@ -292,11 +271,9 @@ void PercentileTableHeader::paintSection( QPainter * painter, const QRect & rect
     QHeaderView::paintSection( painter, rect, logicalIndex );
     painter->restore();
 
-    // Paint with rich text
+    // Align rich text, which requires setting a width for it to be aligned within
     QStaticText text{ sectionText( logicalIndex ) };
-
-    // Align the text, which requires setting a width for it to be aligned within
-    QTextOption option{ orientation() == Qt::Horizontal ? Qt::AlignHCenter : Qt::AlignRight };
+    const QTextOption option{ orientation() == Qt::Horizontal ? Qt::AlignHCenter : Qt::AlignRight };
     text.setTextOption( option );
     const qreal rectWidth = rect.width() - 2 * horizontalMargin();
     text.setTextWidth( qMax( rectWidth, text.size().width() ) );
@@ -316,18 +293,22 @@ QSize PercentileTableHeader::sectionSizeFromContents( int logicalIndex ) const
 
 QString PercentileTableHeader::sectionText( int logicalIndex ) const
 {
+    const PercentileTableModel * model = tableModel();
+    if ( !model )
+        return QString{};
+
     if ( orientation() == Qt::Horizontal )
     {
-        return [ logicalIndex ]()
+        return [ logicalIndex, model ]()
         {
             switch ( logicalIndex )
             {
                 case PercentileTableModel::ValueCol:
                     return tr( "Value" );
                 case PercentileTableModel::CountCol:
-                    return tr( "Files<sub> P(n-1)...P(n)</sub>" );
+                    return tr( "Files<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
                 case PercentileTableModel::SumCol:
-                    return tr( "Sum<sub> P(n-1)...P(n)</sub>" );
+                    return tr( "Sum<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
                 case PercentileTableModel::CumCountCol:
                     return tr( "Files<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
                 case PercentileTableModel::CumSumCol:
@@ -350,5 +331,5 @@ QString PercentileTableHeader::sectionText( int logicalIndex ) const
         }
 
         return tr( "<span style='font-size: large;'>P<sub>%1</sub></span>" ).arg( percentile );
-    }( tableModel()->mapRow( logicalIndex ) );
+    }( model->mapRow( logicalIndex ) );
 }
