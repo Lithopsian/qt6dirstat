@@ -329,7 +329,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
 void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 {
-    const QString suffix = currentSuffix().toLower();
+    const QString suffix = currentSuffix();
     FileInfo * dir = _subtree();
     if ( suffix.isEmpty() || !dir )
         return;

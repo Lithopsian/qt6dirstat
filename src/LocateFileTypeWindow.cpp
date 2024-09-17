@@ -41,7 +41,7 @@ namespace
 	const DirInfo * dir = item->dotEntry() ? item->dotEntry() : item->toDirInfo();
 	for ( FileInfoIterator it{ dir }; *it; ++it )
 	{
-	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseInsensitive ) )
+	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseSensitive ) )
 		result << *it;
 	}
 

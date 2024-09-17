@@ -184,21 +184,24 @@ namespace QDirStat
 	 * Map a row number to a percentile index.  The mapping is
 	 * 1:1 if the rows are not being filtered.
 	 *
-	 * filterStep() gives the step size for filtering, for example
-	 * 5 shows every 5th percentile.
+	 * The mapping was previously much more complicated due to
+	 * "margins", extra rows shown at the start and end of the table
+	 * in addition to the filtered rows.
 	 **/
 	int mapRow( int row ) const
 	    { return row * filterStep(); }
 
 	/**
 	 * Return whether row 'index' should be highlighted.  Every 10th
-	 * row is highlighted if all rows are being shown.
+	 * row is highlighted if more than every 5th row is being shown.
 	 **/
 	bool highlightRow( const QModelIndex & index ) const
-	    { return !_filterRows && mapRow( index.row() ) % 10 == 0; }
+	    { return filterStep() < 5 && mapRow( index.row() ) % 10 == 0; }
 
 	/**
-	 * Return the filtered step size.
+	 * Return the filtered step size.  For example, 5 shows every
+	 * 5th percentile.  Currently this is either 5 or 1, set by a
+	 * simple checkbox in FileSizeStatsWindow.
 	 *
 	 * Note that the program will run with any value, but should
 	 * normally be a value that divides 100 to an exact round
@@ -226,9 +229,10 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor.  'parent' must be the QTableView that
+	 * contains the header; this is used to access the model.
 	 **/
-	PercentileTableHeader( Qt::Orientation orientation, QWidget * parent ):
+	PercentileTableHeader( Qt::Orientation orientation, QTableView * parent ):
 	    QHeaderView{ orientation, parent }
 	{
 	    setSectionsClickable( true );
