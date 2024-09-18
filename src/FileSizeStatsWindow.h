@@ -145,12 +145,6 @@ namespace QDirStat
 	void connectActions();
 
 	/**
-	 * Configure a percentile marker action, including setting
-	 * it in the markers combo box and connecting the action.
-	 **/
-	void markersAction( QActionGroup * group, QAction * action, int index );
-
-	/**
 	 * Populate with new content.
 	 **/
 	void populate( FileInfo * fileInfo, const QString & suffix );

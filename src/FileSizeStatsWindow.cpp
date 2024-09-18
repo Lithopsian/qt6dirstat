@@ -194,12 +194,27 @@ void FileSizeStatsWindow::initWidgets()
     _ui->actionEndMax->setText( _ui->actionEndMax->text().arg( PercentileStats::maxPercentile() ) );
 
     // Put the percentile marker actions in a group so only one is ever checked
-    QActionGroup * actionGroup = new QActionGroup{ this };
-    markersAction( actionGroup, _ui->actionNoPercentiles, 0 );
-    markersAction( actionGroup, _ui->actionEvery10th, 10 );
-    markersAction( actionGroup, _ui->actionEvery5th, 5 );
-    markersAction( actionGroup, _ui->actionEvery2nd, 2 );
-    markersAction( actionGroup, _ui->actionEveryPercentile, 1 );
+    QComboBox * comboBox = _ui->markersComboBox;
+    QActionGroup * group = new QActionGroup{ this };
+    const auto markersAction = [ comboBox, group ]( QAction * action, int step )
+    {
+	action->setCheckable( true );
+	action->setData( step );
+	group->addAction( action );
+
+	// Create a combo-box entry from the action text, with a pointer to the action in userData()
+	comboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
+
+	// Each action simply selects the combo-box entry just created from it
+	const int index = comboBox->count() - 1;
+	connect( action, &QAction::triggered,
+	         [ comboBox, index ](){ comboBox->setCurrentIndex( index ); } );
+    };
+    markersAction( _ui->actionNoPercentiles, 0 );
+    markersAction( _ui->actionEvery10th, 10 );
+    markersAction( _ui->actionEvery5th, 5 );
+    markersAction( _ui->actionEvery2nd, 2 );
+    markersAction( _ui->actionEveryPercentile, 1 );
     _ui->actionNoPercentiles->setChecked( true );
 
     // Set up the percentile and buckets tables
@@ -207,10 +222,10 @@ void FileSizeStatsWindow::initWidgets()
     _ui->bucketsTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
 
     QTableView * table = _ui->percentileTable;
-    table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
-    _ui->percentileTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
-    table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
     table->setModel( new PercentileTableModel{ this } );
+    table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
+    table->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
+    table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
 }
 
 
@@ -254,20 +269,6 @@ void FileSizeStatsWindow::connectActions()
 	connect( helpButton, &QAbstractButton::clicked,
 	         this,       &FileSizeStatsWindow::showHelp );
     }
-}
-
-
-void FileSizeStatsWindow::markersAction( QActionGroup * group, QAction * action, int step )
-{
-    action->setCheckable( true );
-    action->setData( step );
-    group->addAction( action );
-    _ui->markersComboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
-
-    // Each action simply selects the corresponding combo-box entry
-    const int index = _ui->markersComboBox->count() - 1;
-    connect( action, &QAction::triggered,
-             [ this, index ](){ _ui->markersComboBox->setCurrentIndex( index ); } );
 }
 
 

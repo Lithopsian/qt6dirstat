@@ -153,6 +153,31 @@ namespace
 	return newTrashDir;
     }
 
+
+    /**
+     * Create a name for 'path' that is unique within 'filesPath'.
+     * If the simple name 'path' already exists, then append a number
+     * to the filename base to create a unique filename.
+     **/
+    QString uniqueName( const QString & path, const QString & filesPath )
+    {
+	const QDir filesDir{ filesPath };
+
+	const QFileInfo file{ path };
+	QString name = file.fileName();
+
+	for ( int i = 1; filesDir.exists( name ); ++i )
+	{
+	    const QString baseName = file.baseName();
+	    const QString suffix   = file.completeSuffix();
+	    name = QString{ "%1_%2" }.arg( baseName ).arg( i );
+	    if ( !suffix.isEmpty() )
+		name += '.' % suffix;
+	}
+
+	return name;
+    }
+
 } // namespace
 
 
@@ -211,7 +236,7 @@ bool Trash::trash( const QString & path )
 	if ( !dir )
 	    return false;
 
-	const QString targetName = dir->uniqueName( path );
+	const QString targetName = uniqueName( path, dir->filesPath() );
 	dir->createTrashInfo( path, targetName );
 	dir->move( path, targetName );
     }
@@ -259,26 +284,6 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
     ensureDirExists( infoPath()  );
 
     // logDebug() << "Created TrashDir " << path << Qt::endl;
-}
-
-
-QString TrashDir::uniqueName( const QString & path )
-{
-    const QDir filesDir{ filesPath() };
-
-    const QFileInfo file{ path };
-    QString name = file.fileName();
-
-    for ( int i = 1; filesDir.exists( name ); ++i )
-    {
-	const QString baseName = file.baseName();
-	const QString suffix   = file.completeSuffix();
-	name = QString{ "%1_%2" }.arg( baseName ).arg( i );
-	if ( !suffix.isEmpty() )
-	    name += '.' % suffix;
-    }
-
-    return name;
 }
 
 

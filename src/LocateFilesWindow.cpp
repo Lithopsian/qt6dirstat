@@ -30,6 +30,20 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Format the number of results and display in 'label'.
+     **/
+    void showResultsCount( int results, bool overflow, QLabel * label )
+    {
+	if ( overflow )
+	    label->setText( QObject::tr( "Limited to %1 results" ).arg( results ) );
+	else if ( results == 1 )
+	    label->setText( QObject::tr( "1 result" ) );
+	else
+	    label->setText( QObject::tr( "%1 results" ).arg( results ) );
+    }
+
+
+    /**
      * Locate one of the items in this list results in the main window's
      * tree and treemap widgets via their SelectionModel.
      **/
@@ -166,7 +180,7 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
     _ui->treeWidget->clear();
 
     populateRecursive( fileInfo ? fileInfo : _subtree() );
-    showResultsCount();
+    showResultsCount( _ui->treeWidget->topLevelItemCount(), _treeWalker->overflow(), _ui->resultsLabel );
 
     _ui->treeWidget->setSortingEnabled( true );
 
@@ -188,18 +202,6 @@ void LocateFilesWindow::populateRecursive( FileInfo * dir )
 	if ( it->hasChildren() )
 	    populateRecursive( *it );
     }
-}
-
-
-void LocateFilesWindow::showResultsCount() const
-{
-    const int results = _ui->treeWidget->topLevelItemCount();
-    if ( _treeWalker->overflow() )
-	_ui->resultsLabel->setText( tr( "Limited to %1 results" ).arg( results ) );
-    else if ( results == 1 )
-	_ui->resultsLabel->setText( tr( "1 result" ) );
-    else
-        _ui->resultsLabel->setText( tr( "%1 results" ).arg( results ) );
 }
 
 

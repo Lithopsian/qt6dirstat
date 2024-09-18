@@ -151,8 +151,7 @@ namespace QDirStat
          * Dump the current history stack to the log.
          * This is meant for debugging.
          **/
-        bool isValidIndex( int index ) const
-            { return index >= 0 && index < _items.size(); }
+        bool isValidIndex( int index ) const { return index >= 0 && index < _items.size(); }
 
         /**
          * Return the current item in the history stack.

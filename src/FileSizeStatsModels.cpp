@@ -297,30 +297,10 @@ QString PercentileTableHeader::sectionText( int logicalIndex ) const
     if ( !model )
         return QString{};
 
-    if ( orientation() == Qt::Horizontal )
+    if ( orientation() == Qt::Vertical )
     {
-        return [ logicalIndex, model ]()
-        {
-            switch ( logicalIndex )
-            {
-                case PercentileTableModel::ValueCol:
-                    return tr( "Value" );
-                case PercentileTableModel::CountCol:
-                    return tr( "Files<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
-                case PercentileTableModel::SumCol:
-                    return tr( "Sum<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
-                case PercentileTableModel::CumCountCol:
-                    return tr( "Files<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
-                case PercentileTableModel::CumSumCol:
-                    return tr( "Sum<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
-            }
+        const int percentile = model->mapRow( logicalIndex );
 
-            return QString{};
-        }();
-    }
-
-    return []( int percentile )
-    {
         switch ( percentile )
         {
             case PercentileStats::minPercentile(): return tr( "<b>Min</b>" );
@@ -331,5 +311,21 @@ QString PercentileTableHeader::sectionText( int logicalIndex ) const
         }
 
         return tr( "<span style='font-size: large;'>P<sub>%1</sub></span>" ).arg( percentile );
-    }( model->mapRow( logicalIndex ) );
+    }
+
+    switch ( logicalIndex )
+    {
+        case PercentileTableModel::ValueCol:
+            return tr( "Value" );
+        case PercentileTableModel::CountCol:
+            return tr( "Files<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
+        case PercentileTableModel::SumCol:
+            return tr( "Sum<sub> P(n-%1)...P(n)</sub>" ).arg( model->filterStep() );
+        case PercentileTableModel::CumCountCol:
+            return tr( "Files<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
+        case PercentileTableModel::CumSumCol:
+            return tr( "Sum<sub> P(%1)...P(n)</sub>" ).arg( PercentileStats::minPercentile() );
+    }
+
+    return QString{};
 }

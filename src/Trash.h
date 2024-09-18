@@ -124,13 +124,6 @@ namespace QDirStat
         const QString & path() const { return _path; }
 
         /**
-         * Create a name that is unique within this trash directory.
-         * If no file or directory with 'name' exists yet in Trash/files or
-         * Trash/info, append a number.
-         **/
-        QString uniqueName( const QString & name );
-
-        /**
          * Create a .trashinfo file for a file or directory 'path' that will be
          * named 'targetName' (the unique name) in the trash dir.
          *
@@ -146,9 +139,6 @@ namespace QDirStat
          * This might throw a FileException.
          **/
         void move( const QString & path, const QString & targetName );
-
-
-    protected:
 
         /**
          * Return the path of the "files" subdirectory of this trash dir.
