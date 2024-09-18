@@ -150,28 +150,12 @@ void HistogramView::setPercentileRange( int startPercentile, int endPercentile, 
 
 void HistogramView::autoLogHeights()
 {
+    // Ignore if the user has overridden the height scaling
     if ( !_autoLogHeights )
 	return;
 
-    _logHeights = false;
-
-    // Need enough buckets for clearly distinct reference values and largest buckets
-    if ( _stats->bucketsCount() > 3 )
-    {
-	// We compare the largest bucket with the P85 percentile of the buckets
-	const FileCount refValue = _stats->bucketCount( qRound( _stats->bucketsCount() * 85.0 / 100.0 ) );
-
-	// More than 20x the reference value (or at least 1) needs a log scale
-	const FileCount highestBucketCount = _stats->highestBucketCount();
-	_logHeights = highestBucketCount > qMax( refValue, 1 ) * 20;
-
-#if VERBOSE_HISTOGRAM
-	logInfo() << "Largest bucket: " << highestBucketCount
-	          << " bucket P85: " << refValue
-	          << "	 -> use log height scale: " << _logHeights
-	          << Qt::endl;
-#endif
-    }
+    // Use log heights if the highest bucket is more than 50 times the 85-percentile bucket count
+    _logHeights = _stats->skewness() > 50;
 }
 
 
@@ -458,7 +442,7 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
 	    continue;
 	}
 
-	// Skip if configured for no percentile markers
+	// Skip if configured for no percentile markers (other than the quartiles)
 	if ( _percentileStep == 0 )
 	    continue;
 
@@ -546,7 +530,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 	const QBrush brushPie   = swapped ? overflowSliceBrush() : barBrush();
 
 	// Create the pie at the origin, so it can be rotated and then positioned afterwards
-	const QRectF rect{ -pieDiameter() / 2, -pieDiameter() / 2, pieDiameter(), pieDiameter() };
+	const QRectF rect{ -pieDiameter() / 2.0, -pieDiameter() / 2.0, pieDiameter(), pieDiameter() };
 
 	// Convert the slice value to a segment in Qt units of 1/16th degree
 	const int fullCircle = 360 * 16;
@@ -571,7 +555,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 	pie->setRotation( -45 );
 
 	// Move the group to its position in the overflow panel
-	pie->setPos( nextPos + QPointF{ panelWidth / 2, pieDiameter() / 2 } );
+	pie->setPos( nextPos + QPointF{ panelWidth / 2, pieDiameter() / 2.0 } );
 	nextPos.ry() += pieDiameter();
     };
 

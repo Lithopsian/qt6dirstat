@@ -274,8 +274,19 @@ namespace QDirStat
 	 * Return the highest number of data points currently in a
 	 * single bucket.
 	 **/
+	PercentileCount lowestBucketCount() const
+	    { return *std::min_element( _bucketCounts.begin(), _bucketCounts.end() ); }
 	PercentileCount highestBucketCount() const
 	    { return *std::max_element( _bucketCounts.begin(), _bucketCounts.end() ); }
+
+	/**
+	 * Return a value representing the difference between the largest
+	 * and some of the smaller buckets.  This is the ratio between
+	 * the largest bucket count and the 85th-percentile (15th smallest)
+	 * bucket count.  If the reference count happens to be 0, 1 is used
+	 * instead.
+	 **/
+	double skewness() const;
 
 	/**
 	 * If 'value' is 0, then return 0.  If 'value' is 1, then return 0.5.

@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <set>
+
 #include "PercentileStats.h"
 #include "Exception.h"
 #include "FormatUtil.h" // only needed with VERBOSE_LOGGING
@@ -235,4 +237,31 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 void PercentileStats::validateBucketIndex( int index ) const
 {
     CHECK_INDEX( index, 0, bucketsCount() - 1, "Bucket index out of range" );
+}
+
+
+double PercentileStats::skewness() const
+{
+    // If there are less than 4 bucket counts then no meaningful skewness can be calculated
+    if ( _bucketCounts.size() < 4 )
+	return 0;
+
+    // Get a reference value from the 85th-percentile (15th smallest) bucket count
+    PercentileCountList sortBuckets{ _bucketCounts };
+    auto it = sortBuckets.begin() + 15 * sortBuckets.size() / 100; // round down for an index
+    std::nth_element( sortBuckets.begin(), it, sortBuckets.end() );
+    const PercentileCount refCount = *it;
+
+    // Compare the reference, or at least 1, to the highest bucket count
+    const PercentileCount highest = highestBucketCount();
+    const double skewness = 1.0 * highest / qMax( refCount, 1 );
+
+#if VERBOSE_LOGGING
+	logInfo() << "Largest bucket: " << formatCount( highest )
+	          << " bucket P85: " << formatCount( refCount )
+	          << " -> skewness: " << skewness
+	          << Qt::endl;
+#endif
+
+    return skewness;
 }

@@ -25,7 +25,7 @@ namespace QDirStat
      * Histogram widget.
      *
      * This widget is based on buckets and percentiles, both of which have to
-     * be fed from the outside, i.e. the data collection is abstracted.
+     * be fed from the outside as a pointer to FileSizeStats.
      *
      * The histogram can be displayed in a traditional way, i.e. from the
      * minimum data value (percentile 0 or P0) to the maximum data value
