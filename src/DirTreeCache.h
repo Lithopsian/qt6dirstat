@@ -128,7 +128,7 @@ namespace QDirStat
 	 * Returns true if the end of the cache file is reached (or if there
 	 * was an error).
 	 **/
-	bool eof() const;
+	bool eof() const { return !_ok || !_cache ? true : gzeof( _cache ); }
 
 	/**
 	 * Returns true if reading the cache file went OK.
@@ -174,13 +174,14 @@ namespace QDirStat
 	/**
 	 * split the current input line into fields separated by whitespace.
 	 **/
-	void splitLine();
+	void splitLine( char * line );
 
 	/**
 	 * Returns the start of field no. 'no' in the current input line
 	 * after splitLine().
 	 **/
-	const char * field( int no ) const;
+	const char * field( int no ) const
+	    { return no >= 0 && no < _fieldsCount ? _fields[ no ] : nullptr; }
 
 	/**
 	 * Return an unescaped version of 'rawPath'.
@@ -198,19 +199,6 @@ namespace QDirStat
 	QString cleanPath( const QString & rawPath ) const
 	    { return QString{ rawPath }.replace( _multiSlash, "/" ); }
 
-	/**
-	 * Recursively set the read status of all dirs from 'dir' on, send tree
-	 * signals and finalize local (i.e. clean up empty or unneeded dot
-	 * entries).
-	 **/
-	void finalizeRecursive( DirInfo * dir );
-
-	/**
-	 * Cascade a read error up to the toplevel directory node read by this
-	 * cache file.
-	 **/
-	void setReadError( DirInfo * dir ) const;
-
 
     private:
 
@@ -220,7 +208,7 @@ namespace QDirStat
 
 	gzFile    _cache;
 	char      _buffer[ MAX_CACHE_LINE_LEN + 1 ];
-	char    * _line{ _buffer };
+//	char    * _line{ _buffer };
 	int       _lineNo{ 0 };
 	char    * _fields[ MAX_FIELDS_PER_LINE ];
 	int       _fieldsCount;

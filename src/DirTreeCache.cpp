@@ -183,7 +183,6 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
              "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
              "\n",
              CACHE_FORMAT_VERSION );
-
     writeTree( cache, tree->firstToplevel() );
     gzclose( cache );
 
@@ -293,6 +292,46 @@ namespace
 	return size;
     }
 
+
+    /**
+     * Recursively set the read status of all dirs from 'dir' on, send tree
+     * signals and finalize local (i.e. clean up empty or unneeded dot
+     * entries).
+     **/
+    void finalizeRecursive( DirInfo * dir, DirTree * tree )
+    {
+	if ( dir->readState() != DirOnRequestOnly )
+	{
+	    if ( !dir->readError() )
+		dir->setReadState( DirFinished );
+
+	    dir->finalizeLocal();
+	    tree->sendReadJobFinished( dir );
+	}
+
+	for ( DirInfoIterator it{ dir }; *it; ++it )
+	    finalizeRecursive( *it, tree );
+    }
+
+
+    /**
+     * Cascade a read error up to the 'toplevel' directory node.
+     **/
+    void setReadError( DirInfo * dir, const DirInfo * toplevel )
+    {
+	//logDebug() << "Setting read error for " << dir << Qt::endl;
+
+	while ( dir )
+	{
+	    dir->setReadState( DirError );
+
+	    if ( dir == toplevel )
+		return;
+
+	    dir = dir->parent();
+	}
+    }
+
 } // namespace
 
 
@@ -365,7 +404,7 @@ CacheReader::~CacheReader()
 
 	// Need to finalize the parent when replacing a subtree, as it will have been marked DirReading
 	DirInfo * toplevel = _parent ? _parent : _toplevel;
-	finalizeRecursive( toplevel );
+	finalizeRecursive( toplevel, _tree );
 	toplevel->finalizeAll();
     }
 }
@@ -376,10 +415,7 @@ bool CacheReader::read( int maxLines )
     while ( !gzeof( _cache ) && _ok && ( maxLines == 0 || --maxLines > 0 ) )
     {
 	if ( readLine() )
-	{
-	    splitLine();
 	    addItem();
-	}
     }
 
     return _ok && !gzeof( _cache );
@@ -394,7 +430,7 @@ void CacheReader::addItem()
 		   << ": Expected at least 4 fields, saw only " << _fieldsCount
 		   << Qt::endl;
 
-	setReadError( _latestDir );
+	setReadError( _latestDir, _toplevel );
 
 	if ( ++_errorCount > MAX_ERROR_COUNT )
 	{
@@ -656,23 +692,12 @@ void CacheReader::addItem()
 }
 
 
-bool CacheReader::eof() const
-{
-    if ( !_ok || !_cache )
-	return true;
-
-    return gzeof( _cache );
-}
-
-
 bool CacheReader::isDir( const QString & dirName )
 {
     while ( !gzeof( _cache ) && _ok )
     {
 	if ( !readLine() )
 	    return false;
-
-	splitLine();
 
 	if ( _fieldsCount < 2 )
 	    return false;
@@ -689,7 +714,6 @@ bool CacheReader::isDir( const QString & dirName )
 	while ( _fieldsCount > n )
 	{
 	    const char * keyword = field( n++ );
-
 	    if ( strcasecmp( keyword, "unread:" ) == 0 )
 		return false;
 	}
@@ -709,7 +733,6 @@ void CacheReader::checkHeader()
 	return;
 
     //logDebug() << "Checking cache file header" << Qt::endl;
-    splitLine();
 
     // Check for    [qdirstat <version> cache file]
     // or	    [kdirstat <version> cache file]
@@ -750,6 +773,8 @@ bool CacheReader::readLine()
 
 //    _fieldsCount = 0;
 
+    char * line;
+
     do
     {
 	++_lineNo;
@@ -758,7 +783,7 @@ bool CacheReader::readLine()
 	if ( buf == Z_NULL || buf[ strlen( buf ) - 1 ] != '\n' )
 	{
 	    _buffer[0] = '\0';
-	    _line      = _buffer;
+	    line       = _buffer;
 
 	    if ( !gzeof( _cache ) )
 	    {
@@ -770,79 +795,39 @@ bool CacheReader::readLine()
 	    return false;
 	}
 
-	_line = skipWhiteSpace( _buffer );
-	killTrailingWhiteSpace( _line );
+	line = skipWhiteSpace( _buffer );
+	killTrailingWhiteSpace( line );
 
 	// logDebug() << "line[ " << _lineNo << "]: \"" << _line << '"' << Qt::endl;
 
     } while ( !gzeof( _cache ) &&
-	      ( *_line == '\0' ||	// empty line
-	        *_line == '#' ) );	// comment line
+	      ( *line == '\0' ||	// empty line
+	        *line == '#' ) );	// comment line
+
+    splitLine( line );
 
     return true;
 }
 
 
-void CacheReader::splitLine()
+void CacheReader::splitLine( char * line )
 {
     _fieldsCount = 0;
 
-    if ( !_ok || !_line )
+    if ( !_ok || !line )
 	return;
 
-    char * current = _line;
-    const char * end = _line + strlen( _line );
+    const char * end = line + strlen( line );
 
-    while ( current && current < end && *current && _fieldsCount < MAX_FIELDS_PER_LINE-1 )
+    while ( line && line < end && *line && _fieldsCount < MAX_FIELDS_PER_LINE-1 )
     {
-	_fields[ _fieldsCount++ ] = current;
-	current = findNextWhiteSpace( current );
+	_fields[ _fieldsCount++ ] = line;
+	line = findNextWhiteSpace( line );
 
-	if ( current && current < end )
+	if ( line && line < end )
 	{
-	    *current++ = '\0';
-	    current = skipWhiteSpace( current );
+	    *line++ = '\0';
+	    line = skipWhiteSpace( line );
 	}
-    }
-}
-
-
-const char * CacheReader::field( int no ) const
-{
-    if ( no >= 0 && no < _fieldsCount )
-	return _fields[ no ];
-    else
-	return nullptr;
-}
-
-
-void CacheReader::finalizeRecursive( DirInfo * dir )
-{
-    if ( dir->readState() != DirOnRequestOnly )
-    {
-	if ( !dir->readError() )
-	    dir->setReadState( DirFinished );
-
-	dir->finalizeLocal();
-	_tree->sendReadJobFinished( dir );
-    }
-
-    for ( DirInfoIterator it{ dir }; *it; ++it )
-	finalizeRecursive( *it );
-}
-
-
-void CacheReader::setReadError( DirInfo * dir ) const
-{
-    //logDebug() << "Setting read error for " << dir << Qt::endl;
-
-    while ( dir )
-    {
-	dir->setReadState( DirError );
-
-	if ( dir == _toplevel )
-	    return;
-
-	dir = dir->parent();
     }
 }
