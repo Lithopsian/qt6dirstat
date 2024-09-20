@@ -73,6 +73,7 @@ void PercentileStats::calculatePercentiles()
     _percentileCounts = PercentileCountList( 1 );
     _percentileSums   = PercentileValueList( 1 );
 
+    // Just keep running totals to go into the lists
     PercentileCount count = 0;
     PercentileValue sum   = 0;
 
@@ -106,7 +107,7 @@ void PercentileStats::calculatePercentiles()
 #if VERBOSE_LOGGING
     for ( int i=0; i < _percentileSums.size(); ++i )
     {
-	logDebug() << " boundary[" << i << "] : " << formatCount( _percentiles[ i ] ) << Qt::endl;
+	logDebug() << " boundary[" << i << "] : " << formatCount( _percentiles[ i ], 6 ) << Qt::endl;
 	logDebug() << "    count[" << i << "] : " << formatCount( percentileCount( i ) ) << Qt::endl;
 	logDebug() << "  cum sum[" << i << "] : " << formatCount( percentileSum( i ) ) << Qt::endl;
 	logDebug() << "cum count[" << i << "] : " << formatCount( percentileSum( i ) ) << Qt::endl;
@@ -129,7 +130,7 @@ void PercentileStats::validateIndexRange( int startIndex, int endIndex )
     validatePercentileIndex( endIndex   );
 
     if ( startIndex >= endIndex )
-	THROW( Exception{ "startPercentile must be less than endPercentile" } );
+	THROW( Exception{ "start percentile index must be less than end percentile index" } );
 }
 
 
@@ -146,8 +147,8 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	bucketCount = 1;
 
     // Create an empty list of boundaries and a list of bucketCount zeroes, discarding any old lists
-    _buckets         = Buckets{};
-    _bucketCounts    = PercentileCountList( bucketCount );
+    _buckets      = Buckets{};
+    _bucketCounts = PercentileCountList( bucketCount );
 
     // Calculate the bucket width either as a linear increment, or a factor for log widths
     const PercentileBoundary bucketWidth = [ logWidths, bucketsStart, bucketsEnd, bucketCount ]()
@@ -159,11 +160,12 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	// Avoid taking the log of 0 and smoothly transition to logs for higher values
 	const PercentileBoundary logStart = log2( bucketsStart );
 	const PercentileBoundary logEnd   = log2( bucketsEnd   );
-	const PercentileBoundary logWidth = ( logEnd - logStart ) / bucketCount;
+	const PercentileBoundary logWidth =
+	    ( logEnd - logStart ) / ( logStart < 1 ? bucketCount - 1 : bucketCount );
 #if VERBOSE_LOGGING
-        logDebug() << " logStart: " << formatCount( logStart )
-                   << " logEnd: " << formatCount( logEnd )
-                   << " logDiff: " << formatCount( logWidth )
+        logDebug() << " logStart: " << formatCount( logStart, 2 )
+                   << " logEnd: " << formatCount( logEnd, 2 )
+                   << " logDiff: " << formatCount( logWidth, 2 )
                    << Qt::endl;
 #endif
 	return std::exp2( logWidth );
@@ -174,7 +176,8 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
                << " endPercentile: " << endPercentile
                << " startVal: " << formatCount( bucketsStart )
                << " endVal: " << formatCount( bucketsEnd )
-               << " bucketWidth: " << formatCount( bucketWidth )
+               << " bucketCount: " << bucketCount
+               << " bucketWidth: " << formatCount( bucketWidth, 2 )
                << Qt::endl;
 #endif
 
@@ -201,15 +204,14 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
     if ( logWidths && nextBucketStart == 0 && bucketWidth > 1 )
 	nextBucketStart = 1;
 
-    // Fill buckets from the start we just found, up to the last requested value
+    // Fill buckets from the data point we just found, up to the last requested value
     auto bucketIt = _bucketCounts.begin();
     for ( auto it = beginIt; it != cend() && *it <= bucketsEnd; ++it )
     {
 	// Loop through buckets until we reach the one for this data point, skipping empty buckets
 	while ( *it >= nextBucketStart )
 	{
-	    // Handle rounding errors which could push us past the last bucket,
-	    // and handle the special case of the last bucket end value
+	    // The calculated end of the last bucket might not exactly match the final data point
 	    if ( bucketIt + 1 != _bucketCounts.end() )
 	    {
 		// For most buckets, just append to the boundaries and get the start of the next bucket
@@ -224,7 +226,7 @@ void PercentileStats::fillBuckets( bool logWidths, int bucketCount, int startPer
 	    }
 	}
 
-	// Add to this bucket
+	// Add a data point to this bucket
 	( *bucketIt )++;
     }
 

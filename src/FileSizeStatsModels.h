@@ -32,6 +32,7 @@ namespace QDirStat
 	{
 	    StartCol,
 	    EndCol,
+	    WidthCol,
 	    ValueCol,
 	    ColCount
 	};
@@ -79,14 +80,14 @@ namespace QDirStat
 	int columnCount( const QModelIndex & ) const override { return ColCount; }
 
 	/**
-	 * Return data to be displayed for the specified model index and role.
-	 **/
-	QVariant data( const QModelIndex & index, int role ) const override;
-
-	/**
 	 * Return header data for the specified section.
 	 **/
 	QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
+
+	/**
+	 * Return data to be displayed for the specified model index and role.
+	 **/
+	QVariant data( const QModelIndex & index, int role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if
@@ -169,16 +170,16 @@ namespace QDirStat
 	int columnCount( const QModelIndex & ) const override { return CumSumCol + 1; }
 
 	/**
-	 * Return data to be displayed for the specified model index and role.
-	 **/
-	QVariant data( const QModelIndex & index, int role ) const override;
-
-	/**
 	 * Return header data for the specified section.  The header contents
 	 * are painted in the paintSection() override, but the tooltips are
 	 * defined here.
 	 **/
 	QVariant headerData( int, Qt::Orientation, int ) const override;
+
+	/**
+	 * Return data to be displayed for the specified model index and role.
+	 **/
+	QVariant data( const QModelIndex & index, int role ) const override;
 
 	/**
 	 * Map a row number to a percentile index.  The mapping is

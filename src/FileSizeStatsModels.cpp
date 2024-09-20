@@ -32,55 +32,22 @@ namespace
         return formatByteSize( size );
     }
 
+
+    QString formatWidthSize( PercentileBoundary size )
+    {
+        if ( size >= 2 )
+            return formatSize( size );
+
+        const int precision = size < 1 ? 2 : 1;
+        return formatByteSize( size, precision );
+    }
+
 }
 
 
 int BucketsTableModel::rowCount( const QModelIndex & parent ) const
 {
     return parent.isValid() || !_stats ? 0 : _stats->bucketsCount();
-}
-
-
-QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
-{
-    if ( !index.isValid() )
-        return QVariant{};
-
-    switch ( role )
-    {
-        case Qt::DisplayRole:
-        {
-            const int row = index.row();
-
-            switch ( index.column() )
-            {
-                case StartCol:  return formatSize( _stats->bucketStart( row ) );
-                case EndCol:    return formatSize( _stats->bucketEnd( row ) );
-                case ValueCol:  return formatCount( _stats->bucketCount( row ) );
-                default:        return QVariant{}; // should never happen
-            }
-        }
-
-        case Qt::TextAlignmentRole:
-            return QVariant{ Qt::AlignVCenter | Qt::AlignRight };
-
-        case Qt::ToolTipRole:
-        {
-            const FileSize size = [ this, &index ]() -> FileSize
-            {
-                switch ( index.column() )
-                {
-                    case StartCol:  return _stats->bucketStart( index.row() );
-                    case EndCol:    return _stats->bucketEnd( index.row() );
-                    default:        return 0;
-                }
-            }();
-            return sizeTooltip( size );
-        }
-
-        default:
-            return QVariant{};
-    }
 }
 
 
@@ -97,6 +64,7 @@ QVariant BucketsTableModel::headerData( int section, Qt::Orientation orientation
             {
                 case StartCol: return tr( "Start size" );
                 case EndCol:   return tr( "End size"   );
+                case WidthCol: return tr( "Width"      );
                 case ValueCol: return tr( "Files"      );
                 default:       return QVariant{}; // should never happen
             }
@@ -120,6 +88,10 @@ QVariant BucketsTableModel::headerData( int section, Qt::Orientation orientation
                     case EndCol:
                         return tr( "The size of the largest file that would be counted in this bucket" );
 
+                    case WidthCol:
+                        return tr( "The size range between the smallest and largest files"
+                                   "<br/>that would counted in this bucket" );
+
                     case ValueCol:
                         return tr( "The number of files between 'Start size' and 'End size' inclusive,"
                                    "<br/>represented in the histogram by one bar" );
@@ -137,6 +109,59 @@ QVariant BucketsTableModel::headerData( int section, Qt::Orientation orientation
 }
 
 
+QVariant BucketsTableModel::data( const QModelIndex & index, int role ) const
+{
+    if ( !index.isValid() )
+        return QVariant{};
+
+    switch ( role )
+    {
+        case Qt::DisplayRole:
+        {
+            switch ( index.column() )
+            {
+                case StartCol:  return formatSize( _stats->bucketStart( index.row() ) );
+                case EndCol:    return formatSize( _stats->bucketEnd( index.row() ) );
+                case WidthCol:  return formatWidthSize( _stats->bucketWidth( index.row() ) );
+                case ValueCol:  return formatCount( _stats->bucketCount( index.row() ) );
+                default:        return QVariant{}; // should never happen
+            }
+        }
+
+        case Qt::TextAlignmentRole:
+            return QVariant{ Qt::AlignVCenter | Qt::AlignRight };
+
+        case Qt::ToolTipRole:
+        {
+            const int row = index.row();
+
+            // Show decimals on the start and end sizes for buckets covering less than 1 byte
+            if ( _stats->bucketWidth( row ) <= 1 && _stats->bucketsCount() > 1 )
+            {
+                switch ( index.column() )
+                {
+                    case StartCol: return formatByteSize( _stats->rawBucketStart( row ), 2 );
+                    case EndCol:   return formatByteSize( _stats->rawBucketEnd( row ), 2 );
+                    default:       return QVariant{};
+                }
+            }
+
+            // Show exact byte size for rounded (eg. 1.4kB) sizes
+            switch ( index.column() )
+            {
+                case StartCol: return sizeTooltip( _stats->bucketStart( row ) );
+                case EndCol:   return sizeTooltip( _stats->bucketEnd( row ) );
+                case WidthCol: return sizeTooltip( std::round( _stats->bucketWidth( row ) ) );
+                default:       return QVariant{};
+            }
+        }
+
+        default:
+            return QVariant{};
+    }
+}
+
+
 
 
 int PercentileTableModel::rowCount( const QModelIndex & parent ) const
@@ -145,6 +170,35 @@ int PercentileTableModel::rowCount( const QModelIndex & parent ) const
         return 0;
 
     return PercentileStats::maxPercentile() / filterStep() + 1;
+}
+
+
+QVariant PercentileTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
+{
+    if ( role != Qt::ToolTipRole || orientation == Qt::Vertical )
+        return QVariant{};
+
+    const QString tooltipText = [ section ]()
+    {
+        switch ( section )
+        {
+            case ValueCol:    return tr( "The file size at this percentile" );
+
+            case CountCol:    return tr( "The number of files larger than the previous precentile"
+                                         "<br/>shown and up to the size of this percentile" );
+
+            case SumCol:      return tr( "The sum of the sizes of the files larger than the previous"
+                                         "<br/>percentile shown and up to the size of this percentile" );
+
+            case CumCountCol: return tr( "The total number of files up to the size of this percentile" );
+
+            case CumSumCol:   return tr( "The sum of the sizes of all files"
+                                         "<br/>up to the size of this percentile" );
+
+            default:          return QString{}; // should never happen
+        }
+    }();
+    return whitespacePre( tooltipText );
 }
 
 
@@ -211,54 +265,29 @@ QVariant PercentileTableModel::data( const QModelIndex & index, int role ) const
         case Qt::ToolTipRole:
         {
             // Show the exact byte size of rounded sizes in the tooltip
-            const FileSize size = [ this, &index ]() -> FileSize
-            {
-                const int row = index.row();
-                const int i   = mapRow( row );
+            const int col = index.column();
+            const int row = index.row();
+            const int i   = mapRow( row );
 
-                switch ( index.column() )
-                {
-                    case ValueCol:  return _stats->percentileValue( i );
-                    case SumCol:    return i == 0 ? 0 : _stats->percentileSum( mapRow( row - 1 ), i );
-                    case CumSumCol: return i == 0 ? 0 : _stats->cumulativeSum( i );
-                    default: return 0;
-                }
-            }();
-            return sizeTooltip( size );
+            if ( i == 0 && col != ValueCol )
+                return QVariant{};
+
+            switch ( col )
+            {
+                case ValueCol:
+                    return sizeTooltip( _stats->percentileValue( i ) );
+                case SumCol:
+                    return sizeTooltip( _stats->percentileSum( mapRow( row - 1 ), i ) );
+                case CumSumCol:
+                    return sizeTooltip( _stats->cumulativeSum( i ) );
+                default:
+                    return QVariant{};
+            }
         }
 
         default:
             return QVariant{};
     }
-}
-
-
-QVariant PercentileTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
-{
-    if ( role != Qt::ToolTipRole || orientation == Qt::Vertical )
-        return QVariant{};
-
-    const QString tooltipText = [ section ]()
-    {
-        switch ( section )
-        {
-            case ValueCol:    return tr( "The file size at this percentile" );
-
-            case CountCol:    return tr( "The number of files larger than the previous precentile"
-                                         "<br/>shown and up to the size of this percentile" );
-
-            case SumCol:      return tr( "The sum of the sizes of the files larger than the previous"
-                                         "<br/>percentile shown and up to the size of this percentile" );
-
-            case CumCountCol: return tr( "The total number of files up to the size of this percentile" );
-
-            case CumSumCol:   return tr( "The sum of the sizes of all files"
-                                         "<br/>up to the size of this percentile" );
-
-            default:          return QString{}; // should never happen
-        }
-    }();
-    return whitespacePre( tooltipText );
 }
 
 

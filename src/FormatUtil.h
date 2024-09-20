@@ -49,34 +49,34 @@ namespace QDirStat
 {
     /**
      * Format simple numbers according to the locale conventions.
-     * Overloaded for various numeric types.
+     * Overloaded for integer and floating point numeric types.
      **/
     inline QString formatCount( qint64 size )
         { return QString{ "%L1" }.arg( size ); }
-    inline QString formatCount( qint32 size )
-        { return QString{ "%L1" }.arg( size ); }
-    inline QString formatCount( double size, int precision = 6 )
+    inline QString formatCount( double size, int precision )
         { return QString{ "%L1" }.arg( size, 0, 'f', precision ); }
-    inline QString formatCount( long double size, int precision = 6 )
-        { return QString{ "%L1" }.arg( static_cast<double>( size ), 0, 'f', precision ); }
 
     /**
-     * Can't use a default argument when using this as a function pointer,
-     * so we really need the overloaded version.
+     * Standard strings for formatting file sizes.  More complex
+     * prefixed byte units are handled inside formatSize().
      **/
-    QString formatSize( FileSize size, int precision );
+    inline QString oneB()    { return QObject::tr( "B"      ); }
+    inline QString oneByte() { return QObject::tr( "1 byte" ); }
+    inline QString bytes()   { return QObject::tr( "bytes"  ); }
 
     /**
      * Format a file / subtree size human readable, i.e. in "GB" / "MB"
      * etc. rather than huge numbers of digits. 'precision' is the number of
      * digits after the decimal point.
-     *
-     * Note: For logDebug() etc., operator<< is overwritten to do exactly that:
-     *
-     *	   logDebug() << "Size: " << x->totalSize() << Qt::endl;
+     **/
+    QString formatSize( FileSize size, int precision );
+
+    /**
+     * Can't use a default argument when using formatSize() as a function
+     * pointer, so provide an overloaded version (although it isn't used
+     * as a function pointer any more).
      **/
     inline QString formatSize( FileSize size )    { return formatSize( size, 1 ); }
-    inline QString formatSize( double size )      { return formatSize( std::llround( size ), 1 ); }
     inline QString formatSize( long double size ) { return formatSize( std::llround( size ), 1 ); }
 
     /**
@@ -84,14 +84,16 @@ namespace QDirStat
      * thousands separator.
      **/
     inline QString formatByteSize( FileSize size )
-	{ return size == 1 ? QObject::tr( "1 byte" ) : QObject::tr( "%L1 bytes" ).arg( size ); }
+	{ return size == 1 ? oneByte() : QString{ "%L1 " }.arg( size ) % bytes(); }
+    inline QString formatByteSize( long double size, int precision )
+	{ return QString{ "%L1 " }.arg( static_cast<double>( size ), 0, 'f', precision ) % bytes(); }
 
     /**
      * Format a file size string with no thousands separators and "B" for the units.
      * This is only intended for small values, typically less than 1,000.
      **/
     inline QString formatShortByteSize( FileSize size )
-	{ return QString::number( size ) % QObject::tr(" B" ); }
+	{ return QString::number( size ) % oneB(); }
 
     /**
      * Format a string of the form "/ 3 links" for describing hard links.  If the

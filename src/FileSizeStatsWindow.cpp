@@ -321,7 +321,7 @@ void FileSizeStatsWindow::initHistogram()
 
 void FileSizeStatsWindow::setPercentileTable()
 {
-    const PercentileBoundary nominalCount = 1.0 * _stats->size() / _stats->maxPercentile();
+    const double nominalCount = 1.0 * _stats->size() / _stats->maxPercentile();
     const int precision = [ nominalCount ]()
     {
 	if ( nominalCount == 0 || nominalCount >= 10 ) return 0;

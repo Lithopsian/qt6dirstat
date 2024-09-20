@@ -230,16 +230,33 @@ namespace QDirStat
 	int bucketsCount() const { return _bucketCounts.size(); }
 
 	/**
+	 * Return the exact span of bytes that are included in bucket
+	 * 'index'.
+	 **/
+	PercentileValue bucketWidth( int index ) const
+	{
+	    validateBucketIndex( index );
+	    return _buckets[ index+1 ] - _buckets[ index ];
+	}
+
+	/**
 	 * Return the start value of bucket 'index'.  This is rounded
 	 * up from the (possibly) fractional bucket start value in
 	 * the _buckets list so that it indicates the smallest integer
 	 * value that would be collected in that bucket, although not
 	 * necessarily the actual smallest value in the bucket.
+	 *
+	 * rawBucketStart() returns an unrounded value.
 	 **/
 	PercentileValue bucketStart( int index ) const
 	{
 	    validateBucketIndex( index );
 	    return std::ceil( _buckets[ index ] );
+	}
+	PercentileBoundary rawBucketStart( int index ) const
+	{
+	    validateBucketIndex( index );
+	    return _buckets[ index ];
 	}
 
 	/**
@@ -250,15 +267,26 @@ namespace QDirStat
 	 * although not necessarily the actual largest value in the
 	 * bucket.
 	 *
-	 * The bucket end should never be smaller than the bucket start
-	 * and this special case has to be checked in case the start of
-	 * 'index +1' is the same as the start of 'index' (ie. a width
-	 * smaller than 1, possibly zero).
+	 * The bucket end calculated in this way may be 1 byte smaller
+	 * than the bucket start, when the bucket does not span an
+	 * integer value and so there are no data points in the bucket.
+	 * In the special case of a single bucket, with the same start
+	 * and end values, force the rounded end value to be the same
+	 * as the start value.
+	 *
+	 * rawBucketEnd() returns the start of the next bucket,
+	 * unrounded.
 	 **/
 	PercentileValue bucketEnd( int index ) const
 	{
 	    validateBucketIndex( index );
-	    return std::ceil( std::max( _buckets[ index + 1 ] - 1, _buckets[ index ] ) );
+	    return std::ceil( _bucketCounts.size() == 1 ? _buckets[ index ] : _buckets[ index + 1 ] - 1 );
+//	    return std::ceil( std::max( _buckets[ index + 1 ] - 1, _buckets[ index ] ) );
+	}
+	PercentileBoundary rawBucketEnd( int index ) const
+	{
+	    validateBucketIndex( index );
+	    return _buckets[ index + 1 ];
 	}
 
 	/**
