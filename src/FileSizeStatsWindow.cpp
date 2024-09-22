@@ -286,15 +286,12 @@ void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
 void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
     const QString & url = fileInfo->debugUrl();
-    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
+    const QString headerUrl = suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url );
+    _ui->headingLabel->setStatusTip( tr( "File size statistics for %1" ).arg( headerUrl ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
     // Existing stats are invalidated; be sure the model and histogram get new pointers promptly
-    if ( suffix.isEmpty() )
-	_stats.reset( new FileSizeStats{ fileInfo } );
-    else
-	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
-
+    _stats.reset( new FileSizeStats{ fileInfo, suffix } );
     _stats->calculatePercentiles();
 
     bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
@@ -447,7 +444,7 @@ void FileSizeStatsWindow::showHelp() const
 void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Elide a label to the width of the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 20 );
 }
 
 

@@ -28,16 +28,11 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor with just a subtree.
-	 **/
-	FileSizeStats( FileInfo * subtree );
-
-	/**
-	 * Constructor with a subtree and suffix.
+	 * Constructor with a subtree and optional suffix.
 	 *
 	 * 'suffix' should start with ".", e.g. ".jpg".
 	 **/
-	FileSizeStats( const FileInfo * subtree, const QString & suffix );
+	FileSizeStats( FileInfo * subtree, const QString & suffix = QString{} );
 
 
     protected:

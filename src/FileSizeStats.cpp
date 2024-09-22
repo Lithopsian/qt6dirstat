@@ -16,24 +16,21 @@
 using namespace QDirStat;
 
 
-FileSizeStats::FileSizeStats( FileInfo * subtree ):
+FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix ):
     PercentileStats{}
 {
     CHECK_PTR( subtree );
 
-    // Avoid reallocations for potentially millions of list appends
-    reserve( subtree->totalNonDirItems() );
-    collect( subtree );
-    sort();
-}
+    if ( suffix.isEmpty() )
+    {
+        reserve( subtree->totalNonDirItems() );
+        collect( subtree );
+    }
+    else
+    {
+        collect( subtree, suffix );
+    }
 
-
-FileSizeStats::FileSizeStats( const FileInfo * subtree, const QString & suffix ):
-    PercentileStats{}
-{
-    CHECK_PTR( subtree );
-
-    collect( subtree, suffix );
     sort();
 }
 

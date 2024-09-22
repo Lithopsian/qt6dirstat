@@ -63,7 +63,7 @@ namespace QDirStat
 	 **/
 	static void populateSharedInstance( QWidget       * mainWindow,
 	                                    FileInfo      * fileInfo,
-	                                    const QString & suffix = "" );
+	                                    const QString & suffix = QString{} );
 
 
     protected slots:
