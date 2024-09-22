@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include <QContextMenuEvent>
 #include <QElapsedTimer>
 #include <QMainWindow>
 #include <QTimer>

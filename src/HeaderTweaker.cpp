@@ -284,15 +284,6 @@ void HeaderTweaker::autoSizeCurrentCol()
 }
 
 
-void HeaderTweaker::setAllColumnsResizeMode( bool autoSize )
-{
-    const QHeaderView::ResizeMode newResizeMode = resizeMode( autoSize );
-
-    for ( int section = 0; section < _header->count(); ++section )
-	setResizeMode( section, newResizeMode );
-}
-
-
 void HeaderTweaker::setAllColumnsAutoSize()
 {
     setAllColumnsResizeMode( true );
@@ -461,12 +452,6 @@ void HeaderTweaker::applyLayout( ColumnLayout * layout )
     setColumnVisibility( _header, layout->columns );
 }
 
-
-void HeaderTweaker::resizeToContents( QHeaderView * header )
-{
-    for ( int col = 0; col < header->count(); ++col )
-	header->setSectionResizeMode( col, QHeaderView::ResizeToContents );
-}
 
 
 

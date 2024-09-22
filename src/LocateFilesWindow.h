@@ -122,7 +122,7 @@ namespace QDirStat
 	/**
 	 * Count the number of items in the list and display the number.
 	 **/
-	void showResultsCount() const;
+//	void showResultsCount() const;
 
 	/**
 	 * Select the first item in the list. This will also select it in the

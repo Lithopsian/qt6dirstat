@@ -33,7 +33,8 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
     if ( lSize < 1000 )
     {
 	// Exact number of bytes, no decimals
-	return QString::number( lSize ) % ( lSize == 1 ? QObject::tr( " byte" ) : QObject::tr( " bytes" ) );
+	return lSize == 1 ? oneByte() : QString{ "%1 " }.arg( lSize ) % bytes();
+//	return QString::number( lSize ) % ( lSize == 1 ? QObject::tr( " byte" ) : QObject::tr( " bytes" ) );
     }
     else
     {
@@ -62,7 +63,7 @@ QString QDirStat::formatTime( time_t rawTime )
 #else
     const QDateTime time = QDateTime::fromSecsSinceEpoch( rawTime );
 #endif
-    return QLocale().toString( time, QLocale::ShortFormat );
+    return QLocale{}.toString( time, QLocale::ShortFormat );
 }
 
 

@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <QDialog>
+#include <QKeyEvent>
 #include <QTreeWidgetItem>
 
 #include "ui_file-type-stats-window.h"

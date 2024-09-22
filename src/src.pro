@@ -40,7 +40,6 @@ SOURCES =   main.cpp			\
 	    AdaptiveTimer.cpp		\
 	    Attic.cpp			\
 	    BreadcrumbNavigator.cpp	\
-	    BucketsTableModel.cpp	\
 	    BusyPopup.cpp		\
 	    Cleanup.cpp			\
 	    CleanupCollection.cpp	\
@@ -71,6 +70,7 @@ SOURCES =   main.cpp			\
 	    FileMTimeStats.cpp		\
 	    FileSizeLabel.cpp		\
 	    FileSizeStats.cpp		\
+	    FileSizeStatsModels.cpp	\
 	    FileSizeStatsWindow.cpp	\
 	    FileSystemsWindow.cpp	\
 	    FileTypeStats.cpp		\
@@ -135,7 +135,6 @@ HEADERS =   QDirStatApp.h		\
 	    AdaptiveTimer.h		\
 	    Attic.h			\
 	    BreadcrumbNavigator.h	\
-	    BucketsTableModel.h		\
 	    BusyPopup.h			\
 	    Cleanup.h			\
 	    CleanupCollection.h		\
@@ -165,6 +164,7 @@ HEADERS =   QDirStatApp.h		\
 	    FileSearchFilter.h		\
 	    FileSizeLabel.h		\
 	    FileSizeStats.h		\
+	    FileSizeStatsModels.h	\
 	    FileSizeStatsWindow.h	\
 	    FileSystemsWindow.h		\
 	    FileTypeStats.h		\

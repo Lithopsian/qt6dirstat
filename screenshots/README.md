@@ -29,12 +29,6 @@ Layout 3 (full): All or most tree columns including file owner, group and permis
 and octal formats, but no details panel to make room for all the columns.
 
 
-### Treemap on side and details with treemap
-
-![Details Panel for a File](QDirStat-layout.png)
-The breadcrumbs, file details panel, treemap, or main directory tree can all be shown or hidden.  The visibility of each will be remembered for the given layout L1, L2, or L3.  Additionally, the treemap be be moved from below the directory tree to the right hand side of it, and the file details panel may be moved from next to the directory tree to next to the treemap.
-
-
 ### Details Panel
 
 ![Details Panel for a File](QDirStat-details-file-L2.png)
@@ -188,6 +182,14 @@ Degenerated histogram if the last percentiles are too far spread out
 ![Histogram with P99](QDirStat-histogram-P99.png)
 
 Just one percentile less makes all the difference: Scaled down from P100 to P99
+
+![Histogram with log buckets](QDirStat-histogram-log-buckets.png)
+
+The histogram looks very different with bucket widths scaled logarithmically
+
+![Histogram with log buckets](QDirStat-histogram-markers.png)
+
+Percentile markers can also be shown on a histogram.
 
 
 

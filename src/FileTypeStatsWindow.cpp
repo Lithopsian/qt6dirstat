@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QKeyEvent>
 #include <QMenu>
 #include <QPointer>
 
@@ -106,14 +105,13 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-//	tree->setColumnCount( FT_ColumnCount );
 	tree->setHeaderLabels( { QObject::tr( "Name" ),
 	                         QObject::tr( "Number" ),
 	                         QObject::tr( "Total Size" ),
 	                         QObject::tr( "Percentage" ) } );
 	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
 	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace
@@ -331,7 +329,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
 void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 {
-    const QString suffix = currentSuffix().toLower();
+    const QString suffix = currentSuffix();
     FileInfo * dir = _subtree();
     if ( suffix.isEmpty() || !dir )
         return;

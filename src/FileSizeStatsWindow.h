@@ -12,6 +12,8 @@
 
 #include <memory>
 
+#include <QActionGroup>
+#include <QContextMenuEvent>
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"
@@ -67,10 +69,10 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Fill the percentiles table depending on the content of the
-	 * checkbox in the same tab.
+	 * Load the nominal percentiles label and reset the model with the
+	 * current filter setting.
 	 **/
-	void fillPercentileTable();
+	void setPercentileTable();
 
 	/**
 	 * Respond to changes in the markers combobox or from the context menu.
@@ -112,14 +114,14 @@ namespace QDirStat
 	 * Toggle the histogram y-axis scale between log and linear and disable
 	 * the automatic selection of the log scale setting.
 	 **/
-	void logScale();
+	void logHeights();
 
 	/**
 	 * Set the histogram y-axis scale to log or linear depending on the
 	 * bucket size distribution and continue to automatically set the
 	 * scaling.
 	 **/
-	void autoLogScale();
+	void autoLogHeights();
 
 	/**
 	 * Set the start percentile to the minimum (0), or set the end
@@ -131,7 +133,7 @@ namespace QDirStat
 	/**
 	 * Show help for a topic determined by the sender of this signal.
 	 **/
-	void showHelp();
+	void showHelp() const;
 
 
     protected:
@@ -141,12 +143,6 @@ namespace QDirStat
 	 **/
 	void initWidgets();
 	void connectActions();
-
-	/**
-	 * Configure a percentile marker action, including setting
-	 * it in the markers combo box and connecting the action.
-	 **/
-	void markersAction( QActionGroup * group, QAction * action, int index );
 
 	/**
 	 * Populate with new content.
@@ -177,8 +173,9 @@ namespace QDirStat
 	void changeEvent( QEvent * event ) override;
 
 	/**
-	 * Context menu event.  If the histogram tab is open, build and
-	 * show a context menu.
+	 * Context menu event.  Build and show a context menu.
+	 * There are currently only context menus for the histogram
+	 * and buckets table tabs.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/

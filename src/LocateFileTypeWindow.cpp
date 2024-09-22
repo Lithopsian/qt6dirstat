@@ -41,7 +41,7 @@ namespace
 	const DirInfo * dir = item->dotEntry() ? item->dotEntry() : item->toDirInfo();
 	for ( FileInfoIterator it{ dir }; *it; ++it )
 	{
-	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseInsensitive ) )
+	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseSensitive ) )
 		result << *it;
 	}
 
@@ -56,14 +56,12 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-//	_ui->treeWidget->setColumnCount( SSR_ColumnCount );
 	tree->setHeaderLabels( { QObject::tr( "Number" ),
 	                         QObject::tr( "Total Size" ),
 	                         QObject::tr( "Directory" ) } );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
-
-	HeaderTweaker::resizeToContents( tree->header() );
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
 
 } // namespace
