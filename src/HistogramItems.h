@@ -10,7 +10,7 @@
 #ifndef HistogramItems_h
 #define HistogramItems_h
 
-#include <QGraphicsItem>
+#include <QGraphicsRectItem>
 
 #include "Typedefs.h" // FileSize
 

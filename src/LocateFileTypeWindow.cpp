@@ -16,7 +16,6 @@
 #include "Exception.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
-#include "HeaderTweaker.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"        // SelectionModel, mainWindow()
 #include "SelectionModel.h"
@@ -56,9 +55,10 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	tree->setHeaderLabels( { QObject::tr( "Number" ),
-	                         QObject::tr( "Total Size" ),
-	                         QObject::tr( "Directory" ) } );
+	const QString number    = QObject::tr( "Number" );
+	const QString size      = QObject::tr( "Total Size" );
+	const QString directory = QObject::tr( "Directory" );
+	tree->setHeaderLabels( { number, size, directory } );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );

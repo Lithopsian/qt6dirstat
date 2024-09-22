@@ -387,7 +387,8 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
-	_ui->dirAllocatedLabel->setBold( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
+	if ( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT )
+	    _ui->dirAllocatedLabel->setBold();
     }
     else  // Special msg -> show it and clear all summary fields
     {

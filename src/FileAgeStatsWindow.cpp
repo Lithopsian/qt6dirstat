@@ -16,7 +16,6 @@
 #include "DiscoverActions.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
-#include "HeaderTweaker.h"
 #include "Logger.h"
 #include "PercentBar.h"
 #include "QDirStatApp.h"
@@ -76,15 +75,10 @@ namespace
 	// Set the row height based on the configured DirTree icon height
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QStringList headers{ QObject::tr( "Year"    ),
-	                           QObject::tr( "Files"   ),
-	                           QObject::tr( "Files %" ),  // percent bar
-	                           QObject::tr( "%"       ),  // percent value
-	                           QObject::tr( "Size"    ),
-	                           QObject::tr( "Size %"  ),  // percent bar
-	                           QObject::tr( "%"       ),  // percent value
-	                         };
-	tree->setHeaderLabels( headers );
+	const QString year  = QObject::tr( "Year" );
+	const QString files = QObject::tr( "Files" );
+	const QString size  = QObject::tr( "Size" );
+	tree->setHeaderLabels( { year, files, files % " %"_L1, "%", size, size % " %"_L1, "%" } );
 	tree->header()->setDefaultAlignment( Qt::AlignCenter );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }

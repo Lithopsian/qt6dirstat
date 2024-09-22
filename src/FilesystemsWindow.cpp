@@ -17,7 +17,6 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MountPoints.h"
-#include "HeaderTweaker.h"
 #include "MainWindow.h"
 #include "PanelMessage.h"
 #include "QDirStatApp.h"
@@ -54,11 +53,11 @@ namespace
 
 	if ( MountPoints::hasSizeInfo() )
 	{
-	    headers << QObject::tr( "Size" )
-	            << QObject::tr( "Used" )
-	            << QObject::tr( "Reserved" )
-	            << QObject::tr( "Free" )
-	            << QObject::tr( "Free %" );
+	    const QString size     = QObject::tr( "Size" );
+	    const QString used     = QObject::tr( "Used" );
+	    const QString reserved = QObject::tr( "Reserved" );
+	    const QString free     = QObject::tr( "Free" );
+	    headers << QStringList{ size, used, reserved, free, free % " %"_L1 };
 	}
 
 	tree->setHeaderLabels( headers );

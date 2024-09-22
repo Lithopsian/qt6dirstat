@@ -316,12 +316,18 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	DirReadJobQueue();
+	DirReadJobQueue():
+	    QObject {}
+	{
+	    connect( &_timer, &QTimer::timeout,
+		     this,    &DirReadJobQueue::timeSlicedRead );
+	}
 
 	/**
 	 * Destructor.
 	 **/
-	~DirReadJobQueue() override;
+	~DirReadJobQueue() override
+	    { clear(); }
 
 	/**
 	 * Add a job to the end of the queue. Begin time-sliced reading if not

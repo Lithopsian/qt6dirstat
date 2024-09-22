@@ -7,9 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QMenu>
-#include <QObject>
-
 #include "FileSizeLabel.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
@@ -17,13 +14,6 @@
 
 
 using namespace QDirStat;
-
-
-void FileSizeLabel::clear()
-{
-    QLabel::setToolTip( QString{} );
-    QLabel::clear();
-}
 
 
 void FileSizeLabel::setSize( const FileInfo * file )
@@ -34,10 +24,11 @@ void FileSizeLabel::setSize( const FileInfo * file )
 
 void FileSizeLabel::setAllocated( const FileInfo * file )
 {
-    setValueWithLinks( file->rawAllocatedSize(), file->links() );
+    const auto size = file->rawAllocatedSize();
+    setValueWithLinks( size, file->links() );
 
-    setBold( file->isSparseFile() ||
-             ( file->rawAllocatedSize() > 4096 && file->usedPercent() < ALLOCATED_FAT_PERCENT ) );
+    if ( file->isSparseFile() || ( size > 4096 && file->usedPercent() < ALLOCATED_FAT_PERCENT ) )
+        setBold();
 }
 
 
@@ -64,17 +55,10 @@ void FileSizeLabel::setToolTip( FileSize size, QLatin1String prefix, nlink_t num
 }
 
 
-void FileSizeLabel::setText( const QString & text )
-{
-    QLabel::setText( text );
-    QLabel::setToolTip( QString{} );
-}
-
-
-void FileSizeLabel::setBold( bool bold )
+void FileSizeLabel::setBold()
 {
     QFont textFont = font();
-    textFont.setBold( bold );
+    textFont.setBold( true );
     setFont( textFont );
 }
 

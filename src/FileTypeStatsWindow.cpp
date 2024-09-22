@@ -17,7 +17,6 @@
 #include "FileInfo.h"
 #include "FileSizeStatsWindow.h"
 #include "FormatUtil.h"
-#include "HeaderTweaker.h"
 #include "LocateFileTypeWindow.h"
 #include "Logger.h"
 #include "MimeCategory.h"
@@ -105,10 +104,11 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	tree->setHeaderLabels( { QObject::tr( "Name" ),
-	                         QObject::tr( "Number" ),
-	                         QObject::tr( "Total Size" ),
-	                         QObject::tr( "Percentage" ) } );
+	const QString name    = QObject::tr( "Name" );
+	const QString number  = QObject::tr( "Number" );
+	const QString size    = QObject::tr( "Total Size" );
+	const QString percent = QObject::tr( "Percentage" );
+	tree->setHeaderLabels( { name, number, size, percent } );
 	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
 	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
@@ -207,7 +207,7 @@ void FileTypeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
                                                   FileInfo       * subtree )
 {
     if ( !subtree )
-        return;
+	return;
 
     FileTypeStatsWindow * instance = sharedInstance( mainWindow );
 
@@ -238,7 +238,7 @@ void FileTypeStatsWindow::syncedPopulate()
 
     FileInfo * newSelection = app()->currentDirInfo();
     if ( newSelection != _subtree() )
-        populate( newSelection );
+	populate( newSelection );
 }
 
 
@@ -266,11 +266,12 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 	if ( category )
 	{
 	    // Add a category item
-	    const int      count   = it.value().count;
-	    const FileSize sum     = it.value().sum;
-	    const float    percent = stats.percentage( sum );
-	    categoryItem[ category ] =
-		addCategoryItem( _ui->treeWidget, category->name(), count, sum, percent );
+	    const int       count   = it.value().count;
+	    const FileSize  sum     = it.value().sum;
+	    const float     percent = stats.percentage( sum );
+	    const QString & name    = category->name();
+
+	    categoryItem[ category ] = addCategoryItem( _ui->treeWidget, name, count, sum, percent );
 	}
     }
 
@@ -289,6 +290,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 		const int      count         = it.value().count;
 		const FileSize sum           = it.value().sum;
 		const float    percent       = stats.percentage( sum );
+
 		addSuffixItem( parentItem, otherCategory, suffix, count, sum, percent );
 	    }
 	    else
@@ -332,7 +334,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
     const QString suffix = currentSuffix();
     FileInfo * dir = _subtree();
     if ( suffix.isEmpty() || !dir )
-        return;
+	return;
 
     //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
 
@@ -445,7 +447,8 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
 	case FT_TotalSizeCol:  return totalSize()  < other.totalSize();
 	case FT_PercentageCol: return percentage() < other.percentage();
 	case FT_NameCol:
-	case FT_ColumnCount: break;
+	case FT_ColumnCount:
+	    break;
     }
 
     return QTreeWidgetItem::operator<( rawOther );

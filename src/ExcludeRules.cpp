@@ -39,20 +39,6 @@ QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
 }
 
 
-void ExcludeRule::setPatternSyntax( PatternSyntax patternSyntax )
-{
-    _patternSyntax = patternSyntax;
-    setPattern( formatPattern( patternSyntax, _pattern ) );
-}
-
-
-void ExcludeRule::setPattern( const QString & pattern )
-{
-    _pattern = pattern;
-    _regExp.setPattern( formatPattern( _patternSyntax, pattern ) );
-}
-
-
 bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) const
 {
     if ( _checkAnyFileChild )  // use matchDirectChildren() for those rules

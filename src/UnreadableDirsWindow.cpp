@@ -13,7 +13,6 @@
 #include "Attic.h"
 #include "DirTreeModel.h"
 #include "FileInfoIterator.h"
-#include "HeaderTweaker.h"
 #include "Logger.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"
@@ -45,13 +44,12 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QStringList headerLabels{ QObject::tr( "Directory" ),
-	                                QObject::tr( "User" ),
-	                                QObject::tr( "Group" ),
-	                                QObject::tr( "Permissions" ),
-	                                QObject::tr( "Perm." ),
-	                              };
-	tree->setHeaderLabels( headerLabels );
+	const QString directory   = QObject::tr( "Directory" );
+	const QString user        = QObject::tr( "User" );
+	const QString group       = QObject::tr( "Group" );
+	const QString permissions = QObject::tr( "Permissions" );
+	const QString perm        = QObject::tr( "Perm." );
+	tree->setHeaderLabels( { directory, user, group, permissions, perm } );
 	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	tree->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );

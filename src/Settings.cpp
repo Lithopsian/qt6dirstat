@@ -193,7 +193,7 @@ QColor Settings::colorValue( const char * key, const QColor & fallback )
 }
 
 
-void Settings::setColorValue( const char * key, const QColor  & color )
+void Settings::setColorValue( const char * key, const QColor & color )
 {
     setValue( key, color.name() );
 }

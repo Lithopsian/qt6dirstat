@@ -172,11 +172,6 @@ namespace QDirStat
 	bool readLine();
 
 	/**
-	 * split the current input line into fields separated by whitespace.
-	 **/
-	void splitLine( char * line );
-
-	/**
 	 * Returns the start of field no. 'no' in the current input line
 	 * after splitLine().
 	 **/

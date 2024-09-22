@@ -112,7 +112,8 @@ namespace QDirStat
 	/**
 	 * Set the matching syntax for this rule.
 	 **/
-	void setPatternSyntax( PatternSyntax patternSyntax );
+	void setPatternSyntax( PatternSyntax patternSyntax )
+	    { _patternSyntax = patternSyntax; setPattern( formatPattern( patternSyntax, _pattern ) ); }
 
 	/**
 	 * Returns the matching syntax for this rule.
@@ -122,7 +123,8 @@ namespace QDirStat
 	/**
 	 * Set the pattern for this rule.
 	 **/
-	void setPattern( const QString & pattern );
+	void setPattern( const QString & pattern )
+	    { _pattern = pattern; _regExp.setPattern( formatPattern( _patternSyntax, pattern ) ); }
 
 	/**
 	 * Return the pattern used to construct this rule.

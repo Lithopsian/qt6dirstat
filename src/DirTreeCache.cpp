@@ -248,6 +248,31 @@ namespace
 
 
     /**
+     * Split the current input line into fields separated by whitespace.
+     **/
+    int splitLine( char * line, char * fields[] )
+    {
+	int fieldsCount = 0;
+
+	const char * end = line + strlen( line );
+
+	while ( line && line < end && *line && fieldsCount < MAX_FIELDS_PER_LINE-1 )
+	{
+	    fields[ fieldsCount++ ] = line;
+	    line = findNextWhiteSpace( line );
+
+	    if ( line && line < end )
+	    {
+		*line++ = '\0';
+		line = skipWhiteSpace( line );
+	    }
+	}
+
+	return fieldsCount;
+    }
+
+
+    /**
      * Split up a file name with path into its path and its name component
      * and return them in path_ret and name_ret, respectively.
      *
@@ -804,30 +829,7 @@ bool CacheReader::readLine()
 	      ( *line == '\0' ||	// empty line
 	        *line == '#' ) );	// comment line
 
-    splitLine( line );
+    _fieldsCount = _ok && line ? splitLine( line, _fields ) : 0;
 
     return true;
-}
-
-
-void CacheReader::splitLine( char * line )
-{
-    _fieldsCount = 0;
-
-    if ( !_ok || !line )
-	return;
-
-    const char * end = line + strlen( line );
-
-    while ( line && line < end && *line && _fieldsCount < MAX_FIELDS_PER_LINE-1 )
-    {
-	_fields[ _fieldsCount++ ] = line;
-	line = findNextWhiteSpace( line );
-
-	if ( line && line < end )
-	{
-	    *line++ = '\0';
-	    line = skipWhiteSpace( line );
-	}
-    }
 }

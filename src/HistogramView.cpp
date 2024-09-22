@@ -459,7 +459,7 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
 qreal HistogramView::overflowWidth()
 {
     QFont font;
-    font.setBold( true);
+    font.setBold( true );
     const qreal headlineWidth = textWidth( font, overflowHeadline() );
 
     return qMax( pieDiameter() + pieSliceOffset() * 2, headlineWidth ) + 2 * overflowBorder();

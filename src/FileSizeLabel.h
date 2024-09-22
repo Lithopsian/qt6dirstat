@@ -15,7 +15,7 @@
 #include "Typedefs.h" // FileSize
 
 
-#define ALLOCATED_FAT_PERCENT	33
+#define ALLOCATED_FAT_PERCENT 33
 
 
 namespace QDirStat
@@ -90,12 +90,13 @@ namespace QDirStat
 	 * Set a custom text. This text may or may not contain the value.  The
 	 * tooltip is disabled.
 	 **/
-	void setText( const QString & text );
+	void setText( const QString & text )
+	    { QLabel::setText( text ); QLabel::setToolTip( QString{} ); }
 
 	/**
 	 * Set the label font to bold.
 	 **/
-	void setBold( bool bold );
+	void setBold();
 
 	/**
 	 * Suppress the content of FileSizeLabel 'cloneLabel' if it has the
@@ -108,7 +109,8 @@ namespace QDirStat
 	 * Clear everything, including the visible text, the numeric value,
 	 * the context menu text and the bold font.
 	 **/
-	void clear();
+	void clear()
+	    { QLabel::setToolTip( QString{} ); QLabel::clear(); }
 
     }; // class FileSizeLabel
 

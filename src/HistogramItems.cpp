@@ -32,12 +32,11 @@ HistogramBar::HistogramBar( const FileSizeStats * stats,
     setZValue( HistogramView::BarLayer );
 
     const int numFiles = stats->bucketCount( bucketIndex );
+    const QString filesText{ numFiles == 1 ? QObject::tr( "file" ) : QObject::tr( "files" ) };
+    const QString startText{ formatSize( stats->bucketStart( bucketIndex ) ) };
+    const QString endText  { formatSize( stats->bucketEnd  ( bucketIndex ) ) };
     const QString tooltip = QObject::tr( "Bucket #%1<br/>%L2 %3<br/>%4...%5" )
-	.arg( bucketIndex + 1 )
-	.arg( numFiles )
-	.arg( numFiles == 1 ? QObject::tr( "file" ) : QObject::tr( "files" ) )
-	.arg( formatSize( stats->bucketStart( bucketIndex ) ) )
-	.arg( formatSize( stats->bucketEnd  ( bucketIndex ) ) );
+	.arg( bucketIndex + 1 ).arg( numFiles ).arg( filesText, startText, endText );
     setToolTip( whitespacePre( tooltip ) );
 
     // Filled rectangle is relative to its parent

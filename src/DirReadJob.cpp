@@ -491,20 +491,6 @@ void CacheReadJob::read()
 
 
 
-DirReadJobQueue::DirReadJobQueue():
-    QObject {}
-{
-    connect( &_timer, &QTimer::timeout,
-             this,    &DirReadJobQueue::timeSlicedRead );
-}
-
-
-DirReadJobQueue::~DirReadJobQueue()
-{
-    clear();
-}
-
-
 void DirReadJobQueue::enqueue( DirReadJob * job )
 {
     if ( job )
