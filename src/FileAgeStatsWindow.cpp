@@ -45,17 +45,17 @@ namespace
     /**
      * Find the gaps between years.
      **/
-    YearsList findGaps( const FileAgeStats & stats, bool startGapsWithCurrentYear )
+    YearsList findGaps( const FileAgeStats & stats )
     {
-	YearsList gaps;
-
 	const YearsList & years = stats.years(); // sorted in ascending order
 	if ( years.isEmpty() )
-	    return gaps;
+	    return YearsList{};
 
-	const short lastYear = startGapsWithCurrentYear ? stats.thisYear() : years.last();
+	const short lastYear = stats.thisYear();
 	if ( lastYear - years.first() == years.count() - 1 )
-	    return gaps;
+	    return YearsList{};
+
+	YearsList gaps;
 
 	for ( short yr = years.first(); yr <= lastYear; yr++ )
 	{
@@ -75,10 +75,12 @@ namespace
 	// Set the row height based on the configured DirTree icon height
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString year  = QObject::tr( "Year" );
-	const QString files = QObject::tr( "Files" );
-	const QString size  = QObject::tr( "Size" );
-	tree->setHeaderLabels( { year, files, files % " %"_L1, "%", size, size % " %"_L1, "%" } );
+	const QString year         = QObject::tr( "Year" );
+	const QString files        = QObject::tr( "Files" );
+	const QString filesPercent = QObject::tr( "Files %" );
+	const QString totalSize    = QObject::tr( "Total Size" );
+	const QString sizePercent  = QObject::tr( "Size %" );
+	tree->setHeaderLabels( { year, files, filesPercent, "%", totalSize, sizePercent, "%" } );
 	tree->header()->setDefaultAlignment( Qt::AlignCenter );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
@@ -196,7 +198,7 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 
     _subtree = fileInfo;
 
-    _ui->headingUrl->setStatusTip( _subtree.url() );
+    _ui->headingLabel->setStatusTip( tr( "File age statistics for %1" ).arg( _subtree.url() ) );
     resizeEvent( nullptr );
 
     // For better Performance: disable sorting while inserting (not!) many items
@@ -246,7 +248,7 @@ void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
 
 void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
 {
-    const auto gaps = findGaps( stats, _startGapsWithCurrentYear );
+    const auto gaps = findGaps( stats );
     for ( short year : gaps )
     {
 	YearListItem * item = new YearListItem{ YearStats{ year } };
@@ -291,7 +293,6 @@ void FileAgeStatsWindow::readSettings()
     settings.beginGroup( "FileAgeStatsWindow" );
 
     _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow",       true ).toBool() );
-    _startGapsWithCurrentYear    = settings.value( "StartGapsWithCurrentYear", true ).toBool();
     int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
 
     const QColor percentBarBackground =
@@ -301,7 +302,6 @@ void FileAgeStatsWindow::readSettings()
     const ColorList sizePercentBarColors =
 	settings.colorListValue( "SizePercentBarColors",  { 0xee0000, 0x00cc00 } );
 
-    settings.setDefaultValue( "StartGapsWithCurrentYear", _startGapsWithCurrentYear );
     settings.setDefaultValue( "PercentBarWidth",          percentBarWidth           );
     settings.setDefaultValue( "PercentBarBackground",     percentBarBackground  );
     settings.setDefaultValue( "FilesPercentBarColors",    filesPercentBarColors );
@@ -360,7 +360,7 @@ void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 24 );
 }
 
 
@@ -383,7 +383,7 @@ YearListItem::YearListItem( const YearStats & stats ) :
     {
 	set( YearListFilesCountCol,   Qt::AlignRight, QString::number( _filesCount   ) );
 	set( YearListFilesPercentCol, Qt::AlignRight, formatPercent  ( _filesPercent ) );
-	set( YearListSizeCol,         Qt::AlignRight, "    "_L1 % formatSize( _size     ) );
+	set( YearListSizeCol,         Qt::AlignRight, formatSize     ( _size         ) );
 	set( YearListSizePercentCol,  Qt::AlignRight, formatPercent  ( _sizePercent  ) );
 
 	setData( YearListFilesPercentBarCol, PercentRole, _filesPercent );

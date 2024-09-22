@@ -135,9 +135,6 @@
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QRadioButton" name="findFilesRadioButton">
@@ -164,12 +161,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_3">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
+       <widget class="Line" name="line">
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -190,9 +187,6 @@
     <widget class="QFrame" name="frame_2">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
@@ -219,12 +213,6 @@
         </property>
         <item>
          <widget class="QLabel" name="currentSubtreePathLabel">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>24</height>
-           </size>
-          </property>
           <property name="frameShape">
            <enum>QFrame::Panel</enum>
           </property>
@@ -236,9 +224,6 @@
           </property>
           <property name="midLineWidth">
            <number>0</number>
-          </property>
-          <property name="text">
-           <string>/home/kilroy/tmp</string>
           </property>
          </widget>
         </item>

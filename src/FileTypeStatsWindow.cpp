@@ -107,9 +107,9 @@ namespace
 	const QString name    = QObject::tr( "Name" );
 	const QString number  = QObject::tr( "Number" );
 	const QString size    = QObject::tr( "Total Size" );
-	const QString percent = QObject::tr( "Percentage" );
+	const QString percent = QObject::tr( "Size %" );
 	tree->setHeaderLabels( { name, number, size, percent } );
-	tree->header()->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignRight );
+	tree->header()->setDefaultAlignment( Qt::AlignCenter );
 	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
     }
@@ -252,7 +252,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
     _subtree = newSubtree;
 
-    _ui->headingUrl->setStatusTip( _subtree.url() );
+    _ui->headingLabel->setStatusTip( tr( "File type statistics for %1" ).arg( _subtree.url() ) );
     resizeEvent( nullptr );
 
     // Create a map of toplevel items for finding suffix item parents
@@ -408,7 +408,7 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 24 );
 }
 
 

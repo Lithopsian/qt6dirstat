@@ -25,9 +25,6 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="text">
-      <string notr="true">Directories with file type</string>
-     </property>
     </widget>
    </item>
    <item>

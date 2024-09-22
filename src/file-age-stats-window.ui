@@ -18,37 +18,14 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
-     <property name="spacing">
-      <number>0</number>
+    <widget class="QLabel" name="headingLabel">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
-     <item>
-      <widget class="QLabel" name="heading">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>File age statistics for </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="headingUrl">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>url</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
    </item>
    <item>
     <widget class="QTreeWidget" name="treeWidget">
