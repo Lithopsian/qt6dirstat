@@ -233,7 +233,7 @@ namespace QDirStat
 	 * Return the exact span of bytes that are included in bucket
 	 * 'index'.
 	 **/
-	PercentileValue bucketWidth( int index ) const
+	PercentileBoundary bucketWidth( int index ) const
 	{
 	    validateBucketIndex( index );
 	    return _buckets[ index+1 ] - _buckets[ index ];
