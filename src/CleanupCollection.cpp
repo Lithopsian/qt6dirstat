@@ -96,9 +96,9 @@ namespace
 	    // This is rich text and the title is styled <h3>, so don't try to be too precise and
 	    // just rely on the final styled text being wider than we assumed.
 	    const QFont font = QGuiApplication::font();
-	    const int spaceWidth = textWidth( font, " " );
+	    const int spaceWidth = qMax( horizontalAdvance( font, " " ), 1 );
 	    const QString cleanTitle = cleanup->cleanTitle();
-	    const int titleWidth = textWidth( font, cleanTitle ) / spaceWidth;
+	    const int titleSpaces = horizontalAdvance( font, cleanTitle ) / spaceWidth;
 
 	    if ( items.size() == 1 )
 	    {
@@ -109,8 +109,9 @@ namespace
 		const QString itemType =
 		    item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
 		const QString itemLine = itemType % ": "_L1 % name;
-		const int itemSpaces = qMax( textWidth( font, itemLine ) / spaceWidth, MIN_DIALOG_WIDTH );
-		const QString title = cleanTitle % QString{ itemSpaces - titleWidth, u' ' };
+		const int itemSpaces = horizontalAdvance( font, itemLine ) / spaceWidth;
+		const int padSpaces = qMax( itemSpaces, MIN_DIALOG_WIDTH ) - titleSpaces;
+		const QString title = cleanTitle % QString{ padSpaces, u' ' };
 
 		return QString{ "<h3>%1</h3>%2<br/>" }.arg( title, itemLine );
 	    }
@@ -131,12 +132,12 @@ namespace
 	    int longestLine = MIN_DIALOG_WIDTH * spaceWidth;
 	    for ( const QString & line : asConst( urls ) )
 	    {
-		const int lineLength = textWidth( font, line );
+		const int lineLength = horizontalAdvance( font, line );
 		if ( lineLength > longestLine )
 		    longestLine = lineLength;
 	    }
-	    const int spaces = longestLine / spaceWidth - titleWidth;
-	    const QString title = cleanTitle % QString{ spaces, u' ' };
+	    const int padSpaces = longestLine / spaceWidth - titleSpaces;
+	    const QString title = cleanTitle % QString{ padSpaces, u' ' };
 
 	    return QString{ "<h3>%1</h3>%2<br>" }.arg( title, urls.join( "<br>"_L1 ) );
 	}();

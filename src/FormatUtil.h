@@ -181,10 +181,22 @@ namespace QDirStat
 
     /**
      * Returns the width in pixels of the given text rendered using
-     * the given font.
+     * the given font.  The two functions return subtly different
+     * results: textWidth returns the size of the visible dark pixels
+     * of 'text', while horizontalAdvance returns the distance from
+     * the "start" of 'text' to the "start" of the character that
+     * would follow it.  In particular, a space character returns
+     * zero textWidth and the textWidth of italics may be wider than
+     * the horizontal advance.
      **/
     inline int textWidth( const QFont & font, const QString & text )
 	{ return QFontMetrics{ font }.boundingRect( text ).width(); }
+    inline int horizontalAdvance( const QFont & font, const QString & text )
+#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
+	{ return QFontMetrics{ font }.width( text ); }
+#else
+	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
+#endif
 
     /**
      * Elide a string, removing characters from the middle to fit
