@@ -198,8 +198,8 @@ void SelectionModel::setCurrentItemPath( const QString & path )
     if ( item )
 	// Set the current item and select it
 	setCurrentItem( item, true );
-    else
-	logError() << "No item with path " << path << Qt::endl;
+//    else
+//	logDebug() << "No item with path " << path << Qt::endl;
 }
 
 
