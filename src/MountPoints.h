@@ -196,11 +196,11 @@ namespace QDirStat
 	 * Qt before 5.4 does not have QStorageInfo, and statfs()
 	 * is Linux-specific (not POSIX).
 	 **/
-	FileSize MountPoint::totalSize()       { return -1LL; }
-	FileSize MountPoint::usedSize()        { return -1LL; }
-	FileSize MountPoint::reservedSize()    { return -1LL; }
-	FileSize MountPoint::freeSizeForUser() { return -1LL; }
-	FileSize MountPoint::freeSizeForRoot() { return -1LL; }
+	FileSize totalSize()       { return -1LL; }
+	FileSize usedSize()        { return -1LL; }
+	FileSize reservedSize()    { return -1LL; }
+	FileSize freeSizeForUser() { return -1LL; }
+	FileSize freeSizeForRoot() { return -1LL; }
 #endif
 
     private:
