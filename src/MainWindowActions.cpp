@@ -134,7 +134,7 @@ void MainWindow::connectToggleAction( QAction * action, void( MainWindow::*actee
 void MainWindow::mapTreeExpandAction( QAction * action, int level )
 {
     connect( action, &QAction::triggered,
-             this,   [ this, level ]() { expandTreeToLevel( level ); } );
+             [ this, level ]() { expandTreeToLevel( level ); } );
 }
 
 
