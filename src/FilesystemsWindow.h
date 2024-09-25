@@ -67,7 +67,8 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
 	 **/
-	static FilesystemsWindow * populateSharedInstance( QWidget * parent );
+	static void populateSharedInstance( QWidget * parent )
+	    { sharedInstance( parent )->populate(); }
 
 
     protected slots:
@@ -128,10 +129,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FilesystemsWindow> _ui;
 
     };	// class FilesystemsWindow
@@ -149,23 +146,26 @@ namespace QDirStat
 	FS_UsedSizeCol,
 	FS_ReservedSizeCol,
 	FS_FreeSizeCol,
-	FS_FreePercentCol
+	FS_FreePercentCol,
     };
 
 
+
     /**
-     * Item class for the filesystems list (which is really a tree widget).
+     * Item class for the filesystems list.
      **/
     class FilesystemItem: public QTreeWidgetItem
     {
     public:
+
 	/**
 	 * Constructor.
 	 **/
-	FilesystemItem( MountPoint * mountPoint, QTreeWidget * parent );
+	FilesystemItem( MountPoint * mountPoint );
 
-	// Getters
-
+	/**
+	 * Getters for the column values.
+	 **/
 	const QString & device()         const { return _device; }
 	const QString & mountPath()      const { return _mountPath; }
 	const QString & fsType()         const { return _fsType; }
@@ -177,13 +177,8 @@ namespace QDirStat
 	bool            isNetworkMount() const { return _isNetworkMount; }
 	bool            isReadOnly()     const { return _isReadOnly; }
 
-    protected:
 
-	/**
-	 * Set the text and text alignment for a column.
-	 **/
-	void set( int col, Qt::Alignment alignment, const QString & text )
-	    { setText( col, text ); setTextAlignment( col, alignment | Qt::AlignVCenter ); }
+    protected:
 
 	/**
 	 * Less-than operator for sorting.
@@ -203,8 +198,8 @@ namespace QDirStat
 	bool     _isNetworkMount;
 	bool     _isReadOnly;
 
-    }; // class FilesystemItem
+    };	// class FilesystemItem
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
 #endif	// FilesystemsWindow_h

@@ -14,6 +14,7 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "DiscoverActions.h"
+#include "FileAgeStats.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
@@ -75,14 +76,61 @@ namespace
 	// Set the row height based on the configured DirTree icon height
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString year         = QObject::tr( "Year" );
-	const QString files        = QObject::tr( "Files" );
-	const QString filesPercent = QObject::tr( "Files %" );
-	const QString totalSize    = QObject::tr( "Total Size" );
-	const QString sizePercent  = QObject::tr( "Size %" );
-	tree->setHeaderLabels( { year, files, filesPercent, "%", totalSize, sizePercent, "%" } );
-	tree->header()->setDefaultAlignment( Qt::AlignCenter );
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( YL_YearCol,            QObject::tr( "Year" ) );
+	headerItem->setText( YL_FilesCountCol,      QObject::tr( "Files" ) );
+	headerItem->setText( YL_FilesPercentBarCol, QObject::tr( "Files %" ) );
+	headerItem->setText( YL_FilesPercentCol,    "%" );
+	headerItem->setText( YL_SizeCol,            QObject::tr( "Total Size" ) );
+	headerItem->setText( YL_SizePercentBarCol,  QObject::tr( "Size %" ) );
+	headerItem->setText( YL_SizePercentCol,     "%" );
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	tree->sortByColumn( YL_YearCol, Qt::DescendingOrder );
+    }
+
+
+    /**
+     * Create an item in the years tree / list widget for each year,
+     * including "gaps", empty months and years newer than the oldest
+     * year.
+     **/
+    void populateTree( FileInfo * fileInfo, QTreeWidget * treeWidget )
+    {
+	FileAgeStats stats{ fileInfo };
+
+	for ( short year : stats.years() )
+	{
+	    YearStats * yearStats = stats.yearStats( year );
+	    if ( yearStats )
+	    {
+		// Add a year item
+		YearListItem * item = new YearListItem{ *yearStats, true };
+		treeWidget->addTopLevelItem( item );
+
+		// Add the month items if applicable
+		if ( stats.monthStatsAvailableFor( year ) )
+		{
+		    for ( short month = 1; month <= 12; month++ )
+		    {
+			YearStats * monthStats = stats.monthStats( year, month );
+			if ( monthStats )
+			    item->addChild( new YearListItem{ *monthStats, monthStats->filesCount > 0 } );
+		    }
+		}
+	    }
+	}
+
+	// Select the first row before filling gaps, so an enabled row is selected
+	treeWidget->setCurrentItem( treeWidget->topLevelItem( 0 ) );
+
+	// Create disabled entries for any years which didn't have any files
+	const auto gaps = findGaps( stats );
+	for ( short year : gaps )
+	    treeWidget->addTopLevelItem( new YearListItem{ YearStats{ year }, false } );
     }
 
 } // namespace
@@ -125,6 +173,8 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
 
     connect( _ui->treeWidget,    &QTreeWidget::itemSelectionChanged,
              this,               &FileAgeStatsWindow::enableActions );
+
+    show();
 }
 
 
@@ -144,21 +194,6 @@ FileAgeStatsWindow * FileAgeStatsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FileAgeStatsWindow{ parent };
 
     return _sharedInstance;
-}
-
-
-void FileAgeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-                                                 FileInfo       * fileInfo )
-{
-    if ( !fileInfo )
-        return;
-
-    // Get the shared instance, creating it if necessary
-    FileAgeStatsWindow * instance = sharedInstance( mainWindow );
-
-    instance->populate( fileInfo );
-    instance->_ui->treeWidget->sortByColumn( YearListYearCol, Qt::DescendingOrder );
-    instance->show();
 }
 
 
@@ -201,60 +236,9 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
     _ui->headingLabel->setStatusTip( tr( "File age statistics for %1" ).arg( _subtree.url() ) );
     resizeEvent( nullptr );
 
-    // For better Performance: disable sorting while inserting (not!) many items
-    _ui->treeWidget->setSortingEnabled( false );
-    populateListWidget(_subtree() );
-    _ui->treeWidget->setSortingEnabled( true );
+    populateTree(_subtree(), _ui->treeWidget );
 
     enableActions();
-}
-
-
-void FileAgeStatsWindow::populateListWidget( FileInfo * fileInfo )
-{
-    FileAgeStats stats{ fileInfo };
-
-    for ( short year : stats.years() )
-    {
-	YearStats * yearStats = stats.yearStats( year );
-	if ( yearStats )
-	{
-	    // Add a year item
-	    YearListItem * item = new YearListItem{ *yearStats };
-	    _ui->treeWidget->addTopLevelItem( item );
-
-	    // Add the month items if applicable
-	    if ( stats.monthStatsAvailableFor( year ) )
-	    {
-		for ( short month = 1; month <= 12; month++ )
-		{
-		    YearStats * monthStats = stats.monthStats( year, month );
-		    if ( monthStats )
-		    {
-			YearListItem * monthItem = new YearListItem{ *monthStats };
-			item->addChild( monthItem );
-
-			if ( monthStats->filesCount == 0 )
-			    monthItem->setFlags( Qt::NoItemFlags ); // disabled
-		    }
-		}
-	    }
-	}
-    }
-
-    fillGaps( stats );
-}
-
-
-void FileAgeStatsWindow::fillGaps( const FileAgeStats & stats )
-{
-    const auto gaps = findGaps( stats );
-    for ( short year : gaps )
-    {
-	YearListItem * item = new YearListItem{ YearStats{ year } };
-	item->setFlags( Qt::NoItemFlags ); // disabled
-	_ui->treeWidget->addTopLevelItem( item );
-    }
 }
 
 
@@ -292,39 +276,30 @@ void FileAgeStatsWindow::readSettings()
 
     settings.beginGroup( "FileAgeStatsWindow" );
 
-    _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow",       true ).toBool() );
-    int percentBarWidth          = settings.value( "PercentBarWidth",          120  ).toInt();
+    _ui->syncCheckBox->setChecked( settings.value( "SyncWithMainWindow", true ).toBool() );
+    const int width = settings.value( "PercentBarWidth", 120  ).toInt();
 
-    const QColor percentBarBackground =
-	settings.colorValue    ( "PercentBarBackground",  QColor{ 160, 160, 160 } );
-    const ColorList filesPercentBarColors =
-	settings.colorListValue( "FilesPercentBarColors", { 0xbb0000, 0x00aa00 } );
-    const ColorList sizePercentBarColors =
-	settings.colorListValue( "SizePercentBarColors",  { 0xee0000, 0x00cc00 } );
+    const QColor    background  = settings.colorValue    ( "PercentBarBackground",  QColor{ 160, 160, 160 } );
+    const ColorList filesColors = settings.colorListValue( "FilesPercentBarColors", { 0xbb0000, 0x00aa00 }  );
+    const ColorList sizeColors  = settings.colorListValue( "SizePercentBarColors",  { 0xee0000, 0x00cc00 }  );
 
-    settings.setDefaultValue( "PercentBarWidth",          percentBarWidth           );
-    settings.setDefaultValue( "PercentBarBackground",     percentBarBackground  );
-    settings.setDefaultValue( "FilesPercentBarColors",    filesPercentBarColors );
-    settings.setDefaultValue( "SizePercentBarColors",     sizePercentBarColors  );
+    settings.setDefaultValue( "PercentBarWidth",       width       );
+    settings.setDefaultValue( "PercentBarBackground",  background  );
+    settings.setDefaultValue( "FilesPercentBarColors", filesColors );
+    settings.setDefaultValue( "SizePercentBarColors",  sizeColors  );
 
     settings.endGroup();
 
     Settings::readWindowSettings( this, "FileAgeStatsWindow" );
 
     // Delegates for the two percent bars
-    _filesPercentBarDelegate = new PercentBarDelegate{ _ui->treeWidget,
-                                                       YearListFilesPercentBarCol,
-                                                       percentBarWidth,
-                                                       percentBarBackground,
-                                                       filesPercentBarColors };
-    _ui->treeWidget->setItemDelegateForColumn( YearListFilesPercentBarCol, _filesPercentBarDelegate );
+    const auto filesDelegate =
+	new PercentBarDelegate{ _ui->treeWidget, YL_FilesPercentBarCol, width, background, filesColors };
+    _ui->treeWidget->setItemDelegateForColumn( YL_FilesPercentBarCol, filesDelegate );
 
-    _sizePercentBarDelegate = new PercentBarDelegate{ _ui->treeWidget,
-                                                      YearListSizePercentBarCol,
-                                                      percentBarWidth,
-                                                      percentBarBackground,
-                                                      sizePercentBarColors };
-    _ui->treeWidget->setItemDelegateForColumn( YearListSizePercentBarCol, _sizePercentBarDelegate );
+    const auto sizeDelegate =
+	new PercentBarDelegate{ _ui->treeWidget, YL_SizePercentBarCol, width, background, sizeColors };
+    _ui->treeWidget->setItemDelegateForColumn( YL_SizePercentBarCol, sizeDelegate );
 }
 
 
@@ -366,33 +341,46 @@ void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 
 
 
-YearListItem::YearListItem( const YearStats & stats ) :
-    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+YearListItem::YearListItem( const YearStats & stats, bool enabled ):
+    QTreeWidgetItem{},
     _year{ stats.year },
     _month{ stats.month },
     _filesCount{ stats.filesCount },
-    _filesPercent{ stats.filesPercent },
-    _size{ stats.size },
-    _sizePercent{ stats.sizePercent }
+    _size{ stats.size }
 {
+    /**
+     * Helper function to set the text and text alignment for a column.
+     **/
+    const auto set = [ this ]( int col, Qt::Alignment alignment, const QString & text )
+    {
+	setText( col, text );
+	setTextAlignment( col, alignment | Qt::AlignVCenter );
+    };
+
     const bool monthItem = _month > 0;
     const QString text = monthItem ? monthAbbreviation( _month ) : QString::number( _year );
-    set( YearListYearCol, Qt::AlignLeft, text );
+    set( YL_YearCol, Qt::AlignLeft, text );
 
     if ( _filesCount > 0 )
     {
-	set( YearListFilesCountCol,   Qt::AlignRight, QString::number( _filesCount   ) );
-	set( YearListFilesPercentCol, Qt::AlignRight, formatPercent  ( _filesPercent ) );
-	set( YearListSizeCol,         Qt::AlignRight, formatSize     ( _size         ) );
-	set( YearListSizePercentCol,  Qt::AlignRight, formatPercent  ( _sizePercent  ) );
+	const auto filesPercent = stats.filesPercent;
+	const auto sizePercent  = stats.sizePercent;
 
-	setData( YearListFilesPercentBarCol, PercentRole, _filesPercent );
-	setData( YearListSizePercentBarCol,  PercentRole, _sizePercent  );
+	set( YL_FilesCountCol,   Qt::AlignRight, formatCount  ( _filesCount  ) );
+	set( YL_FilesPercentCol, Qt::AlignRight, formatPercent( filesPercent ) );
+	set( YL_SizeCol,         Qt::AlignRight, formatSize   ( _size        ) );
+	set( YL_SizePercentCol,  Qt::AlignRight, formatPercent( sizePercent  ) );
+
+	setData( YL_FilesPercentBarCol, PercentRole, filesPercent );
+	setData( YL_SizePercentBarCol,  PercentRole, sizePercent  );
 
 	const bool treeLevel = monthItem ? 1 : 0;
-	setData( YearListFilesPercentBarCol, TreeLevelRole, treeLevel );
-	setData( YearListSizePercentBarCol,  TreeLevelRole, treeLevel );
+	setData( YL_FilesPercentBarCol, TreeLevelRole, treeLevel );
+	setData( YL_SizePercentBarCol,  TreeLevelRole, treeLevel );
     }
+
+    if ( !enabled )
+	setFlags( Qt::NoItemFlags );
 }
 
 
@@ -406,22 +394,25 @@ bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const YearListItem & other = dynamic_cast<const YearListItem &>( rawOther );
 
-    switch ( (YearListColumns)treeWidget()->sortColumn() )
+    switch ( treeWidget()->sortColumn() )
     {
-	case YearListYearCol:
+	case YL_YearCol:
 	    if ( _month > 0 )
 		return _month < other._month;
 	    else
 		return _year  < other._year;
 
-	case YearListFilesCountCol:     return _filesCount   < other._filesCount;
-	case YearListFilesPercentBarCol:
-	case YearListFilesPercentCol:   return _filesPercent < other._filesPercent;
-	case YearListSizeCol:           return _size         < other._size;
-	case YearListSizePercentBarCol:
-	case YearListSizePercentCol:    return _sizePercent  < other._sizePercent;
-	case YearListColumnCount:       break;
-    }
+	case YL_FilesCountCol:
+	case YL_FilesPercentBarCol:
+	case YL_FilesPercentCol:
+	    return _filesCount < other._filesCount;
 
-    return QTreeWidgetItem::operator<( rawOther );
+	case YL_SizeCol:
+	case YL_SizePercentBarCol:
+	case YL_SizePercentCol:
+	    return _size < other._size;
+
+	default:
+	    return QTreeWidgetItem::operator<( rawOther );
+    }
 }

@@ -63,8 +63,8 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
 	 **/
-	static void populateSharedInstance( QWidget  * mainWindow,
-	                                    FileInfo * subtree );
+	static void populateSharedInstance( QWidget  * mainWindow, FileInfo * subtree )
+	    { if ( subtree ) sharedInstance( mainWindow )->populate( subtree ); }
 
 
     protected slots:
@@ -132,7 +132,7 @@ namespace QDirStat
 	 * Return the suffix of the currently selected file type or an empty
 	 * string if no suffix is selected.
 	 **/
-	QString currentSuffix() const;
+	QString currentItemSuffix() const;
 
 	/**
 	 * Key press event for detecting enter/return.
@@ -155,15 +155,11 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FileTypeStatsWindow> _ui;
 	Subtree _subtree;
 	int     _topX;
 
-    }; // class FileTypeStatsWindow
+    };	// class FileTypeStatsWindow
 
 
     /**
@@ -175,7 +171,7 @@ namespace QDirStat
 	FT_CountCol,
 	FT_TotalSizeCol,
 	FT_PercentageCol,
-	FT_ColumnCount
+	FT_ColumnCount,
     };
 
 
@@ -197,26 +193,8 @@ namespace QDirStat
 	              FileSize        totalSize,
 	              float           percentage );
 
-	//
-	// Getters
-	//
-
-	const QString & name()          const { return _name; }
-	int             count()         const { return _count; }
-	FileSize        totalSize()     const { return _totalSize; }
-	float           percentage()    const { return _percentage; }
-
 
     protected:
-
-	/**
-	 * Helper function to set both the column text and alignment.
-	 **/
-	void set( FileTypeColumns col, Qt::Alignment alignment, const QString & text )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, Qt::AlignVCenter | alignment );
-	}
 
 	/**
 	 * Less-than operator for sorting.
@@ -228,13 +206,11 @@ namespace QDirStat
 
     private:
 
-	QString  _name;
 	int      _count;
 	FileSize _totalSize;
 	float    _percentage;
 
-    }; // class FileTypeItem
-
+    };	// class FileTypeItem
 
 
 
@@ -293,8 +269,8 @@ namespace QDirStat
 
 	QString _suffix;
 
-    }; // class SuffixFileTypeItem
+    };	// class SuffixFileTypeItem
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // FileTypeStatsWindow_h
+#endif	// FileTypeStatsWindow_h

@@ -92,8 +92,7 @@ namespace
                         FileSize        sum,
                         float           percent )
     {
-	auto item = new SuffixFileTypeItem{ otherCategory, suffix, count, sum, percent };
-	parent->addChild( item );
+	parent->addChild( new SuffixFileTypeItem{ otherCategory, suffix, count, sum, percent } );
     }
 
 
@@ -104,14 +103,83 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString name    = QObject::tr( "Name" );
-	const QString number  = QObject::tr( "Number" );
-	const QString size    = QObject::tr( "Total Size" );
-	const QString percent = QObject::tr( "Size %" );
-	tree->setHeaderLabels( { name, number, size, percent } );
-	tree->header()->setDefaultAlignment( Qt::AlignCenter );
-	tree->headerItem()->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( FT_NameCol,       QObject::tr( "Name" ) );
+	headerItem->setText( FT_CountCol,      QObject::tr( "Files" ) );
+	headerItem->setText( FT_TotalSizeCol,  QObject::tr( "Total Size" ) );
+	headerItem->setText( FT_PercentageCol, QObject::tr( "Size %" ) );
+	headerItem->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	tree->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
+    }
+
+
+    /**
+     * Populate 'treeWidget' with type statistics collected for
+     * 'subtree'.  The statistics are discarded once the tree has
+     * been populated.
+     **/
+    void populateTree( QTreeWidget * treeWidget, FileInfo * subtree )
+    {
+	// Create a map of toplevel items for finding suffix item parents
+	QHash<const MimeCategory *, FileTypeItem *> categoryItem;
+
+	FileTypeStats stats{ subtree };
+
+	for ( auto it = stats.categoriesBegin(); it != stats.categoriesEnd(); ++it )
+	{
+	    const MimeCategory * category = it.key();
+	    if ( category )
+	    {
+		// Add a category item
+		const int       count   = it.value().count;
+		const FileSize  sum     = it.value().sum;
+		const float     percent = stats.percentage( sum );
+		const QString & name    = category->name();
+
+		categoryItem[ category ] = addCategoryItem( treeWidget, name, count, sum, percent );
+	    }
+	}
+
+	// Create items for each individual suffix (below a category)
+	for ( auto it = stats.suffixesBegin(); it != stats.suffixesEnd(); ++it )
+	{
+	    const QString      & suffix   = it.key().suffix;
+	    const MimeCategory * category = it.key().category;
+
+	    if ( category )
+	    {
+		FileTypeItem * parentItem = categoryItem.value( category, nullptr );
+		if ( parentItem )
+		{
+		    const bool     otherCategory = category == stats.otherCategory();
+		    const int      count         = it.value().count;
+		    const FileSize sum           = it.value().sum;
+		    const float    percent       = stats.percentage( sum );
+
+		    addSuffixItem( parentItem, otherCategory, suffix, count, sum, percent );
+		}
+		else
+		{
+		    logError() << "No parent category item for " << suffix << Qt::endl;
+		}
+	    }
+	    else
+	    {
+		logError() << "No category for suffix " << suffix << Qt::endl;
+	    }
+	}
+
+	// Prune the <Other> category widgets to the configured TopX entries
+	FileTypeItem * otherCategoryItem = categoryItem.value( stats.otherCategory(), nullptr );
+	if ( otherCategoryItem )
+	    topXOtherItems( otherCategoryItem );
+
+	treeWidget->setCurrentItem( treeWidget->topLevelItem( 0 ) );
     }
 
 } // namespace
@@ -165,6 +233,8 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
 
     connect( _ui->actionSizeStats, &QAction::triggered,
              this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+
+    show();
 }
 
 
@@ -200,21 +270,6 @@ void FileTypeStatsWindow::readSettings()
     // Add actions to this window to get the hotkeys
     addAction( _ui->actionLocate );
     addAction( _ui->actionSizeStats );
-}
-
-
-void FileTypeStatsWindow::populateSharedInstance( QWidget        * mainWindow,
-                                                  FileInfo       * subtree )
-{
-    if ( !subtree )
-	return;
-
-    FileTypeStatsWindow * instance = sharedInstance( mainWindow );
-
-    // Actually faster to build the tree already sorted as we want
-    instance->_ui->treeWidget->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
-    instance->populate( subtree );
-    instance->show();
 }
 
 
@@ -255,67 +310,13 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _ui->headingLabel->setStatusTip( tr( "File type statistics for %1" ).arg( _subtree.url() ) );
     resizeEvent( nullptr );
 
-    // Create a map of toplevel items for finding suffix item parents
-    QHash<const MimeCategory *, FileTypeItem *> categoryItem;
-
-    FileTypeStats stats{ _subtree() };
-
-    for ( auto it = stats.categoriesBegin(); it != stats.categoriesEnd(); ++it )
-    {
-	const MimeCategory * category = it.key();
-	if ( category )
-	{
-	    // Add a category item
-	    const int       count   = it.value().count;
-	    const FileSize  sum     = it.value().sum;
-	    const float     percent = stats.percentage( sum );
-	    const QString & name    = category->name();
-
-	    categoryItem[ category ] = addCategoryItem( _ui->treeWidget, name, count, sum, percent );
-	}
-    }
-
-    // Create items for each individual suffix (below a category)
-    for ( auto it = stats.suffixesBegin(); it != stats.suffixesEnd(); ++it )
-    {
-	const QString      & suffix   = it.key().suffix;
-	const MimeCategory * category = it.key().category;
-
-	if ( category )
-	{
-	    FileTypeItem * parentItem = categoryItem.value( category, nullptr );
-	    if ( parentItem )
-	    {
-		const bool     otherCategory = category == stats.otherCategory();
-		const int      count         = it.value().count;
-		const FileSize sum           = it.value().sum;
-		const float    percent       = stats.percentage( sum );
-
-		addSuffixItem( parentItem, otherCategory, suffix, count, sum, percent );
-	    }
-	    else
-	    {
-		logError() << "No parent category item for " << suffix << Qt::endl;
-	    }
-	}
-	else
-	{
-	    logError() << "No category for suffix " << suffix << Qt::endl;
-	}
-    }
-
-    // Prune the <Other> category widgets to the configured TopX entries
-    FileTypeItem * otherCategoryItem = categoryItem.value( stats.otherCategory(), nullptr );
-    if ( otherCategoryItem )
-	topXOtherItems( otherCategoryItem );
-
-//    _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
+    populateTree( _ui->treeWidget, _subtree() );
 }
 
 
 void FileTypeStatsWindow::locateCurrentFileType()
 {
-    const QString suffix = currentSuffix();
+    const QString suffix = currentItemSuffix();
 
     // Can click/press on inappropriate rows
     if ( suffix.isEmpty() )
@@ -331,7 +332,7 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
 void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 {
-    const QString suffix = currentSuffix();
+    const QString suffix = currentItemSuffix();
     FileInfo * dir = _subtree();
     if ( suffix.isEmpty() || !dir )
 	return;
@@ -342,9 +343,9 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 }
 
 
-QString FileTypeStatsWindow::currentSuffix() const
+QString FileTypeStatsWindow::currentItemSuffix() const
 {
-    const SuffixFileTypeItem * item = dynamic_cast<SuffixFileTypeItem *>( _ui->treeWidget->currentItem() );
+    const auto * item = dynamic_cast<const SuffixFileTypeItem *>( _ui->treeWidget->currentItem() );
     if ( item && !item->suffix().isEmpty() )
 	return item->suffix();
 
@@ -354,7 +355,7 @@ QString FileTypeStatsWindow::currentSuffix() const
 
 void FileTypeStatsWindow::enableActions()
 {
-    enableActions( !currentSuffix().isEmpty() );
+    enableActions( !currentItemSuffix().isEmpty() );
 }
 
 
@@ -372,7 +373,7 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 	return;
 
     // The clicked item will always be the current item now
-    const QString suffix = currentSuffix();
+    const QString suffix = currentItemSuffix();
     if ( suffix.isEmpty() )
 	return;
 
@@ -395,7 +396,7 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
     }
 
     QTreeWidgetItem * item = _ui->treeWidget->currentItem();
-    SuffixFileTypeItem * suffixItem = dynamic_cast<SuffixFileTypeItem *>( item );
+    const auto * suffixItem = dynamic_cast<const SuffixFileTypeItem *>( item );
     if ( suffixItem )
 	// Try the locate file type window, although it may not be an appropriate suffix
 	locateCurrentFileType();
@@ -418,16 +419,24 @@ FileTypeItem::FileTypeItem( const QString & name,
                             int             count,
                             FileSize        totalSize,
                             float           percentage ):
-    QTreeWidgetItem{ QTreeWidgetItem::UserType },
-    _name{ name },
+    QTreeWidgetItem{},
     _count{ count },
     _totalSize{ totalSize },
     _percentage{ percentage }
 {
+    /**
+     * Helper function to set the text and text alignment for a column.
+     **/
+    const auto set = [ this ]( int col, Qt::Alignment alignment, const QString & text )
+    {
+	setText( col, text );
+	setTextAlignment( col, alignment | Qt::AlignVCenter );
+    };
+
     set( FT_NameCol,       Qt::AlignLeft,  name );
-    set( FT_CountCol,      Qt::AlignRight, QString::number( count ) );
+    set( FT_CountCol,      Qt::AlignRight, formatCount( count ) );
     set( FT_TotalSizeCol,  Qt::AlignRight, formatSize( totalSize ) );
-    set( FT_PercentageCol, Qt::AlignRight, QString::number( percentage, 'f', 2 ) % '%' );
+    set( FT_PercentageCol, Qt::AlignRight, formatPercent( percentage ) );
 }
 
 
@@ -441,15 +450,11 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
     // error which should not be silently ignored.
     const FileTypeItem & other = dynamic_cast<const FileTypeItem &>( rawOther );
 
-    switch ( static_cast<FileTypeColumns>( treeWidget()->sortColumn() ) )
+    switch ( treeWidget()->sortColumn() )
     {
-	case FT_CountCol:      return count()      < other.count();
-	case FT_TotalSizeCol:  return totalSize()  < other.totalSize();
-	case FT_PercentageCol: return percentage() < other.percentage();
-	case FT_NameCol:
-	case FT_ColumnCount:
-	    break;
+	case FT_CountCol:      return _count      < other._count;
+	case FT_TotalSizeCol:  return _totalSize  < other._totalSize;
+	case FT_PercentageCol: return _percentage < other._percentage;
+	default:               return QTreeWidgetItem::operator<( rawOther );
     }
-
-    return QTreeWidgetItem::operator<( rawOther );
 }

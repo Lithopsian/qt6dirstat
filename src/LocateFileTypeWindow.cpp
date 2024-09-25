@@ -55,13 +55,17 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString number    = QObject::tr( "Number" );
-	const QString size      = QObject::tr( "Total Size" );
-	const QString directory = QObject::tr( "Directory" );
-	tree->setHeaderLabels( { number, size, directory } );
-	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-	tree->headerItem()->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( SSR_CountCol,     QObject::tr( "Files" ) );
+	headerItem->setText( SSR_TotalSizeCol, QObject::tr( "Total Size" ) );
+	headerItem->setText( SSR_PathCol,      QObject::tr( "Directory" ) );
+	headerItem->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	tree->sortByColumn( SSR_PathCol, Qt::AscendingOrder );
     }
 
 } // namespace
@@ -85,6 +89,8 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
              this,               &LocateFileTypeWindow::selectResult );
+
+    show();
 }
 
 
@@ -115,12 +121,7 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
     LocateFileTypeWindow * instance = sharedInstance();
 
     instance->populate( suffix, fileInfo );
-    instance->_ui->treeWidget->sortByColumn( SSR_PathCol, Qt::AscendingOrder );
-    instance->show();
     instance->raise();
-
-    // Select the first row after a delay so it doesn't slow down displaying the list
-    QTimer::singleShot( 25, instance, &LocateFileTypeWindow::selectFirstItem );
 }
 
 
@@ -129,22 +130,18 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     _suffix  = suffix;
     _subtree = fileInfo;
 
-    // For better Performance: Disable sorting while inserting many items
-    _ui->treeWidget->setSortingEnabled( false );
     _ui->treeWidget->clear();
-
     populateRecursive( fileInfo ? fileInfo : _subtree() );
-
-    _ui->treeWidget->setSortingEnabled( true );
 
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
-    const QString heading = tr( " with %1 files below %2" ).arg( displaySuffix(), _subtree.url() );
-    _ui->heading->setStatusTip( intro % heading );
+    const QString heading = tr( " with *%1 files below %2" ).arg( suffix, _subtree.url() );
 
     // Force a redraw of the header from the status tip
+    _ui->heading->setStatusTip( intro % heading );
     resizeEvent( nullptr );
 
+    _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
 //    logDebug() << count << " directories" << Qt::endl;
 }
 
@@ -177,31 +174,39 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 void LocateFileTypeWindow::refresh()
 {
     populate( _suffix, _subtree() );
-    selectFirstItem();
 }
 
 
-void LocateFileTypeWindow::selectResult( QTreeWidgetItem * item ) const
+void LocateFileTypeWindow::selectResults() const
 {
+    const QTreeWidgetItem * item = _ui->treeWidget->currentItem();
     if ( !item )
 	return;
 
-    SuffixSearchResultItem * searchResult = dynamic_cast<SuffixSearchResultItem *>( item );
+    const SuffixSearchResultItem * searchResult = dynamic_cast<const SuffixSearchResultItem *>( item );
     CHECK_DYNAMIC_CAST( searchResult, "SuffixSearchResultItem" );
+
 
     DirTree * tree = _subtree.tree();
     if ( tree )
     {
-	FileInfo * dir = _subtree.tree()->locate( searchResult->path() );
+	FileInfo * dir = tree->locate( searchResult->path() );
 
 	const FileInfoSet matches = matchingFiles( dir, _suffix );
 	if ( !matches.isEmpty() )
-	    app()->selectionModel()->setCurrentItem( matches.first(), true );
+	    app()->selectionModel()->setCurrentItem( matches.first(), false );
 
 	app()->selectionModel()->setSelectedItems( matches );
 
-	// logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
+	//logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
     }
+}
+
+
+void LocateFileTypeWindow::selectResult() const
+{
+    // Select after a delay so the dialog tree appears promptly
+    QTimer::singleShot( 100, this, &LocateFileTypeWindow::selectResults );
 }
 
 
@@ -217,14 +222,23 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
                                                 int             count,
                                                 FileSize        totalSize ):
-    QTreeWidgetItem{ QTreeWidgetItem::UserType },
+    QTreeWidgetItem{},
     _path{ path },
     _count{ count },
     _totalSize{ totalSize }
 {
-    set( SSR_CountCol,     QString::number( count ), Qt::AlignRight );
-    set( SSR_TotalSizeCol, formatSize( totalSize ),  Qt::AlignRight );
-    set( SSR_PathCol,      path,                     Qt::AlignLeft  );
+    /**
+     * Helper function to set the text and text alignment for a column.
+     **/
+    const auto set = [ this ]( int col, Qt::Alignment alignment, const QString & text )
+    {
+	setText( col, text );
+	setTextAlignment( col, alignment | Qt::AlignVCenter );
+    };
+
+    set( SSR_CountCol,     Qt::AlignRight, formatCount( count ) );
+    set( SSR_TotalSizeCol, Qt::AlignRight, formatSize( totalSize ) );
+    set( SSR_PathCol,      Qt::AlignLeft,  path );
 
     setIcon( SSR_PathCol,  QIcon( app()->dirTreeModel()->dirIcon() ) );
 }
@@ -240,16 +254,11 @@ bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const SuffixSearchResultItem & other = dynamic_cast<const SuffixSearchResultItem &>( rawOther );
 
-    switch ( static_cast<SuffixSearchResultColumns>( treeWidget()->sortColumn() ) )
+    switch ( treeWidget()->sortColumn() )
     {
 	case SSR_CountCol:     return _count     < other.count();
 	case SSR_TotalSizeCol: return _totalSize < other.totalSize();
-
-	case SSR_PathCol:
-	case SSR_ColumnCount:
-	    break;
+	default:               return QTreeWidgetItem::operator<( rawOther );
     }
-
-    return QTreeWidgetItem::operator<( rawOther );
 }
 

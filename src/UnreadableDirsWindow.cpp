@@ -7,10 +7,12 @@
  *              Ian Nartowicz
  */
 
+#include <QAbstractButton>
 #include <QPointer>
 
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"
+#include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfoIterator.h"
 #include "Logger.h"
@@ -28,12 +30,16 @@ namespace
     /**
      * Select one of the search results in the main window's tree and
      * treemap widgets via their SelectionModel.
+     *
+     * Only the result path is known and this must be searched in the
+     * tree.  This is to avoid holding stale pointers.  If there is
+     * no widget selected or the path is no longer found in the tree
+     * (or there is no tree!), nothing happens.
      **/
     void selectResult( QTreeWidgetItem * widgetItem )
     {
-	const UnreadableDirListItem * item = dynamic_cast<UnreadableDirListItem *>( widgetItem );
-	if ( item )
-	    app()->selectionModel()->setCurrentItem( item->dir(), true ); // select
+	if ( widgetItem )
+	    app()->selectionModel()->setCurrentItemPath( widgetItem->text( UD_PathCol ) );
     }
 
 
@@ -44,15 +50,19 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString directory   = QObject::tr( "Directory" );
-	const QString user        = QObject::tr( "User" );
-	const QString group       = QObject::tr( "Group" );
-	const QString permissions = QObject::tr( "Permissions" );
-	const QString perm        = QObject::tr( "Perm." );
-	tree->setHeaderLabels( { directory, user, group, permissions, perm } );
-	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-	tree->headerItem()->setTextAlignment( UD_Path, Qt::AlignLeft | Qt::AlignVCenter );
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( UD_PathCol,  QObject::tr( "Directory" ) );
+	headerItem->setText( UD_UserCol,  QObject::tr( "User" ) );
+	headerItem->setText( UD_GroupCol, QObject::tr( "Group" ) );
+	headerItem->setText( UD_PermCol,  QObject::tr( "Permissions" ) );
+	headerItem->setText( UD_OctalCol, QObject::tr( "Perm." ) );
+	headerItem->setTextAlignment( UD_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	tree->sortByColumn( UD_PathCol, Qt::AscendingOrder );
     }
 
 } // namespace
@@ -71,8 +81,12 @@ UnreadableDirsWindow::UnreadableDirsWindow( QWidget * parent ):
     initTree( _ui->treeWidget );
     Settings::readWindowSettings( this, "UnreadableDirsWindow" );
 
-    connect( _ui->treeWidget, &QTreeWidget::currentItemChanged,
-             this,            &selectResult );
+    connect( _ui->treeWidget, &QTreeWidget::currentItemChanged, &selectResult );
+
+    connect( _ui->refreshButton, &QAbstractButton::clicked,
+             this,               &UnreadableDirsWindow::populate );
+
+    show();
 }
 
 
@@ -94,52 +108,51 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 }
 
 
-void UnreadableDirsWindow::populateSharedInstance( FileInfo * fileInfo )
-{
-    if ( !fileInfo )
-        return;
-
-    sharedInstance()->populate( fileInfo );
-    sharedInstance()->show();
-}
-
-
-void UnreadableDirsWindow::populate( FileInfo * fileInfo )
+void UnreadableDirsWindow::populate()
 {
     _ui->treeWidget->clear();
-    _subtree = fileInfo;
 
-    //logDebug() << "Locating all unreadable dirs below " << _subtree.url() << Qt::endl;
+    //logDebug() << "Locating all unreadable dirs" << Qt::endl;
 
-    populateRecursive( fileInfo ? fileInfo : _subtree() );
-    _ui->treeWidget->sortByColumn( UD_Path, Qt::AscendingOrder );
+    populateRecursive( app()->firstToplevel() );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
     _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString{} );
 
-    //logDebug() << count << " directories" << Qt::endl;
+    //logDebug() << rowCount << " directories" << Qt::endl;
 
-    // Make sure something is selected, even if this window is not the active
-    // one (for example because the user just clicked on another suffix in the
-    // file type stats window). When the window is activated, the tree widget
-    // automatically uses the topmost item as the current item, and in the
-    // default selection mode, this item is also selected. When the window is
-    // not active, this does not happen yet - until the window is activated.
+    // Make sure something is selected, even if this window is not the active one
     _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
 }
 
 
-void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
+void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
 {
-    if ( !fileInfo || !fileInfo->isDirInfo() )
+    if ( !subtree || !subtree->isDirInfo() )
 	return;
 
-    DirInfo * dir = fileInfo->toDirInfo();
+    DirInfo * dir = subtree->toDirInfo();
     if ( dir->readError() )
-	_ui->treeWidget->addTopLevelItem( new UnreadableDirListItem{ dir } );
+    {
+	QTreeWidgetItem * item = new QTreeWidgetItem{ _ui->treeWidget };
+
+	const auto set = [ item ]( UnreadableDirectories col, Qt::Alignment alignment, const QString & text )
+	{
+	    item->setText( col, text );
+	    item->setTextAlignment( col, alignment | Qt::AlignVCenter );
+	};
+
+	set( UD_PathCol,  Qt::AlignLeft,  dir->url() );
+	set( UD_UserCol,  Qt::AlignLeft,  dir->userName() );
+	set( UD_GroupCol, Qt::AlignLeft,  dir->groupName() );
+	set( UD_PermCol,  Qt::AlignRight, dir->symbolicPermissions() );
+	set( UD_OctalCol, Qt::AlignRight, dir->octalPermissions() );
+
+	item->setIcon( UD_PathCol, app()->dirTreeModel()->unreadableDirIcon() );
+    }
 
     // Recurse through any subdirectories
-    for ( DirInfoIterator it{ fileInfo }; *it; ++it )
+    for ( DirInfoIterator it{ subtree }; *it; ++it )
 	populateRecursive( *it );
 
     // Dot entries can't contain unreadable dirs, but attics can
@@ -148,7 +161,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * fileInfo )
 
 
 
-
+/*
 UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
     QTreeWidgetItem{ QTreeWidgetItem::UserType },
     _dir{ dir }
@@ -161,7 +174,7 @@ UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
 
     setIcon( UD_Path, app()->dirTreeModel()->unreadableDirIcon() );
 }
-
+*/
 /*
 bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
@@ -173,15 +186,13 @@ bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const UnreadableDirListItem & other = dynamic_cast<const UnreadableDirListItem &>( rawOther );
 
-    switch ( (UnreadableDirectories)treeWidget()->sortColumn() )
+    switch ( treeWidget()->sortColumn() )
     {
 	case UD_Path: break;
 	case UD_User:        return _dir->userName()            < other._dir->userName();
 	case UD_Group:       return _dir->groupName()           < other._dir->groupName();
 	case UD_Permissions: return _dir->symbolicPermissions() < other._dir->symbolicPermissions();
 	case UD_Octal:       return _dir->octalPermissions()    < other._dir->octalPermissions();
-    }
-
-    return QTreeWidgetItem::operator<( rawOther );
+	default:             return QTreeWidgetItem::operator<( rawOther );
 }
 */
