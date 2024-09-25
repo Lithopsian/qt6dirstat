@@ -16,15 +16,14 @@
 #include <QTreeWidgetItem>
 
 #include "ui_file-age-stats-window.h"
-#include "FileAgeStats.h" // YearsList
 #include "Subtree.h"
+#include "Typedefs.h" // FileSize
 
 
 namespace QDirStat
 {
-    class FileAgeStats;
-    class PercentBarDelegate;
     class YearListItem;
+    class YearStats;
 
     /**
      * Modeless dialog to display file age statistics, i.e. statistics about
@@ -35,7 +34,7 @@ namespace QDirStat
 	Q_OBJECT
 
 	/**
-	 * Constructor.  Private.  Access the window through the static
+	 * Constructor.  Private; access the window through the static
 	 * populateSharedInstance().
 	 *
 	 * Note that this widget will destroy itself upon window close.
@@ -48,7 +47,7 @@ namespace QDirStat
 	~FileAgeStatsWindow() override;
 
 	/**
-	 * Returns the shared instance pointer for this windw.  It is created if
+	 * Returns the shared instance pointer for this window.  It is created if
 	 * it doesn't already exist.
 	 **/
 	static FileAgeStatsWindow * sharedInstance( QWidget * parent );
@@ -60,8 +59,8 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
 	 **/
-	static void populateSharedInstance( QWidget  * parent,
-	                                    FileInfo * fileInfo );
+	static void populateSharedInstance( QWidget * parent, FileInfo * fileInfo )
+	    { if ( fileInfo ) sharedInstance( parent )->populate( fileInfo ); }
 
 
     protected slots:
@@ -117,16 +116,6 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo );
 
 	/**
-	 * Create an item in the years tree / list widget for each year
-	 **/
-	void populateListWidget( FileInfo * fileInfo );
-
-	/**
-	 * Fill the gaps between years.
-	 **/
-	void fillGaps( const FileAgeStats & stats );
-
-	/**
 	 * Return the currently selected item in the tree widget or 0
 	 * if there is none or if it is the wrong type.
 	 **/
@@ -153,15 +142,9 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FileAgeStatsWindow> _ui;
 
-	PercentBarDelegate * _filesPercentBarDelegate{ nullptr };
-	PercentBarDelegate * _sizePercentBarDelegate{ nullptr };
-	Subtree              _subtree;
+	Subtree _subtree;
 
     };	// class FileAgeStatsWindow
 
@@ -171,14 +154,14 @@ namespace QDirStat
      **/
     enum YearListColumns
     {
-	YearListYearCol,
-	YearListFilesCountCol,
-	YearListFilesPercentBarCol,
-	YearListFilesPercentCol,
-	YearListSizeCol,
-	YearListSizePercentBarCol,
-	YearListSizePercentCol,
-	YearListColumnCount
+	YL_YearCol,
+	YL_FilesCountCol,
+	YL_FilesPercentBarCol,
+	YL_FilesPercentCol,
+	YL_SizeCol,
+	YL_SizePercentBarCol,
+	YL_SizePercentCol,
+	YL_ColumnCount,
     };
 
 
@@ -193,7 +176,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	YearListItem( const YearStats & yearStats );
+	YearListItem( const YearStats & yearStats, bool enabled );
 
 	/**
 	 * Return the year for this item.
@@ -220,27 +203,16 @@ namespace QDirStat
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;
 
-	/**
-	 * Helper function to set both the column text and alignment.
-	 **/
-	void set( YearListColumns col, Qt::Alignment alignment, const QString & text )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, Qt::AlignVCenter | alignment );
-	}
-
 
     private:
 
 	short    _year;
 	short    _month;
 	int      _filesCount;
-	float    _filesPercent;
 	FileSize _size;
-	float    _sizePercent;
 
     };	// class YearListItem
 
 }	// namespace QDirStat
 
-#endif // FileAgeStatsWindow_h
+#endif	// FileAgeStatsWindow_h
