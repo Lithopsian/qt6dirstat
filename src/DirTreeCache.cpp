@@ -587,7 +587,7 @@ void CacheReader::addItem()
 
 	// Try the easy way first - the starting point of this cache
 	if ( _parent && !parent )
-	    parent = dynamic_cast<DirInfo *> ( _parent->locate( path ) );
+	    parent = _parent->locate( path )->toDirInfo();
 
 #if VERBOSE_LOCATE_PARENT
 	if ( parent )
@@ -597,7 +597,7 @@ void CacheReader::addItem()
 	if ( !parent )
 	{
 	    // Fallback: Search the entire tree
-	    parent = dynamic_cast<DirInfo *> ( _tree->locate( path ) );
+	    parent = _tree->locate( path )->toDirInfo();
 
 #if VERBOSE_LOCATE_PARENT
 	    if ( parent )
