@@ -16,7 +16,17 @@
 using namespace QDirStat;
 
 
-FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix ):
+namespace
+{
+    bool canCollect( const FileInfo * subtree, bool excludeSymLinks )
+    {
+        return ( !excludeSymLinks && subtree->isSymLink() ) || subtree->isFile();
+    }
+
+}
+
+
+FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix, bool excludeSymLinks ):
     PercentileStats{}
 {
     CHECK_PTR( subtree );
@@ -24,32 +34,32 @@ FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix ):
     if ( suffix.isEmpty() )
     {
         reserve( subtree->totalNonDirItems() );
-        collect( subtree );
+        collect( subtree, excludeSymLinks );
     }
     else
     {
-        collect( subtree, suffix );
+        collect( subtree, suffix, excludeSymLinks );
     }
 
     sort();
 }
 
 
-void FileSizeStats::collect( const FileInfo * subtree )
+void FileSizeStats::collect( const FileInfo * subtree, bool excludeSymLinks )
 {
-    if ( subtree->isFileOrSymLink() )
+    if ( canCollect( subtree, excludeSymLinks ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it );
+        collect( *it, excludeSymLinks );
 }
 
 
-void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
+void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix, bool excludeSymLinks )
 {
-    if ( subtree->isFileOrSymLink() && subtree->name().endsWith( suffix ) )
+    if ( canCollect( subtree, excludeSymLinks ) && subtree->name().endsWith( suffix ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it, suffix );
+        collect( *it, suffix, excludeSymLinks );
 }
