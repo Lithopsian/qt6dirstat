@@ -12,16 +12,12 @@
 
 #include <QTreeView>
 
-#include "Typedefs.h" // ColorList
-
 
 namespace QDirStat
 {
     class DirTreeModel;
     class FileInfo;
     class HeaderTweaker;
-    class PercentBarDelegate;
-    class SizeColDelegate;
 
     /**
      * Tree view widget for the QDirStat directory tree.
@@ -113,25 +109,6 @@ namespace QDirStat
 	void readSettings();
 
 	/**
-	 * Return the default percent bar fill colors.
-	 **/
-	ColorList percentBarDefaultColors() const
-	{
-	    return ColorList{ QColor{   0,   0, 255 },
-	                      QColor{  34,  34, 255 },
-	                      QColor{  68,  68, 255 },
-	                      QColor{  85,  85, 255 },
-	                      QColor{ 102, 102, 255 },
-	                      QColor{ 119, 119, 255 },
-	                      QColor{ 136, 136, 255 },
-	                      QColor{ 153, 153, 255 },
-	                      QColor{ 170, 170, 255 },
-	                      QColor{ 187, 187, 255 },
-	                      QColor{ 204, 204, 255 },
-	                    };
-	}
-
-	/**
 	 * Return the list of items that are currently expanded.
 	 **/
 	QModelIndexList expandedIndexes() const;
@@ -157,11 +134,7 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
-	PercentBarDelegate * _percentBarDelegate;
-	SizeColDelegate    * _sizeColDelegate;
-	HeaderTweaker      * _headerTweaker;
+	HeaderTweaker * _headerTweaker;
 
     };	// class DirTreeView
 

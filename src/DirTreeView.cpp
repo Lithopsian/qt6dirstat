@@ -29,11 +29,8 @@ using namespace QDirStat;
 
 DirTreeView::DirTreeView( QWidget * parent ):
     QTreeView{ parent },
-    _sizeColDelegate{ new SizeColDelegate{ this } },
     _headerTweaker{ new HeaderTweaker{ header(), this } }
 {
-    setItemDelegateForColumn( SizeCol, _sizeColDelegate );
-
     readSettings();
 
     connect( verticalScrollBar(), &QScrollBar::valueChanged,
@@ -55,6 +52,22 @@ DirTreeView::~DirTreeView()
 
 void DirTreeView::readSettings()
 {
+    const auto percentBarDefaultColors = []()
+    {
+	return ColorList{ QColor{   0,   0, 255 },
+	                  QColor{  34,  34, 255 },
+	                  QColor{  68,  68, 255 },
+	                  QColor{  85,  85, 255 },
+	                  QColor{ 102, 102, 255 },
+	                  QColor{ 119, 119, 255 },
+	                  QColor{ 136, 136, 255 },
+	                  QColor{ 153, 153, 255 },
+	                  QColor{ 170, 170, 255 },
+	                  QColor{ 187, 187, 255 },
+	                  QColor{ 204, 204, 255 },
+	                };
+    };
+
     Settings settings;
 
     settings.beginGroup( "DirTreeView" );
@@ -70,8 +83,9 @@ void DirTreeView::readSettings()
     settings.endGroup();
 
     // Now we have all the settings for the percent bar delegate
-    _percentBarDelegate = new PercentBarDelegate{ this, PercentBarCol, barWidth, barBackground, barColors };
-    setItemDelegateForColumn( PercentBarCol, _percentBarDelegate );
+    const auto delegate = new PercentBarDelegate{ this, PercentBarCol, barWidth, barBackground, barColors };
+    setItemDelegateForColumn( PercentBarCol, delegate );
+    setItemDelegateForColumn( SizeCol, new SizeColDelegate{ this } );
 }
 
 
@@ -237,35 +251,38 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
 
 void DirTreeView::scrolled( int )
 {
-    // Restrict checking to visible rows
-    const int precision = header()->resizeContentsPrecision();
-    header()->setResizeContentsPrecision( 0 );
+    // Reset the precision to just the visible rows, but remember the original setting
+    const auto treeHeader = header();
+    const int precision = treeHeader->resizeContentsPrecision();
+    treeHeader->setResizeContentsPrecision( 0 );
 
+    // Loop through columns which have variable widths
     for ( DataColumn col : { NameCol,
-			     PercentNumCol,
-			     SizeCol,
-			     TotalItemsCol,
-			     TotalFilesCol,
-			     TotalSubDirsCol,
-			     UserCol,
-			     GroupCol,
-			   } )
+                             PercentNumCol,
+                             SizeCol,
+                             TotalItemsCol,
+                             TotalFilesCol,
+                             TotalSubDirsCol,
+                             UserCol,
+                             GroupCol,
+                           } )
     {
 	// Only check visible columns that are configured to auto-size
-	const int section = DataColumns::toViewCol( col );
-	if ( !header()->isSectionHidden( section ) &&
-	     header()->sectionResizeMode( section ) == QHeaderView::ResizeToContents )
+	const int  section = DataColumns::toViewCol( col );
+	const auto mode    = treeHeader->sectionResizeMode( section );
+	const bool hidden  = treeHeader->isSectionHidden( section );
+	if ( !hidden && mode == QHeaderView::ResizeToContents )
 	{
 	    // Signal an update if the required width is more than the current width
-	    if ( sizeHintForColumn( section ) > header()->sectionSize( section ) )
+	    if ( sizeHintForColumn( section ) > treeHeader->sectionSize( section ) )
 	    {
 		// Pick a row, any row, just to make Qt reassess the columns
-		emit _sizeColDelegate->sizeHintChanged( indexAt( { 0, 0 } ) );
+		emit itemDelegateForColumn( SizeCol )->sizeHintChanged( indexAt( { 0, 0 } ) );
 		break;
 	    }
 	}
     }
 
     // Return the checked rows limit to the default
-    header()->setResizeContentsPrecision( precision );
+    treeHeader->setResizeContentsPrecision( precision );
 }
