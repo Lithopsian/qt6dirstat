@@ -1003,7 +1003,7 @@ void MainWindow::showDirPermissionsWarning()
 
 void MainWindow::showUnreadableDirs()
 {
-    UnreadableDirsWindow::populateSharedInstance( app()->firstToplevel() );
+    UnreadableDirsWindow::populateSharedInstance();
 }
 
 
