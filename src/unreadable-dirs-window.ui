@@ -63,7 +63,17 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="buttonHBox" stretch="1,0">
+    <layout class="QHBoxLayout" name="buttonHBox" stretch="0,1,0">
+     <property name="spacing">
+      <number>12</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="text">
+        <string>&amp;Refresh</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="totalLabel">
        <property name="text">
