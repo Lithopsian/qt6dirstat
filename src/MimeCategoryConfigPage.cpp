@@ -302,21 +302,21 @@ void MimeCategoryConfigPage::updateActions()
 {
     const QListWidgetItem * currentItem = _ui->listWidget->currentItem();
 
-    const bool isSymlink =
+    const bool isSymLink =
 	currentItem && currentItem->text() == MimeCategorizer::symlinkCategoryName();
     const bool isExecutable =
 	currentItem && currentItem->text() == MimeCategorizer::executableCategoryName();
 
     // Name can't be changed for symlinks and executables
-    _ui->nameLineEdit->setEnabled( currentItem && !isSymlink && !isExecutable );
+    _ui->nameLineEdit->setEnabled( currentItem && !isSymLink && !isExecutable );
     _ui->categoryColorEdit->setEnabled( currentItem );
 
     // Patterns can't be changed for symlinks
-    _ui->patternsTopWidget->setEnabled( currentItem && !isSymlink );
-    _ui->patternsBottomWidget->setEnabled( currentItem && !isSymlink );
+    _ui->patternsTopWidget->setEnabled( currentItem && !isSymLink );
+    _ui->patternsBottomWidget->setEnabled( currentItem && !isSymLink );
 
     // Symlinks and executables can't be removed
-    actionRemove()->setEnabled( currentItem && !isSymlink && !isExecutable );
+    actionRemove()->setEnabled( currentItem && !isSymLink && !isExecutable );
 
     // Any category can have a colour
     _ui->categoryColorButton->setEnabled( currentItem );
