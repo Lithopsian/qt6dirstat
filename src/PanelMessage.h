@@ -34,12 +34,7 @@ namespace QDirStat
 	/**
 	 * Constructor.  Private, use the static methods for access.
 	 **/
-	PanelMessage( QWidget * parent ):
-    QWidget{ parent },
-    _ui{ new Ui::PanelMessage }
-{
-    _ui->setupUi( this );
-}
+	PanelMessage( QWidget * parent );
 
 
     public:
