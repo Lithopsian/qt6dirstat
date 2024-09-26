@@ -116,12 +116,6 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo );
 
 	/**
-	 * Return the currently selected item in the tree widget or 0
-	 * if there is none or if it is the wrong type.
-	 **/
-	const YearListItem * selectedItem() const;
-
-	/**
 	 * Key press event for detecting enter/return.
 	 *
 	 * Reimplemented from QWidget.
@@ -154,7 +148,7 @@ namespace QDirStat
      **/
     enum YearListColumns
     {
-	YL_YearCol,
+	YL_YearMonthCol,
 	YL_FilesCountCol,
 	YL_FilesPercentBarCol,
 	YL_FilesPercentCol,
@@ -176,7 +170,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	YearListItem( const YearStats & yearStats, bool enabled );
+	YearListItem( const YearStats & yearStats );
 
 	/**
 	 * Return the year for this item.

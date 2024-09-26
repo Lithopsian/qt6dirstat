@@ -117,7 +117,7 @@ void UnreadableDirsWindow::populate()
     populateRecursive( app()->firstToplevel() );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
-    _ui->totalLabel->setText( rowCount > 1 ? tr( "%1 directories" ).arg( rowCount ) : QString{} );
+    _ui->totalLabel->setText( rowCount > 1 ? tr( "%L1 directories" ).arg( rowCount ) : QString{} );
 
     //logDebug() << rowCount << " directories" << Qt::endl;
 
@@ -134,7 +134,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
     DirInfo * dir = subtree->toDirInfo();
     if ( dir->readError() )
     {
-	QTreeWidgetItem * item = new QTreeWidgetItem{ _ui->treeWidget };
+	QTreeWidgetItem * item = new QTreeWidgetItem{ _ui->treeWidget, QTreeWidgetItem::UserType };
 
 	const auto set = [ item ]( UnreadableDirectories col, Qt::Alignment alignment, const QString & text )
 	{
@@ -158,41 +158,3 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
     // Dot entries can't contain unreadable dirs, but attics can
     populateRecursive( dir->attic() );
 }
-
-
-
-/*
-UnreadableDirListItem::UnreadableDirListItem( DirInfo * dir ) :
-    QTreeWidgetItem{ QTreeWidgetItem::UserType },
-    _dir{ dir }
-{
-    set( UD_Path,        dir->url(),                 Qt::AlignLeft  );
-    set( UD_User,        dir->userName(),            Qt::AlignLeft  );
-    set( UD_Group,       dir->groupName(),           Qt::AlignLeft  );
-    set( UD_Permissions, dir->symbolicPermissions(), Qt::AlignRight );
-    set( UD_Octal,       dir->octalPermissions(),    Qt::AlignRight );
-
-    setIcon( UD_Path, app()->dirTreeModel()->unreadableDirIcon() );
-}
-*/
-/*
-bool UnreadableDirListItem::operator<( const QTreeWidgetItem & rawOther ) const
-{
-    if ( !treeWidget() )
-	return QTreeWidgetItem::operator<( rawOther );
-
-    // Since this is a reference, the dynamic_cast will throw a std::bad_cast
-    // exception if it fails. Not catching this here since this is a genuine
-    // error which should not be silently ignored.
-    const UnreadableDirListItem & other = dynamic_cast<const UnreadableDirListItem &>( rawOther );
-
-    switch ( treeWidget()->sortColumn() )
-    {
-	case UD_Path: break;
-	case UD_User:        return _dir->userName()            < other._dir->userName();
-	case UD_Group:       return _dir->groupName()           < other._dir->groupName();
-	case UD_Permissions: return _dir->symbolicPermissions() < other._dir->symbolicPermissions();
-	case UD_Octal:       return _dir->octalPermissions()    < other._dir->octalPermissions();
-	default:             return QTreeWidgetItem::operator<( rawOther );
-}
-*/

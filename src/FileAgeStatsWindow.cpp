@@ -35,6 +35,16 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns the current item in 'tree', cast as a YearListItem,
+     * or 0 if there is no current item or it is not a YearListItem.
+     **/
+    const YearListItem * currentItem( const QTreeWidget * treeWidget)
+    {
+	return dynamic_cast<const YearListItem *>( treeWidget->currentItem() );
+    }
+
+
+    /**
      * Returns whether a locate could be performed for the current selection.
      **/
     bool canLocate( const YearListItem * item )
@@ -77,7 +87,7 @@ namespace
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
-	headerItem->setText( YL_YearCol,            QObject::tr( "Year" ) );
+	headerItem->setText( YL_YearMonthCol,       QObject::tr( "Year" ) );
 	headerItem->setText( YL_FilesCountCol,      QObject::tr( "Files" ) );
 	headerItem->setText( YL_FilesPercentBarCol, QObject::tr( "Files %" ) );
 	headerItem->setText( YL_FilesPercentCol,    "%" );
@@ -89,7 +99,7 @@ namespace
 	header->setDefaultAlignment( Qt::AlignCenter );
 	header->setSectionResizeMode( QHeaderView::ResizeToContents );
 
-	tree->sortByColumn( YL_YearCol, Qt::DescendingOrder );
+	tree->sortByColumn( YL_YearMonthCol, Qt::DescendingOrder );
     }
 
 
@@ -102,35 +112,40 @@ namespace
     {
 	FileAgeStats stats{ fileInfo };
 
-	for ( short year : stats.years() )
+	/**
+	 * Create a YearListItem and all its children for 'year'.
+	 **/
+	const auto createYearItem = [ &stats, treeWidget ]( short year )
 	{
 	    YearStats * yearStats = stats.yearStats( year );
-	    if ( yearStats )
-	    {
-		// Add a year item
-		YearListItem * item = new YearListItem{ *yearStats, true };
-		treeWidget->addTopLevelItem( item );
+	    if ( !yearStats )
+		return;
 
-		// Add the month items if applicable
-		if ( stats.monthStatsAvailableFor( year ) )
+	    YearListItem * item = new YearListItem{ *yearStats };
+	    treeWidget->addTopLevelItem( item );
+
+	    // Add the month items if applicable
+	    if ( stats.monthStatsAvailableFor( year ) )
+	    {
+		for ( short month = 1; month <= 12; month++ )
 		{
-		    for ( short month = 1; month <= 12; month++ )
-		    {
-			YearStats * monthStats = stats.monthStats( year, month );
-			if ( monthStats )
-			    item->addChild( new YearListItem{ *monthStats, monthStats->filesCount > 0 } );
-		    }
+		    const YearStats * monthStats = stats.monthStats( year, month );
+		    if ( monthStats )
+			item->addChild( new YearListItem{ *monthStats } );
 		}
 	    }
-	}
+	};
+
+	for ( short year : stats.years() )
+	    createYearItem( year );
 
 	// Select the first row before filling gaps, so an enabled row is selected
 	treeWidget->setCurrentItem( treeWidget->topLevelItem( 0 ) );
 
-	// Create disabled entries for any years which didn't have any files
+	// Create empty entries for any years which didn't have any files
 	const auto gaps = findGaps( stats );
 	for ( short year : gaps )
-	    treeWidget->addTopLevelItem( new YearListItem{ YearStats{ year }, false } );
+	    treeWidget->addTopLevelItem( new YearListItem{ YearStats{ year } } );
     }
 
 } // namespace
@@ -168,7 +183,7 @@ FileAgeStatsWindow::FileAgeStatsWindow( QWidget * parent ):
     connect( _ui->locateButton,  &QPushButton::clicked,
              this,               &FileAgeStatsWindow::locateFiles );
 
-    connect( _ui->treeWidget,    &QTreeWidget::itemDoubleClicked,
+    connect( _ui->treeWidget,    &QTreeWidget::itemActivated,
              this,               &FileAgeStatsWindow::locateFiles );
 
     connect( _ui->treeWidget,    &QTreeWidget::itemSelectionChanged,
@@ -242,31 +257,22 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 }
 
 
-const YearListItem * FileAgeStatsWindow::selectedItem() const
-{
-    return dynamic_cast<const YearListItem *>( _ui->treeWidget->currentItem() );
-}
-
-
 void FileAgeStatsWindow::locateFiles()
 {
-    const YearListItem * item = selectedItem();
-    if ( item && canLocate( item ) )
+    const YearListItem * item = currentItem( _ui->treeWidget );
+    if ( canLocate( item ) && item->year() > 0 )
     {
-	const short month = item->month();
-	const short year  = item->year();
-
-	if ( month > 0 && year > 0 )
-	    emit DiscoverActions::discoverFilesFromMonth( _subtree.url(), year, month );
-	else if ( year > 0 )
-	    emit DiscoverActions::discoverFilesFromYear( _subtree.url(), year );
+	if ( item->month() > 0 )
+	    DiscoverActions::discoverFilesFromMonth( _subtree.url(), item->year(), item->month() );
+	else
+	    DiscoverActions::discoverFilesFromYear( _subtree.url(), item->year() );
     }
 }
 
 
 void FileAgeStatsWindow::enableActions()
 {
-    _ui->locateButton->setEnabled( canLocate( selectedItem() ) );
+    _ui->locateButton->setEnabled( canLocate( currentItem( _ui->treeWidget ) ) );
 }
 
 
@@ -317,18 +323,11 @@ void FileAgeStatsWindow::writeSettings()
 
 void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 {
-    if ( event->key() != Qt::Key_Return && event->key() != Qt::Key_Enter )
-    {
-	QDialog::keyPressEvent( event );
-	return;
-    }
-
-    QTreeWidgetItem * item = _ui->treeWidget->currentItem();
-    YearListItem * listItem = dynamic_cast<YearListItem *>( item );
-    if ( listItem && listItem->childCount() > 0 )
-	item->setExpanded( !item->isExpanded() );
-    else
+    // Act on the enter key here so it doesn't just go to the default (dialog) button
+    if ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter )
 	locateFiles();
+    else
+	QDialog::keyPressEvent( event );
 }
 
 
@@ -341,8 +340,8 @@ void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 
 
 
-YearListItem::YearListItem( const YearStats & stats, bool enabled ):
-    QTreeWidgetItem{},
+YearListItem::YearListItem( const YearStats & stats ):
+    QTreeWidgetItem{ UserType },
     _year{ stats.year },
     _month{ stats.month },
     _filesCount{ stats.filesCount },
@@ -359,7 +358,7 @@ YearListItem::YearListItem( const YearStats & stats, bool enabled ):
 
     const bool monthItem = _month > 0;
     const QString text = monthItem ? monthAbbreviation( _month ) : QString::number( _year );
-    set( YL_YearCol, Qt::AlignLeft, text );
+    set( YL_YearMonthCol, Qt::AlignLeft, text );
 
     if ( _filesCount > 0 )
     {
@@ -374,20 +373,21 @@ YearListItem::YearListItem( const YearStats & stats, bool enabled ):
 	setData( YL_FilesPercentBarCol, PercentRole, filesPercent );
 	setData( YL_SizePercentBarCol,  PercentRole, sizePercent  );
 
-	const bool treeLevel = monthItem ? 1 : 0;
+	const int treeLevel = monthItem ? 1 : 0;
 	setData( YL_FilesPercentBarCol, TreeLevelRole, treeLevel );
 	setData( YL_SizePercentBarCol,  TreeLevelRole, treeLevel );
     }
-
-    if ( !enabled )
+    else
+    {
 	setFlags( Qt::NoItemFlags );
+    }
 }
 
 
 bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )
-	QTreeWidgetItem::operator<( rawOther );
+	return QTreeWidgetItem::operator<( rawOther );
 
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
@@ -396,7 +396,7 @@ bool YearListItem::operator<( const QTreeWidgetItem & rawOther ) const
 
     switch ( treeWidget()->sortColumn() )
     {
-	case YL_YearCol:
+	case YL_YearMonthCol:
 	    if ( _month > 0 )
 		return _month < other._month;
 	    else

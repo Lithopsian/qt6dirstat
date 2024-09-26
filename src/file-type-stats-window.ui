@@ -151,5 +151,53 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLocate</sender>
+   <signal>triggered()</signal>
+   <receiver>locateButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>159</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSizeStats</sender>
+   <signal>triggered()</signal>
+   <receiver>sizeStatsButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>266</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidget</sender>
+   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
+   <receiver>locateButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>338</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>159</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

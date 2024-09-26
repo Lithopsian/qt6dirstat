@@ -134,7 +134,7 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
     populateRecursive( fileInfo ? fileInfo : _subtree() );
 
     const int count = _ui->treeWidget->topLevelItemCount();
-    const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%1 directories" ).arg( count );
+    const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%L1 directories" ).arg( count );
     const QString heading = tr( " with *%1 files below %2" ).arg( suffix, _subtree.url() );
 
     // Force a redraw of the header from the status tip
@@ -179,27 +179,23 @@ void LocateFileTypeWindow::refresh()
 
 void LocateFileTypeWindow::selectResults() const
 {
+    const DirTree * tree = _subtree.tree();
     const QTreeWidgetItem * item = _ui->treeWidget->currentItem();
-    if ( !item )
+    if ( !tree || !item )
 	return;
 
     const SuffixSearchResultItem * searchResult = dynamic_cast<const SuffixSearchResultItem *>( item );
     CHECK_DYNAMIC_CAST( searchResult, "SuffixSearchResultItem" );
 
+    FileInfo * dir = tree->locate( searchResult->path() );
 
-    DirTree * tree = _subtree.tree();
-    if ( tree )
-    {
-	FileInfo * dir = tree->locate( searchResult->path() );
+    const FileInfoSet matches = matchingFiles( dir, _suffix );
+    if ( !matches.isEmpty() )
+	app()->selectionModel()->setCurrentItem( matches.first(), false );
 
-	const FileInfoSet matches = matchingFiles( dir, _suffix );
-	if ( !matches.isEmpty() )
-	    app()->selectionModel()->setCurrentItem( matches.first(), false );
+    app()->selectionModel()->setSelectedItems( matches );
 
-	app()->selectionModel()->setSelectedItems( matches );
-
-	//logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
-    }
+    //logDebug() << "Selecting " << searchResult->path() << " with " << matches.size() << " matches" << Qt::endl;
 }
 
 
@@ -222,7 +218,7 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
                                                 int             count,
                                                 FileSize        totalSize ):
-    QTreeWidgetItem{},
+    QTreeWidgetItem{ UserType },
     _path{ path },
     _count{ count },
     _totalSize{ totalSize }
