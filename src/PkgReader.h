@@ -102,10 +102,8 @@ namespace QDirStat
      * used for getting the file list when needed and then waits for it to
      * return a result.
      **/
-    class PkgReadJob: public QObject, public DirReadJob
+    class PkgReadJob: public DirReadJob
     {
-        Q_OBJECT
-
     public:
 
         /**
@@ -119,7 +117,6 @@ namespace QDirStat
         PkgReadJob( DirTree   * tree,
                     PkgInfo   * pkg,
                     bool        verboseMissingPkgFiles ):
-            QObject{},
             DirReadJob{ tree, pkg },
             _pkg{ pkg },
             _verboseMissingPkgFiles{ verboseMissingPkgFiles }
@@ -191,7 +188,7 @@ namespace QDirStat
      * waiting for the result each time (which is what the more generic
      * PkgReadJob does).
      **/
-    class AsyncPkgReadJob: public PkgReadJob
+    class AsyncPkgReadJob: public QObject, public PkgReadJob
     {
         Q_OBJECT
 
@@ -248,8 +245,6 @@ namespace QDirStat
 
     class CachePkgReadJob: public PkgReadJob
     {
-        Q_OBJECT
-
     public:
 
         /**

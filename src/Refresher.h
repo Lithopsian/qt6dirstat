@@ -34,6 +34,8 @@ namespace QDirStat
      **/
     class Refresher: public QObject
     {
+	Q_OBJECT
+
     public:
 
 	/**
