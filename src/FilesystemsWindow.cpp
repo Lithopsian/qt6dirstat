@@ -32,6 +32,17 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns the current item in 'tree', cast as a
+     * FilesystemItem, or 0 if there is no current item or it is
+     * not a FilesystemItem.
+     **/
+    const FilesystemItem * currentItem( const QTreeWidget * treeWidget)
+    {
+	return dynamic_cast<const FilesystemItem *>( treeWidget->currentItem() );
+    }
+
+
+    /**
      * Returns the icon filename for the given type of mount point.
      **/
     const char * iconName( const MountPoint * mountPoint )
@@ -101,23 +112,19 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     connect( _ui->refreshButton,  &QAbstractButton::clicked,
              this,                &FilesystemsWindow::populate );
 
+    connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
+             this,                &FilesystemsWindow::enableActions );
+
     connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
               this,               &FilesystemsWindow::contextMenu);
 
-    connect( _ui->fsTree,         &QTreeWidget::itemDoubleClicked,
-             _ui->actionRead,     &QAction::triggered );
-
     connect( _ui->readButton,     &QAbstractButton::clicked,
-             _ui->actionRead,     &QAction::triggered );
-
-    connect( _ui->actionRead,     &QAction::triggered,
              this,                &FilesystemsWindow::readSelectedFilesystem );
 
     connect( _ui->actionCopy,     &QAction::triggered,
              this,                &FilesystemsWindow::copyDeviceToClipboard );
 
-    connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
-             this,                &FilesystemsWindow::enableActions );
+    // See also signal/slot connections in filesystems-window.ui
 
     show();
 }
@@ -188,13 +195,9 @@ void FilesystemsWindow::readSelectedFilesystem()
 
 QString FilesystemsWindow::selectedPath() const
 {
-    const QList<QTreeWidgetItem *> sel = _ui->fsTree->selectedItems();
-    if ( !sel.isEmpty() )
-    {
-	const FilesystemItem * item = dynamic_cast<FilesystemItem *>( sel.first() );
-	if ( item )
-	    return item->mountPath();
-    }
+    const FilesystemItem * item = currentItem( _ui->fsTree );
+    if ( item )
+	return item->mountPath();
 
     return QString{};
 }
@@ -202,9 +205,9 @@ QString FilesystemsWindow::selectedPath() const
 
 void FilesystemsWindow::copyDeviceToClipboard()
 {
-    const FilesystemItem * currentItem = dynamic_cast<FilesystemItem *>( _ui->fsTree->currentItem() );
-    if ( currentItem )
-	QApplication::clipboard()->setText( currentItem->device().trimmed() );
+    const FilesystemItem * item = currentItem( _ui->fsTree );
+    if ( item )
+	QApplication::clipboard()->setText( item->device().trimmed() );
 }
 
 
@@ -226,7 +229,8 @@ void FilesystemsWindow::contextMenu( const QPoint & pos )
 
 void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 {
-    if ( !selectedPath().isEmpty() && ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
+    // Use the enter key here so it doesn't just go to the default (dialog) button
+    if ( ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
 	readSelectedFilesystem();
     else
 	QDialog::keyPressEvent( event );
@@ -235,7 +239,7 @@ void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 
 
 FilesystemItem::FilesystemItem( MountPoint * mountPoint ):
-    QTreeWidgetItem{},
+    QTreeWidgetItem{ UserType },
     _device        { mountPoint->device()          },
     _mountPath     { mountPoint->path()            },
     _fsType        { mountPoint->filesystemType()  },

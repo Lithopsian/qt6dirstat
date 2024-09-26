@@ -31,6 +31,17 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns the current item in 'tree', cast as a
+     * SuffixFileTypeItem, or 0 if there is no current item or it is
+     * not a SuffixFileTypeItem.
+     **/
+    const SuffixFileTypeItem * currentItem( const QTreeWidget * treeWidget)
+    {
+	return dynamic_cast<const SuffixFileTypeItem *>( treeWidget->currentItem() );
+    }
+
+
+    /**
      * Process the "Other" category so that it contains no more than
      * a configured "topX" number of different suffixes (including
      * "<no extension>").  The pruned suffix items are still included
@@ -216,23 +227,16 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     connect( _ui->treeWidget,      &QTreeWidget::customContextMenuRequested,
              this,                 &FileTypeStatsWindow::contextMenu);
 
-    connect( _ui->treeWidget,      &QTreeWidget::itemDoubleClicked,
-             this,                 &FileTypeStatsWindow::locateCurrentFileType );
-
     connect( _ui->refreshButton,   &QAbstractButton::clicked,
              this,                 &FileTypeStatsWindow::refresh );
 
     connect( _ui->locateButton,    &QAbstractButton::clicked,
              this,                 &FileTypeStatsWindow::locateCurrentFileType );
 
-    connect( _ui->actionLocate,    &QAction::triggered,
-             this,                 &FileTypeStatsWindow::locateCurrentFileType );
-
     connect( _ui->sizeStatsButton, &QAbstractButton::clicked,
              this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
-    connect( _ui->actionSizeStats, &QAction::triggered,
-             this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
+    // See also signal/slot connections in file-type-stats-window.ui
 
     show();
 }
@@ -318,7 +322,6 @@ void FileTypeStatsWindow::locateCurrentFileType()
 {
     const QString suffix = currentItemSuffix();
 
-    // Can click/press on inappropriate rows
     if ( suffix.isEmpty() )
 	return;
 
@@ -345,7 +348,7 @@ void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 
 QString FileTypeStatsWindow::currentItemSuffix() const
 {
-    const auto * item = dynamic_cast<const SuffixFileTypeItem *>( _ui->treeWidget->currentItem() );
+    const auto * item = currentItem( _ui->treeWidget );
     if ( item && !item->suffix().isEmpty() )
 	return item->suffix();
 
@@ -389,20 +392,21 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 
 void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 {
-    if ( event->key() != Qt::Key_Return && event->key() != Qt::Key_Enter )
+    if ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter )
     {
-	QDialog::keyPressEvent( event );
+	// Act on enter key here so it doesn't go to the default (dialog) button
+	QTreeWidgetItem * item = _ui->treeWidget->currentItem();
+	if ( item->childCount() > 0 )
+	    // For category headings, toggle the expanded state
+	    item->setExpanded( !item->isExpanded() );
+	else if ( item->type() == QTreeWidgetItem::UserType )
+	    // Try the locate file type action, although it may not be an appropriate suffix
+	    locateCurrentFileType();
+
 	return;
     }
 
-    QTreeWidgetItem * item = _ui->treeWidget->currentItem();
-    const auto * suffixItem = dynamic_cast<const SuffixFileTypeItem *>( item );
-    if ( suffixItem )
-	// Try the locate file type window, although it may not be an appropriate suffix
-	locateCurrentFileType();
-    else
-	// For category headings, toggle the expanded state
-	item->setExpanded( !item->isExpanded() );
+    QDialog::keyPressEvent( event );
 }
 
 
@@ -419,7 +423,7 @@ FileTypeItem::FileTypeItem( const QString & name,
                             int             count,
                             FileSize        totalSize,
                             float           percentage ):
-    QTreeWidgetItem{},
+    QTreeWidgetItem{ UserType },
     _count{ count },
     _totalSize{ totalSize },
     _percentage{ percentage }

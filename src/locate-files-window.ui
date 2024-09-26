@@ -35,6 +35,9 @@
      <property name="uniformRowHeights">
       <bool>true</bool>
      </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
      <column>
       <property name="text">
        <string notr="true">1</string>
@@ -59,12 +62,6 @@
      </item>
      <item>
       <widget class="QLabel" name="resultsLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="text">
         <string>42 results</string>
        </property>

@@ -34,11 +34,11 @@ namespace
     void showResultsCount( int results, bool overflow, QLabel * label )
     {
 	if ( overflow )
-	    label->setText( QObject::tr( "Limited to %1 results" ).arg( results ) );
+	    label->setText( QObject::tr( "Limited to %L1 results" ).arg( results ) );
 	else if ( results == 1 )
 	    label->setText( QObject::tr( "1 result" ) );
 	else
-	    label->setText( QObject::tr( "%1 results" ).arg( results ) );
+	    label->setText( QObject::tr( "%L1 results" ).arg( results ) );
     }
 
 
@@ -240,7 +240,7 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 
 
 LocateListItem::LocateListItem( FileInfo * item ):
-    QTreeWidgetItem{},
+    QTreeWidgetItem{ UserType },
     _size{ item->totalSize() },
     _mtime{ item->mtime() },
     _path{ item->url() }
