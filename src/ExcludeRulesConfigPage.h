@@ -33,7 +33,14 @@ namespace QDirStat
 
     public:
 
+	/**
+	 * Constructor.
+	 **/
 	ExcludeRulesConfigPage( ConfigDialog * parent );
+
+	/**
+	 * Destructor.
+	 **/
 	~ExcludeRulesConfigPage() override;
 
 
@@ -133,10 +140,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	std::unique_ptr<Ui::ExcludeRulesConfigPage> _ui;
 

@@ -48,6 +48,7 @@ namespace QDirStat
         typedef QVector<int>          Cooldowns;
         typedef std::function<void()> Payload;
 
+
     public:
 
         /**
@@ -123,8 +124,6 @@ namespace QDirStat
 
     private:
 
-        // Data members
-
         Payload   _payload;
         int       _payloadTime{ 0 };
 
@@ -135,8 +134,8 @@ namespace QDirStat
         QTimer    _deliveryTimer;
         QTimer    _cooldownTimer;
 
-    }; // class AdaptiveTimer
+    };  // class AdaptiveTimer
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // AdaptiveTimer_h
+#endif  // AdaptiveTimer_h

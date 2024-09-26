@@ -33,7 +33,7 @@ namespace QDirStat
 	Q_OBJECT
 
 	/**
-	 * Internal constructor.
+	 * Constructor.
 	 *
 	 * Private, use the static askOpenDir() instead.
 	 **/

@@ -50,14 +50,10 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::GeneralConfigPage> _ui;
 
-    }; // class GeneralConfigPage
+    };	// class GeneralConfigPage
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // GeneralConfigPage_h
+#endif	// GeneralConfigPage_h

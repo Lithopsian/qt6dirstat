@@ -23,7 +23,9 @@ namespace QDirStat
     class PkgFileListCache;
     class PkgFilter;
 
+
     typedef QSharedPointer<PkgFileListCache> PkgFileListCachePtr;
+
 
     /**
      * A class for reading information about installed packages.
@@ -76,7 +78,7 @@ namespace QDirStat
         void readSettings();
 
 
-        // Data members
+    private:
 
         /**
          * These can be set manually in the [Pkg] section of the config file at
@@ -86,8 +88,7 @@ namespace QDirStat
         int  _minCachePkgListSize;
         bool _verboseMissingPkgFiles;
 
-    };        // class PkgReader
-
+    };  // class PkgReader
 
 
 
@@ -175,13 +176,10 @@ namespace QDirStat
 
     private:
 
-        // Data members
-
         PkgInfo * _pkg;
         bool      _verboseMissingPkgFiles;
 
-    };        // class PkgReadJob
-
+    };  // class PkgReadJob
 
 
 
@@ -242,12 +240,9 @@ namespace QDirStat
 
     private:
 
-        // Data members
-
         QStringList   _fileList;
 
     };  // class AsyncPkgReadJob
-
 
 
 
@@ -290,12 +285,10 @@ namespace QDirStat
 
     private:
 
-        // Data members
-
         PkgFileListCachePtr _fileListCache;
 
     };  // class CachePkgReadJob
 
-}        // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // ifndef PkgReader_h
+#endif  // ifndef PkgReader_h

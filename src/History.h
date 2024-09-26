@@ -29,7 +29,6 @@ namespace QDirStat
      **/
     class History
     {
-
     public:
 
         /**
@@ -170,6 +169,6 @@ namespace QDirStat
 
     };  // class History
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
 #endif  // History_h

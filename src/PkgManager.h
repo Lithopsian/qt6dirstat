@@ -176,8 +176,8 @@ namespace QDirStat
 	virtual QString queryName( const PkgInfo * pkg ) const
 	    { return pkg->name(); }
 
-    }; // class PkgManager
+    };	// class PkgManager
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // PkgManager_h
+#endif	// PkgManager_h

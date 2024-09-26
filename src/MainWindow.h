@@ -50,6 +50,7 @@ namespace QDirStat
 //            LayoutTreemapOnSide,
         };
 
+
     public:
 
         /**
@@ -699,8 +700,8 @@ namespace QDirStat
         int              _sortCol;
         Qt::SortOrder    _sortOrder;
 
-    }; // class MainWindow
+    };  // class MainWindow
 
-}   // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // MainWindow_H
+#endif  // MainWindow_H

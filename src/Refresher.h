@@ -34,8 +34,6 @@ namespace QDirStat
      **/
     class Refresher: public QObject
     {
-	Q_OBJECT
-
     public:
 
 	/**
@@ -61,7 +59,7 @@ namespace QDirStat
 
 	const FileInfoSet _items;
 
-    };	// class FileInfoSet
+    };	// class Refresher
 
 }	// namespace QDirStat
 

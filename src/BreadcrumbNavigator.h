@@ -30,7 +30,9 @@ namespace QDirStat
 	QString pathComponent;
 	QString displayName;   // This may be shortened
 	QString url;
-    };
+
+    };	// struct Breadcrumb
+
 
     typedef QVector<Breadcrumb> BreadcrumbList;
 
@@ -89,14 +91,10 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	BreadcrumbList _breadcrumbs;
 
-    }; // class BreadcrumbNavigator
+    };	// class BreadcrumbNavigator
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // BreadcrumbNavigator_h
+#endif	// BreadcrumbNavigator_h

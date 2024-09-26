@@ -36,6 +36,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Create a SelectionModel that uses the DirTree in 'dirTreeModel'.
 	 * This object does not take ownership of 'dirTreeModel'.
@@ -190,8 +191,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	DirTreeModel * _dirTreeModel;
 	FileInfo     * _currentItem{ nullptr };
 	FileInfoSet    _selectedItems;
@@ -235,6 +234,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Creates a SelectionModelProxy. This automatically connects the
 	 * master SelectionModel's signals to the matching signals of this
@@ -244,6 +244,7 @@ namespace QDirStat
 	 * of this object when the parent is deleted.
 	 **/
 	SelectionModelProxy( SelectionModel * master, QObject * parent );
+
 
     signals:
 

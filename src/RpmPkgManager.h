@@ -28,6 +28,9 @@ namespace QDirStat
     {
     public:
 
+	/**
+	 * Constructor.
+	 **/
 	RpmPkgManager() { readSettings(); }
 
 	/**
@@ -63,7 +66,6 @@ namespace QDirStat
 	 *   /usr/bin/rpm -qf ${path}
 	 **/
 	QString owningPkg( const QString & path ) const override;
-
 
 	//-----------------------------------------------------------------
 	//		       Optional Features
@@ -167,12 +169,10 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	int _getPkgListWarningSec;
 
-    }; // class RpmPkgManager
+    };	// class RpmPkgManager
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // RpmPkgManager_h
+#endif	// RpmPkgManager_h

@@ -76,7 +76,6 @@ namespace QDirStat
      **/
     class FileTypeStats
     {
-
     public:
 
 	/**
@@ -133,10 +132,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<const MimeCategory> _otherCategory;
 
 	SuffixMap   _suffixes;
@@ -144,8 +139,8 @@ namespace QDirStat
 
 	FileSize    _totalSize{ 0LL };
 
-    }; // class FileTypeStats
+    };	// class FileTypeStats
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // FileTypeStats_h
+#endif	// FileTypeStats_h

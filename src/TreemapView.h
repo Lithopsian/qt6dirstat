@@ -40,15 +40,6 @@ namespace QDirStat
     class SelectionModelProxy;
     class Settings;
 
-    enum TreemapCancel
-    {
-	TreemapCancelNone,
-	TreemapCancelCancel,
-	TreemapCancelRestart,
-    };
-
-    typedef QVector<const ParentTileHighlighter *> ParentHighlightList;
-
     enum TreemapLayers
     {
 	TileLayer,
@@ -58,12 +49,24 @@ namespace QDirStat
 	SceneHighlightLayer,
     };
 
+
+    typedef QVector<const ParentTileHighlighter *> ParentHighlightList;
+
+
     /**
      * View widget that displays a DirTree as a treemap.
      **/
     class TreemapView: public QGraphicsView
     {
 	Q_OBJECT
+
+	enum TreemapCancel
+	{
+	    TreemapCancelNone,
+	    TreemapCancelCancel,
+	    TreemapCancelRestart,
+	};
+
 
     public:
 
@@ -453,6 +456,7 @@ namespace QDirStat
 	 **/
 	void deleteNotify( FileInfo * );
 
+
     protected:
 
 	/**
@@ -590,7 +594,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
 	const DirTree       * _tree{ nullptr };
 	SelectionModel      * _selectionModel{ nullptr };
 	SelectionModelProxy * _selectionModelProxy{ nullptr };
@@ -645,7 +648,7 @@ namespace QDirStat
 	QElapsedTimer   _stopwatch;
 	TreemapTile   * _lastTile; // see PAINT_DEBUGGING in TreemapTile.h
 
-    }; // class TreemapView
+    };	// class TreemapView
 
 
 
@@ -674,7 +677,7 @@ namespace QDirStat
 	               Qt::PenStyle        lineStyle,
 	               qreal               zValue );
 
-    }; // class HighlightRect
+    };	// class HighlightRect
 
 
 
@@ -688,6 +691,10 @@ namespace QDirStat
     class CurrentTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	CurrentTileHighlighter( const TreemapView * treemapView,
 	                        const TreemapTile * tile,
 	                        bool                isSelected ):
@@ -698,7 +705,7 @@ namespace QDirStat
 	                   CurrentHighlightLayer }
 	{}
 
-    }; // class CurrentTileHighlighter
+    };	// class CurrentTileHighlighter
 
 
 
@@ -713,6 +720,10 @@ namespace QDirStat
     class SelectedTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	SelectedTileHighlighter( const TreemapView * treemapView,
 	                         const TreemapTile * tile ):
 	    HighlightRect{ tile,
@@ -722,7 +733,7 @@ namespace QDirStat
 	                   TileHighlightLayer }
 	{}
 
-    }; // class SelectedTileHighlighter
+    };	// class SelectedTileHighlighter
 
 
 
@@ -735,6 +746,10 @@ namespace QDirStat
     class ParentTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	ParentTileHighlighter( const TreemapView * treemapView,
 	                       const TreemapTile * tile,
 	                       const QString     & tooltip ):
@@ -753,7 +768,9 @@ namespace QDirStat
 	 **/
 	const TreemapTile * tile() const { return _tile; }
 
+
     protected:
+
 	/**
 	 * Return the shape of this item; in this case only the outline,
 	 * leaving the inside hollow to avoid displaying the tooltip there as
@@ -763,12 +780,12 @@ namespace QDirStat
 	 **/
 	QPainterPath shape() const override;
 
+
     private:
 
-	// Data members
 	const TreemapTile * _tile;
 
-    };
+    };	// class ParentTileHighlighter
 
 
 

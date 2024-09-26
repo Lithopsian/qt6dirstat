@@ -42,6 +42,7 @@ namespace QDirStat
     class FileInfoSorter
     {
     public:
+
 	/**
 	 * Constructor. This sets the sort column and sort order that will be
 	 * used in subsequent calls.
@@ -57,12 +58,14 @@ namespace QDirStat
 	 **/
 	bool operator() ( FileInfo * a, FileInfo * b ) const;
 
+
     private:
+
 	DataColumn    _sortCol;
 	Qt::SortOrder _sortOrder;
 
-    }; // class FileInfoSorter
+    };	// class FileInfoSorter
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // FileInfoSorter_h
+#endif	// FileInfoSorter_h

@@ -26,6 +26,7 @@ namespace QDirStat
     typedef QVector<PercentileValue>    PercentileValueList;
     typedef QVector<PercentileBoundary> Buckets;
 
+
     /**
      * Base class for percentile-related statistics calculation.
      *
@@ -65,7 +66,6 @@ namespace QDirStat
      **/
     class PercentileStats: public PercentileValueList
     {
-
     public:
 
 	/**
@@ -405,4 +405,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef PercentileStats_h
+#endif	// ifndef PercentileStats_h

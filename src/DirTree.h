@@ -40,6 +40,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Constructor.
 	 *
@@ -499,8 +500,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	std::unique_ptr<DirInfo>            _root;
 	std::unique_ptr<const ExcludeRules> _excludeRules;
 	std::unique_ptr<const ExcludeRules> _tmpExcludeRules;
@@ -518,4 +517,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef DirTree_h
+#endif	// ifndef DirTree_h

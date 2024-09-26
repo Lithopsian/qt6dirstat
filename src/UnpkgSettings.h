@@ -100,17 +100,13 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	QString     _startingDir;
 	QStringList _excludeDirs;
 	QStringList _ignorePatterns;
 	bool        _crossFilesystems;
 
-    };  // UnpkgSettings
+    };	// UnpkgSettings
 
-}       // namespace QDirStat
+}	// namespace QDirStat
 
-#endif  // UnpkgSettings_h
+#endif	// UnpkgSettings_h

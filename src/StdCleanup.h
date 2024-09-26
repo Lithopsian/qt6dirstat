@@ -26,5 +26,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef StdCleanup_h
+#endif	// ifndef StdCleanup_h
 

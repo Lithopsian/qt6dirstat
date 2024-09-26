@@ -33,6 +33,7 @@ namespace QDirStat
 	const MimeCategory * category;
     };
 
+
     /**
      * Suffix matches return a list (possibly with only one entry) of pairs.
      * Each pair contains a regular expression and the category it matches to.
@@ -45,6 +46,7 @@ namespace QDirStat
     typedef QVector<const MimeCategory *>         MimeCategoryList;
     typedef MimeCategoryList::const_iterator      MimeCategoryIterator;
     typedef QVector<WildcardPair>                 WildcardList;
+
 
     /**
      * Class to determine the MimeCategory of filenames.
@@ -283,9 +285,9 @@ namespace QDirStat
 	                                  const QString & caseInsensitivePatterns,
 	                                  const QString & caseSensitivePatterns )
 	    { return addCategory( name,
-                                  color,
-                                  caseInsensitivePatterns.split( u',' ),
-                                  caseSensitivePatterns.split  ( u',' ) ); }
+	                          color,
+	                          caseInsensitivePatterns.split( u',' ),
+	                          caseSensitivePatterns.split  ( u',' ) ); }
 
 	/**
 	 * Add default categories in case none were read from the settings.
@@ -302,10 +304,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	MimeCategoryList     _categories;
 

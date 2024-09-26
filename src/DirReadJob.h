@@ -140,6 +140,7 @@ namespace QDirStat
     };	// class DirReadJob
 
 
+
     /**
      * Implementation of the abstract DirReadJob class that reads a local
      * directory.
@@ -253,7 +254,6 @@ namespace QDirStat
 
     class CacheReadJob: public DirReadJob
     {
-
     public:
 
 	/**
@@ -284,7 +284,7 @@ namespace QDirStat
 	CacheReader * reader() const { return _reader.get(); }
 
 
-    private:
+    protected:
 
 	/**
 	 * Initializations common for all constructors.
@@ -292,7 +292,7 @@ namespace QDirStat
 	void init();
 
 
-	// Data members
+    private:
 
 	std::unique_ptr<CacheReader> _reader;
 
@@ -320,7 +320,7 @@ namespace QDirStat
 	    QObject {}
 	{
 	    connect( &_timer, &QTimer::timeout,
-		     this,    &DirReadJobQueue::timeSlicedRead );
+	             this,    &DirReadJobQueue::timeSlicedRead );
 	}
 
 	/**
@@ -437,6 +437,7 @@ namespace QDirStat
     };	// class DirReadJobQueue
 
 
+
     /**
      * Human-readable output of a DirReadJob in a debug stream.
      **/
@@ -456,4 +457,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef DirReadJob_h
+#endif	// ifndef DirReadJob_h

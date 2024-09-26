@@ -27,6 +27,7 @@ namespace QDirStat
     };
     Q_DECLARE_FLAGS( WildcardConversionOptions, WildcardConversionOption )
 
+
     /**
      * Class for the wildcard-type of string matching used by the categorizer
      * and other filtering.  This is implemented by converting the wildcard pattern
@@ -41,14 +42,15 @@ namespace QDirStat
     protected:
 
 	/**
-	 * There are subclasses CaseSensitiveWildcard and CaseInsensitiveWildcard, and
-	 * currently no requirement to access this constructor directly.
-	 *
 	 * Constructor with a pattern.  The wildcard pattern is converted to an
-	 * anchored regular expression that doesn't capture any substrings.  The default
-	 * is case-sensitive and follows PCRE syntax with no modifiers.  Most pattern
-	 * options don't match much sense in the case of wildcards, and CaseInsensitiveOption
-	 * is specified using the CaseInsensitiveWildcard sub-class.
+	 * anchored regular expression that doesn't capture any substrings.  The
+	 * default is case-sensitive and follows PCRE syntax with no modifiers.
+	 * Most pattern options don't match much sense in the case of wildcards,
+	 * and CaseInsensitiveOption is specified using the CaseInsensitiveWildcard
+	 * sub-class.
+	 *
+	 * This constructor is protected: access using CaseInsensitiveWildcard or
+	 * CaseSensitiveWildcard.
 	 **/
 	Wildcard( const QString & pattern, PatternOption options ):
 	    QRegularExpression{ wildcardRegularExpression( pattern, options ) }
@@ -111,12 +113,12 @@ namespace QDirStat
     };	// class Wildcard
 
 
+
     /**
      * Convenience class for making a case-sensitive wildcard regular expression.
      **/
     class CaseSensitiveWildcard: public Wildcard
     {
-
     public:
 
 	/**
@@ -125,7 +127,8 @@ namespace QDirStat
 	CaseSensitiveWildcard( const QString & pattern ):
 	    Wildcard{ pattern, NoPatternOption }
 	{}
-    };
+
+    };	// class CaseSensitiveWildcard
 
 
     /**
@@ -133,7 +136,6 @@ namespace QDirStat
      **/
     class CaseInsensitiveWildcard: public Wildcard
     {
-
     public:
 
 	/**
@@ -142,7 +144,8 @@ namespace QDirStat
 	CaseInsensitiveWildcard( const QString & pattern ):
 	    Wildcard{ pattern, CaseInsensitiveOption }
 	{}
-    };
+
+    };	// class CaseInsensitiveWildcard
 
 }	// namespace QDirStat
 

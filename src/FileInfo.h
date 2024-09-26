@@ -57,6 +57,7 @@ namespace QDirStat
 	DirError		// Error while reading
     };
 
+
     /**
      * The most basic building block of a DirTree:
      *
@@ -983,10 +984,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members.
-	//
-
 	// Keep this short in order to use as little memory as possible -
 	// there will be a _lot_ of entries of this kind!
 	QString    _name;		// the file name (without path!)
@@ -1013,6 +1010,7 @@ namespace QDirStat
 	time_t     _mtime;		// modification time
 
     };	// class FileInfo
+
 
 
     /**
@@ -1060,5 +1058,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef FileInfo_h
+#endif	// ifndef FileInfo_h
 

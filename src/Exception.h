@@ -21,6 +21,7 @@
 class Exception
 {
 public:
+
     /**
      * Constructor.
      */
@@ -48,10 +49,12 @@ public:
      */
     virtual QLatin1String className() const { return "Exception"_L1; }
 
+
 private:
 
     QString _what;
-};
+
+}; // class Exception
 
 
 /**
@@ -61,12 +64,14 @@ private:
 class NullPointerException: public Exception
 {
 public:
+
     NullPointerException():
 	Exception{ "Null pointer" }
     {}
 
     ~NullPointerException() noexcept override = default;
-};
+
+}; // class NullPointerException
 
 
 /**
@@ -75,6 +80,7 @@ public:
 class FileException: public Exception
 {
 public:
+
     FileException( const QString & filename, const QString & msg ):
 	Exception{ msg },
 	_filename{ filename }
@@ -82,9 +88,12 @@ public:
 
     ~FileException() noexcept override = default;
 
+
 private:
+
     QString _filename;
-};
+
+}; // class FileException
 
 
 /**
@@ -93,6 +102,7 @@ private:
 class SysCallFailedException: public Exception
 {
 public:
+
     SysCallFailedException( const QString & sysCall,
                             const QString & resourceName ):
 	Exception{ errMsg( sysCall, resourceName ) },
@@ -107,12 +117,17 @@ public:
      **/
     const QString & resourceName() const { return _resourceName; }
 
+
 protected:
+
     QString errMsg( const QString & sysCall, const QString & resourceName ) const;
 
+
 private:
+
     QString _resourceName;
-};
+
+}; // class SysCallFailedException
 
 
 /**
@@ -122,12 +137,14 @@ private:
 class DynamicCastException: public Exception
 {
 public:
+
     DynamicCastException( const QString & expectedType ):
 	Exception{ "dynamic_cast failed; expected: " + expectedType }
     {}
 
     ~DynamicCastException() noexcept override = default;
-};
+
+}; // class DynamicCastException
 
 
 /**
@@ -137,22 +154,25 @@ public:
 class BadMagicNumberException: public Exception
 {
 public:
+
     BadMagicNumberException( const void * badPointer ):
 	Exception{ QString{ "Magic number check failed for address 0x%1" }
 	           .arg( reinterpret_cast<quintptr>( badPointer ), 0, 16 ) }
     {}
 
     ~BadMagicNumberException() noexcept override = default;
-};
+
+}; // class BadMagicNumberException
 
 
 /**
  * Exception class for "index out of range"
  * Use with CHECK_INDEX()
  **/
-class IndexOutOfRangeException : public Exception
+class IndexOutOfRangeException: public Exception
 {
 public:
+
     /**
      * Constructor.
      *
@@ -173,16 +193,18 @@ public:
     {}
 
     ~IndexOutOfRangeException() noexcept override = default;
-};
+
+}; // class IndexOutOfRangeException
 
 
 
 /**
  * Exception class for "too many files"
  **/
-class TooManyFilesException : public Exception
+class TooManyFilesException: public Exception
 {
 public:
+
     /**
      * Constructor.
      *
@@ -196,15 +218,17 @@ public:
     {}
 
     ~TooManyFilesException() noexcept override = default;
-};
+
+}; // class TooManyFilesException
 
 
 /**
  * Exception class for "filesystem too big"
  **/
-class FilesystemTooBigException : public Exception
+class FilesystemTooBigException: public Exception
 {
 public:
+
     /**
      * Constructor.
      *
@@ -219,9 +243,12 @@ public:
 
     ~FilesystemTooBigException() noexcept override = default;
 
+
 protected:
+
     QString errMsg() const;
-};
+
+}; // class FilesystemTooBigException
 
 
 
@@ -381,6 +408,5 @@ void _rethrow_helper( const EX_t    & exception,
 
     throw;
 }
-
 
 #endif // Exception_h

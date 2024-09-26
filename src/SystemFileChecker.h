@@ -28,8 +28,8 @@ namespace QDirStat
          **/
         bool isSystemFile( const FileInfo * file );
 
-    }; // namespace SystemFileChecker
+    };  // namespace SystemFileChecker
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // SystemFileChecker_h
+#endif  // SystemFileChecker_h

@@ -70,6 +70,7 @@ enum LogSeverity
 class Logger
 {
 public:
+
     /**
      * Constructor: Create a logger that logs to the specified file.
      * The first logger created is also implicitly used as the default
@@ -228,7 +229,7 @@ private:
     QTextStream     _nullStream{ stderr, QIODevice::WriteOnly };
     LogSeverity     _logLevel{ LogSeverityVerbose };
 
-};
+}; // class Logger
 
 
 
@@ -269,6 +270,4 @@ inline QTextStream & operator<<( QTextStream & str, QSize size )
     char * strerror( int ) __attribute__ ((deprecated));
 #endif
 
-
 #endif // Logger_h
-

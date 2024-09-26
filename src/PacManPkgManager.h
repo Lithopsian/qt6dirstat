@@ -112,8 +112,8 @@ namespace QDirStat
 	 **/
 	PkgInfoList parsePkgList( const QString & output ) const;
 
-    }; // class PacManPkgManager
+    };	// class PacManPkgManager
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // PacManPkgManager_h
+#endif	// PacManPkgManager_h

@@ -25,8 +25,6 @@ class QCloseEvent;
 
 namespace QDirStat
 {
-    typedef QVector<QProcess *> ProcessList;
-
     /**
      * Terminal-like window to watch output of external processes started via
      * QProcess. The command invoked by the process, its stdout and stderr output
@@ -43,6 +41,9 @@ namespace QDirStat
     class OutputWindow: public QDialog
     {
         Q_OBJECT
+
+        typedef QVector<QProcess *> ProcessList;
+
 
     public:
 
@@ -328,10 +329,6 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
-
         std::unique_ptr<Ui::OutputWindow > _ui;
 
         ProcessList _processList;
@@ -348,6 +345,7 @@ namespace QDirStat
         QFont       _terminalDefaultFont;
 
     };  // class OutputWindow
+
 
 
     inline QTextStream & operator<<( QTextStream & stream, QProcess * process )

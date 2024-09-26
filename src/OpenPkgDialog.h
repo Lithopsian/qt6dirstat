@@ -29,6 +29,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Constructor.
 	 *

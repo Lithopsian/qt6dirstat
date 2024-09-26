@@ -57,6 +57,7 @@ namespace QDirStat
     };	// class DirTreeFilter
 
 
+
     /**
      * Dir tree filter that checks a wildcard match against a path.
      * This uses QRegularExpression in wildcard mode through the
@@ -65,9 +66,12 @@ namespace QDirStat
     class DirTreePatternFilter: public DirTreeFilter
     {
 	/**
-	 * Constructor. If 'pattern' contains a slash ("/"), it is matched
-	 * against the complete path. Otherwise, it is matched only against the
-	 * filename.  Used by the create method to generate a filter.
+	 * Constructor.  Private, use the static create() method for
+	 * access.
+	 *
+	 * If 'pattern' contains a slash ("/"), it is matched against
+	 * the complete path. Otherwise, it is matched only against the
+	 * filename.
 	 **/
 	DirTreePatternFilter( const QString & pattern ):
 	    DirTreeFilter{},
@@ -103,6 +107,7 @@ namespace QDirStat
     };	// class DirTreePatternFilter
 
 
+
     /**
      * Simpler, but much more common pattern filter:
      *
@@ -136,6 +141,7 @@ namespace QDirStat
 	QString _suffix;
 
     };	// class DirTreeSuffixFilter
+
 
 
     /**

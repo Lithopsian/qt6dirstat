@@ -57,6 +57,7 @@ namespace QDirStat
     class FileInfoIterator
     {
     public:
+
 	/**
 	 * STL iterator tags.  These are necessary to use std:: algorithm
 	 * functions with this iterator.
@@ -110,10 +111,12 @@ namespace QDirStat
 	bool operator==( const FileInfoIterator & other ) const { return _current == other._current; }
 	bool operator!=( const FileInfoIterator & other ) const { return !( *this == other ); }
 
+
     private:
+
 	pointer _current;
 
-    }; // class FileInfoIterator
+    };	// class FileInfoIterator
 
 
     /**
@@ -127,13 +130,13 @@ namespace QDirStat
 
 
 
-
     /**
      * Iterator for DirInfo children.  The dot entry is not returned.
      **/
     class DirInfoIterator
     {
     public:
+
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = DirInfo *;
 	using difference_type = ptrdiff_t;
@@ -156,7 +159,9 @@ namespace QDirStat
 	bool operator==( const DirInfoIterator & other ) const { return _current == other._current; }
 	bool operator!=( const DirInfoIterator & other ) const { return !( *this == other ); }
 
+
     protected:
+
 	/**
 	 * Find the next child that is a DirInfo object, starting
 	 * from 'item'.
@@ -167,15 +172,16 @@ namespace QDirStat
 	    return item ? item->toDirInfo() : nullptr;
 	}
 
+
     private:
+
 	pointer _current;
 
-    }; // class DirInfoIterator
+    };	// class DirInfoIterator
 
 
     inline DirInfoIterator dirInfoBegin( const FileInfo * item ) { return item; }
     inline DirInfoIterator dirInfoEnd( const FileInfo * ) { return nullptr; }
-
 
 
 
@@ -187,6 +193,7 @@ namespace QDirStat
     class DotEntryIterator
     {
     public:
+
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = FileInfo *;
 	using difference_type = ptrdiff_t;
@@ -210,6 +217,7 @@ namespace QDirStat
 
 	bool operator==( const DotEntryIterator & other ) const { return _current == other._current; }
 	bool operator!=( const DotEntryIterator & other ) const { return !( *this == other ); }
+
 
     protected:
 
@@ -242,7 +250,6 @@ namespace QDirStat
 
 
 
-
     /**
      * Iterator class for children of a FileInfo object, including any
      * dot entry and attic.  Although the children are not returned in
@@ -251,6 +258,7 @@ namespace QDirStat
     class AtticIterator
     {
     public:
+
 	using iterator_category = std::forward_iterator_tag;
 	using value_type = FileInfo *;
 	using difference_type = ptrdiff_t;
@@ -276,6 +284,7 @@ namespace QDirStat
 
 	bool operator==( const AtticIterator & other ) const { return _current == other._current; }
 	bool operator!=( const AtticIterator & other ) const { return !( *this == other ); }
+
 
     protected:
 
@@ -317,7 +326,6 @@ namespace QDirStat
 
 
 
-
     /**
      * Iterator class for children of a FileInfo object.  The children,
      * including the dot entry but not tany attic, are returned in
@@ -333,11 +341,10 @@ namespace QDirStat
      **/
     class BySizeIterator
     {
+    public:
+
 	using BySizeIteratorList = QVector<FileInfo *>;
 	using BySizeIteratorPos  = BySizeIteratorList::const_iterator;
-
-
-    public:
 
 	/**
 	 * Constructor: finds the children of 'parent', including a dot
@@ -385,9 +392,9 @@ namespace QDirStat
 	BySizeIteratorPos  _currentIt;
 	FileSize           _totalSize{ 0LL };
 
-    }; // class BySizeIterator
+    };	// class BySizeIterator
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // ifndef FileInfoIterator_h
+#endif	// ifndef FileInfoIterator_h
 

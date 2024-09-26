@@ -24,6 +24,7 @@ namespace QDirStat
     class PathSelectorItem: public QListWidgetItem
     {
     public:
+
 	/**
 	 * Constructor for a simple path list item.
 	 * Use QListWidgetItem::setIcon() to set an icon.
@@ -50,10 +51,9 @@ namespace QDirStat
 
     private:
 
-	QString      _path;
+	QString _path;
 
     };	// class PathSelectorItem
-
 
 
 

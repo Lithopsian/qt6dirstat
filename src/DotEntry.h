@@ -26,6 +26,7 @@ namespace QDirStat
     class DotEntry: public DirInfo
     {
     public:
+
 	/**
 	 * Constructor.
 	 **/
@@ -109,5 +110,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef DotEntry_h
+#endif	// ifndef DotEntry_h
 

@@ -332,10 +332,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data Members
-	//
-
 	// Statistics data to represent
 	const FileSizeStats * _stats{ nullptr };
 
@@ -357,8 +353,8 @@ namespace QDirStat
 	qreal  _minHeight{ 100 }; // at least 100 pixels high in case there is no overflow panel
 	QSizeF _size;
 
-    }; // class HistogramView
+    };	// class HistogramView
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // ifndef HistogramView_h
+#endif	// ifndef HistogramView_h

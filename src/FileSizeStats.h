@@ -32,7 +32,7 @@ namespace QDirStat
 	 *
 	 * 'suffix' should start with ".", e.g. ".jpg".
 	 **/
-	FileSizeStats( FileInfo * subtree, const QString & suffix = QString{} );
+	FileSizeStats( FileInfo * subtree, const QString & suffix = QString{}, bool excludeSymlinks = false );
 
 
     protected:
@@ -42,7 +42,7 @@ namespace QDirStat
 	 * size for each file to the data collection. Note that the data are
 	 * unsorted after this.
 	 **/
-	void collect( const FileInfo * subtree );
+	void collect( const FileInfo * subtree, bool excludeSymLinks );
 
 	/**
 	 * Recurse through all file elements in the subtree and append the own
@@ -55,5 +55,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef FileSizeStats_h
+#endif	// ifndef FileSizeStats_h
 

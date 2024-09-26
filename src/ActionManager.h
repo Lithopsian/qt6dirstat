@@ -165,10 +165,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	CleanupCollection * _cleanupCollection;
 	QPointer<QMenu>     _menu;
 	QStringList         _menuEnabledActions;

@@ -49,8 +49,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor with all the base fields.  Other constructors will
-	 * delegate to this one.
+	 * Constructor.
 	 **/
 	PercentBarDelegate( QTreeView * treeView,
 	                    int         percentBarCol,
@@ -95,18 +94,14 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data Members
-	//
-
 	int               _percentBarCol;
 	int               _sizeHintWidth;
 	const QColor      _barBackground;
 	const ColorList   _fillColors;
 	int               _indentation;
 
-    }; // class PercentBarDelegate
+    };	// class PercentBarDelegate
 
-}      // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // PercentBar_h
+#endif	// PercentBar_h

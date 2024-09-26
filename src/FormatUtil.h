@@ -220,6 +220,6 @@ namespace QDirStat
 //    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
 //	{ return stream << formatSize( lSize ); }
 
-}       // namespace QDirStat
+}	// namespace QDirStat
 
-#endif  // FormatUtil_h
+#endif	// FormatUtil_h

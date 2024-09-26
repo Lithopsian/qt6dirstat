@@ -116,10 +116,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<History> _history;
 
 	QAction * _actionGoBack;

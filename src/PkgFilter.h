@@ -82,6 +82,7 @@ namespace QDirStat
     };  // class PkgFilter
 
 
+
     inline QTextStream & operator<<( QTextStream     & stream,
                                      const PkgFilter & filter )
     {
@@ -95,6 +96,6 @@ namespace QDirStat
         return stream;
     }
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
 #endif  // PkgFilter_h
