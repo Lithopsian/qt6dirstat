@@ -326,7 +326,7 @@ void OutputWindow::killAll()
     _processList.clear();
 
     _killedAll = true;
-    addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %1 processes." ).arg( killCount ) );
+    addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %L1 processes." ).arg( killCount ) );
 }
 
 

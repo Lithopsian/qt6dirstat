@@ -127,7 +127,7 @@ namespace
 		urls << QObject::tr( "<u>for files:</u>" ) << files;
 
 	    if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
-		urls << QObject::tr( "<i>(%1 items total)</i>" ).arg( items.size() );
+		urls << QObject::tr( "<i>(%L1 items total)</i>" ).arg( items.size() );
 
 	    int longestLine = MIN_DIALOG_WIDTH * spaceWidth;
 	    for ( const QString & line : asConst( urls ) )
