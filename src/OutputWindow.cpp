@@ -31,17 +31,17 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     _ui->terminal->clear();
     setAutoClose( autoClose );
 
-    connect( _ui->actionZoomIn,      &QAction::triggered,
-             this,                   &OutputWindow::zoomIn );
+    connect( _ui->zoomInButton,    &QPushButton::clicked,
+             this,                 &OutputWindow::zoomIn );
 
-    connect( _ui->actionZoomOut,     &QAction::triggered,
-             this,                   &OutputWindow::zoomOut );
+    connect( _ui->zoomOutButton,   &QPushButton::clicked,
+             this,                 &OutputWindow::zoomOut );
 
-    connect( _ui->actionResetZoom,   &QAction::triggered,
-             this,                   &OutputWindow::resetZoom );
+    connect( _ui->resetZoomButton, &QPushButton::clicked,
+             this,                 &OutputWindow::resetZoom );
 
-    connect( _ui->actionKillProcess, &QAction::triggered,
-             this,                   &OutputWindow::killAll );
+    connect( _ui->killButton,      &QPushButton::clicked,
+             this,                 &OutputWindow::killAll );
 
     updateActions();
 }
@@ -49,7 +49,7 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
 
 OutputWindow::~OutputWindow()
 {
-    logDebug() << "Destructor" << Qt::endl;
+    //logDebug() << "Destructor" << Qt::endl;
 
     if ( !_processList.isEmpty() )
     {
@@ -249,7 +249,7 @@ void OutputWindow::closeIfDone()
     {
 	if ( ( autoClose() && _errorCount == 0 ) || _closed || !isVisible() )
 	{
-	    //logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
+	    logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
 	    this->deleteLater(); // It is safe to call this multiple times
 	}
     }
@@ -392,8 +392,13 @@ QString OutputWindow::command( QProcess * process )
 }
 
 
-void OutputWindow::closeEvent( QCloseEvent * )
+void OutputWindow::hideEvent( QHideEvent * event )
 {
+    // Ignore iconification or placing in another workspace
+    if ( event->spontaneous() )
+	return;
+
+    // Flag as "logically closed"
     _closed = true;
 
     // Wait until the last process is finished and then delete this window

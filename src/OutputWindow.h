@@ -13,14 +13,12 @@
 #include <memory>
 
 #include <QDialog>
+#include <QHideEvent>
 #include <QProcess>
 #include <QTextStream>
 #include <QVector>
 
 #include "ui_output-window.h"
-
-
-class QCloseEvent;
 
 
 namespace QDirStat
@@ -270,17 +268,20 @@ namespace QDirStat
             { _ui->autoCloseCheckBox->setChecked( autoClose ); }
 
         /**
-         * Close event: invoked upon QDialog::close() (i.e. the "Close" button),
-         * the window manager close button (the [x] at the top right), or when
+         * Hide event: invoked upon QDialog::close() (i.e. the "Close" button),
+         * the window manager close button (the [x] at the top right), when
          * this dialog decides to auto-close itself after the last process
-         * finishes successfully.
+         * finishes successfully, or when the dialog is hidden
+         * "non-spontaneously".  Before Qt 6.3, refject(), for example by
+         * pressing the Escape key, hides the window but does not close it.
          *
          * This object will delete itself in this event if there are no more
-         * processes to watch.
+         * processes to watch, or set a flag that the dialog can be deleted
+         * when the last process ends.
          *
          * Reimplemented from QWidget.
          **/
-        void closeEvent( QCloseEvent * ) override;
+        void hideEvent( QHideEvent * ) override;
 
         /**
          * Remove a finished process and signal it is done.
