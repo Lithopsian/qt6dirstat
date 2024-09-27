@@ -12,6 +12,7 @@
 #include <QtMath> // qFloor()
 
 #include "OutputWindow.h"
+#include "ActionManager.h"
 #include "Exception.h"
 #include "Settings.h"
 
@@ -50,6 +51,8 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
 OutputWindow::~OutputWindow()
 {
     //logDebug() << "Destructor" << Qt::endl;
+
+    Settings::writeWindowSettings( this, "OutputWindow" );
 
     if ( !_processList.isEmpty() )
     {
@@ -456,6 +459,9 @@ void OutputWindow::readSettings()
     newPalette.setBrush( QPalette::Base, _terminalBackground );
     _ui->terminal->setPalette( newPalette );
     _ui->terminal->setFont( _terminalDefaultFont );
+
+    Settings::readWindowSettings( this, "OutputWindow" );
+    ActionManager::actionHotkeys( this, "OutputWindow" );
 }
 
 
