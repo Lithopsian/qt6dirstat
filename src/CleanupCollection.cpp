@@ -343,6 +343,7 @@ void CleanupCollection::lastProcessFinished( int totalErrorCount )
 {
     _activeOutputWindow = nullptr;
     emit cleanupFinished( totalErrorCount );
+    updateActions();
 }
 
 
