@@ -179,8 +179,6 @@ void ActionManager::moveToTrash()
 
 void ActionManager::actionHotkeys( QWidget * parent, const char * group )
 {
-//    Settings::readWindowSettings( parent, group );
-
     Settings settings;
 
     settings.beginGroup( group );

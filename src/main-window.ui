@@ -500,7 +500,7 @@
     <string>&amp;Copy Path</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string/>
    </property>
   </action>
   <action name="actionTreemapZoomTo">
@@ -685,9 +685,6 @@
    <property name="toolTip">
     <string>Move the selected items to the trash bin</string>
    </property>
-   <property name="shortcut">
-    <string>Del</string>
-   </property>
   </action>
   <action name="actionDumpSelection">
    <property name="text">
@@ -717,9 +714,6 @@
    </property>
    <property name="statusTip">
     <string>https://github.com/shundhammer/qdirstat/blob/master/README.md</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
    </property>
   </action>
   <action name="actionFileSizeStats">
@@ -992,9 +986,6 @@
    </property>
    <property name="toolTip">
     <string>Find files or directories in the scanned Tree</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionTreemapHelp">

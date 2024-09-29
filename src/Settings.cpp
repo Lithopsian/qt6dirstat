@@ -284,18 +284,18 @@ void Settings::applyActionHotkey( QAction * action )
 
     if ( contains( actionName ) )
     {
-	const QString shortcut = value( actionName ).toString();
-	const QKeySequence hotkey{ shortcut };
-	if ( shortcut.isEmpty() || !hotkey.isEmpty() )
+	const QString shortcuts = value( actionName ).toString();
+	const auto hotkeys = QKeySequence::listFromString( shortcuts );
+	if ( shortcuts.isEmpty() || !hotkeys.isEmpty() )
 	{
 	    // Put any empty or valid key sequence on the action even if it's already set
-	    action->setShortcut( hotkey.toString() );
+	    action->setShortcuts( hotkeys );
 	    return;
 	}
     }
 
     // Use the .ui shortcut as the default setting
-    setValue( actionName, action->shortcut().toString() );
+    setValue( actionName, QKeySequence::listToString( action->shortcuts() ) );
 }
 
 
