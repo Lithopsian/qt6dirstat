@@ -70,15 +70,6 @@ namespace QDirStat
 	void unlock( const FileInfo * newCurrentItem );
 
 
-    public slots:
-
-	/**
-	 * Add a FileInfo item to the history if it's a directory and its URL
-	 * is not the same as the current history item.
-	 **/
-	void addToHistory( const FileInfo * item );
-
-
     signals:
 
 	/**
@@ -86,6 +77,15 @@ namespace QDirStat
 	 * specified URL.
 	 **/
 	void navigateToUrl( const QString & url );
+
+
+    public slots:
+
+	/**
+	 * Add a FileInfo item to the history if it's a directory and its URL
+	 * is not the same as the current history item.
+	 **/
+	void addToHistory( const FileInfo * item );
 
 
     protected slots:

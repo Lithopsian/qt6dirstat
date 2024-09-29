@@ -94,6 +94,27 @@ namespace QDirStat
 	void clear();
 
 
+    signals:
+
+	/**
+	 * Emitted when the current item changes. 'newCurrent' is the new
+	 * current item, 'oldCurrent' the previous one. Any of them might be 0.
+	 **/
+	void currentItemChanged( FileInfo * newCurrent, const FileInfo * oldCurrent );
+
+	/**
+	 * Emitted when the selection changes.
+	 **/
+	void selectionChanged();
+	void selectionChangedItems( const FileInfoSet & selectedItems );
+
+	/**
+	 * Emitted when the current branch changes. Tree views can use this to
+	 * close all other branches.
+	 **/
+	void currentBranchChanged( const QModelIndex & branch );
+
+
     public slots:
 
 	/**
@@ -144,27 +165,6 @@ namespace QDirStat
 	 * parents.
 	 **/
 	void prepareForRefresh( const FileInfoSet & refreshSet );
-
-
-    signals:
-
-	/**
-	 * Emitted when the current item changes. 'newCurrent' is the new
-	 * current item, 'oldCurrent' the previous one. Any of them might be 0.
-	 **/
-	void currentItemChanged( FileInfo * newCurrent, const FileInfo * oldCurrent );
-
-	/**
-	 * Emitted when the selection changes.
-	 **/
-	void selectionChanged();
-	void selectionChangedItems( const FileInfoSet & selectedItems );
-
-	/**
-	 * Emitted when the current branch changes. Tree views can use this to
-	 * close all other branches.
-	 **/
-	void currentBranchChanged( const QModelIndex & branch );
 
 
     protected slots:

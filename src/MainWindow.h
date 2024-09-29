@@ -81,89 +81,7 @@ namespace QDirStat
          **/
         void showOpenDirErrorPopup( const SysCallFailedException & ex );
 
-
-    public slots:
-
-        /**
-         * Open an URL (directory or package URL).
-         **/
-        void openUrl( const QString & url );
-
-        /**
-         * Open a directory selection dialog and open the selected URL.
-         **/
-        void askOpenDir();
-
-        /**
-         * Read a filesystem, as requested from the filesystems window.
-         **/
-        void readFilesystem( const QString & path );
-
-        /**
-         * Show the directories that could not be read in a separate non-modal
-         * window.
-         **/
-        void showUnreadableDirs();
-
-
-    protected:
-
-        /**
-         * Replace the current tree with the list of installed
-         * packages from the system's package manager that match 'pkgUrl'.
-         **/
-        void readPkg( const PkgFilter & pkgFilter );
-
-        /**
-         * Show unpackaged files with the specified 'unpkgSettings' parameters
-         * (startingDir, excludeDirs, ignorePatterns).
-         *
-         * The URL may start with "unpkg:/".
-         **/
-        void showUnpkgFiles( const UnpkgSettings & unpkgSettings );
-
-        /**
-         * Show unpackaged files with the UnpkgSettings parameters from the config
-         * file or default values if no config was written yet.
-         **/
-        void showUnpkgFiles( const QString & url );
-
-        /**
-         * Return 'true' if the URL starts with "unpkg:/".
-         **/
-        static bool isUnpkgUrl( const QString & url )
-            { return url.startsWith( unpkgScheme(), Qt::CaseInsensitive ); }
-
-        /**
-         * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
-         **/
-        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
-
-        /**
-         * Disable the treemap, reset the permissions warning, breadcrumbs,
-         * and trees, then display a BusyPopup to prepare for a packaged or
-         * unpackaged files read.
-         **/
-        void pkgQuerySetup();
-
-        /**
-         * Update the window title: Show "[root]" if running as root and add the
-         * URL if that is configured.
-         **/
-        void updateWindowTitle( const QString & url );
-
-        /**
-         * Show progress text in the status bar for a few seconds.
-         **/
-        void showProgress( const QString & text );
-
-        /**
-         * Show details about the current selection in the details view.
-         **/
-        void updateFileDetailsView();
-
-
-    public: // for the config dialog
+        // for the config dialog
 
         /**
          * Return the DirTreeView for this window
@@ -201,6 +119,30 @@ namespace QDirStat
          **/
         int longStatusBarTimeout() const { return _longStatusBarTimeout; }
         void setLongStatusBarTimeout( int newValue ) { _longStatusBarTimeout = newValue; }
+
+
+    public slots:
+
+        /**
+         * Open an URL (directory or package URL).
+         **/
+        void openUrl( const QString & url );
+
+        /**
+         * Open a directory selection dialog and open the selected URL.
+         **/
+        void askOpenDir();
+
+        /**
+         * Read a filesystem, as requested from the filesystems window.
+         **/
+        void readFilesystem( const QString & path );
+
+        /**
+         * Show the directories that could not be read in a separate non-modal
+         * window.
+         **/
+        void showUnreadableDirs();
 
 
     protected slots:
@@ -469,6 +411,60 @@ namespace QDirStat
 
 
     protected:
+
+        /**
+         * Replace the current tree with the list of installed
+         * packages from the system's package manager that match 'pkgUrl'.
+         **/
+        void readPkg( const PkgFilter & pkgFilter );
+
+        /**
+         * Show unpackaged files with the specified 'unpkgSettings' parameters
+         * (startingDir, excludeDirs, ignorePatterns).
+         *
+         * The URL may start with "unpkg:/".
+         **/
+        void showUnpkgFiles( const UnpkgSettings & unpkgSettings );
+
+        /**
+         * Show unpackaged files with the UnpkgSettings parameters from the config
+         * file or default values if no config was written yet.
+         **/
+        void showUnpkgFiles( const QString & url );
+
+        /**
+         * Return 'true' if the URL starts with "unpkg:/".
+         **/
+        static bool isUnpkgUrl( const QString & url )
+            { return url.startsWith( unpkgScheme(), Qt::CaseInsensitive ); }
+
+        /**
+         * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
+         **/
+        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
+
+        /**
+         * Disable the treemap, reset the permissions warning, breadcrumbs,
+         * and trees, then display a BusyPopup to prepare for a packaged or
+         * unpackaged files read.
+         **/
+        void pkgQuerySetup();
+
+        /**
+         * Update the window title: Show "[root]" if running as root and add the
+         * URL if that is configured.
+         **/
+        void updateWindowTitle( const QString & url );
+
+        /**
+         * Show progress text in the status bar for a few seconds.
+         **/
+        void showProgress( const QString & text );
+
+        /**
+         * Show details about the current selection in the details view.
+         **/
+        void updateFileDetailsView();
 
         /**
          * Return whether verbose selection is enabled.

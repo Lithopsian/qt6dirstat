@@ -69,15 +69,6 @@ namespace QDirStat
 	void clear() { setPath( nullptr ); }
 
 
-    public slots:
-
-	/**
-	 * Set the path from a FileInfo item.
-	 * A null item clears the path.
-	 **/
-	void setPath( const FileInfo * item );
-
-
     signals:
 
 	/**
@@ -87,6 +78,15 @@ namespace QDirStat
 	 * the clicked directory in a view.
 	 **/
 	void pathClicked( const QString & path );
+
+
+    public slots:
+
+	/**
+	 * Set the path from a FileInfo item.
+	 * A null item clears the path.
+	 **/
+	void setPath( const FileInfo * item );
 
 
     private:

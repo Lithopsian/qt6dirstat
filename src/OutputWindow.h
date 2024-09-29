@@ -164,13 +164,17 @@ namespace QDirStat
         static QString command( QProcess * process );
 
 
-    public slots:
+    signals:
 
         /**
-         * Add a command line to show in the output area.
-         * This is typically displayed in white.
+         * Emitted when the last process finished, no matter if that was successful
+         * or with an error. 'totalErrorCount' is the accumulated error count of
+         * all processes this OutputWindow watched.
          **/
-        void addCommandLine( const QString & commandline );
+        void lastProcessFinished( int totalErrorCount );
+
+
+    public slots:
 
         /**
          * Add one or more lines of stdout to show in the output area.
@@ -183,6 +187,15 @@ namespace QDirStat
          * This is typically displayed in red.
          **/
         void addStderr( const QString & output );
+
+
+    protected slots:
+
+        /**
+         * Add a command line to show in the output area.
+         * This is typically displayed in white.
+         **/
+        void addCommandLine( const QString & commandline );
 
         /**
          * Kill all processes this class watches.
@@ -203,9 +216,6 @@ namespace QDirStat
          * Read parameters from the settings.
          **/
         void readSettings();
-
-
-    protected slots:
 
         /**
          * Read output on one of the watched process's stdout channel.
@@ -247,16 +257,6 @@ namespace QDirStat
          * before)
          **/
         void timeoutShow();
-
-
-    signals:
-
-        /**
-         * Emitted when the last process finished, no matter if that was successful
-         * or with an error. 'totalErrorCount' is the accumulated error count of
-         * all processes this OutputWindow watched.
-         **/
-        void lastProcessFinished( int totalErrorCount );
 
 
     protected:

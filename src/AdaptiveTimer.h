@@ -87,6 +87,19 @@ namespace QDirStat
         void request( Payload payload );
 
 
+    protected slots:
+
+        /**
+         * Decrease the delivery delay.
+         **/
+        void decreaseDelay();
+
+        /**
+         * Timeout for the delivery timer.
+         **/
+        void deliveryTimeout();
+
+
     protected:
 
         /**
@@ -107,19 +120,6 @@ namespace QDirStat
          * Increase the delivery delay.
          **/
         void increaseDelay();
-
-
-    protected slots:
-
-        /**
-         * Decrease the delivery delay.
-         **/
-        void decreaseDelay();
-
-        /**
-         * Timeout for the delivery timer.
-         **/
-        void deliveryTimeout();
 
 
     private:

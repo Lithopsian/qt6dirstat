@@ -416,6 +416,38 @@ namespace QDirStat
 	void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
 
 
+    signals:
+
+	/**
+	 * Emitted when the currently selected item changes.
+	 * Caution: 'item' may be 0 when the selection is cleared.
+	 *
+	 * Unused.
+	 **/
+//	void selectionChanged( FileInfo * item );
+
+	/**
+	 * Emitted when the current item changes.
+	 **/
+	void currentItemChanged( FileInfo * newCurrent );
+
+	/**
+	 * Emitted when the treemap changes, e.g. is rebuilt, zoomed in, or
+	 * zoomed out.
+	 **/
+	void treemapChanged();
+
+	/**
+	 * Emitted when the mouse cursor enters a hover over 'item'.
+	 **/
+	void hoverEnter( FileInfo * item );
+
+	/**
+	 * Emitted when the mouse cursor leaves the hover over 'item'.
+	 **/
+	void hoverLeave( FileInfo * item );
+
+
     public slots:
 
 	/**
@@ -455,6 +487,42 @@ namespace QDirStat
 	 * subsequent reads.
 	 **/
 	void deleteNotify( FileInfo * );
+
+
+    protected slots:
+
+	/**
+	 * Clear the treemap contents.
+	 **/
+	void clear();
+
+	/**
+	 * The Mime categories have changed and the map needs to be re-coloured.
+	 **/
+	void changeTreemapColors();
+
+	/**
+	 * Update the selected items that have been selected in another view.
+	 **/
+	void updateSelection( const FileInfoSet & newSelection );
+
+	/**
+	 * Update the current item that has been changed in another view.
+	 **/
+	void updateCurrentItem( FileInfo * currentItem );
+
+	/**
+	 * Search the treemap for a tile with the specified FileInfo node and
+	 * make that tile the current item if it is found. If nothing is found
+	 * or if 'node' is 0, the highlighting is removed from the previous
+	 * current item.
+	 **/
+	void setCurrentItem( FileInfo * node );
+
+	/**
+	 * The treemap thread has finished.
+	 **/
+	void treemapFinished();
 
 
     protected:
@@ -522,74 +590,6 @@ namespace QDirStat
 	 * Cancels any treemap builds.
 	 **/
 	void cancelTreemap();
-
-
-    signals:
-
-	/**
-	 * Emitted when the currently selected item changes.
-	 * Caution: 'item' may be 0 when the selection is cleared.
-	 *
-	 * Unused.
-	 **/
-//	void selectionChanged( FileInfo * item );
-
-	/**
-	 * Emitted when the current item changes.
-	 **/
-	void currentItemChanged( FileInfo * newCurrent );
-
-	/**
-	 * Emitted when the treemap changes, e.g. is rebuilt, zoomed in, or
-	 * zoomed out.
-	 **/
-	void treemapChanged();
-
-	/**
-	 * Emitted when the mouse cursor enters a hover over 'item'.
-	 **/
-	void hoverEnter( FileInfo * item );
-
-	/**
-	 * Emitted when the mouse cursor leaves the hover over 'item'.
-	 **/
-	void hoverLeave( FileInfo * item );
-
-
-    protected slots:
-
-	/**
-	 * Clear the treemap contents.
-	 **/
-	void clear();
-
-	/**
-	 * The Mime categories have changed and the map needs to be re-coloured.
-	 **/
-	void changeTreemapColors();
-
-	/**
-	 * Update the selected items that have been selected in another view.
-	 **/
-	void updateSelection( const FileInfoSet & newSelection );
-
-	/**
-	 * Update the current item that has been changed in another view.
-	 **/
-	void updateCurrentItem( FileInfo * currentItem );
-
-	/**
-	 * Search the treemap for a tile with the specified FileInfo node and
-	 * make that tile the current item if it is found. If nothing is found
-	 * or if 'node' is 0, the highlighting is removed from the previous
-	 * current item.
-	 **/
-	void setCurrentItem( FileInfo * node );
-
-	/**
-	 * The treemap thread has finished.
-	 **/
-	void treemapFinished();
 
 
     private:

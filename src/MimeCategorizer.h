@@ -166,6 +166,14 @@ namespace QDirStat
 	static QString symlinkCategoryName() { return tr( "symlink" ); }
 
 
+    signals:
+
+	/**
+	 * Emitted when changes are applied from the settings dialogue.
+	 **/
+	void categoriesChanged();
+
+
     protected:
 
 	/**
@@ -293,14 +301,6 @@ namespace QDirStat
 	 * Add default categories in case none were read from the settings.
 	 **/
 	void addDefaultCategories();
-
-
-    signals:
-
-	/**
-	 * Emitted when changes are applied from the settings dialogue.
-	 **/
-	void categoriesChanged();
 
 
     private:
