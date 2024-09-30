@@ -35,6 +35,9 @@
      <property name="sortingEnabled">
       <bool>true</bool>
      </property>
+     <property name="expandsOnDoubleClick">
+      <bool>false</bool>
+     </property>
      <attribute name="headerStretchLastSection">
       <bool>false</bool>
      </attribute>
@@ -46,7 +49,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,1,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">
       <number>12</number>
      </property>
@@ -57,9 +60,6 @@
        </property>
        <property name="text">
         <string>&amp;Refresh</string>
-       </property>
-       <property name="default">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -75,6 +75,9 @@
          </property>
          <property name="text">
           <string>&amp;Locate by Type</string>
+         </property>
+         <property name="default">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -119,7 +122,7 @@
     <string>&amp;Locate</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Enter</string>
    </property>
   </action>
   <action name="actionSizeStats">
@@ -152,22 +155,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionLocate</sender>
-   <signal>triggered()</signal>
-   <receiver>locateButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>159</x>
-     <y>316</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSizeStats</sender>
    <signal>triggered()</signal>
    <receiver>sizeStatsButton</receiver>
@@ -179,22 +166,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>266</x>
-     <y>316</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>treeWidget</sender>
-   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
-   <receiver>locateButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>338</x>
-     <y>161</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>159</x>
      <y>316</y>
     </hint>
    </hints>

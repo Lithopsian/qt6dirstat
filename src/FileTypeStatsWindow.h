@@ -13,7 +13,6 @@
 #include <memory>
 
 #include <QDialog>
-#include <QKeyEvent>
 #include <QTreeWidgetItem>
 
 #include "ui_file-type-stats-window.h"
@@ -101,6 +100,11 @@ namespace QDirStat
 	void sizeStatsForCurrentFileType();
 
 	/**
+	 * 'item' was activated by mouse or keyboard.
+	 **/
+	void itemActivated();
+
+	/**
 	 * Enable or disable the actions depending on the current item.
 	 **/
 	void enableActions();
@@ -112,11 +116,6 @@ namespace QDirStat
 
 
     protected:
-
-	/**
-	 * Read the window and hotkey settings.
-	 **/
-	void readSettings();
 
 	/**
 	 * Populate the widgets for a subtree.
@@ -169,8 +168,9 @@ namespace QDirStat
     {
 	FT_NameCol = 0,
 	FT_CountCol,
+	FT_CountPercentCol,
 	FT_TotalSizeCol,
-	FT_PercentageCol,
+	FT_SizePercentCol,
 	FT_ColumnCount,
     };
 
@@ -185,13 +185,24 @@ namespace QDirStat
 
 	/**
 	 * Constructor. After creating, this item has to be inserted into the
-	 * tree at the appropriate place: Toplevel for categories, below a
+	 * tree at the appropriate place: toplevel for categories, below a
 	 * category for suffixes.
 	 **/
 	FileTypeItem( const QString & name,
-	              int             count,
+	              FileCount       count,
+	              float           countPercent,
 	              FileSize        totalSize,
-	              float           percentage );
+	              float           sizePercent );
+
+	/**
+	 * Return the files count for this category item.
+	 **/
+	FileCount count() const { return _count; }
+
+	/**
+	 * Return the total files size for this category item.
+	 **/
+	FileSize totalSize() const { return _totalSize; }
 
 
     protected:
@@ -206,9 +217,8 @@ namespace QDirStat
 
     private:
 
-	int      _count;
-	FileSize _totalSize;
-	float    _percentage;
+	FileCount _count;
+	FileSize  _totalSize;
 
     };	// class FileTypeItem
 
@@ -226,10 +236,11 @@ namespace QDirStat
 	 **/
 	SuffixFileTypeItem( bool            otherCategory,
 	                    const QString & suffix,
-	                    int             count,
+	                    FileCount       count,
+	                    float           countPercent,
 	                    FileSize        totalSize,
-	                    float           percentage ):
-	    FileTypeItem{ itemName( otherCategory, suffix ), count, totalSize, percentage },
+	                    float           sizePercent ):
+	    FileTypeItem{ itemName( otherCategory, suffix ), count, countPercent, totalSize, sizePercent },
 	    _suffix{ suffix }
 	{}
 

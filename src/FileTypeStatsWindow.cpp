@@ -7,15 +7,17 @@
  *              Ian Nartowicz
  */
 
+#include <QKeyEvent>
 #include <QMenu>
 #include <QPointer>
 
 #include "FileTypeStatsWindow.h"
-#include "FileTypeStats.h"
+#include "ActionManager.h"
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfo.h"
 #include "FileSizeStatsWindow.h"
+#include "FileTypeStats.h"
 #include "FormatUtil.h"
 #include "LocateFileTypeWindow.h"
 #include "Logger.h"
@@ -76,11 +78,12 @@ namespace
      **/
     FileTypeItem * addCategoryItem( QTreeWidget   * treeWidget,
                                     const QString & name,
-                                    int             count,
-                                    FileSize        sum,
-                                    float           percent )
+                                    FileCount       count,
+                                    float           countPercent,
+                                    FileSize        size,
+                                    float           sizePercent )
     {
-	auto item = new FileTypeItem{ name, count, sum, percent };
+	auto item = new FileTypeItem{ name, count, countPercent, size, sizePercent };
 	treeWidget->addTopLevelItem( item );
 
 	return item;
@@ -99,11 +102,13 @@ namespace
     void addSuffixItem( FileTypeItem  * parent,
                         bool            otherCategory,
                         const QString & suffix,
-                        int             count,
-                        FileSize        sum,
-                        float           percent )
+                        FileCount       count,
+                        FileSize        size )
     {
-	parent->addChild( new SuffixFileTypeItem{ otherCategory, suffix, count, sum, percent } );
+	const float countPercent = parent->count() ? 100.0f * count / parent->count() : 0.0f;
+	const float sizePercent = parent->totalSize() ? 100.0f * size / parent->totalSize() : 0.0f;
+	auto item = new SuffixFileTypeItem{ otherCategory, suffix, count, countPercent, size, sizePercent };
+	parent->addChild( item );
     }
 
 
@@ -115,10 +120,11 @@ namespace
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
-	headerItem->setText( FT_NameCol,       QObject::tr( "Name" ) );
-	headerItem->setText( FT_CountCol,      QObject::tr( "Files" ) );
-	headerItem->setText( FT_TotalSizeCol,  QObject::tr( "Total Size" ) );
-	headerItem->setText( FT_PercentageCol, QObject::tr( "Size %" ) );
+	headerItem->setText( FT_NameCol,         QObject::tr( "Name" ) );
+	headerItem->setText( FT_CountCol,        QObject::tr( "Files" ) );
+	headerItem->setText( FT_CountPercentCol, "%" );
+	headerItem->setText( FT_TotalSizeCol,    QObject::tr( "Total Size" ) );
+	headerItem->setText( FT_SizePercentCol,  "%" );
 	headerItem->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
 
 	QHeaderView * header = tree->header();
@@ -147,12 +153,13 @@ namespace
 	    if ( category )
 	    {
 		// Add a category item
-		const int       count   = it.value().count;
-		const FileSize  sum     = it.value().sum;
-		const float     percent = stats.percentage( sum );
-		const QString & name    = category->name();
-
-		categoryItem[ category ] = addCategoryItem( treeWidget, name, count, sum, percent );
+		const FileCount count        = it.value().count;
+		const float     countPercent = stats.countPercent( count );
+		const FileSize  size         = it.value().size;
+		const float     sizePercent  = stats.sizePercent( size );
+		const QString & name         = category->name();
+		categoryItem[ category ] =
+		    addCategoryItem( treeWidget, name, count, countPercent, size, sizePercent );
 	    }
 	}
 
@@ -167,12 +174,10 @@ namespace
 		FileTypeItem * parentItem = categoryItem.value( category, nullptr );
 		if ( parentItem )
 		{
-		    const bool     otherCategory = category == stats.otherCategory();
-		    const int      count         = it.value().count;
-		    const FileSize sum           = it.value().sum;
-		    const float    percent       = stats.percentage( sum );
-
-		    addSuffixItem( parentItem, otherCategory, suffix, count, sum, percent );
+		    const bool      otherCategory = category == stats.otherCategory();
+		    const FileCount count         = it.value().count;
+		    const FileSize  size          = it.value().size;
+		    addSuffixItem( parentItem, otherCategory, suffix, count, size );
 		}
 		else
 		{
@@ -207,7 +212,9 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initTree( _ui->treeWidget );
-    readSettings();
+
+    Settings::readWindowSettings( this, "FileTypeStatsWindow" );
+    ActionManager::actionHotkeys( this, "FileTypeStatsWindow" );
 
     const DirTree        * dirTree        = app()->dirTree();
     const SelectionModel * selectionModel = app()->selectionModel();
@@ -236,6 +243,12 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     connect( _ui->sizeStatsButton, &QAbstractButton::clicked,
              this,                 &FileTypeStatsWindow::sizeStatsForCurrentFileType );
 
+    connect( _ui->treeWidget,      &QTreeWidget::itemActivated,
+             this,                 &FileTypeStatsWindow::itemActivated );
+
+    connect( _ui->actionLocate,    &QAction::triggered,
+             this,                 &FileTypeStatsWindow::itemActivated );
+
     // See also signal/slot connections in file-type-stats-window.ui
 
     show();
@@ -258,22 +271,6 @@ FileTypeStatsWindow * FileTypeStatsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FileTypeStatsWindow{ parent };
 
     return _sharedInstance;
-}
-
-
-void FileTypeStatsWindow::readSettings()
-{
-    Settings::readWindowSettings( this, "FileTypeStatsWindow" );
-
-    Settings settings;
-    settings.beginGroup( "FileTypeStatsWindow" );
-    settings.applyActionHotkey( _ui->actionLocate );
-    settings.applyActionHotkey( _ui->actionSizeStats );
-    settings.endGroup();
-
-    // Add actions to this window to get the hotkeys
-    addAction( _ui->actionLocate );
-    addAction( _ui->actionSizeStats );
 }
 
 
@@ -390,21 +387,21 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 }
 
 
+void FileTypeStatsWindow::itemActivated()
+{
+    QTreeWidgetItem * item = _ui->treeWidget->currentItem();
+    if ( item->childCount() == 0 )
+	locateCurrentFileType();
+    else
+	item->setExpanded( !item->isExpanded() );
+}
+
+
 void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 {
+    // Let return/enter trigger itemActivated instead of buttons that don't have focus
     if ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter )
-    {
-	// Act on enter key here so it doesn't go to the default (dialog) button
-	QTreeWidgetItem * item = _ui->treeWidget->currentItem();
-	if ( item->childCount() > 0 )
-	    // For category headings, toggle the expanded state
-	    item->setExpanded( !item->isExpanded() );
-	else if ( item->type() == QTreeWidgetItem::UserType )
-	    // Try the locate file type action, although it may not be an appropriate suffix
-	    locateCurrentFileType();
-
 	return;
-    }
 
     QDialog::keyPressEvent( event );
 }
@@ -420,13 +417,13 @@ void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
 
 
 FileTypeItem::FileTypeItem( const QString & name,
-                            int             count,
+                            FileCount       count,
+                            float           countPercent,
                             FileSize        totalSize,
-                            float           percentage ):
+                            float           sizePercent ):
     QTreeWidgetItem{ UserType },
     _count{ count },
-    _totalSize{ totalSize },
-    _percentage{ percentage }
+    _totalSize{ totalSize }
 {
     /**
      * Helper function to set the text and text alignment for a column.
@@ -437,10 +434,14 @@ FileTypeItem::FileTypeItem( const QString & name,
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    set( FT_NameCol,       Qt::AlignLeft,  name );
-    set( FT_CountCol,      Qt::AlignRight, formatCount( count ) );
-    set( FT_TotalSizeCol,  Qt::AlignRight, formatSize( totalSize ) );
-    set( FT_PercentageCol, Qt::AlignRight, formatPercent( percentage ) );
+    set( FT_NameCol,         Qt::AlignLeft,  name );
+    set( FT_CountCol,        Qt::AlignRight, formatCount( count ) );
+    set( FT_CountPercentCol, Qt::AlignRight, formatPercent( countPercent ) );
+    set( FT_TotalSizeCol,    Qt::AlignRight, formatSize( totalSize ) );
+    set( FT_SizePercentCol,  Qt::AlignRight, formatPercent( sizePercent ) );
+
+    if ( totalSize > 999 )
+	setToolTip( FT_TotalSizeCol, formatByteSize( totalSize ) );
 }
 
 
@@ -456,9 +457,15 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
 
     switch ( treeWidget()->sortColumn() )
     {
-	case FT_CountCol:      return _count      < other._count;
-	case FT_TotalSizeCol:  return _totalSize  < other._totalSize;
-	case FT_PercentageCol: return _percentage < other._percentage;
-	default:               return QTreeWidgetItem::operator<( rawOther );
+	case FT_CountCol:
+	case FT_CountPercentCol:
+	    return _count < other._count;
+
+	case FT_TotalSizeCol:
+	case FT_SizePercentCol:
+	    return _totalSize < other._totalSize;
+
+	default:
+	    return QTreeWidgetItem::operator<( rawOther );
     }
 }

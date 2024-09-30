@@ -24,21 +24,21 @@ namespace QDirStat
     class MimeCategory;
 
     /**
-     * SuffixCategory and CountSum are defined instead of using
+     * SuffixCategory and CountSize are defined instead of using
      * QPair for the hash keys and values.  This just means that
      * the pair members can be referred to by name rather than
      * simply 'first' and 'second'.
      **/
     struct SuffixCategory
     {
-	QString suffix;
+	QString              suffix;
 	const MimeCategory * category;
     };
 
-    struct CountSum
+    struct CountSize
     {
-	int count;
-	FileSize sum;
+	FileCount count;
+	FileSize  size;
     };
 
     /**
@@ -60,8 +60,8 @@ namespace QDirStat
      * aggregated at the category level; SuffixMap is used for
      * statistics aggregated by suffix per category.
      **/
-    typedef QHash<const MimeCategory *, CountSum> CategoryMap;
-    typedef QHash<SuffixCategory, CountSum>       SuffixMap;
+    typedef QHash<const MimeCategory *, CountSize> CategoryMap;
+    typedef QHash<SuffixCategory, CountSize>       SuffixMap;
 
 
     /**
@@ -99,10 +99,13 @@ namespace QDirStat
 	const MimeCategory * otherCategory() const { return _otherCategory.get(); }
 
 	/**
-	 * Return the percentage of 'size' relative to the tree total size.
+	 * Return the percentage of 'size' or 'count' relative to the subtree
+	 * total.
 	 **/
-	float percentage( FileSize size ) const
-	    { return _totalSize == 0LL ? 0.0f : 100.0f * size / _totalSize; }
+	float countPercent( FileCount count ) const
+	    { return _totalCount == 0 ? 0.0f : 100.0f * count / _totalCount; }
+	float sizePercent( FileSize size ) const
+	    { return _totalSize == 0 ? 0.0f : 100.0f * size / _totalSize; }
 
 
     protected:
@@ -118,8 +121,8 @@ namespace QDirStat
 	/**
 	 * Aaggregate entries to each of the maps.
 	 **/
-	void addCategorySum( const MimeCategory * category, const FileInfo * item );
-	void addSuffixSum  ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
+	void addCategoryItem( const MimeCategory * category, const FileInfo * item );
+	void addSuffixItem  ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
 
 	/**
 	 * Check if the sums add up and how much is unaccounted for.
@@ -137,7 +140,8 @@ namespace QDirStat
 	SuffixMap   _suffixes;
 	CategoryMap _categories;
 
-	FileSize    _totalSize{ 0LL };
+	FileCount   _totalCount{ 0 };
+	FileSize    _totalSize{ 0 };
 
     };	// class FileTypeStats
 
