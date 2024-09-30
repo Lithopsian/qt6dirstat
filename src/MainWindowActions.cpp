@@ -19,11 +19,15 @@ using namespace QDirStat;
 
 void MainWindow::connectMenuActions()
 {
-    // Use standard key sequences for some actions, Designer can't handle these
+    // Use standard key sequences for some actions - Designer can't handle these
     _ui->actionCopyPath->setShortcuts( QKeySequence::Copy );
     _ui->actionFindFiles->setShortcuts( QKeySequence::Find );
     _ui->actionMoveToTrash->setShortcuts( QKeySequence::Delete );
     _ui->actionHelp->setShortcuts( QKeySequence::HelpContents );
+    _ui->actionTreemapZoomTo->setShortcut( Qt::CTRL+Qt::Key_Equal );
+    _ui->actionTreemapZoomIn->setShortcuts( QKeySequence::ZoomIn );
+    _ui->actionTreemapZoomOut->setShortcuts( QKeySequence::ZoomOut );
+    _ui->actionResetTreemapZoom->setShortcut( Qt::CTRL+Qt::Key_0 );
 
     _ui->actionWhatsNew->setStatusTip( RELEASE_URL ); // defined in Version.h
 

@@ -514,9 +514,6 @@
    <property name="toolTip">
     <string>Zoom the treemap in to the selected item</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+=</string>
-   </property>
   </action>
   <action name="actionTreemapZoomIn">
    <property name="icon">
@@ -528,9 +525,6 @@
    </property>
    <property name="toolTip">
     <string>Zoom the treemap in (enlarge) one level</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl++</string>
    </property>
   </action>
   <action name="actionTreemapZoomOut">
@@ -544,9 +538,6 @@
    <property name="toolTip">
     <string>Zoom the treemap out one level</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
-   </property>
   </action>
   <action name="actionResetTreemapZoom">
    <property name="icon">
@@ -558,9 +549,6 @@
    </property>
    <property name="toolTip">
     <string>Reset the treemap zoom factor to normal</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+0</string>
    </property>
   </action>
   <action name="actionShowTreemap">

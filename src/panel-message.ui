@@ -16,9 +16,6 @@
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="lineWidth">
-      <number>1</number>
-     </property>
      <layout class="QHBoxLayout" name="frameHBox">
       <property name="leftMargin">
        <number>0</number>

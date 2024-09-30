@@ -25,12 +25,15 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     _ui{ new Ui::OutputWindow }
 {
     _ui->setupUi( this );
+    _ui->actionZoomIn->setShortcuts( QKeySequence::ZoomIn );
+    _ui->actionZoomOut->setShortcuts( QKeySequence::ZoomOut );
+    _ui->actionResetZoom->setShortcut( Qt::CTRL+Qt::Key_0 );
 
     //logDebug() << "Creating with parent " << parent << Qt::endl;
     readSettings();
 
-    _ui->terminal->clear();
     setAutoClose( autoClose );
+    clearOutput();
 
     connect( _ui->zoomInButton,    &QPushButton::clicked,
              this,                 &OutputWindow::zoomIn );
@@ -135,12 +138,6 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     format.setForeground( QBrush{ textColor } );
     cursor.setCharFormat( format );
     cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
-}
-
-
-void OutputWindow::clearOutput()
-{
-    _ui->terminal->clear();
 }
 
 
@@ -410,21 +407,14 @@ void OutputWindow::hideEvent( QHideEvent * event )
 }
 
 
-void OutputWindow::updateActions()
-{
-    _ui->killButton->setEnabled( hasActiveProcess() );
-}
-
-
 void OutputWindow::showAfterTimeout( int timeoutMillisec )
 {
     // Show immediately if there is an error
     _showOnStderr = true;
 
-    // Shiw after the configured timeout if processes are still running
-    QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
-                        this,
-                        &OutputWindow::timeoutShow );
+    // Show after the configured timeout if processes are still running
+    const int millisec = timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout();
+    QTimer::singleShot( millisec, this, &OutputWindow::timeoutShow );
 }
 
 

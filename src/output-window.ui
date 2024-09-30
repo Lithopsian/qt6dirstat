@@ -152,9 +152,6 @@ p, li { white-space: pre-wrap; }
    <property name="toolTip">
     <string>Make the font of the output window larger.</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl++</string>
-   </property>
   </action>
   <action name="actionZoomOut">
    <property name="icon">
@@ -166,9 +163,6 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Make the font of the output window smaller.</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
    </property>
   </action>
   <action name="actionResetZoom">
@@ -195,6 +189,22 @@ p, li { white-space: pre-wrap; }
   <include location="icons.qrc"/>
  </resources>
  <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>OutputWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>514</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>actionZoomIn</sender>
    <signal>triggered()</signal>
@@ -240,22 +250,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>282</x>
      <y>377</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>OutputWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>514</x>
-     <y>377</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>329</x>
-     <y>199</y>
     </hint>
    </hints>
   </connection>

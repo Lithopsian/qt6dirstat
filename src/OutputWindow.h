@@ -205,12 +205,14 @@ namespace QDirStat
         /**
          * Clear the output area, i.e. remove all previous output and commands.
          **/
-        void clearOutput();
+        void clearOutput()
+            { _ui->terminal->clear(); }
 
         /**
          * Enable or disable actions based on the internal status of this object.
          **/
-        void updateActions();
+        void updateActions()
+            { _ui->killButton->setEnabled( hasActiveProcess() ); }
 
         /**
          * Read parameters from the settings.
