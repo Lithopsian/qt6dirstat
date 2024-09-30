@@ -203,23 +203,6 @@ namespace QDirStat
         void killAll();
 
         /**
-         * Clear the output area, i.e. remove all previous output and commands.
-         **/
-        void clearOutput()
-            { _ui->terminal->clear(); }
-
-        /**
-         * Enable or disable actions based on the internal status of this object.
-         **/
-        void updateActions()
-            { _ui->killButton->setEnabled( hasActiveProcess() ); }
-
-        /**
-         * Read parameters from the settings.
-         **/
-        void readSettings();
-
-        /**
          * Read output on one of the watched process's stdout channel.
          **/
         void readStdout();
@@ -264,10 +247,27 @@ namespace QDirStat
     protected:
 
         /**
+         * Read parameters from the settings.
+         **/
+        void readSettings();
+
+        /**
+         * Clear the output area, i.e. remove all previous output and commands.
+         **/
+        void clearOutput()
+            { _ui->terminal->clear(); }
+
+        /**
          * Set the auto-close checkbox to the given state.
          **/
         void setAutoClose( bool autoClose )
             { _ui->autoCloseCheckBox->setChecked( autoClose ); }
+
+        /**
+         * Enable or disable actions based on the internal status of this object.
+         **/
+        void updateActions()
+            { _ui->killButton->setEnabled( hasActiveProcess() ); }
 
         /**
          * Hide event: invoked upon QDialog::close() (i.e. the "Close" button),

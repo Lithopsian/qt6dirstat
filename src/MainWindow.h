@@ -120,23 +120,23 @@ namespace QDirStat
         int longStatusBarTimeout() const { return _longStatusBarTimeout; }
         void setLongStatusBarTimeout( int newValue ) { _longStatusBarTimeout = newValue; }
 
-
-    public slots:
-
         /**
          * Open an URL (directory or package URL).
          **/
         void openUrl( const QString & url );
 
         /**
-         * Open a directory selection dialog and open the selected URL.
-         **/
-        void askOpenDir();
-
-        /**
          * Read a filesystem, as requested from the filesystems window.
          **/
         void readFilesystem( const QString & path );
+
+
+    public slots:
+
+        /**
+         * Open a directory selection dialog and open the selected URL.
+         **/
+        void askOpenDir();
 
         /**
          * Show the directories that could not be read in a separate non-modal
@@ -146,11 +146,6 @@ namespace QDirStat
 
 
     protected slots:
-
-        /**
-         * Open a directory URL (start reading that directory).
-         **/
-        void openDir( const QString & url );
 
         /**
          * Open a file selection dialog to ask for a cache file, clear the
@@ -178,12 +173,6 @@ namespace QDirStat
          * Stop reading if reading is in process.
          **/
         void stopReading();
-
-        /**
-         * Show the directories that could not be read in a separate non-modal
-         * window.
-         **/
-        void closeChildren();
 
         /**
          * Navigate one directory level up.
@@ -248,13 +237,6 @@ namespace QDirStat
          * Sort tree view by read jobs, hide treemap view.
          **/
         void busyDisplay();
-
-        /**
-         * Change display mode to "idle" (after reading the directory tree is
-         * finished): If the tree view is still sorted by read jobs, now sort it by
-         * subtree percent, show the treemap view if enabled.
-         **/
-        void idleDisplay();
 
         /**
          * Enable or disable actions depending on current status.
@@ -377,11 +359,6 @@ namespace QDirStat
         void openActionUrl();
 
         /**
-         * Expand the directory tree's branches to depth 'level'.
-         **/
-        void expandTreeToLevel( int level );
-
-        /**
          * Show the URL of 'item' and its total size in the status line.
          **/
         void showCurrent( FileInfo * item );
@@ -411,6 +388,23 @@ namespace QDirStat
 
 
     protected:
+
+        /**
+         * Change display mode to "idle" (after reading the directory tree is
+         * finished): If the tree view is still sorted by read jobs, now sort it by
+         * subtree percent, show the treemap view if enabled.
+         **/
+        void idleDisplay();
+
+        /**
+         * Close the children of this window before starting a new read.
+         **/
+        void closeChildren();
+
+        /**
+         * Open a directory URL (start reading that directory).
+         **/
+        void openDir( const QString & url );
 
         /**
          * Replace the current tree with the list of installed
@@ -482,6 +476,11 @@ namespace QDirStat
          * reading directories.
          **/
         void showDirPermissionsWarning();
+
+        /**
+         * Expand the directory tree's branches to depth 'level'.
+         **/
+        void expandTreeToLevel( int level );
 
         /**
          * Read parameters from the settings file.

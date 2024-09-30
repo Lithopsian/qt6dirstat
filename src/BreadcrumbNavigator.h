@@ -84,6 +84,7 @@ namespace QDirStat
 
 	/**
 	 * Set the path from a FileInfo item.
+	 *
 	 * A null item clears the path.
 	 **/
 	void setPath( const FileInfo * item );

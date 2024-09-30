@@ -492,11 +492,6 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Clear the treemap contents.
-	 **/
-	void clear();
-
-	/**
 	 * The Mime categories have changed and the map needs to be re-coloured.
 	 **/
 	void changeTreemapColors();
@@ -526,6 +521,11 @@ namespace QDirStat
 
 
     protected:
+
+	/**
+	 * Clear the treemap contents.
+	 **/
+	void clear();
 
 	/**
 	 * Read parameters from the settings file.

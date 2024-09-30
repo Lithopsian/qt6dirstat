@@ -76,11 +76,6 @@ namespace QDirStat
 	void goUp();
 
 	/**
-	 * Write settings to the config file
-	 **/
-	void writeSettings();
-
-       /**
 	 * Notification that the user selected a directory in the tree
 	 **/
 	void treeSelection( const QModelIndex & newCurrentItem );
@@ -93,6 +88,11 @@ namespace QDirStat
 
 
     protected:
+
+	/**
+	 * Write settings to the config file
+	 **/
+	void writeSettings();
 
 	/**
 	 * The path of the directory the user selected.
