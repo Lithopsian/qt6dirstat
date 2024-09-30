@@ -8,11 +8,11 @@
  */
 
 #include <QClipboard>
-#include <QContextMenuEvent>
-#include <QMenu>
+#include <QKeyEvent>
 #include <QPointer>
 
 #include "FilesystemsWindow.h"
+#include "ActionManager.h"
 #include "DirTreeModel.h"
 #include "FormatUtil.h"
 #include "Logger.h"
@@ -103,8 +103,9 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initTree( _ui->fsTree );
+
+    Settings::readWindowSettings( this, "FilesystemsWindow" );
     enableActions();
-    readSettings();
 
     connect( _ui->normalCheckBox, &QCheckBox::toggled,
              this,                &FilesystemsWindow::populate );
@@ -115,16 +116,8 @@ FilesystemsWindow::FilesystemsWindow( QWidget * parent ):
     connect( _ui->fsTree,         &QTreeWidget::itemSelectionChanged,
              this,                &FilesystemsWindow::enableActions );
 
-    connect( _ui->fsTree,         &QTreeWidget::customContextMenuRequested,
-              this,               &FilesystemsWindow::contextMenu);
-
     connect( _ui->readButton,     &QAbstractButton::clicked,
              this,                &FilesystemsWindow::readSelectedFilesystem );
-
-    connect( _ui->actionCopy,     &QAction::triggered,
-             this,                &FilesystemsWindow::copyDeviceToClipboard );
-
-    // See also signal/slot connections in filesystems-window.ui
 
     show();
 }
@@ -144,18 +137,6 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 	_sharedInstance = new FilesystemsWindow{ parent };
 
     return _sharedInstance;
-}
-
-
-void FilesystemsWindow::readSettings()
-{
-    Settings::readWindowSettings( this, "FilesystemsWindow" );
-
-    Settings settings;
-    settings.beginGroup( "FilesystemsWindow" );
-    settings.applyActionHotkey( _ui->actionRead );
-    settings.applyActionHotkey( _ui->actionCopy );
-    settings.endGroup();
 }
 
 
@@ -186,10 +167,7 @@ void FilesystemsWindow::readSelectedFilesystem()
 {
     const QString path = selectedPath();
     if ( !path.isEmpty() )
-    {
-	//logDebug() << "Read " << path << Qt::endl;
 	app()->mainWindow()->readFilesystem( path );
-    }
 }
 
 
@@ -203,37 +181,32 @@ QString FilesystemsWindow::selectedPath() const
 }
 
 
-void FilesystemsWindow::copyDeviceToClipboard()
+void FilesystemsWindow::copyToClipboard()
 {
+    // Copt the original device string, not just the displayed (possibly ellipsized) text
     const FilesystemItem * item = currentItem( _ui->fsTree );
     if ( item )
-	QApplication::clipboard()->setText( item->device().trimmed() );
-}
-
-
-void FilesystemsWindow::contextMenu( const QPoint & pos )
-{
-    // See if the right click was actually on an item
-    if ( !_ui->fsTree->itemAt( pos ) )
-	return;
-
-    // The clicked item will always be the current item now
-    _ui->actionRead->setText( tr( "Read at " ) % selectedPath() );
-
-    QMenu menu;
-    menu.addAction( _ui->actionRead );
-    menu.addAction( _ui->actionCopy );
-    menu.exec( _ui->fsTree->mapToGlobal( pos ) );
+    {
+	const int col = _ui->fsTree->currentColumn();
+	const QString text = col == FS_DeviceCol ? item->device() : item->text( col );
+	QApplication::clipboard()->setText( text );
+    }
 }
 
 
 void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 {
-    // Use the enter key here so it doesn't just go to the default (dialog) button
+    if ( event == QKeySequence::Copy )
+    {
+	copyToClipboard();
+	return;
+    }
+
+    // Let return/enter trigger itemActivated instead of buttons that don't have focus
     if ( ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
-	readSelectedFilesystem();
-    else
-	QDialog::keyPressEvent( event );
+	return;
+
+    QDialog::keyPressEvent( event );
 }
 
 

@@ -7,15 +7,15 @@
  *              Ian Nartowicz
  */
 
+#include <QActionGroup>
 #include <QCommandLinkButton>
+#include <QContextMenuEvent>
 #include <QDesktopServices>
 #include <QMenu>
 #include <QPointer>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QUrl>
 
 #include "FileSizeStatsWindow.h"
+#include "ActionManager.h"
 #include "FileInfo.h"
 #include "FileSizeStats.h"
 #include "FileSizeStatsModels.h"
@@ -48,27 +48,6 @@ namespace
     BucketsTableModel * bucketsTableModel( const QTableView * bucketsTable )
     {
 	return qobject_cast<BucketsTableModel *>( bucketsTable->model() );
-    }
-
-
-    /**
-     * Read hotkey settings and apply to the existing actions found
-     * within 'tree'.  The ui file hotkeys are used as default values.
-     **/
-    void readHotkeySettings( QWidget * tree )
-    {
-	Settings settings;
-
-	settings.beginGroup( "FileSizeStatsWindow" );
-
-	const auto actions = tree->findChildren<QAction *>( nullptr, Qt::FindDirectChildrenOnly );
-	for ( QAction * action : actions )
-	{
-	    tree->addAction( action );
-	    settings.applyActionHotkey( action );
-	}
-
-	settings.endGroup();
     }
 
 
@@ -153,7 +132,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     connectActions();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
-    readHotkeySettings( this );
+    ActionManager::actionHotkeys( this, "FileSizeStatsWindow" );
 
     show();
 }

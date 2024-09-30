@@ -25,16 +25,14 @@ namespace QDirStat
 
 
     /**
-     * File modification year / month statistics for one year or one month.
+     * File count and size statistics for one year or one month.
      **/
     struct YearStats
     {
-        short    year;                     // 1970 (time_t 0 seconds) - 32767
-        short    month;                    // 1-12 or 0 for the complete year
-        float    filesPercent{ 0.0f };     // 0.0 .. 100.0
-        int      filesCount{ 0 };
-        float    sizePercent{ 0.0f };      // 0.0 .. 100.0
-        FileSize size{ 0LL };
+        short     year;                     // 1970 (time_t 0 seconds) - 32767
+        short     month;                    // 1-12 or 0 for the complete year
+        FileCount count{ 0 };
+        FileSize  size{ 0 };
 
         YearStats( short yr = 0, short mn = 0 ):
             year{ yr },
@@ -61,7 +59,7 @@ namespace QDirStat
          * Return a sorted list of the years where files with that modification
          * year were found after collecting data.
          **/
-        const YearsList & years() const { return _yearsList; }
+        YearsList years() const { return _yearStats.keys(); }
 
         /**
          * Return year statistics for the specified year or 0 if there are
@@ -101,6 +99,14 @@ namespace QDirStat
          **/
         short lastYear() const { return _thisYear - 1; }
 
+        /**
+         * Return the percentage of 'count' or 'size' wrt the total.
+         **/
+        float countPercent( FileCount count ) const
+            { return _totalCount == 0 ? 0.0 : 100.0f * count / _totalCount; }
+        float sizePercent( FileSize size ) const
+            { return _totalSize == 0 ? 0.0 : 100.0f * size / _totalSize; }
+
 
     protected:
 
@@ -119,30 +125,32 @@ namespace QDirStat
          * Sum up the totals over all years and calculate the percentages for
          * each year
          **/
-        void calcPercentages();
+//        void calcPercentages();
 
         /**
          * Calculate the monthly percentages for all 12 months in one year.
          **/
-        void calcMonthPercentages( short year );
+//        void calcMonthPercentages( short year );
 
         /**
          * Fill the _yearsList with all the years in the _yearStats hash and
          * sort the list.
          **/
-        void collectYears();
+//        void collectYears();
 
 
     private:
 
         YearStatsHash   _yearStats;
-        YearsList       _yearsList;
 
         YearStats       _thisYearMonthStats[ 12 ];
         YearStats       _lastYearMonthStats[ 12 ];
 
         short           _thisYear;
         short           _thisMonth;
+
+        FileCount       _totalCount{ 0 };
+        FileSize        _totalSize{ 0 };
 
     };  // class FileAgesStats
 

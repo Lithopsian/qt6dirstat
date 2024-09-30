@@ -12,8 +12,6 @@
 
 #include <memory>
 
-#include <QActionGroup>
-#include <QContextMenuEvent>
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"

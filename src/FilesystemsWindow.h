@@ -84,23 +84,8 @@ namespace QDirStat
 	 **/
 	void readSelectedFilesystem();
 
-	/**
-	 * Copies the device path to the clipboard, trieggered from the context menu.
-	 **/
-	void copyDeviceToClipboard();
-
-	/**
-	 * Custom context menu signalled.
-	 **/
-	void contextMenu( const QPoint & pos );
-
 
     protected:
-
-	/**
-	 * Read the window and hotkey settings.
-	 **/
-	void readSettings();
 
 	/**
 	 * Populate the window with all normal filesystems. Bind mounts,
@@ -118,6 +103,13 @@ namespace QDirStat
 	 * string if there is none.
 	 **/
 	QString selectedPath() const;
+
+	/**
+	 * Copies the currently-selected item column text to the clipboard.
+	 * The full text of the device column is copied, not just the
+	 * visible text.
+	 **/
+	void copyToClipboard();
 
 	/**
 	 * Key press event for detecting evnter/return.

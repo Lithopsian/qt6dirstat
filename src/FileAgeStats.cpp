@@ -28,8 +28,8 @@ FileAgeStats::FileAgeStats( const FileInfo * subtree ):
     initMonthStats( lastYear() );
 
     collectRecursive( subtree );
-    calcPercentages();
-    collectYears();
+//    calcPercentages();
+//    collectYears();
 }
 
 
@@ -62,25 +62,27 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
 
             YearStats & yearStats = _yearStats[ year ];
             yearStats.year = year;
-            ++yearStats.filesCount;
+            ++yearStats.count;
+            ++_totalCount;
             yearStats.size += item->size();
+            _totalSize += item->size();
 
             YearStats * thisMonthStats = monthStats( year, month );
             if ( thisMonthStats )
             {
-                ++thisMonthStats->filesCount;
+                ++thisMonthStats->count;
                 thisMonthStats->size += item->size();
             }
         }
     }
 }
 
-
+/*
 void FileAgeStats::calcPercentages()
 {
     // Sum up the totals over all years
-    int      totalFilesCount = 0;
-    FileSize totalFilesSize  = 0LL;
+    FileCount totalFilesCount = 0;
+    FileSize  totalFilesSize  = 0LL;
 
     for ( const YearStats & stats : asConst( _yearStats ) )
     {
@@ -108,7 +110,7 @@ void FileAgeStats::calcMonthPercentages( short year )
     if ( !thisYearStats )
         return;
 
-    for ( int month = 1; month <= 12; month++ )
+    for ( short month = 1; month <= 12; month++ )
     {
         YearStats * stats = monthStats( year, month );
         if ( stats )
@@ -121,14 +123,14 @@ void FileAgeStats::calcMonthPercentages( short year )
         }
     }
 }
-
-
+*/
+/*
 void FileAgeStats::collectYears()
 {
     _yearsList = _yearStats.keys();
     std::sort( _yearsList.begin(), _yearsList.end() );
 }
-
+*/
 
 YearStats * FileAgeStats::monthStats( short year, short month )
 {

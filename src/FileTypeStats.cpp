@@ -106,10 +106,10 @@ namespace
 	const int otherCategoryCount = categories[ otherCategory ].count;
 
 	// QHash will default-construct (ie. zeroes) the entry if it don't exist yet
-	CountSum & noExtension = suffixes[ { QString{}, otherCategory } ];
+	CountSize & noExtension = suffixes[ { QString{}, otherCategory } ];
 
 #if VERBOSE_STATS
-	FileSize totalMergedSum   = 0LL;
+	FileSize totalMergedSize  = 0LL;
 	int      totalMergedCount = 0;
 #endif
 
@@ -127,14 +127,14 @@ namespace
 		if ( isCruft( suffix, suffixCount, otherCategoryCount ) )
 		{
 		    // copy the cruft values to the "no extension" entry in the "Other" category
-		    const FileSize suffixSum = it.value().sum;
+		    const FileSize suffixSize = it.value().size;
 		    noExtension.count += suffixCount;
-		    noExtension.sum   += suffixSum;
+		    noExtension.size  += suffixSize;
 		    cruftSuffixes << suffix;
 
 #if VERBOSE_STATS
 		    totalMergedCount += suffixCount;
-		    totalMergedSum   += suffixSum ;
+		    totalMergedSize  += suffixSize;
 #endif
 		}
 	    }
@@ -151,7 +151,7 @@ namespace
 	               << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
 
 	    logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
-	               << "(" << formatSize( totalMergedSum ) << ")" << Qt::endl;
+	               << "(" << formatSize( totalMergedSize ) << ")" << Qt::endl;
 	}
 #endif
 
@@ -193,6 +193,8 @@ void FileTypeStats::collect( const FileInfo * dir )
 	}
 	else if ( it->isFileOrSymLink() )
 	{
+	    ++_totalCount;
+
 	    // First attempt: try the MIME categorizer.
 	    QString suffix;
 	    const MimeCategory * category = categorizer->category( *it, &suffix );
@@ -203,14 +205,14 @@ void FileTypeStats::collect( const FileInfo * dir )
 		// possible suffixies.  When the category is matched using a
 		// non-suffix rule, there may be no suffix here even though the
 		// file has a suffix.
-		addCategorySum( category, *it );
-		addSuffixSum( suffix, category, *it );
+		addCategoryItem( category, *it );
+		addSuffixItem( suffix, category, *it );
 	    }
 	    else // !category
 	    {
 		// Use the "Other" category with any filename extension as the suffix
-		addCategorySum( otherCategory(), *it );
-		addSuffixSum( filenameExtension( it->name() ), otherCategory(), *it );
+		addCategoryItem( otherCategory(), *it );
+		addSuffixItem( filenameExtension( it->name() ), otherCategory(), *it );
 	    }
 
 	    // Disregard block devices and other special files
@@ -219,34 +221,38 @@ void FileTypeStats::collect( const FileInfo * dir )
 }
 
 
-void FileTypeStats::addCategorySum( const MimeCategory * category, const FileInfo * item )
+void FileTypeStats::addCategoryItem( const MimeCategory * category, const FileInfo * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
-    CountSum & countSum = _categories[ category ];
-    ++countSum.count;
-    countSum.sum += item->size();
+    CountSize & countSize = _categories[ category ];
+    ++countSize.count;
+    countSize.size += item->size();
 }
 
 
-void FileTypeStats::addSuffixSum( const QString & suffix, const MimeCategory * category, const FileInfo * item )
+void FileTypeStats::addSuffixItem( const QString & suffix, const MimeCategory * category, const FileInfo * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
-    CountSum & countSum = _suffixes[ { suffix, category } ];
-    ++countSum.count;
-    countSum.sum += item->size();
+    CountSize & countSize = _suffixes[ { suffix, category } ];
+    ++countSize.count;
+    countSize.size += item->size();
 }
 
 
 #if VERBOSE_STATS
 void FileTypeStats::sanityCheck()
 {
-    const FileSize diff =
+    const FileSize countDiff =
+	std::accumulate( _categories.cbegin(), _categories.cend(), _totalCount,
+                        []( FileCount count, const CountSize & cat ) { return count - cat.count; } );
+
+    const FileSize sizeDiff =
 	std::accumulate( _categories.cbegin(), _categories.cend(), _totalSize,
-                        []( FileSize sum, const CountSum & cat ) { return sum - cat.sum; } );
+                        []( FileSize size, const CountSize & cat ) { return size - cat.size; } );
 
     logDebug() << "Unaccounted in categories: "
-               << formatSize( diff ) << " of " << formatSize( _totalSize )
-               << " (" << QString::number( percentage( diff ), 'f', 2 ) << "%)"
+               << formatSize( sizeDiff ) << " of " << formatSize( _totalSize )
+               << " (" << QString::number( sizePercent( sizeDiff ), 'f', 2 ) << "%)"
                << Qt::endl;
 }
 #endif

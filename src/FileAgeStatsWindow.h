@@ -101,6 +101,11 @@ namespace QDirStat
 	void locateFiles();
 
 	/**
+	 * 'item' was activated by mouse or keyboard.
+	 **/
+	void itemActivated( QTreeWidgetItem * item, int );
+
+	/**
 	 * Enable or disable actions and buttons depending on the internal
 	 * state, e.g. if any item is selected and the number of files for the
 	 * selected year are in the specified range (1..10000).
@@ -170,7 +175,20 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	YearListItem( const YearStats & yearStats );
+	YearListItem( short     year,
+	              short     month,
+	              FileCount count,
+	              float     countPercent,
+	              FileSize  size,
+	              float     sizePercent );
+
+	/**
+	 * Constructor with just a year.  This will create a disabled
+	 * item with no counts.
+	 **/
+	YearListItem( short year ):
+	    YearListItem{ year, 0, 0, 0, 0, 0 }
+	{}
 
 	/**
 	 * Return the year for this item.
@@ -185,7 +203,7 @@ namespace QDirStat
 	/**
 	 * Return the files count for this item.
 	 **/
-	int filesCount() const { return _filesCount; }
+	int count() const { return _count; }
 
 
     protected:
@@ -200,10 +218,10 @@ namespace QDirStat
 
     private:
 
-	short    _year;
-	short    _month;
-	int      _filesCount;
-	FileSize _size;
+	short     _year;
+	short     _month;
+	FileCount _count;
+	FileSize  _size;
 
     };	// class YearListItem
 
