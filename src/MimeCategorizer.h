@@ -302,6 +302,12 @@ namespace QDirStat
 	 **/
 	void addDefaultCategories();
 
+	/**
+	 * Return whether 'length' has the bit 'lengths[length]' set to true.
+	 **/
+	bool testBit( const QBitArray & lengths, qsizetype length ) const
+	    { return length < lengths.size() && lengths.testBit( length ); }
+
 
     private:
 

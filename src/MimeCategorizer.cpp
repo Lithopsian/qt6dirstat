@@ -11,6 +11,7 @@
 
 #include "MimeCategorizer.h"
 #include "FileInfo.h"
+#include "FormatUtil.h"
 #include "Logger.h"
 #include "Settings.h"
 
@@ -204,20 +205,18 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
     // can match.
     const auto length = filename.size();
 
-    if ( length < _caseSensitiveLengths.size() && _caseSensitiveLengths.testBit( length ) )
+    if ( testBit( _caseSensitiveLengths, length ) )
     {
 	const MimeCategory * category = _caseSensitiveExact.value( filename, nullptr );
 	if ( category )
 	    return category;
     }
 
-    if ( length < _caseInsensitiveLengths.size() &&
-         _caseInsensitiveLengths.testBit( length ) &&
-         !filename.isLower() )
+    // A lowercased filename will have been detected already because there is a pattern
+    // in the case-sensitive map, so only filenames which are not lowercase are of
+    // interest here.
+    if ( testBit( _caseInsensitiveLengths, length ) && !isLower( filename ) )
     {
-	// A lowercased filename will have been detected already because there is a pattern
-	// in the case-sensitive map, so only filenames which are not lowercase are of
-	// interest here.
 	const MimeCategory * category = _caseInsensitiveExact.value( filename.toLower(), nullptr );
 	if ( category )
 	    return category;
@@ -235,7 +234,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	// from the case-insensitive lists)
 	const MimeCategory * category = matchWildcardSuffix( _caseSensitiveSuffixes, filename, suffix );
 
-	if ( !category && suffix.size() > 1 && !suffix.isLower() && !suffix.isUpper() )
+	if ( !category && !isLower( suffix ) && !isUpper( suffix ) )
 	    category = matchWildcardSuffix( _caseInsensitiveSuffixes, filename, suffix.toLower() );
 
 	if ( category ) // success
