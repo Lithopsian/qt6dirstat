@@ -230,7 +230,9 @@ void FileTypeStats::addCategoryItem( const MimeCategory * category, const FileIn
 }
 
 
-void FileTypeStats::addSuffixItem( const QString & suffix, const MimeCategory * category, const FileInfo * item )
+void FileTypeStats::addSuffixItem( const QString & suffix,
+                                   const MimeCategory * category,
+                                   const FileInfo * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
     CountSize & countSize = _suffixes[ { suffix, category } ];
@@ -240,19 +242,16 @@ void FileTypeStats::addSuffixItem( const QString & suffix, const MimeCategory * 
 
 
 #if VERBOSE_STATS
-void FileTypeStats::sanityCheck()
+void FileTypeStats::sanityCheck() const
 {
-    const FileSize countDiff =
-	std::accumulate( _categories.cbegin(), _categories.cend(), _totalCount,
-                        []( FileCount count, const CountSize & cat ) { return count - cat.count; } );
-
     const FileSize sizeDiff =
 	std::accumulate( _categories.cbegin(), _categories.cend(), _totalSize,
                         []( FileSize size, const CountSize & cat ) { return size - cat.size; } );
+    const float diffPercent = _totalSize ? 100.0f * sizeDiff / _totalSize : 100.0f;
 
     logDebug() << "Unaccounted in categories: "
                << formatSize( sizeDiff ) << " of " << formatSize( _totalSize )
-               << " (" << QString::number( sizePercent( sizeDiff ), 'f', 2 ) << "%)"
+               << " (" << QString::number( diffPercent, 'f', 2 ) << "%)"
                << Qt::endl;
 }
 #endif

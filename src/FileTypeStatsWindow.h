@@ -17,11 +17,11 @@
 
 #include "ui_file-type-stats-window.h"
 #include "Subtree.h"
-#include "Typedefs.h" // FileSize
-
+#include "Typedefs.h" // FileCount, FileSize
 
 namespace QDirStat
 {
+    class CountSize;
     class FileInfo;
 
     /**
@@ -59,8 +59,8 @@ namespace QDirStat
     public:
 
 	/**
-	 * Convenience function for creating, populating and showing the shared
-	 * instance.
+	 * Populate the shared singleton instance of this window for 'subtree'.
+	 * Create a new instance if there isn't one currently.
 	 **/
 	static void populateSharedInstance( QWidget  * mainWindow, FileInfo * subtree )
 	    { if ( subtree ) sharedInstance( mainWindow )->populate( subtree ); }
@@ -95,12 +95,12 @@ namespace QDirStat
 
 	/**
 	 * Open a "File Size Statistics" window for the currently selected file
-	 * type or re-popuolate it if it is still open.
+	 * type and subtree, or re-populate it if it is still open.
 	 **/
 	void sizeStatsForCurrentFileType();
 
 	/**
-	 * 'item' was activated by mouse or keyboard.
+	 * An item in the tree was activated by mouse or keyboard.
 	 **/
 	void itemActivated();
 
@@ -110,7 +110,7 @@ namespace QDirStat
 	void enableActions();
 
 	/**
-	 * Custom context menu signalled.
+	 * Custom context menu signalled for the tree.
 	 **/
 	void contextMenu( const QPoint & pos );
 
@@ -156,7 +156,6 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::FileTypeStatsWindow> _ui;
 	Subtree _subtree;
-	int     _topX;
 
     };	// class FileTypeStatsWindow
 
@@ -168,8 +167,10 @@ namespace QDirStat
     {
 	FT_NameCol = 0,
 	FT_CountCol,
+	FT_CountPercentBarCol,
 	FT_CountPercentCol,
 	FT_TotalSizeCol,
+	FT_SizePercentBarCol,
 	FT_SizePercentCol,
 	FT_ColumnCount,
     };
@@ -188,11 +189,11 @@ namespace QDirStat
 	 * tree at the appropriate place: toplevel for categories, below a
 	 * category for suffixes.
 	 **/
-	FileTypeItem( const QString & name,
-	              FileCount       count,
-	              float           countPercent,
-	              FileSize        totalSize,
-	              float           sizePercent );
+	FileTypeItem( const QString   & name,
+	              const CountSize & countSize,
+	              FileCount         parentCount,
+	              FileSize          parentSize,
+	              int               treeLevel = 0 );
 
 	/**
 	 * Return the files count for this category item.
@@ -234,13 +235,12 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	SuffixFileTypeItem( bool            otherCategory,
-	                    const QString & suffix,
-	                    FileCount       count,
-	                    float           countPercent,
-	                    FileSize        totalSize,
-	                    float           sizePercent ):
-	    FileTypeItem{ itemName( otherCategory, suffix ), count, countPercent, totalSize, sizePercent },
+	SuffixFileTypeItem( bool              otherCategory,
+	                    const QString   & suffix,
+	                    const CountSize & countSize,
+	                    FileCount         parentCount,
+	                    FileSize          parentSize ):
+	    FileTypeItem{ itemName( otherCategory, suffix ), countSize, parentCount, parentSize, 1 },
 	    _suffix{ suffix }
 	{}
 

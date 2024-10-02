@@ -15,7 +15,7 @@
 #include <QHash>
 
 #include "ui_file-type-stats-window.h"
-#include "Typedefs.h" // FileSize
+#include "Typedefs.h" // FileCount, FileSize
 
 
 namespace QDirStat
@@ -99,13 +99,11 @@ namespace QDirStat
 	const MimeCategory * otherCategory() const { return _otherCategory.get(); }
 
 	/**
-	 * Return the percentage of 'size' or 'count' relative to the subtree
-	 * total.
+	 * Return the total number of files collected or the total size of
+	 * all the collected files.
 	 **/
-	float countPercent( FileCount count ) const
-	    { return _totalCount == 0 ? 0.0f : 100.0f * count / _totalCount; }
-	float sizePercent( FileSize size ) const
-	    { return _totalSize == 0 ? 0.0f : 100.0f * size / _totalSize; }
+        FileCount totalCount() const { return _totalCount; }
+        FileSize totalSize() const { return _totalSize; }
 
 
     protected:
@@ -119,10 +117,16 @@ namespace QDirStat
 	void collect( const FileInfo * dir );
 
 	/**
-	 * Aaggregate entries to each of the maps.
+	 * Aggregate category entries to a map of CountSize structs with
+	 * MimeCategory * keys.
 	 **/
 	void addCategoryItem( const MimeCategory * category, const FileInfo * item );
-	void addSuffixItem  ( const QString & suffix, const MimeCategory * category, const FileInfo * item );
+
+	/**
+	 * Aggregate suffix entries to a map of CountSize structs with
+	 * SuffixCategory keys.
+	 **/
+	void addSuffixItem( const QString & suffix, const MimeCategory * category, const FileInfo * item );
 
 	/**
 	 * Check if the sums add up and how much is unaccounted for.
@@ -130,7 +134,7 @@ namespace QDirStat
 	 * Note that this will never match exactly, because the map sizes don't
 	 * include directories.
 	 **/
-	void sanityCheck();
+	void sanityCheck() const;
 
 
     private:

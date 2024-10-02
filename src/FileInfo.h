@@ -35,6 +35,9 @@ namespace QDirStat
     /**
      * An alternative to using a QPair for passing both the year and
      * month for a FileInfo object.
+     *
+     * Note that this struct is small enough and simple enough that
+     * it shouldn't normally be passed by const reference.
      **/
     struct YearAndMonth
     {

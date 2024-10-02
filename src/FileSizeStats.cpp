@@ -8,7 +8,6 @@
  */
 
 #include "FileSizeStats.h"
-#include "Exception.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 
@@ -29,7 +28,8 @@ namespace
 FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix, bool excludeSymLinks ):
     PercentileStats{}
 {
-    CHECK_PTR( subtree );
+    if ( !subtree || !subtree->checkMagicNumber() )
+        return;
 
     if ( suffix.isEmpty() )
     {

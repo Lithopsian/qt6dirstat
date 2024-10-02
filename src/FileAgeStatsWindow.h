@@ -17,13 +17,12 @@
 
 #include "ui_file-age-stats-window.h"
 #include "Subtree.h"
-#include "Typedefs.h" // FileSize
+#include "Typedefs.h" // FileCount, FileSize
 
 
 namespace QDirStat
 {
     class YearListItem;
-    class YearStats;
 
     /**
      * Modeless dialog to display file age statistics, i.e. statistics about
@@ -87,12 +86,7 @@ namespace QDirStat
 	/**
 	 * Read settings from the config file
 	 **/
-	void readSettings();
-
-	/**
-	 * Write settings to the config file
-	 **/
-	void writeSettings();
+//	void readSettings();
 
 	/**
 	 * Emit the locateFilesFromYear() signal for the currently selected
@@ -114,6 +108,13 @@ namespace QDirStat
 
 
     protected:
+
+	/**
+	 * Return the number of recent years for which to display monthly
+	 * statistics.
+	 **/
+	constexpr static short yearsWithMonths()
+	    { return 5; }
 
 	/**
 	 * Populate the window.
