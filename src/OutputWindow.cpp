@@ -27,7 +27,7 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     _ui->setupUi( this );
     _ui->actionZoomIn->setShortcuts( QKeySequence::ZoomIn );
     _ui->actionZoomOut->setShortcuts( QKeySequence::ZoomOut );
-    _ui->actionResetZoom->setShortcut( Qt::CTRL+Qt::Key_0 );
+    _ui->actionResetZoom->setShortcut( Qt::CTRL | Qt::Key_0 );
 
     //logDebug() << "Creating with parent " << parent << Qt::endl;
     readSettings();

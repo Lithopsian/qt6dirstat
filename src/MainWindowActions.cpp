@@ -24,10 +24,10 @@ void MainWindow::connectMenuActions()
     _ui->actionFindFiles->setShortcuts( QKeySequence::Find );
     _ui->actionMoveToTrash->setShortcuts( QKeySequence::Delete );
     _ui->actionHelp->setShortcuts( QKeySequence::HelpContents );
-    _ui->actionTreemapZoomTo->setShortcut( Qt::CTRL+Qt::Key_Equal );
+    _ui->actionTreemapZoomTo->setShortcut( Qt::CTRL | Qt::Key_Equal );
     _ui->actionTreemapZoomIn->setShortcuts( QKeySequence::ZoomIn );
     _ui->actionTreemapZoomOut->setShortcuts( QKeySequence::ZoomOut );
-    _ui->actionResetTreemapZoom->setShortcut( Qt::CTRL+Qt::Key_0 );
+    _ui->actionResetTreemapZoom->setShortcut( Qt::CTRL | Qt::Key_0 );
 
     _ui->actionWhatsNew->setStatusTip( RELEASE_URL ); // defined in Version.h
 
