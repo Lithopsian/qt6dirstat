@@ -107,9 +107,9 @@ MainWindow::MainWindow( bool slowUpdate ):
 
     _historyButtons = new HistoryButtons{ _ui->actionGoBack, _ui->actionGoForward, this };
 
-    connectSignals( dirTreeModel->tree(), dirTreeModel, selectionModel );
     connectMenuActions(); // see MainWindowActions.cpp
     ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
+    connectSignals( dirTreeModel->tree(), dirTreeModel, selectionModel );
     readSettings();
 
     dirTreeModel->setBaseFont( _ui->dirTreeView->font() );
