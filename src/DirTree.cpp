@@ -68,7 +68,7 @@ namespace
 	DirInfo * dir = new DirInfo{ parent, tree, name, statInfo };
 	parent->insertChild( dir );
 
-	if ( !isRoot && !parent->isPkgInfo() && !parent->isFromCache() && dir->device() != parent->device() )
+	if ( !isRoot && !parent->isPkgInfo() && parent->device() && dir->device() != parent->device() )
 	{
 	    logDebug() << dir << " is a mount point under " << parent << Qt::endl;
 	    dir->setMountPoint();
