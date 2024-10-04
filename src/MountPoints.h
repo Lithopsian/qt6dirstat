@@ -312,6 +312,12 @@ namespace QDirStat
 	static bool hasBtrfs();
 
 	/**
+	 * Return 'true' if any mount point has filesystem type "btrfs".
+	 **/
+	static bool hasNtfs()
+	    { return instance()->_hasNtfs; };
+
+	/**
 	 * Return begin and end iterators for the mount point map.
 	 **/
 	static MountPointMap::const_iterator cbegin() { return instance()->MountPointMap::cbegin(); }
@@ -375,6 +381,7 @@ namespace QDirStat
     private:
 
 	bool _hasBtrfs;
+	bool _hasNtfs;
 	bool _checkedForBtrfs;
 
     };	// class MountPoints

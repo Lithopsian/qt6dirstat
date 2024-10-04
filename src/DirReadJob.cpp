@@ -436,7 +436,11 @@ bool LocalDirReadJob::checkForNtfs()
 {
     _checkedForNtfs = true;
 
-    if ( !_dirName.isEmpty() )
+    if ( !MountPoints::hasNtfs() )
+    {
+	_isNtfs = false;
+    }
+    else if ( !_dirName.isEmpty() )
     {
 	const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _dirName );
 	_isNtfs = mountPoint && mountPoint->isNtfs();
