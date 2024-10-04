@@ -83,7 +83,7 @@ void DirTreeView::readSettings()
     settings.endGroup();
 
     // Now we have all the settings for the percent bar delegate
-    const auto delegate = new PercentBarDelegate{ this, PercentBarCol, barWidth, barBackground, barColors };
+    const auto delegate = new PercentBarDelegate{ this, barWidth, barBackground, barColors };
     setItemDelegateForColumn( PercentBarCol, delegate );
     setItemDelegateForColumn( SizeCol, new SizeColDelegate{ this } );
 }
