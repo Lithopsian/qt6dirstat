@@ -188,8 +188,8 @@ namespace QDirStat
 	/**
 	 * Write window settings (size and position) to the settings.
 	 **/
-	static void writeWindowSettings( QWidget    * widget,
-	                                 const char * settingsGroup );
+	static void writeWindowSettings( const QWidget * widget,
+	                                 const char    * settingsGroup );
 
 	/**
 	 * Find all settings groups that start with the group prefix

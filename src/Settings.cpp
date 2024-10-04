@@ -316,7 +316,7 @@ void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup 
 }
 
 
-void Settings::writeWindowSettings( QWidget * widget, const char * settingsGroup )
+void Settings::writeWindowSettings( const QWidget * widget, const char * settingsGroup )
 {
     QDirStat::Settings settings;
 
