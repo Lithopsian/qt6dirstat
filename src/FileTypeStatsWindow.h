@@ -13,16 +13,15 @@
 #include <memory>
 
 #include <QDialog>
-#include <QKeyEvent>
 #include <QTreeWidgetItem>
 
 #include "ui_file-type-stats-window.h"
 #include "Subtree.h"
-#include "Typedefs.h" // FileSize
-
+#include "Typedefs.h" // FileCount, FileSize
 
 namespace QDirStat
 {
+    class CountSize;
     class FileInfo;
 
     /**
@@ -60,11 +59,11 @@ namespace QDirStat
     public:
 
 	/**
-	 * Convenience function for creating, populating and showing the shared
-	 * instance.
+	 * Populate the shared singleton instance of this window for 'subtree'.
+	 * Create a new instance if there isn't one currently.
 	 **/
-	static void populateSharedInstance( QWidget  * mainWindow,
-	                                    FileInfo * subtree );
+	static void populateSharedInstance( QWidget  * mainWindow, FileInfo * subtree )
+	    { if ( subtree ) sharedInstance( mainWindow )->populate( subtree ); }
 
 
     protected slots:
@@ -96,9 +95,14 @@ namespace QDirStat
 
 	/**
 	 * Open a "File Size Statistics" window for the currently selected file
-	 * type or re-popuolate it if it is still open.
+	 * type and subtree, or re-populate it if it is still open.
 	 **/
 	void sizeStatsForCurrentFileType();
+
+	/**
+	 * An item in the tree was activated by mouse or keyboard.
+	 **/
+	void itemActivated();
 
 	/**
 	 * Enable or disable the actions depending on the current item.
@@ -106,17 +110,12 @@ namespace QDirStat
 	void enableActions();
 
 	/**
-	 * Custom context menu signalled.
+	 * Custom context menu signalled for the tree.
 	 **/
 	void contextMenu( const QPoint & pos );
 
 
     protected:
-
-	/**
-	 * Read the window and hotkey settings.
-	 **/
-	void readSettings();
 
 	/**
 	 * Populate the widgets for a subtree.
@@ -132,7 +131,7 @@ namespace QDirStat
 	 * Return the suffix of the currently selected file type or an empty
 	 * string if no suffix is selected.
 	 **/
-	QString currentSuffix() const;
+	QString currentItemSuffix() const;
 
 	/**
 	 * Key press event for detecting enter/return.
@@ -155,15 +154,10 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FileTypeStatsWindow> _ui;
 	Subtree _subtree;
-	int     _topX;
 
-    }; // class FileTypeStatsWindow
+    };	// class FileTypeStatsWindow
 
 
     /**
@@ -173,9 +167,12 @@ namespace QDirStat
     {
 	FT_NameCol = 0,
 	FT_CountCol,
+	FT_CountPercentBarCol,
+	FT_CountPercentCol,
 	FT_TotalSizeCol,
-	FT_PercentageCol,
-	FT_ColumnCount
+	FT_SizePercentBarCol,
+	FT_SizePercentCol,
+	FT_ColumnCount,
     };
 
 
@@ -189,34 +186,27 @@ namespace QDirStat
 
 	/**
 	 * Constructor. After creating, this item has to be inserted into the
-	 * tree at the appropriate place: Toplevel for categories, below a
+	 * tree at the appropriate place: toplevel for categories, below a
 	 * category for suffixes.
 	 **/
-	FileTypeItem( const QString & name,
-	              int             count,
-	              FileSize        totalSize,
-	              float           percentage );
+	FileTypeItem( const QString   & name,
+	              const CountSize & countSize,
+	              FileCount         parentCount,
+	              FileSize          parentSize,
+	              int               treeLevel = 0 );
 
-	//
-	// Getters
-	//
+	/**
+	 * Return the files count for this category item.
+	 **/
+	FileCount count() const { return _count; }
 
-	const QString & name()          const { return _name; }
-	int             count()         const { return _count; }
-	FileSize        totalSize()     const { return _totalSize; }
-	float           percentage()    const { return _percentage; }
+	/**
+	 * Return the total files size for this category item.
+	 **/
+	FileSize totalSize() const { return _totalSize; }
 
 
     protected:
-
-	/**
-	 * Helper function to set both the column text and alignment.
-	 **/
-	void set( FileTypeColumns col, Qt::Alignment alignment, const QString & text )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, Qt::AlignVCenter | alignment );
-	}
 
 	/**
 	 * Less-than operator for sorting.
@@ -228,13 +218,10 @@ namespace QDirStat
 
     private:
 
-	QString  _name;
-	int      _count;
-	FileSize _totalSize;
-	float    _percentage;
+	FileCount _count;
+	FileSize  _totalSize;
 
-    }; // class FileTypeItem
-
+    };	// class FileTypeItem
 
 
 
@@ -248,12 +235,12 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	SuffixFileTypeItem( bool            otherCategory,
-	                    const QString & suffix,
-	                    int             count,
-	                    FileSize        totalSize,
-	                    float           percentage ):
-	    FileTypeItem{ itemName( otherCategory, suffix ), count, totalSize, percentage },
+	SuffixFileTypeItem( bool              otherCategory,
+	                    const QString   & suffix,
+	                    const CountSize & countSize,
+	                    FileCount         parentCount,
+	                    FileSize          parentSize ):
+	    FileTypeItem{ itemName( otherCategory, suffix ), countSize, parentCount, parentSize, 1 },
 	    _suffix{ suffix }
 	{}
 
@@ -293,8 +280,8 @@ namespace QDirStat
 
 	QString _suffix;
 
-    }; // class SuffixFileTypeItem
+    };	// class SuffixFileTypeItem
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // FileTypeStatsWindow_h
+#endif	// FileTypeStatsWindow_h

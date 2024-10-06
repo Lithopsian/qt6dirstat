@@ -560,7 +560,7 @@ void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
 
     _ui->selHeading->setText( sel.count() == 1 ?
                               tr( "1 Selected Item" ) :
-                              tr( "%1 Selected Items" ).arg( sel.count() ) );
+                              tr( "%L1 Selected Items" ).arg( sel.count() ) );
 
     setLabel( _ui->selTotalSizeLabel,        sel.totalSize()          );
     setLabel( _ui->selAllocatedLabel,        sel.totalAllocatedSize() );

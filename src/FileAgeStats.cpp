@@ -7,11 +7,9 @@
  *              Ian Nartowicz
  */
 
-#include <algorithm>    // std::sort()
 #include <QDate>
 
 #include "FileAgeStats.h"
-#include "Exception.h"
 #include "FileInfoIterator.h"
 
 
@@ -22,25 +20,8 @@ FileAgeStats::FileAgeStats( const FileInfo * subtree ):
     _thisYear{ static_cast<short>( QDate::currentDate().year() ) },
     _thisMonth{ static_cast<short>( QDate::currentDate().month() ) }
 {
-    CHECK_PTR( subtree );
-
-    initMonthStats( thisYear() );
-    initMonthStats( lastYear() );
-
-    collectRecursive( subtree );
-    calcPercentages();
-    collectYears();
-}
-
-
-void FileAgeStats::initMonthStats( short year )
-{
-    for ( short month = 1; month <= 12; month++ )
-    {
-        YearStats * stats = monthStats( year, month );
-        if ( stats )
-            *stats = YearStats{ year, month };
-    }
+    if ( subtree && subtree->checkMagicNumber() )
+        collectRecursive( subtree );
 }
 
 
@@ -56,90 +37,20 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
         }
         else if ( item->isFileOrSymLink() )
         {
+            ++_totalCount;
+            _totalSize += item->size();
+
             const auto  yearAndMonth = item->yearAndMonth();
             const short year         = yearAndMonth.year;
             const short month        = yearAndMonth.month;
 
-            YearStats & yearStats = _yearStats[ year ];
-            yearStats.year = year;
-            ++yearStats.filesCount;
+            YearMonthStats & yearStats = _yearStats[ year ];
+            ++yearStats.count;
             yearStats.size += item->size();
 
-            YearStats * thisMonthStats = monthStats( year, month );
-            if ( thisMonthStats )
-            {
-                ++thisMonthStats->filesCount;
-                thisMonthStats->size += item->size();
-            }
+            YearMonthStats & monthStats = _monthStats[ yearMonthHash( year, month ) ];
+            ++monthStats.count;
+            monthStats.size += item->size();
         }
     }
-}
-
-
-void FileAgeStats::calcPercentages()
-{
-    // Sum up the totals over all years
-    int      totalFilesCount = 0;
-    FileSize totalFilesSize  = 0LL;
-
-    for ( const YearStats & stats : asConst( _yearStats ) )
-    {
-        totalFilesCount += stats.filesCount;
-        totalFilesSize  += stats.size;
-    }
-
-    for ( YearStats & stats : _yearStats )
-    {
-        if ( totalFilesCount > 0 )
-            stats.filesPercent = 100.0f * stats.filesCount / totalFilesCount;
-
-        if ( totalFilesSize > 0 )
-            stats.sizePercent = 100.0f * stats.size / totalFilesSize;
-    }
-
-    calcMonthPercentages( thisYear() );
-    calcMonthPercentages( lastYear() );
-}
-
-
-void FileAgeStats::calcMonthPercentages( short year )
-{
-    const YearStats * thisYearStats = yearStats( year );
-    if ( !thisYearStats )
-        return;
-
-    for ( int month = 1; month <= 12; month++ )
-    {
-        YearStats * stats = monthStats( year, month );
-        if ( stats )
-        {
-            if ( thisYearStats->filesCount > 0 )
-                stats->filesPercent = 100.0f * stats->filesCount / thisYearStats->filesCount;
-
-            if ( thisYearStats->size > 0 )
-                stats->sizePercent = 100.0f * stats->size / thisYearStats->size;
-        }
-    }
-}
-
-
-void FileAgeStats::collectYears()
-{
-    _yearsList = _yearStats.keys();
-    std::sort( _yearsList.begin(), _yearsList.end() );
-}
-
-
-YearStats * FileAgeStats::monthStats( short year, short month )
-{
-    if ( month >= 1 && month <= 12 )
-    {
-        if ( year == thisYear() && month <= thisMonth() )
-            return &( _thisYearMonthStats[ month - 1 ] );
-
-        if ( year == lastYear() )
-            return &( _lastYearMonthStats[ month - 1 ] );
-    }
-
-    return nullptr;
 }

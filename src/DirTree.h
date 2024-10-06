@@ -12,17 +12,160 @@
 
 #include <memory>
 
-#include "DirReadJob.h" // DirReadJobQueue
+#include <QTimer>
+#include <QVector>
+
 #include "Typedefs.h"   // FileSize
 
 
 namespace QDirStat
 {
     class DirInfo;
+    class DirReadJob;
+    class FileInfo;
     class FileInfoSet;
     class ExcludeRules;
     class DirTreeFilter;
     class PkgFilter;
+
+    typedef QVector<DirReadJob *> DirReadJobList;
+
+
+    /**
+     * Queue for read jobs
+     *
+     * Handles time-sliced reading automatically.
+     **/
+    class DirReadJobQueue: public QObject
+    {
+	Q_OBJECT
+
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	DirReadJobQueue():
+	    QObject {}
+	{
+	    connect( &_timer, &QTimer::timeout,
+	             this,    &DirReadJobQueue::timeSlicedRead );
+	}
+
+	/**
+	 * Destructor.
+	 **/
+	~DirReadJobQueue() override
+	    { clear(); }
+
+	/**
+	 * Add a job to the end of the queue. Begin time-sliced reading if not
+	 * in progress yet.
+	 **/
+	void enqueue( DirReadJob * job );
+
+	/**
+	 * Get the head of the queue (the next job that is due for processing).
+	 **/
+	DirReadJob * head() const { return _queue.first();}
+
+	/**
+	 * Count the number of pending jobs in the queue.
+	 **/
+	int count() const { return _queue.count() + _blocked.count(); }
+
+	/**
+	 * Check if the queue is empty.
+	 **/
+	bool isEmpty() const { return _queue.isEmpty() && _blocked.isEmpty(); }
+
+	/**
+	 * Add a job to the list of blocked jobs: Jobs that are not yet ready
+	 * yet, e.g. because they are waiting for results from an external
+	 * process.
+	 **/
+	void addBlocked( DirReadJob * job ) { _blocked.append( job ); }
+
+	/**
+	 * Notification that a job that was blocked is now ready to be
+	 * scheduled, so it will be taken out of the list of blocked jobs and
+	 * added to the end of the queue.
+	 **/
+	void unblock( DirReadJob * job );
+
+	/**
+	 * Clear the queue: Remove all pending jobs from the queue and destroy
+	 * them.
+	 **/
+	void clear();
+
+	/**
+	 * Abort all jobs in the queue.
+	 **/
+	void abort();
+
+	/**
+	 * Delete all jobs for a subtree, except 'exceptJob'.
+	 **/
+	void killSubtree( DirInfo * subtree, const DirReadJob * exceptJob = nullptr );
+
+	/**
+	 * Notification that a job is finished.
+	 * This takes that job out of the queue and deletes it.
+	 * Read jobs are required to call this when they are finished.
+	 **/
+	void jobFinishedNotify( DirReadJob * job );
+
+
+    signals:
+
+	/**
+	 * Emitted when job reading starts, i.e. when a new job is inserted
+	 * into a queue that was empty
+	 **/
+	void startingReading();
+
+	/**
+	 * Emitted when reading is finished, i.e. when the last read job of the
+	 * queue is finished.
+	 **/
+	void finished();
+
+
+    public slots:
+
+	/**
+	 * Notification that a child node is about to be deleted from the
+	 * outside (i.e., not from this ReadJobQueue), e.g. because of cleanup
+	 * actions. This will remove all pending directory read jobs for that
+	 * subtree from the job queue.
+	 **/
+	void deletingChildNotify( FileInfo * child );
+
+
+    protected slots:
+
+	/**
+	 * Time-sliced work procedure to be performed while the application is
+	 * in the main loop: Read some directory entries, but relinquish
+	 * control back to the application so it can maintain some
+	 * responsiveness. This method uses a timer of minimal duration to
+	 * activate itself as soon as there are no more user events to
+	 * process. Call this only once directly after inserting a read job
+	 * into the job queue.
+	 **/
+	void timeSlicedRead();
+
+
+    private:
+
+	DirReadJobList _queue;
+	DirReadJobList _blocked;
+	QTimer         _timer;
+
+    };	// class DirReadJobQueue
+
+
 
     /**
      * This class provides some infrastructure as well as global data for a
@@ -40,6 +183,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Constructor.
 	 *
@@ -353,6 +497,10 @@ namespace QDirStat
 	 *
 	 * This may be 0 if no small file (< 512 bytes) was found in this tree
 	 * yet.
+	 *
+	 * FileSize (64 bits) is overkill, but the maximum cluster size for some
+	 * filesystems is approaching this value (eg. 256M for ext4) so just for
+	 * safety.
 	 **/
 	FileSize clusterSize() const { return _blocksPerCluster * STD_BLOCK_SIZE; }
 
@@ -379,6 +527,12 @@ namespace QDirStat
 	 * Return the current hard links accounting policy.
 	 **/
 	bool ignoreHardLinks() const { return _ignoreHardLinks; }
+
+	/**
+	 * Check if going from 'parent' to 'child' would cross a filesystem
+	 * boundary. This take Btrfs subvolumes into account.
+	 **/
+	static bool crossingFilesystems( const DirInfo * parent, const DirInfo * child );
 
 
     signals:
@@ -499,8 +653,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	std::unique_ptr<DirInfo>            _root;
 	std::unique_ptr<const ExcludeRules> _excludeRules;
 	std::unique_ptr<const ExcludeRules> _tmpExcludeRules;
@@ -518,4 +670,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef DirTree_h
+#endif	// ifndef DirTree_h

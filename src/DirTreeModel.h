@@ -46,6 +46,7 @@ namespace QDirStat
 	SizeTextRole,
     };
 
+
     class DirTreeModel: public QAbstractItemModel
     {
 	Q_OBJECT
@@ -477,10 +478,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	DirTree * _tree;
 
 	bool            _crossFilesystems;
@@ -524,4 +521,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // DirTreeModel_h
+#endif	// DirTreeModel_h

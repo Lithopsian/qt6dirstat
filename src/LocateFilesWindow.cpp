@@ -34,11 +34,11 @@ namespace
     void showResultsCount( int results, bool overflow, QLabel * label )
     {
 	if ( overflow )
-	    label->setText( QObject::tr( "Limited to %1 results" ).arg( results ) );
+	    label->setText( QObject::tr( "Limited to %L1 results" ).arg( results ) );
 	else if ( results == 1 )
 	    label->setText( QObject::tr( "1 result" ) );
 	else
-	    label->setText( QObject::tr( "%1 results" ).arg( results ) );
+	    label->setText( QObject::tr( "%L1 results" ).arg( results ) );
     }
 
 
@@ -77,13 +77,17 @@ namespace
     {
 	app()->dirTreeModel()->setTreeWidgetSizes( tree );
 
-	const QString size     = QObject::tr( "Total Size" );
-	const QString modified = QObject::tr( "Last Modified" );
-	const QString path     = QObject::tr( "Path" );
-	tree->setHeaderLabels( { size, modified, path } );
-	tree->header()->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-	tree->headerItem()->setTextAlignment( LocateListPathCol, Qt::AlignLeft | Qt::AlignVCenter);
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( LL_SizeCol,  QObject::tr( "Total Size" ) );
+	headerItem->setText( LL_MTimeCol, QObject::tr( "Last Modified" ) );
+	headerItem->setText( LL_PathCol,  QObject::tr( "Path" ) );
+	headerItem->setTextAlignment( LL_PathCol, Qt::AlignLeft | Qt::AlignVCenter);
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	// The tree will be sorted each time populateSharedInstance() is called
     }
 
 } // namespace
@@ -110,11 +114,12 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
     connect( _ui->refreshButton, &QPushButton::clicked,
              this,               &LocateFilesWindow::refresh );
 
-    connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
-             this,               &locateInMainWindow );
-
     connect( _ui->treeWidget,    &QTreeWidget::customContextMenuRequested,
              this,               &LocateFilesWindow::itemContextMenu );
+
+    connect( _ui->treeWidget, &QTreeWidget::currentItemChanged, &locateInMainWindow );
+
+    show();
 }
 
 
@@ -142,7 +147,6 @@ LocateFilesWindow * LocateFilesWindow::sharedInstance( TreeWalker * treeWalker )
 void LocateFilesWindow::refresh()
 {
     populate( _subtree() );
-    selectFirstItem();
 }
 
 
@@ -158,13 +162,11 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
     // Get the shared instance, creating it if necessary
     LocateFilesWindow * instance = sharedInstance( treeWalker );
 
+    // Set the heading and sort order for each new populate command
+    instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
     instance->_ui->heading->setStatusTip( headingText );
     instance->populate( fileInfo );
-    instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
-    instance->show();
-
-    // Select the first row after a delay so it doesn't slow down displaying the list
-    QTimer::singleShot( 25, instance, &LocateFilesWindow::selectFirstItem );
+    instance->raise();
 }
 
 
@@ -172,20 +174,20 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
 {
     // logDebug() << "populating with " << fileInfo << Qt::endl;
 
+    _ui->treeWidget->clear();
+
     _subtree = fileInfo;
     _treeWalker->prepare( _subtree() );
 
-    // For better Performance: Disable sorting while inserting many items
-    _ui->treeWidget->setSortingEnabled( false );
-    _ui->treeWidget->clear();
-
-    populateRecursive( fileInfo ? fileInfo : _subtree() );
+    populateRecursive( fileInfo );
     showResultsCount( _ui->treeWidget->topLevelItemCount(), _treeWalker->overflow(), _ui->resultsLabel );
-
-    _ui->treeWidget->setSortingEnabled( true );
 
     // Force a redraw of the header from the status tip
     resizeEvent( nullptr );
+
+    // Select the first row after a delay so it (and its signals) doesn't slow down the list showing
+    QTimer::singleShot( 50, this, [ this ]()
+	{ _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); } );
 }
 
 
@@ -220,8 +222,15 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 void LocateFilesWindow::resizeEvent( QResizeEvent * )
 {
     // Format the heading with the current url, which may be a fallback
-    const FileInfo * fileInfo = _subtree();
-    const QString heading = _ui->heading->statusTip().arg( fileInfo ? fileInfo->url() : QString{} );
+    const QString heading = [ this ]()
+    {
+	const QString statusTip = _ui->heading->statusTip();
+	if ( statusTip.isEmpty() )
+	    return QString{};
+
+	const FileInfo * fileInfo = _subtree();
+	return statusTip.arg( fileInfo ? fileInfo->url() : QString{} );
+    }();
 
     // Calculate a width from the dialog less margins, less a bit more
     elideLabel( _ui->heading, heading, size().width() - 24 );
@@ -231,19 +240,25 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 
 
 LocateListItem::LocateListItem( FileInfo * item ):
-    QTreeWidgetItem{ QTreeWidgetItem::UserType }
+    QTreeWidgetItem{ UserType },
+    _size{ item->totalSize() },
+    _mtime{ item->mtime() },
+    _path{ item->url() }
 {
-    CHECK_PTR( item );
+    /**
+     * Helper function to set the text and text alignment for a column.
+     **/
+    const auto set = [ this ]( int col, Qt::Alignment alignment, const QString & text )
+    {
+	setText( col, text );
+	setTextAlignment( col, alignment | Qt::AlignVCenter );
+    };
 
-    _path  = item->url();
-    _size  = item->totalSize();
-    _mtime = item->mtime();
+    set( LL_SizeCol,  Qt::AlignRight,   formatSize( _size ) );
+    set( LL_MTimeCol, Qt::AlignHCenter, formatTime( _mtime ) );
+    set( LL_PathCol,  Qt::AlignLeft,    _path );
 
-    set( LocateListSizeCol,  formatSize( _size ),  Qt::AlignRight   );
-    set( LocateListMTimeCol, formatTime( _mtime ), Qt::AlignHCenter );
-    set( LocateListPathCol,  _path,                Qt::AlignLeft    );
-
-    setIcon( LocateListPathCol, app()->dirTreeModel()->itemTypeIcon( item ) );
+    setIcon( LL_PathCol, app()->dirTreeModel()->itemTypeIcon( item ) );
 }
 
 
@@ -257,16 +272,13 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     // error which should not be silently ignored.
     const LocateListItem & other = dynamic_cast<const LocateListItem &>( rawOther );
 
-    switch ( static_cast<LocateListColumns>( treeWidget()->sortColumn() ) )
+    switch ( treeWidget()->sortColumn() )
     {
-	case LocateListSizeCol:  return _size  < other.size();
-	case LocateListMTimeCol: return _mtime < other.mtime();
-
-	case LocateListPathCol:
-	case LocateListColumnCount:
-	    break;
+	case LL_SizeCol:  return _size  < other.size();
+	case LL_MTimeCol: return _mtime < other.mtime();
+	default:                 return QTreeWidgetItem::operator<( rawOther );
     }
 
-    return QTreeWidgetItem::operator<( rawOther );
+
 }
 

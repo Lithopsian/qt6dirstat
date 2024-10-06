@@ -7,15 +7,15 @@
  *              Ian Nartowicz
  */
 
+#include <QActionGroup>
 #include <QCommandLinkButton>
+#include <QContextMenuEvent>
 #include <QDesktopServices>
 #include <QMenu>
 #include <QPointer>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QUrl>
 
 #include "FileSizeStatsWindow.h"
+#include "ActionManager.h"
 #include "FileInfo.h"
 #include "FileSizeStats.h"
 #include "FileSizeStatsModels.h"
@@ -48,27 +48,6 @@ namespace
     BucketsTableModel * bucketsTableModel( const QTableView * bucketsTable )
     {
 	return qobject_cast<BucketsTableModel *>( bucketsTable->model() );
-    }
-
-
-    /**
-     * Read hotkey settings and apply to the existing actions found
-     * within 'tree'.  The ui file hotkeys are used as default values.
-     **/
-    void readHotkeySettings( QWidget * tree )
-    {
-	Settings settings;
-
-	settings.beginGroup( "FileSizeStatsWindow" );
-
-	const auto actions = tree->findChildren<QAction *>( nullptr, Qt::FindDirectChildrenOnly );
-	for ( QAction * action : actions )
-	{
-	    tree->addAction( action );
-	    settings.applyActionHotkey( action );
-	}
-
-	settings.endGroup();
     }
 
 
@@ -153,7 +132,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
     connectActions();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
-    readHotkeySettings( this );
+    ActionManager::actionHotkeys( this, "FileSizeStatsWindow" );
 
     show();
 }
@@ -263,6 +242,9 @@ void FileSizeStatsWindow::connectActions()
     connect( _ui->actionAutoPercentiles,    &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoPercentileRange );
 
+    connect( _ui->excludeSymLinksCheckBox,  &QCheckBox::toggled,
+             this,                          &FileSizeStatsWindow::refresh );
+
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
     for ( const QCommandLinkButton * helpButton : helpButtons )
     {
@@ -272,36 +254,42 @@ void FileSizeStatsWindow::connectActions()
 }
 
 
-void FileSizeStatsWindow::populateSharedInstance( QWidget       * mainWindow,
-                                                  FileInfo      * fileInfo,
-                                                  const QString & suffix  )
+void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
 {
-    if ( !fileInfo )
-	return;
+    _subtree = fileInfo;
+    _suffix = suffix;
 
-    sharedInstance( mainWindow )->populate( fileInfo, suffix );
+    const QString & url = fileInfo->debugUrl();
+    const QString headerUrl = suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url );
+    _ui->headingLabel->setStatusTip( tr( "File size statistics for %1" ).arg( headerUrl ) );
+    resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
+
+    loadStats( fileInfo, suffix );
+
+    initHistogram();
 }
 
 
-void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
+void FileSizeStatsWindow::refresh()
 {
-    const QString & url = fileInfo->debugUrl();
-    _ui->headingUrl->setStatusTip( suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url ) );
-    resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
+    loadStats( _subtree(), _suffix );
 
+    setPercentileRange();
+}
+
+
+void FileSizeStatsWindow::loadStats( FileInfo * fileInfo, const QString & suffix )
+{
     // Existing stats are invalidated; be sure the model and histogram get new pointers promptly
-    if ( suffix.isEmpty() )
-	_stats.reset( new FileSizeStats{ fileInfo } );
-    else
-	_stats.reset( new FileSizeStats{ fileInfo, suffix } );
-
+    _stats.reset( new FileSizeStats{ fileInfo, suffix, _ui->excludeSymLinksCheckBox->isChecked() } );
     _stats->calculatePercentiles();
 
-    bucketsTableModel( _ui->bucketsTable )->setStats( _stats.get() );
-    percentileTableModel( _ui->percentileTable )->setStats( _stats.get() );
+    const FileSizeStats * stats = _stats.get();
+    bucketsTableModel( _ui->bucketsTable )->setStats( stats );
+    percentileTableModel( _ui->percentileTable )->setStats( stats );
+    _ui->histogramView->init( stats );
 
     setPercentileTable();
-    initHistogram();
 }
 
 
@@ -310,7 +298,6 @@ void FileSizeStatsWindow::initHistogram()
     // Block the slider signals so the histogram doesn't get built multiple (or zero!) times
     SignalBlocker startBlocker( _ui->startPercentileSlider );
     SignalBlocker endBlocker( _ui->endPercentileSlider );
-    _ui->histogramView->init( _stats.get() );
     autoPercentileRange();
 
     // Signals were blocked, so we have to load the buckets explicitly
@@ -447,7 +434,7 @@ void FileSizeStatsWindow::showHelp() const
 void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Elide a label to the width of the dialog less margins, less a bit more
-    elideLabel( _ui->headingUrl, _ui->headingUrl->statusTip(), size().width() - 200 );
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 20 );
 }
 
 

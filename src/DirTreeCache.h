@@ -61,13 +61,9 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	bool _ok;
 
-    };
+    };	// class CacheWriter
 
 
 
@@ -81,6 +77,7 @@ namespace QDirStat
 	             DirTree       * tree,
 	             DirInfo       * parent,
 	             bool            markFromCache );
+
 
     public:
 
@@ -197,13 +194,8 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	gzFile    _cache;
 	char      _buffer[ MAX_CACHE_LINE_LEN + 1 ];
-//	char    * _line{ _buffer };
 	int       _lineNo{ 0 };
 	char    * _fields[ MAX_FIELDS_PER_LINE ];
 	int       _fieldsCount;
@@ -218,9 +210,9 @@ namespace QDirStat
 
 	QRegularExpression _multiSlash{ "//+" };
 
-    }; // CacheReader
+    };	// CacheReader
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // ifndef DirTreeCache_h
+#endif	// ifndef DirTreeCache_h
 

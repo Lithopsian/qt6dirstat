@@ -29,43 +29,6 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return the device name where 'dir' is on if it's a mount point.
-     * This uses MountPoints which reads /proc/mounts.
-     **/
-    QString device( const DirInfo * dir )
-    {
-	return MountPoints::device( dir->url() );
-    }
-
-
-    /**
-     * Check if going from 'parent' to 'child' would cross a filesystem
-     * boundary. This take Btrfs subvolumes into account.
-     **/
-    bool crossingFilesystems( DirInfo * parent, DirInfo * child )
-    {
-	if ( parent->device() == child->device() )
-	    return false;
-
-	const QString childDevice  = device( child );
-	const QString parentDevice = device( parent->findNearestMountPoint() );
-//	if ( parentDevice.isEmpty() ) // redundant check now that findNearestMountPoint() works
-//	    parentDevice = tree->device();
-
-	// Not safe to assume that empty devices indicate filesystem crossing.
-	// Calling something a mountpoint when it isn't causes findNearestMountPoint()
-	// to return null and things then crash.
-	const bool crossing = !parentDevice.isEmpty() && !childDevice.isEmpty() && parentDevice != childDevice;
-	if ( crossing )
-	    logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
-	else
-	    logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
-
-	return crossing;
-    }
-
-
-    /**
      * Check if we really should cross into a mounted filesystem; don't do
      * it if this is a system mount, a bind mount, a filesystem mounted
      * multiple times, or a network mount (NFS / Samba).
@@ -89,23 +52,6 @@ namespace
 //	             << " mounted filesystem " << mountPoint->path() << Qt::endl;
 
 	return doCross;
-    }
-
-
-    /**
-     * Delete all jobs within 'subtree' from the given queue, except 'exceptJob'.
-     **/
-    void killQueue( DirInfo * subtree, DirReadJobList & queue, const DirReadJob * exceptJob )
-    {
-	DirReadJobList newQueue;
-	for ( DirReadJob * job : asConst( queue ) )
-	{
-	    if ( job->dir() && job->dir()->isInSubtree( subtree ) && ( !exceptJob || job != exceptJob ) )
-		delete job;
-	    else
-		newQueue << job;
-	}
-	newQueue.swap( queue );
     }
 
 } // namespace
@@ -322,11 +268,11 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
 	subDir->setExcluded();
 	subDir->finishReading( DirOnRequestOnly );
     }
-    else if ( !crossingFilesystems( dir(), subDir ) ) // normal case
+    else if ( !DirTree::crossingFilesystems( dir(), subDir ) ) // normal case
     {
 	tree()->addJob( new LocalDirReadJob{ tree(), subDir, true } );
     }
-    else	    // The subdirectory we just found is a mount point.
+    else // The subdirectory we just found is a mount point.
     {
 	subDir->setMountPoint();
 
@@ -436,7 +382,11 @@ bool LocalDirReadJob::checkForNtfs()
 {
     _checkedForNtfs = true;
 
-    if ( !_dirName.isEmpty() )
+    if ( !MountPoints::hasNtfs() )
+    {
+	_isNtfs = false;
+    }
+    else if ( !_dirName.isEmpty() )
     {
 	const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _dirName );
 	_isNtfs = mountPoint && mountPoint->isNtfs();
@@ -486,109 +436,4 @@ void CacheReadJob::read()
     }
 
     finished();
-}
-
-
-
-
-void DirReadJobQueue::enqueue( DirReadJob * job )
-{
-    if ( job )
-    {
-	_queue.append( job );
-	job->setQueue( this );
-
-	if ( !_timer.isActive() )
-	{
-	    // logDebug() << "First job queued" << Qt::endl;
-	    _timer.start( 0 );
-	}
-    }
-}
-
-
-void DirReadJobQueue::clear()
-{
-    qDeleteAll( _queue );
-    _queue.clear();
-    _queue.squeeze();
-
-    qDeleteAll( _blocked );
-    _blocked.clear();
-    _blocked.squeeze();
-}
-
-
-void DirReadJobQueue::abort()
-{
-    for ( const DirReadJob * job : asConst( _queue ) )
-    {
-	if ( job->dir() )
-	    job->dir()->readJobAborted();
-    }
-
-    for ( const DirReadJob * job : asConst( _blocked ) )
-    {
-	if ( job->dir() )
-	    job->dir()->readJobAborted();
-    }
-
-    clear();
-}
-
-
-void DirReadJobQueue::timeSlicedRead()
-{
-    if ( _queue.isEmpty() )
-	_timer.stop();
-    else
-	_queue.first()->read();
-}
-
-
-void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
-{
-    if ( job )
-    {
-	// Get rid of the old (finished) job.
-	_queue.removeOne( job );
-	delete job;
-    }
-
-    if ( _queue.isEmpty() && _blocked.isEmpty() )
-    {
-	// The timer will fire again and then stop itself
-	logDebug() << "No more jobs - finishing" << Qt::endl;
-	emit finished();
-    }
-}
-
-
-void DirReadJobQueue::deletingChildNotify( FileInfo * child )
-{
-    if ( child && child->isDirInfo() )
-    {
-	logDebug() << "Killing all pending read jobs for " << child << Qt::endl;
-	killSubtree( child->toDirInfo() );
-    }
-}
-
-
-void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJob )
-{
-    if ( !subtree )
-	return;
-
-    killQueue( subtree, _queue,   exceptJob );
-    killQueue( subtree, _blocked, exceptJob );
-}
-
-
-void DirReadJobQueue::unblock( DirReadJob * job )
-{
-    _blocked.removeAll( job );
-    enqueue( job );
-
-//    if ( _blocked.isEmpty() )
-//	logDebug() << "No more jobs waiting for external processes" << Qt::endl;
 }

@@ -71,6 +71,7 @@ namespace
 	                                 true,
 	                                 false,
 	                                 Cleanup::ShowAlways };
+	cleanup->setIcon( ":/icons/mimetype.png" );
 	cleanup->setShortcut( Qt::CTRL | Qt::Key_Y );
 
 	return cleanup;

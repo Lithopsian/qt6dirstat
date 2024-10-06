@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>GeneralConfigPage</class>
  <widget class="QWidget" name="GeneralConfigPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>357</width>
+    <height>434</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="leftMargin">
     <number>24</number>
@@ -38,7 +46,7 @@
              <string>&lt;p style='white-space:pre'&gt;The default setting for whether to automatically read across the&lt;br/&gt;boundaries of mounted filesystems.  The program will always start&lt;br/&gt;with this setting, but it can be changed in the Open Directory dialog.&lt;/p&gt;</string>
             </property>
             <property name="text">
-             <string>&amp;Cross filesystem boundaries while reading</string>
+             <string>Cross &amp;filesystem boundaries while reading</string>
             </property>
            </widget>
           </item>
@@ -132,7 +140,7 @@
              <string>&lt;p style='white-space:pre'&gt;Show a warning message when a directory read is&lt;br/&gt;incomplete due to insufficient permissions to read some files&lt;/p&gt;</string>
             </property>
             <property name="text">
-             <string>Show &amp;warning for insufficient permissions</string>
+             <string>Show warning for insufficient &amp;permissions</string>
             </property>
            </widget>
           </item>
@@ -205,7 +213,7 @@
              <string>&amp;Long message timeout</string>
             </property>
             <property name="buddy">
-             <cstring>statusBarShortTimeoutSpinBox</cstring>
+             <cstring>statusBarLongTimeoutSpinBox</cstring>
             </property>
            </widget>
           </item>

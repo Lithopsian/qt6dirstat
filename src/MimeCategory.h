@@ -29,6 +29,7 @@ namespace QDirStat
     class MimeCategory
     {
     public:
+
 	/**
 	 * Create a MimeCategory with the specified name and default color.
 	 **/
@@ -192,10 +193,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	QString _name;
 	QColor  _color;

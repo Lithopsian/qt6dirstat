@@ -42,9 +42,10 @@ namespace QDirStat
 	 * unsorted after this.
 	 **/
 	void collect( FileInfo * subtree );
-    };
+
+    };	// class FileMTimeStats
 
 }	// namespace QDirStat
 
-#endif // ifndef FileMTimeStats_h
+#endif	// ifndef FileMTimeStats_h
 

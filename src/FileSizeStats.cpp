@@ -8,7 +8,6 @@
  */
 
 #include "FileSizeStats.h"
-#include "Exception.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 
@@ -16,43 +15,51 @@
 using namespace QDirStat;
 
 
-FileSizeStats::FileSizeStats( FileInfo * subtree ):
+namespace
+{
+    bool canCollect( const FileInfo * subtree, bool excludeSymLinks )
+    {
+        return ( !excludeSymLinks && subtree->isSymLink() ) || subtree->isFile();
+    }
+
+}
+
+
+FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix, bool excludeSymLinks ):
     PercentileStats{}
 {
-    CHECK_PTR( subtree );
+    if ( !subtree || !subtree->checkMagicNumber() )
+        return;
 
-    // Avoid reallocations for potentially millions of list appends
-    reserve( subtree->totalNonDirItems() );
-    collect( subtree );
+    if ( suffix.isEmpty() )
+    {
+        reserve( subtree->totalNonDirItems() );
+        collect( subtree, excludeSymLinks );
+    }
+    else
+    {
+        collect( subtree, suffix, excludeSymLinks );
+    }
+
     sort();
 }
 
 
-FileSizeStats::FileSizeStats( const FileInfo * subtree, const QString & suffix ):
-    PercentileStats{}
+void FileSizeStats::collect( const FileInfo * subtree, bool excludeSymLinks )
 {
-    CHECK_PTR( subtree );
-
-    collect( subtree, suffix );
-    sort();
-}
-
-
-void FileSizeStats::collect( const FileInfo * subtree )
-{
-    if ( subtree->isFileOrSymLink() )
+    if ( canCollect( subtree, excludeSymLinks ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it );
+        collect( *it, excludeSymLinks );
 }
 
 
-void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix )
+void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix, bool excludeSymLinks )
 {
-    if ( subtree->isFileOrSymLink() && subtree->name().endsWith( suffix ) )
+    if ( canCollect( subtree, excludeSymLinks ) && subtree->name().endsWith( suffix ) )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it, suffix );
+        collect( *it, suffix, excludeSymLinks );
 }

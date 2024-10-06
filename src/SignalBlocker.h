@@ -20,6 +20,7 @@
 class SignalBlocker
 {
     public:
+
 	SignalBlocker( QObject * obj ):
 	    _obj{ obj }
 	{
@@ -32,10 +33,13 @@ class SignalBlocker
 	    _obj->blockSignals( _oldBlocked );
 	}
 
+
     private:
+
 	QObject * _obj;
 	bool      _oldBlocked;
-};
 
-#endif // SignalBlocker_h
+};	// class SignalBlocker
+
+#endif	// SignalBlocker_h
 

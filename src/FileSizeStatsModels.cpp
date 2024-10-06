@@ -21,8 +21,8 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return text showing the exact size 'size; in bytes, formatted
-     * according to the local locale style.
+     * Return text showing the exact size 'size' in bytes, formatted
+     * according to the locale style.
      **/
     QString sizeTooltip( FileSize size )
     {

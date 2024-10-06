@@ -73,12 +73,6 @@ namespace QDirStat
 	~HeaderTweaker() override;
 
 	/**
-	 * Resize a header view to contents.
-	 **/
-//	static void resizeToContents( QHeaderView * header )
-//	    { header->setSectionResizeMode( QHeaderView::ResizeToContents ); }
-
-	/**
 	 * Switch the layout to the one with the specified name.
 	 **/
 	void changeLayout( const QString & layoutName );
@@ -235,10 +229,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	DirTreeView      * _treeView;
 	QHeaderView      * _header;

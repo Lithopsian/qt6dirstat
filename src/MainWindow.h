@@ -50,6 +50,7 @@ namespace QDirStat
 //            LayoutTreemapOnSide,
         };
 
+
     public:
 
         /**
@@ -80,89 +81,7 @@ namespace QDirStat
          **/
         void showOpenDirErrorPopup( const SysCallFailedException & ex );
 
-
-    public slots:
-
-        /**
-         * Open an URL (directory or package URL).
-         **/
-        void openUrl( const QString & url );
-
-        /**
-         * Open a directory selection dialog and open the selected URL.
-         **/
-        void askOpenDir();
-
-        /**
-         * Read a filesystem, as requested from the filesystems window.
-         **/
-        void readFilesystem( const QString & path );
-
-        /**
-         * Show the directories that could not be read in a separate non-modal
-         * window.
-         **/
-        void showUnreadableDirs();
-
-
-    protected:
-
-        /**
-         * Replace the current tree with the list of installed
-         * packages from the system's package manager that match 'pkgUrl'.
-         **/
-        void readPkg( const PkgFilter & pkgFilter );
-
-        /**
-         * Show unpackaged files with the specified 'unpkgSettings' parameters
-         * (startingDir, excludeDirs, ignorePatterns).
-         *
-         * The URL may start with "unpkg:/".
-         **/
-        void showUnpkgFiles( const UnpkgSettings & unpkgSettings );
-
-        /**
-         * Show unpackaged files with the UnpkgSettings parameters from the config
-         * file or default values if no config was written yet.
-         **/
-        void showUnpkgFiles( const QString & url );
-
-        /**
-         * Return 'true' if the URL starts with "unpkg:/".
-         **/
-        static bool isUnpkgUrl( const QString & url )
-            { return url.startsWith( unpkgScheme(), Qt::CaseInsensitive ); }
-
-        /**
-         * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
-         **/
-        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
-
-        /**
-         * Disable the treemap, reset the permissions warning, breadcrumbs,
-         * and trees, then display a BusyPopup to prepare for a packaged or
-         * unpackaged files read.
-         **/
-        void pkgQuerySetup();
-
-        /**
-         * Update the window title: Show "[root]" if running as root and add the
-         * URL if that is configured.
-         **/
-        void updateWindowTitle( const QString & url );
-
-        /**
-         * Show progress text in the status bar for a few seconds.
-         **/
-        void showProgress( const QString & text );
-
-        /**
-         * Show details about the current selection in the details view.
-         **/
-        void updateFileDetailsView();
-
-
-    public: // for the config dialog
+        // for the config dialog
 
         /**
          * Return the DirTreeView for this window
@@ -201,13 +120,32 @@ namespace QDirStat
         int longStatusBarTimeout() const { return _longStatusBarTimeout; }
         void setLongStatusBarTimeout( int newValue ) { _longStatusBarTimeout = newValue; }
 
-
-    protected slots:
+        /**
+         * Open an URL (directory or package URL).
+         **/
+        void openUrl( const QString & url );
 
         /**
-         * Open a directory URL (start reading that directory).
+         * Read a filesystem, as requested from the filesystems window.
          **/
-        void openDir( const QString & url );
+        void readFilesystem( const QString & path );
+
+
+    public slots:
+
+        /**
+         * Open a directory selection dialog and open the selected URL.
+         **/
+        void askOpenDir();
+
+        /**
+         * Show the directories that could not be read in a separate non-modal
+         * window.
+         **/
+        void showUnreadableDirs();
+
+
+    protected slots:
 
         /**
          * Open a file selection dialog to ask for a cache file, clear the
@@ -235,12 +173,6 @@ namespace QDirStat
          * Stop reading if reading is in process.
          **/
         void stopReading();
-
-        /**
-         * Show the directories that could not be read in a separate non-modal
-         * window.
-         **/
-        void closeChildren();
 
         /**
          * Navigate one directory level up.
@@ -305,13 +237,6 @@ namespace QDirStat
          * Sort tree view by read jobs, hide treemap view.
          **/
         void busyDisplay();
-
-        /**
-         * Change display mode to "idle" (after reading the directory tree is
-         * finished): If the tree view is still sorted by read jobs, now sort it by
-         * subtree percent, show the treemap view if enabled.
-         **/
-        void idleDisplay();
 
         /**
          * Enable or disable actions depending on current status.
@@ -434,11 +359,6 @@ namespace QDirStat
         void openActionUrl();
 
         /**
-         * Expand the directory tree's branches to depth 'level'.
-         **/
-        void expandTreeToLevel( int level );
-
-        /**
          * Show the URL of 'item' and its total size in the status line.
          **/
         void showCurrent( FileInfo * item );
@@ -470,6 +390,77 @@ namespace QDirStat
     protected:
 
         /**
+         * Change display mode to "idle" (after reading the directory tree is
+         * finished): If the tree view is still sorted by read jobs, now sort it by
+         * subtree percent, show the treemap view if enabled.
+         **/
+        void idleDisplay();
+
+        /**
+         * Close the children of this window before starting a new read.
+         **/
+        void closeChildren();
+
+        /**
+         * Open a directory URL (start reading that directory).
+         **/
+        void openDir( const QString & url );
+
+        /**
+         * Replace the current tree with the list of installed
+         * packages from the system's package manager that match 'pkgUrl'.
+         **/
+        void readPkg( const PkgFilter & pkgFilter );
+
+        /**
+         * Show unpackaged files with the specified 'unpkgSettings' parameters
+         * (startingDir, excludeDirs, ignorePatterns).
+         *
+         * The URL may start with "unpkg:/".
+         **/
+        void showUnpkgFiles( const UnpkgSettings & unpkgSettings );
+
+        /**
+         * Show unpackaged files with the UnpkgSettings parameters from the config
+         * file or default values if no config was written yet.
+         **/
+        void showUnpkgFiles( const QString & url );
+
+        /**
+         * Return 'true' if the URL starts with "unpkg:/".
+         **/
+        static bool isUnpkgUrl( const QString & url )
+            { return url.startsWith( unpkgScheme(), Qt::CaseInsensitive ); }
+
+        /**
+         * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
+         **/
+        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
+
+        /**
+         * Disable the treemap, reset the permissions warning, breadcrumbs,
+         * and trees, then display a BusyPopup to prepare for a packaged or
+         * unpackaged files read.
+         **/
+        void pkgQuerySetup();
+
+        /**
+         * Update the window title: Show "[root]" if running as root and add the
+         * URL if that is configured.
+         **/
+        void updateWindowTitle( const QString & url );
+
+        /**
+         * Show progress text in the status bar for a few seconds.
+         **/
+        void showProgress( const QString & text );
+
+        /**
+         * Show details about the current selection in the details view.
+         **/
+        void updateFileDetailsView();
+
+        /**
          * Return whether verbose selection is enabled.
          **/
         bool verboseSelection() const { return _ui->actionVerboseSelection->isChecked(); }
@@ -485,6 +476,11 @@ namespace QDirStat
          * reading directories.
          **/
         void showDirPermissionsWarning();
+
+        /**
+         * Expand the directory tree's branches to depth 'level'.
+         **/
+        void expandTreeToLevel( int level );
 
         /**
          * Read parameters from the settings file.
@@ -699,8 +695,8 @@ namespace QDirStat
         int              _sortCol;
         Qt::SortOrder    _sortOrder;
 
-    }; // class MainWindow
+    };  // class MainWindow
 
-}   // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // MainWindow_H
+#endif  // MainWindow_H

@@ -30,7 +30,9 @@ namespace QDirStat
 	QString pathComponent;
 	QString displayName;   // This may be shortened
 	QString url;
-    };
+
+    };	// struct Breadcrumb
+
 
     typedef QVector<Breadcrumb> BreadcrumbList;
 
@@ -67,15 +69,6 @@ namespace QDirStat
 	void clear() { setPath( nullptr ); }
 
 
-    public slots:
-
-	/**
-	 * Set the path from a FileInfo item.
-	 * A null item clears the path.
-	 **/
-	void setPath( const FileInfo * item );
-
-
     signals:
 
 	/**
@@ -87,16 +80,22 @@ namespace QDirStat
 	void pathClicked( const QString & path );
 
 
-    private:
+    public slots:
 
-	//
-	// Data members
-	//
+	/**
+	 * Set the path from a FileInfo item.
+	 *
+	 * A null item clears the path.
+	 **/
+	void setPath( const FileInfo * item );
+
+
+    private:
 
 	BreadcrumbList _breadcrumbs;
 
-    }; // class BreadcrumbNavigator
+    };	// class BreadcrumbNavigator
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // BreadcrumbNavigator_h
+#endif	// BreadcrumbNavigator_h

@@ -35,7 +35,14 @@ namespace QDirStat
 
     public:
 
+	/**
+	 * Constructor.
+	 **/
 	MimeCategoryConfigPage( ConfigDialog * parent );
+
+	/**
+	 * Destructor.
+	 **/
 	~MimeCategoryConfigPage() override;
 
 
@@ -208,8 +215,6 @@ namespace QDirStat
 
 
     private:
-
-	// Data
 
 	std::unique_ptr<Ui::MimeCategoryConfigPage> _ui;
 

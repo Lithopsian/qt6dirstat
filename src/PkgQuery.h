@@ -147,14 +147,12 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	QVector<const PkgManager *> _pkgManagers; // primary and secondary package managers found
 
 	QCache<QString, QString> _cache; // mapping of paths and package names
 
-    }; // class PkgQuery
+    };	// class PkgQuery
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // PkgQuery_h
+#endif	// PkgQuery_h

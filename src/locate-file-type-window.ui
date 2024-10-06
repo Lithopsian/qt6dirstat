@@ -25,14 +25,14 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="text">
-      <string notr="true">Directories with file type</string>
-     </property>
     </widget>
    </item>
    <item>
     <widget class="QTreeWidget" name="treeWidget">
      <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+     <property name="sortingEnabled">
       <bool>true</bool>
      </property>
      <column>

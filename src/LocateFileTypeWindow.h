@@ -79,17 +79,15 @@ namespace QDirStat
 
 	/**
 	 * Select one of the search results in the main window's tree and
-	 * treemap widgets via their SelectionModel.
+	 * treemap widgets via their SelectionModel.  The actual selection
+	 * is done after a short timeout to avoid blocking the dialog tree
+	 * itself.
 	 **/
-	void selectResult( QTreeWidgetItem * item ) const;
+	void selectResult() const;
+	void selectResults() const;
 
 
     protected:
-
-	/**
-	 * Return the current search suffix with leading '*'.
-	 **/
-	QString displaySuffix() const { return '*' + _suffix; }
 
 	/**
 	 * Populate the window: Locate files with 'suffix' in 'fileInfo'.
@@ -107,14 +105,6 @@ namespace QDirStat
 	void populateRecursive( FileInfo * dir );
 
 	/**
-	 * Select the first item in the list. This will also select it in the
-	 * main window, open the branch where this item is in and scroll the
-	 * main window's tree so that item is visible tere.
-	 **/
-	void selectFirstItem() const
-	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
-
-	/**
 	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
@@ -128,15 +118,12 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::LocateFileTypeWindow> _ui;
 
 	Subtree _subtree;
 	QString _suffix;
-    };
+
+    };	// class LocateFileTypeWindow
 
 
     /**
@@ -147,7 +134,7 @@ namespace QDirStat
 	SSR_CountCol = 0,
 	SSR_TotalSizeCol,
 	SSR_PathCol,
-	SSR_ColumnCount
+	SSR_ColumnCount,
     };
 
 
@@ -191,15 +178,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Set both the text and text alignment for a column.
-	 **/
-	void set( int col, const QString & text, Qt::Alignment alignment )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, alignment | Qt::AlignVCenter );
-	}
-
-	/**
 	 * Less-than operator for sorting.
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;
@@ -211,8 +189,8 @@ namespace QDirStat
 	int      _count;
 	FileSize _totalSize;
 
-    }; // class SuffixSearchResultItem
+    };	// class SuffixSearchResultItem
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // LocateFileTypeWindow_h
+#endif	// LocateFileTypeWindow_h

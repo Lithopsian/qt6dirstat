@@ -196,6 +196,7 @@ void MountPoints::init()
     clear();
 
     _hasBtrfs        = false;
+    _hasNtfs         = false;
     _checkedForBtrfs = false;
 
     populate();
@@ -249,6 +250,7 @@ bool MountPoints::hasBtrfs()
 void MountPoints::populate()
 {
     QStringList ntfsDevices = findNtfsDevices();
+    _hasNtfs = !ntfsDevices.isEmpty();
 
 #if USE_PROC_MOUNTS
     read( "/proc/mounts", ntfsDevices ) || read( "/etc/mtab", ntfsDevices );

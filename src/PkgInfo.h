@@ -45,6 +45,7 @@ namespace QDirStat
             _multiArch{ false }
         {}
 
+
     public:
 
         /**
@@ -166,8 +167,6 @@ namespace QDirStat
 
 
     private:
-
-        // Data members
 
         const PkgManager * _pkgManager;
 

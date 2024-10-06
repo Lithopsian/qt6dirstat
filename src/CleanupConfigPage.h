@@ -34,7 +34,14 @@ namespace QDirStat
 
     public:
 
+	/**
+	 * Constructor.
+	 **/
 	CleanupConfigPage( ConfigDialog * parent );
+
+	/**
+	 * Destructor.
+	 **/
 	~CleanupConfigPage() override;
 
 
@@ -142,10 +149,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	std::unique_ptr<Ui::CleanupConfigPage> _ui;
 

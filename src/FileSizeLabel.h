@@ -112,8 +112,8 @@ namespace QDirStat
 	void clear()
 	    { QLabel::setToolTip( QString{} ); QLabel::clear(); }
 
-    }; // class FileSizeLabel
+    };	// class FileSizeLabel
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // FileSizeLabel_h
+#endif	// FileSizeLabel_h

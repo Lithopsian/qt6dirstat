@@ -49,7 +49,9 @@ namespace QDirStat
 	ReadJobsCol,		// Dummy column only for sorting by pending read jobs
     };
 
+
     typedef QVector<DataColumn> DataColumnList;
+
 
     namespace DataColumns
     {
@@ -122,7 +124,8 @@ namespace QDirStat
 	 **/
 	void ensureNameColFirst( DataColumnList & colList );
 
-    };	// DataColumns namespace
+    };	// namespace DataColumns
+
 
 
     /**

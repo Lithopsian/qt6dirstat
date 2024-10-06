@@ -26,6 +26,16 @@ namespace QDirStat
     class FileTypeStats;
     class MimeCategory;
 
+    enum UnreadableDirectories
+    {
+	UD_PathCol,
+	UD_UserCol,
+	UD_GroupCol,
+	UD_PermCol,
+	UD_OctalCol,
+    };
+
+
     /**
      * Modeless dialog to display directories that could not be read when
      * reading a directory tree.
@@ -84,115 +94,36 @@ namespace QDirStat
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
 	 **/
-	static void populateSharedInstance( FileInfo * fileInfo );
+	static void populateSharedInstance()
+	    { sharedInstance()->populate(); }
+
+
+    protected slots:
 
 	/**
-	 * Obtain the subtree from the last used URL or 0 if none was found.
+	 * Populate the window: locate unreadable directories.
+	 *
+	 * This clears the old search results first, then searches from
+	 * the top level of the directory tree.
 	 **/
-//	const Subtree & subtree() const { return _subtree; }
+	void populate();
 
 
     protected:
-
-	/**
-	 * Populate the window: Locate unreadable directories.
-	 *
-	 * This clears the old search results first, then searches the subtree
-	 * and populates the search result list with the directories could not
-	 * be read.
-	 **/
-	void populate( FileInfo * fileInfo );
 
 	/**
 	 * Recursively find unreadable directories in a subtree and add an
 	 * entry to the tree widget for each one.
 	 **/
-	void populateRecursive( FileInfo * fileInfo );
+	void populateRecursive( FileInfo * subtree );
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	std::unique_ptr<Ui::UnreadableDirsWindow> _ui;
 
-	Subtree _subtree;
+    };	// class UnreadableDirsWindow
 
-    };
+}	// namespace QDirStat
 
-
-
-    /**
-     * Item class for the directory list (which is really a tree widget),
-     * representing one directory that could not be read.
-     *
-     * This item intentionally does not store a FileInfo or DirInfo pointer
-     * for each search result, but its path. This is more expensive to
-     * store, and the corresponding DirInfo * has to be fetched again with
-     * DirTree::locate() (which is an expensive operation), but it is a lot
-     * safer in case the tree is modified, i.e. if the user starts cleanup
-     * operations or refreshes the tree from disk. Not only are no pointers
-     * stored that might become invalid, but the search result remains valid
-     * even after such an operation since the strings (the paths) will still
-     * match an object in the tree in most cases.
-     *
-     * In the worst case, the search result won't find the corresponding
-     * DirInfo * anymore (if that directory branch was deleted), but for sure
-     * it will not crash.
-     **/
-
-    enum UnreadableDirectories
-    {
-	UD_Path,
-	UD_User,
-	UD_Group,
-	UD_Permissions,
-	UD_Octal
-    };
-
-    class UnreadableDirListItem: public QTreeWidgetItem
-    {
-    public:
-
-	/**
-	 * Constructor.
-	 **/
-	UnreadableDirListItem( DirInfo * dir );
-
-	/**
-	 * Return the directory object for this item.
-	 **/
-	DirInfo * dir() const { return _dir; }
-
-
-    protected:
-
-	/**
-	 * Set the text and alignment for a column.
-	 **/
-	void set( UnreadableDirectories col, const QString & text, Qt::Alignment alignment )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, alignment | Qt::AlignVCenter );
-	}
-
-	/**
-	 * Less-than operator for sorting.
-	 *
-	 * Currently, all columns sort by their text value, so this override
-	 * is not required.
-	 **/
-//	bool operator<( const QTreeWidgetItem & other ) const override;
-
-
-    private:
-
-	DirInfo * _dir;
-
-    }; // class UnreadableDirListItem
-
-} // namespace QDirStat
-
-#endif // UnreadableDirsWindow_h
+#endif	// UnreadableDirsWindow_h

@@ -29,12 +29,6 @@ namespace QDirStat
 
     public:
 
-	enum DesktopApps
-	{
-	    Terminal,
-	    FileManager,
-	};
-
 	enum RefreshPolicy
 	{
 	    NoRefresh,
@@ -50,6 +44,7 @@ namespace QDirStat
 	    ShowAfterTimeout,  // This includes ShowIfErrorOutput
 	    ShowNever
 	};
+
 
 	/**
 	 * Constructor with nearly all fields (the icon and hotkey
@@ -361,10 +356,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	bool               _active;
 	QString            _title;
 	QString            _command;
@@ -380,7 +371,7 @@ namespace QDirStat
 	bool               _outputWindowAutoClose;
 	QString            _shell;
 
-    }; // Cleanup
+    };	// Cleanup
 
 
 
@@ -396,5 +387,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef Cleanup_h
+#endif	// ifndef Cleanup_h
 

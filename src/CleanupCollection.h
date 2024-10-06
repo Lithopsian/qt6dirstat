@@ -31,6 +31,7 @@ namespace QDirStat
     typedef QVector<Cleanup *>          CleanupList;
     typedef CleanupList::const_iterator CleanupListIterator;
 
+
     /**
      * Set of Cleanup actions to be performed for DirTree items, consisting of
      * a number of predefined and a number of user-defined cleanups.
@@ -197,10 +198,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	CleanupList               _cleanupList;
 	std::unique_ptr<Trash>    _trash;
 	SelectionModel          * _selectionModel;
@@ -212,5 +209,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef CleanupCollection_h
+#endif	// ifndef CleanupCollection_h
 

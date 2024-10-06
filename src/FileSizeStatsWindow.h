@@ -12,12 +12,10 @@
 
 #include <memory>
 
-#include <QActionGroup>
-#include <QContextMenuEvent>
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"
-
+#include "Subtree.h"
 
 namespace QDirStat
 {
@@ -63,10 +61,20 @@ namespace QDirStat
 	 **/
 	static void populateSharedInstance( QWidget       * mainWindow,
 	                                    FileInfo      * fileInfo,
-	                                    const QString & suffix = "" );
+	                                    const QString & suffix = QString{} )
+	    { if ( fileInfo ) sharedInstance( mainWindow )->populate( fileInfo, suffix ); }
 
 
     protected slots:
+
+	/**
+	 * Re-populate with the existing subtree, suffix, and dialog
+	 * settings.  This is used when excludeSymLinks is changed.
+	 * The statistics are reloaded, the buckets are re-filled,
+	 * the models are all reset, and the histogram is rebuilt,
+	 * but the percentile range is not changed.
+	 **/
+	void refresh();
 
 	/**
 	 * Load the nominal percentiles label and reset the model with the
@@ -145,9 +153,23 @@ namespace QDirStat
 	void connectActions();
 
 	/**
-	 * Populate with new content.
+	 * Populate with new content.  The titles are initialised, the
+	 * statistics are loaded, the buckets are filled, the models
+	 * are all reset, the percentile range is set automatically,
+	 * and the histogram is rebuilt.
 	 **/
 	void populate( FileInfo * fileInfo, const QString & suffix );
+
+	/**
+	 * (Re-)load the statistics from disk, including calculating
+	 * the percentiles.  Notify the models and reset the percentile
+	 * table model.
+	 *
+	 * Note that the buckets are not filled, the buckets table
+	 * model is not reset, and the histogram is not rebuilt.  These
+	 * must all be done immediately after a call to loadStats().
+	 **/
+	void loadStats( FileInfo * fileInfo, const QString & suffix );
 
 	/**
 	 * Initialise the histogram data.
@@ -184,15 +206,14 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
 	std::unique_ptr<FileSizeStats>           _stats;
 
-    }; // class FileSizeStatsWindow
+	Subtree _subtree;
+	QString _suffix;
 
-} // namespace QDirStat
+    };	// class FileSizeStatsWindow
 
-#endif // FileSizeStatsWindow_h
+}	// namespace QDirStat
+
+#endif	// FileSizeStatsWindow_h

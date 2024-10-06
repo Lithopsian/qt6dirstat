@@ -84,14 +84,11 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
-
         TrashDir    * _homeTrashDir;
         TrashDirMap   _trashDirs;
 
-    };	// class Trash
+    };  // class Trash
+
 
 
     /**
@@ -109,6 +106,7 @@ namespace QDirStat
     class TrashDir
     {
     public:
+
         /**
          * Constructor. This will create the trash directory and its required
          * subdirectories if it doesn't exist yet.
@@ -153,15 +151,11 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
-
         QString _path;
         dev_t   _device;
 
     };  // class TrashDir
 
-}	// namespace QDirStat
+}       // namespace QDirStat
 
-#endif	// Trash_h
+#endif  // Trash_h

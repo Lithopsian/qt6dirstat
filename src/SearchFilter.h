@@ -27,6 +27,7 @@ namespace QDirStat
         SelectAll   // Pattern is irrelevant
     };
 
+
     /**
      * Base class for search filters like PkgFilter or FileSearchFilter.
      **/
@@ -101,8 +102,6 @@ namespace QDirStat
 
     private:
 
-        // Data members
-
         QString            _pattern;
         QRegularExpression _regexp;
         FilterMode         _filterMode;
@@ -110,6 +109,7 @@ namespace QDirStat
         bool               _caseSensitive;
 
     };  // class SearchFilter
+
 
 
     inline QTextStream & operator<<( QTextStream        & stream,
@@ -125,6 +125,6 @@ namespace QDirStat
         return stream;
     }
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
 #endif  // SearchFilter_h

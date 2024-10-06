@@ -36,6 +36,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Create a SelectionModel that uses the DirTree in 'dirTreeModel'.
 	 * This object does not take ownership of 'dirTreeModel'.
@@ -92,43 +93,6 @@ namespace QDirStat
 	 **/
 	void clear();
 
-
-    public slots:
-
-	/**
-	 * Replace the current selection with one item.
-	 * If this item is 0, everything is deselected.
-	 * This does NOT change the current item.
-	 **/
-//	void selectItem( FileInfo * item );
-
-	/**
-	 * Extend the current selection with one item: Add this item to the set
-	 * of selected items. If this item is 0, the selection remains
-	 * unchanged.
-	 *
-	 * This does NOT change the current item.
-	 *
-	 * If 'clear' is 'true', this will clear the old selection first, so
-	 * this has the same effect as selectItem().
-	 **/
-//	void extendSelection( FileInfo * item, bool clear = false );
-
-	/**
-	 * Search the dir tree for an item with the specified path and, if
-	 * successful, make it the current item.
-	 *
-	 * See also setCurrentItem( FileInfo *, bool ).
-	 **/
-	void setCurrentItemPath( const QString & path );
-
-	/**
-	 * Make 'item' the current branch. This is meant to notify connected
-	 * tree views to close all other branches. See also the
-	 * currentBranchChanged() signal.
-	 **/
-	void updateCurrentBranch( FileInfo * newItem );
-
 	/**
 	 * Prepare refreshing a set of items: Select a suitable item that will
 	 * still be in the tree after refreshing is finished.
@@ -166,6 +130,43 @@ namespace QDirStat
 	void currentBranchChanged( const QModelIndex & branch );
 
 
+    public slots:
+
+	/**
+	 * Replace the current selection with one item.
+	 * If this item is 0, everything is deselected.
+	 * This does NOT change the current item.
+	 **/
+//	void selectItem( FileInfo * item );
+
+	/**
+	 * Extend the current selection with one item: Add this item to the set
+	 * of selected items. If this item is 0, the selection remains
+	 * unchanged.
+	 *
+	 * This does NOT change the current item.
+	 *
+	 * If 'clear' is 'true', this will clear the old selection first, so
+	 * this has the same effect as selectItem().
+	 **/
+//	void extendSelection( FileInfo * item, bool clear = false );
+
+	/**
+	 * Search the dir tree for an item with the specified path and, if
+	 * successful, make it the current item.
+	 *
+	 * See also setCurrentItem( FileInfo *, bool ).
+	 **/
+	void setCurrentItemPath( const QString & path );
+
+	/**
+	 * Make 'item' the current branch. This is meant to notify connected
+	 * tree views to close all other branches. See also the
+	 * currentBranchChanged() signal.
+	 **/
+	void updateCurrentBranch( FileInfo * newItem );
+
+
     protected slots:
 
 	/**
@@ -189,8 +190,6 @@ namespace QDirStat
 
 
     private:
-
-	// Data members
 
 	DirTreeModel * _dirTreeModel;
 	FileInfo     * _currentItem{ nullptr };
@@ -235,6 +234,7 @@ namespace QDirStat
 	Q_OBJECT
 
     public:
+
 	/**
 	 * Creates a SelectionModelProxy. This automatically connects the
 	 * master SelectionModel's signals to the matching signals of this
@@ -244,6 +244,7 @@ namespace QDirStat
 	 * of this object when the parent is deleted.
 	 **/
 	SelectionModelProxy( SelectionModel * master, QObject * parent );
+
 
     signals:
 

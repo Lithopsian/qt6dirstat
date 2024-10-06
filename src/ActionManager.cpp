@@ -177,6 +177,23 @@ void ActionManager::moveToTrash()
 }
 
 
+void ActionManager::actionHotkeys( QWidget * parent, const char * group )
+{
+    Settings settings;
+
+    settings.beginGroup( group );
+
+    const auto actions = parent->findChildren<QAction *>( nullptr, Qt::FindDirectChildrenOnly );
+    for ( QAction * action : actions )
+    {
+	parent->addAction( action );
+	settings.applyActionHotkey( action );
+    }
+
+    settings.endGroup();
+}
+
+
 void ActionManager::swapActions( QWidget * widget,
                                  QAction * actionToRemove,
                                  QAction * actionToAdd )

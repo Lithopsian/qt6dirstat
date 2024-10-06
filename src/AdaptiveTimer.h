@@ -48,6 +48,7 @@ namespace QDirStat
         typedef QVector<int>          Cooldowns;
         typedef std::function<void()> Payload;
 
+
     public:
 
         /**
@@ -86,6 +87,19 @@ namespace QDirStat
         void request( Payload payload );
 
 
+    protected slots:
+
+        /**
+         * Decrease the delivery delay.
+         **/
+        void decreaseDelay();
+
+        /**
+         * Timeout for the delivery timer.
+         **/
+        void deliveryTimeout();
+
+
     protected:
 
         /**
@@ -108,22 +122,7 @@ namespace QDirStat
         void increaseDelay();
 
 
-    protected slots:
-
-        /**
-         * Decrease the delivery delay.
-         **/
-        void decreaseDelay();
-
-        /**
-         * Timeout for the delivery timer.
-         **/
-        void deliveryTimeout();
-
-
     private:
-
-        // Data members
 
         Payload   _payload;
         int       _payloadTime{ 0 };
@@ -135,8 +134,8 @@ namespace QDirStat
         QTimer    _deliveryTimer;
         QTimer    _cooldownTimer;
 
-    }; // class AdaptiveTimer
+    };  // class AdaptiveTimer
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
-#endif // AdaptiveTimer_h
+#endif  // AdaptiveTimer_h

@@ -114,25 +114,6 @@ namespace QDirStat
 	void populate( FileInfo * fileInfo );
 
 	/**
-	 * Set the sort column and sort order (Qt::AscendingOrder or
-	 * Qt::DescendingOrder), sort the list and select the first item.
-	 **/
-//	void sortByColumn( int col, Qt::SortOrder order );
-
-	/**
-	 * Count the number of items in the list and display the number.
-	 **/
-//	void showResultsCount() const;
-
-	/**
-	 * Select the first item in the list. This will also select it in the
-	 * main window, open the branch where this item is in and scroll the
-	 * main window's tree so that item is visible tere.
-	 **/
-	void selectFirstItem() const
-	    { _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) ); }
-
-	/**
 	 * Recursively locate directories that contain files matching the
 	 * search suffix and create a search result item for each one.
 	 **/
@@ -152,15 +133,12 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::LocateFilesWindow> _ui;
 
 	std::unique_ptr<TreeWalker> _treeWalker;
 	Subtree                     _subtree;
-    };
+
+    };	// class LocateFilesWindow
 
 
     /**
@@ -168,16 +146,15 @@ namespace QDirStat
      **/
     enum LocateListColumns
     {
-	LocateListSizeCol,
-	LocateListMTimeCol,
-	LocateListPathCol,
-	LocateListColumnCount
+	LL_SizeCol,
+	LL_MTimeCol,
+	LL_PathCol,
+	LL_ColumnCount,
     };
 
 
     /**
-     * Item class for the locate list (which is really a tree widget),
-     * representing one file with its path.
+     * Item class for the locate list, representing one file with its path.
      *
      * This item intentionally does not store a FileInfo or DirInfo pointer
      * for each search result, but its path. This is more expensive to store,
@@ -205,21 +182,12 @@ namespace QDirStat
 	/**
 	 * Getters for the item properties.
 	 **/
-	const QString & path()  const { return _path;  }
 	FileSize        size()  const { return _size;  }
 	time_t          mtime() const { return _mtime; }
+	const QString & path()  const { return _path;  }
 
 
     protected:
-
-	/**
-	 * Sets both the text and text alignment for a column.
-	 **/
-	void set( int col, const QString & text, Qt::Alignment alignment )
-	{
-	    setText( col, text );
-	    setTextAlignment( col, alignment | Qt::AlignVCenter );
-	}
 
 	/**
 	 * Less-than operator for sorting.
@@ -229,12 +197,12 @@ namespace QDirStat
 
     private:
 
-	QString  _path;
 	FileSize _size;
 	time_t   _mtime;
+	QString  _path;
 
-    }; // class LocateListItem
+    };	// class LocateListItem
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
 #endif // LocateFilesWindow_h

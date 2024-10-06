@@ -30,12 +30,6 @@ namespace QDirStat
     class SelectedTileHighlighter;
     class TreemapView;
 
-    enum Orientation
-    {
-	TreemapHorizontal,
-	TreemapVertical,
-    };
-
     /**
      * Lightweight class that contains a pre-calculated list of the cushion
      * heights for each depth in the tree.  It exposes an iterator so the
@@ -49,6 +43,7 @@ namespace QDirStat
     class CushionHeightSequence: public QVector<double>
     {
     public:
+
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
 	    QVector<double>( 10 ), // ten elements, not onex10.0
 	    _constLast{ cend() - 1 } // iterator to last list entry
@@ -67,9 +62,13 @@ namespace QDirStat
 	 **/
 	CushionHeightSequence::const_iterator constLast() const { return _constLast; }
 
+
     private:
+
 	CushionHeightSequence::const_iterator _constLast;
-    };
+
+    };	// CushionHeightSequence
+
 
 
     /**
@@ -184,7 +183,8 @@ namespace QDirStat
 	static double linearCoefficient( double start, double end, double reciprocal )
 	    { return (start + end) * reciprocal; }
 
-	// Data members
+
+    private:
 
 	double _xx2;
 	double _xx1;
@@ -193,7 +193,8 @@ namespace QDirStat
 
 	CushionHeightSequence::const_iterator _height;
 
-    }; // class CushionSurface
+    };	// class CushionSurface
+
 
 
     /**
@@ -204,6 +205,13 @@ namespace QDirStat
      **/
     class TreemapTile: public QGraphicsRectItem
     {
+
+	enum Orientation
+	{
+	    TreemapHorizontal,
+	    TreemapVertical,
+	};
+
 
     protected:
 
@@ -223,6 +231,7 @@ namespace QDirStat
 	             FileInfo             * orig,
 	             const QRectF         & rect,
 	             const CushionSurface & cushionSurface );
+
 
     public:
 
@@ -445,8 +454,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	TreemapView * _parentView;
 	FileInfo    * _orig;
 
@@ -461,7 +468,9 @@ namespace QDirStat
 
 	SelectedTileHighlighter * _highlighter{ nullptr };
 
-    }; // class TreemapTile
+    };	// class TreemapTile
+
+
 
     /**
      * Derived class for tiles in the simple layout being laid out in the
@@ -478,7 +487,10 @@ namespace QDirStat
 	 * horizontal direction.
 	 **/
 	HorizontalTreemapTile( TreemapTile * parentTile, FileInfo * orig, const QRectF & rect );
-    };
+
+    };	// class HorizontalTreemapTile
+
+
 
     /**
      * Derived class for tiles in the simple layout being laid out in the
@@ -495,7 +507,10 @@ namespace QDirStat
 	 * vertical direction.
 	 **/
 	VerticalTreemapTile( TreemapTile * parentTile, FileInfo * orig, const QRectF & rect );
-    };
+
+    };	// class VerticalTreemapTile
+
+
 
     inline QTextStream & operator<<( QTextStream & stream, TreemapTile * tile )
     {
@@ -509,4 +524,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef TreemapTile_h
+#endif	// ifndef TreemapTile_h

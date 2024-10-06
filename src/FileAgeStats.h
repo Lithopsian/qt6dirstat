@@ -12,37 +12,30 @@
 
 #include <QHash>
 
-#include "Typedefs.h" // FileSize
+#include "Typedefs.h" // FileCount, FileSize
 
 
 namespace QDirStat
 {
     class FileInfo;
-    class YearStats;
-
-    typedef QHash<short, YearStats> YearStatsHash;
-    typedef QList<short>            YearsList;
 
     /**
-     * File modification year / month statistics for one year or one month.
+     * File count and size statistics for one year or one month.
+     *
+     * Note that this struct is small enough and simple enough that
+     * it shouldn't normally be passed by const reference.
      **/
-    class YearStats
+    struct YearMonthStats
     {
-    public:
+        FileCount count{ 0 };
+        FileSize  size{ 0 };
 
-        short    year;                     // 1970 (time_t 0 seconds) - 32767
-        short    month;                    // 1-12 or 0 for the complete year
-        float    filesPercent{ 0.0f };     // 0.0 .. 100.0
-        int      filesCount{ 0 };
-        float    sizePercent{ 0.0f };      // 0.0 .. 100.0
-        FileSize size{ 0LL };
+    };  // struct YearMonthStats
 
-        YearStats( short yr = 0, short mn = 0 ):
-            year{ yr },
-            month{ mn }
-        {}
 
-    };  // class YearStats
+    typedef QHash<short, YearMonthStats> YearStatsHash;
+    typedef QHash<int,   YearMonthStats> MonthStatsHash;
+    typedef QList<short>                 YearsList;
 
 
     /**
@@ -59,33 +52,39 @@ namespace QDirStat
         FileAgeStats( const FileInfo * subtree );
 
         /**
-         * Return a sorted list of the years where files with that modification
-         * year were found after collecting data.
+         * Return an unsorted list of the years where files with that
+         * modification year were found after collecting data.
          **/
-        const YearsList & years() const { return _yearsList; }
+        YearsList years() const
+            { return _yearStats.keys(); }
 
         /**
-         * Return year statistics for the specified year or 0 if there are
-         * none.
-         **/
-        YearStats * yearStats( short year )
-                { return _yearStats.contains( year ) ? &( _yearStats[ year ] ) : nullptr; }
-
-        /**
-         * Return the month statistics for the specified year and month
-         * or 0 if there are none.
-         *
-         * Month statistics are only available for this year and the last year.
-         **/
-        YearStats * monthStats( short year, short month );
-
-        /**
-         * Return 'true' if month statistics are available for the specified
+         * Return 'true' if year statistics are available for the specified
          * year.
-         *
-         * Month statistics are only available for this year and the last year.
          **/
-        bool monthStatsAvailableFor( short year ) const { return year == thisYear() || year == lastYear(); }
+        bool yearStatsAvailable( short year ) const
+            { return _yearStats.contains( year ); }
+
+        /**
+         * Return year statistics for the specified year.
+         *
+         * If this function is called when yearStatsAvailableFor() returns
+         * false, it will return a default-constructed YearMonthStats
+         * struct with count and size both 0.
+         **/
+        YearMonthStats yearStats( short year ) const
+            { return _yearStats.value( year, YearMonthStats{} ); }
+
+        /**
+         * Return the month statistics for the specified year and month.
+         *
+         * Note that this function will return a default-constructed
+         * YearMonthStats struct if no files were collected for this
+         * month, but it does not create a default-constructed entry
+         * in the hash table.
+         **/
+        YearMonthStats monthStats( short year, short month ) const
+            { return _monthStats.value( yearMonthHash( year, month ), YearMonthStats{} ); }
 
         /**
          * Return the current year.
@@ -98,17 +97,22 @@ namespace QDirStat
         short thisMonth() const { return _thisMonth; }
 
         /**
-         * Return the year before the current year.
+         * Return the percentage of 'count' or 'size' wrt the total.
          **/
-        short lastYear() const { return _thisYear - 1; }
+        float countPercent( FileCount count ) const
+            { return _totalCount == 0 ? 100.0 : 100.0f * count / _totalCount; }
+        float sizePercent( FileSize size ) const
+            { return _totalSize == 0 ? 100.0 : 100.0f * size / _totalSize; }
 
 
     protected:
 
         /**
-         * Initialise all month stats for this or the last year.
+         * Return a unique value for the combination 'year' and 'month', to
+         * be used as the hash key for MonthStats.
          **/
-        void initMonthStats( short year );
+        static int yearMonthHash( short year, short month )
+            { return year * 12 + month; }
 
         /**
          * Recurse through all file elements in the subtree and calculate the
@@ -116,38 +120,17 @@ namespace QDirStat
          **/
         void collectRecursive( const FileInfo * subtree );
 
-        /**
-         * Sum up the totals over all years and calculate the percentages for
-         * each year
-         **/
-        void calcPercentages();
-
-        /**
-         * Calculate the monthly percentages for all 12 months in one year.
-         **/
-        void calcMonthPercentages( short year );
-
-        /**
-         * Fill the _yearsList with all the years in the _yearStats hash and
-         * sort the list.
-         **/
-        void collectYears();
-
 
     private:
 
-        //
-        // Data Members
-        //
+        short          _thisYear;
+        short          _thisMonth;
 
-        YearStatsHash   _yearStats;
-        YearsList       _yearsList;
+        FileCount      _totalCount{ 0 };
+        FileSize       _totalSize{ 0 };
 
-        YearStats       _thisYearMonthStats[ 12 ];
-        YearStats       _lastYearMonthStats[ 12 ];
-
-        short           _thisYear;
-        short           _thisMonth;
+        YearStatsHash  _yearStats;
+        MonthStatsHash _monthStats;
 
     };  // class FileAgesStats
 

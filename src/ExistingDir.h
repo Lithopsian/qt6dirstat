@@ -66,7 +66,7 @@ namespace QDirStat
 	 **/
 	ExistingDirCompleter( QObject * parent );
 
-    };  // class ExistingDirCompleter
+    };	// class ExistingDirCompleter
 
 }	// namespace QDirStat
 

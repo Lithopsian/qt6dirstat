@@ -135,6 +135,12 @@ namespace QDirStat
 	 **/
 	static void moveToTrash();
 
+	/**
+	 * Read hotkey settings and apply to the existing actions found
+	 * within 'tree'.  The ui file hotkeys are used as default values.
+	 **/
+	static void actionHotkeys( QWidget * parent, const char * group );
+
 
     protected:
 
@@ -164,10 +170,6 @@ namespace QDirStat
 
 
     private:
-
-	//
-	// Data members
-	//
 
 	CleanupCollection * _cleanupCollection;
 	QPointer<QMenu>     _menu;

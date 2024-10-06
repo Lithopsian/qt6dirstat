@@ -19,7 +19,6 @@
 
 namespace QDirStat
 {
-    class DirInfo;
     class FileSearchFilter;
 
     /**
@@ -34,62 +33,50 @@ namespace QDirStat
 	 *
 	 * Use the static method askFindFiles for access.
 	 **/
-	FindFilesDialog( QWidget * parent = nullptr );
+	FindFilesDialog( QWidget * parent, const QString & pattern );
 
 	/**
-	 * Destructor.
+	 * Destructor.  Saves the window geometry.  askFindFiles() creates
+	 * the dialog on the stack, so it is always destroyed when it is
+	 * closed.
 	 **/
 	~FindFilesDialog() override;
 
 
     public:
+
 	/**
-	 * Open an "open package" dialog and wait for the user to enter
-	 * values.
-	 *
-	 * 'cancelled_ret' is a return parameter that (if non-null) is set to
-	 * 'true' if the user cancelled the dialog.
+	 * Open a find files dialog and execute a search if the dialog is
+	 * accepted.  The dialog is modal and blocking; this function
+	 * does not return until the dialog has been closed and any search
+	 * has been run.
 	 **/
 	static void askFindFiles( QWidget * parent = nullptr );
-
-
-    protected slots:
-
-	/**
-	 * Save the values of the widgets to the settings file or
-	 * to internal static variables.
-	 **/
-	void saveValues();
 
 
     protected:
 
 	/**
-	 * Load values for all widgets from the settings / the config file or
-	 * from internal static variables
-	 **/
-	void loadValues();
-
-	/**
-	 * The package filter the user entered.
+	 * Return a file search filter coresponding to the values entered
+	 * in the dialog.
 	 **/
 	FileSearchFilter fileSearchFilter();
 
 	/**
-	 * Read settings from the config file
+	 * Read settings from the config file.  All the dialog fields
+	 * except for 'pattern' are saved.  The 'pattern' string is
+	 * remembered in local static storage only for as long as the
+	 * program is open.  The window size and position are also
+	 * loaded from Settings.
 	 **/
 	void readSettings();
 
 	/**
-	 * Write settings to the config file
+	 * Write settings to the config file.  The dialog fields are
+	 * written to Settings only if the dialog is accepted.  The
+	 * window geometry is always saved when the dialog is destroyed.
 	 **/
 	void writeSettings();
-
-	/**
-	 * Return the currently selected subtree if a directory is selected
-	 * or 0 if not.
-	 **/
-	DirInfo * currentSubtree();
 
 	/**
 	 * Resize event, reimplemented from QWidget.
@@ -100,19 +87,12 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
+	void resizeEvent( QResizeEvent * ) override;
 
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::FindFilesDialog> _ui;
-
-	static QString _lastPattern;
-	static QString _lastPath;
 
     };	// class FindFilesDialog
 

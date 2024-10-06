@@ -146,8 +146,6 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	std::unique_ptr<Ui::FileDetailsView> _ui;
 
 	AdaptiveTimer * _pkgUpdateTimer;
@@ -157,4 +155,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // FileDetailsView_h
+#endif	// FileDetailsView_h

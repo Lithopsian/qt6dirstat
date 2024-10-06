@@ -42,6 +42,7 @@ namespace QDirStat
     class Subtree
     {
     public:
+
         /**
          * Default constructor, has no tree and no url.  Explicitly declared,
          * otherwise it is suppressed because of the deleted copy constructors.
@@ -178,10 +179,6 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
-
         DirTree * _tree{ nullptr };
         QString   _url;
         QString   _parentUrl;
@@ -189,8 +186,8 @@ namespace QDirStat
         bool      _useRootFallback{ true };
         bool      _useParentFallback{ false };
 
-    };	// class Subtree
+    };  // class Subtree
 
-}	// namespace QDirStat
+}       // namespace QDirStat
 
-#endif // ifndef Subtree_h
+#endif  // ifndef Subtree_h

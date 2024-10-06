@@ -699,10 +699,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	int            _pendingReadJobs{ 0 };
 
 	bool           _isMountPoint:1;		// flag: is this a mount point?
@@ -737,5 +733,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef DirInfo_h
+#endif	// ifndef DirInfo_h
 

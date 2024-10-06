@@ -31,6 +31,7 @@ namespace QDirStat
     class HistogramBar: public QGraphicsRectItem
     {
     public:
+
 	/**
 	 * Constructor: 'bucketIndex' is the number of the bar (0
 	 * being the leftmost) in the histogram.
@@ -42,7 +43,9 @@ namespace QDirStat
 	              const QPen          & pen,
 	              const QBrush        & brush );
 
+
     protected:
+
 	/**
 	 * Mouse hover events
 	 *
@@ -56,8 +59,8 @@ namespace QDirStat
 	 **/
 	void adjustBar( qreal adjustment );
 
-    }; // class HistogramBar
+    };	// class HistogramBar
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // ifndef HistogramItems_h
+#endif	// ifndef HistogramItems_h

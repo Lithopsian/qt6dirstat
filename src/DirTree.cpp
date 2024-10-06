@@ -68,11 +68,8 @@ namespace
 	DirInfo * dir = new DirInfo{ parent, tree, name, statInfo };
 	parent->insertChild( dir );
 
-	if ( !isRoot && !parent->isPkgInfo() && !parent->isFromCache() && dir->device() != parent->device() )
-	{
-	    logDebug() << dir << " is a mount point under " << parent << Qt::endl;
+	if ( !isRoot && !parent->isPkgInfo() && DirTree::crossingFilesystems( parent, dir ) )
 	    dir->setMountPoint();
-	}
 
 	return dir;
     }
@@ -709,4 +706,154 @@ void DirTree::setIgnoreHardLinks( bool ignore )
 	logInfo() << "Ignoring hard links" << Qt::endl;
 
     _ignoreHardLinks = ignore;
+}
+
+
+bool DirTree::crossingFilesystems( const DirInfo * parent, const DirInfo * child )
+{
+    /**
+     * Return the device name where 'dir' is on if it's a mount point.
+     * This uses MountPoints which reads /proc/mounts.
+     **/
+    const auto device = []( const DirInfo * dir ) { return MountPoints::device( dir->url() ); };
+
+    // If the device numbers match then we're definitely not crossing
+    if ( parent->device() == child->device() )
+	return false;
+
+    // See if there is an entry in the mountpoint list for 'child'
+    const QString childDevice  = device( child );
+    if ( childDevice.isEmpty() )
+	return false;
+
+    // Compare to the parent device name to eliminate mountpoints on the same device (eg. Btrfs sub-volumes)
+    const QString parentDevice = device( parent->findNearestMountPoint() );
+    const bool crossing = !parentDevice.isEmpty() && parentDevice != childDevice;
+    if ( crossing )
+	logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
+    else
+	logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
+
+    return crossing;
+}
+
+
+
+
+void DirReadJobQueue::enqueue( DirReadJob * job )
+{
+    if ( job )
+    {
+	_queue.append( job );
+	job->setQueue( this );
+
+	if ( !_timer.isActive() )
+	{
+	    // logDebug() << "First job queued" << Qt::endl;
+	    _timer.start( 0 );
+	}
+    }
+}
+
+
+void DirReadJobQueue::clear()
+{
+    qDeleteAll( _queue );
+    _queue.clear();
+    _queue.squeeze();
+
+    qDeleteAll( _blocked );
+    _blocked.clear();
+    _blocked.squeeze();
+}
+
+
+void DirReadJobQueue::abort()
+{
+    for ( const DirReadJob * job : asConst( _queue ) )
+    {
+	if ( job->dir() )
+	    job->dir()->readJobAborted();
+    }
+
+    for ( const DirReadJob * job : asConst( _blocked ) )
+    {
+	if ( job->dir() )
+	    job->dir()->readJobAborted();
+    }
+
+    clear();
+}
+
+
+void DirReadJobQueue::timeSlicedRead()
+{
+    if ( _queue.isEmpty() )
+	_timer.stop();
+    else
+	_queue.first()->read();
+}
+
+
+void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
+{
+    if ( job )
+    {
+	// Get rid of the old (finished) job.
+	_queue.removeOne( job );
+	delete job;
+    }
+
+    if ( _queue.isEmpty() && _blocked.isEmpty() )
+    {
+	// The timer will fire again and then stop itself
+	logDebug() << "No more jobs - finishing" << Qt::endl;
+	emit finished();
+    }
+}
+
+
+void DirReadJobQueue::deletingChildNotify( FileInfo * child )
+{
+    if ( child && child->isDirInfo() )
+    {
+	logDebug() << "Killing all pending read jobs for " << child << Qt::endl;
+	killSubtree( child->toDirInfo() );
+    }
+}
+
+
+void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJob )
+{
+    if ( !subtree )
+	return;
+
+    /**
+     * Delete all jobs within 'subtree' from the given queue, except 'exceptJob'.
+     **/
+    const auto killQueue = [ subtree, exceptJob ]( DirReadJobList & queue )
+    {
+	DirReadJobList newQueue;
+	for ( DirReadJob * job : asConst( queue ) )
+	{
+	    if ( job->dir() && job->dir()->isInSubtree( subtree ) && ( !exceptJob || job != exceptJob ) )
+		delete job;
+	    else
+		newQueue << job;
+	}
+	newQueue.swap( queue );
+    };
+
+    killQueue( _queue );
+    killQueue( _blocked );
+}
+
+
+void DirReadJobQueue::unblock( DirReadJob * job )
+{
+    _blocked.removeAll( job );
+    enqueue( job );
+
+//    if ( _blocked.isEmpty() )
+//	logDebug() << "No more jobs waiting for external processes" << Qt::endl;
 }

@@ -72,8 +72,8 @@ namespace QDirStat
          **/
         virtual bool overflow() const { return false; }
 
-
     };  // class TreeWalker
+
 
 
     /**
@@ -95,10 +95,13 @@ namespace QDirStat
 
         bool check( const FileInfo * item ) override;
 
+
     private:
 
         FileSize _threshold;
-    };
+
+    };  // class LargestFilesTreeWalker
+
 
 
     /**
@@ -120,10 +123,13 @@ namespace QDirStat
 
         bool check( const FileInfo * item ) override;
 
+
     private:
 
         time_t _threshold;
-    };
+
+    };  // class NewFilesTreeWalker
+
 
 
     /**
@@ -145,10 +151,13 @@ namespace QDirStat
 
         bool check( const FileInfo * item ) override;
 
+
     private:
 
         time_t _threshold;
-    };
+
+    };  // class OldFilesTreeWalker
+
 
 
     /**
@@ -159,7 +168,9 @@ namespace QDirStat
     public:
 
         bool check( const FileInfo * item ) override;
-    };
+
+    }; // class HardLinkedFilesTreeWalker
+
 
 
     /**
@@ -170,7 +181,9 @@ namespace QDirStat
     public:
 
         bool check( const FileInfo * item ) override;
-    };
+
+    };  // class BrokenSymLinksTreeWalker
+
 
 
     /**
@@ -181,7 +194,9 @@ namespace QDirStat
     public:
 
         bool check( const FileInfo * item ) override;
-    };
+
+    };  // class SparseFilesTreeWalker
+
 
 
     /**
@@ -198,10 +213,13 @@ namespace QDirStat
 
         bool check( const FileInfo * item ) override;
 
+
     private:
 
         short _year;
-    };
+
+    };  // class FilesFromYearTreeWalker
+
 
 
     /**
@@ -219,11 +237,14 @@ namespace QDirStat
 
         bool check( const FileInfo * item ) override;
 
+
     private:
 
         short _year;
         short _month;
-    };
+
+    };  // class FilesFromMonthTreeWalker
+
 
 
     /**
@@ -232,6 +253,7 @@ namespace QDirStat
     class FindFilesTreeWalker: public TreeWalker
     {
     public:
+
         FindFilesTreeWalker( const FileSearchFilter & filter ):
             TreeWalker{},
             _filter{ filter }
@@ -243,13 +265,14 @@ namespace QDirStat
 
         bool overflow() const override { return _overflow; }
 
+
     private:
 
         FileSearchFilter _filter;
         int              _count;
         bool             _overflow;
 
-    };
+    };   // class FindFilesTreeWalker
 
 }       // namespace QDirStat
 

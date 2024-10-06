@@ -54,6 +54,45 @@ namespace QDirStat
 	~ListEditor() override = default;
 
 
+    protected slots:
+
+	/**
+	 * Move the current list item to the top of the list.
+	 **/
+	void toTop();
+
+	/**
+	 * Move the current list item one position up.
+	 **/
+	void moveUp();
+
+	/**
+	 * Create a new list item.
+	 **/
+	virtual void add();
+
+	/**
+	 * Remove the current list item.
+	 **/
+	void remove();
+
+	/**
+	 * Move the current list item one position down.
+	 **/
+	void moveDown();
+
+	/**
+	 * Move the current list item to the bottom of the list.
+	 **/
+	void toBottom();
+
+	/**
+	 * Notification that the current item in the list widget changed.
+	 **/
+	virtual void currentItemChanged( QListWidgetItem * current,
+	                                 QListWidgetItem * previous);
+
+
     protected:
 
 	/**
@@ -122,48 +161,6 @@ namespace QDirStat
 	 * Derived classes are required to implement this.
 	 **/
 	virtual QString valueText( void * value ) = 0;
-
-
-    protected slots:
-
-	/**
-	 * Move the current list item to the top of the list.
-	 **/
-	void toTop();
-
-	/**
-	 * Move the current list item one position up.
-	 **/
-	void moveUp();
-
-	/**
-	 * Create a new list item.
-	 **/
-	virtual void add();
-
-	/**
-	 * Remove the current list item.
-	 **/
-	void remove();
-
-	/**
-	 * Move the current list item one position down.
-	 **/
-	void moveDown();
-
-	/**
-	 * Move the current list item to the bottom of the list.
-	 **/
-	void toBottom();
-
-	/**
-	 * Notification that the current item in the list widget changed.
-	 **/
-	virtual void currentItemChanged( QListWidgetItem * current,
-	                                 QListWidgetItem * previous);
-
-
-    protected:
 
 	/**
 	 * Connect the list widget and toolbutton actions.  This can't

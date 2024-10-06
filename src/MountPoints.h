@@ -28,7 +28,6 @@ typedef void * QStorageInfo;
 
 namespace QDirStat
 {
-
     /**
      * Helper class to represent one mount point of a Linux/Unix filesystem.
      **/
@@ -196,11 +195,11 @@ namespace QDirStat
 	 * Qt before 5.4 does not have QStorageInfo, and statfs()
 	 * is Linux-specific (not POSIX).
 	 **/
-	FileSize MountPoint::totalSize()       { return -1LL; }
-	FileSize MountPoint::usedSize()        { return -1LL; }
-	FileSize MountPoint::reservedSize()    { return -1LL; }
-	FileSize MountPoint::freeSizeForUser() { return -1LL; }
-	FileSize MountPoint::freeSizeForRoot() { return -1LL; }
+	FileSize totalSize()       { return -1LL; }
+	FileSize usedSize()        { return -1LL; }
+	FileSize reservedSize()    { return -1LL; }
+	FileSize freeSizeForUser() { return -1LL; }
+	FileSize freeSizeForRoot() { return -1LL; }
 #endif
 
     private:
@@ -222,11 +221,10 @@ namespace QDirStat
 	QStringList _mountOptions;
 	bool        _isDuplicate{ false };
 
-    }; // class MountPoint
+    };	// class MountPoint
 
 
     typedef QMap<QString, MountPoint *>   MountPointMap;
-//    typedef MountPointMap::const_iterator MountPointMapIterator;
 
 
     /**
@@ -314,6 +312,12 @@ namespace QDirStat
 	static bool hasBtrfs();
 
 	/**
+	 * Return 'true' if any mount point has filesystem type "btrfs".
+	 **/
+	static bool hasNtfs()
+	    { return instance()->_hasNtfs; };
+
+	/**
 	 * Return begin and end iterators for the mount point map.
 	 **/
 	static MountPointMap::const_iterator cbegin() { return instance()->MountPointMap::cbegin(); }
@@ -376,15 +380,11 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
+	bool _hasBtrfs;
+	bool _hasNtfs;
+	bool _checkedForBtrfs;
 
-	bool          _hasBtrfs;
-	bool          _checkedForBtrfs;
-
-    }; // class MountPoints
-
+    };	// class MountPoints
 
 
 
@@ -401,6 +401,7 @@ namespace QDirStat
     class MountPointIterator
     {
     public:
+
 	MountPointIterator( bool all ):
 	    _all{ all },
 	    _end{ MountPoints::cend() },
@@ -413,7 +414,9 @@ namespace QDirStat
 	MountPointIterator & operator++() { _current = find( ++_current ); return *this; }
 	MountPointIterator operator++(int) { auto tmp = *this; operator++(); return tmp; }
 
+
     protected:
+
 	/**
 	 * Find the next mount point that is "normal", starting
 	 * from 'item', or any mount point if '_all' is true.
@@ -425,13 +428,15 @@ namespace QDirStat
 	    return current;
 	}
 
+
     private:
+
 	bool _all;
+
 	MountPointMap::const_iterator _end;
 	MountPointMap::const_iterator _current;
 
-    }; // class MountPointIterator
-
+    };	// class MountPointIterator
 
 
 
@@ -450,6 +455,6 @@ namespace QDirStat
 	return stream;
     }
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // MountPoints_h
+#endif	// MountPoints_h

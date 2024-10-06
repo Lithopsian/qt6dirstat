@@ -174,6 +174,44 @@ namespace QDirStat
     QString monthAbbreviation( short month );
 
     /**
+     * Returns whether 'test' is upper- or lower-case.  Upper case is
+     * defined as any string which is the same as toUpper() of that
+     * string.
+     *
+     * Qt versions before 5.14 used a different definition, where
+     * isUpper() was only true if the string was not empty and
+     * contained only upper-case letters.
+     *
+     * Before Qt 5.12, these functions do not exist, so a simplified
+     * check is implemented.
+     **/
+#if QT_VERSION < QT_VERSION_CHECK( 5, 14, 0 )
+    inline bool isLower( const QString & test )
+    {
+	for ( QChar testChar : test )
+	{
+	    if ( testChar.isUpper() )
+		return false;
+	}
+	return true;
+    }
+    inline bool isUpper( const QString & test )
+    {
+	for ( QChar testChar : test )
+	{
+	    if ( testChar.isLower() )
+		return false;
+	}
+	return true;
+    }
+#else
+    inline bool isLower( const QString & test )
+	{ return test.isLower(); }
+    inline bool isUpper( const QString & test )
+	{ return test.isUpper(); }
+#endif
+
+    /**
      * Returns the height in pixels of the given font.
      **/
     inline int fontHeight( const QFont & font )
@@ -181,10 +219,22 @@ namespace QDirStat
 
     /**
      * Returns the width in pixels of the given text rendered using
-     * the given font.
+     * the given font.  The two functions return subtly different
+     * results: textWidth returns the size of the visible dark pixels
+     * of 'text', while horizontalAdvance returns the distance from
+     * the "start" of 'text' to the "start" of the character that
+     * would follow it.  In particular, a space character returns
+     * zero textWidth and the textWidth of italics may be wider than
+     * the horizontal advance.
      **/
     inline int textWidth( const QFont & font, const QString & text )
 	{ return QFontMetrics{ font }.boundingRect( text ).width(); }
+    inline int horizontalAdvance( const QFont & font, const QString & text )
+#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
+	{ return QFontMetrics{ font }.width( text ); }
+#else
+	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
+#endif
 
     /**
      * Elide a string, removing characters from the middle to fit
@@ -208,6 +258,6 @@ namespace QDirStat
 //    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
 //	{ return stream << formatSize( lSize ); }
 
-}       // namespace QDirStat
+}	// namespace QDirStat
 
-#endif  // FormatUtil_h
+#endif	// FormatUtil_h

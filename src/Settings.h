@@ -47,8 +47,6 @@ namespace QDirStat
      **/
     class Settings: public QSettings
     {
-	Q_OBJECT
-
     protected:
 
 	/**
@@ -190,8 +188,8 @@ namespace QDirStat
 	/**
 	 * Write window settings (size and position) to the settings.
 	 **/
-	static void writeWindowSettings( QWidget    * widget,
-	                                 const char * settingsGroup );
+	static void writeWindowSettings( const QWidget * widget,
+	                                 const char    * settingsGroup );
 
 	/**
 	 * Find all settings groups that start with the group prefix
@@ -235,11 +233,9 @@ namespace QDirStat
 
     private:
 
-	// Data members
-
 	static UsedFileList _usedConfigFiles;
 
-    }; // class Settings
+    };	// class Settings
 
 
 
@@ -251,8 +247,6 @@ namespace QDirStat
      **/
     class CleanupSettings: public Settings
     {
-	Q_OBJECT
-
     public:
 
 	/**
@@ -265,7 +259,7 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "Cleanup"_L1; }
 
-    }; // class CleanupSettings
+    };	// class CleanupSettings
 
 
 
@@ -277,8 +271,6 @@ namespace QDirStat
      **/
     class ExcludeRuleSettings: public Settings
     {
-	Q_OBJECT
-
     public:
 
 	/**
@@ -291,7 +283,7 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "ExcludeRule"_L1; }
 
-    }; // class ExcludeRuleSettings
+    };	// class ExcludeRuleSettings
 
 
 
@@ -303,8 +295,6 @@ namespace QDirStat
      **/
     class MimeCategorySettings: public Settings
     {
-	Q_OBJECT
-
     public:
 
 	/**
@@ -317,8 +307,8 @@ namespace QDirStat
 	 **/
 	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
 
-    }; // class MimeCategorySettings
+    };	// class MimeCategorySettings
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
 #endif	// Settings_h

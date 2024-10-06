@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <QDialog>
+#include <QHideEvent>
 #include <QProcess>
 #include <QTextStream>
 #include <QVector>
@@ -20,13 +21,8 @@
 #include "ui_output-window.h"
 
 
-class QCloseEvent;
-
-
 namespace QDirStat
 {
-    typedef QVector<QProcess *> ProcessList;
-
     /**
      * Terminal-like window to watch output of external processes started via
      * QProcess. The command invoked by the process, its stdout and stderr output
@@ -43,6 +39,9 @@ namespace QDirStat
     class OutputWindow: public QDialog
     {
         Q_OBJECT
+
+        typedef QVector<QProcess *> ProcessList;
+
 
     public:
 
@@ -165,13 +164,17 @@ namespace QDirStat
         static QString command( QProcess * process );
 
 
-    public slots:
+    signals:
 
         /**
-         * Add a command line to show in the output area.
-         * This is typically displayed in white.
+         * Emitted when the last process finished, no matter if that was successful
+         * or with an error. 'totalErrorCount' is the accumulated error count of
+         * all processes this OutputWindow watched.
          **/
-        void addCommandLine( const QString & commandline );
+        void lastProcessFinished( int totalErrorCount );
+
+
+    public slots:
 
         /**
          * Add one or more lines of stdout to show in the output area.
@@ -185,28 +188,19 @@ namespace QDirStat
          **/
         void addStderr( const QString & output );
 
+
+    protected slots:
+
+        /**
+         * Add a command line to show in the output area.
+         * This is typically displayed in white.
+         **/
+        void addCommandLine( const QString & commandline );
+
         /**
          * Kill all processes this class watches.
          **/
         void killAll();
-
-        /**
-         * Clear the output area, i.e. remove all previous output and commands.
-         **/
-        void clearOutput();
-
-        /**
-         * Enable or disable actions based on the internal status of this object.
-         **/
-        void updateActions();
-
-        /**
-         * Read parameters from the settings.
-         **/
-        void readSettings();
-
-
-    protected slots:
 
         /**
          * Read output on one of the watched process's stdout channel.
@@ -250,17 +244,18 @@ namespace QDirStat
         void timeoutShow();
 
 
-    signals:
+    protected:
 
         /**
-         * Emitted when the last process finished, no matter if that was successful
-         * or with an error. 'totalErrorCount' is the accumulated error count of
-         * all processes this OutputWindow watched.
+         * Read parameters from the settings.
          **/
-        void lastProcessFinished( int totalErrorCount );
+        void readSettings();
 
-
-    protected:
+        /**
+         * Clear the output area, i.e. remove all previous output and commands.
+         **/
+        void clearOutput()
+            { _ui->terminal->clear(); }
 
         /**
          * Set the auto-close checkbox to the given state.
@@ -269,17 +264,26 @@ namespace QDirStat
             { _ui->autoCloseCheckBox->setChecked( autoClose ); }
 
         /**
-         * Close event: invoked upon QDialog::close() (i.e. the "Close" button),
-         * the window manager close button (the [x] at the top right), or when
+         * Enable or disable actions based on the internal status of this object.
+         **/
+        void updateActions()
+            { _ui->killButton->setEnabled( hasActiveProcess() ); }
+
+        /**
+         * Hide event: invoked upon QDialog::close() (i.e. the "Close" button),
+         * the window manager close button (the [x] at the top right), when
          * this dialog decides to auto-close itself after the last process
-         * finishes successfully.
+         * finishes successfully, or when the dialog is hidden
+         * "non-spontaneously".  Before Qt 6.3, refject(), for example by
+         * pressing the Escape key, hides the window but does not close it.
          *
          * This object will delete itself in this event if there are no more
-         * processes to watch.
+         * processes to watch, or set a flag that the dialog can be deleted
+         * when the last process ends.
          *
          * Reimplemented from QWidget.
          **/
-        void closeEvent( QCloseEvent * ) override;
+        void hideEvent( QHideEvent * ) override;
 
         /**
          * Remove a finished process and signal it is done.
@@ -328,10 +332,6 @@ namespace QDirStat
 
     private:
 
-        //
-        // Data members
-        //
-
         std::unique_ptr<Ui::OutputWindow > _ui;
 
         ProcessList _processList;
@@ -348,6 +348,7 @@ namespace QDirStat
         QFont       _terminalDefaultFont;
 
     };  // class OutputWindow
+
 
 
     inline QTextStream & operator<<( QTextStream & stream, QProcess * process )

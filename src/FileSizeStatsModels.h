@@ -104,7 +104,7 @@ namespace QDirStat
 
 	const FileSizeStats * _stats{ nullptr };
 
-    }; // class BucketsTableModel
+    };	// class BucketsTableModel
 
 
 
@@ -218,8 +218,7 @@ namespace QDirStat
 
 	bool _filterRows{ true };
 
-    }; // class PercentileTableModel
-
+    };	// class PercentileTableModel
 
 
 
@@ -276,8 +275,8 @@ namespace QDirStat
 	constexpr static unsigned short horizontalMargin() { return 8; }
 	constexpr static unsigned short verticalMargin()   { return 4; }
 
-    }; // class PercentileTableHeader
+    };	// class PercentileTableHeader
 
-} // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // BucketsTableModel_h
+#endif	// BucketsTableModel_h

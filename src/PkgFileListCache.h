@@ -40,6 +40,7 @@ namespace QDirStat
 	    LookupAll    = 0xFF,	// Will use all
 	};
 
+
 	/**
 	 * Constructor. 'lookupType' indicates what type of lookup to prepare
 	 * for. This has significant impact on the memory footprint.
@@ -106,7 +107,7 @@ namespace QDirStat
 	QMultiHash<QString, QString> _pkgFileNames;
 	QSet<QString>                _fileNames;
 
-    }; 	// class PkgFileListCache
+    };	// class PkgFileListCache
 
 }	// namespace QDirStat
 

@@ -107,10 +107,9 @@ MainWindow::MainWindow( bool slowUpdate ):
 
     _historyButtons = new HistoryButtons{ _ui->actionGoBack, _ui->actionGoForward, this };
 
-    ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
-
-    connectSignals( dirTreeModel->tree(), dirTreeModel, selectionModel );
     connectMenuActions(); // see MainWindowActions.cpp
+    ActionManager::setActions( this, selectionModel, _ui->toolBar, _ui->menuCleanup );
+    connectSignals( dirTreeModel->tree(), dirTreeModel, selectionModel );
     readSettings();
 
     dirTreeModel->setBaseFont( _ui->dirTreeView->font() );
@@ -809,7 +808,7 @@ void MainWindow::showSummary()
     if ( count > 1 )
     {
 	const QString total = formatSize( sel.normalized().totalSize() );
-	_ui->statusBar->showMessage( tr( "%1 items selected (%2 total)" ).arg( count ).arg( total ) );
+	_ui->statusBar->showMessage( tr( "%L1 items selected (%2 total)" ).arg( count ).arg( total ) );
     }
     else
     {
@@ -846,7 +845,7 @@ void MainWindow::cleanupFinished( int errorCount )
 	if ( errorCount == 1 )
 	    return tr( "Cleanup action finished with 1 error" );
 
-	return tr( "Cleanup action finished with %1 errors" ).arg( errorCount );
+	return tr( "Cleanup action finished with %L1 errors" ).arg( errorCount );
     }();
 
     showProgress( msg );
@@ -1003,7 +1002,7 @@ void MainWindow::showDirPermissionsWarning()
 
 void MainWindow::showUnreadableDirs()
 {
-    UnreadableDirsWindow::populateSharedInstance( app()->firstToplevel() );
+    UnreadableDirsWindow::populateSharedInstance();
 }
 
 

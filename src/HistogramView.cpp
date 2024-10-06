@@ -8,7 +8,6 @@
  */
 
 #include <QTextDocument>
-#include <QTimer>
 
 #include "HistogramView.h"
 #include "Exception.h"

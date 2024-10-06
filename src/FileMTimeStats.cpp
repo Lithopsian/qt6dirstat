@@ -18,7 +18,7 @@ using namespace QDirStat;
 FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
     PercentileStats{}
 {
-    if ( subtree )
+    if ( subtree && subtree->checkMagicNumber() )
     {
         reserve( subtree->totalNonDirItems() );
         collect( subtree );

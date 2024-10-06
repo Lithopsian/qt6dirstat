@@ -32,6 +32,7 @@ namespace QDirStat
     class Attic: public DirInfo
     {
     public:
+
 	/**
 	 * Constructor.
 	 **/
@@ -87,5 +88,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef Attic_h
+#endif	// ifndef Attic_h
 

@@ -35,6 +35,9 @@ namespace QDirStat
     /**
      * An alternative to using a QPair for passing both the year and
      * month for a FileInfo object.
+     *
+     * Note that this struct is small enough and simple enough that
+     * it shouldn't normally be passed by const reference.
      **/
     struct YearAndMonth
     {
@@ -56,6 +59,7 @@ namespace QDirStat
 	DirPermissionDenied,	// Insufficient permissions for reading
 	DirError		// Error while reading
     };
+
 
     /**
      * The most basic building block of a DirTree:
@@ -983,10 +987,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members.
-	//
-
 	// Keep this short in order to use as little memory as possible -
 	// there will be a _lot_ of entries of this kind!
 	QString    _name;		// the file name (without path!)
@@ -1013,6 +1013,7 @@ namespace QDirStat
 	time_t     _mtime;		// modification time
 
     };	// class FileInfo
+
 
 
     /**
@@ -1060,5 +1061,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef FileInfo_h
+#endif	// ifndef FileInfo_h
 

@@ -54,8 +54,8 @@ namespace QDirStat
 	QSize sizeHint( const QStyleOptionViewItem & option,
 	                const QModelIndex          & index) const override;
 
-    };  // class SizeColDelegate
+    }; 	// class SizeColDelegate
 
-}       // namespace QDirStat
+}	// namespace QDirStat
 
-#endif  // SizeColDelegate_h
+#endif	// SizeColDelegate_h

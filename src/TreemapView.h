@@ -40,15 +40,6 @@ namespace QDirStat
     class SelectionModelProxy;
     class Settings;
 
-    enum TreemapCancel
-    {
-	TreemapCancelNone,
-	TreemapCancelCancel,
-	TreemapCancelRestart,
-    };
-
-    typedef QVector<const ParentTileHighlighter *> ParentHighlightList;
-
     enum TreemapLayers
     {
 	TileLayer,
@@ -58,12 +49,24 @@ namespace QDirStat
 	SceneHighlightLayer,
     };
 
+
+    typedef QVector<const ParentTileHighlighter *> ParentHighlightList;
+
+
     /**
      * View widget that displays a DirTree as a treemap.
      **/
     class TreemapView: public QGraphicsView
     {
 	Q_OBJECT
+
+	enum TreemapCancel
+	{
+	    TreemapCancelNone,
+	    TreemapCancelCancel,
+	    TreemapCancelRestart,
+	};
+
 
     public:
 
@@ -413,6 +416,38 @@ namespace QDirStat
 	void setLastTile( TreemapTile * tile ) { _lastTile = tile; }
 
 
+    signals:
+
+	/**
+	 * Emitted when the currently selected item changes.
+	 * Caution: 'item' may be 0 when the selection is cleared.
+	 *
+	 * Unused.
+	 **/
+//	void selectionChanged( FileInfo * item );
+
+	/**
+	 * Emitted when the current item changes.
+	 **/
+	void currentItemChanged( FileInfo * newCurrent );
+
+	/**
+	 * Emitted when the treemap changes, e.g. is rebuilt, zoomed in, or
+	 * zoomed out.
+	 **/
+	void treemapChanged();
+
+	/**
+	 * Emitted when the mouse cursor enters a hover over 'item'.
+	 **/
+	void hoverEnter( FileInfo * item );
+
+	/**
+	 * Emitted when the mouse cursor leaves the hover over 'item'.
+	 **/
+	void hoverLeave( FileInfo * item );
+
+
     public slots:
 
 	/**
@@ -453,7 +488,44 @@ namespace QDirStat
 	 **/
 	void deleteNotify( FileInfo * );
 
+
+    protected slots:
+
+	/**
+	 * The Mime categories have changed and the map needs to be re-coloured.
+	 **/
+	void changeTreemapColors();
+
+	/**
+	 * Update the selected items that have been selected in another view.
+	 **/
+	void updateSelection( const FileInfoSet & newSelection );
+
+	/**
+	 * Update the current item that has been changed in another view.
+	 **/
+	void updateCurrentItem( FileInfo * currentItem );
+
+	/**
+	 * Search the treemap for a tile with the specified FileInfo node and
+	 * make that tile the current item if it is found. If nothing is found
+	 * or if 'node' is 0, the highlighting is removed from the previous
+	 * current item.
+	 **/
+	void setCurrentItem( FileInfo * node );
+
+	/**
+	 * The treemap thread has finished.
+	 **/
+	void treemapFinished();
+
+
     protected:
+
+	/**
+	 * Clear the treemap contents.
+	 **/
+	void clear();
 
 	/**
 	 * Read parameters from the settings file.
@@ -520,77 +592,8 @@ namespace QDirStat
 	void cancelTreemap();
 
 
-    signals:
-
-	/**
-	 * Emitted when the currently selected item changes.
-	 * Caution: 'item' may be 0 when the selection is cleared.
-	 *
-	 * Unused.
-	 **/
-//	void selectionChanged( FileInfo * item );
-
-	/**
-	 * Emitted when the current item changes.
-	 **/
-	void currentItemChanged( FileInfo * newCurrent );
-
-	/**
-	 * Emitted when the treemap changes, e.g. is rebuilt, zoomed in, or
-	 * zoomed out.
-	 **/
-	void treemapChanged();
-
-	/**
-	 * Emitted when the mouse cursor enters a hover over 'item'.
-	 **/
-	void hoverEnter( FileInfo * item );
-
-	/**
-	 * Emitted when the mouse cursor leaves the hover over 'item'.
-	 **/
-	void hoverLeave( FileInfo * item );
-
-
-    protected slots:
-
-	/**
-	 * Clear the treemap contents.
-	 **/
-	void clear();
-
-	/**
-	 * The Mime categories have changed and the map needs to be re-coloured.
-	 **/
-	void changeTreemapColors();
-
-	/**
-	 * Update the selected items that have been selected in another view.
-	 **/
-	void updateSelection( const FileInfoSet & newSelection );
-
-	/**
-	 * Update the current item that has been changed in another view.
-	 **/
-	void updateCurrentItem( FileInfo * currentItem );
-
-	/**
-	 * Search the treemap for a tile with the specified FileInfo node and
-	 * make that tile the current item if it is found. If nothing is found
-	 * or if 'node' is 0, the highlighting is removed from the previous
-	 * current item.
-	 **/
-	void setCurrentItem( FileInfo * node );
-
-	/**
-	 * The treemap thread has finished.
-	 **/
-	void treemapFinished();
-
-
     private:
 
-	// Data members
 	const DirTree       * _tree{ nullptr };
 	SelectionModel      * _selectionModel{ nullptr };
 	SelectionModelProxy * _selectionModelProxy{ nullptr };
@@ -645,7 +648,7 @@ namespace QDirStat
 	QElapsedTimer   _stopwatch;
 	TreemapTile   * _lastTile; // see PAINT_DEBUGGING in TreemapTile.h
 
-    }; // class TreemapView
+    };	// class TreemapView
 
 
 
@@ -674,7 +677,7 @@ namespace QDirStat
 	               Qt::PenStyle        lineStyle,
 	               qreal               zValue );
 
-    }; // class HighlightRect
+    };	// class HighlightRect
 
 
 
@@ -688,6 +691,10 @@ namespace QDirStat
     class CurrentTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	CurrentTileHighlighter( const TreemapView * treemapView,
 	                        const TreemapTile * tile,
 	                        bool                isSelected ):
@@ -698,7 +705,7 @@ namespace QDirStat
 	                   CurrentHighlightLayer }
 	{}
 
-    }; // class CurrentTileHighlighter
+    };	// class CurrentTileHighlighter
 
 
 
@@ -713,6 +720,10 @@ namespace QDirStat
     class SelectedTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	SelectedTileHighlighter( const TreemapView * treemapView,
 	                         const TreemapTile * tile ):
 	    HighlightRect{ tile,
@@ -722,7 +733,7 @@ namespace QDirStat
 	                   TileHighlightLayer }
 	{}
 
-    }; // class SelectedTileHighlighter
+    };	// class SelectedTileHighlighter
 
 
 
@@ -735,6 +746,10 @@ namespace QDirStat
     class ParentTileHighlighter: public HighlightRect
     {
     public:
+
+	/**
+	 * Constructor.
+	 **/
 	ParentTileHighlighter( const TreemapView * treemapView,
 	                       const TreemapTile * tile,
 	                       const QString     & tooltip ):
@@ -753,7 +768,9 @@ namespace QDirStat
 	 **/
 	const TreemapTile * tile() const { return _tile; }
 
+
     protected:
+
 	/**
 	 * Return the shape of this item; in this case only the outline,
 	 * leaving the inside hollow to avoid displaying the tooltip there as
@@ -763,12 +780,12 @@ namespace QDirStat
 	 **/
 	QPainterPath shape() const override;
 
+
     private:
 
-	// Data members
 	const TreemapTile * _tile;
 
-    };
+    };	// class ParentTileHighlighter
 
 
 

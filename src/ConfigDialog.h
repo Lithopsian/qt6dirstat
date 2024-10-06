@@ -97,10 +97,6 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data members
-	//
-
 	std::unique_ptr<Ui::ConfigDialog> _ui;
 
     };	// class ConfigDialog

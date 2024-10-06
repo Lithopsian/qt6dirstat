@@ -106,6 +106,9 @@
        <property name="text">
         <string>&amp;Read</string>
        </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -118,30 +121,6 @@
     </layout>
    </item>
   </layout>
-  <action name="actionRead">
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/open-dir.png</normaloff>:/icons/open-dir.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Read</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionCopy">
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/edit-copy.png</normaloff>:/icons/edit-copy.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Copy device</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
  </widget>
  <resources>
   <include location="icons.qrc"/>
@@ -160,6 +139,22 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fsTree</sender>
+   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
+   <receiver>readButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>371</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>328</y>
     </hint>
    </hints>
   </connection>

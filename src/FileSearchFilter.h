@@ -16,7 +16,7 @@
 
 namespace QDirStat
 {
-    class DirInfo;
+    class FileInfo;
 
     /**
      * Filter class for searching for files and/or directories.
@@ -40,7 +40,7 @@ namespace QDirStat
          * - If it starts with "=", it uses "ExactMatch".
          * - If it's empty, it uses "SelectAll".
          **/
-        FileSearchFilter( DirInfo       * dir,
+        FileSearchFilter( FileInfo      * dir,
                           const QString & pattern,
                           FilterMode      filterMode,
                           bool            caseSensitive,
@@ -74,18 +74,19 @@ namespace QDirStat
         /**
          * Directory to start the search from
          **/
-        DirInfo * dir() const { return _dir; }
+        FileInfo * dir() const { return _dir; }
 
 
     private:
 
-        DirInfo * _dir;
-        bool      _findFiles{ true };
-        bool      _findDirs{ true };
-        bool      _findSymLinks{ true };
-        bool      _findPkgs{ true };
+        FileInfo * _dir;
+        bool       _findFiles{ true };
+        bool       _findDirs{ true };
+        bool       _findSymLinks{ true };
+        bool       _findPkgs{ true };
 
     };  // class FileSearchFilter
+
 
 
     inline QTextStream & operator<<( QTextStream            & stream,
@@ -116,6 +117,6 @@ namespace QDirStat
         return stream;
     }
 
-} // namespace QDirStat
+}       // namespace QDirStat
 
 #endif  // FileSearchFilter_h

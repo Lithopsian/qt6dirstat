@@ -13,6 +13,7 @@
 #include <QColor>
 #include <QStyledItemDelegate>
 #include <QTreeView>
+#include <QTreeWidget>
 
 #include "Typedefs.h" // ColorList
 
@@ -49,16 +50,13 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor with all the base fields.  Other constructors will
-	 * delegate to this one.
+	 * Constructor.
 	 **/
 	PercentBarDelegate( QTreeView * treeView,
-	                    int         percentBarCol,
 	                    int         barWidth,
 	                    QColor      barBackground,
 	                    ColorList   fillColors ):
 	    QStyledItemDelegate{ treeView },
-	    _percentBarCol{ percentBarCol },
 	    _sizeHintWidth{ barWidth },
 	    _barBackground{ barBackground },
 	    _fillColors{ fillColors },
@@ -67,6 +65,7 @@ namespace QDirStat
 
 	/**
 	 * Paint one cell in the view.
+	 *
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	void paint( QPainter                   * painter,
@@ -75,16 +74,24 @@ namespace QDirStat
 
 	/**
 	 * Return a size hint for one cell in the view.
+	 *
 	 * Inherited from QStyledItemDelegate.
 	 **/
 	QSize sizeHint( const QStyleOptionViewItem & option,
 	                const QModelIndex          & index) const override;
+
+	/**
+	 * Create two PercentBarDelegates from configuration settings and
+	 * add them to the 'filesCol' and 'sizeCol' columns of 'tree'.
+	 **/
+	static void createStatsDelegates( QTreeWidget * treeWidget, int filesCol, int sizeCol );
 
 
     protected:
 
 	/**
 	 * Paint a percent bar into a widget.
+	 *
 	 * 'indentPixel' is the number of pixels to indent the bar.
 	 **/
 	void paintPercentBar( QPainter                   * painter,
@@ -95,18 +102,13 @@ namespace QDirStat
 
     private:
 
-	//
-	// Data Members
-	//
-
-	int               _percentBarCol;
 	int               _sizeHintWidth;
 	const QColor      _barBackground;
 	const ColorList   _fillColors;
 	int               _indentation;
 
-    }; // class PercentBarDelegate
+    };	// class PercentBarDelegate
 
-}      // namespace QDirStat
+}	// namespace QDirStat
 
-#endif // PercentBar_h
+#endif	// PercentBar_h

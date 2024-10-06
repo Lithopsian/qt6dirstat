@@ -12,6 +12,7 @@
 #include <QtMath> // qFloor()
 
 #include "OutputWindow.h"
+#include "ActionManager.h"
 #include "Exception.h"
 #include "Settings.h"
 
@@ -24,24 +25,27 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     _ui{ new Ui::OutputWindow }
 {
     _ui->setupUi( this );
+    _ui->actionZoomIn->setShortcuts( QKeySequence::ZoomIn );
+    _ui->actionZoomOut->setShortcuts( QKeySequence::ZoomOut );
+    _ui->actionResetZoom->setShortcut( Qt::CTRL | Qt::Key_0 );
 
     //logDebug() << "Creating with parent " << parent << Qt::endl;
     readSettings();
 
-    _ui->terminal->clear();
     setAutoClose( autoClose );
+    clearOutput();
 
-    connect( _ui->actionZoomIn,      &QAction::triggered,
-             this,                   &OutputWindow::zoomIn );
+    connect( _ui->zoomInButton,    &QPushButton::clicked,
+             this,                 &OutputWindow::zoomIn );
 
-    connect( _ui->actionZoomOut,     &QAction::triggered,
-             this,                   &OutputWindow::zoomOut );
+    connect( _ui->zoomOutButton,   &QPushButton::clicked,
+             this,                 &OutputWindow::zoomOut );
 
-    connect( _ui->actionResetZoom,   &QAction::triggered,
-             this,                   &OutputWindow::resetZoom );
+    connect( _ui->resetZoomButton, &QPushButton::clicked,
+             this,                 &OutputWindow::resetZoom );
 
-    connect( _ui->actionKillProcess, &QAction::triggered,
-             this,                   &OutputWindow::killAll );
+    connect( _ui->killButton,      &QPushButton::clicked,
+             this,                 &OutputWindow::killAll );
 
     updateActions();
 }
@@ -49,7 +53,9 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
 
 OutputWindow::~OutputWindow()
 {
-    logDebug() << "Destructor" << Qt::endl;
+    //logDebug() << "Destructor" << Qt::endl;
+
+    Settings::writeWindowSettings( this, "OutputWindow" );
 
     if ( !_processList.isEmpty() )
     {
@@ -132,12 +138,6 @@ void OutputWindow::addText( const QString & rawText, const QColor & textColor )
     format.setForeground( QBrush{ textColor } );
     cursor.setCharFormat( format );
     cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
-}
-
-
-void OutputWindow::clearOutput()
-{
-    _ui->terminal->clear();
 }
 
 
@@ -249,7 +249,7 @@ void OutputWindow::closeIfDone()
     {
 	if ( ( autoClose() && _errorCount == 0 ) || _closed || !isVisible() )
 	{
-	    //logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
+	    logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
 	    this->deleteLater(); // It is safe to call this multiple times
 	}
     }
@@ -326,7 +326,7 @@ void OutputWindow::killAll()
     _processList.clear();
 
     _killedAll = true;
-    addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %1 processes." ).arg( killCount ) );
+    addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %L1 processes." ).arg( killCount ) );
 }
 
 
@@ -392,8 +392,13 @@ QString OutputWindow::command( QProcess * process )
 }
 
 
-void OutputWindow::closeEvent( QCloseEvent * )
+void OutputWindow::hideEvent( QHideEvent * event )
 {
+    // Ignore iconification or placing in another workspace
+    if ( event->spontaneous() )
+	return;
+
+    // Flag as "logically closed"
     _closed = true;
 
     // Wait until the last process is finished and then delete this window
@@ -402,21 +407,14 @@ void OutputWindow::closeEvent( QCloseEvent * )
 }
 
 
-void OutputWindow::updateActions()
-{
-    _ui->killButton->setEnabled( hasActiveProcess() );
-}
-
-
 void OutputWindow::showAfterTimeout( int timeoutMillisec )
 {
     // Show immediately if there is an error
     _showOnStderr = true;
 
-    // Shiw after the configured timeout if processes are still running
-    QTimer::singleShot( timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout(),
-                        this,
-                        &OutputWindow::timeoutShow );
+    // Show after the configured timeout if processes are still running
+    const int millisec = timeoutMillisec > 0 ? timeoutMillisec : defaultShowTimeout();
+    QTimer::singleShot( millisec, this, &OutputWindow::timeoutShow );
 }
 
 
@@ -451,6 +449,9 @@ void OutputWindow::readSettings()
     newPalette.setBrush( QPalette::Base, _terminalBackground );
     _ui->terminal->setPalette( newPalette );
     _ui->terminal->setFont( _terminalDefaultFont );
+
+    Settings::readWindowSettings( this, "OutputWindow" );
+    ActionManager::actionHotkeys( this, "OutputWindow" );
 }
 
 

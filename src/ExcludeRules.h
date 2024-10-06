@@ -200,7 +200,8 @@ namespace QDirStat
 	QString       _pattern;
 	bool          _useFullPath;
 	bool          _checkAnyFileChild;
-    };
+
+    };	// class ExcludeRule
 
 
     typedef QVector<const ExcludeRule *> ExcludeRuleList;
@@ -216,7 +217,6 @@ namespace QDirStat
      **/
     class ExcludeRules: public ExcludeRuleList
     {
-
     public:
 
 	/**
@@ -319,7 +319,8 @@ namespace QDirStat
 	 **/
 	void addDefaultRules();
 
-    };
+    };	// class ExcludeRules
+
 
 
     /**
@@ -339,5 +340,5 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif // ifndef ExcludeRules_h
+#endif	// ifndef ExcludeRules_h
 
