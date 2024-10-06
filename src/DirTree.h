@@ -381,6 +381,12 @@ namespace QDirStat
 	 **/
 	bool ignoreHardLinks() const { return _ignoreHardLinks; }
 
+	/**
+	 * Check if going from 'parent' to 'child' would cross a filesystem
+	 * boundary. This take Btrfs subvolumes into account.
+	 **/
+	static bool crossingFilesystems( const DirInfo * parent, const DirInfo * child );
+
 
     signals:
 

@@ -29,43 +29,6 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return the device name where 'dir' is on if it's a mount point.
-     * This uses MountPoints which reads /proc/mounts.
-     **/
-    QString device( const DirInfo * dir )
-    {
-	return MountPoints::device( dir->url() );
-    }
-
-
-    /**
-     * Check if going from 'parent' to 'child' would cross a filesystem
-     * boundary. This take Btrfs subvolumes into account.
-     **/
-    bool crossingFilesystems( DirInfo * parent, DirInfo * child )
-    {
-	if ( parent->device() == child->device() )
-	    return false;
-
-	const QString childDevice  = device( child );
-	const QString parentDevice = device( parent->findNearestMountPoint() );
-//	if ( parentDevice.isEmpty() ) // redundant check now that findNearestMountPoint() works
-//	    parentDevice = tree->device();
-
-	// Not safe to assume that empty devices indicate filesystem crossing.
-	// Calling something a mountpoint when it isn't causes findNearestMountPoint()
-	// to return null and things then crash.
-	const bool crossing = !parentDevice.isEmpty() && !childDevice.isEmpty() && parentDevice != childDevice;
-	if ( crossing )
-	    logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
-	else
-	    logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
-
-	return crossing;
-    }
-
-
-    /**
      * Check if we really should cross into a mounted filesystem; don't do
      * it if this is a system mount, a bind mount, a filesystem mounted
      * multiple times, or a network mount (NFS / Samba).
@@ -322,11 +285,11 @@ void LocalDirReadJob::processSubDir( const QString & entryName, DirInfo * subDir
 	subDir->setExcluded();
 	subDir->finishReading( DirOnRequestOnly );
     }
-    else if ( !crossingFilesystems( dir(), subDir ) ) // normal case
+    else if ( !DirTree::crossingFilesystems( dir(), subDir ) ) // normal case
     {
 	tree()->addJob( new LocalDirReadJob{ tree(), subDir, true } );
     }
-    else	    // The subdirectory we just found is a mount point.
+    else // The subdirectory we just found is a mount point.
     {
 	subDir->setMountPoint();
 

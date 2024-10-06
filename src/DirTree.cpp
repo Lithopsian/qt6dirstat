@@ -68,11 +68,8 @@ namespace
 	DirInfo * dir = new DirInfo{ parent, tree, name, statInfo };
 	parent->insertChild( dir );
 
-	if ( !isRoot && !parent->isPkgInfo() && parent->device() && dir->device() != parent->device() )
-	{
-	    logDebug() << dir << " is a mount point under " << parent << Qt::endl;
+	if ( !isRoot && !parent->isPkgInfo() && DirTree::crossingFilesystems( parent, dir ) )
 	    dir->setMountPoint();
-	}
 
 	return dir;
     }
@@ -709,4 +706,33 @@ void DirTree::setIgnoreHardLinks( bool ignore )
 	logInfo() << "Ignoring hard links" << Qt::endl;
 
     _ignoreHardLinks = ignore;
+}
+
+
+bool DirTree::crossingFilesystems( const DirInfo * parent, const DirInfo * child )
+{
+    /**
+     * Return the device name where 'dir' is on if it's a mount point.
+     * This uses MountPoints which reads /proc/mounts.
+     **/
+    const auto device = []( const DirInfo * dir ) { return MountPoints::device( dir->url() ); };
+
+    // If the device numbers match then we're definitely not crossing
+    if ( parent->device() == child->device() )
+	return false;
+
+    // See if there is an entry in the mountpoint list for 'child'
+    const QString childDevice  = device( child );
+    if ( childDevice.isEmpty() )
+	return false;
+
+    // Compare to the parent device name to eliminate mountpoints on the same device (eg. Btrfs sub-volumes)
+    const QString parentDevice = device( parent->findNearestMountPoint() );
+    const bool crossing = !parentDevice.isEmpty() && parentDevice != childDevice;
+    if ( crossing )
+	logInfo() << "Filesystem boundary at mount point " << child << " on device " << childDevice << Qt::endl;
+    else
+	logInfo() << "Mount point " << child << " is still on the same device " << childDevice << Qt::endl;
+
+    return crossing;
 }
