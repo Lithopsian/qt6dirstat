@@ -736,3 +736,124 @@ bool DirTree::crossingFilesystems( const DirInfo * parent, const DirInfo * child
 
     return crossing;
 }
+
+
+
+
+void DirReadJobQueue::enqueue( DirReadJob * job )
+{
+    if ( job )
+    {
+	_queue.append( job );
+	job->setQueue( this );
+
+	if ( !_timer.isActive() )
+	{
+	    // logDebug() << "First job queued" << Qt::endl;
+	    _timer.start( 0 );
+	}
+    }
+}
+
+
+void DirReadJobQueue::clear()
+{
+    qDeleteAll( _queue );
+    _queue.clear();
+    _queue.squeeze();
+
+    qDeleteAll( _blocked );
+    _blocked.clear();
+    _blocked.squeeze();
+}
+
+
+void DirReadJobQueue::abort()
+{
+    for ( const DirReadJob * job : asConst( _queue ) )
+    {
+	if ( job->dir() )
+	    job->dir()->readJobAborted();
+    }
+
+    for ( const DirReadJob * job : asConst( _blocked ) )
+    {
+	if ( job->dir() )
+	    job->dir()->readJobAborted();
+    }
+
+    clear();
+}
+
+
+void DirReadJobQueue::timeSlicedRead()
+{
+    if ( _queue.isEmpty() )
+	_timer.stop();
+    else
+	_queue.first()->read();
+}
+
+
+void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
+{
+    if ( job )
+    {
+	// Get rid of the old (finished) job.
+	_queue.removeOne( job );
+	delete job;
+    }
+
+    if ( _queue.isEmpty() && _blocked.isEmpty() )
+    {
+	// The timer will fire again and then stop itself
+	logDebug() << "No more jobs - finishing" << Qt::endl;
+	emit finished();
+    }
+}
+
+
+void DirReadJobQueue::deletingChildNotify( FileInfo * child )
+{
+    if ( child && child->isDirInfo() )
+    {
+	logDebug() << "Killing all pending read jobs for " << child << Qt::endl;
+	killSubtree( child->toDirInfo() );
+    }
+}
+
+
+void DirReadJobQueue::killSubtree( DirInfo * subtree, const DirReadJob * exceptJob )
+{
+    if ( !subtree )
+	return;
+
+    /**
+     * Delete all jobs within 'subtree' from the given queue, except 'exceptJob'.
+     **/
+    const auto killQueue = [ subtree, exceptJob ]( DirReadJobList & queue )
+    {
+	DirReadJobList newQueue;
+	for ( DirReadJob * job : asConst( queue ) )
+	{
+	    if ( job->dir() && job->dir()->isInSubtree( subtree ) && ( !exceptJob || job != exceptJob ) )
+		delete job;
+	    else
+		newQueue << job;
+	}
+	newQueue.swap( queue );
+    };
+
+    killQueue( _queue );
+    killQueue( _blocked );
+}
+
+
+void DirReadJobQueue::unblock( DirReadJob * job )
+{
+    _blocked.removeAll( job );
+    enqueue( job );
+
+//    if ( _blocked.isEmpty() )
+//	logDebug() << "No more jobs waiting for external processes" << Qt::endl;
+}
