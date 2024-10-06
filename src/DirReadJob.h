@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include <QString>
 #include <QTextStream>
 
 
