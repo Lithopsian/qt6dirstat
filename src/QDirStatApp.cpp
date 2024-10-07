@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QStandardPaths>
-
 #include "QDirStatApp.h"
 #include "DirInfo.h"
 #include "DirTree.h"
