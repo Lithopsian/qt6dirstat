@@ -143,8 +143,9 @@ namespace QDirStat
 	 * Tooltip event handler.
 	 *
 	 * This is implemented here to detect elided text in the name
-	 * column.  This could be done in a delegate, but can't be done
-	 * from the model where other tooltips are handled.
+	 * column.  This can't be done from the model where other
+	 * tooltips are handled because the actual tree geometry can't
+	 * be accessed.
 	 *
 	 * Reimplemented from QTreeView.
 	 **/

@@ -9,7 +9,6 @@
 
 #include <QAbstractButton>
 #include <QPointer>
-#include <QScrollBar>
 
 #include "UnreadableDirsWindow.h"
 #include "Attic.h"

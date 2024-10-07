@@ -10,7 +10,6 @@
 #include <QClipboard>
 #include <QKeyEvent>
 #include <QPointer>
-#include <QScrollBar>
 
 #include "FilesystemsWindow.h"
 #include "ActionManager.h"

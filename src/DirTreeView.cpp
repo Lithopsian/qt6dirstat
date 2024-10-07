@@ -12,7 +12,6 @@
 #include <QKeyEvent>
 #include <QScreen>
 #include <QScrollBar>
-#include <QToolTip>
 
 #include "DirTreeView.h"
 #include "ActionManager.h"

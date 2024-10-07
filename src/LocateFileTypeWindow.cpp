@@ -246,9 +246,6 @@ QVariant SuffixSearchResultItem::data( int column, int role ) const
 	return QTreeWidgetItem::data( column, role );
 
     return tooltipForElided( this, SSR_PathCol, 0 );
-
-//    const QTreeWidget * tree = treeWidget();
-//    return tooltipForElided( tree, column, 0, tree->iconSize(), tree->font(), text( column ) );
 }
 
 
