@@ -34,12 +34,12 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Set the font for 'label' to bold.
+     * Set the font bold property for 'label' to 'bold'.
      **/
-    void setBold( QLabel * label )
+    void setBold( QLabel * label, bool bold )
     {
 	QFont textFont = label->font();
-	textFont.setBold( true );
+	textFont.setBold( bold );
 	label->setFont( textFont );
     }
 
@@ -94,8 +94,9 @@ namespace
 	const auto size = file->rawAllocatedSize();
 	setValueWithLinks( label, size, file->links() );
 
-	if ( file->isSparseFile() || ( size > 4096 && file->usedPercent() < ALLOCATED_FAT_PERCENT ) )
-	    setBold( label );
+	const bool bold =
+	    file->isSparseFile() || ( size > 4096 && file->usedPercent() < ALLOCATED_FAT_PERCENT );
+	setBold( label, bold );
     }
 
 
@@ -482,8 +483,7 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
-	if ( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT )
-	    setBold( _ui->dirAllocatedLabel );
+	setBold( _ui->dirAllocatedLabel, totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
     }
     else  // Special msg -> show it and clear all summary fields
     {
