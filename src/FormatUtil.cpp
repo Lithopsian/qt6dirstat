@@ -9,13 +9,40 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLocale>
+#include <QScrollBar>
+#include <QToolTip>
+#include <QTreeView>
+#include <QTreeWidgetItem>
 
 #include "FormatUtil.h"
+#include "Logger.h"
 
 
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Insert zero-width spaces at regular intervals into 'text'
+     * to allow it to line-break naturally even if it doesn't
+     * contain characters that would normally allow a line-break.
+     *
+     * Note that this function changes 'text' and returns a
+     * reference to the original QString.
+     **/
+    QString & breakable( QString & text )
+    {
+	for ( int i = 10; i < text.size(); i += 10 )
+	    text.insert( i, u'\u200B' ); // zero-width space
+
+	return text;
+    }
+
+} // namespace
 
 
 QString QDirStat::formatSize( FileSize lSize, int precision )
@@ -34,7 +61,6 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
     {
 	// Exact number of bytes, no decimals
 	return lSize == 1 ? oneByte() : QString{ "%1 " }.arg( lSize ) % bytes();
-//	return QString::number( lSize ) % ( lSize == 1 ? QObject::tr( " byte" ) : QObject::tr( " bytes" ) );
     }
     else
     {
@@ -160,4 +186,71 @@ void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
     // Calculate a width from the dialog less margins, less a bit more
     const QFontMetrics metrics{ label->font() };
     label->setText( metrics.elidedText( text, Qt::ElideMiddle, maxSize ) );
+}
+
+
+void QDirStat::resizeTreeColumns( QTreeView * tree )
+{
+    // Try to resize everything to contents
+    QHeaderView * header = tree->header();
+    header->resizeSections( QHeaderView::ResizeToContents );
+    const int contentsWidth = header->sectionSize( 0 );
+
+    // Get the width of the vertical scrollbar if it is visible
+    const QScrollBar * scrollbar = tree->verticalScrollBar();
+    const bool scrollbarVisible = scrollbar->minimum() != scrollbar->maximum();
+    const int scrollbarWidth = scrollbarVisible ? scrollbar->sizeHint().width() : 0;
+
+    // Calculate the space that is available for this column by setting a minimum and then stretching
+    const int headerWidth = header->sectionSizeHint( 0 );
+    header->resizeSection( 0, headerWidth );
+    header->setSectionResizeMode( 0, QHeaderView::Stretch );
+    const int stretchedWidth =
+	qMax( headerWidth, header->sectionSize( 0 ) - scrollbarWidth - tree->indentation() );
+
+    // Set the width to the minimum of the contents width or the available width
+    header->setSectionResizeMode( 0, QHeaderView::Interactive );
+    header->resizeSection( 0, qMin( contentsWidth, stretchedWidth ) );
+}
+
+
+QString QDirStat::tooltipForElided( const QTreeWidgetItem * item, int column, int treeLevel )
+{
+    QTreeWidget * tree = item->treeWidget();
+
+    // Mock up a style option for the item
+    QStyleOptionViewItem opt;
+    if ( item->icon( column ).isNull() )
+	opt.features = QStyleOptionViewItem::HasDisplay;
+    else
+	opt.features = QStyleOptionViewItem::HasDisplay | QStyleOptionViewItem::HasDecoration;
+    opt.decorationSize = tree->iconSize();
+    opt.font           = tree->font();
+    opt.text           = item->text( column );
+
+    // No tooltip of the column is wider than the item
+    const int sectionWidth = tree->header()->sectionSize( column );
+    const QSize itemSize = tree->style()->sizeFromContents( QStyle::CT_ItemViewItem, &opt, QSize{} );
+    if ( itemSize.width() + tree->indentation() * treeLevel <= sectionWidth )
+	return QString{};
+
+    return breakable( opt.text );
+}
+
+
+void QDirStat::tooltipForElided( QRect                      visualRect,
+                                 QSize                      sizeHint,
+                                 const QAbstractItemModel * model,
+                                 const QModelIndex        & index,
+                                 QPoint                     pos )
+{
+    if ( model && visualRect.width() < sizeHint.width() )
+    {
+	QString text = model->data( index, Qt::DisplayRole ).toString();
+	QToolTip::showText( pos, breakable( text ) );
+    }
+    else
+    {
+	QToolTip::hideText();
+    }
 }

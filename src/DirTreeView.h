@@ -55,13 +55,22 @@ namespace QDirStat
 	/**
 	 * Expand or collapse an item based on a FileInfo pointer.
 	 **/
-	void setExpanded( FileInfo * item, bool expanded = true );
+	void setExpandedItem( FileInfo * item, bool expanded = true );
 
 	/**
 	 * Scroll to the current item (index).  This will open any necessary
 	 * branches and attempt to center the item in the viewport.
 	 **/
 	void scrollToCurrent() { scrollTo( currentIndex(), QAbstractItemView::PositionAtCenter ); }
+
+	/**
+	 * Helpers to get model data or headerData values directly from
+	 * DirTreView.
+	 **/
+	QVariant data( const QModelIndex & index, int role ) const
+	    { return model()->data( index, role ); }
+	QVariant headerData( int section, Qt::Orientation orientation, int role ) const
+	    { return model()->headerData( section, orientation, role ); }
 
 
     public slots:
@@ -123,13 +132,23 @@ namespace QDirStat
 	/**
 	 * Mouse button handler.
 	 *
-	 * Don't let QTreeView steal and misappropriate the mouse back /
-	 * forward buttons; we want consistent history buttons throughout the
-	 * application.
+	 * Don't let QTreeView take the mouse back/forward buttons; we
+	 * want consistent history buttons throughout the application.
 	 *
 	 * Reimplemented from QTreeView.
 	 **/
 	void mousePressEvent( QMouseEvent * event ) override;
+
+	/**
+	 * Tooltip event handler.
+	 *
+	 * This is implemented here to detect elided text in the name
+	 * column.  This could be done in a delegate, but can't be done
+	 * from the model where other tooltips are handled.
+	 *
+	 * Reimplemented from QTreeView.
+	 **/
+	bool viewportEvent( QEvent * event ) override;
 
 
     private:

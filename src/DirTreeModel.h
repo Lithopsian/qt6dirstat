@@ -18,11 +18,9 @@
 #include <QPalette>
 #include <QSet>
 #include <QTimer>
+#include <QTreeView>
 
 #include "DataColumns.h"
-
-
-class QTreeWidget;
 
 
 namespace QDirStat
@@ -178,12 +176,6 @@ namespace QDirStat
 	DirTreeItemSize dirTreeItemSize() const { return _treeItemSize; }
 
 	/**
-	 * Returns the configured tree icon size.
-	 **/
-	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
-
-	/**
 	 * Update internal settings from the general configuration page.
 	 * Any changes will be saved to the conf file in the destructor.
 	 **/
@@ -258,10 +250,11 @@ namespace QDirStat
 	const QIcon & networkIcon() const { return _networkIcon; }
 
 	/**
-	 * Set the icon and font size of a QTreeWidget's items based on
-	 * the configured DirTree item size.
+	 * Set the icon size of a QTreeView's items based on
+	 * the configured DirTree icon size.
 	 **/
-	void setTreeWidgetSizes( QTreeWidget * widget ) const;
+	void setTreeIconSize( QTreeView * tree ) const
+	    { tree->setIconSize( dirTreeIconSize() ); }
 
 
     public slots:
@@ -369,6 +362,12 @@ namespace QDirStat
 	    { return treeIconDir.contains( "medium"_L1 ) ? DTIS_Medium : DTIS_Small; }
 
 	/**
+	 * Returns the configured tree icon size.
+	 **/
+	QSize dirTreeIconSize() const
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
+
+	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about
 	 * new children (all the children of 'dir'). This might become
 	 * recursive if any of those children in turn are already finished.
@@ -452,9 +451,7 @@ namespace QDirStat
 	 * Return header data (in this case: column header texts) for the
 	 * specified section (column number).
 	 **/
-	QVariant headerData( int             section,
-	                     Qt::Orientation orientation,
-	                     int             role ) const override;
+	QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if
@@ -466,9 +463,7 @@ namespace QDirStat
 	 * Return the model index for the specified row (direct tree child
 	 * number) and column of item 'parent'.
 	 **/
-	QModelIndex index( int row,
-	                   int column,
-	                   const QModelIndex & parent = QModelIndex{} ) const override;
+	QModelIndex index( int row, int column, const QModelIndex & parent = QModelIndex{} ) const override;
 
 	/**
 	 * Return the parent model index of item 'index'.

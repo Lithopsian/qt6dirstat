@@ -53,7 +53,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( SSR_CountCol,     QObject::tr( "Files" ) );
@@ -89,8 +89,6 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
              this,               &LocateFileTypeWindow::selectResult );
-
-    show();
 }
 
 
@@ -121,6 +119,7 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
     LocateFileTypeWindow * instance = sharedInstance();
 
     instance->populate( suffix, fileInfo );
+    instance->show();
     instance->raise();
 }
 
@@ -237,6 +236,19 @@ SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
     set( SSR_PathCol,      Qt::AlignLeft,  path );
 
     setIcon( SSR_PathCol,  QIcon( app()->dirTreeModel()->dirIcon() ) );
+}
+
+
+QVariant SuffixSearchResultItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+    if ( role != Qt::ToolTipRole || column != SSR_PathCol )
+	return QTreeWidgetItem::data( column, role );
+
+    return tooltipForElided( this, SSR_PathCol, 0 );
+
+//    const QTreeWidget * tree = treeWidget();
+//    return tooltipForElided( tree, column, 0, tree->iconSize(), tree->font(), text( column ) );
 }
 
 

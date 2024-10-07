@@ -86,7 +86,7 @@ namespace QDirStat
         /**
          * Return the DirTreeView for this window
          **/
-        DirTreeView * dirTreeView() const { return _ui->dirTreeView; }
+//        DirTreeView * dirTreeView() const { return _ui->dirTreeView; }
 
         /**
          * Return the TreemapView for this window

@@ -75,7 +75,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( LL_SizeCol,  QObject::tr( "Total Size" ) );
@@ -118,8 +118,6 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
              this,               &LocateFilesWindow::itemContextMenu );
 
     connect( _ui->treeWidget, &QTreeWidget::currentItemChanged, &locateInMainWindow );
-
-    show();
 }
 
 
@@ -166,6 +164,9 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
     instance->_ui->heading->setStatusTip( headingText );
     instance->populate( fileInfo );
+
+    // Show now so the BusyPopup is not obscured
+    instance->show();
     instance->raise();
 }
 
@@ -259,6 +260,19 @@ LocateListItem::LocateListItem( FileInfo * item ):
     set( LL_PathCol,  Qt::AlignLeft,    _path );
 
     setIcon( LL_PathCol, app()->dirTreeModel()->itemTypeIcon( item ) );
+}
+
+
+QVariant LocateListItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+    if ( role != Qt::ToolTipRole || column != LL_PathCol )
+	return QTreeWidgetItem::data( column, role );
+
+    return tooltipForElided( this, LL_PathCol, 0 );
+
+//    const QTreeWidget * tree = treeWidget();
+//    return tooltipForElided( tree, column, 0, tree->iconSize(), tree->font(), text( column ) );
 }
 
 

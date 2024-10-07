@@ -124,6 +124,31 @@ namespace QDirStat
 
     };	// class UnreadableDirsWindow
 
+
+
+    /**
+     * Item class for the filesystems list.
+     **/
+    class UnreadableDirsItem: public QTreeWidgetItem
+    {
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	UnreadableDirsItem( const DirInfo * dir );
+
+
+    protected:
+
+	/**
+	 * Override the model data, just for the tooltip for the path
+	 * column.
+	 **/
+	QVariant data( int column, int role ) const override;
+
+    };	// class FilesystemItem
+
 }	// namespace QDirStat
 
 #endif	// UnreadableDirsWindow_h

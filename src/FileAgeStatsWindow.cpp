@@ -89,7 +89,7 @@ namespace
     void initTree( QTreeWidget * tree )
     {
 	// Set the row height based on the configured DirTree icon height
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( YL_YearMonthCol,       QObject::tr( "Year" ) );

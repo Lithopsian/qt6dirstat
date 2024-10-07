@@ -109,7 +109,7 @@ namespace QDirStat
 	 * The full text of the device column is copied, not just the
 	 * visible text.
 	 **/
-	void copyToClipboard();
+//	void copyToClipboard();
 
 	/**
 	 * Key press event for detecting evnter/return.
@@ -123,6 +123,8 @@ namespace QDirStat
 
 	std::unique_ptr<Ui::FilesystemsWindow> _ui;
 
+	bool _warnedAboutBtrfs{ false };
+
     };	// class FilesystemsWindow
 
 
@@ -132,13 +134,13 @@ namespace QDirStat
     enum FilesystemColumns
     {
 	FS_DeviceCol = 0,
-	FS_MountPathCol,
 	FS_TypeCol,
 	FS_TotalSizeCol,
 	FS_UsedSizeCol,
 	FS_ReservedSizeCol,
 	FS_FreeSizeCol,
 	FS_FreePercentCol,
+	FS_MountPathCol,
     };
 
 
@@ -173,9 +175,15 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Override the model data, just for the tooltips for the device
+	 * and mount point columns.
+	 **/
+	QVariant data( int column, int role ) const override;
+
+	/**
 	 * Less-than operator for sorting.
 	 **/
-	bool operator<( const QTreeWidgetItem & rawOther ) const;
+	bool operator<( const QTreeWidgetItem & rawOther ) const override;
 
 
     private:

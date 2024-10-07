@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <QTreeWidget>
+#include <QAbstractItemView>
 
 #include "DirTreeModel.h"
 #include "DirInfo.h"
@@ -37,9 +37,9 @@ namespace
     {
 	QStringList parents;
 
-	for ( QModelIndex parent = index; parent.isValid(); parent = index.model()->parent( parent ) )
+	for ( QModelIndex parent = index; parent.isValid(); parent = parent.parent() )
 	{
-	    const QVariant data = index.model()->data( parent, 0 );
+	    const QVariant data = parent.data( 0 );
 	    if ( data.isValid() )
 		parents.prepend( data.toString() );
 	}
@@ -869,20 +869,20 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     //dumpPersistentIndexList( persistentIndexList() );
 }
 
-
-void DirTreeModel::setTreeWidgetSizes( QTreeWidget * treeWidget ) const
+/*
+void DirTreeModel::setTreeItemSizes( QTreeView * tree ) const
 {
     if ( dirTreeItemSize() == DTIS_Medium )
     {
-        QFont biggerFont = treeWidget->font();
+        QFont biggerFont = tree->font();
         biggerFont.setPointSizeF( biggerFont.pointSizeF() * 1.1 );
-        treeWidget->setFont( biggerFont );
+        tree->setFont( biggerFont );
 	//setStyleSheet( QString{ "QTreeView{ font-size: %1pt; }" }.arg( pointSize ) );
     }
 
-    treeWidget->setIconSize( dirTreeIconSize() );
+    tree->setIconSize( dirTreeIconSize() );
 }
-
+*/
 
 QVariant DirTreeModel::columnIcon( FileInfo * item, int col ) const
 {
@@ -1129,7 +1129,7 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 	           << " col " << index.column()
 	           << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
 	           << "\t" << item
-	            << " data(0): " << index.model()->data( index, 0 ).toString()
+	            << " data(0): " << this->data( index, 0 ).toString()
 	           << Qt::endl;
 	logDebug() << "Ancestors: " << modelTreeAncestors( index ).join( " -> "_L1 ) << Qt::endl;
     }

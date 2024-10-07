@@ -114,7 +114,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );

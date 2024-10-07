@@ -17,6 +17,7 @@
 
 class QAction;
 class QMenu;
+class QTreeView;
 
 
 namespace QDirStat

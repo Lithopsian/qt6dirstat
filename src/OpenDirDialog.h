@@ -13,11 +13,13 @@
 #include <memory>
 
 #include <QDialog>
+#include <QStyledItemDelegate>
 
 #include "ui_open-dir-dialog.h"
 
 
 class QFileSystemModel;
+class QHelpEvent;
 
 
 namespace QDirStat
@@ -25,8 +27,7 @@ namespace QDirStat
     class ExistingDirValidator;
 
     /**
-     * Dialog to let the user select installed packages to open, very much like
-     * a "get existing directory" dialog, but returning a PkgFilter instead.
+     * Dialog to let the user select a directory to read.
      **/
     class OpenDirDialog: public QDialog
     {
@@ -149,6 +150,45 @@ namespace QDirStat
 	QString                _lastPath;
 
     };	// class OpenDirDialog
+
+
+
+    /**
+     * This delegate exists solely to provide a tooltip for
+     * elided items in the open directory tree.
+     **/
+    class OpenDirDelegate : public QStyledItemDelegate
+    {
+	Q_OBJECT
+
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	OpenDirDelegate( QObject * parent ):
+	    QStyledItemDelegate{ parent }
+	{}
+
+	/**
+	 * The help event is called with event type Tooltip when
+	 * a tooltip is requested.  If the tree item contents are
+	 * wider than the (only) tree section, then a tooltip is
+	 * shown with the full item text.
+	 *
+	 * Note that this function does not call tooltipForElided();
+	 * delegates have convenient access to both the available
+	 * width (starting from the indented position) and the width
+	 * of the contents including any icon.  There seems little
+	 * point extracting this information to call another function
+	 * that does the same thing.
+	 **/
+	bool helpEvent( QHelpEvent                 * event,
+	                QAbstractItemView          * view,
+	                const QStyleOptionViewItem & option,
+	                const QModelIndex          & index ) override;
+
+    };	// class OpenDirDelegate
 
 }	// namespace QDirStat
 

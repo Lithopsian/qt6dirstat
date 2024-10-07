@@ -263,7 +263,7 @@ namespace QDirStat
 	static MountPoints * instance();
 
 	/**
-	 * Initialise the member variables.
+	 * Initialise the member variables and mount point map.
 	 **/
 	void init();
 
@@ -309,7 +309,8 @@ namespace QDirStat
 	/**
 	 * Return 'true' if any mount point has filesystem type "btrfs".
 	 **/
-	static bool hasBtrfs();
+	static bool hasBtrfs()
+	    { return instance()->_hasBtrfs; }
 
 	/**
 	 * Return 'true' if any mount point has filesystem type "btrfs".
@@ -382,7 +383,6 @@ namespace QDirStat
 
 	bool _hasBtrfs;
 	bool _hasNtfs;
-	bool _checkedForBtrfs;
 
     };	// class MountPoints
 

@@ -257,7 +257,7 @@ QString HeaderTweaker::colName( int section ) const
 
     const DataColumn col = DataColumns::fromViewCol( section );
 
-    return _treeView->model()->headerData( col, Qt::Horizontal, Qt::DisplayRole ).toString();
+    return _treeView->headerData( col, Qt::Horizontal, Qt::DisplayRole ).toString();
 }
 
 

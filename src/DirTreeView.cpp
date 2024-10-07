@@ -7,9 +7,12 @@
  *              Ian Nartowicz
  */
 
+#include <QApplication>
 #include <QMenu>
 #include <QKeyEvent>
+#include <QScreen>
 #include <QScrollBar>
+#include <QToolTip>
 
 #include "DirTreeView.h"
 #include "ActionManager.h"
@@ -204,14 +207,14 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
 }
 
 
-void DirTreeView::setExpanded( FileInfo * item, bool expanded )
+void DirTreeView::setExpandedItem( FileInfo * item, bool expanded )
 {
     const DirTreeModel * model = dirTreeModel();
     if ( model )
     {
 	const QModelIndex index = model->modelIndex( item );
 	if ( index.isValid() )
-	    QTreeView::setExpanded( index, expanded );
+	    setExpanded( index, expanded );
     }
 }
 
@@ -285,4 +288,24 @@ void DirTreeView::scrolled( int )
 
     // Return the checked rows limit to the default
     treeHeader->setResizeContentsPrecision( precision );
+}
+
+
+bool DirTreeView::viewportEvent( QEvent * event )
+{
+    if ( event && event->type() == QEvent::ToolTip )
+    {
+	QHelpEvent * helpEvent = static_cast<QHelpEvent *>( event );
+	QModelIndex index = indexAt( helpEvent->pos() );
+	if ( index.isValid() )
+	{
+	    const QRect rect     = visualRect( index );
+	    const QSize sizeHint = sizeHintForIndex( index );
+	    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
+
+	    return true;
+	}
+    }
+
+    return QTreeView::viewportEvent( event );
 }

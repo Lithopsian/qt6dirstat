@@ -9,13 +9,18 @@
 
 #include <QDir>
 #include <QFileSystemModel>
+#include <QHelpEvent>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTimer>
+#include <QToolTip>
 
 #include "OpenDirDialog.h"
+#include "DirTreeModel.h"
 #include "ExistingDir.h"
+#include "FormatUtil.h"
 #include "Logger.h"
+#include "QDirStatApp.h" // DirTreeModel
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -71,6 +76,8 @@ void OpenDirDialog::initPathComboBox()
 
 void OpenDirDialog::initDirTree()
 {
+    app()->dirTreeModel()->setTreeIconSize( _ui->dirTreeView );
+
     _filesystemModel->setRootPath( "/" );
     _filesystemModel->setFilter( QDir::Dirs       |
                                  QDir::NoDot      |
@@ -82,6 +89,8 @@ void OpenDirDialog::initDirTree()
     _ui->dirTreeView->hideColumn( 3 );  // Date Modified
     _ui->dirTreeView->hideColumn( 2 );  // Type
     _ui->dirTreeView->hideColumn( 1 );  // Size
+
+    _ui->dirTreeView->setItemDelegateForColumn( 0, new OpenDirDelegate{ this } );
 }
 
 
@@ -261,3 +270,20 @@ QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
     return path;
 }
 
+
+
+
+bool OpenDirDelegate::helpEvent( QHelpEvent                 * event,
+                                 QAbstractItemView          * view,
+                                 const QStyleOptionViewItem & option,
+                                 const QModelIndex          & index )
+{
+    if ( event && event->type() == QEvent::ToolTip && view && index.isValid() )
+    {
+        tooltipForElided( option.rect, sizeHint( option, index ), view->model(), index, event->globalPos() );
+
+        return true;
+    }
+
+    return QStyledItemDelegate::helpEvent( event, view, option, index );
+}

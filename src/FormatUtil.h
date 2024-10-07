@@ -14,8 +14,8 @@
 #include <sys/types.h> // mode_t
 #include <sys/stat.h>  // ALLPERMS, S_IRUSR, S_ISUID, etc
 
+#include <QAbstractItemModel>
 #include <QFontMetrics>
-#include <QLocale>
 #include <QStringBuilder>
 
 #include "Typedefs.h" // FileSize
@@ -43,6 +43,8 @@
 
 
 class QLabel;
+class QTreeView;
+class QTreeWidgetItem;
 
 
 namespace QDirStat
@@ -256,7 +258,39 @@ namespace QDirStat
      * formatSize() explicitly if you need this.
      **/
 //    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
-//	{ return stream << formatSize( lSize ); }
+//        { return stream << formatSize( lSize ); }
+
+    /**
+     * Resize the columns of 'tree'.  First, attempt to resize all
+     * columns to fit their contents.  This will generally succeed,
+     * but may leave the tree wider than the viewport.  Next, resize
+     * the first column with a hard minimum size of its header width,
+     * and then stretch the first column as much as possible from its
+     * minimum size.  Use the smaller of those two widths and leave
+     * the columns in interactive resize mode so the user can access
+     * any text that is still ellipsized.
+     **/
+    void resizeTreeColumns( QTreeView * tree );
+
+    /**
+     * Compare the size of a tree item with the section width.  If
+     * the item is wider than the section then a tooltip should be
+     * shown.  Two overloads are provided: the first calculates the
+     * item and section widths for 'column' in 'item' and returns
+     * either an empty string or a string to be displayed as the
+     * tooltip; the second compares 'sizeHint' and 'visualRect' and
+     * shows a tooltip itself from the display role for 'index' in
+     * 'model'.  Both versions insert zero-width spaces into the text
+     * to allow it to break naturally even if it doesn't contain
+     * characters that would normally allow a line break.
+     *
+     **/
+    QString tooltipForElided( const QTreeWidgetItem * item, int column, int treeLevel );
+    void tooltipForElided( QRect                      visualRect,
+                           QSize                      sizeHint,
+                           const QAbstractItemModel * model,
+                           const QModelIndex        & index,
+                           QPoint                     pos );
 
 }	// namespace QDirStat
 

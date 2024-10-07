@@ -178,6 +178,12 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Override the model data, just for the tooltip for the
+	 * directory column.
+	 **/
+	QVariant data( int column, int role ) const override;
+
+	/**
 	 * Less-than operator for sorting.
 	 **/
 	bool operator<( const QTreeWidgetItem & other ) const override;

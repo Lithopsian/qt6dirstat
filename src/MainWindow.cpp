@@ -685,7 +685,7 @@ void MainWindow::applyFutureSelection()
 
 	// A bit annoying to open every refreshed directory, so just the top level
 //        if ( sel->parent() == app()->dirTree()->root() )
-            _ui->dirTreeView->setExpanded( sel, true );
+            _ui->dirTreeView->setExpandedItem( sel, true );
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }
@@ -932,7 +932,7 @@ void MainWindow::navigateToUrl( const QString & url )
     if ( sel )
     {
 	app()->selectionModel()->setCurrentItem( sel, true ); // select
-	_ui->dirTreeView->setExpanded( sel, true );
+	_ui->dirTreeView->setExpandedItem( sel, true );
     }
 }
 

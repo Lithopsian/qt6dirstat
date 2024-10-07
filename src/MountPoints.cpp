@@ -197,7 +197,6 @@ void MountPoints::init()
 
     _hasBtrfs        = false;
     _hasNtfs         = false;
-    _checkedForBtrfs = false;
 
     populate();
 }
@@ -233,20 +232,6 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 }
 
 
-bool MountPoints::hasBtrfs()
-{
-    auto mountPoints = instance();
-
-    if ( !mountPoints->_checkedForBtrfs )
-    {
-        mountPoints->_hasBtrfs = checkForBtrfs( mountPoints );
-        mountPoints->_checkedForBtrfs = true;
-    }
-
-    return mountPoints->_hasBtrfs;
-}
-
-
 void MountPoints::populate()
 {
     QStringList ntfsDevices = findNtfsDevices();
@@ -257,6 +242,8 @@ void MountPoints::populate()
     if ( isEmpty() )
         logError() << "Could not read either /proc/mounts or /etc/mtab" << Qt::endl;
 #endif
+
+    _hasBtrfs = checkForBtrfs( this );
 
 #if HAVE_Q_STORAGE_INFO
     if ( isEmpty() )
