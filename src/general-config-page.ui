@@ -68,7 +68,7 @@
           <item row="2" column="1">
            <widget class="QComboBox" name="treeIconThemeComboBox">
             <property name="toolTip">
-             <string>The size of the rows in tree view lists</string>
+             <string>The size of icons in tree view lists</string>
             </property>
             <item>
              <property name="text">
@@ -117,7 +117,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="treeIconThemeCaption">
             <property name="text">
-             <string>&amp;Tree item size</string>
+             <string>&amp;Tree icon size</string>
             </property>
             <property name="buddy">
              <cstring>treeIconThemeComboBox</cstring>

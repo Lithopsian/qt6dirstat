@@ -869,20 +869,6 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     //dumpPersistentIndexList( persistentIndexList() );
 }
 
-/*
-void DirTreeModel::setTreeItemSizes( QTreeView * tree ) const
-{
-    if ( dirTreeItemSize() == DTIS_Medium )
-    {
-        QFont biggerFont = tree->font();
-        biggerFont.setPointSizeF( biggerFont.pointSizeF() * 1.1 );
-        tree->setFont( biggerFont );
-	//setStyleSheet( QString{ "QTreeView{ font-size: %1pt; }" }.arg( pointSize ) );
-    }
-
-    tree->setIconSize( dirTreeIconSize() );
-}
-*/
 
 QVariant DirTreeModel::columnIcon( FileInfo * item, int col ) const
 {
