@@ -68,7 +68,6 @@ SOURCES =   main.cpp			\
 	    FileInfoSet.cpp		\
 	    FileInfoSorter.cpp		\
 	    FileMTimeStats.cpp		\
-	    FileSizeLabel.cpp		\
 	    FileSizeStats.cpp		\
 	    FileSizeStatsModels.cpp	\
 	    FileSizeStatsWindow.cpp	\
@@ -162,7 +161,6 @@ HEADERS =   QDirStatApp.h		\
 	    FileInfoSorter.h		\
 	    FileMTimeStats.h		\
 	    FileSearchFilter.h		\
-	    FileSizeLabel.h		\
 	    FileSizeStats.h		\
 	    FileSizeStatsModels.h	\
 	    FileSizeStatsWindow.h	\

@@ -93,6 +93,11 @@ namespace QDirStat
 	/**
 	 * Update package information via the AdaptiveTimer.
 	 **/
+	const Ui::FileDetailsView * ui() { return _ui.get(); }
+
+	/**
+	 * Update package information via the AdaptiveTimer.
+	 **/
 	void updatePkgInfo( const QString & path );
 
 	/**
@@ -104,11 +109,6 @@ namespace QDirStat
 	 * Show details about a package.
 	 **/
 	void showDetails( PkgInfo * pkgInfo );
-
-	/**
-	 * Show a summary of the current selection.
-	 **/
-//	void showSelectionSummary( const FileInfoSet & selectedItems );
 
 	/**
 	 * Show the packages summary (pkg:/).

@@ -2,8 +2,13 @@
 <ui version="4.0">
  <class>FileDetailsView</class>
  <widget class="QStackedWidget" name="FileDetailsView">
-  <property name="currentIndex">
-   <number>1</number>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>229</width>
+    <height>374</height>
+   </rect>
   </property>
   <widget class="QWidget" name="fileDetailsPage">
    <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -134,14 +139,14 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="fileAllocatedLabel">
+         <widget class="QLabel" name="fileAllocatedLabel">
           <property name="text">
            <string notr="true">42.0 kB</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="fileSizeLabel">
+         <widget class="QLabel" name="fileSizeLabel">
           <property name="text">
            <string notr="true">42.0 kB</string>
           </property>
@@ -475,6 +480,12 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
            </spacer>
           </item>
          </layout>
@@ -511,7 +522,7 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="dirAllocatedLabel">
+         <widget class="QLabel" name="dirAllocatedLabel">
           <property name="text">
            <string notr="true">512.0 MiB</string>
           </property>
@@ -642,14 +653,14 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="dirTotalSizeLabel">
+         <widget class="QLabel" name="dirTotalSizeLabel">
           <property name="text">
            <string notr="true">512.0 MiB</string>
           </property>
          </widget>
         </item>
         <item row="11" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="dirOwnSizeLabel">
+         <widget class="QLabel" name="dirOwnSizeLabel">
           <property name="text">
            <string notr="true">4.0 kiB</string>
           </property>
@@ -889,7 +900,7 @@
          </widget>
         </item>
         <item row="5" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="pkgTotalSizeLabel">
+         <widget class="QLabel" name="pkgTotalSizeLabel">
           <property name="text">
            <string notr="true">240.0 MB</string>
           </property>
@@ -908,7 +919,7 @@
          </widget>
         </item>
         <item row="6" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="pkgAllocatedLabel">
+         <widget class="QLabel" name="pkgAllocatedLabel">
           <property name="text">
            <string notr="true">240.0 MB</string>
           </property>
@@ -1149,7 +1160,7 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="pkgSummaryAllocatedLabel">
+         <widget class="QLabel" name="pkgSummaryAllocatedLabel">
           <property name="text">
            <string notr="true">240.0 MB</string>
           </property>
@@ -1175,7 +1186,7 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="pkgSummaryTotalSizeLabel">
+         <widget class="QLabel" name="pkgSummaryTotalSizeLabel">
           <property name="text">
            <string notr="true">240.0 MB</string>
           </property>
@@ -1295,7 +1306,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="selAllocatedLabel">
+         <widget class="QLabel" name="selAllocatedLabel">
           <property name="text">
            <string notr="true">512.0 MB</string>
           </property>
@@ -1347,7 +1358,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QDirStat::FileSizeLabel" name="selTotalSizeLabel">
+         <widget class="QLabel" name="selTotalSizeLabel">
           <property name="text">
            <string notr="true">512.0 MB</string>
           </property>
@@ -1427,13 +1438,6 @@
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QDirStat::FileSizeLabel</class>
-   <extends>QLabel</extends>
-   <header>FileSizeLabel.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="icons.qrc"/>
  </resources>

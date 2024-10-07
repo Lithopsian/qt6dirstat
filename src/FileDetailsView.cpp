@@ -25,6 +25,7 @@
 
 
 #define MAX_SYMLINK_TARGET_LEN 25
+#define ALLOCATED_FAT_PERCENT 33
 
 
 using namespace QDirStat;
@@ -33,25 +34,117 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Set a label with a number and an optional prefix.
+     * Set the font for 'label' to bold.
      **/
-    void setLabel( QLabel        * label,
-                   int             number,
-                   QLatin1String   prefix = QLatin1String{} )
+    void setBold( QLabel * label )
+    {
+	QFont textFont = label->font();
+	textFont.setBold( true );
+	label->setFont( textFont );
+    }
+
+
+    /**
+     * Set the tooltip for 'label' to a value.  The value will be formatted as the
+     * exact number of bytes with the unit "bytes".  For values below 1000 bytes
+     * (will appear as 1.0kB), no tooltip will be shown since the exact number of
+     * bytes are already visible.  The tooltip may have a prefix (eg. ">") or it may
+     * have hard links, but it should never have both.
+     **/
+    void setToolTip( QLabel * label, FileSize size, QLatin1String prefix, nlink_t numLinks )
+    {
+	if ( size < 1000 ) // not useful below (rounded) 1 kB
+	    label->setToolTip( QString{} );
+
+	label->setToolTip( whitespacePre( prefix % formatByteSize( size ) % formatLinksRichText( numLinks ) ) );
+    }
+
+
+    /**
+     * Set the text and tooltip for 'label'.  The label string is formatted in a
+     * human-readable format, including the number of hard links (only when there
+     * is more than one hard link).
+     **/
+    void setValueWithLinks( QLabel * label, FileSize size, nlink_t numLinks )
+    {
+	label->setText( formatSize( size ) % formatLinksInline( numLinks ) );
+	setToolTip( label, size, QLatin1String{}, numLinks );
+    }
+
+
+    /**
+     * Set the text for 'label' to a file size, including special handling for
+     * sparse files and files with multiple hard links.
+     **/
+    void setSize( QLabel * label, const FileInfo * file )
+    {
+	setValueWithLinks( label, file->rawByteSize(), file->links() );
+    }
+
+
+    /**
+     * Set the text for 'label' to an allocated size, including special handling
+     * for sparse files and files with multiple hard links.
+     *
+     * Note that this is only useful for plain files, not for directories,
+     * packages or multiple selected files.
+     **/
+    void setAllocated( QLabel * label, const FileInfo * file )
+    {
+	const auto size = file->rawAllocatedSize();
+	setValueWithLinks( label, size, file->links() );
+
+	if ( file->isSparseFile() || ( size > 4096 && file->usedPercent() < ALLOCATED_FAT_PERCENT ) )
+	    setBold( label );
+    }
+
+
+    /**
+     * Set the text and tooltip for 'label'. This will format the value and
+     * display it in human-readable format, i.e. something like "123.4 MB".
+     * Values such as zero or -1 will be formatted as an empty string.
+     *
+     * 'prefix' is an optional text prefix like "> " to indicate that the
+     * exact value is unknown (e.g. because of insuficcient permissions in
+     * a directory tree).
+     *
+     * If the value is more than 1024, the label is given a tooltip containing
+     * the exact value in bytes.
+     **/
+    void setValue( QLabel * label, FileSize value, QLatin1String prefix )
+    {
+	label->setText( prefix % formatSize( value ) );
+	setToolTip( label, value, prefix, 0 );
+    }
+
+
+    /**
+     * Clear the visible text and tooltip from 'label'.
+     **/
+    void clearLabel( QLabel * label )
+    {
+	label->setToolTip( QString{} );
+	label->clear();
+    }
+
+
+    /**
+     * Set the text for 'label' to a number with an optional prefix.
+     **/
+    void setLabel( QLabel * label, int number, QLatin1String prefix = QLatin1String{} )
     {
 	label->setText( prefix % QString{ "%L1" }.arg( number ) );
     }
 
 
     /**
-     * Set a file size label with a file size and an optional prefix.
+     * Set the text for 'label' to a file size with an optional prefix.
      **/
-    void setLabel( FileSizeLabel * label,
-                   FileSize        size,
-                   QLatin1String   prefix = QLatin1String{} )
+    void setLabel( QLabel * label, FileSize size, QLatin1String prefix = QLatin1String{} )
     {
-	label->setValue( size, prefix );
+	setValue( label, size, prefix );
     }
+
 
     /**
      * Return the MIME category of a file.
@@ -61,6 +154,7 @@ namespace
 	return MimeCategorizer::instance()->name( fileInfo );
     }
 
+
     /**
      * Return a message string describing the status of a DirInfo node.
      **/
@@ -68,6 +162,7 @@ namespace
     {
 	return FileDetailsView::readStateMsg( dir->isBusy() ? DirReading : dir->readState() );
     }
+
 
     /**
      * The ratio of totalSize() / totalAllocatedSize() in percent for a directory.
@@ -123,19 +218,18 @@ namespace
 // The delay stages are constructed to rapidly move to stage 1, which is a short
 // delay of half the time taken for the previous query to complete.  In practice,
 // this delay will probably not be noticeable.  After that the delay increases only
-// with fairly rapid repeated requests so a level which is likely to be visible, but
+// with fairly rapid repeated requests to a level which is likely to be visible, but
 // will still allow most requests to complete after a moment.  The longest delays
-// are only reached with very rapid repeated requests such as scrolling through a list
-// of files and then quickly drop to a shorter delay when the repeated requests stop
-// or slow down.
+// are only reached with very rapid repeated requests such as scrolling through a
+// list of files and then quickly drop to a shorter delay when the repeated requests
+// stop or slow down.
 FileDetailsView::FileDetailsView( QWidget * parent ):
     QStackedWidget{ parent },
     _ui{ new Ui::FileDetailsView },
     _pkgUpdateTimer{ new AdaptiveTimer{ this,
                                         { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
                                         { 3000, 1000, 500, 250, 150 },  // cooldown stages
-                                      }
-                    }
+                                      } }
 {
     _ui->setupUi( this );
 
@@ -150,8 +244,8 @@ void FileDetailsView::setCurrentPage( QWidget * page )
 {
     // Simply hiding all other widgets is not enough: The QStackedLayout will
     // still reserve screen space for the largest widget. The other pages
-    // really need to be removed from the layout. They are still children of
-    // the QStackedWidget, but no longer in the layout.
+    // need to be removed from the layout. They are still children of the
+    // QStackedWidget, but no longer in the layout.
 
     while ( count() > 0 )
 	removeWidget( widget( 0 ) );
@@ -231,9 +325,9 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     {
 	_ui->fileMimeCaption->setEnabled( false );
 	_ui->fileMimeLabel->setEnabled( false );
-	_ui->fileMimeLabel->clear();
-	_ui->fileSizeLabel->clear();
-	_ui->fileAllocatedLabel->clear();
+	clearLabel( _ui->fileMimeLabel );
+	clearLabel( _ui->fileSizeLabel );
+	clearLabel( _ui->fileAllocatedLabel );
     }
     else // ! isSymLink
     {
@@ -244,8 +338,8 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     _ui->fileAllocatedCaption->setEnabled( !isSpecial );
     if ( !isSpecial )
     {
-	_ui->fileSizeLabel->setSize( file );
-	_ui->fileAllocatedLabel->setAllocated( file );
+	setSize( _ui->fileSizeLabel, file );
+	setAllocated( _ui->fileAllocatedLabel, file );
     }
 
     _ui->fileUserLabel->setText( file->userName() );
@@ -283,7 +377,7 @@ void FileDetailsView::showFilePkgInfo( const FileInfo * file )
 	    QString delayHint{ _pkgUpdateTimer->delayStage(), u'.' };
 	    _ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
-	    // Caspture url by value because the FileInfo may be gone by the time the timer expires
+	    // Capture url by value because the FileInfo may be gone by the time the timer expires
 	    const QString url = file->url();
 	    _pkgUpdateTimer->request( [ this, url ]() { updatePkgInfo( url ); } );
 
@@ -312,6 +406,7 @@ void FileDetailsView::setSystemFileWarningVisibility( bool visible )
     _ui->fileSystemFileWarning->setVisible( visible );
     _ui->fileSystemFileWarningSpacer->setVisible( visible );
 }
+
 
 void FileDetailsView::setFilePkgBlockVisibility( bool visible )
 {
@@ -388,16 +483,16 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 
 //	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
 	if ( totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT )
-	    _ui->dirAllocatedLabel->setBold();
+	    setBold( _ui->dirAllocatedLabel );
     }
     else  // Special msg -> show it and clear all summary fields
     {
 	_ui->dirTotalSizeLabel->setText( msg );
-	_ui->dirAllocatedLabel->clear();
-	_ui->dirItemCountLabel->clear();
-	_ui->dirFileCountLabel->clear();
-	_ui->dirSubDirCountLabel->clear();
-	_ui->dirLatestMTimeLabel->clear();
+	clearLabel( _ui->dirAllocatedLabel );
+	clearLabel( _ui->dirItemCountLabel );
+	clearLabel( _ui->dirFileCountLabel );
+	clearLabel( _ui->dirSubDirCountLabel );
+	clearLabel( _ui->dirLatestMTimeLabel );
     }
 }
 
@@ -475,10 +570,10 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
     {
 	// Special msg -> show it and clear all summary fields
 	_ui->pkgTotalSizeLabel->setText( msg );
-	_ui->pkgAllocatedLabel->clear();
-	_ui->pkgItemCountLabel->clear();
-	_ui->pkgFileCountLabel->clear();
-	_ui->pkgSubDirCountLabel->clear();
+	clearLabel( _ui->pkgAllocatedLabel );
+	clearLabel( _ui->pkgItemCountLabel );
+	clearLabel( _ui->pkgFileCountLabel );
+	clearLabel( _ui->pkgSubDirCountLabel );
     }
 
     _ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
@@ -515,10 +610,10 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
     else
     {
 	_ui->pkgSummaryTotalSizeLabel->setText( msg );
-	_ui->pkgSummaryAllocatedLabel->clear();
-	_ui->pkgSummaryItemCountLabel->clear();
-	_ui->pkgSummaryFileCountLabel->clear();
-	_ui->pkgSummarySubDirCountLabel->clear();
+	clearLabel( _ui->pkgSummaryAllocatedLabel );
+	clearLabel( _ui->pkgSummaryItemCountLabel );
+	clearLabel( _ui->pkgSummaryFileCountLabel );
+	clearLabel( _ui->pkgSummarySubDirCountLabel );
     }
 
     _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
