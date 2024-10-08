@@ -91,7 +91,7 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Update package information via the AdaptiveTimer.
+	 * Getter for a raw pointer to the UI object.
 	 **/
 	const Ui::FileDetailsView * ui() { return _ui.get(); }
 
@@ -128,11 +128,6 @@ namespace QDirStat
 	 * the caption if a category is found.
 	 **/
 	void setMimeCategory( const FileInfo * fileInfo );
-
-	/**
-	 * Set a label with a text of limited size.
-	 **/
-	void setLabelLimited( QLabel * label, const QString & text );
 
 	// Boilerplate widget setting methods
 	void showFileInfo( FileInfo * file );

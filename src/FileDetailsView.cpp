@@ -18,7 +18,7 @@
 #include "MimeCategorizer.h"
 #include "MountPoints.h"
 #include "PkgQuery.h"
-#include "QDirStatApp.h"
+#include "QDirStatApp.h" // DirTreeModel, SelectionModel
 #include "SelectionModel.h"
 #include "SystemFileChecker.h"
 #include "SysUtil.h"
@@ -33,6 +33,18 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Set a label with a text of limited size.
+     **/
+    void setLabelLimited( QLabel * label, const QString & text, int limit, bool setTooltip = true )
+    {
+	const QString limitedText = elideMiddle( text, limit );
+	label->setText( limitedText );
+	if ( setTooltip )
+	    label->setToolTip( text == limitedText ? QString{} : text );
+    }
+
+
     /**
      * Set the font bold property for 'label' to 'bold'.
      **/
@@ -132,7 +144,7 @@ namespace
     /**
      * Set the text for 'label' to a number with an optional prefix.
      **/
-    void setLabel( QLabel * label, int number, QLatin1String prefix = QLatin1String{} )
+    void setCountLabel( QLabel * label, FileCount number, QLatin1String prefix = QLatin1String{} )
     {
 	label->setText( prefix % QString{ "%L1" }.arg( number ) );
     }
@@ -141,7 +153,7 @@ namespace
     /**
      * Set the text for 'label' to a file size with an optional prefix.
      **/
-    void setLabel( QLabel * label, FileSize size, QLatin1String prefix = QLatin1String{} )
+    void setSizeLabel( QLabel * label, FileSize size, QLatin1String prefix = QLatin1String{} )
     {
 	setValue( label, size, prefix );
     }
@@ -256,31 +268,72 @@ void FileDetailsView::setCurrentPage( QWidget * page )
 }
 
 
+void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
+{
+    // logDebug() << "Showing selection summary" << Qt::endl;
+
+    FileCount fileCount        = 0;
+    FileCount dirCount         = 0;
+    FileCount subtreeFileCount = 0;
+
+    const FileInfoSet sel = selectedItems.normalized();
+    for ( FileInfo * item : sel )
+    {
+	if ( item->isDirInfo() )
+	{
+	    ++dirCount;
+	    subtreeFileCount += item->totalFiles();
+	}
+	else
+	{
+	    ++fileCount;
+	}
+    }
+
+    _ui->selFileCountCaption->setEnabled( fileCount > 0 );
+    _ui->selFileCountLabel->setEnabled( fileCount > 0 );
+
+    _ui->selDirCountCaption->setEnabled( dirCount > 0 );
+    _ui->selDirCountLabel->setEnabled( dirCount > 0 );
+
+    _ui->selSubtreeFileCountCaption->setEnabled( subtreeFileCount > 0 );
+    _ui->selSubtreeFileCountLabel->setEnabled( subtreeFileCount > 0 );
+
+    _ui->selHeading->setText( sel.count() == 1 ?
+                              tr( "1 Selected Item" ) :
+                              tr( "%L1 Selected Items" ).arg( sel.count() ) );
+
+    setSizeLabel ( _ui->selTotalSizeLabel,        sel.totalSize()          );
+    setSizeLabel ( _ui->selAllocatedLabel,        sel.totalAllocatedSize() );
+    setCountLabel( _ui->selFileCountLabel,        fileCount                );
+    setCountLabel( _ui->selDirCountLabel,         dirCount                 );
+    setCountLabel( _ui->selSubtreeFileCountLabel, subtreeFileCount         );
+
+    setCurrentPage( _ui->selectionSummaryPage );
+}
+
+
 void FileDetailsView::showDetails( FileInfo * file )
 {
     if ( !file )
     {
 	clear();
-	return;
     }
-
-    if ( file->isPkgInfo() )
+    else if ( file->isPkgInfo() )
     {
 	showDetails( file->toPkgInfo() );
-	return;
     }
-
-    if ( file->isDirInfo() )
+    else if ( file->isDirInfo() )
     {
 	showDetails( file->toDirInfo() );
-	return;
     }
-
-    // logDebug() << "Showing file details about " << file << Qt::endl;
-
-    showFilePkgInfo( file );
-    showFileInfo( file );
-    setCurrentPage( _ui->fileDetailsPage );
+    else
+    {
+	// logDebug() << "Showing file details about " << file << Qt::endl;
+	showFilePkgInfo( file );
+	showFileInfo( file );
+	setCurrentPage( _ui->fileDetailsPage );
+    }
 }
 
 
@@ -289,7 +342,7 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     const bool isSpecial = file->isSpecial();
     const bool isSymLink = file->isSymLink();
 
-    setLabelLimited(_ui->fileNameLabel, file->baseName() );
+    setLabelLimited(_ui->fileNameLabel, file->baseName(), _labelLimit );
     _ui->fileTypeLabel->setText( formatFilesystemObjectType( file ) );
 
     _ui->symlinkIcon->setVisible( isSymLink );
@@ -306,10 +359,9 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     if ( isSymLink )
     {
 	const QString fullTarget  = file->symLinkTarget();
-	QString shortTarget = fullTarget;
-	if ( fullTarget.length() >= MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' ) )
-	    shortTarget = ".../"_L1 % SysUtil::baseName( fullTarget );
-	_ui->fileLinkLabel->setText( shortTarget );
+	const bool shorten = fullTarget.length() > MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' );
+	const QString shortTarget = shorten ? "…/" % SysUtil::baseName( fullTarget ) : fullTarget;
+	setLabelLimited( _ui->fileLinkLabel, shortTarget, _labelLimit, false ); // don't set tooltip yet
 
 	if ( file->isBrokenSymLink() )
 	{
@@ -319,7 +371,8 @@ void FileDetailsView::showFileInfo( FileInfo * file )
 	else
 	{
 	    _ui->fileLinkLabel->setStyleSheet( QString{} );
-	    _ui->fileLinkLabel->setToolTip( shortTarget != fullTarget ? fullTarget : QString{} );
+	    const bool elided = _ui->fileLinkLabel->text() != fullTarget;
+	    _ui->fileLinkLabel->setToolTip( elided ? fullTarget : QString{} );
 	}
     }
     else if ( isSpecial )
@@ -347,9 +400,6 @@ void FileDetailsView::showFileInfo( FileInfo * file )
     _ui->fileGroupLabel->setText( file->groupName() );
     _ui->filePermissionsLabel->setText( formatPermissions( file->mode() ) );
     _ui->fileMTimeLabel->setText( formatTime( file->mtime() ) );
-
-//    if ( !file->isSparseFile() )
-//	_ui->fileSizeLabel->suppressIfSameContent( _ui->fileAllocatedLabel, _ui->fileAllocatedCaption );
 }
 
 
@@ -397,7 +447,7 @@ void FileDetailsView::updatePkgInfo( const QString & path )
     // logDebug() << "Updating pkg info for " << path << Qt::endl;
 
     const QString pkg = PkgQuery::owningPkg( path );
-    _ui->filePackageLabel->setText( pkg );
+    setLabelLimited( _ui->filePackageLabel, pkg, _labelLimit );
     _ui->filePackageCaption->setEnabled( !pkg.isEmpty() );
 }
 
@@ -421,7 +471,7 @@ void FileDetailsView::showDetails( DirInfo * dir )
     // logDebug() << "Showing dir details about " << dir << Qt::endl;
 
     const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
-    setLabelLimited(_ui->dirNameLabel, name );
+    setLabelLimited( _ui->dirNameLabel, name, _labelLimit );
 
     const bool isMountPoint = dir->isMountPoint() && !dir->readError();
     _ui->dirUnreadableIcon->setVisible( dir->readError() );
@@ -475,14 +525,13 @@ void FileDetailsView::showSubtreeInfo( DirInfo * dir )
 	// No special msg -> show summary fields
 
 	const QLatin1String prefix = dir->sizePrefix();
-	setLabel( _ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
-	setLabel( _ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
-	setLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
-	setLabel( _ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
-	setLabel( _ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
+	setSizeLabel ( _ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
+	setSizeLabel ( _ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
+	setCountLabel( _ui->dirItemCountLabel,   dir->totalItems(),         prefix );
+	setCountLabel( _ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
+	setCountLabel( _ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
 	_ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
 
-//	_ui->dirTotalSizeLabel->suppressIfSameContent( _ui->dirAllocatedLabel, _ui->dirAllocatedCaption );
 	setBold( _ui->dirAllocatedLabel, totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
     }
     else  // Special msg -> show it and clear all summary fields
@@ -501,7 +550,7 @@ void FileDetailsView::showDirNodeInfo( const DirInfo * dir )
 {
     _ui->dirOwnSizeCaption->setVisible( dir->size() > 0 );
     _ui->dirOwnSizeLabel->setVisible  ( dir->size() > 0 );
-    setLabel( _ui->dirOwnSizeLabel, dir->size() );
+    setSizeLabel( _ui->dirOwnSizeLabel, dir->size() );
 
     _ui->dirUserLabel->setText( dir->userName() );
     _ui->dirGroupLabel->setText( dir->groupName() );
@@ -549,7 +598,7 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
 	return;
     }
 
-    setLabelLimited( _ui->pkgNameLabel, pkg->name() );
+    setLabelLimited( _ui->pkgNameLabel, pkg->name(), _labelLimit );
     _ui->pkgVersionLabel->setText( pkg->version() );
     _ui->pkgArchLabel->setText( pkg->arch() );
 
@@ -558,13 +607,11 @@ void FileDetailsView::showDetails( PkgInfo * pkg )
     {
 	// No special msg -> show summary fields
 	const QLatin1String prefix = pkg->sizePrefix();
-	setLabel( _ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
-	setLabel( _ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
-	setLabel( _ui->pkgItemCountLabel,   pkg->totalItems(),         prefix );
-	setLabel( _ui->pkgFileCountLabel,   pkg->totalFiles(),         prefix );
-	setLabel( _ui->pkgSubDirCountLabel, pkg->totalSubDirs(),       prefix );
-
-//	_ui->pkgTotalSizeLabel->suppressIfSameContent( _ui->pkgAllocatedLabel, _ui->pkgAllocatedCaption );
+	setSizeLabel ( _ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
+	setSizeLabel ( _ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
+	setCountLabel( _ui->pkgItemCountLabel,   pkg->totalItems(),         prefix );
+	setCountLabel( _ui->pkgFileCountLabel,   pkg->totalFiles(),         prefix );
+	setCountLabel( _ui->pkgSubDirCountLabel, pkg->totalSubDirs(),       prefix );
     }
     else
     {
@@ -592,20 +639,17 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
 	return;
     }
 
-    setLabel( _ui->pkgSummaryPkgCountLabel, pkg->childCount() );
+    setCountLabel( _ui->pkgSummaryPkgCountLabel, pkg->childCount() );
 
     const QString msg = subtreeMsg( pkg );
     if ( msg.isEmpty() )
     {
 	const QLatin1String prefix = pkg->sizePrefix();
-	setLabel( _ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
-	setLabel( _ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
-	setLabel( _ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );
-	setLabel( _ui->pkgSummaryFileCountLabel,   pkg->totalFiles(),         prefix );
-	setLabel( _ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs(),       prefix );
-
-//	_ui->pkgSummaryTotalSizeLabel->suppressIfSameContent( _ui->pkgSummaryAllocatedLabel,
-//							      _ui->pkgSummaryAllocatedCaption );
+	setSizeLabel ( _ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
+	setSizeLabel ( _ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
+	setCountLabel( _ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );
+	setCountLabel( _ui->pkgSummaryFileCountLabel,   pkg->totalFiles(),         prefix );
+	setCountLabel( _ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs(),       prefix );
     }
     else
     {
@@ -619,60 +663,6 @@ void FileDetailsView::showPkgSummary( PkgInfo * pkg )
     _ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
 
     setCurrentPage( _ui->pkgSummaryPage );
-}
-
-
-void FileDetailsView::showDetails( const FileInfoSet & selectedItems )
-{
-    // logDebug() << "Showing selection summary" << Qt::endl;
-
-    int fileCount        = 0;
-    int dirCount         = 0;
-    int subtreeFileCount = 0;
-
-    const FileInfoSet sel = selectedItems.normalized();
-    for ( FileInfo * item : sel )
-    {
-	if ( item->isDirInfo() )
-	{
-	    ++dirCount;
-	    subtreeFileCount += item->totalFiles();
-	}
-	else
-	{
-	    ++fileCount;
-	}
-    }
-
-    _ui->selFileCountCaption->setEnabled( fileCount > 0 );
-    _ui->selFileCountLabel->setEnabled( fileCount > 0 );
-
-    _ui->selDirCountCaption->setEnabled( dirCount > 0 );
-    _ui->selDirCountLabel->setEnabled( dirCount > 0 );
-
-    _ui->selSubtreeFileCountCaption->setEnabled( subtreeFileCount > 0 );
-    _ui->selSubtreeFileCountLabel->setEnabled( subtreeFileCount > 0 );
-
-    _ui->selHeading->setText( sel.count() == 1 ?
-                              tr( "1 Selected Item" ) :
-                              tr( "%L1 Selected Items" ).arg( sel.count() ) );
-
-    setLabel( _ui->selTotalSizeLabel,        sel.totalSize()          );
-    setLabel( _ui->selAllocatedLabel,        sel.totalAllocatedSize() );
-    setLabel( _ui->selFileCountLabel,        fileCount                );
-    setLabel( _ui->selDirCountLabel,         dirCount                 );
-    setLabel( _ui->selSubtreeFileCountLabel, subtreeFileCount         );
-
-//    _ui->selTotalSizeLabel->suppressIfSameContent( _ui->selAllocatedLabel, _ui->selAllocatedCaption );
-
-    setCurrentPage( _ui->selectionSummaryPage );
-}
-
-
-void FileDetailsView::setLabelLimited( QLabel * label, const QString & text )
-{
-    const QString limitedText = elideMiddle( text, _labelLimit );
-    label->setText( limitedText );
 }
 
 
