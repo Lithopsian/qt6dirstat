@@ -249,11 +249,6 @@ namespace QDirStat
 	void buildWildcardLists( const MimeCategory * category );
 
 	/**
-	 * Iterate over all categories to find categories by name.
-	 **/
-	const MimeCategory * findCategoryByName( const QString & categoryName ) const;
-
-	/**
 	 * Iterate over the pairs of regular expressions and categories that match a
 	 * particular suffix.  Return the first category that matches either one of
 	 * the regular expressions or has en empty regular expression, indicating a
@@ -279,10 +274,10 @@ namespace QDirStat
 	 * Create a new category and add it to the live list held in this class.
 	 * The patterns are passed as QStringLists.
 	 **/
-	const MimeCategory * addCategory ( const QString     & name,
-	                                   const QColor      & color,
-	                                   const QStringList & caseInsensitivePatterns,
-	                                   const QStringList & caseSensitivePatterns );
+	const MimeCategory * addCategory( const QString     & name,
+	                                  const QColor      & color,
+	                                  const QStringList & caseInsensitivePatterns,
+	                                  const QStringList & caseSensitivePatterns );
 
 	/**
 	 * Add a category from a name, colour, and comma-delimited patterns
@@ -291,11 +286,7 @@ namespace QDirStat
 	const MimeCategory * addCategory( const QString & name,
 	                                  const QColor  & color,
 	                                  const QString & caseInsensitivePatterns,
-	                                  const QString & caseSensitivePatterns )
-	    { return addCategory( name,
-	                          color,
-	                          caseInsensitivePatterns.split( u',' ),
-	                          caseSensitivePatterns.split  ( u',' ) ); }
+	                                  const QString & caseSensitivePatterns );
 
 	/**
 	 * Add default categories in case none were read from the settings.

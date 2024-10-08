@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QElapsedTimer>
+
 #include "AdaptiveTimer.h"
 #include "Logger.h"
 

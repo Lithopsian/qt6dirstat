@@ -62,20 +62,18 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
 	// Exact number of bytes, no decimals
 	return lSize == 1 ? oneByte() : QString{ "%1 " }.arg( lSize ) % bytes();
     }
-    else
+
+    int    unitIndex = 0;
+    double size      = lSize / 1024.0;
+
+    // Restrict to three digits before the decimal point, if possible
+    while ( size >= 1000.0 && unitIndex < units.size() - 1 )
     {
-	int    unitIndex = 0;
-	double size = lSize / 1024.0;
-
-	// Restrict to three digits before the decimal point
-	while ( size >= 1000.0 && unitIndex < units.size() - 1 )
-	{
-	    size /= 1024.0;
-	    ++unitIndex;
-	}
-
-	return QString::number( size, 'f', precision ) % units.at( unitIndex );
+	size /= 1024.0;
+	++unitIndex;
     }
+
+    return QString::number( size, 'f', precision ) % units.at( unitIndex );
 }
 
 
