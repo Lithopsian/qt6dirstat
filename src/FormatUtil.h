@@ -239,14 +239,27 @@ namespace QDirStat
 #endif
 
     /**
-     * Elide a string, removing characters from the middle to fit
-     * with maxLen characters.
+     * Elide 'text', removing characters from the middle to be at
+     * most 'maxLen' characters, and return the elided string.
      **/
     QString elideMiddle( const QString & text, int maxLen );
 
     /**
-     * Elide the text to fit within 'maxSize' using the label widget font
-     * and place it in the label.
+     * Return 'text', elided if necessary to fit 'maxSize' pixels
+     * wide when rendered in 'font'.
+     **/
+    inline QString elidedText( const QFont & font, const QString & text, int maxSize )
+        { return QFontMetrics{ font }.elidedText( text, Qt::ElideMiddle, maxSize ); }
+
+    /**
+     * Return the width of an ellipsis character in 'font'.
+     **/
+    inline int ellipsisWidth( const QFont & font )
+        { return horizontalAdvance( font, QString{ u'…' } ); }
+
+    /**
+     * Elide the text to fit within 'maxSize' pixels using the label
+     * widget font, and place it in the label.
      **/
     void elideLabel( QLabel * label, const QString & text, int maxSize );
 

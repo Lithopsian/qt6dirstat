@@ -11,6 +11,7 @@
 #define QDirStatApp_h
 
 #include <QApplication>
+#include <QScreen>
 
 
 namespace QDirStat
@@ -130,6 +131,23 @@ namespace QDirStat
          * selected file, or 0 if there is no current item.
          **/
         FileInfo * currentDirInfo() const;
+
+        /**
+         * Return the primary screen size.  This is the size less any window
+         * frames, etc.
+         **/
+        QSize screenSize() const { return primaryScreen()->availableSize(); }
+
+        /**
+         * Return the hard maximum width of a message box dialog.  This is
+         * hard-coded into the message box and is not exposed in the API,
+         * but this is the calculation used since at least Qt4.
+         **/
+        int maxDialogWidth() const
+        {
+            const int screenWidth = screenSize().width();
+            return screenWidth < 1024 ? screenWidth : qMin( screenWidth - 480, 1000 );
+        }
 
 
     private:

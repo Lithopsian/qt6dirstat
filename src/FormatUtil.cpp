@@ -181,9 +181,7 @@ QString QDirStat::elideMiddle( const QString & text, int maxLen )
 
 void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    const QFontMetrics metrics{ label->font() };
-    label->setText( metrics.elidedText( text, Qt::ElideMiddle, maxSize ) );
+    label->setText( elidedText( label->font(), text, maxSize ) );
 }
 
 

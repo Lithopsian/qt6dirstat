@@ -18,6 +18,7 @@
 #include "FileInfo.h"
 #include "FormatUtil.h"
 #include "OutputWindow.h"
+#include "QDirStatApp.h" // activeWindow(), maxDialogWidth()
 #include "Refresher.h"
 #include "SelectionModel.h"
 #include "Settings.h"
@@ -25,9 +26,8 @@
 #include "Trash.h"
 
 
-#define MAX_URLS_IN_CONFIRMATION_POPUP  9
-#define MIN_DIALOG_WIDTH               40
-#define MAX_SAFE_DIALOG_WIDTH          85
+#define MAX_URLS_IN_CONFIRMATION  10
+#define MIN_DIALOG_WIDTH         320
 
 
 using namespace QDirStat;
@@ -52,32 +52,90 @@ namespace
 
 
     /**
-     * Return the URLs for the selected item types in 'items':
-     * directories (including dot entries) or files.
+     * Generate rich text for a confirmation message box.
+     *
+     * QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
+     * "white-space: pre", but only up to an internal hard limit.
+     * So elide ridiculously long names and add enough spaces to the title to avoid wrapping
+     * This is rich text and the title is styled <h3>, so don't try to be too precise and
+     * just rely on the final styled text being at least as wide as we need.  Similarly,
+     * filenames with  characters replaced by HTML entities will be elided too much.
      **/
-    QStringList filteredUrls( const FileInfoSet & items,
-                              bool                dirs,
-                              bool                files )
+    QString confirmationMsg( const Cleanup * cleanup, const FileInfoSet & items )
     {
-	QStringList urls;
+	const QFont   font         = QGuiApplication::font();
+	const int     spaceWidth   = qMax( horizontalAdvance( font, " " ), 1 );
+	const QString title        = cleanup->cleanTitle();
+	const int     titleWidth   = horizontalAdvance( font, title );
+	const int     maxSafeWidth = app()->maxDialogWidth() - 100;
 
-	for ( const FileInfo * item : items )
+	if ( items.size() == 1 )
 	{
-	    const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
+	    // Elide to a width that won't need to wrap
+	    const FileInfo * item = items.first();
+	    const QString itemType =
+		item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
+	    const int maxSafeNameWidth = maxSafeWidth - textWidth( font, itemType );
+	    const QString name = elidedText( font, item->debugUrl(), maxSafeNameWidth );
 
-	    if ( ( item->isDirInfo() && dirs ) || ( !item->isDirInfo() && files ) )
-	    {
-		if ( urls.size() >= MAX_URLS_IN_CONFIRMATION_POPUP )
-		{
-		    urls << "...";
-		    return urls;
-		}
+	    // Pad the title to avoid tiny dialog boxes or wrapping of the label
+	    const QString itemLine = itemType % ": "_L1 % name;
+	    const int itemWidth = qMax( horizontalAdvance( font, itemLine ), MIN_DIALOG_WIDTH );
+	    const QString padding{ ( itemWidth - titleWidth ) / spaceWidth, u' ' };
 
-		urls << name;
-	    }
+	    return QString{ "<h3>%1%2</h3>%3<br/>" }.arg( title, padding, itemLine.toHtmlEscaped() );
 	}
 
-	return urls;
+	/**
+	 * Return the URLs for the selected item types in 'items':
+	 * directories (including dot entries) or files.
+	 **/
+	const auto filteredUrls = [ &items, &font, maxSafeWidth ]( bool dirs, bool files )
+	{
+	    QStringList urls;
+
+	    for ( const FileInfo * item : items )
+	    {
+		const bool isDir = item->isDirInfo();
+		if ( ( isDir && dirs ) || ( !isDir && files ) )
+		{
+		    if ( urls.size() >= MAX_URLS_IN_CONFIRMATION )
+		    {
+			urls.replace( urls.size() - 1, ". . ." );
+			return urls;
+		    }
+
+		    const QString name = elidedText( font, item->debugUrl(), maxSafeWidth );
+		    urls << ' ' % name.toHtmlEscaped();
+		}
+	    }
+
+	    return urls;
+	};
+	const QStringList dirs  = filteredUrls( true, false );
+	const QStringList files = filteredUrls( false, true );
+
+	// Put dirs first, then files, then summary if either list is filtered
+	QStringList urls;
+	if ( !dirs.isEmpty() )
+	    urls << QObject::tr( "<u>for directories:</u>" ) << dirs;
+	if ( !files.isEmpty() )
+	    urls << QObject::tr( "<u>for files:</u>" ) << files;
+	if ( dirs.size() >= MAX_URLS_IN_CONFIRMATION || files.size() >= MAX_URLS_IN_CONFIRMATION )
+	    urls << QObject::tr( "<i>(%L1 items total)</i>" ).arg( items.size() );
+	const QString urlsString = urls.join( "<br/>"_L1 );
+
+	// Pad the title to prevent wrapping or a tiny dialogs
+	int longestLine = MIN_DIALOG_WIDTH;
+	for ( const QString & line : asConst( urls ) )
+	{
+	    const int lineLength = horizontalAdvance( font, line );
+	    if ( lineLength > longestLine )
+		longestLine = lineLength;
+	}
+	const QString padding{ ( longestLine - titleWidth ) / spaceWidth, u' ' };
+
+	return QString{ "<h3>%1%2</h3>%3<br>" }.arg( title, padding, urlsString );
     }
 
 
@@ -85,66 +143,11 @@ namespace
      * Ask user for confirmation to execute a cleanup action for
      * 'items'. Returns 'true' if user accepts, 'false' otherwise.
      **/
-    bool confirmation( Cleanup * cleanup, const FileInfoSet & items )
+    bool confirmation( const Cleanup * cleanup, const FileInfoSet & items )
     {
-	// Pad the title to avoid tiny dialog boxes and expand to the width of the longest line
-	const QString msg = [ cleanup, &items ]()
-	{
-	    // QMessageBox wraps most text at a fixed width, but can be forced wider using <h3> and
-	    // "white-space: pre", but only up to about 100 characters
-	    // So elide ridiculously long names and add enough spaces to the title to avoid wrapping
-	    // This is rich text and the title is styled <h3>, so don't try to be too precise and
-	    // just rely on the final styled text being wider than we assumed.
-	    const QFont font = QGuiApplication::font();
-	    const int spaceWidth = qMax( horizontalAdvance( font, " " ), 1 );
-	    const QString cleanTitle = cleanup->cleanTitle();
-	    const int titleSpaces = horizontalAdvance( font, cleanTitle ) / spaceWidth;
-
-	    if ( items.size() == 1 )
-	    {
-		const FileInfo * item = items.first();
-		const QString name = elideMiddle( item->debugUrl().toHtmlEscaped(), MAX_SAFE_DIALOG_WIDTH );
-
-		// Pad the title to avoid tiny dialog boxes
-		const QString itemType =
-		    item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
-		const QString itemLine = itemType % ": "_L1 % name;
-		const int itemSpaces = horizontalAdvance( font, itemLine ) / spaceWidth;
-		const int padSpaces = qMax( itemSpaces, MIN_DIALOG_WIDTH ) - titleSpaces;
-		const QString title = cleanTitle % QString{ padSpaces, u' ' };
-
-		return QString{ "<h3>%1</h3>%2<br/>" }.arg( title, itemLine );
-	    }
-
-	    const QStringList dirs  = filteredUrls( items, true, false ); // dirs first, if any
-	    const QStringList files = filteredUrls( items, false, true ); // then files
-
-	    QStringList urls;
-	    if ( !dirs.isEmpty() )
-		urls << QObject::tr( "<u>for directories:</u>" ) << dirs;
-
-	    if ( !files.isEmpty() )
-		urls << QObject::tr( "<u>for files:</u>" ) << files;
-
-	    if ( dirs.size() > MAX_URLS_IN_CONFIRMATION_POPUP || files.size() > MAX_URLS_IN_CONFIRMATION_POPUP )
-		urls << QObject::tr( "<i>(%L1 items total)</i>" ).arg( items.size() );
-
-	    int longestLine = MIN_DIALOG_WIDTH * spaceWidth;
-	    for ( const QString & line : asConst( urls ) )
-	    {
-		const int lineLength = horizontalAdvance( font, line );
-		if ( lineLength > longestLine )
-		    longestLine = lineLength;
-	    }
-	    const int padSpaces = longestLine / spaceWidth - titleSpaces;
-	    const QString title = cleanTitle % QString{ padSpaces, u' ' };
-
-	    return QString{ "<h3>%1</h3>%2<br>" }.arg( title, urls.join( "<br>"_L1 ) );
-	}();
-
-	const int ret = QMessageBox::question( qApp->activeWindow(),
+	const int ret = QMessageBox::question( app()->activeWindow(),
 	                                       QObject::tr( "Please Confirm" ),
-	                                       whitespacePre( msg ),
+	                                       whitespacePre( confirmationMsg( cleanup, items ) ),
 	                                       QMessageBox::Yes | QMessageBox::No );
 
 	return ret == QMessageBox::Yes;
@@ -278,7 +281,7 @@ void CleanupCollection::execute()
     }
 
     // Remember the active window because it can lose focus if there is a confirmation dialog
-    QWidget * activeWindow = qApp->activeWindow();
+    QWidget * activeWindow = app()->activeWindow();
 
     if ( cleanup->askForConfirmation() && !confirmation( cleanup, selection ) )
     {
@@ -517,7 +520,7 @@ void CleanupCollection::moveToTrash()
     const FileInfoSet selectedItems = _selectionModel->selectedItems();
 
     // Prepare output window
-    OutputWindow * outputWindow = new OutputWindow{ qApp->activeWindow(), true };
+    OutputWindow * outputWindow = new OutputWindow{ app()->activeWindow(), true };
 
     // Prepare refresher
     createRefresher( outputWindow, selectedItems.parents() );
