@@ -19,6 +19,7 @@
 
 #include "ui_main-window.h"
 #include "Subtree.h"
+#include "Typedefs.h" // _L1
 
 
 class QActionGroup;
@@ -649,6 +650,13 @@ namespace QDirStat
          * Reimplemented from QWidget.
          **/
         void changeEvent( QEvent * event ) override;
+
+        /**
+         * Rebuild the breadcrumbs whenever the window size changes.
+         *
+         * Reimplemented from QWidget.
+         **/
+        void resizeEvent( QResizeEvent * ) override;
 
         /**
          * Detect all attempts to close the main window.  Cleanly abort

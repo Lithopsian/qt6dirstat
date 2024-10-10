@@ -1113,6 +1113,12 @@ void MainWindow::changeEvent( QEvent * event )
 }
 
 
+void MainWindow::resizeEvent( QResizeEvent * )
+{
+    _ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+}
+
+
 void MainWindow::closeEvent( QCloseEvent * )
 {
     // Stop in-progress reads cleanly
