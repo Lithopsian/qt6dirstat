@@ -256,10 +256,9 @@ namespace QDirStat
 	void setTreeIconSize( QTreeView * tree ) const
 	    { tree->setIconSize( dirTreeIconSize() ); }
 
-
+#if 0
     public slots:
 
-#if 0
 	/**
 	 * Item clicked in the tree widget, for debugging.
 	 **/

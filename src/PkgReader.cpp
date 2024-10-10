@@ -329,7 +329,7 @@ namespace
 	if ( pathComponent.isEmpty() )
 	    return nullptr;
 
-	auto compare = [ & pathComponent ]( FileInfo * item ) { return item->name() == pathComponent; };
+	const auto compare = [ & pathComponent ]( FileInfo * item ) { return item->name() == pathComponent; };
 	auto it = std::find_if( begin( parent ), end( parent ), compare );
 	return *it;
     }

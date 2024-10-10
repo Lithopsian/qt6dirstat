@@ -49,14 +49,16 @@ namespace QDirStat
 	void clear() { setCurrentPage( _ui->emptyPage ); }
 
 	/**
-	 * Show a summary of multiple selected items.
+	 * Show a summary of multiple selected items.  The
+	 * counts are of a normalized list, so selected children
+	 * of a selected parent are not counted.
 	 **/
 	void showDetails( const FileInfoSet & selectedItems );
 
 	/**
-	 * Show details about a "file": either a package, a
-	 * directory, a pseudo-directory, an actual file, or a
-	 * summary for the top level of the package view.
+	 * Show details about a single item: either a package,
+	 * a directory, a pseudo-directory, an actual file, or
+	 * a summary for the top level of the package view.
 	 **/
 	void showDetails( FileInfo * fileInfo );
 
@@ -72,9 +74,7 @@ namespace QDirStat
 	int labelLimit() const { return _labelLimit; }
 
 	/**
-	 * Set the label limit. Note that if a label needs to be limited, it
-	 * will get three characters less than this value to compensate for the
-	 * "..." ellipsis that indicates that it was cut off.
+	 * Set the label limit.
 	 **/
 	void setLabelLimit( int newLimit ) { _labelLimit = newLimit; }
 
@@ -83,7 +83,8 @@ namespace QDirStat
 
 	/**
 	 * Notification that the categories have changed in some way
-	 * and we may need to update the panel.
+	 * and we may need to update the panel.  Iy is currently only
+	 * relevant for a regular file in the file details page.
 	 **/
 	void categoriesChanged();
 
@@ -96,47 +97,12 @@ namespace QDirStat
 	const Ui::FileDetailsView * ui() { return _ui.get(); }
 
 	/**
-	 * Update package information via the AdaptiveTimer.
-	 **/
-	void updatePkgInfo( const QString & path );
-
-	/**
-	 * Show details about a directory.
-	 **/
-	void showDetails( DirInfo * dirInfo );
-
-	/**
-	 * Show details about a package.
-	 **/
-	void showDetails( PkgInfo * pkgInfo );
-
-	/**
-	 * Show the packages summary (pkg:/).
-	 **/
-	void showPkgSummary( PkgInfo * pkgInfo );
-
-	/**
 	 * Activate a page of this widget stack. This is similar to
 	 * setCurrentWidget(), but it also hides all the other pages to
 	 * minimize the screen space requirements: No extra space is reserved
 	 * for any of the other pages which might be larger than this one.
 	 **/
 	void setCurrentPage( QWidget * page );
-
-	/**
-	 * Sets the label to the category for this file, and enables
-	 * the caption if a category is found.
-	 **/
-	void setMimeCategory( const FileInfo * fileInfo );
-
-	// Boilerplate widget setting methods
-	void showFileInfo( FileInfo * file );
-	void showFilePkgInfo( const FileInfo * file );
-	void showSubtreeInfo( DirInfo * dir );
-	void showDirNodeInfo( const DirInfo * dir );
-	void setSystemFileWarningVisibility( bool visible );
-	void setFilePkgBlockVisibility( bool visible );
-	void setDirBlockVisibility( bool visible );
 
 
     private:

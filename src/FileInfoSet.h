@@ -42,11 +42,11 @@ namespace QDirStat
 
 	/**
 	 * Return the number of items in the set.  This overload is provided
-	 * to consistently return an int where QSet::size() in Qt6 would
-	 * return a qsizetype (not available before 5.10).  We are limited
-	 * to 2 billion FileInfo objects anyway.
+	 * to consistently return a FileCount (qint32) where QSet::size() in
+	 * Qt6 would return a qsizetype (aka qint64, not available before 5.10).
+	 * We are limited to 2 billion FileInfo objects anyway.
 	 **/
-	int size() const { return QSet::size(); }
+	FileCount size() const { return QSet::size(); }
 
 	/**
 	 * Return the first item in this set or 0 if the set is empty.

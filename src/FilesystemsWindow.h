@@ -105,13 +105,6 @@ namespace QDirStat
 	QString selectedPath() const;
 
 	/**
-	 * Copies the currently-selected item column text to the clipboard.
-	 * The full text of the device column is copied, not just the
-	 * visible text.
-	 **/
-//	void copyToClipboard();
-
-	/**
 	 * Key press event for detecting evnter/return.
 	 *
 	 * Reimplemented from QWidget.

@@ -10,6 +10,9 @@
     <height>374</height>
    </rect>
   </property>
+  <property name="currentIndex">
+   <number>5</number>
+  </property>
   <widget class="QWidget" name="fileDetailsPage">
    <layout class="QHBoxLayout" name="horizontalLayout_5">
     <property name="rightMargin">

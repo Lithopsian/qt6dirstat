@@ -617,7 +617,7 @@ void DirInfo::unlinkChild( FileInfo * deletedChild )
 	return;
     }
 
-    auto compare = [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; };
+    const auto compare = [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; };
     auto it = std::find_if( begin( this ), end( this ), compare );
     if ( *it )
     {

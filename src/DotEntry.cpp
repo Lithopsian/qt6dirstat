@@ -31,7 +31,7 @@ FileInfo * DotEntry::locate( const QString & url )
     {
 	// logDebug() << "Searching DotEntry for " << url << " in " << this << Qt::endl;
 
-	auto compare = [ &url ]( FileInfo * item ) { return item->name() == url; };
+	const auto compare = [ &url ]( FileInfo * item ) { return item->name() == url; };
 	auto it = std::find_if( begin( this ), end( this ), compare );
 	if ( *it )
 	    return *it;

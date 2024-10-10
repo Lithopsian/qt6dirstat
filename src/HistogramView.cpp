@@ -631,9 +631,7 @@ void HistogramView::resizeEvent( QResizeEvent * )
     //logDebug() << "Event size: " << event->oldSize() << Qt::endl;
     //logDebug() << "Event size: " << event->size() << Qt::endl;
 
-    // Not safe to delete and create children during the recursive showChildren() in a show event
-//    if ( event->oldSize().width() > 0 && event->oldSize().height() > 0 )
-	rebuildDirty();
+    rebuildDirty();
 }
 
 

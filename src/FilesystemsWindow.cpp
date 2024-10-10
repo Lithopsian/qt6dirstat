@@ -181,28 +181,9 @@ QString FilesystemsWindow::selectedPath() const
     return QString{};
 }
 
-/*
-void FilesystemsWindow::copyToClipboard()
-{
-    // Copt the original device string, not just the displayed (possibly ellipsized) text
-    const FilesystemItem * item = currentItem( _ui->fsTree );
-    if ( item )
-    {
-	const int col = _ui->fsTree->currentColumn();
-	const QString text = col == FS_DeviceCol ? item->device() : item->text( col );
-	QApplication::clipboard()->setText( text );
-    }
-}
-*/
 
 void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 {
-//    if ( event == QKeySequence::Copy )
-//    {
-//	copyToClipboard();
-//	return;
-//    }
-
     // Let return/enter trigger itemActivated instead of buttons that don't have focus
     if ( ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
 	return;
