@@ -40,14 +40,6 @@ namespace QDirStat
 	void applyChanges();
 
 
-    protected:
-
-	/**
-	 * Populate the widgets from the values held in MainWindow and DirTreeModel.
-	 **/
-	void setup();
-
-
     private:
 
 	std::unique_ptr<Ui::GeneralConfigPage> _ui;

@@ -19,40 +19,46 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Populate the widgets from the values held in MainWindow and DirTreeModel.
+     **/
+    void setup( const Ui::GeneralConfigPage * ui )
+    {
+        // All these settings are held in variables in MainWindow, DirTreeModel, and FileDetailsView
+        const DirTreeModel * dirTreeModel = app()->dirTreeModel();
+        ui->crossFilesystemsCheckBox->setChecked  ( dirTreeModel->crossFilesystems() );
+        ui->useBoldForDominantCheckBox->setChecked( dirTreeModel->useBoldForDominantItems() );
+        ui->treeUpdateIntervalSpinBox->setValue   ( dirTreeModel->updateTimerMillisec() );
+        ui->treeIconThemeComboBox->setCurrentIndex( dirTreeModel->dirTreeItemSize() );
+
+        const MainWindow * mainWindow = app()->mainWindow();
+        ui->urlInWindowTitleCheckBox->setChecked  ( mainWindow->urlInWindowTitle() );
+        ui->elidePathsCheckBox->setChecked        ( mainWindow->fileDetailsView()->elideToFit() );
+        ui->dirReadWarningCheckBox->setChecked    ( mainWindow->showDirPermissionsMsg() );
+        ui->useTreemapHoverCheckBox->setChecked   ( mainWindow->treemapView()->useTreemapHover() );
+        ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
+        ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
+
+        // Use word-joiner character to stop unwanted line breaks
+        const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠" );
+        ui->explainerLabel->setText( QObject::tr( "There are many more settings in the file " ) + joinedFileName );
+    }
+
+}
+
+
 GeneralConfigPage::GeneralConfigPage( ConfigDialog * parent ):
     QWidget{ parent },
     _ui{ new Ui::GeneralConfigPage }
 {
     _ui->setupUi( this );
 
-    setup();
+    setup( _ui.get() );
 
     connect( parent, &ConfigDialog::applyChanges,
              this,   &GeneralConfigPage::applyChanges );
-}
-
-
-void GeneralConfigPage::setup()
-{
-    // All the values on this page are held in variables in MainWindow and
-    // DirTreeModel (or DirTree).
-    const DirTreeModel * dirTreeModel = app()->dirTreeModel();
-    _ui->crossFilesystemsCheckBox->setChecked  ( dirTreeModel->crossFilesystems() );
-    _ui->useBoldForDominantCheckBox->setChecked( dirTreeModel->useBoldForDominantItems() );
-    _ui->treeUpdateIntervalSpinBox->setValue   ( dirTreeModel->updateTimerMillisec() );
-    _ui->treeIconThemeComboBox->setCurrentIndex( dirTreeModel->dirTreeItemSize() );
-
-    const MainWindow * mainWindow = app()->mainWindow();
-    _ui->urlInWindowTitleCheckBox->setChecked  ( mainWindow->urlInWindowTitle() );
-    _ui->dirReadWarningCheckBox->setChecked    ( mainWindow->showDirPermissionsMsg() );
-    _ui->useTreemapHoverCheckBox->setChecked   ( mainWindow->treemapView()->useTreemapHover() );
-    _ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
-    _ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
-
-    // Use word-joiner character to stop unwanted line breaks
-    const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠" );
-    _ui->explainerLabel->setText( tr( "There are many more settings in the file " ) + joinedFileName );
-
 }
 
 
@@ -73,4 +79,8 @@ void GeneralConfigPage::applyChanges()
     mainWindow->setStatusBarTimeout              ( 1000 * _ui->statusBarShortTimeoutSpinBox->value() );
     mainWindow->setLongStatusBarTimeout          ( 1000 * _ui->statusBarLongTimeoutSpinBox->value() );
 
+    // Only do this relativcely expensive operation if the value has changed
+    const bool elideToFit = _ui->elidePathsCheckBox->isChecked();
+    if ( elideToFit != mainWindow->fileDetailsView()->elideToFit() )
+        mainWindow->fileDetailsView()->setElideToFit( elideToFit );
 }

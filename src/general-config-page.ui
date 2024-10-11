@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>357</width>
-    <height>434</height>
+    <height>461</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -47,6 +47,16 @@
             </property>
             <property name="text">
              <string>Cross &amp;filesystem boundaries while reading</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="elidePathsCheckBox">
+            <property name="toolTip">
+             <string>&lt;p style='white-space:pre'&gt;Whether to elide path labels to fit in the file details panel&lt;br/&gt;- a scrollbar may still appear if the panel is too narrow for the other fields&lt;/p&gt;</string>
+            </property>
+            <property name="text">
+             <string>&amp;Elide paths in the details panel</string>
             </property>
            </widget>
           </item>

@@ -241,12 +241,12 @@ void MainWindow::readSettings()
     const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
     _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
 
-    _ui->actionVerboseSelection->setChecked  ( settings.value( "VerboseSelection",      false ).toBool() );
-    _ui->treemapView->setUseTreemapHover     ( settings.value( "UseTreemapHover",       false ).toBool() );
-    _ui->actionShowMenuBar->setChecked       ( settings.value( "ShowMenuBar",           true  ).toBool() );
-    _ui->actionShowStatusBar->setChecked     ( settings.value( "ShowStatusBar",         true  ).toBool() );
-    _ui->actionDetailsWithTreemap->setChecked( settings.value( "DetailsWithTreemap",    false ).toBool() );
-    _ui->fileDetailsView->setLabelLimit      ( settings.value( "FileDetailsLabelLimit", 0     ).toInt()  );
+    _ui->actionVerboseSelection->setChecked  ( settings.value( "VerboseSelection",   false ).toBool() );
+    _ui->treemapView->setUseTreemapHover     ( settings.value( "UseTreemapHover",    false ).toBool() );
+    _ui->actionShowMenuBar->setChecked       ( settings.value( "ShowMenuBar",        true  ).toBool() );
+    _ui->actionShowStatusBar->setChecked     ( settings.value( "ShowStatusBar",      true  ).toBool() );
+    _ui->actionDetailsWithTreemap->setChecked( settings.value( "DetailsWithTreemap", false ).toBool() );
+    _ui->fileDetailsView->setElideToFit      ( settings.value( "FileDetailsElide",   false ).toBool() );
 
     settings.endGroup();
 
@@ -294,7 +294,7 @@ void MainWindow::writeSettings()
     settings.setValue( "LongStatusBarTimeout",     _longStatusBarTimeout                      );
     settings.setValue( "UrlInWindowTitle",         _urlInWindowTitle                          );
     settings.setValue( "UseTreemapHover",          _ui->treemapView->useTreemapHover()        );
-    settings.setValue( "FileDetailsLabelLimit",    _ui->fileDetailsView->labelLimit()         );
+    settings.setValue( "FileDetailsElide",         _ui->fileDetailsView->elideToFit()         );
     settings.setValue( "State",                    saveState()                                );
     settings.endGroup();
 
@@ -392,23 +392,8 @@ void MainWindow::idleDisplay()
 	expandTreeToLevel( 1 );
     }
 
-    updateFileDetailsView();
+    _ui->fileDetailsView->showDetails();
     _historyButtons->unlock( app()->selectionModel()->currentItem() );
-}
-
-
-void MainWindow::updateFileDetailsView()
-{
-    if ( !_ui->fileDetailsView->isVisible() )
-	return;
-
-    const FileInfoSet sel = app()->selectionModel()->selectedItems();
-    if ( sel.count() > 1 )
-	_ui->fileDetailsView->showDetails( sel );
-    else if ( !sel.isEmpty() )
-	_ui->fileDetailsView->showDetails( sel.first() );
-    else
-	_ui->fileDetailsView->showDetails( app()->selectionModel()->currentItem() );
 }
 
 
@@ -1019,7 +1004,7 @@ void MainWindow::closeChildren()
 void MainWindow::selectionChanged()
 {
     showSummary();
-    updateFileDetailsView();
+    _ui->fileDetailsView->showDetails();
 
     if ( verboseSelection() )
     {
@@ -1036,7 +1021,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
     showSummary();
 
     if ( !oldCurrent || !newCurrent )
-	updateFileDetailsView();
+	_ui->fileDetailsView->showDetails();
 
     if ( verboseSelection() )
     {
@@ -1106,8 +1091,9 @@ void MainWindow::updateActions()
 
 void MainWindow::changeEvent( QEvent * event )
 {
-    if ( event->type() == QEvent::PaletteChange )
-	updateFileDetailsView();
+    const QEvent::Type type = event->type();
+    if ( type == QEvent::PaletteChange || type == QEvent::FontChange )
+	_ui->fileDetailsView->showDetails();
 
     QMainWindow::changeEvent( event );
 }
