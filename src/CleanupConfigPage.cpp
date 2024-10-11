@@ -37,6 +37,10 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
 
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
     _ui->keySequenceEdit->setClearButtonEnabled( true );
+#else
+    QLineEdit * lineEdit = _ui->keySequenceEdit->findChild<QLineEdit *>();
+    if ( lineEdit )
+	lineEdit->setClearButtonEnabled( true );
 #endif
 
     connect( _ui->outputWindowPolicyComboBox, QOverload<int>::of( &QComboBox::currentIndexChanged ),
