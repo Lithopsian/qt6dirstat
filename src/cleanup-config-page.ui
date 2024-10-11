@@ -140,11 +140,14 @@
      </widget>
      <widget class="QWidget" name="rightColumnWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <property name="spacing">
-        <number>8</number>
-       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="topMargin">
+          <number>8</number>
+         </property>
+         <property name="bottomMargin">
+          <number>8</number>
+         </property>
          <item>
           <widget class="QLabel" name="titleCaption">
            <property name="font">
@@ -284,7 +287,7 @@ Only Cleanups with icons appear in the main toolbar</string>
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>240</height>
+              <height>260</height>
              </size>
             </property>
             <property name="toolTip">
@@ -298,9 +301,15 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>256</width>
-               <height>128</height>
+               <width>268</width>
+               <height>122</height>
               </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Recurse, confirmation, and refresh policy options</string>
@@ -309,16 +318,10 @@ Only Cleanups with icons appear in the main toolbar</string>
               <string>Options</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_9">
-              <property name="spacing">
-               <number>8</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_8">
-                <property name="spacing">
-                 <number>4</number>
+                <property name="bottomMargin">
+                 <number>8</number>
                 </property>
                 <item>
                  <widget class="QCheckBox" name="recurseCheckBox">
@@ -344,9 +347,6 @@ Only Cleanups with icons appear in the main toolbar</string>
               </item>
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_2">
-                <property name="spacing">
-                 <number>4</number>
-                </property>
                 <item>
                  <widget class="QLabel" name="refreshPolicyCaption">
                   <property name="text">
@@ -386,19 +386,6 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </item>
                </layout>
               </item>
-              <item>
-               <spacer name="optionsPageSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="worksForPage">
@@ -406,9 +393,15 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>183</width>
-               <height>91</height>
+               <width>268</width>
+               <height>86</height>
               </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Works for directories, files, pseudo-entries</string>
@@ -447,19 +440,6 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="worksForPageSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="outputWindowPage">
@@ -467,9 +447,15 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>238</width>
-               <height>120</height>
+               <width>268</width>
+               <height>123</height>
               </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Output window display policy</string>
@@ -478,9 +464,6 @@ Only Cleanups with icons appear in the main toolbar</string>
               <string>Output Window</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_4">
-              <property name="topMargin">
-               <number>0</number>
-              </property>
               <item>
                <layout class="QGridLayout" name="outputWindowPageGridLayout" columnstretch="0,1">
                 <item row="0" column="0">
@@ -583,19 +566,6 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </item>
                </layout>
               </item>
-              <item>
-               <spacer name="outputWindowPageSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="shellPage">
@@ -603,9 +573,15 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>224</width>
-               <height>82</height>
+               <width>268</width>
+               <height>77</height>
               </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Execution shell for commands</string>
@@ -666,19 +642,6 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="shellPageSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
            </widget>
@@ -732,6 +695,7 @@ Only Cleanups with icons appear in the main toolbar</string>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
+  <include location="../../../../home/iann/.designer/backup/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>229</width>
+    <width>230</width>
     <height>374</height>
    </rect>
+  </property>
+  <property name="currentIndex">
+   <number>0</number>
   </property>
   <widget class="QWidget" name="fileDetailsPage">
    <layout class="QHBoxLayout" name="horizontalLayout_5">
     <property name="rightMargin">
-     <number>5</number>
-    </property>
-    <property name="bottomMargin">
-     <number>5</number>
+     <number>4</number>
     </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
@@ -341,6 +341,9 @@
   </widget>
   <widget class="QWidget" name="dirDetailsPage">
    <layout class="QHBoxLayout" name="horizontalLayout_6">
+    <property name="rightMargin">
+     <number>4</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -758,12 +761,6 @@
   </widget>
   <widget class="QWidget" name="pkgDetailsPage">
    <layout class="QHBoxLayout" name="pkgDetailsHBox">
-    <property name="rightMargin">
-     <number>5</number>
-    </property>
-    <property name="bottomMargin">
-     <number>5</number>
-    </property>
     <item>
      <layout class="QVBoxLayout" name="pkgDetailsVBox">
       <item>
@@ -1033,12 +1030,6 @@
   </widget>
   <widget class="QWidget" name="pkgSummaryPage">
    <layout class="QHBoxLayout" name="horizontalLayout_11">
-    <property name="rightMargin">
-     <number>5</number>
-    </property>
-    <property name="bottomMargin">
-     <number>5</number>
-    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
@@ -1260,12 +1251,6 @@
   </widget>
   <widget class="QWidget" name="selectionSummaryPage">
    <layout class="QHBoxLayout" name="selPageHBox">
-    <property name="rightMargin">
-     <number>5</number>
-    </property>
-    <property name="bottomMargin">
-     <number>5</number>
-    </property>
     <item>
      <layout class="QVBoxLayout" name="selPageVBox">
       <item>
@@ -1439,6 +1424,8 @@
   </widget>
  </widget>
  <resources>
+  <include location="icons.qrc"/>
+  <include location="icons.qrc"/>
   <include location="icons.qrc"/>
  </resources>
  <connections/>

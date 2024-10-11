@@ -134,13 +134,10 @@
      </widget>
      <widget class="QWidget" name="rightColumnWidget">
       <layout class="QVBoxLayout" name="verticalLayout_5">
-       <property name="spacing">
-        <number>8</number>
-       </property>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <property name="bottomMargin">
-          <number>8</number>
+          <number>12</number>
          </property>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_3">

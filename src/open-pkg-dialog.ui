@@ -105,9 +105,6 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>8</number>
-        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">

@@ -65,7 +65,7 @@
          <item>
           <widget class="QDirStat::PathSelector" name="pathSelector">
            <property name="spacing">
-            <number>3</number>
+            <number>4</number>
            </property>
           </widget>
          </item>
