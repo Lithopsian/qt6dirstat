@@ -239,12 +239,6 @@ namespace QDirStat
 #endif
 
     /**
-     * Elide 'text', removing characters from the middle to be at
-     * most 'maxLen' characters, and return the elided string.
-     **/
-    QString elideMiddle( const QString & text, int maxLen );
-
-    /**
      * Return 'text', elided if necessary to fit 'maxSize' pixels
      * wide when rendered in 'font'.
      **/

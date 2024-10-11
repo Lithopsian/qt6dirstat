@@ -170,15 +170,6 @@ QString QDirStat::monthAbbreviation( short month )
 }
 
 
-QString QDirStat::elideMiddle( const QString & text, int maxLen )
-{
-    if ( maxLen < 4 || text.size() < maxLen )
-        return text;
-
-    return text.left( maxLen / 2 ) % u'…' % text.right( maxLen / 2 - 1 );
-}
-
-
 void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
 {
     label->setText( elidedText( label->font(), text, maxSize ) );
