@@ -46,19 +46,13 @@ namespace QDirStat
 	/**
 	 * Show an empty page.
 	 **/
-	void clear() { setCurrentPage( _ui->emptyPage ); }
+	void clear()
+	    { setCurrentPage( _ui->emptyPage ); }
 
 	/**
-	 * Show a summary of multiple selected items.
+	 * Show details about the current selection in the panel.
 	 **/
-	void showDetails( const FileInfoSet & selectedItems );
-
-	/**
-	 * Show details about a "file": either a package, a
-	 * directory, a pseudo-directory, an actual file, or a
-	 * summary for the top level of the package view.
-	 **/
-	void showDetails( FileInfo * fileInfo );
+	void showDetails();
 
 	/**
 	 * Return a description of a FileInfo ReadState enum.
@@ -66,24 +60,25 @@ namespace QDirStat
 	static QString readStateMsg( int readState );
 
 	/**
-	 * Return the label limit, i.e. the maximum number of characters for
-	 * certain fields that can otherwise grow out of bounds.
+	 * Return whether to elide the panel labels to fit the
+	 * current width.
 	 **/
-	int labelLimit() const { return _labelLimit; }
+	bool elideToFit() const { return _lastPixel >= 0; }
 
 	/**
-	 * Set the label limit. Note that if a label needs to be limited, it
-	 * will get three characters less than this value to compensate for the
-	 * "..." ellipsis that indicates that it was cut off.
+	 * Change whether to elide paths to 'elide' and re-display
+	 * the panel with the new setting.
 	 **/
-	void setLabelLimit( int newLimit ) { _labelLimit = newLimit; }
+	void setElideToFit( bool elide )
+	    { _lastPixel = elide ? 0 : -1; elide ? resizeEvent( nullptr ) : showDetails(); }
 
 
     protected slots:
 
 	/**
 	 * Notification that the categories have changed in some way
-	 * and we may need to update the panel.
+	 * and we may need to update the panel.  It is currently only
+	 * relevant for a regular file in the file details page.
 	 **/
 	void categoriesChanged();
 
@@ -93,27 +88,21 @@ namespace QDirStat
 	/**
 	 * Getter for a raw pointer to the UI object.
 	 **/
-	const Ui::FileDetailsView * ui() { return _ui.get(); }
+	const Ui::FileDetailsView * ui() const { return _ui.get(); }
 
 	/**
-	 * Update package information via the AdaptiveTimer.
+	 * Show a summary of multiple selected items.  The
+	 * counts are of a normalized list, so selected children
+	 * of a selected parent are not counted.
 	 **/
-	void updatePkgInfo( const QString & path );
+//	void showDetails( const FileInfoSet & selectedItems );
 
 	/**
-	 * Show details about a directory.
+	 * Show details about a single item: either a package,
+	 * a directory, a pseudo-directory, an actual file, or
+	 * a summary for the top level of the package view.
 	 **/
-	void showDetails( DirInfo * dirInfo );
-
-	/**
-	 * Show details about a package.
-	 **/
-	void showDetails( PkgInfo * pkgInfo );
-
-	/**
-	 * Show the packages summary (pkg:/).
-	 **/
-	void showPkgSummary( PkgInfo * pkgInfo );
+	void showDetails( FileInfo * fileInfo );
 
 	/**
 	 * Activate a page of this widget stack. This is similar to
@@ -124,19 +113,14 @@ namespace QDirStat
 	void setCurrentPage( QWidget * page );
 
 	/**
-	 * Sets the label to the category for this file, and enables
-	 * the caption if a category is found.
+	 * Re-calculate the last (right-hand) pixel of the contents area
+	 * of the panel if '_lastPixel' >= 0.  Otherwise, leave it as -1
+	 * indicating that path labels should not be elided.  Then
+	 * re-display the panel with the current selection.
+	 *
+	 * Reimplemented from QStackedWidget/QWidget.
 	 **/
-	void setMimeCategory( const FileInfo * fileInfo );
-
-	// Boilerplate widget setting methods
-	void showFileInfo( FileInfo * file );
-	void showFilePkgInfo( const FileInfo * file );
-	void showSubtreeInfo( DirInfo * dir );
-	void showDirNodeInfo( const DirInfo * dir );
-	void setSystemFileWarningVisibility( bool visible );
-	void setFilePkgBlockVisibility( bool visible );
-	void setDirBlockVisibility( bool visible );
+	void resizeEvent( QResizeEvent * ) override;
 
 
     private:
@@ -144,7 +128,7 @@ namespace QDirStat
 	std::unique_ptr<Ui::FileDetailsView> _ui;
 
 	AdaptiveTimer * _pkgUpdateTimer;
-	int             _labelLimit{ 0 };
+	int             _lastPixel{ 0 };
 
     };	// class FileDetailsView
 
