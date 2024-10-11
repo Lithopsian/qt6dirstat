@@ -11,6 +11,7 @@
 
 #include "MainWindow.h"
 #include "ActionManager.h"
+#include "FileDetailsView.h"
 #include "HeaderTweaker.h"
 #include "Logger.h"
 #include "QDirStatApp.h"
@@ -46,30 +47,32 @@ QString MainWindow::currentLayoutName() const
 
 void MainWindow::initLayouts( const QString & currentLayoutName )
 {
+    /**
+     * Create one layout action.
+     **/
+    const auto initLayout = [ this, &currentLayoutName ]( const QString & layoutName )
+    {
+	readLayoutSetting( layoutName );
+
+	QAction * action = layoutAction( layoutName );
+	_layoutActionGroup->addAction( action );
+
+	if ( layoutName == currentLayoutName )
+	{
+	    action->setChecked( true );
+	    changeLayout( layoutName ); // setChecked() doesn't fire triggered() and it isn't connected yet anyway
+	}
+    };
+
     // Qt Designer does not support QActionGroups; it was there for Qt 3, but
     // they dropped that feature for Qt 4/5.
     _layoutActionGroup = new QActionGroup{ this };
 
     // Note that the column layouts are handled in the HeaderTweaker and its
     // ColumnLayout helper class; see also HeaderTweaker.h and .cpp.
-    initLayout( HeaderTweaker::l1Name(), currentLayoutName );
-    initLayout( HeaderTweaker::l2Name(), currentLayoutName );
-    initLayout( HeaderTweaker::l3Name(), currentLayoutName );
-}
-
-
-void MainWindow::initLayout( const QString & layoutName, const QString & currentLayoutName )
-{
-    readLayoutSetting( layoutName );
-
-    QAction * action = layoutAction( layoutName );
-    _layoutActionGroup->addAction( action );
-
-    if ( layoutName == currentLayoutName )
-    {
-	action->setChecked( true );
-	changeLayout( layoutName ); // setChecked() doesn't fire triggered() and it isn't connected yet anyway
-    }
+    initLayout( HeaderTweaker::l1Name() );
+    initLayout( HeaderTweaker::l2Name() );
+    initLayout( HeaderTweaker::l3Name() );
 }
 
 
@@ -115,7 +118,7 @@ void MainWindow::updateLayoutDetailsPanel( bool detailsPanelVisible )
     if ( detailsPanelVisible )
     {
 	detailsWithTreemap( _ui->actionDetailsWithTreemap->isChecked() );
-	updateFileDetailsView();
+	_ui->fileDetailsView->showDetails();
     }
     else
     {
@@ -178,23 +181,25 @@ void MainWindow::readLayoutSetting( const QString & layoutName )
 }
 
 
-void MainWindow::writeLayoutSetting( const QAction * action )
-{
-    Settings settings;
-
-    settings.beginGroup( "TreeViewLayout_" + layoutName( action ) );
-    settings.setValue( "ShowCurrentPath",  layoutShowBreadcrumbs ( action ) );
-    settings.setValue( "ShowDetailsPanel", layoutShowDetailsPanel( action ) );
-    settings.setValue( "ShowDirTree",      layoutShowDirTree     ( action ) );
-    settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
-//    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
-//    settings.setValue( "DetailsWithTreemap", layoutdetailsWithTreemap( action ) );
-    settings.endGroup();
-}
-
-
 void MainWindow::writeLayoutSettings()
 {
+    /**
+     * Write settings for one layout.
+     **/
+    const auto writeLayoutSetting = [ this ]( const QAction * action )
+    {
+	Settings settings;
+
+	settings.beginGroup( "TreeViewLayout_" + layoutName( action ) );
+	settings.setValue( "ShowCurrentPath",  layoutShowBreadcrumbs ( action ) );
+	settings.setValue( "ShowDetailsPanel", layoutShowDetailsPanel( action ) );
+	settings.setValue( "ShowDirTree",      layoutShowDirTree     ( action ) );
+	settings.setValue( "ShowTreemap",      layoutShowTreemap     ( action ) );
+    //    settings.setValue( "TreemapOnSide",    layoutTreemapOnSide   ( action ) );
+    //    settings.setValue( "DetailsWithTreemap", layoutdetailsWithTreemap( action ) );
+	settings.endGroup();
+    };
+
     writeLayoutSetting( _ui->actionLayout1 );
     writeLayoutSetting( _ui->actionLayout2 );
     writeLayoutSetting( _ui->actionLayout3 );

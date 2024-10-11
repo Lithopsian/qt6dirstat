@@ -139,7 +139,7 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
     createColumnLayouts();
 
     connect( _header, &QHeaderView::sectionCountChanged,
-             this,    &HeaderTweaker::initHeader );
+             this,    &HeaderTweaker::readSettings );
 
     connect( _header, &QHeaderView::customContextMenuRequested,
              this,    &HeaderTweaker::contextMenu );
@@ -152,19 +152,16 @@ HeaderTweaker::~HeaderTweaker()
 }
 
 
-void HeaderTweaker::initHeader()
-{
-    // Initialize stuff when the header actually has sections: it is
-    // constructed empty. It is only populated when the tree view model
-    // requests header data from the data model.
-
-    // logDebug() << "Header count: " << _header->count() << Qt::endl;
-    readSettings();
-}
-
-
 void HeaderTweaker::createColumnLayouts()
 {
+    /**
+     * Create one column layout.
+     **/
+    const auto createColumnLayout = [ this ]( const QString & layoutName )
+    {
+	_layouts[ layoutName ] = new ColumnLayout{ layoutName };
+    };
+
     // Layout L1: Short
     createColumnLayout( l1Name() );
 

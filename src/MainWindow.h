@@ -28,6 +28,7 @@ class SysCallFailedException;
 
 namespace QDirStat
 {
+    class FileDetailsView;
     class HistoryButtons;
     class PkgFilter;
     class PkgManager;
@@ -130,6 +131,11 @@ namespace QDirStat
          * Read a filesystem, as requested from the filesystems window.
          **/
         void readFilesystem( const QString & path );
+
+        /**
+         * Return a pointer to the FileDetailsView panel widget.
+         **/
+        FileDetailsView * fileDetailsView() const { return _ui->fileDetailsView; }
 
 
     public slots:
@@ -457,11 +463,6 @@ namespace QDirStat
         void showProgress( const QString & text );
 
         /**
-         * Show details about the current selection in the details view.
-         **/
-        void updateFileDetailsView();
-
-        /**
          * Return whether verbose selection is enabled.
          **/
         bool verboseSelection() const { return _ui->actionVerboseSelection->isChecked(); }
@@ -546,11 +547,6 @@ namespace QDirStat
         void initLayouts( const QString & currentLayoutName );
 
         /**
-         * Create one layout action.
-         **/
-        void initLayout( const QString & layoutName, const QString & currentLayoutName );
-
-        /**
          * Get the layout details show values from an action.
          **/
          bool layoutShowBreadcrumbs( const QAction * action ) const
@@ -603,7 +599,6 @@ namespace QDirStat
         /**
          * Write layout settings.
          **/
-        void writeLayoutSetting( const QAction * action );
         void writeLayoutSettings();
 
         /**
