@@ -61,9 +61,6 @@
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
-           <property name="textElideMode">
-            <enum>Qt::ElideMiddle</enum>
-           </property>
            <property name="uniformRowHeights">
             <bool>true</bool>
            </property>
@@ -111,7 +108,7 @@
            <x>0</x>
            <y>0</y>
            <width>79</width>
-           <height>187</height>
+           <height>188</height>
           </rect>
          </property>
         </widget>
