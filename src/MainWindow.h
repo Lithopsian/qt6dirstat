@@ -639,28 +639,19 @@ namespace QDirStat
         QString parseUnpkgStartingDir( const UnpkgSettings & unpkgSettings );
 
         /**
-         * Detect theme changes.  Currently only the file details panel needs to
-         * react to this, so just call it directly.
+         * Detect theme changes, resizes, and attempts to close the
+         * window.
          *
-         * Reimplemented from QWidget.
-         **/
-        void changeEvent( QEvent * event ) override;
-
-        /**
-         * Rebuild the breadcrumbs whenever the window size changes.
+         * The breadcrumbs are redrawn when the font changes or the
+         * window is resized, in case the elided text needs to change.
          *
-         * Reimplemented from QWidget.
-         **/
-        void resizeEvent( QResizeEvent * ) override;
-
-        /**
-         * Detect all attempts to close the main window.  Cleanly abort
-         * any reads and always allow the window to close.  This will
-         * exit the main event loop and the application will shut down.
+         * Active reads are cleanly aborted before allowing the window
+         * to close.  Once the window closes, the main loop will exit
+         * and the application will shutdown.
          *
-         * Reimplemented from QWidget.
+         * Reimplemented from QMainWindow/QWidget.
          **/
-        void closeEvent( QCloseEvent * ) override;
+        bool event( QEvent * event ) override;
 
         /**
          * Handle mouse buttons: activate history actions actionGoBack and

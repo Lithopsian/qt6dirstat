@@ -360,8 +360,9 @@ void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 
 void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 24 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel - 8 );
 }
 
 

@@ -113,6 +113,13 @@ namespace QDirStat
 	void setCurrentPage( QWidget * page );
 
 	/**
+	 * Detect theme changes.
+	 *
+	 * Reimplemented from QWidget.
+	 **/
+	void changeEvent( QEvent * event ) override;
+
+	/**
 	 * Re-calculate the last (right-hand) pixel of the contents area
 	 * of the panel if '_lastPixel' >= 0.  Otherwise, leave it as -1
 	 * indicating that path labels should not be elided.  Then

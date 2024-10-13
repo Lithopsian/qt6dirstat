@@ -54,6 +54,11 @@ namespace QDirStat
 	static void askFindFiles( QWidget * parent = nullptr );
 
 
+    protected slots:
+
+//	void finished( int result );
+
+
     protected:
 
 	/**
@@ -88,6 +93,14 @@ namespace QDirStat
 	 * further.
 	 **/
 	void resizeEvent( QResizeEvent * ) override;
+
+	/**
+	 * Resize event, reimplemented from QWidget.
+	 *
+	 * This is to generate a dummy resizeEvent after the layouts have
+	 * been completed, so that the path label is displayed correctly.
+	 **/
+	void showEvent( QShowEvent * ) override;
 
 
     private:

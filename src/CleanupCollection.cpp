@@ -64,7 +64,7 @@ namespace
     QString confirmationMsg( const Cleanup * cleanup, const FileInfoSet & items )
     {
 	const QFont   font         = QGuiApplication::font();
-	const int     spaceWidth   = qMax( horizontalAdvance( font, " " ), 1 );
+	const int     spaceWidth   = qMax( horizontalAdvance( font, u' ' ), 1 );
 	const QString title        = cleanup->cleanTitle();
 	const int     titleWidth   = horizontalAdvance( font, title );
 	const int     maxSafeWidth = app()->maxDialogWidth() - 100;

@@ -207,8 +207,9 @@ void LocateFileTypeWindow::selectResult() const
 
 void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->heading, _ui->heading->statusTip(), size().width() - 24 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->heading, _ui->heading->statusTip(), lastPixel - 8 );
 }
 
 

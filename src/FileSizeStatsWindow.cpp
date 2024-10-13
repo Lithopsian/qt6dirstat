@@ -433,8 +433,9 @@ void FileSizeStatsWindow::showHelp() const
 
 void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
-    // Elide a label to the width of the dialog less margins, less a bit more
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 20 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel - 8 );
 }
 
 
@@ -444,6 +445,9 @@ void FileSizeStatsWindow::changeEvent( QEvent * event )
 
     if ( event->type() == QEvent::PaletteChange )
 	setPercentileTable();
+
+    if ( event->type() == QEvent::FontChange )
+	resizeEvent( nullptr );
 }
 
 

@@ -237,6 +237,12 @@ namespace QDirStat
 #else
 	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
 #endif
+    inline int horizontalAdvance( const QFont & font, QChar text )
+#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
+	{ return QFontMetrics{ font }.width( text ); }
+#else
+	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
+#endif
 
     /**
      * Return 'text', elided if necessary to fit 'maxSize' pixels
@@ -249,13 +255,14 @@ namespace QDirStat
      * Return the width of an ellipsis character in 'font'.
      **/
     inline int ellipsisWidth( const QFont & font )
-        { return horizontalAdvance( font, QString{ u'…' } ); }
+        { return horizontalAdvance( font, u'…' ); }
 
     /**
-     * Elide the text to fit within 'maxSize' pixels using the label
-     * widget font, and place it in the label.
+     * Elide the text to fit between the start position of 'label'
+     * and 'lastPixel', generally the end position of the parent
+     * minus any margin.
      **/
-    void elideLabel( QLabel * label, const QString & text, int maxSize );
+    void elideLabel( QLabel * label, const QString & text, int lastPixel );
 
     /**
      * Human-readable output of a file size in a debug stream.

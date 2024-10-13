@@ -92,7 +92,7 @@ void FindFilesDialog::askFindFiles( QWidget * parent )
 
     // Execute as a modal dialog - will wait here for it to complete
     FindFilesDialog dialog{ parent, pattern };
-    const int result = dialog.exec();
+    int result = dialog.exec();
 
     // Only save the dialog values and execute the search if the dialog is accepted
     if ( result == QDialog::Accepted )
@@ -149,9 +149,30 @@ void FindFilesDialog::writeSettings()
 }
 
 
-void FindFilesDialog::resizeEvent( QResizeEvent * )
+void FindFilesDialog::resizeEvent( QResizeEvent * event )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    const QString fullText = _ui->currentSubtreePathLabel->statusTip();
-    elideLabel( _ui->currentSubtreePathLabel, fullText, size().width() - 100 );
+    // The first resize event is before the layouts are done, so ignore it
+    if ( event && !event->oldSize().isValid() )
+        return;
+
+    // Calculate the right-hand edge of the available space from the parent frame less various margins
+    QLabel * label = _ui->currentSubtreePathLabel;
+    const int lastPixel = _ui->treeFrame->width() -
+                          _ui->treeFrame->layout()->contentsMargins().right() -
+                          _ui->pathHBox->contentsMargins().right() -
+                          label->contentsMargins().right() -
+                          label->frameWidth() * 2;
+
+    // Because of the frame, there is also an indent
+    const int indent = horizontalAdvance( font(), u'x' );
+
+    // Elide the label to the available space less a pixel to allow shrinking
+    elideLabel( label, label->statusTip(), lastPixel - indent - 16 );
+}
+
+
+void FindFilesDialog::showEvent( QShowEvent * )
+{
+    // (Re-)display the path label
+    resizeEvent( nullptr );
 }

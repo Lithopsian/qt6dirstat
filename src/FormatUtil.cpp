@@ -128,7 +128,7 @@ QString QDirStat::formatMillisec( qint64 millisec )
     const int hours = millisec / 3600000L; // 60*60*1000
     millisec %= 3600000L;
 
-    const int min = millisec / 60000L;	// 60*1000
+    const int min = millisec / 60000L; // 60*1000
     millisec %= 60000L;
 
     if ( hours < 1 && min < 1 && millisec < 60000 )
@@ -170,9 +170,11 @@ QString QDirStat::monthAbbreviation( short month )
 }
 
 
-void QDirStat::elideLabel( QLabel * label, const QString & text, int maxSize )
+void QDirStat::elideLabel( QLabel * label, const QString & text, int lastPixel )
 {
-    label->setText( elidedText( label->font(), text, maxSize ) );
+    // Fit the text into the space between the left-hand pixel and the right-hand pixel
+    const QString elided = elidedText( label->font(), text, lastPixel - label->x() );
+    label->setText( elided );
 }
 
 

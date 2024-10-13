@@ -1089,28 +1089,29 @@ void MainWindow::updateActions()
 }
 
 
-void MainWindow::changeEvent( QEvent * event )
+bool MainWindow::event( QEvent * event )
 {
-    const QEvent::Type type = event->type();
-    if ( type == QEvent::PaletteChange || type == QEvent::FontChange )
-	_ui->fileDetailsView->showDetails();
+    const auto type = event->type();
+    if ( type == QEvent::Close )
+    {
+	// Stop in-progress reads cleanly
+	stopReading();
+	return true;
+    }
 
-    QMainWindow::changeEvent( event );
+    if ( type == QEvent::FontChange || type == QEvent::Resize )
+	_ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+
+    return QMainWindow::event( event );
 }
 
-
-void MainWindow::resizeEvent( QResizeEvent * )
-{
-    _ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
-}
-
-
+/*
 void MainWindow::closeEvent( QCloseEvent * )
 {
     // Stop in-progress reads cleanly
     stopReading();
 }
-
+*/
 
 //---------------------------------------------------------------------------
 //			       Debugging helpers

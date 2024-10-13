@@ -78,12 +78,18 @@ namespace
 
 
     /**
-     * Set a label with 'text'.  If 'lastPixel' is less than zero, the
-     * whole text is displayed and the panel may have a horizontal
-     * scrollbar.  Otherwise, 'lastPixel' gives the x-coordinate of the
-     * right-hand edge of the contents portion of the details panel and
-     * 'text' is elided to fit in 'label' without requiring a scrollbar.
+     * Set a label with 'text'.
+     *
+     * If 'lastPixel' is less than zero, the whole text is displayed and
+     * the panel may have a horizontal scrollbar.  Otherwise, 'lastPixel'
+     * gives the x-coordinate of the right-hand edge of the contents
+     * portion of the details panel and 'text' is elided to fit in 'label'
+     * without requiring a scrollbar.
+     *
+     * If the label is elided then a tooltip is set containing the full
+     * text.
      **/
+#if 0
     void setLabelLimited( QLabel * label, const QString & text, int lastPixel )
     {
 	const QString limitedText = [ label, &text, lastPixel ]()
@@ -97,6 +103,16 @@ namespace
 
 	label->setText( limitedText );
 	label->setToolTip( text == limitedText ? QString{} : text );
+    }
+#endif
+    void setLabelLimited( QLabel * label, const QString & text, int lastPixel )
+    {
+	if ( lastPixel < 0 )
+	    label->setText( text );
+	else
+	    elideLabel( label, text, lastPixel );
+
+	label->setToolTip( label->text() == text ? QString{} : text );
     }
 
 
@@ -761,6 +777,16 @@ void FileDetailsView::setCurrentPage( QWidget * page )
 
     addWidget( page );
     setCurrentWidget( page );
+}
+
+
+void FileDetailsView::changeEvent( QEvent * event )
+{
+    const QEvent::Type type = event->type();
+    if ( type == QEvent::PaletteChange || type == QEvent::FontChange )
+	showDetails();
+
+    QStackedWidget::changeEvent( event );
 }
 
 
