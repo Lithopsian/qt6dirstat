@@ -235,7 +235,7 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 
     // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
     const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
-    elideLabel( _ui->heading, heading, lastPixel - 8 );
+    elideLabel( _ui->heading, heading, lastPixel );
 }
 
 

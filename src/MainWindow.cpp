@@ -1105,13 +1105,6 @@ bool MainWindow::event( QEvent * event )
     return QMainWindow::event( event );
 }
 
-/*
-void MainWindow::closeEvent( QCloseEvent * )
-{
-    // Stop in-progress reads cleanly
-    stopReading();
-}
-*/
 
 //---------------------------------------------------------------------------
 //			       Debugging helpers

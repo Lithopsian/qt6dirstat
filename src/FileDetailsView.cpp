@@ -89,30 +89,14 @@ namespace
      * If the label is elided then a tooltip is set containing the full
      * text.
      **/
-#if 0
-    void setLabelLimited( QLabel * label, const QString & text, int lastPixel )
-    {
-	const QString limitedText = [ label, &text, lastPixel ]()
-	{
-	    if ( lastPixel < 0 )
-		return text;
-
-	    const int availableWidth = lastPixel - label->x();
-	    return elidedText( label->font(), text, availableWidth );
-	}();
-
-	label->setText( limitedText );
-	label->setToolTip( text == limitedText ? QString{} : text );
-    }
-#endif
-    void setLabelLimited( QLabel * label, const QString & text, int lastPixel )
+    void setLabelLimited( QLabel * label, QString text, int lastPixel )
     {
 	if ( lastPixel < 0 )
 	    label->setText( text );
 	else
 	    elideLabel( label, text, lastPixel );
 
-	label->setToolTip( label->text() == text ? QString{} : text );
+	label->setToolTip( label->text() == text ? QString{} : breakable( text ) );
     }
 
 
@@ -419,7 +403,7 @@ namespace
 	if ( isSymLink )
 	{
 	    // Shorten long targets that include a path component to the base name
-	    const QString fullTarget  = file->symLinkTarget();
+	    QString fullTarget  = file->symLinkTarget();
 	    const bool shorten = fullTarget.length() > MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' );
 	    const QString shortTarget{ shorten ? "…/" % SysUtil::baseName( fullTarget ) : fullTarget };
 	    setLabelLimited( ui->fileLinkLabel, shortTarget, lastPixel ); // don't set tooltip yet
@@ -427,13 +411,13 @@ namespace
 	    if ( file->isBrokenSymLink() )
 	    {
 		ui->fileLinkLabel->setStyleSheet( errorStyleSheet() );
-		ui->fileLinkLabel->setToolTip( fullTarget % QObject::tr( " (broken)" ) );
+		ui->fileLinkLabel->setToolTip( QObject::tr( "Broken symlink:\n" ) % breakable( fullTarget ) );
 	    }
 	    else
 	    {
 		ui->fileLinkLabel->setStyleSheet( QString{} );
 		if ( shortTarget != fullTarget ) // setLabelLimited won't have detected this case
-		    ui->fileLinkLabel->setToolTip( fullTarget );
+		    ui->fileLinkLabel->setToolTip( breakable( fullTarget ) );
 	    }
 	}
 	else if ( isSpecial )
@@ -666,8 +650,8 @@ FileDetailsView::FileDetailsView( QWidget * parent ):
     QStackedWidget{ parent },
     _ui{ new Ui::FileDetailsView },
     _pkgUpdateTimer{ new AdaptiveTimer{ this,
-                                        { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages
-                                        { 3000, 1000, 500, 250, 150 },  // cooldown stages
+                                        { 0.0f, 0.5f, 1.0f, 2.0f, 5.0f }, // delay stages, x payload time
+                                        { 3000, 1000, 500, 250, 150 },  // cooldown stages, ms
                                       } }
 {
     _ui->setupUi( this );
@@ -782,7 +766,7 @@ void FileDetailsView::setCurrentPage( QWidget * page )
 
 void FileDetailsView::changeEvent( QEvent * event )
 {
-    const QEvent::Type type = event->type();
+    const auto type = event->type();
     if ( type == QEvent::PaletteChange || type == QEvent::FontChange )
 	showDetails();
 
@@ -796,10 +780,17 @@ void FileDetailsView::resizeEvent( QResizeEvent * )
     if ( _lastPixel < 0 || !currentWidget() )
 	return;
 
+    // Recalculate ther last pixel
     const QLayout * layout = currentWidget()->layout();
     if ( layout )
-	_lastPixel = contentsRect().width() - layout->contentsMargins().right() - layout->spacing();
+	_lastPixel = contentsRect().right() - layout->contentsMargins().right() - layout->spacing();
 
+    // Grab any package name because showDetails() may blank it and wait for a process to update it
+    const QString tooltipText = _ui->filePackageLabel->toolTip();
+    const QString fullText = tooltipText.isEmpty() ? _ui->filePackageLabel->text() : tooltipText;
+
+    // Refresh the whole panel and put the package name back
     showDetails();
+    setLabelLimited( _ui->filePackageLabel, fullText, _lastPixel );
 }
 

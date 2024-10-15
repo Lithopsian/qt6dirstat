@@ -107,13 +107,19 @@ namespace QDirStat
 	/**
 	 * Activate a page of this widget stack. This is similar to
 	 * setCurrentWidget(), but it also hides all the other pages to
-	 * minimize the screen space requirements: No extra space is reserved
-	 * for any of the other pages which might be larger than this one.
+	 * minimize the screen space requirements: No extra space is
+	 * reserved for any of the other pages which might be larger
+	 * than this one.
 	 **/
 	void setCurrentPage( QWidget * page );
 
 	/**
-	 * Detect theme changes.
+	 * Detect theme changes.  Font and palette changes result in the
+	 * panel being repopulated.  Only a minority of pages are
+	 * affected (only one by palette changes) but these events will
+	 * be rare and the effort of trying to match particular change
+	 * types to what is being displayed is likely to cause more harm
+	 * than just always doing a complete refresh.
 	 *
 	 * Reimplemented from QWidget.
 	 **/

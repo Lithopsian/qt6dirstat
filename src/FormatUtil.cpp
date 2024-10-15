@@ -24,27 +24,6 @@
 using namespace QDirStat;
 
 
-namespace
-{
-    /**
-     * Insert zero-width spaces at regular intervals into 'text'
-     * to allow it to line-break naturally even if it doesn't
-     * contain characters that would normally allow a line-break.
-     *
-     * Note that this function changes 'text' and returns a
-     * reference to the original QString.
-     **/
-    QString & breakable( QString & text )
-    {
-	for ( int i = 10; i < text.size(); i += 10 )
-	    text.insert( i, u'\u200B' ); // zero-width space
-
-	return text;
-    }
-
-} // namespace
-
-
 QString QDirStat::formatSize( FileSize lSize, int precision )
 {
     static QStringList units{ QObject::tr( " kB" ),
@@ -170,10 +149,25 @@ QString QDirStat::monthAbbreviation( short month )
 }
 
 
+QString & QDirStat::breakable( QString & text )
+{
+    for ( int i = 10; i < text.size(); i += 10 )
+	text.insert( i, u'\u200B' ); // zero-width space
+
+    return text;
+}
+
+
 void QDirStat::elideLabel( QLabel * label, const QString & text, int lastPixel )
 {
+    const QFont font = label->font();
+
+    // The text in a frame is indented in addition to the frame width
+    const int indent = label->frameWidth() > 0 ? labelFrameIndent( font ) + label->frameWidth() : 0;
+    const int extra = 2 * indent + ellipsisWidth( font );
+
     // Fit the text into the space between the left-hand pixel and the right-hand pixel
-    const QString elided = elidedText( label->font(), text, lastPixel - label->x() );
+    const QString elided = elidedText( font, text, lastPixel - label->x() - extra );
     label->setText( elided );
 }
 

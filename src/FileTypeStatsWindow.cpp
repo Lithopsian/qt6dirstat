@@ -405,8 +405,8 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
 {
     // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-    const int lastPixel = contentsRect().width() - layout()->contentsMargins().right();
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel - 8 );
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel );
 }
 
 

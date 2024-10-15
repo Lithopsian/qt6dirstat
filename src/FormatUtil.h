@@ -258,6 +258,20 @@ namespace QDirStat
         { return horizontalAdvance( font, u'…' ); }
 
     /**
+     * Return the indent between a label frame and the text.
+     **/
+    inline int labelFrameIndent( const QFont & font )
+        { return horizontalAdvance( font, u'x' ) / 2; }
+
+    /**
+     * Returns a copy of 'text' with zero-width spaces inserted
+     * at regular intervals to allow it to line-break naturally
+     * even if it doesn't contain characters that would normally
+     * allow a line-break.
+     **/
+    QString & breakable( QString & text );
+
+    /**
      * Elide the text to fit between the start position of 'label'
      * and 'lastPixel', generally the end position of the parent
      * minus any margin.
@@ -267,7 +281,7 @@ namespace QDirStat
     /**
      * Human-readable output of a file size in a debug stream.
      *
-     * Removed because the overload of is ambiguous between FileSize
+     * Removed because this overload is ambiguous between FileSize
      * and qsizetype (and potentially other long long ints).  Use
      * formatSize() explicitly if you need this.
      **/
