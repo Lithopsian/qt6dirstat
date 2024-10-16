@@ -54,6 +54,45 @@ namespace
 	return doCross;
     }
 
+
+    /**
+     * Handle an error during fstatat() of a directory entry.
+     **/
+    void handleStatError( const QString & entryName, const QString & fullName, DirInfo * dir, DirTree * tree )
+    {
+	logWarning() << "lstat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
+
+	/*
+	 * Not much we can do when lstat() didn't work; let's at
+	 * least create an (almost empty) entry as a placeholder.
+	 */
+	DirInfo * child = new DirInfo{ dir, tree, entryName };
+	child->finalizeLocal();
+	child->setReadState( DirError );
+	dir->insertChild( child );
+	tree->childAddedNotify( child );
+    }
+
+
+    /**
+     * Exclude the directory of this read job after it is almost completely
+     * read. This is used when checking for exclude rules matching direct
+     * file children of a directory.
+     *
+     * The main purpose of having this as a separate function is to have a
+     * clear backtrace if it segfaults.
+     **/
+    void excludeDirLate( DirReadJobQueue * queue, DirTree * tree, DirInfo * dir, LocalDirReadJob * except )
+    {
+	logDebug() << "Excluding dir " << dir << Qt::endl;
+
+	// Kill all queued jobs for this dir except 'except'
+	queue->killSubtree( dir, except );
+
+	tree->clearSubtree( dir );
+	dir->setExcluded();
+    }
+
 } // namespace
 
 
@@ -228,9 +267,9 @@ void LocalDirReadJob::startReading()
 		    tree()->childAddedNotify( child );
 		}
 	    }
-	    else  // lstat() error
+	    else  // fstatat() error
 	    {
-		handleLstatError( entryName );
+		handleStatError( entryName, fullName( entryName ), dir(), tree() );
 	    }
 	}
 
@@ -247,7 +286,7 @@ void LocalDirReadJob::startReading()
 	// immediately, so the performance impact is minimal.
 	const bool excludeLate = _applyFileChildExcludeRules && tree()->matchesDirectChildren( dir() );
 	if ( excludeLate )
-	    excludeDirLate();
+	    excludeDirLate( queue(), tree(), dir(), this );
 
 	dir()->finishReading( excludeLate ? DirOnRequestOnly : DirFinished );
     }
@@ -340,32 +379,6 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 }
 
 
-void LocalDirReadJob::excludeDirLate()
-{
-    logDebug() << "Excluding dir " << dir() << Qt::endl;
-
-    // Kill all queued jobs for this dir except this one
-    queue()->killSubtree( dir(), this );
-
-    tree()->clearSubtree( dir() );
-    dir()->setExcluded();
-}
-
-
-void LocalDirReadJob::handleLstatError( const QString & entryName )
-{
-    logWarning() << "lstat(" << fullName( entryName ) << ") failed: " << formatErrno() << Qt::endl;
-
-    /*
-     * Not much we can do when lstat() didn't work; let's at
-     * least create an (almost empty) entry as a placeholder.
-     */
-    DirInfo * child = new DirInfo{ dir(), tree(), entryName };
-    child->finalizeLocal();
-    child->setReadState( DirError );
-    dir()->insertChild( child );
-    tree()->childAddedNotify( child );
-}
 
 
 QString LocalDirReadJob::fullName( const QString & entryName ) const

@@ -205,21 +205,6 @@ namespace QDirStat
 	bool readCacheFile( const QString & cacheFileName );
 
 	/**
-	 * Handle an error during lstat() of a directory entry.
-	 **/
-	void handleLstatError( const QString & entryName );
-
-	/**
-	 * Exclude the directory of this read job after it is almost completely
-	 * read. This is used when checking for exclude rules matching direct
-	 * file children of a directory.
-	 *
-	 * The main purpose of having this as a separate function is to have a
-	 * clear backtrace if it segfaults.
-	 **/
-	void excludeDirLate();
-
-	/**
 	 * Return the full name with path of an entry of this directory.
 	 **/
 	QString fullName( const QString & entryName ) const;
