@@ -298,11 +298,17 @@ bool DirTreeView::viewportEvent( QEvent * event )
 	QModelIndex index = indexAt( helpEvent->pos() );
 	if ( index.isValid() )
 	{
-	    const QRect rect     = visualRect( index );
-	    const QSize sizeHint = sizeHintForIndex( index );
-	    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
+	    // Don't interfere with tooltips set by the model
+	    const int col = index.column();
+	    if ( col != PercentBarCol && col != SizeCol && col != PermissionsCol && col != OctalPermissionsCol )
+	    {
+		// Show a tooltip when the column is elided or contains non-printable characters
+		const QRect rect     = visualRect( index );
+		const QSize sizeHint = sizeHintForIndex( index );
+		tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
 
-	    return true;
+		return true;
+	    }
 	}
     }
 
