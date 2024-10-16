@@ -523,7 +523,7 @@ void CacheReader::addItem()
 	    switch ( toupper( *type ) )
 	    {
 		// 'F' is ambiguous unfortunately
-		case 'F': return *(mode_str+1) == '\0' ? S_IFREG : S_IFIFO;
+		case 'F': return *(type+1) == '\0' ? S_IFREG : S_IFIFO;
 		case 'D': return S_IFDIR;
 		case 'L': return S_IFLNK;
 		case 'B': return S_IFBLK;
