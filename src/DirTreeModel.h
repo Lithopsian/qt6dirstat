@@ -64,7 +64,7 @@ namespace QDirStat
 	/**
 	 * Returns the internal DirTree this view works on.
 	 *
-	 * Handle with caution: This might be short-lived information.	The
+	 * Handle with caution: this might be short-lived information.	The
 	 * model might choose to create a new tree shortly after returning
 	 * this, so don't store this pointer internally.
 	 **/
@@ -92,7 +92,8 @@ namespace QDirStat
 	/**
 	 * Set the base font for the tree view,
 	 **/
-	void setBaseFont( const QFont & font );
+	void setBaseFont( const QFont & font )
+	    { _baseFont = font; }
 
 	/**
 	 * Return the icon indicate an item's type (file, directory etc.)
@@ -493,7 +494,6 @@ namespace QDirStat
 	QColor _dirReadErrDarkTheme;
 	QColor _subtreeReadErrDarkTheme;
 	QFont  _baseFont;
-	QFont  _themeFont;
 
 	// The various tree icons
 	QIcon  _dirIcon;

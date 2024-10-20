@@ -46,11 +46,8 @@ void ListEditor::createAction( const QString      & actionName,
 }
 
 
-void ListEditor::connectActions()
+void ListEditor::initListWidget()
 {
-    connect( listWidget(), &QListWidget::currentItemChanged,
-             this,         &ListEditor::currentItemChanged );
-
     createAction( "actionToTop",
                   ":/icons/move-top.png",
                   tr( "Move to &top" ),
@@ -93,7 +90,16 @@ void ListEditor::connectActions()
                   toBottomButton(),
                   &ListEditor::toBottom );
 
+    QListWidget * widget = listWidget();
+    widget->setUniformItemSizes( true );
+    widget->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    widget->clear();
     fillListWidget();
+
+    connect( widget, &QListWidget::currentItemChanged,
+             this,   &ListEditor::currentItemChanged );
+
+    widget->setCurrentRow( 0 );
 }
 
 

@@ -278,7 +278,7 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
 
     _subtree = fileInfo;
 
-    _ui->headingLabel->setStatusTip( tr( "File age statistics for %1" ).arg( _subtree.url() ) );
+    _ui->headingLabel->setStatusTip( tr( "File age statistics for " ) % replaceCrLf( _subtree.url() ) );
     resizeEvent( nullptr );
 
     populateTree(_subtree(), _ui->treeWidget, yearsWithMonths() );
@@ -304,39 +304,6 @@ void FileAgeStatsWindow::enableActions()
 {
     _ui->locateButton->setEnabled( canLocate( currentItem( _ui->treeWidget ) ) );
 }
-
-/*
-void FileAgeStatsWindow::readSettings()
-{
-    Settings settings;
-
-    settings.beginGroup( "FileAgeStatsWindow" );
-
-    _ui->syncCheckBox->setChecked( settings.value        ( "SyncWithMainWindow",    true ).toBool() );
-    const int       width       = settings.value         ( "PercentBarWidth",       120  ).toInt();
-    const QColor    background  = settings.colorValue    ( "PercentBarBackground",  QColor{ 160, 160, 160 } );
-    const ColorList filesColors = settings.colorListValue( "FilesPercentBarColors", { 0xbb0000, 0x00aa00 }  );
-    const ColorList sizeColors  = settings.colorListValue( "SizePercentBarColors",  { 0xee0000, 0x00cc00 }  );
-
-    settings.setDefaultValue( "PercentBarWidth",       width       );
-    settings.setDefaultValue( "PercentBarBackground",  background  );
-    settings.setDefaultValue( "FilesPercentBarColors", filesColors );
-    settings.setDefaultValue( "SizePercentBarColors",  sizeColors  );
-
-    settings.endGroup();
-
-    Settings::readWindowSettings( this, "FileAgeStatsWindow" );
-
-    // Delegates for the two percent bars
-    const auto filesDelegate =
-	new PercentBarDelegate{ _ui->treeWidget, width, background, filesColors };
-    _ui->treeWidget->setItemDelegateForColumn( YL_FilesPercentBarCol, filesDelegate );
-
-    const auto sizeDelegate =
-	new PercentBarDelegate{ _ui->treeWidget, width, background, sizeColors };
-    _ui->treeWidget->setItemDelegateForColumn( YL_SizePercentBarCol, sizeDelegate );
-}
-*/
 
 
 void FileAgeStatsWindow::itemActivated( QTreeWidgetItem * item, int )

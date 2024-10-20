@@ -68,6 +68,9 @@
           <property name="text">
            <string notr="true">myfile.txt</string>
           </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
+          </property>
           <property name="textInteractionFlags">
            <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
           </property>
@@ -243,6 +246,9 @@
           <property name="text">
            <string notr="true">category</string>
           </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
+          </property>
          </widget>
         </item>
         <item row="2" column="0">
@@ -304,6 +310,9 @@
          <widget class="QLabel" name="fileLinkLabel">
           <property name="text">
            <string>target</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
           </property>
          </widget>
         </item>
@@ -386,6 +395,9 @@
           </property>
           <property name="text">
            <string notr="true">doc/</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
           </property>
           <property name="textInteractionFlags">
            <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>

@@ -118,11 +118,12 @@ namespace
 
 	while ( true )
 	{
-	    // Keep shortening until it fits or we can't elide anything else
+	    // Keep shortening until it fits ...
 	    const int currentLength = breadcrumbsLen( breadcrumbs, font );
 	    if ( currentLength <= maxLength )
 		return;
 
+	    // ... or we can't elide anything else
 	    Breadcrumb * longestCrumb = pickLongBreadcrumb( breadcrumbs );
 	    if ( !longestCrumb )
 		return;
@@ -143,10 +144,15 @@ namespace
 
 
     /**
-     * Generate HTML from a BreadcrumbList.
+     * Generate HTML from a BreadcrumbList.  Carriage returns and
+     * linefeeds have already been replaced by spaces, but escape
+     * special characters and wrap to prevent whitespace being
+     * collapsed.
      **/
     QString toHtml( const BreadcrumbList & breadcrumbs )
     {
+	const QString crumbTemplate{ "<a href=\"%1\">%2</a>" };
+
 	QString html;
 
 	for ( const Breadcrumb & crumb : breadcrumbs )
@@ -158,14 +164,14 @@ namespace
 		if ( crumb.url.isEmpty() )
 		    html += escapedName;
 		else
-		    html += "<a href=\""_L1 % crumb.url % "\">"_L1 % escapedName % "</a>"_L1;
+		    html += crumbTemplate.arg( crumb.url, escapedName );
 
 		if ( !name.endsWith( u'/' ) )
 		    html += u'/';
 	    }
 	}
 
-	return html;
+	return whitespacePre( html );
     }
 
 
@@ -212,7 +218,8 @@ namespace
 	if ( !item || !item->tree() )
 	    return BreadcrumbList{};
 
-	const FileInfo * toplevel = item->tree()->firstToplevel();
+	const DirTree * tree = item->tree();
+	const FileInfo * toplevel = tree->firstToplevel();
 	if ( !toplevel )
 	    return BreadcrumbList{};
 
@@ -225,19 +232,16 @@ namespace
 
 	splitBasePath( toplevel->name(), basePath, name );
 	if ( !basePath.isEmpty() )
-	    breadcrumbs[ 0 ].pathComponent = basePath;
+	    breadcrumbs[ 0 ].pathComponent = replaceCrLf( basePath );
 
-	while ( item && depth > 0 )
+	// Redundant loop conditions just as sanity checks
+	while ( depth > 0 && item && item != tree->root() )
 	{
-	    // Stop at the DirTree's <root> pseudo item
-	    if ( item->tree() && item == item->tree()->root() )
-		break;
-
 	    if ( item->isDirInfo() )
 	    {
 		splitBasePath( item->name(), basePath, name );
 
-		breadcrumbs[ depth ].pathComponent = name;
+		breadcrumbs[ depth ].pathComponent = replaceCrLf( name );
 		breadcrumbs[ depth ].url = item->debugUrl();
 	    }
 
@@ -271,14 +275,20 @@ BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
 
 void BreadcrumbNavigator::setPath( const FileInfo * item )
 {
-    // Break the path into components
+    // Break the item pathname into components
     _breadcrumbs = fillBreadcrumbs( item );
 
+    // Ensure that the layout already properly represents the main window geometry
+    QLayout * layout = parentWidget()->layout();
+    if ( !layout->geometry().isValid() )
+	layout->activate();
+
     // Elide components until the whole label will fit inside the central widget
-    const int parentContentsWidth = parentWidget()->layout()->contentsRect().width();
-    const QMargins margins = contentsMargins();
-    const int maxWidth = parentContentsWidth - ( margins.left() + margins.right() + 16 );
-    shortenBreadcrumbs( _breadcrumbs, font(), maxWidth );
+    int leftMargin;
+    int rightMargin;
+    layout->getContentsMargins( &leftMargin, &rightMargin, nullptr, nullptr );
+    const int maxWidth = layout->contentsRect().width() - leftMargin - rightMargin;
+    shortenBreadcrumbs( _breadcrumbs, font(), maxWidth - ellipsisWidth( font() ) );
 
 #if VERBOSE_BREADCRUMBS
     logBreadcrumbs( _breadcrumbs );

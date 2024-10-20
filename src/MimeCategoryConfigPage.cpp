@@ -14,6 +14,7 @@
 #include "ConfigDialog.h"
 #include "DirTree.h"
 #include "DirInfo.h"
+#include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
@@ -117,8 +118,9 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     //logDebug() << "MimeCategoryConfigPage constructor" << Qt::endl;
 
     _ui->setupUi( this );
+    _ui->nameLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
 
-    connectActions();
+    initListWidget();
 
     connect( _ui->nameLineEdit,             &QLineEdit::textChanged,
              this,                          &MimeCategoryConfigPage::nameChanged );
@@ -241,7 +243,6 @@ void MimeCategoryConfigPage::fillListWidget()
     }
 
     _ui->listWidget->sortItems();
-    _ui->listWidget->setCurrentRow( 0 );
 }
 
 

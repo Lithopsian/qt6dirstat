@@ -35,9 +35,6 @@
            <height>300</height>
           </size>
          </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
         </widget>
        </item>
        <item>
@@ -393,7 +390,7 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>183</width>
+               <width>256</width>
                <height>86</height>
               </rect>
              </property>
@@ -447,7 +444,7 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>238</width>
+               <width>256</width>
                <height>123</height>
               </rect>
              </property>
@@ -573,7 +570,7 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>224</width>
+               <width>256</width>
                <height>77</height>
               </rect>
              </property>

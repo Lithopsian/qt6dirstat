@@ -13,12 +13,12 @@
 #include <QLabel>
 #include <QLocale>
 #include <QScrollBar>
+#include <QTextDocument>
 #include <QToolTip>
 #include <QTreeView>
 #include <QTreeWidgetItem>
 
 #include "FormatUtil.h"
-#include "Logger.h"
 
 
 using namespace QDirStat;
@@ -149,12 +149,26 @@ QString QDirStat::monthAbbreviation( short month )
 }
 
 
-QString & QDirStat::breakable( QString & text )
+QString QDirStat::replaceCrLf( const QString & text )
 {
-    for ( int i = 10; i < text.size(); i += 10 )
-	text.insert( i, u'\u200B' ); // zero-width space
+    if ( !hasLineBreak( text ) )
+	return text;
 
-    return text;
+    return QString{ text }.replace( QRegularExpression{ "\r|\n" }, " " );
+}
+
+
+QString & QDirStat::pathTooltip( QString & path )
+{
+    // Add possible line break points in case a tooltip with no spaces is wider than the screen
+    for ( int i = 25; i < path.size(); i += 25 )
+	path.insert( i, u'\u200B' ); // zero-width space
+
+    // Stop the tooltip being treated as rich text even if it contains html
+    if ( Qt::mightBeRichText( path ) )
+	path.replace( u'<', "<\u200B" ); // this can't start an html tag
+
+    return path;
 }
 
 
@@ -163,12 +177,12 @@ void QDirStat::elideLabel( QLabel * label, const QString & text, int lastPixel )
     const QFont font = label->font();
 
     // The text in a frame is indented in addition to the frame width
-    const int indent = label->frameWidth() > 0 ? labelFrameIndent( font ) + label->frameWidth() : 0;
-    const int extra = 2 * indent + ellipsisWidth( font );
+    const int frameWidth = label->frameWidth();
+    const int indent = frameWidth > 0 ? labelFrameIndent( font ) + frameWidth : 0;
 
     // Fit the text into the space between the left-hand pixel and the right-hand pixel
-    const QString elided = elidedText( font, text, lastPixel - label->x() - extra );
-    label->setText( elided );
+    const int roomToResize = ellipsisWidth( font );
+    label->setText( elidedText( font, text, lastPixel - label->x() - 2 * indent - roomToResize ) );
 }
 
 
@@ -211,13 +225,13 @@ QString QDirStat::tooltipForElided( const QTreeWidgetItem * item, int column, in
     opt.font           = tree->font();
     opt.text           = item->text( column );
 
-    // No tooltip of the column is wider than the item
+    // No tooltip if the column is wider than the item
     const int sectionWidth = tree->header()->sectionSize( column );
     const QSize itemSize = tree->style()->sizeFromContents( QStyle::CT_ItemViewItem, &opt, QSize{} );
     if ( itemSize.width() + tree->indentation() * treeLevel <= sectionWidth )
 	return QString{};
 
-    return breakable( opt.text );
+    return pathTooltip( opt.text );
 }
 
 
@@ -227,13 +241,29 @@ void QDirStat::tooltipForElided( QRect                      visualRect,
                                  const QModelIndex        & index,
                                  QPoint                     pos )
 {
-    if ( model && visualRect.width() < sizeHint.width() )
+    if ( model )
     {
-	QString text = model->data( index, Qt::DisplayRole ).toString();
-	QToolTip::showText( pos, breakable( text ) );
+	const QString tooltipText = [ visualRect, sizeHint, model, &index ]()
+	{
+	    QString modelTooltip = model->data( index, Qt::ToolTipRole ).toString();
+	    if ( !modelTooltip.isEmpty() )
+		return modelTooltip;
+
+	    if ( visualRect.width() < sizeHint.width() || visualRect.height() < sizeHint.height() )
+	    {
+		QString text = model->data( index, Qt::DisplayRole ).toString();
+		return pathTooltip( text );
+	    }
+
+	    return QString{};
+	}();
+
+	if ( !tooltipText.isEmpty() )
+	{
+	    QToolTip::showText( pos, tooltipText );
+	    return;
+	}
     }
-    else
-    {
-	QToolTip::hideText();
-    }
+
+    QToolTip::hideText();
 }

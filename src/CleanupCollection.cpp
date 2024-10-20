@@ -76,7 +76,7 @@ namespace
 	    const QString itemType =
 		item->isDirInfo() ? QObject::tr( "for directory" ) : QObject::tr( "for file" );
 	    const int maxSafeNameWidth = maxSafeWidth - textWidth( font, itemType );
-	    const QString name = elidedText( font, item->debugUrl(), maxSafeNameWidth );
+	    const QString name = elidedText( font, replaceCrLf( item->debugUrl() ), maxSafeNameWidth );
 
 	    // Pad the title to avoid tiny dialog boxes or wrapping of the label
 	    const QString itemLine = itemType % ": "_L1 % name;
@@ -105,7 +105,7 @@ namespace
 			return urls;
 		    }
 
-		    const QString name = elidedText( font, item->debugUrl(), maxSafeWidth );
+		    const QString name = elidedText( font, replaceCrLf( item->debugUrl() ), maxSafeWidth );
 		    urls << ' ' % name.toHtmlEscaped();
 		}
 	    }

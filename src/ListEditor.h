@@ -167,7 +167,7 @@ namespace QDirStat
 	 * be done in the ListEditor constructor because the page UI
 	 * isn't set up yet.
 	 **/
-	void connectActions();
+	void initListWidget();
 
 	/**
 	 * Create an action for a QToolButton.  Actions are only

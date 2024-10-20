@@ -25,6 +25,9 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
+     </property>
     </widget>
    </item>
    <item>

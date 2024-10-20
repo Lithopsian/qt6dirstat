@@ -334,7 +334,8 @@ bool OutputWindow::hasActiveProcess() const
 {
     for ( const QProcess * process : asConst( _processList ) )
     {
-	if ( process->state() == QProcess::Starting || process->state() == QProcess::Running )
+	QProcess::ProcessState state = process->state();
+	if ( state == QProcess::Starting || state == QProcess::Running )
 	    return true;
     }
 

@@ -162,7 +162,7 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
 
     // Set the heading and sort order for each new populate command
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
-    instance->_ui->heading->setStatusTip( headingText );
+    instance->_ui->heading->setStatusTip( replaceCrLf( headingText ) );
     instance->populate( fileInfo );
 
     // Show now so the BusyPopup is not obscured
@@ -258,7 +258,7 @@ LocateListItem::LocateListItem( FileInfo * item ):
 
     set( LL_SizeCol,  Qt::AlignRight,   formatSize( _size ) );
     set( LL_MTimeCol, Qt::AlignHCenter, formatTime( _mtime ) );
-    set( LL_PathCol,  Qt::AlignLeft,    _path );
+    set( LL_PathCol,  Qt::AlignLeft,    replaceCrLf( _path ) );
 
     setIcon( LL_PathCol, app()->dirTreeModel()->itemTypeIcon( item ) );
 }
@@ -270,7 +270,7 @@ QVariant LocateListItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole || column != LL_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
-    return tooltipForElided( this, LL_PathCol, 0 );
+    return hasLineBreak( _path ) ? _path : tooltipForElided( this, LL_PathCol, 0 );
 }
 
 
@@ -288,6 +288,7 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case LL_SizeCol:  return _size  < other.size();
 	case LL_MTimeCol: return _mtime < other.mtime();
+	case LL_PathCol:  return _path  < other.path();
 	default:                 return QTreeWidgetItem::operator<( rawOther );
     }
 

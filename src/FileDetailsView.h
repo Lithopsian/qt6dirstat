@@ -91,13 +91,6 @@ namespace QDirStat
 	const Ui::FileDetailsView * ui() const { return _ui.get(); }
 
 	/**
-	 * Show a summary of multiple selected items.  The
-	 * counts are of a normalized list, so selected children
-	 * of a selected parent are not counted.
-	 **/
-//	void showDetails( const FileInfoSet & selectedItems );
-
-	/**
 	 * Show details about a single item: either a package,
 	 * a directory, a pseudo-directory, an actual file, or
 	 * a summary for the top level of the package view.
@@ -107,7 +100,7 @@ namespace QDirStat
 	/**
 	 * Activate a page of this widget stack. This is similar to
 	 * setCurrentWidget(), but it also hides all the other pages to
-	 * minimize the screen space requirements: No extra space is
+	 * minimize the screen space requirements: no extra space is
 	 * reserved for any of the other pages which might be larger
 	 * than this one.
 	 **/
@@ -131,7 +124,7 @@ namespace QDirStat
 	 * indicating that path labels should not be elided.  Then
 	 * re-display the panel with the current selection.
 	 *
-	 * Reimplemented from QStackedWidget/QWidget.
+	 * Reimplemented from QFrame/QWidget.
 	 **/
 	void resizeEvent( QResizeEvent * ) override;
 

@@ -13,6 +13,7 @@
 #include "ActionManager.h"
 #include "Cleanup.h"
 #include "CleanupCollection.h"
+#include "FormatUtil.h"
 #include "ConfigDialog.h"
 #include "OutputWindow.h"
 #include "Typedefs.h" // _L1
@@ -30,9 +31,10 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     _outputWindowDefaultTimeout{ OutputWindow::defaultShowTimeout() }
 {
     _ui->setupUi( this );
+    _ui->titleLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
 
     enableEditWidgets( false );
-    connectActions();
+    initListWidget();
     enableWindowPolicyWidgets();
 
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
@@ -95,16 +97,12 @@ void CleanupConfigPage::applyChanges()
 
 void CleanupConfigPage::fillListWidget()
 {
-    _ui->listWidget->clear();
-
-    for ( const Cleanup * cleanup : *ActionManager::cleanupCollection() )
+    for ( const Cleanup * cleanup : *( ActionManager::cleanupCollection() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	Cleanup * newCleanup = new Cleanup{ cleanup };
 	createItem( newCleanup->cleanTitle(), newCleanup );
     }
-
-    _ui->listWidget->setCurrentRow( 0 );
 }
 
 

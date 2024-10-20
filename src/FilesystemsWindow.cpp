@@ -255,15 +255,11 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint ):
 QVariant FilesystemItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are likely to be long and elided
-    if ( role != Qt::ToolTipRole || ( column != FS_DeviceCol && column != FS_MountPathCol ) )
+//    if ( role != Qt::ToolTipRole || ( column != FS_DeviceCol && column != FS_MountPathCol ) )
+    if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 
     return tooltipForElided( this, column, column == FS_DeviceCol ? 1 : 0 );
-
-//    const QTreeWidget * tree = treeWidget();
-//    const QSize iconSize = column == FS_DeviceCol ? tree->iconSize() : QSize{}; // only device has icon
-//    const int indentation = column == FS_DeviceCol ? tree->indentation() : 0; // mount point column not indented
-//    return tooltipForElided( tree, column, indentation, iconSize, tree->font(), text( column ) );
 }
 
 

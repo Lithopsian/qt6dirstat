@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QAbstractItemView>
-
 #include "DirTreeModel.h"
 #include "DirInfo.h"
 #include "DirTree.h"
@@ -208,6 +206,31 @@ namespace
 	return formatSize( item->size() );
     }
 
+
+    /**
+     * Return the formatted tooltip for the size column.
+     **/
+    QVariant sizeColTooltip( FileInfo * item )
+    {
+	if ( item->isDirInfo() )
+	    return QVariant{ item->sizePrefix() % formatByteSize( item->totalAllocatedSize() ) };
+
+	const QString sizeText = formatByteSize( item->rawByteSize() );
+	const QString allocText = [ item ]()
+	{
+	    if ( item->allocatedSize() == item->rawByteSize() && !item->isSparseFile() )
+		return QString{};
+
+	    const QString usedText = item->isSparseFile() ? QObject::tr( "sparse data" ) : QObject::tr( "used" );
+	    const QString allocText = formatByteSize( item->rawAllocatedSize() );
+	    return QString{ ' ' % usedText % '\n' % allocText % ' ' % QObject::tr( "allocated" ) };
+	}();
+	const QString linksText = formatLinksRichText( item->links() );
+
+	return whitespacePre( item->sizePrefix() % sizeText % allocText % linksText );
+    }
+
+
     /**
      * Return the column text for the data() override function.
      **/
@@ -224,6 +247,15 @@ namespace
 
 	switch ( col )
 	{
+	    case NameCol:
+	    {
+		// Hack to avoid (very rare) line breaks blowing up the (uniform) line size
+		if ( item == tree->firstToplevel() )
+		    return replaceCrLf( item->name() );
+
+		return item->name();
+	    }
+
 	    case PercentBarCol:
 	    {
 		// Leave to delegate except for special cases
@@ -240,13 +272,12 @@ namespace
 
 	    case PercentNumCol:
 	    {
-		if ( item->isAttic() || item == tree->firstToplevel() )
-		    return QVariant{};
+		if ( !item->isAttic() && item != tree->firstToplevel() )
+		    return formatPercentQVariant( item->subtreeAllocatedPercent() );
 
-		return formatPercentQVariant( item->subtreeAllocatedPercent() );
+		return QVariant{};
 	    }
 
-	    case NameCol:             return item->name();
 	    case SizeCol:             return sizeColText( item );
 	    case LatestMTimeCol:      return formatTime( item->latestMTime() );
 	    case UserCol:             return item->userName();
@@ -322,12 +353,41 @@ namespace
 
 
     /**
+     * Return the column tooltip for the data() override function.
+     **/
+    QVariant columnTooltip( FileInfo * item, int col )
+    {
+	switch ( col )
+	{
+	    case NameCol:
+	    {
+		// CR/LF will have been removed from the root name display role so provide the original
+		QString name = item->name();
+		return hasLineBreak( name ) ? pathTooltip( name ) : QVariant{};
+	    }
+
+	    case PercentBarCol:
+		return formatPercentQVariant( item->subtreeAllocatedPercent() );
+
+	    case SizeCol:
+		return sizeColTooltip( item );
+
+	    case PermissionsCol:
+		return item->octalPermissions();
+
+	    case OctalPermissionsCol:
+		return item->symbolicPermissions();
+
+	    default:
+		return QVariant{};
+	}
+    }
+
+
+    /**
      * Return the column font for the data() override function.
      **/
-    QVariant columnFont( const QFont & baseFont,
-                         FileInfo    * item,
-                         int           col,
-                         bool          useBoldForDominantItems )
+    QVariant columnFont( const QFont & baseFont, FileInfo * item, int col, bool useBoldForDominant )
     {
 	switch ( col )
 	{
@@ -341,7 +401,7 @@ namespace
 	    case PercentNumCol:
 	    case SizeCol:
 	    {
-		if ( useBoldForDominantItems && item && item->isDominant() )
+		if ( useBoldForDominant && item && item->isDominant() )
 		{
 		    QFont font{ baseFont };
 		    font.setWeight( QFont::Bold );
@@ -382,30 +442,6 @@ namespace
 	}
 
 	return false;
-    }
-
-
-    /**
-     * Return the formatted tooltip for the size column.
-     **/
-    QVariant sizeColTooltip( FileInfo * item )
-    {
-	if ( item->isDirInfo() )
-	    return QVariant{ item->sizePrefix() % formatByteSize( item->totalAllocatedSize() ) };
-
-	const QString sizeText = formatByteSize( item->rawByteSize() );
-	const QString allocText = [ item ]()
-	{
-	    if ( item->allocatedSize() == item->rawByteSize() && !item->isSparseFile() )
-		return QString{};
-
-	    const QString usedText = item->isSparseFile() ? QObject::tr( "sparse data" ) : QObject::tr( "used" );
-	    const QString allocText = formatByteSize( item->rawAllocatedSize() );
-	    return QString{ ' ' % usedText % '\n' % allocText % ' ' % QObject::tr( "allocated" ) };
-	}();
-	const QString linksText = formatLinksRichText( item->links() );
-
-	return whitespacePre( item->sizePrefix() % sizeText % allocText % linksText );
     }
 
 
@@ -535,7 +571,6 @@ void DirTreeModel::updateSettings( bool crossFilesystems,
     _updateTimer.setInterval( _slowUpdate ? _slowUpdateMillisec : updateTimerMillisec );
 
     loadIcons();
-    setBaseFont( _themeFont );
 
     emit layoutChanged();
 }
@@ -547,16 +582,6 @@ void DirTreeModel::setSlowUpdate()
     _updateTimer.setInterval( _slowUpdateMillisec );
 
     logInfo() << "Display update every " << _slowUpdateMillisec << " millisec" << Qt::endl;
-}
-
-
-void DirTreeModel::setBaseFont( const QFont & font )
-{
-    _themeFont = font;
-    _baseFont = font;
-
-    if ( _treeItemSize == DTIS_Medium )
-	_baseFont.setPointSizeF( font.pointSizeF() * 1.1 );
 }
 
 
@@ -717,7 +742,6 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
     if ( !index.isValid() )
 	return QVariant{};
 
-    const DataColumn col  = DataColumns::fromViewCol( index.column() );
     FileInfo * item = internalPointerCast( index );
     CHECK_MAGIC( item );
 
@@ -727,7 +751,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    if ( item && item->isDirInfo() )
 		item->toDirInfo()->touch();
 
-	    return columnText( _tree, item, col );
+	    return columnText( _tree, item, index.column() );
 
 	case Qt::ForegroundRole: // text colour
 	    if ( item->isIgnored() || item->isAttic() )
@@ -742,37 +766,22 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    return QVariant{};
 
 	case Qt::DecorationRole: // icon
-	    return columnIcon( item, col );
+	    return columnIcon( item, index.column() );
 
 	case Qt::TextAlignmentRole:
-	    return columnAlignment( item, col );
+	    return columnAlignment( item, index.column() );
 
 	case Qt::ToolTipRole:
-	    switch ( col )
-	    {
-		case PercentBarCol:
-		    return formatPercentQVariant( item->subtreeAllocatedPercent() );
-
-		case SizeCol:
-		    return sizeColTooltip( item );
-
-		case PermissionsCol:
-		    return item->octalPermissions();
-
-		case OctalPermissionsCol:
-		    return item->symbolicPermissions();
-
-		default:
-		    return QVariant{};
-	    }
+	    return columnTooltip( item, index.column() );
 
 	case Qt::FontRole:
-	    return columnFont( _baseFont, item, col, _useBoldForDominantItems );
+	    return columnFont( _baseFont, item, index.column(), _useBoldForDominantItems );
 
 	case Qt::BackgroundRole:
-	    if ( col == NameCol && item->isDirInfo() && item->toDirInfo()->isFromCache() )
+	    if ( index.column() == NameCol && item->isDirInfo() && item->toDirInfo()->isFromCache() )
 		return QGuiApplication::palette().color( QPalette::Active, QPalette::AlternateBase );
-	    break;
+
+	    return QVariant{};
 
 	case PercentRole: // Send percent data to the PercentBarDelegate
 	    return percentData( _tree, item );
@@ -782,9 +791,10 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 
 	case SizeTextRole: // Send an array of size text strings to the SizeColDelegate
 	    return sizeTextData( item );
-    }
 
-    return QVariant{};
+	default:
+	    return QVariant{};
+    }
 }
 
 
@@ -821,14 +831,11 @@ QVariant DirTreeModel::headerData( int             section,
 	    // Default is AlignHCenter, but use align left for the name header
 	    if ( DataColumns::fromViewCol( section ) == NameCol )
 		return QVariant{ Qt::AlignVCenter | Qt::AlignLeft };
-	    break;
+	    return QVariant{};
 
-	// Theme standard font, adjusted for the configured item size
-	case Qt::FontRole:
-	    return _baseFont;
+	default:
+	    return QVariant{};
     }
-
-    return QVariant{};
 }
 
 

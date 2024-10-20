@@ -91,6 +91,45 @@ void DirTreeView::readSettings()
 }
 
 
+void DirTreeView::scrolled( int )
+{
+    // Reset the precision to just the visible rows, but remember the original setting
+    const auto treeHeader = header();
+    const int precision = treeHeader->resizeContentsPrecision();
+    treeHeader->setResizeContentsPrecision( 0 );
+
+    // Loop through columns which have variable widths
+    for ( DataColumn col : { NameCol,
+                             PercentNumCol,
+                             SizeCol,
+                             TotalItemsCol,
+                             TotalFilesCol,
+                             TotalSubDirsCol,
+                             UserCol,
+                             GroupCol,
+                           } )
+    {
+	// Only check visible columns that are configured to auto-size
+	const int  section = DataColumns::toViewCol( col );
+	const auto mode    = treeHeader->sectionResizeMode( section );
+	const bool hidden  = treeHeader->isSectionHidden( section );
+	if ( !hidden && mode == QHeaderView::ResizeToContents )
+	{
+	    // Signal an update if the required width is more than the current width
+	    if ( sizeHintForColumn( section ) > treeHeader->sectionSize( section ) )
+	    {
+		// Pick a row, any row, just to make Qt reassess the columns
+		emit itemDelegateForColumn( SizeCol )->sizeHintChanged( indexAt( { 0, 0 } ) );
+		break;
+	    }
+	}
+    }
+
+    // Return the checked rows limit to the default
+    treeHeader->setResizeContentsPrecision( precision );
+}
+
+
 void DirTreeView::contextMenu( const QPoint & pos )
 {
     QModelIndex index = indexAt( pos );
@@ -251,45 +290,6 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
 }
 
 
-void DirTreeView::scrolled( int )
-{
-    // Reset the precision to just the visible rows, but remember the original setting
-    const auto treeHeader = header();
-    const int precision = treeHeader->resizeContentsPrecision();
-    treeHeader->setResizeContentsPrecision( 0 );
-
-    // Loop through columns which have variable widths
-    for ( DataColumn col : { NameCol,
-                             PercentNumCol,
-                             SizeCol,
-                             TotalItemsCol,
-                             TotalFilesCol,
-                             TotalSubDirsCol,
-                             UserCol,
-                             GroupCol,
-                           } )
-    {
-	// Only check visible columns that are configured to auto-size
-	const int  section = DataColumns::toViewCol( col );
-	const auto mode    = treeHeader->sectionResizeMode( section );
-	const bool hidden  = treeHeader->isSectionHidden( section );
-	if ( !hidden && mode == QHeaderView::ResizeToContents )
-	{
-	    // Signal an update if the required width is more than the current width
-	    if ( sizeHintForColumn( section ) > treeHeader->sectionSize( section ) )
-	    {
-		// Pick a row, any row, just to make Qt reassess the columns
-		emit itemDelegateForColumn( SizeCol )->sizeHintChanged( indexAt( { 0, 0 } ) );
-		break;
-	    }
-	}
-    }
-
-    // Return the checked rows limit to the default
-    treeHeader->setResizeContentsPrecision( precision );
-}
-
-
 bool DirTreeView::viewportEvent( QEvent * event )
 {
     if ( event && event->type() == QEvent::ToolTip )
@@ -298,17 +298,12 @@ bool DirTreeView::viewportEvent( QEvent * event )
 	QModelIndex index = indexAt( helpEvent->pos() );
 	if ( index.isValid() )
 	{
-	    // Don't interfere with tooltips set by the model
-	    const int col = index.column();
-	    if ( col != PercentBarCol && col != SizeCol && col != PermissionsCol && col != OctalPermissionsCol )
-	    {
-		// Show a tooltip when the column is elided or contains non-printable characters
-		const QRect rect     = visualRect( index );
-		const QSize sizeHint = sizeHintForIndex( index );
-		tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
+	    // Show a tooltip when the model provides one or when the column is elided
+	    const QRect rect     = visualRect( index );
+	    const QSize sizeHint = sizeHintForIndex( index );
+	    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
 
-		return true;
-	    }
+	    return true;
 	}
     }
 

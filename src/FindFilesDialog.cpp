@@ -138,12 +138,14 @@ FindFilesDialog::FindFilesDialog( QWidget * parent, const QString & pattern ):
 {
     _ui->setupUi( this );
 
+    _ui->patternField->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+
     readSettings( this, ui() );
 
     _ui->patternField->setText( pattern );
 
     QString subtreeText = currentSubtree()->url();
-    _ui->currentSubtreePathLabel->setStatusTip( subtreeText );
+    _ui->currentSubtreePathLabel->setStatusTip( replaceCrLf( subtreeText ) );
     _ui->currentSubtreeRadioButton->setEnabled( !subtreeText.isEmpty() );
 
     // The subtree label will be filled in by the resizeEvent handler

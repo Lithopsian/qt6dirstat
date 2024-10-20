@@ -84,19 +84,23 @@ namespace
      * the panel may have a horizontal scrollbar.  Otherwise, 'lastPixel'
      * gives the x-coordinate of the right-hand edge of the contents
      * portion of the details panel and 'text' is elided to fit in 'label'
-     * without requiring a scrollbar.
+     * without requiring a scrollbar.  Also, carriage returns and
+     * linefeeds are replaced by spaces to prevent breaking the panel
+     * layout.
      *
-     * If the label is elided then a tooltip is set containing the full
-     * text.
+     * If the label is elided or contains a line-breaking character, then
+     * a tooltip is set containing the original full text.
      **/
     void setLabelLimited( QLabel * label, QString text, int lastPixel )
     {
+	const bool lineBreak = hasLineBreak( text );
+	const QString cleanedText = replaceCrLf( text );
 	if ( lastPixel < 0 )
-	    label->setText( text );
+	    label->setText( cleanedText );
 	else
-	    elideLabel( label, text, lastPixel );
+	    elideLabel( label, cleanedText, lastPixel );
 
-	label->setToolTip( label->text() == text ? QString{} : breakable( text ) );
+	label->setToolTip( lineBreak || label->text() != text ? pathTooltip( text ) : QString{} );
     }
 
 
@@ -411,13 +415,13 @@ namespace
 	    if ( file->isBrokenSymLink() )
 	    {
 		ui->fileLinkLabel->setStyleSheet( errorStyleSheet() );
-		ui->fileLinkLabel->setToolTip( QObject::tr( "Broken symlink:\n" ) % breakable( fullTarget ) );
+		ui->fileLinkLabel->setToolTip( QObject::tr( "Broken symlink:\n" ) % pathTooltip( fullTarget ) );
 	    }
 	    else
 	    {
 		ui->fileLinkLabel->setStyleSheet( QString{} );
 		if ( shortTarget != fullTarget ) // setLabelLimited won't have detected this case
-		    ui->fileLinkLabel->setToolTip( breakable( fullTarget ) );
+		    ui->fileLinkLabel->setToolTip( pathTooltip( fullTarget ) );
 	    }
 	}
 	else if ( isSpecial )
@@ -780,7 +784,7 @@ void FileDetailsView::resizeEvent( QResizeEvent * )
     if ( _lastPixel < 0 || !currentWidget() )
 	return;
 
-    // Recalculate ther last pixel
+    // Recalculate the last pixel
     const QLayout * layout = currentWidget()->layout();
     if ( layout )
 	_lastPixel = contentsRect().right() - layout->contentsMargins().right() - layout->spacing();
@@ -789,7 +793,7 @@ void FileDetailsView::resizeEvent( QResizeEvent * )
     const QString tooltipText = _ui->filePackageLabel->toolTip();
     const QString fullText = tooltipText.isEmpty() ? _ui->filePackageLabel->text() : tooltipText;
 
-    // Refresh the whole panel and put the package name back
+    // Refresh the whole panel and put the package name back before anyone notices
     showDetails();
     setLabelLimited( _ui->filePackageLabel, fullText, _lastPixel );
 }

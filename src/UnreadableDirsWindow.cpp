@@ -157,21 +157,26 @@ UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    set( UD_PathCol,  Qt::AlignLeft,  dir->url() );
+    set( UD_PathCol,  Qt::AlignLeft,  replaceCrLf( dir->url() ) );
     set( UD_UserCol,  Qt::AlignLeft,  dir->userName() );
     set( UD_GroupCol, Qt::AlignLeft,  dir->groupName() );
     set( UD_PermCol,  Qt::AlignRight, dir->symbolicPermissions() );
     set( UD_OctalCol, Qt::AlignRight, dir->octalPermissions() );
 
     setIcon( UD_PathCol, app()->dirTreeModel()->unreadableDirIcon() );
+
+    if ( text( UD_PathCol ) != dir->url() )
+	setToolTip( UD_PathCol, dir->url() );
 }
 
 
 QVariant UnreadableDirsItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are likely to be long and elided
-    if ( role != Qt::ToolTipRole || column != UD_PathCol )
+//    if ( role != Qt::ToolTipRole || column != UD_PathCol )
+    if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 
-    return tooltipForElided( this, UD_PathCol, 1 );
+    const QString tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole ).toString();
+    return tooltipText.isEmpty() ? tooltipForElided( this, column, 1 ) : tooltipText;
 }
