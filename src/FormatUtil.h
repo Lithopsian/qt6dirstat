@@ -267,8 +267,8 @@ namespace QDirStat
         { return QRegularExpression{ "\\p{C}" }.match( text ).hasMatch(); }
 
     /**
-     * Return a regular expression excluding any Unicode control
-     * characters.
+     * Return a regular expression matching any string that doesn't
+     * include Unicode control characters.
      **/
     inline QRegularExpression excludeControlCharacters()
         { return QRegularExpression{ "[^\\p{C}]*" }; }
