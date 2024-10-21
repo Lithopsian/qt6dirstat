@@ -11,7 +11,6 @@
 #define SizeColDelegate_h
 
 #include <QStyledItemDelegate>
-#include <QTreeView>
 
 
 namespace QDirStat
@@ -32,7 +31,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	SizeColDelegate( QTreeView * treeView ):
+	SizeColDelegate( QObject * treeView ):
 	    QStyledItemDelegate{ treeView }
 	{}
 

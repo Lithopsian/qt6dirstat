@@ -40,10 +40,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="QWidget" name="treeViewContainer" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
-         <property name="spacing">
-          <number>0</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -57,33 +54,23 @@
           <number>0</number>
          </property>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <property name="spacing">
-            <number>4</number>
+          <widget class="QDirStat::DirTreeView" name="dirTreeView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
            </property>
-           <item>
-            <widget class="QDirStat::DirTreeView" name="dirTreeView">
-             <property name="contextMenuPolicy">
-              <enum>Qt::CustomContextMenu</enum>
-             </property>
-             <property name="selectionMode">
-              <enum>QAbstractItemView::ExtendedSelection</enum>
-             </property>
-             <property name="textElideMode">
-              <enum>Qt::ElideMiddle</enum>
-             </property>
-             <property name="uniformRowHeights">
-              <bool>true</bool>
-             </property>
-             <property name="sortingEnabled">
-              <bool>true</bool>
-             </property>
-             <attribute name="headerStretchLastSection">
-              <bool>false</bool>
-             </attribute>
-            </widget>
-           </item>
-          </layout>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="uniformRowHeights">
+            <bool>true</bool>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <attribute name="headerStretchLastSection">
+            <bool>false</bool>
+           </attribute>
+          </widget>
          </item>
          <item>
           <widget class="QWidget" name="messagePanel" native="true">
@@ -121,7 +108,7 @@
            <x>0</x>
            <y>0</y>
            <width>79</width>
-           <height>187</height>
+           <height>188</height>
           </rect>
          </property>
         </widget>

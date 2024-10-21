@@ -14,11 +14,12 @@
 #include <sys/types.h> // mode_t
 #include <sys/stat.h>  // ALLPERMS, S_IRUSR, S_ISUID, etc
 
+#include <QAbstractItemModel>
 #include <QFontMetrics>
-#include <QLocale>
+#include <QRegularExpression>
 #include <QStringBuilder>
 
-#include "Typedefs.h" // FileSize
+#include "Typedefs.h" // FileSize, _L1
 
 
 #ifndef ALLPERMS
@@ -43,6 +44,8 @@
 
 
 class QLabel;
+class QTreeView;
+class QTreeWidgetItem;
 
 
 namespace QDirStat
@@ -84,23 +87,23 @@ namespace QDirStat
      * thousands separator.
      **/
     inline QString formatByteSize( FileSize size )
-	{ return size == 1 ? oneByte() : QString{ "%L1 " }.arg( size ) % bytes(); }
+        { return size == 1 ? oneByte() : QString{ "%L1 " }.arg( size ) % bytes(); }
     inline QString formatByteSize( long double size, int precision )
-	{ return QString{ "%L1 " }.arg( static_cast<double>( size ), 0, 'f', precision ) % bytes(); }
+        { return QString{ "%L1 " }.arg( static_cast<double>( size ), 0, 'f', precision ) % bytes(); }
 
     /**
      * Format a file size string with no thousands separators and "B" for the units.
      * This is only intended for small values, typically less than 1,000.
      **/
     inline QString formatShortByteSize( FileSize size )
-	{ return QString::number( size ) % oneB(); }
+        { return QString::number( size ) % oneB(); }
 
     /**
      * Format a string of the form "/ 3 links" for describing hard links.  If the
      * number of links is less than 2, an empty string is returned.
      **/
     inline QString formatLinksInline( nlink_t numLinks )
-	{ return numLinks > 1 ? QObject::tr( " / %1 links" ).arg( numLinks) : QString{}; }
+        { return numLinks > 1 ? QObject::tr( " / %1 links" ).arg( numLinks) : QString{}; }
 
     /**
      * Format a string of the form "<br/>3 links" for describing hard links on a
@@ -108,14 +111,14 @@ namespace QDirStat
      * an empty string is returned.
      **/
     inline QString formatLinksRichText( nlink_t numLinks )
-	{ return numLinks > 1 ? QObject::tr( "<br/>%1 hard links" ).arg( numLinks ) : QString{}; }
+        { return numLinks > 1 ? QObject::tr( "<br/>%1 hard links" ).arg( numLinks ) : QString{}; }
 
     /**
      * Wraps the text in html formatting to prevent line breaks except at explicit
      * newlines and break tags.
      **/
     inline QString whitespacePre( const QString & text )
-	{ return "<p style='white-space:pre'>"_L1 % text % "</p>"_L1; }
+        { return "<p style='white-space:pre'>"_L1 % text % "</p>"_L1; }
 
     /**
      * Format a timestamp (like the latestMTime()) human-readable.
@@ -131,13 +134,13 @@ namespace QDirStat
      * Format a percentage.
      **/
     inline QString formatPercent( float percent )
-	{ return percent < 0.0f ? QString{} : QString::number( percent, 'f', 1 ) % '%'; }
+        { return percent < 0.0f ? QString{} : QString::number( percent, 'f', 1 ) % '%'; }
 
     /**
      * Return the mode (the permission bits) returned from stat() like the
      * "ls -l" shell command does, e.g.
      *
-     *	   drwxr-xr-x
+     *           drwxr-xr-x
      **/
     QString symbolicMode( mode_t perm );
 
@@ -145,28 +148,28 @@ namespace QDirStat
      * Format a number in octal with a leading zero.
      **/
     inline QString formatOctal( int number )
-	{ return '0' % QString::number( number, 8 ); }
+        { return '0' % QString::number( number, 8 ); }
 
     /**
      * Format a file stat mode as octal.
      **/
     inline QString octalMode( mode_t mode )
-	{ return formatOctal( ALLPERMS & mode ); }
+        { return formatOctal( ALLPERMS & mode ); }
 
     /**
      * Format the mode (the permissions bits) returned from the stat() system
      * call in the commonly used formats, both symbolic and octal, e.g.
-     *	   drwxr-xr-x  0755
+     *           drwxr-xr-x  0755
      **/
     inline QString formatPermissions( mode_t mode )
-	{ return symbolicMode( mode ) % "  "_L1 % formatOctal( ALLPERMS & mode ); }
+        { return symbolicMode( mode ) % "  "_L1 % formatOctal( ALLPERMS & mode ); }
 
     /**
      * Returns the string resized to the given width and padded with
      * non-breaking spaces.
      **/
     inline QString pad( const QString & string, int width )
-	{ return string.leftJustified( width, QChar( 0x00A0 ) ); }
+        { return string.leftJustified( width, QChar( 0x00A0 ) ); }
 
     /**
      * Returns a three-letter abbreviation for the requested month.
@@ -178,44 +181,44 @@ namespace QDirStat
      * defined as any string which is the same as toUpper() of that
      * string.
      *
+     * Before Qt 5.12, these functions do not exist in QString, so a
+     * simplified check is implemented for compatibility.
+     *
      * Qt versions before 5.14 used a different definition, where
      * isUpper() was only true if the string was not empty and
-     * contained only upper-case letters.
-     *
-     * Before Qt 5.12, these functions do not exist, so a simplified
-     * check is implemented.
+     * contained only upper-case letters, so don't use those.
      **/
 #if QT_VERSION < QT_VERSION_CHECK( 5, 14, 0 )
     inline bool isLower( const QString & test )
     {
-	for ( QChar testChar : test )
-	{
-	    if ( testChar.isUpper() )
-		return false;
-	}
-	return true;
+        for ( QChar testChar : test )
+        {
+            if ( testChar.isUpper() )
+                return false;
+        }
+        return true;
     }
     inline bool isUpper( const QString & test )
     {
-	for ( QChar testChar : test )
-	{
-	    if ( testChar.isLower() )
-		return false;
-	}
-	return true;
+        for ( QChar testChar : test )
+        {
+            if ( testChar.isLower() )
+                return false;
+        }
+        return true;
     }
 #else
     inline bool isLower( const QString & test )
-	{ return test.isLower(); }
+        { return test.isLower(); }
     inline bool isUpper( const QString & test )
-	{ return test.isUpper(); }
+        { return test.isUpper(); }
 #endif
 
     /**
      * Returns the height in pixels of the given font.
      **/
     inline int fontHeight( const QFont & font )
-	{ return QFontMetrics{ font }.height(); }
+        { return QFontMetrics{ font }.height(); }
 
     /**
      * Returns the width in pixels of the given text rendered using
@@ -228,36 +231,132 @@ namespace QDirStat
      * the horizontal advance.
      **/
     inline int textWidth( const QFont & font, const QString & text )
-	{ return QFontMetrics{ font }.boundingRect( text ).width(); }
+        { return QFontMetrics{ font }.boundingRect( text ).width(); }
     inline int horizontalAdvance( const QFont & font, const QString & text )
 #if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
-	{ return QFontMetrics{ font }.width( text ); }
+        { return QFontMetrics{ font }.width( text ); }
 #else
-	{ return QFontMetrics{ font }.horizontalAdvance( text ); }
+        { return QFontMetrics{ font }.horizontalAdvance( text ); }
+#endif
+    inline int horizontalAdvance( const QFont & font, QChar text )
+#if QT_VERSION < QT_VERSION_CHECK( 5, 11, 0 )
+        { return QFontMetrics{ font }.width( text ); }
+#else
+        { return QFontMetrics{ font }.horizontalAdvance( text ); }
 #endif
 
     /**
-     * Elide a string, removing characters from the middle to fit
-     * with maxLen characters.
+     * Returns whether 'text' contains a carriage return or linefeed
+     * character.
      **/
-    QString elideMiddle( const QString & text, int maxLen );
+    inline bool hasLineBreak( const QString & text )
+        { return text.contains( u'\n' ) || text.contains( u'\r' ); }
 
     /**
-     * Elide the text to fit within 'maxSize' using the label widget font
-     * and place it in the label.
+     * Return a copy of 'text' with carriage return and linefeed
+     * characters replaced by spaces.  The string is tested first to
+     * avoid detaching in the 99.99% of cases that don't have these
+     * characters in 'text'.
      **/
-    void elideLabel( QLabel * label, const QString & text, int maxSize );
+    QString replaceCrLf( const QString & text );
+
+    /**
+     * Return whether 'text' contains any any Unicode control characters.
+     **/
+    inline bool hasControlCharacter( const QString & text )
+        { return QRegularExpression{ "\\p{C}" }.match( text ).hasMatch(); }
+
+    /**
+     * Return a regular expression excluding any Unicode control
+     * characters.
+     **/
+    inline QRegularExpression excludeControlCharacters()
+        { return QRegularExpression{ "[^\\p{C}]*" }; }
+
+    /**
+     * Return 'text', elided if necessary to fit 'maxSize' pixels
+     * wide when rendered in 'font'.
+     **/
+    inline QString elidedText( const QFont & font, const QString & text, int maxSize )
+        { return QFontMetrics{ font }.elidedText( text, Qt::ElideMiddle, maxSize ); }
+
+    /**
+     * Return the width of an ellipsis character in 'font'.
+     **/
+    inline int ellipsisWidth( const QFont & font )
+        { return horizontalAdvance( font, u'…' ); }
+
+    /**
+     * Return the indent between a label frame and the text.
+     **/
+    inline int labelFrameIndent( const QFont & font )
+        { return horizontalAdvance( font, u'x' ) / 2; }
+
+    /**
+     * Returns a reference to 'path', possibly modified.
+     *
+     * Zero-width spaces are inserted at regular intervals to allow
+     * long paths to line-break naturally even if they don't contain
+     * characters that would normally allow a line-break.
+     *
+     * If (very unusually) 'path' would be treated as rich text in
+     * a label or tooltip, then all '<' characters are modified to
+     * prevent them being identified as html tags.  Tooltips shown
+     * as (html-escaped) rich text wrap at a very narrow width,
+     * unsuitable for displaying paths and inconsistent with paths
+     * that are shown as plain text.  This is usually unnecessary
+     * for labels, which can be forced to display as plain text.
+     **/
+    QString & pathTooltip( QString & path );
+
+    /**
+     * Elide 'text' to fit between the start position of 'label' and
+     * 'lastPixel', generally the end position of the parent minus any
+     * margin.
+     **/
+    void elideLabel( QLabel * label, const QString & text, int lastPixel );
+
+    /**
+     * Resize the columns of 'tree'.  First, attempt to resize all
+     * columns to fit their contents.  This will generally succeed,
+     * but may leave the tree wider than the viewport.  Next, resize
+     * the first column with a hard minimum size of its header width,
+     * and then stretch the first column as much as possible from its
+     * minimum size.  Use the smaller of those two widths and leave
+     * the columns in interactive resize mode so the user can access
+     * any text that is still ellipsized.
+     **/
+    void resizeTreeColumns( QTreeView * tree );
+
+    /**
+     * Compare the size of a tree item with the section width.  If
+     * the item is wider than the section then a tooltip should be
+     * shown.
+     *
+     * Two overloads are provided: the first calculates the
+     * item and section widths for 'column' in 'item' and returns
+     * either an empty string or a string to be displayed as the
+     * tooltip; the second compares 'sizeHint' and 'visualRect' and
+     * shows a tooltip itself from the display role for 'index' in
+     * 'model'.
+     **/
+    QString tooltipForElided( const QTreeWidgetItem * item, int column, int treeLevel );
+    void tooltipForElided( QRect                      visualRect,
+                           QSize                      sizeHint,
+                           const QAbstractItemModel * model,
+                           const QModelIndex        & index,
+                           QPoint                     pos );
 
     /**
      * Human-readable output of a file size in a debug stream.
      *
-     * Removed because the overload of is ambiguous between FileSize
-     * and qsizetype (and potentially other long long ints).  Use
+     * Removed because this overload is ambiguous between FileSize and
+     * qsizetype (and potentially other long long ints).  Use
      * formatSize() explicitly if you need this.
      **/
 //    inline QTextStream & operator<<( QTextStream & stream, FileSize lSize )
-//	{ return stream << formatSize( lSize ); }
+//        { return stream << formatSize( lSize ); }
 
-}	// namespace QDirStat
+} // namespace QDirStat
 
-#endif	// FormatUtil_h
+#endif // FormatUtil_h

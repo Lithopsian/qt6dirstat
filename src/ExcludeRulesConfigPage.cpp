@@ -11,6 +11,7 @@
 #include "ConfigDialog.h"
 #include "DirTree.h"
 #include "ExcludeRules.h"
+#include "FormatUtil.h"
 #include "QDirStatApp.h"
 
 
@@ -25,9 +26,10 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
     _ui{ new Ui::ExcludeRulesConfigPage }
 {
     _ui->setupUi( this );
+    _ui->patternLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
 
     enableEditWidgets( false );
-    connectActions();
+    initListWidget();
 
     connect( _ui->patternLineEdit, &QLineEdit::textChanged,
              this,                 &ExcludeRulesConfigPage::patternChanged );
@@ -77,16 +79,12 @@ void ExcludeRulesConfigPage::applyChanges()
 
 void ExcludeRulesConfigPage::fillListWidget()
 {
-    _ui->listWidget->clear();
-
     for ( const ExcludeRule * excludeRule : *( app()->dirTree()->excludeRules() ) )
     {
 	// Make a deep copy so the config dialog can work without disturbing the real rules
 	ExcludeRule * rule = new ExcludeRule{ *excludeRule };
 	createItem( rule->pattern(), rule );
     }
-
-    _ui->listWidget->setCurrentRow( 0 );
 }
 
 

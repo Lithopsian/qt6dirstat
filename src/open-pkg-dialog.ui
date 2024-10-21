@@ -35,17 +35,17 @@
      <property name="spacing">
       <number>12</number>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
-     </property>
      <property name="leftMargin">
-      <number>8</number>
+      <number>12</number>
      </property>
      <property name="topMargin">
       <number>12</number>
      </property>
+     <property name="rightMargin">
+      <number>12</number>
+     </property>
      <property name="bottomMargin">
-      <number>16</number>
+      <number>12</number>
      </property>
      <item>
       <spacer name="verticalSpacer_2">
@@ -105,9 +105,6 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>8</number>
-        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">

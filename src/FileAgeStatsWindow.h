@@ -84,11 +84,6 @@ namespace QDirStat
 	void refresh();
 
 	/**
-	 * Read settings from the config file
-	 **/
-//	void readSettings();
-
-	/**
 	 * Emit the locateFilesFromYear() signal for the currently selected
 	 * item's year. Do nothing if nothing is selected.
 	 **/

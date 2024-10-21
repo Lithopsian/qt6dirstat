@@ -292,18 +292,6 @@ const MimeCategory * MimeCategorizer::matchWildcard( const QString & filename ) 
 }
 
 
-const MimeCategory * MimeCategorizer::findCategoryByName( const QString & categoryName ) const
-{
-    for ( const MimeCategory * category : asConst( _categories ) )
-    {
-	if ( category && category->name() == categoryName )
-	    return category;
-    }
-
-    return nullptr; // No match
-}
-
-
 const MimeCategory * MimeCategorizer::addCategory ( const QString     & name,
                                                     const QColor      & color,
                                                     const QStringList & caseInsensitivePatterns,
@@ -316,6 +304,18 @@ const MimeCategory * MimeCategorizer::addCategory ( const QString     & name,
     _categories << category;
 
     return category;
+}
+
+
+const MimeCategory * MimeCategorizer::addCategory( const QString & name,
+                                                   const QColor  & color,
+                                                   const QString & caseInsensitivePatterns,
+                                                   const QString & caseSensitivePatterns )
+{
+    const QStringList caseInsensitivePatternList = caseInsensitivePatterns.split( u',' );
+    const QStringList caseSensitivePatternList   = caseSensitivePatterns.split  ( u',' );
+
+    return addCategory( name, color, caseInsensitivePatternList, caseSensitivePatternList );
 }
 
 
@@ -465,6 +465,20 @@ void MimeCategorizer::replaceCategories( const MimeCategoryList & categories )
 
 void MimeCategorizer::ensureMandatoryCategories()
 {
+    /**
+     * Iterate over all categories to find categories by name.
+     **/
+    const auto findCategoryByName = [ this ]( const QString & categoryName )
+    {
+	for ( const MimeCategory * category : asConst( _categories ) )
+	{
+	    if ( category && category->name() == categoryName )
+		return category;
+	}
+
+	return static_cast<const MimeCategory *>( nullptr ); // No match
+    };
+
     // Remember this category so we don't have to search for it every time
     _executableCategory = findCategoryByName( executableCategoryName() );
     if ( !_executableCategory )

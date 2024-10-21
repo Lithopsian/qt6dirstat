@@ -453,7 +453,7 @@ void DirInfo::insertChild( FileInfo * newChild )
      * to be done directly because _dotEntry is always 0 for a DotEntry
      * itself.
      **/
-    if ( _dotEntry && !newChild->isDir() )
+    if ( _dotEntry && !newChild->isDirInfo() )
     {
 	// semi-recursive just to avoid repeating the same code here
 	_dotEntry->insertChild( newChild );
@@ -617,7 +617,7 @@ void DirInfo::unlinkChild( FileInfo * deletedChild )
 	return;
     }
 
-    auto compare = [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; };
+    const auto compare = [ deletedChild ]( FileInfo * item ) { return item->next() == deletedChild; };
     auto it = std::find_if( begin( this ), end( this ), compare );
     if ( *it )
     {

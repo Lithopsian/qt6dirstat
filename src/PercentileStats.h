@@ -281,7 +281,6 @@ namespace QDirStat
 	{
 	    validateBucketIndex( index );
 	    return std::ceil( _bucketCounts.size() == 1 ? _buckets[ index ] : _buckets[ index + 1 ] - 1 );
-//	    return std::ceil( std::max( _buckets[ index + 1 ] - 1, _buckets[ index ] ) );
 	}
 	PercentileBoundary rawBucketEnd( int index ) const
 	{

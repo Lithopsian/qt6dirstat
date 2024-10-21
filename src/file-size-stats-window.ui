@@ -25,6 +25,9 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -252,8 +255,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>500</width>
-            <height>532</height>
+            <width>276</width>
+            <height>658</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">

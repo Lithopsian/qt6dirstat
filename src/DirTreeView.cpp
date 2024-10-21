@@ -7,8 +7,10 @@
  *              Ian Nartowicz
  */
 
+#include <QApplication>
 #include <QMenu>
 #include <QKeyEvent>
+#include <QScreen>
 #include <QScrollBar>
 
 #include "DirTreeView.h"
@@ -86,6 +88,45 @@ void DirTreeView::readSettings()
     const auto delegate = new PercentBarDelegate{ this, barWidth, barBackground, barColors };
     setItemDelegateForColumn( PercentBarCol, delegate );
     setItemDelegateForColumn( SizeCol, new SizeColDelegate{ this } );
+}
+
+
+void DirTreeView::scrolled( int )
+{
+    // Reset the precision to just the visible rows, but remember the original setting
+    const auto treeHeader = header();
+    const int precision = treeHeader->resizeContentsPrecision();
+    treeHeader->setResizeContentsPrecision( 0 );
+
+    // Loop through columns which have variable widths
+    for ( DataColumn col : { NameCol,
+                             PercentNumCol,
+                             SizeCol,
+                             TotalItemsCol,
+                             TotalFilesCol,
+                             TotalSubDirsCol,
+                             UserCol,
+                             GroupCol,
+                           } )
+    {
+	// Only check visible columns that are configured to auto-size
+	const int  section = DataColumns::toViewCol( col );
+	const auto mode    = treeHeader->sectionResizeMode( section );
+	const bool hidden  = treeHeader->isSectionHidden( section );
+	if ( !hidden && mode == QHeaderView::ResizeToContents )
+	{
+	    // Signal an update if the required width is more than the current width
+	    if ( sizeHintForColumn( section ) > treeHeader->sectionSize( section ) )
+	    {
+		// Pick a row, any row, just to make Qt reassess the columns
+		emit itemDelegateForColumn( SizeCol )->sizeHintChanged( indexAt( { 0, 0 } ) );
+		break;
+	    }
+	}
+    }
+
+    // Return the checked rows limit to the default
+    treeHeader->setResizeContentsPrecision( precision );
 }
 
 
@@ -204,14 +245,14 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
 }
 
 
-void DirTreeView::setExpanded( FileInfo * item, bool expanded )
+void DirTreeView::setExpandedItem( FileInfo * item, bool expanded )
 {
     const DirTreeModel * model = dirTreeModel();
     if ( model )
     {
 	const QModelIndex index = model->modelIndex( item );
 	if ( index.isValid() )
-	    QTreeView::setExpanded( index, expanded );
+	    setExpanded( index, expanded );
     }
 }
 
@@ -249,40 +290,22 @@ void DirTreeView::keyPressEvent( QKeyEvent * event )
 }
 
 
-void DirTreeView::scrolled( int )
+bool DirTreeView::viewportEvent( QEvent * event )
 {
-    // Reset the precision to just the visible rows, but remember the original setting
-    const auto treeHeader = header();
-    const int precision = treeHeader->resizeContentsPrecision();
-    treeHeader->setResizeContentsPrecision( 0 );
-
-    // Loop through columns which have variable widths
-    for ( DataColumn col : { NameCol,
-                             PercentNumCol,
-                             SizeCol,
-                             TotalItemsCol,
-                             TotalFilesCol,
-                             TotalSubDirsCol,
-                             UserCol,
-                             GroupCol,
-                           } )
+    if ( event && event->type() == QEvent::ToolTip )
     {
-	// Only check visible columns that are configured to auto-size
-	const int  section = DataColumns::toViewCol( col );
-	const auto mode    = treeHeader->sectionResizeMode( section );
-	const bool hidden  = treeHeader->isSectionHidden( section );
-	if ( !hidden && mode == QHeaderView::ResizeToContents )
+	QHelpEvent * helpEvent = static_cast<QHelpEvent *>( event );
+	QModelIndex index = indexAt( helpEvent->pos() );
+	if ( index.isValid() )
 	{
-	    // Signal an update if the required width is more than the current width
-	    if ( sizeHintForColumn( section ) > treeHeader->sectionSize( section ) )
-	    {
-		// Pick a row, any row, just to make Qt reassess the columns
-		emit itemDelegateForColumn( SizeCol )->sizeHintChanged( indexAt( { 0, 0 } ) );
-		break;
-	    }
+	    // Show a tooltip when the model provides one or when the column is elided
+	    const QRect rect     = visualRect( index );
+	    const QSize sizeHint = sizeHintForIndex( index );
+	    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
+
+	    return true;
 	}
     }
 
-    // Return the checked rows limit to the default
-    treeHeader->setResizeContentsPrecision( precision );
+    return QTreeView::viewportEvent( event );
 }

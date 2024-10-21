@@ -13,11 +13,13 @@
 #include <memory>
 
 #include <QDialog>
+#include <QStyledItemDelegate>
 
 #include "ui_open-dir-dialog.h"
 
 
 class QFileSystemModel;
+class QHelpEvent;
 
 
 namespace QDirStat
@@ -25,8 +27,7 @@ namespace QDirStat
     class ExistingDirValidator;
 
     /**
-     * Dialog to let the user select installed packages to open, very much like
-     * a "get existing directory" dialog, but returning a PkgFilter instead.
+     * Dialog to let the user select a directory to read.
      **/
     class OpenDirDialog: public QDialog
     {
@@ -90,11 +91,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Write settings to the config file
-	 **/
-	void writeSettings();
-
-	/**
 	 * The path of the directory the user selected.
 	 **/
 	QString selectedPath() const { return _ui->pathComboBox->currentText(); }
@@ -106,38 +102,14 @@ namespace QDirStat
 	bool crossFilesystems() const { return _ui->crossFilesystemsCheckBox->isChecked(); }
 
 	/**
-	 * Read settings from the config file
-	 **/
-	void readSettings();
-
-	/**
 	 * Set a path in the dirTree.
 	 **/
 	void setPath( const QString & path );
 
 	/**
-	 * Create and apply an ExistingDirValidator, enable the clear
-	 * button, and set the current combo-box text in the line edit.
-	 **/
-	void initPathComboBox();
-
-	/**
-	 * Initialise the QFileSystemModel and DirTreeView.
-	 **/
-	void initDirTree();
-
-	/**
 	 * Connect to signals.
 	 **/
 	void initConnections();
-
-	/**
-	 * Populate the path combo-box with a new path.  If the path
-	 * is already in the list, then set it as the current item,
-	 * otherwise build a new list with the path and all its
-	 * ancestors.
-	 **/
-	void populatePathComboBox( const QModelIndex & currentIndex );
 
 
     private:
@@ -149,6 +121,42 @@ namespace QDirStat
 	QString                _lastPath;
 
     };	// class OpenDirDialog
+
+
+
+    /**
+     * This delegate exists solely to provide a tooltip for
+     * elided items in the open directory tree.
+     **/
+    class OpenDirDelegate : public QStyledItemDelegate
+    {
+	Q_OBJECT
+
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	OpenDirDelegate( QObject * parent ):
+	    QStyledItemDelegate{ parent }
+	{}
+
+	/**
+	 * Tooltip event handler.
+	 *
+	 * The help event handler is called with event type Tooltip
+	 * when a tooltip is requested.  If the tree item contents
+	 * are wider than the (only) tree section, then a tooltip is
+	 * shown with the full item text.
+	 *
+	 * Reimplemented from QStyledItemDelegate/QAbstractItemDelegate.
+	 **/
+	bool helpEvent( QHelpEvent                 * event,
+	                QAbstractItemView          * view,
+	                const QStyleOptionViewItem & option,
+	                const QModelIndex          & index ) override;
+
+    };	// class OpenDirDelegate
 
 }	// namespace QDirStat
 

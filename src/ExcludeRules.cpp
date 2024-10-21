@@ -62,7 +62,7 @@ bool ExcludeRule::matchDirectChildren( const DirInfo * dir ) const
 
     // Search through FileInfo children to see if any match
     const DirInfo * parent = dir->dotEntry() ? dir->dotEntry() : dir;
-    auto match = [ this ]( FileInfo * item ) { return !item->isDir() && isMatch( item->name() ); };
+    const auto match = [ this ]( FileInfo * item ) { return !item->isDir() && isMatch( item->name() ); };
     return std::any_of( begin( parent ), end( parent ), match );
 }
 

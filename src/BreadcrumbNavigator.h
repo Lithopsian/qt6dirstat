@@ -28,8 +28,11 @@ namespace QDirStat
 	{}
 
 	QString pathComponent;
-	QString displayName;   // This may be shortened
+	QString elidedName;   // Empty or elided version of pathComponent
 	QString url;
+
+	const QString & displayName() const
+	    { return elidedName.isEmpty() ? pathComponent : elidedName; }
 
     };	// struct Breadcrumb
 

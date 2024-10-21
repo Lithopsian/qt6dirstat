@@ -41,8 +41,7 @@ namespace QDirStat
         void discoverSparseFiles();
 
         /**
-         * Actions that are meant to be connected to the FileAgeWindow's
-         * 'locate...()' signals (but they can be used stand-alone as well).
+         * Actions from FileAgeStatsWindow.
          **/
         void discoverFilesFromYear ( const QString & path, short year );
         void discoverFilesFromMonth( const QString & path, short year, short month );

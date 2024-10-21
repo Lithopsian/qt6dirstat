@@ -261,7 +261,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
     const QString & url = fileInfo->debugUrl();
     const QString headerUrl = suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url );
-    _ui->headingLabel->setStatusTip( tr( "File size statistics for %1" ).arg( headerUrl ) );
+    _ui->headingLabel->setStatusTip( tr( "File size statistics for %1" ) % replaceCrLf( headerUrl ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
     loadStats( fileInfo, suffix );
@@ -433,8 +433,9 @@ void FileSizeStatsWindow::showHelp() const
 
 void FileSizeStatsWindow::resizeEvent( QResizeEvent * )
 {
-    // Elide a label to the width of the dialog less margins, less a bit more
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 20 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel );
 }
 
 
@@ -444,6 +445,9 @@ void FileSizeStatsWindow::changeEvent( QEvent * event )
 
     if ( event->type() == QEvent::PaletteChange )
 	setPercentileTable();
+
+    if ( event->type() == QEvent::FontChange )
+	resizeEvent( nullptr );
 }
 
 

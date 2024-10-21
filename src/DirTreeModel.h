@@ -18,11 +18,9 @@
 #include <QPalette>
 #include <QSet>
 #include <QTimer>
+#include <QTreeView>
 
 #include "DataColumns.h"
-
-
-class QTreeWidget;
 
 
 namespace QDirStat
@@ -66,7 +64,7 @@ namespace QDirStat
 	/**
 	 * Returns the internal DirTree this view works on.
 	 *
-	 * Handle with caution: This might be short-lived information.	The
+	 * Handle with caution: this might be short-lived information.	The
 	 * model might choose to create a new tree shortly after returning
 	 * this, so don't store this pointer internally.
 	 **/
@@ -94,7 +92,8 @@ namespace QDirStat
 	/**
 	 * Set the base font for the tree view,
 	 **/
-	void setBaseFont( const QFont & font );
+	void setBaseFont( const QFont & font )
+	    { _baseFont = font; }
 
 	/**
 	 * Return the icon indicate an item's type (file, directory etc.)
@@ -178,12 +177,6 @@ namespace QDirStat
 	DirTreeItemSize dirTreeItemSize() const { return _treeItemSize; }
 
 	/**
-	 * Returns the configured tree icon size.
-	 **/
-	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
-
-	/**
 	 * Update internal settings from the general configuration page.
 	 * Any changes will be saved to the conf file in the destructor.
 	 **/
@@ -258,15 +251,15 @@ namespace QDirStat
 	const QIcon & networkIcon() const { return _networkIcon; }
 
 	/**
-	 * Set the icon and font size of a QTreeWidget's items based on
-	 * the configured DirTree item size.
+	 * Set the icon size of a QTreeView's items based on
+	 * the configured DirTree icon size.
 	 **/
-	void setTreeWidgetSizes( QTreeWidget * widget ) const;
-
-
-    public slots:
+	void setTreeIconSize( QTreeView * tree ) const
+	    { tree->setIconSize( dirTreeIconSize() ); }
 
 #if 0
+    public slots:
+
 	/**
 	 * Item clicked in the tree widget, for debugging.
 	 **/
@@ -369,6 +362,12 @@ namespace QDirStat
 	    { return treeIconDir.contains( "medium"_L1 ) ? DTIS_Medium : DTIS_Small; }
 
 	/**
+	 * Returns the configured tree icon size.
+	 **/
+	QSize dirTreeIconSize() const
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
+
+	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about
 	 * new children (all the children of 'dir'). This might become
 	 * recursive if any of those children in turn are already finished.
@@ -452,9 +451,7 @@ namespace QDirStat
 	 * Return header data (in this case: column header texts) for the
 	 * specified section (column number).
 	 **/
-	QVariant headerData( int             section,
-	                     Qt::Orientation orientation,
-	                     int             role ) const override;
+	QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
 
 	/**
 	 * Return item flags for the specified model index. This specifies if
@@ -466,9 +463,7 @@ namespace QDirStat
 	 * Return the model index for the specified row (direct tree child
 	 * number) and column of item 'parent'.
 	 **/
-	QModelIndex index( int row,
-	                   int column,
-	                   const QModelIndex & parent = QModelIndex{} ) const override;
+	QModelIndex index( int row, int column, const QModelIndex & parent = QModelIndex{} ) const override;
 
 	/**
 	 * Return the parent model index of item 'index'.
@@ -499,7 +494,6 @@ namespace QDirStat
 	QColor _dirReadErrDarkTheme;
 	QColor _subtreeReadErrDarkTheme;
 	QFont  _baseFont;
-	QFont  _themeFont;
 
 	// The various tree icons
 	QIcon  _dirIcon;

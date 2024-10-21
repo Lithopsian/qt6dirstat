@@ -25,6 +25,62 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Read settings from the config file.  All the dialog fields
+     * except for 'pattern' are saved.  The 'pattern' string is
+     * remembered in local static storage only for as long as the
+     * program is open.  The window size and position are also
+     * loaded from Settings.
+     **/
+    void readSettings( FindFilesDialog * window, const Ui::FindFilesDialog * ui )
+    {
+        QDirStat::Settings settings;
+
+        settings.beginGroup( "FindFilesDialog" );
+
+        ui->filterModeComboBox->setCurrentText     ( settings.value( "filterMode",     "Auto" ).toString() );
+        ui->caseSensitiveCheckBox->setChecked      ( settings.value( "caseSensitive",  false  ).toBool()   );
+
+        ui->findFilesRadioButton->setChecked       ( settings.value( "findFiles",      false  ).toBool() );
+        ui->findDirectoriesRadioButton->setChecked ( settings.value( "findDirs",       false  ).toBool() );
+        ui->findBothRadioButton->setChecked        ( settings.value( "findBoth",       true   ).toBool() );
+        ui->findSymLinksCheckBox->setChecked       ( settings.value( "findSymLinks",   true   ).toBool() );
+
+        ui->wholeTreeRadioButton->setChecked       ( settings.value( "wholeTree",      true   ).toBool() );
+        ui->currentSubtreeRadioButton->setChecked  ( settings.value( "currentSubtree", false  ).toBool() );
+
+        settings.endGroup();
+
+        Settings::readWindowSettings( window, "FindFilesDialog" );
+    }
+
+
+    /**
+     * Write settings to the config file.  The dialog fields are
+     * written to Settings only if the dialog is accepted.  The
+     * window geometry is always saved when the dialog is destroyed.
+     **/
+    void writeSettings( const Ui::FindFilesDialog * ui )
+    {
+        QDirStat::Settings settings;
+
+        settings.beginGroup( "FindFilesDialog" );
+
+        settings.setValue( "filterMode",     ui->filterModeComboBox->currentText()       );
+        settings.setValue( "caseSensitive",  ui->caseSensitiveCheckBox->isChecked()      );
+
+        settings.setValue( "findFiles",      ui->findFilesRadioButton->isChecked()       );
+        settings.setValue( "findDirs",       ui->findDirectoriesRadioButton->isChecked() );
+        settings.setValue( "findBoth",       ui->findBothRadioButton->isChecked()        );
+        settings.setValue( "findSymLinks",   ui->findSymLinksCheckBox->isChecked()       );
+
+        settings.setValue( "wholeTree",      ui->wholeTreeRadioButton->isChecked()       );
+        settings.setValue( "currentSubtree", ui->currentSubtreeRadioButton->isChecked()  );
+
+        settings.endGroup();
+    }
+
+
+    /**
      * Return the currently selected subtree if a directory is selected,
      * otherwise the top level directory.
      **/
@@ -37,6 +93,42 @@ namespace
         return app()->firstToplevel();
     }
 
+
+    /**
+     * Return a file search filter coresponding to the values entered
+     * in the dialog.
+     **/
+    FileSearchFilter fileSearchFilter( const Ui::FindFilesDialog * ui )
+    {
+        FileInfo * fileInfo  = ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
+        const bool findBoth  = ui->findBothRadioButton->isChecked();
+        const bool findDirs  = ui->findDirectoriesRadioButton->isChecked() || findBoth;
+        const bool findFiles = ui->findFilesRadioButton->isChecked() || findBoth;
+
+        return FileSearchFilter{ fileInfo,
+                                ui->patternField->text(),
+                                static_cast<FilterMode>( ui->filterModeComboBox->currentIndex() ),
+                                ui->caseSensitiveCheckBox->isChecked(),
+                                findFiles,
+                                findDirs,
+                                ui->findSymLinksCheckBox->isChecked(),
+                                findDirs };
+    }
+
+
+    /**
+     * Elide the path label to fit inside the current dialog width, so
+     * that it fills the available width but very long subtree paths
+     * don't stretch the dialog.  A little extra room is left for the
+     * user to shrink the dialog, which would then force the label to
+     * be elided further.
+    **/
+    void showPathLabel( QLabel * label, const QLayout * hbox )
+    {
+        // Elide the label to the available space
+        elideLabel( label, label->statusTip(), hbox->contentsRect().right() );
+    }
+
 }
 
 
@@ -46,12 +138,14 @@ FindFilesDialog::FindFilesDialog( QWidget * parent, const QString & pattern ):
 {
     _ui->setupUi( this );
 
-    readSettings();
+    _ui->patternField->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+
+    readSettings( this, ui() );
 
     _ui->patternField->setText( pattern );
 
     QString subtreeText = currentSubtree()->url();
-    _ui->currentSubtreePathLabel->setStatusTip( subtreeText );
+    _ui->currentSubtreePathLabel->setStatusTip( replaceCrLf( subtreeText ) );
     _ui->currentSubtreeRadioButton->setEnabled( !subtreeText.isEmpty() );
 
     // The subtree label will be filled in by the resizeEvent handler
@@ -67,24 +161,6 @@ FindFilesDialog::~FindFilesDialog()
 }
 
 
-FileSearchFilter FindFilesDialog::fileSearchFilter()
-{
-    FileInfo * fileInfo  = _ui->wholeTreeRadioButton->isChecked() ? app()->firstToplevel() : currentSubtree();
-    const bool findBoth  = _ui->findBothRadioButton->isChecked();
-    const bool findDirs  = _ui->findDirectoriesRadioButton->isChecked() || findBoth;
-    const bool findFiles = _ui->findFilesRadioButton->isChecked() || findBoth;
-
-    return FileSearchFilter{ fileInfo,
-                            _ui->patternField->text(),
-                            static_cast<FilterMode>( _ui->filterModeComboBox->currentIndex() ),
-                            _ui->caseSensitiveCheckBox->isChecked(),
-                            findFiles,
-                            findDirs,
-                            _ui->findSymLinksCheckBox->isChecked(),
-                            findDirs };
-}
-
-
 void FindFilesDialog::askFindFiles( QWidget * parent )
 {
     // Remember the pattern string, but don't put it in Settings
@@ -92,66 +168,29 @@ void FindFilesDialog::askFindFiles( QWidget * parent )
 
     // Execute as a modal dialog - will wait here for it to complete
     FindFilesDialog dialog{ parent, pattern };
-    const int result = dialog.exec();
+    int result = dialog.exec();
 
     // Only save the dialog values and execute the search if the dialog is accepted
     if ( result == QDialog::Accepted )
     {
-        const FileSearchFilter filter = dialog.fileSearchFilter();
+        const FileSearchFilter filter = fileSearchFilter( dialog.ui() );
         pattern = filter.pattern();
-        dialog.writeSettings();
+        writeSettings( dialog.ui() );
         DiscoverActions::findFiles( filter );
     }
 }
 
 
-void FindFilesDialog::readSettings()
+void FindFilesDialog::resizeEvent( QResizeEvent * event )
 {
-    QDirStat::Settings settings;
-
-    settings.beginGroup( "FindFilesDialog" );
-
-    _ui->filterModeComboBox->setCurrentText     ( settings.value( "filterMode",     "Auto" ).toString() );
-    _ui->caseSensitiveCheckBox->setChecked      ( settings.value( "caseSensitive",  false  ).toBool()   );
-
-    _ui->findFilesRadioButton->setChecked       ( settings.value( "findFiles",      false  ).toBool() );
-    _ui->findDirectoriesRadioButton->setChecked ( settings.value( "findDirs",       false  ).toBool() );
-    _ui->findBothRadioButton->setChecked        ( settings.value( "findBoth",       true   ).toBool() );
-    _ui->findSymLinksCheckBox->setChecked       ( settings.value( "findSymLinks",   true   ).toBool() );
-
-    _ui->wholeTreeRadioButton->setChecked       ( settings.value( "wholeTree",      true   ).toBool() );
-    _ui->currentSubtreeRadioButton->setChecked  ( settings.value( "currentSubtree", false  ).toBool() );
-
-    settings.endGroup();
-
-    Settings::readWindowSettings( this, "FindFilesDialog" );
+    // The first resize event is before the layouts are done, so ignore it
+    if ( event && event->oldSize().isValid() )
+        showEvent( nullptr );
 }
 
 
-void FindFilesDialog::writeSettings()
+void FindFilesDialog::showEvent( QShowEvent * )
 {
-    QDirStat::Settings settings;
-
-    settings.beginGroup( "FindFilesDialog" );
-
-    settings.setValue( "filterMode",     _ui->filterModeComboBox->currentText()       );
-    settings.setValue( "caseSensitive",  _ui->caseSensitiveCheckBox->isChecked()      );
-
-    settings.setValue( "findFiles",      _ui->findFilesRadioButton->isChecked()       );
-    settings.setValue( "findDirs",       _ui->findDirectoriesRadioButton->isChecked() );
-    settings.setValue( "findBoth",       _ui->findBothRadioButton->isChecked()        );
-    settings.setValue( "findSymLinks",   _ui->findSymLinksCheckBox->isChecked()       );
-
-    settings.setValue( "wholeTree",      _ui->wholeTreeRadioButton->isChecked()       );
-    settings.setValue( "currentSubtree", _ui->currentSubtreeRadioButton->isChecked()  );
-
-    settings.endGroup();
-}
-
-
-void FindFilesDialog::resizeEvent( QResizeEvent * )
-{
-    // Calculate a width from the dialog less margins, less a bit more
-    const QString fullText = _ui->currentSubtreePathLabel->statusTip();
-    elideLabel( _ui->currentSubtreePathLabel, fullText, size().width() - 100 );
+    // (Re-)display the path label
+    showPathLabel( _ui->currentSubtreePathLabel, _ui->pathHBox );
 }

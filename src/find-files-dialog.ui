@@ -74,7 +74,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="filterModeCaption">
        <property name="text">
-        <string>Match &amp;Mode:</string>
+        <string>Match &amp;mode:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -113,7 +113,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Regular Expression</string>
+         <string>Regular expression</string>
         </property>
        </item>
       </widget>
@@ -121,7 +121,7 @@
      <item row="1" column="2">
       <widget class="QCheckBox" name="caseSensitiveCheckBox">
        <property name="text">
-        <string>Case Sensiti&amp;ve</string>
+        <string>Case sensiti&amp;ve</string>
        </property>
        <property name="checked">
         <bool>false</bool>
@@ -139,21 +139,21 @@
       <item>
        <widget class="QRadioButton" name="findFilesRadioButton">
         <property name="text">
-         <string>Find &amp;Files</string>
+         <string>Find &amp;files</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="findDirectoriesRadioButton">
         <property name="text">
-         <string>Find &amp;Directories</string>
+         <string>Find &amp;directories</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="findBothRadioButton">
         <property name="text">
-         <string>Find &amp;Both, Files and Directories</string>
+         <string>Find &amp;both files and directories</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -173,7 +173,7 @@
       <item>
        <widget class="QCheckBox" name="findSymLinksCheckBox">
         <property name="text">
-         <string>Find &amp;Symbolic Links</string>
+         <string>Find &amp;symbolic links</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -184,7 +184,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame_2">
+    <widget class="QFrame" name="treeFrame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -192,14 +192,14 @@
       <item>
        <widget class="QRadioButton" name="wholeTreeRadioButton">
         <property name="text">
-         <string>In the &amp;Whole Tree</string>
+         <string>In the &amp;whole tree</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="currentSubtreeRadioButton">
         <property name="text">
-         <string>In the &amp;Current Subtree</string>
+         <string>In the &amp;current subtree</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -209,7 +209,7 @@
       <item>
        <layout class="QHBoxLayout" name="pathHBox">
         <property name="leftMargin">
-         <number>20</number>
+         <number>16</number>
         </property>
         <item>
          <widget class="QLabel" name="currentSubtreePathLabel">
@@ -218,6 +218,9 @@
           </property>
           <property name="frameShadow">
            <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
           </property>
          </widget>
         </item>

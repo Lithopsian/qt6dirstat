@@ -114,7 +114,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );
@@ -301,7 +301,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
     _subtree = newSubtree;
 
-    _ui->headingLabel->setStatusTip( tr( "File type statistics for %1" ).arg( _subtree.url() ) );
+    _ui->headingLabel->setStatusTip( tr( "File type statistics for %1" ) % replaceCrLf( _subtree.url() ) );
     resizeEvent( nullptr );
 
     populateTree( _ui->treeWidget, _subtree() );
@@ -404,8 +404,9 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 
 void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), size().width() - 24 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel );
 }
 
 

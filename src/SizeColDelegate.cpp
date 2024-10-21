@@ -86,29 +86,30 @@ void SizeColDelegate::paint( QPainter                   * painter,
 	// Use the model font since it may be bold (for dominant items)
 	painter->setFont( index.data( Qt::FontRole ).value<QFont>() );
 
-	QRect rect           = option.rect;
-	const int allocWidth = textWidth( painter->font(), allocText );
-	const int linksWidth = textWidth( painter->font(), linksText );
-	rect.setWidth( rect.width() - allocWidth - linksWidth - RIGHT_MARGIN );
-
 	const QPalette & palette = option.palette;
 	const bool disabled      = textBrush == palette.brush( QPalette::Disabled, QPalette::WindowText );
 	const bool selected      = option.state & QStyle::State_Selected;
 	const auto group         = disabled ? QPalette::Disabled : QPalette::Normal;
 	const auto role          = selected ? QPalette::HighlightedText : QPalette::WindowText;
-	painter->setPen( palette.color( group, role ) );
+	const int alignment      = Qt::AlignRight | Qt::AlignVCenter;
 
-	// Since we align right, we need to move the rectangle to the left
-	// to reserve some space for the allocated size and any links text.
-	const int alignment = Qt::AlignRight | Qt::AlignVCenter;
-	painter->drawText( rect, alignment, sizeText );
-	rect.setWidth( option.rect.width() - RIGHT_MARGIN );
+	// Since we align right, move the rect right edge to the left for each piece of text
+	QRect rect = option.rect;
+
+	// Draw the links text, if any
+	rect.setRight( rect.right() - RIGHT_MARGIN );
+	painter->setPen( palette.color( group, role ) );
 	painter->drawText( rect, alignment, linksText );
 
 	// Draw the allocated size (" (4k)").
-	rect.setWidth( option.rect.width() - linksWidth - RIGHT_MARGIN );
+	rect.setRight( rect.right() - textWidth( painter->font(), linksText ) );
 	painter->setPen( highlightedText( option, sparseFile, disabled ) );
 	painter->drawText( rect, alignment, allocText );
+
+	// Draw the size text ("137 B")
+	rect.setRight( rect.right() - textWidth( painter->font(), allocText ) );
+	painter->setPen( palette.color( group, role ) );
+	painter->drawText( rect, alignment, sizeText );
 
 	return;
     }
@@ -122,12 +123,10 @@ QSize SizeColDelegate::sizeHint( const QStyleOptionViewItem & option,
     if ( data.size() == 2 || data.size() == 3 )
     {
 	const QString text   = data.join( QLatin1String{} );
-	const QFont   font   = index.data( Qt::FontRole ).value<QFont>();
+	const QFont   font   = option.font;
 	const int     width  = textWidth( font, text ) + LEFT_MARGIN + RIGHT_MARGIN;
 	const int     height = fontHeight( font ) + TOP_MARGIN + BOTTOM_MARGIN;
-#if 0
-	logDebug() << "size hint for \"" << text << "\": " << width << ", " << height << Qt::endl;
-#endif
+
 	return QSize{ width, height };
     }
 

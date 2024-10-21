@@ -17,6 +17,7 @@
 
 class QAction;
 class QMenu;
+class QTreeView;
 
 
 namespace QDirStat
@@ -124,7 +125,7 @@ namespace QDirStat
 	 * the header's sectionCountChanged() signal, which is emitted once
 	 * when the header sections are first created.
 	 **/
-	void initHeader();
+//	void initHeader();
 
 	/**
 	 * Post a context menu for the header at 'pos'.
@@ -153,12 +154,6 @@ namespace QDirStat
 	 * Create one action and connect to the given slot.
 	 **/
 	QAction * createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) );
-
-	/**
-	 * Create one column layout.
-	 **/
-	void createColumnLayout( const QString & layoutName )
-	    { _layouts[ layoutName ] = new ColumnLayout{ layoutName }; }
 
 	/**
 	 * Create the column layouts.

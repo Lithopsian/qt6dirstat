@@ -9,13 +9,17 @@
 
 #include <QDir>
 #include <QFileSystemModel>
+#include <QHelpEvent>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTimer>
 
 #include "OpenDirDialog.h"
+#include "DirTreeModel.h"
 #include "ExistingDir.h"
+#include "FormatUtil.h"
 #include "Logger.h"
+#include "QDirStatApp.h" // DirTreeModel
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -24,6 +28,91 @@
 
 
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Read settings from the config file
+     **/
+    void readSettings( QDialog * dialog, QSplitter * mainSplitter )
+    {
+        Settings::readWindowSettings( dialog, "OpenDirDialog" );
+
+        Settings settings;
+
+        settings.beginGroup( "OpenDirDialog" );
+        const QByteArray mainSplitterState = settings.value( "MainSplitter" , QByteArray() ).toByteArray();
+        settings.endGroup();
+
+        if ( !mainSplitterState.isNull() )
+            mainSplitter->restoreState( mainSplitterState );
+    }
+
+
+    /**
+     * Initialise the QFileSystemModel and DirTreeView.
+     **/
+    void initDirTree( QTreeView * dirTreeView, QFileSystemModel * filesystemModel )
+    {
+        app()->dirTreeModel()->setTreeIconSize( dirTreeView );
+
+        const auto filter = QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks | QDir::Drives;
+        filesystemModel->setFilter( filter );
+        filesystemModel->setRootPath( "/" );
+
+        dirTreeView->setModel( filesystemModel );
+        dirTreeView->hideColumn( 3 );  // Date Modified
+        dirTreeView->hideColumn( 2 );  // Type
+        dirTreeView->hideColumn( 1 );  // Size
+
+        dirTreeView->setItemDelegateForColumn( 0, new OpenDirDelegate{ dirTreeView } );
+    }
+
+
+    /**
+     * Populate the path combo-box with a new path.  If the path
+     * is already in the list, then set it as the current item,
+     * otherwise build a new list with the path and all its
+     * ancestors.
+     **/
+    void populatePathComboBox( QComboBox         * pathComboBox,
+                               QFileSystemModel  * filesystemModel,
+                               const QModelIndex & currentIndex )
+    {
+        // Keep the contents if the new path is already in the list
+        for ( int i=0; i < pathComboBox->count(); ++i )
+        {
+            if ( pathComboBox->itemText( i ) == filesystemModel->filePath( currentIndex ) )
+            {
+                pathComboBox->setCurrentIndex( i );
+                return;
+            }
+        }
+
+        // Build a new list from the current path and all its ancestors
+        pathComboBox->clear();
+        for ( QModelIndex index = currentIndex; index.isValid(); index = filesystemModel->parent( index ) )
+            pathComboBox->addItem( filesystemModel->filePath( index ) );
+    }
+
+
+    /**
+     * Create and apply an ExistingDirValidator, enable the clear
+     * button, and set the current combo-box text in the line edit.
+     **/
+    ExistingDirValidator * initPathComboBox( QComboBox * pathComboBox )
+    {
+        QLineEdit * lineEdit = pathComboBox->lineEdit();
+        if ( lineEdit )
+            lineEdit->setClearButtonEnabled( true );
+
+        ExistingDirValidator * validator = new ExistingDirValidator{ pathComboBox };
+        pathComboBox->setValidator( validator );
+        return validator;
+    }
+
+}
 
 
 OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
@@ -37,10 +126,10 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
     _ui->pathSelector->addNormalMountPoints();
     _ui->crossFilesystemsCheckBox->setChecked( crossFilesystems );
 
-    initPathComboBox();
-    initDirTree();
+    _validator = initPathComboBox( _ui->pathComboBox );
+    initDirTree( _ui->dirTreeView, _filesystemModel );
     initConnections();
-    readSettings();
+    readSettings( this, _ui->mainSplitter );
 
     setPath( QDir::currentPath() );
     QTimer::singleShot( 250, this, [ this ]()
@@ -54,34 +143,17 @@ OpenDirDialog::OpenDirDialog( QWidget * parent, bool crossFilesystems ):
 OpenDirDialog::~OpenDirDialog()
 {
     // Always save the window geometry, even if cancelled
-    writeSettings();
-}
+    Settings::writeWindowSettings( this, "OpenDirDialog" );
 
+    Settings settings;
 
-void OpenDirDialog::initPathComboBox()
-{
-    QLineEdit * lineEdit = _ui->pathComboBox->lineEdit();
-    if ( lineEdit )
-        lineEdit->setClearButtonEnabled( true );
+    settings.beginGroup( "OpenDirDialog" );
+    settings.setValue( "MainSplitter", _ui->mainSplitter->saveState()  );
+    settings.endGroup();
 
-    _validator = new ExistingDirValidator{ this };
-    _ui->pathComboBox->setValidator( _validator );
-}
-
-
-void OpenDirDialog::initDirTree()
-{
-    _filesystemModel->setRootPath( "/" );
-    _filesystemModel->setFilter( QDir::Dirs       |
-                                 QDir::NoDot      |
-                                 QDir::NoDotDot   |
-                                 QDir::NoSymLinks |
-                                 QDir::Drives );
-
-    _ui->dirTreeView->setModel( _filesystemModel );
-    _ui->dirTreeView->hideColumn( 3 );  // Date Modified
-    _ui->dirTreeView->hideColumn( 2 );  // Type
-    _ui->dirTreeView->hideColumn( 1 );  // Size
+    // Do NOT write _crossFilesystems back to the settings here; this is done
+    // from the config dialog. The value in this dialog is just temporary for
+    // the current program run.
 }
 
 
@@ -127,7 +199,7 @@ void OpenDirDialog::setPath( const QString & path )
     const SignalBlocker sigBlockerValidator{ _validator };
 
     const QModelIndex currentIndex = _filesystemModel->index( path );
-    populatePathComboBox( currentIndex );
+    populatePathComboBox( _ui->pathComboBox, _filesystemModel, currentIndex );
     _ui->dirTreeView->setCurrentIndex( currentIndex );
 
     _lastPath = path;
@@ -182,62 +254,12 @@ void OpenDirDialog::treeSelection( const QModelIndex & newCurrentItem )
 }
 
 
-void OpenDirDialog::populatePathComboBox( const QModelIndex & currentIndex )
-{
-    // Keep the contents if the new path is already in the list
-    for ( int i=0; i < _ui->pathComboBox->count(); ++i )
-    {
-        if ( _ui->pathComboBox->itemText( i ) == _filesystemModel->filePath( currentIndex ) )
-        {
-            _ui->pathComboBox->setCurrentIndex( i );
-            return;
-        }
-    }
-
-    // Build a new list from the current path and all its ancestors
-    _ui->pathComboBox->clear();
-    for ( QModelIndex index = currentIndex; index.isValid(); index = _filesystemModel->parent( index ) )
-        _ui->pathComboBox->addItem( _filesystemModel->filePath( index ) );
-}
-
-
 void OpenDirDialog::goUp()
 {
     // Just move one place in the combobox list
     const int nextIndex = _ui->pathComboBox->currentIndex() + 1;
     if ( nextIndex < _ui->pathComboBox->count() )
         _ui->pathComboBox->setCurrentIndex( nextIndex );
-}
-
-
-void OpenDirDialog::readSettings()
-{
-    Settings::readWindowSettings( this, "OpenDirDialog" );
-
-    Settings settings;
-
-    settings.beginGroup( "OpenDirDialog" );
-    const QByteArray mainSplitterState = settings.value( "MainSplitter" , QByteArray() ).toByteArray();
-    settings.endGroup();
-
-    if ( !mainSplitterState.isNull() )
-        _ui->mainSplitter->restoreState( mainSplitterState );
-}
-
-
-void OpenDirDialog::writeSettings()
-{
-    // Do NOT write _crossFilesystems back to the settings here; this is done
-    // from the config dialog. The value in this dialog is just temporary for
-    // the current program run.
-
-    Settings::writeWindowSettings( this, "OpenDirDialog" );
-
-    Settings settings;
-
-    settings.beginGroup( "OpenDirDialog" );
-    settings.setValue( "MainSplitter", _ui->mainSplitter->saveState()  );
-    settings.endGroup();
 }
 
 
@@ -261,3 +283,20 @@ QString OpenDirDialog::askOpenDir( QWidget * parent, bool & crossFilesystems )
     return path;
 }
 
+
+
+
+bool OpenDirDelegate::helpEvent( QHelpEvent                 * event,
+                                 QAbstractItemView          * view,
+                                 const QStyleOptionViewItem & option,
+                                 const QModelIndex          & index )
+{
+    if ( event && event->type() == QEvent::ToolTip && view && index.isValid() )
+    {
+        tooltipForElided( option.rect, sizeHint( option, index ), view->model(), index, event->globalPos() );
+
+        return true;
+    }
+
+    return QStyledItemDelegate::helpEvent( event, view, option, index );
+}

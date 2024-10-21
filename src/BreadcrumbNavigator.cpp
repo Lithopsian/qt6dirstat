@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <QLayout>
+
 #include "BreadcrumbNavigator.h"
 #include "DirInfo.h"
 #include "DirTree.h"
@@ -15,10 +17,7 @@
 #include "Logger.h"
 
 
-#define VERBOSE_BREADCRUMBS     0
-
-#define MAX_TOTAL_LEN         120
-#define SHORTENED_LEN          10
+#define VERBOSE_BREADCRUMBS 0
 
 
 using namespace QDirStat;
@@ -49,7 +48,7 @@ namespace
 
 	    logDebug() << "_breadcrumb[ " << i << " ]: "
 	               << " pathComponent: \"" << crumb.pathComponent
-	               << "\" displayName: \"" << crumb.displayName
+	               << "\" displayName: \"" << crumb.elidedName
 	               << "\" url: \"" << crumb.url << '"'
 	               << Qt::endl;
 	}
@@ -61,16 +60,18 @@ namespace
     /**
      * Return the total display length of all breadcrumbs plus delimiters.
      **/
-    int breadcrumbsLen( const BreadcrumbList & breadcrumbs )
+    int breadcrumbsLen( const BreadcrumbList & breadcrumbs, const QFont & font )
     {
+	const QChar delimiter{ u'/' };
+	const int delimiterWidth = horizontalAdvance( font, delimiter );
 	int len = 0;
 
 	for ( const Breadcrumb & crumb : breadcrumbs )
 	{
-	    const QString & name = crumb.displayName.isEmpty() ? crumb.pathComponent : crumb.displayName;
-	    len += name.length();
-	    if ( !name.endsWith( u'/' ) )
-		++len; // For the "/" delimiter
+	    const QString & name = crumb.displayName();
+	    len += horizontalAdvance( font, name );
+	    if ( !name.endsWith( delimiter ) )
+		len += delimiterWidth;
 	}
 
 	return len;
@@ -78,20 +79,21 @@ namespace
 
 
     /**
-     * Return the longest breadcrumb that has not been shortened yet
-     * or 0 if there are no more.
+     * Return the longest breadcrumb that can still be elided (ie. more
+     * than one character) or 0 if there are no more.
      **/
     Breadcrumb * pickLongBreadcrumb( BreadcrumbList & breadcrumbs )
     {
-	int maxLen = 0;
+	int maxLen = 1;
 	Breadcrumb * longestCrumb = nullptr;
 
 	for ( Breadcrumb & crumb : breadcrumbs )
 	{
-	    if ( crumb.displayName.isEmpty() && crumb.pathComponent.length() > maxLen )
+	    const QString & name = crumb.displayName();
+	    if ( name.length() > maxLen )
 	    {
 		longestCrumb = &crumb;
-		maxLen = crumb.pathComponent.length();
+		maxLen = name.length();
 	    }
 	}
 
@@ -102,51 +104,74 @@ namespace
     /**
      * Shorten excessively long breadcrumbs so they have a better chance to
      * fit on the screen.
+     *
+     * This iterative process keeps eliding the longest name by up to a
+     * half until the path as a whole fits in the available space.  This
+     * avoids excessively shortening one component and leaving others
+     * much longer, or eliding to a stump when there is much more space
+     * available.
      **/
-    void shortenBreadcrumbs( BreadcrumbList & breadcrumbs )
+    void shortenBreadcrumbs( BreadcrumbList & breadcrumbs, const QFont & font, int maxLength )
     {
-	while ( breadcrumbsLen( breadcrumbs ) > MAX_TOTAL_LEN )
+	// Don't try to elide a component to smaller than the ellipsis character
+	const int minLength = ellipsisWidth( font );
+
+	while ( true )
 	{
+	    // Keep shortening until it fits ...
+	    const int currentLength = breadcrumbsLen( breadcrumbs, font );
+	    if ( currentLength <= maxLength )
+		return;
+
+	    // ... or we can't elide anything else
 	    Breadcrumb * longestCrumb = pickLongBreadcrumb( breadcrumbs );
 	    if ( !longestCrumb )
 		return;
 
-	    longestCrumb->displayName = elideMiddle( longestCrumb->pathComponent, SHORTENED_LEN );
+	    // Shorten the current longest component by as much as needed, but by no more than half
+	    const QString & crumbName = longestCrumb->displayName();
+	    const int crumbLength = horizontalAdvance( font, crumbName );
+	    const int elideLength = qMax( crumbLength - ( currentLength - maxLength ), crumbLength / 2 );
+	    longestCrumb->elidedName = elidedText( font, crumbName, qMax( elideLength, minLength ) );
+
 #if VERBOSE_BREADCRUMBS
-	    logDebug() << "Shortened from " << longestCrumb->pathComponent.length()
-	               << " to " << longestCrumb->displayName.length()
-	               << ": " << longestCrumb->displayName << Qt::endl;
+	    logDebug() << "Shortened from " << crumbLength
+	               << " to " << elideLength
+	               << ": " << horizontalAdvance( font, longestCrumb->elidedName ) << Qt::endl;
 #endif
 	}
     }
 
 
     /**
-     * Generate HTML from a BreadcrumbList.
+     * Generate HTML from a BreadcrumbList.  Carriage returns and
+     * linefeeds have already been replaced by spaces, but escape
+     * special characters and wrap to prevent whitespace being
+     * collapsed.
      **/
     QString toHtml( const BreadcrumbList & breadcrumbs )
     {
+	const QString crumbTemplate{ "<a href=\"%1\">%2</a>" };
+
 	QString html;
 
 	for ( const Breadcrumb & crumb : breadcrumbs )
 	{
-	    QString name = crumb.displayName;
-	    if ( name.isEmpty() )
-		name = crumb.pathComponent;
-
+	    const QString & name = crumb.displayName();
 	    if ( !name.isEmpty() )
 	    {
+		const QString escapedName = name.toHtmlEscaped();
 		if ( crumb.url.isEmpty() )
-		    html += name.toHtmlEscaped();
+		    html += escapedName;
 		else
-		    html += "<a href=\""_L1 % crumb.url % "\">"_L1 % name.toHtmlEscaped() % "</a>"_L1;
+		    html += crumbTemplate.arg( crumb.url, escapedName );
 
 		if ( !name.endsWith( u'/' ) )
 		    html += u'/';
 	    }
 	}
 
-	return html;
+	return whitespacePre( html );
     }
 
 
@@ -155,14 +180,14 @@ namespace
      * component) and its base name (the last path component).
      *
      * Both 'basePath_ret' and 'name_ret' are return parameters and will be
-     * modified by this function. If nonempty, a trailing path separator
+     * modified by this function. If non-empty, a trailing path separator
      * ("/") is added to 'basePath_ret'.
      **/
     void splitBasePath( const QString & path,
                         QString       & basePath_ret, // return parameter
                         QString       & name_ret )    // return parameter
     {
-	basePath_ret = "";
+	basePath_ret = QString();
 	name_ret = path;
 
 	if ( path != "/"_L1 && path.contains( u'/' ) )
@@ -193,32 +218,30 @@ namespace
 	if ( !item || !item->tree() )
 	    return BreadcrumbList{};
 
-	const FileInfo * toplevel = item->tree()->firstToplevel();
+	const DirTree * tree = item->tree();
+	const FileInfo * toplevel = tree->firstToplevel();
 	if ( !toplevel )
 	    return BreadcrumbList{};
 
 	// logDebug() << item->debugUrl() << Qt::endl;
 	int depth = item->treeLevel();
-	BreadcrumbList breadcrumbs = BreadcrumbList( depth + 1, Breadcrumb() );
+	BreadcrumbList breadcrumbs = BreadcrumbList( depth + 1 );
 
 	QString name;
 	QString basePath;
 
 	splitBasePath( toplevel->name(), basePath, name );
 	if ( !basePath.isEmpty() )
-	    breadcrumbs[ 0 ].pathComponent = basePath;
+	    breadcrumbs[ 0 ].pathComponent = replaceCrLf( basePath );
 
-	while ( item && depth > 0 )
+	// Redundant loop conditions just as sanity checks
+	while ( depth > 0 && item && item != tree->root() )
 	{
-	    // Stop at the DirTree's <root> pseudo item
-	    if ( item->tree() && item == item->tree()->root() )
-		break;
-
 	    if ( item->isDirInfo() )
 	    {
 		splitBasePath( item->name(), basePath, name );
 
-		breadcrumbs[ depth ].pathComponent = name;
+		breadcrumbs[ depth ].pathComponent = replaceCrLf( name );
 		breadcrumbs[ depth ].url = item->debugUrl();
 	    }
 
@@ -252,11 +275,24 @@ BreadcrumbNavigator::BreadcrumbNavigator( QWidget * parent ):
 
 void BreadcrumbNavigator::setPath( const FileInfo * item )
 {
+    // Break the item pathname into components
     _breadcrumbs = fillBreadcrumbs( item );
-    shortenBreadcrumbs( _breadcrumbs );
-    setText( toHtml( _breadcrumbs ) );
+
+    // Ensure that the layout already properly represents the main window geometry
+    QLayout * layout = parentWidget()->layout();
+    if ( !layout->geometry().isValid() )
+	layout->activate();
+
+    // Elide components until the whole label will fit inside the central widget
+    int leftMargin;
+    int rightMargin;
+    layout->getContentsMargins( &leftMargin, &rightMargin, nullptr, nullptr );
+    const int maxWidth = layout->contentsRect().width() - leftMargin - rightMargin;
+    shortenBreadcrumbs( _breadcrumbs, font(), maxWidth - ellipsisWidth( font() ) );
 
 #if VERBOSE_BREADCRUMBS
     logBreadcrumbs( _breadcrumbs );
 #endif
+
+    setText( toHtml( _breadcrumbs ) );
 }

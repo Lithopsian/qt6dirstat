@@ -53,7 +53,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( SSR_CountCol,     QObject::tr( "Files" ) );
@@ -89,8 +89,6 @@ LocateFileTypeWindow::LocateFileTypeWindow( QWidget * parent ):
 
     connect( _ui->treeWidget,    &QTreeWidget::currentItemChanged,
              this,               &LocateFileTypeWindow::selectResult );
-
-    show();
 }
 
 
@@ -121,6 +119,7 @@ void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileI
     LocateFileTypeWindow * instance = sharedInstance();
 
     instance->populate( suffix, fileInfo );
+    instance->show();
     instance->raise();
 }
 
@@ -135,7 +134,7 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
 
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%L1 directories" ).arg( count );
-    const QString heading = tr( " with *%1 files below %2" ).arg( suffix, _subtree.url() );
+    const QString heading = tr( " with *%1 files below %2" ).arg( suffix, replaceCrLf( _subtree.url() ) );
 
     // Force a redraw of the header from the status tip
     _ui->heading->setStatusTip( intro % heading );
@@ -208,8 +207,9 @@ void LocateFileTypeWindow::selectResult() const
 
 void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 {
-    // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->heading, _ui->heading->statusTip(), size().width() - 24 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->heading, _ui->heading->statusTip(), lastPixel );
 }
 
 
@@ -234,9 +234,19 @@ SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
 
     set( SSR_CountCol,     Qt::AlignRight, formatCount( count ) );
     set( SSR_TotalSizeCol, Qt::AlignRight, formatSize( totalSize ) );
-    set( SSR_PathCol,      Qt::AlignLeft,  path );
+    set( SSR_PathCol,      Qt::AlignLeft,  replaceCrLf( path ) );
 
     setIcon( SSR_PathCol,  QIcon( app()->dirTreeModel()->dirIcon() ) );
+}
+
+
+QVariant SuffixSearchResultItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+    if ( role != Qt::ToolTipRole || column != SSR_PathCol )
+	return QTreeWidgetItem::data( column, role );
+
+    return hasLineBreak( _path ) ? _path : tooltipForElided( this, SSR_PathCol, 0 );
 }
 
 

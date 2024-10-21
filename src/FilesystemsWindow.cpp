@@ -60,7 +60,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FS_DeviceCol,    QObject::tr( "Device" ) );
@@ -81,12 +81,8 @@ namespace
 	    headerItem->setToolTip( FS_FreeSizeCol,     QObject::tr( "Free for unprivileged users" ) );
 	}
 
-
-
 	// Center the column headers except the first two
-	QHeaderView * header = tree->header();
-	header->setDefaultAlignment( Qt::AlignCenter );
-	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+	tree->header()->setDefaultAlignment( Qt::AlignCenter );
 
 	tree->sortItems( FS_DeviceCol, Qt::AscendingOrder );
     }
@@ -152,8 +148,13 @@ void FilesystemsWindow::populate()
 
     _ui->fsTree->setCurrentItem( _ui->fsTree->topLevelItem( 0 ) );
 
-    if ( MountPoints::hasBtrfs() )
+    if ( MountPoints::hasBtrfs() && !_warnedAboutBtrfs )
+    {
+	_warnedAboutBtrfs = true;
 	PanelMessage::showFilesystemsMsg( this, _ui->vBox );
+    }
+
+    resizeTreeColumns( _ui->fsTree );
 }
 
 
@@ -181,27 +182,8 @@ QString FilesystemsWindow::selectedPath() const
 }
 
 
-void FilesystemsWindow::copyToClipboard()
-{
-    // Copt the original device string, not just the displayed (possibly ellipsized) text
-    const FilesystemItem * item = currentItem( _ui->fsTree );
-    if ( item )
-    {
-	const int col = _ui->fsTree->currentColumn();
-	const QString text = col == FS_DeviceCol ? item->device() : item->text( col );
-	QApplication::clipboard()->setText( text );
-    }
-}
-
-
 void FilesystemsWindow::keyPressEvent( QKeyEvent * event )
 {
-    if ( event == QKeySequence::Copy )
-    {
-	copyToClipboard();
-	return;
-    }
-
     // Let return/enter trigger itemActivated instead of buttons that don't have focus
     if ( ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) )
 	return;
@@ -232,20 +214,11 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint ):
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    // Columns are not resizeable, so cut off insanely long generated device mapper names
-    QString dev = _device;
-    const int limit = sizeof( "/dev/mapper/luks-123456" );
-    if ( dev.size() > limit )
-    {
-	dev = dev.left( limit - 1 ) % "…"; // ellipsis
-	setToolTip( FS_DeviceCol, _device );
-    }
-
     setIcon( FS_DeviceCol, QIcon{ app()->dirTreeModel()->treeIconDir() % iconName( mountPoint ) } );
 
-    set( FS_DeviceCol,    Qt::AlignLeft,    dev );
-    set( FS_MountPathCol, Qt::AlignLeft,    _mountPath );
+    set( FS_DeviceCol,    Qt::AlignLeft,    _device );
     set( FS_TypeCol,      Qt::AlignHCenter, _fsType );
+    set( FS_MountPathCol, Qt::AlignLeft,    _mountPath );
 
     if ( MountPoints::hasSizeInfo() && _totalSize > 0 )
     {
@@ -279,6 +252,17 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint ):
 }
 
 
+QVariant FilesystemItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+//    if ( role != Qt::ToolTipRole || ( column != FS_DeviceCol && column != FS_MountPathCol ) )
+    if ( role != Qt::ToolTipRole )
+	return QTreeWidgetItem::data( column, role );
+
+    return tooltipForElided( this, column, column == FS_DeviceCol ? 1 : 0 );
+}
+
+
 bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )
@@ -289,17 +273,15 @@ bool FilesystemItem::operator<( const QTreeWidgetItem & rawOther ) const
     switch ( treeWidget()->sortColumn() )
     {
 	case FS_DeviceCol:
-	    if ( isNetworkMount() == other.isNetworkMount() )
-		return device() < other.device();
-	    return isNetworkMount() < other.isNetworkMount();
+	    return isNetworkMount() < other.isNetworkMount() || QTreeWidgetItem::operator<( rawOther );
 
-	case FS_MountPathCol:    return mountPath()    < other.mountPath();
-	case FS_TypeCol:         return fsType()       < other.fsType();
+//	case FS_TypeCol:         return fsType()       < other.fsType();
 	case FS_TotalSizeCol:    return totalSize()    < other.totalSize();
 	case FS_UsedSizeCol:     return usedSize()     < other.usedSize();
 	case FS_ReservedSizeCol: return reservedSize() < other.reservedSize();
 	case FS_FreeSizeCol:     return freeSize()     < other.freeSize();
 	case FS_FreePercentCol:  return freePercent()  < other.freePercent();
+//	case FS_MountPathCol:    return mountPath()    < other.mountPath();
 
 	default: return QTreeWidgetItem::operator<( rawOther );
     }

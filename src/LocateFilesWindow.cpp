@@ -75,7 +75,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( LL_SizeCol,  QObject::tr( "Total Size" ) );
@@ -118,8 +118,6 @@ LocateFilesWindow::LocateFilesWindow( TreeWalker * treeWalker,
              this,               &LocateFilesWindow::itemContextMenu );
 
     connect( _ui->treeWidget, &QTreeWidget::currentItemChanged, &locateInMainWindow );
-
-    show();
 }
 
 
@@ -164,8 +162,11 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
 
     // Set the heading and sort order for each new populate command
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
-    instance->_ui->heading->setStatusTip( headingText );
+    instance->_ui->heading->setStatusTip( replaceCrLf( headingText ) );
     instance->populate( fileInfo );
+
+    // Show now so the BusyPopup is not obscured
+    instance->show();
     instance->raise();
 }
 
@@ -232,8 +233,9 @@ void LocateFilesWindow::resizeEvent( QResizeEvent * )
 	return statusTip.arg( fileInfo ? fileInfo->url() : QString{} );
     }();
 
-    // Calculate a width from the dialog less margins, less a bit more
-    elideLabel( _ui->heading, heading, size().width() - 24 );
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
+    elideLabel( _ui->heading, heading, lastPixel );
 }
 
 
@@ -256,9 +258,19 @@ LocateListItem::LocateListItem( FileInfo * item ):
 
     set( LL_SizeCol,  Qt::AlignRight,   formatSize( _size ) );
     set( LL_MTimeCol, Qt::AlignHCenter, formatTime( _mtime ) );
-    set( LL_PathCol,  Qt::AlignLeft,    _path );
+    set( LL_PathCol,  Qt::AlignLeft,    replaceCrLf( _path ) );
 
     setIcon( LL_PathCol, app()->dirTreeModel()->itemTypeIcon( item ) );
+}
+
+
+QVariant LocateListItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+    if ( role != Qt::ToolTipRole || column != LL_PathCol )
+	return QTreeWidgetItem::data( column, role );
+
+    return hasLineBreak( _path ) ? _path : tooltipForElided( this, LL_PathCol, 0 );
 }
 
 
@@ -276,6 +288,7 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case LL_SizeCol:  return _size  < other.size();
 	case LL_MTimeCol: return _mtime < other.mtime();
+	case LL_PathCol:  return _path  < other.path();
 	default:                 return QTreeWidgetItem::operator<( rawOther );
     }
 

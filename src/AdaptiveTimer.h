@@ -12,7 +12,6 @@
 
 #include <functional> // std::function
 
-#include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
 #include <QVector>

@@ -57,37 +57,25 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return a file search filter coresponding to the values entered
-	 * in the dialog.
+	 * Getter for a raw pointer to the UI object.
 	 **/
-	FileSearchFilter fileSearchFilter();
+	const Ui::FindFilesDialog * ui() const { return _ui.get(); }
 
 	/**
-	 * Read settings from the config file.  All the dialog fields
-	 * except for 'pattern' are saved.  The 'pattern' string is
-	 * remembered in local static storage only for as long as the
-	 * program is open.  The window size and position are also
-	 * loaded from Settings.
-	 **/
-	void readSettings();
-
-	/**
-	 * Write settings to the config file.  The dialog fields are
-	 * written to Settings only if the dialog is accepted.  The
-	 * window geometry is always saved when the dialog is destroyed.
-	 **/
-	void writeSettings();
-
-	/**
-	 * Resize event, reimplemented from QWidget.
+	 * Resize event, reimplemented from QDialog/QWidget.
 	 *
-	 * Elide the label to fit inside the current dialog width, so that
-	 * it fills the available width but very long subtree paths don't
-	 * stretch the dialog.  A little extra room is left for the user to
-	 * shrink the dialog, which would then force the label to be elided
-	 * further.
+	 * This makes a call to showEvent() which re-displays the path
+	 * label, elided to the new dialog width.
 	 **/
-	void resizeEvent( QResizeEvent * ) override;
+	void resizeEvent( QResizeEvent * event ) override;
+
+	/**
+	 * Resize event, reimplemented from QDialog/QWidget.
+	 *
+	 * This displays the path label after the layouts have been
+	 * completed, so that it is elided correctly.
+	 **/
+	void showEvent( QShowEvent * ) override;
 
 
     private:

@@ -15,6 +15,7 @@
 #include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfoIterator.h"
+#include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
 #include "QDirStatApp.h"
@@ -48,7 +49,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeWidgetSizes( tree );
+	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( UD_PathCol,  QObject::tr( "Directory" ) );
@@ -60,7 +61,6 @@ namespace
 
 	QHeaderView * header = tree->header();
 	header->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-	header->setSectionResizeMode( QHeaderView::ResizeToContents );
 
 	tree->sortByColumn( UD_PathCol, Qt::AscendingOrder );
     }
@@ -123,6 +123,8 @@ void UnreadableDirsWindow::populate()
 
     // Make sure something is selected, even if this window is not the active one
     _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
+
+    resizeTreeColumns( _ui->treeWidget );
 }
 
 
@@ -133,23 +135,7 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
 
     DirInfo * dir = subtree->toDirInfo();
     if ( dir->readError() )
-    {
-	QTreeWidgetItem * item = new QTreeWidgetItem{ _ui->treeWidget, QTreeWidgetItem::UserType };
-
-	const auto set = [ item ]( UnreadableDirectories col, Qt::Alignment alignment, const QString & text )
-	{
-	    item->setText( col, text );
-	    item->setTextAlignment( col, alignment | Qt::AlignVCenter );
-	};
-
-	set( UD_PathCol,  Qt::AlignLeft,  dir->url() );
-	set( UD_UserCol,  Qt::AlignLeft,  dir->userName() );
-	set( UD_GroupCol, Qt::AlignLeft,  dir->groupName() );
-	set( UD_PermCol,  Qt::AlignRight, dir->symbolicPermissions() );
-	set( UD_OctalCol, Qt::AlignRight, dir->octalPermissions() );
-
-	item->setIcon( UD_PathCol, app()->dirTreeModel()->unreadableDirIcon() );
-    }
+	_ui->treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
 
     // Recurse through any subdirectories
     for ( DirInfoIterator it{ subtree }; *it; ++it )
@@ -157,4 +143,40 @@ void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
 
     // Dot entries can't contain unreadable dirs, but attics can
     populateRecursive( dir->attic() );
+}
+
+
+
+
+UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
+    QTreeWidgetItem{ UserType }
+{
+    const auto set = [ this ]( UnreadableDirectories col, Qt::Alignment alignment, const QString & text )
+    {
+	setText( col, text );
+	setTextAlignment( col, alignment | Qt::AlignVCenter );
+    };
+
+    set( UD_PathCol,  Qt::AlignLeft,  replaceCrLf( dir->url() ) );
+    set( UD_UserCol,  Qt::AlignLeft,  dir->userName() );
+    set( UD_GroupCol, Qt::AlignLeft,  dir->groupName() );
+    set( UD_PermCol,  Qt::AlignRight, dir->symbolicPermissions() );
+    set( UD_OctalCol, Qt::AlignRight, dir->octalPermissions() );
+
+    setIcon( UD_PathCol, app()->dirTreeModel()->unreadableDirIcon() );
+
+    if ( text( UD_PathCol ) != dir->url() )
+	setToolTip( UD_PathCol, dir->url() );
+}
+
+
+QVariant UnreadableDirsItem::data( int column, int role ) const
+{
+    // This is just for the tooltip on columns that are likely to be long and elided
+//    if ( role != Qt::ToolTipRole || column != UD_PathCol )
+    if ( role != Qt::ToolTipRole )
+	return QTreeWidgetItem::data( column, role );
+
+    const QString tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole ).toString();
+    return tooltipText.isEmpty() ? tooltipForElided( this, column, 1 ) : tooltipText;
 }

@@ -60,7 +60,7 @@ namespace
 	if ( item->isFifo()        ) return "FIFO";
 	if ( item->isSocket()      ) return "Socket";
 
-	return "";
+	return "X";
     }
 
 
@@ -118,9 +118,11 @@ namespace
 	// Optional fields
 	if ( item->isExcluded() )
 	    gzprintf( cache, "\tunread: %s", "excluded" );
-	if ( item->readState() == DirPermissionDenied )
+	else if ( item->readState() == DirPermissionDenied )
 	    gzprintf( cache, "\tunread: %s", "permissions" );
-	if ( item->isMountPoint() && item->readState() == DirOnRequestOnly )
+	else if ( item->readState() == DirError )
+	    gzprintf( cache, "\tunread: %s", "readerror" );
+	else if ( item->isMountPoint() && item->readState() == DirOnRequestOnly )
 	    gzprintf( cache, "\tunread: %s", "mountpoint" );
 	if ( item->isSparseFile() )
 	    gzprintf( cache, "\tblocks: %lld", item->blocks() );
@@ -523,7 +525,7 @@ void CacheReader::addItem()
 	    switch ( toupper( *type ) )
 	    {
 		// 'F' is ambiguous unfortunately
-		case 'F': return *(mode_str+1) == '\0' ? S_IFREG : S_IFIFO;
+		case 'F': return *(type+1) == '\0' ? S_IFREG : S_IFIFO;
 		case 'D': return S_IFDIR;
 		case 'L': return S_IFLNK;
 		case 'B': return S_IFBLK;
@@ -533,7 +535,7 @@ void CacheReader::addItem()
 	    }
 	}();
     }
-
+logDebug() << unread_str << Qt::endl;
     // Path
     if ( *raw_path == '/' )
 	_latestDir = nullptr;
@@ -565,7 +567,7 @@ void CacheReader::addItem()
     // Blocks: only stored for sparse files, otherwise just guess from the file size
     const FileSize blocks = blocks_str ?
                             strtoll( blocks_str, 0, 10 ) :
-                            static_cast<FileSize>( ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
+                            static_cast<FileSize>( std::ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
@@ -623,7 +625,8 @@ void CacheReader::addItem()
 	}
     }
 
-    if ( S_ISDIR( mode ) ) // directory
+    // Treat unread items as directories even if the mode is bad
+    if ( unread_str || S_ISDIR( mode ) ) // directory
     {
 	QString url = ( parent == _tree->root() ) ? fullPath : name;
 #if VERBOSE_CACHE_DIRS
@@ -671,6 +674,10 @@ void CacheReader::addItem()
 
 		    case 'p':
 			dir->setReadState( DirPermissionDenied );
+			break;
+
+		    case 'r':
+			dir->setReadState( DirError );
 			break;
 
 		    case 'm':

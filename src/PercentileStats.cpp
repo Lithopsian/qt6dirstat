@@ -79,7 +79,7 @@ void PercentileStats::calculatePercentiles()
 
     // Iterate the percentiles as we go along, starting at percentile 1
     auto it = _percentiles.cbegin() + 1;
-    auto filledPercentile = [ this, &it, &count, &sum ]()
+    const auto filledPercentile = [ this, &it, &count, &sum ]()
     {
 	// Put the running totals into the lists
 	_percentileCounts.append( count );

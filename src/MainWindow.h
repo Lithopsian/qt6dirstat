@@ -19,6 +19,7 @@
 
 #include "ui_main-window.h"
 #include "Subtree.h"
+#include "Typedefs.h" // _L1
 
 
 class QActionGroup;
@@ -27,6 +28,7 @@ class SysCallFailedException;
 
 namespace QDirStat
 {
+    class FileDetailsView;
     class HistoryButtons;
     class PkgFilter;
     class PkgManager;
@@ -86,7 +88,7 @@ namespace QDirStat
         /**
          * Return the DirTreeView for this window
          **/
-        DirTreeView * dirTreeView() const { return _ui->dirTreeView; }
+//        DirTreeView * dirTreeView() const { return _ui->dirTreeView; }
 
         /**
          * Return the TreemapView for this window
@@ -129,6 +131,11 @@ namespace QDirStat
          * Read a filesystem, as requested from the filesystems window.
          **/
         void readFilesystem( const QString & path );
+
+        /**
+         * Return a pointer to the FileDetailsView panel widget.
+         **/
+        FileDetailsView * fileDetailsView() const { return _ui->fileDetailsView; }
 
 
     public slots:
@@ -456,11 +463,6 @@ namespace QDirStat
         void showProgress( const QString & text );
 
         /**
-         * Show details about the current selection in the details view.
-         **/
-        void updateFileDetailsView();
-
-        /**
          * Return whether verbose selection is enabled.
          **/
         bool verboseSelection() const { return _ui->actionVerboseSelection->isChecked(); }
@@ -545,11 +547,6 @@ namespace QDirStat
         void initLayouts( const QString & currentLayoutName );
 
         /**
-         * Create one layout action.
-         **/
-        void initLayout( const QString & layoutName, const QString & currentLayoutName );
-
-        /**
          * Get the layout details show values from an action.
          **/
          bool layoutShowBreadcrumbs( const QAction * action ) const
@@ -602,7 +599,6 @@ namespace QDirStat
         /**
          * Write layout settings.
          **/
-        void writeLayoutSetting( const QAction * action );
         void writeLayoutSettings();
 
         /**
@@ -643,21 +639,19 @@ namespace QDirStat
         QString parseUnpkgStartingDir( const UnpkgSettings & unpkgSettings );
 
         /**
-         * Detect theme changes.  Currently only the file details panel needs to
-         * react to this, so just call it directly.
+         * Detect theme changes, resizes, and attempts to close the
+         * window.
          *
-         * Reimplemented from QWidget.
-         **/
-        void changeEvent( QEvent * event ) override;
-
-        /**
-         * Detect all attempts to close the main window.  Cleanly abort
-         * any reads and always allow the window to close.  This will
-         * exit the main event loop and the application will shut down.
+         * The breadcrumbs are redrawn when the font changes or the
+         * window is resized, in case the elided text needs to change.
          *
-         * Reimplemented from QWidget.
+         * Active reads are cleanly aborted before allowing the window
+         * to close.  Once the window closes, the main loop will exit
+         * and the application will shutdown.
+         *
+         * Reimplemented from QMainWindow/QWidget.
          **/
-        void closeEvent( QCloseEvent * ) override;
+        bool event( QEvent * event ) override;
 
         /**
          * Handle mouse buttons: activate history actions actionGoBack and
