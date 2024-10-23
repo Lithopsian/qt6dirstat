@@ -32,7 +32,7 @@ namespace QDirStat
 	QString url;
 
 	const QString & displayName() const
-	    { return elidedName.isEmpty() ? pathComponent : elidedName; }
+	    { return elidedName.isNull() ? pathComponent : elidedName; }
 
     };	// struct Breadcrumb
 
