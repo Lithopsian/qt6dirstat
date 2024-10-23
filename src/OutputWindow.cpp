@@ -273,20 +273,11 @@ void OutputWindow::noMoreProcesses()
 void OutputWindow::zoom( qreal factor )
 {
     QFont font = _ui->terminal->font();
-    if ( font.pixelSize() != -1 )
-    {
-	int pixelSize = qFloor( font.pixelSize() * factor );
-	if ( pixelSize == font.pixelSize() ) // rounding (always down) to the same value
-	    ++pixelSize;
-	font.setPixelSize( pixelSize );
-    }
-    else
-    {
-	const qreal oldPointSize = font.pointSizeF();
-	font.setPointSizeF( oldPointSize * factor );
-	if ( font.pointSizeF() == oldPointSize ) // some platforms may round (down) to integer sizes
-	    font.setPointSizeF( font.pointSizeF() + 1 );
-    }
+    QFontInfo fontInfo{ font };
+
+    const int oldPixelSize = fontInfo.pixelSize();
+    const int newPixelSize = qFloor( oldPixelSize * factor );
+    font.setPixelSize( newPixelSize == oldPixelSize ? newPixelSize + 1 : qMax( newPixelSize, 1 ) );
 
     _ui->terminal->setFont( font );
 }

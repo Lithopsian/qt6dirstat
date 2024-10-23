@@ -274,7 +274,7 @@ namespace QDirStat
          * the window manager close button (the [x] at the top right), when
          * this dialog decides to auto-close itself after the last process
          * finishes successfully, or when the dialog is hidden
-         * "non-spontaneously".  Before Qt 6.3, refject(), for example by
+         * "non-spontaneously".  Before Qt 6.3, reject(), for example by
          * pressing the Escape key, hides the window but does not close it.
          *
          * This object will delete itself in this event if there are no more
@@ -320,7 +320,8 @@ namespace QDirStat
         QProcess * startNextProcess();
 
         /**
-         * Zoom the terminal font by the specified factor.
+         * Zoom the terminal font by the specified factor.  The operation is
+         * performed in pixels from QFontInfo, with a minimum of 1 pixel.
          **/
         void zoom( qreal factor );
 
