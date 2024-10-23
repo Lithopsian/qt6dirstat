@@ -228,13 +228,36 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 QString SysUtil::baseName( const QString & fileName )
 {
     //logDebug() << fileName << Qt::endl;
-    const QStringList segments = fileName.split( u'/', Qt::SkipEmptyParts );
-    if ( !segments.isEmpty() )
-	return segments.last();
+    const int delimeterIndex = fileName.lastIndexOf( u'/' );
+    if ( delimeterIndex < 0 )
+	return fileName;
 
-    return QString{};
+    return fileName.mid( delimeterIndex + 1 );
+//    const QStringList segments = fileName.split( u'/', Qt::SkipEmptyParts );
+//    if ( !segments.isEmpty() )
+//	return segments.last();
+
+//    return QString{};
 }
 
+
+void SysUtil::splitPath( const QString & fileNameWithPath,
+                         QString       & path_ret, // return parameter
+                         QString       & name_ret )    // return parameter
+{
+    const int delimeterIndex = fileNameWithPath.lastIndexOf ( u'/' );
+    if ( delimeterIndex < 0 || delimeterIndex == fileNameWithPath.size() - 1 )
+    {
+	// Paths ending in "/" (notably root) or paths without any "/"
+	path_ret = QString();
+	name_ret = fileNameWithPath;
+
+	return;
+    }
+
+    path_ret = fileNameWithPath.left( qMax( 1, delimeterIndex ) ); // at least "/"
+    name_ret = fileNameWithPath.mid( delimeterIndex + 1 ); // everything after the last "/"
+}
 
 QString SysUtil::userName( uid_t uid )
 {

@@ -196,10 +196,31 @@ namespace QDirStat
 	 *	   "/usr/bin"		-> "bin"
 	 *	   "/usr/bin/"		-> "bin"
 	 *
+	 * Note that if 'pathName' ends with "/", including root (ie.
+	 * exactly "/") then this function will return an empty string.
+	 *
 	 * Note that FileInfo also has a member function baseName() which is
 	 * a lightweight wrapper for this function.
 	 **/
 	QString baseName( const QString & fileName );
+
+	/**
+	 * Split a path up into its base path (everything up to the last path
+	 * component) and its base name (the last path component).
+	 *
+	 * Both 'path_ret' and 'name_ret' are return parameters and will be
+	 * modified by this function.
+	 *
+	 * If 'path' is root (ie. "/") 'basPath_ret' is empty and
+	 * 'name_ret' = "/".  If 'path' has no "/" characters, then
+	 * 'name_ret' = 'path' and 'path_ret' is empty.  Otherwise
+	 * 'path_ret' contains the initial portion of 'path' up to and
+	 * including the last "/" character and 'name_ret' contains the portion
+	 * of 'path' after the last "/" character to the end of the string.
+	 **/
+	void splitPath( const QString & fileNameWithPath,
+                        QString       & path_ret,   // return parameter
+                        QString       & name_ret ); // return parameter
 
 	/**
 	 * Return the user name of the owner.

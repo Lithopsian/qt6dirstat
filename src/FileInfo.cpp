@@ -315,12 +315,6 @@ QString FileInfo::octalPermissions() const
 }
 
 
-QString FileInfo::baseName() const
-{
-    return SysUtil::baseName( _name );
-}
-
-
 DirInfo * FileInfo::toDirInfo()
 {
     return dynamic_cast<DirInfo *>( this );

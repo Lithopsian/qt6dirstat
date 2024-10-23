@@ -228,40 +228,6 @@ namespace
 
 
     /**
-     * Split a path up into its base path (everything up to the last path
-     * component) and its base name (the last path component).
-     *
-     * Both 'path_ret' and 'name_ret' are return parameters and will be
-     * modified by this function.
-     *
-     * If 'path' is root (ie. "/") 'basPath_ret' is empty and
-     * 'name_ret' = "/".  If 'path' has no "/" characters, then
-     * 'name_ret' = 'path' and 'path_ret' is empty.  Otherwise
-     * 'path_ret' contains the initial portion of 'path' up to and
-     * including the last "/" character and 'name_ret' contains the portion
-     * of 'path' after the last "/" character to the end of the string.
-     **/
-    void splitPath( const QString & path,
-                    QString       & path_ret,  // return parameter
-                    QString       & name_ret ) // return parameter
-    {
-	if ( path != "/"_L1 && path.contains( u'/' ) )
-	{
-	    QStringList components{ path.split( u'/', Qt::SkipEmptyParts ) };
-
-	    if ( !components.empty() )
-		name_ret = components.takeLast();
-
-	    if ( !components.empty() )
-		path_ret = components.join( u'/' ) % '/';
-
-	    if ( path.startsWith( u'/' ) )
-		path_ret.prepend( u'/' );
-	}
-    }
-
-
-    /**
      * Create a BreadcrumbList by traversing the tree from
      * 'item' to the toplevel.
      **/
@@ -298,7 +264,7 @@ namespace
 	// Add the root directory as the 2nd crumb
 	QString name;
 	QString path;
-	splitPath( toplevel->name(), path, name );
+	SysUtil::splitPath( toplevel->name(), path, name );
 	breadcrumbs[ 1 ].pathComponent = replaceCrLf( name );
 	breadcrumbs[ 1 ].url           = toplevel->debugUrl();
 

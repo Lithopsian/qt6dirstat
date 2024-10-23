@@ -37,6 +37,20 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Return the last component of the path for 'item'.  In most
+     * cases this will simply be the item name, but the root item
+     * is the full absolute pathname for 'item'.
+     *
+     * Note that for "/" (and any other path ending in "/"), this
+     * function will return an empty string.
+     **/
+    QString baseName( const FileInfo * item )
+    {
+	return SysUtil::baseName( item->name() );
+    }
+
+
+    /**
      * Clear the visible text and tooltip from 'label'.
      **/
     void clearLabel( QLabel * label )
@@ -388,7 +402,7 @@ namespace
 	const bool isSpecial = file->isSpecial();
 	const bool isSymLink = file->isSymLink();
 
-	setLabelLimited(ui->fileNameLabel, file->baseName(), lastPixel );
+	setLabelLimited(ui->fileNameLabel, baseName( file ), lastPixel );
 	ui->fileTypeLabel->setText( formatFileInfoType( file ) );
 
 	// Set an indicator icon for the type of file
@@ -507,7 +521,7 @@ namespace
     {
 	// logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-	const QString name = dir->isPseudoDir() ? dir->name() : ( dir->baseName() % '/' );
+	const QString name = dir->isPseudoDir() ? dir->name() : ( baseName( dir ) % '/' );
 	setLabelLimited( ui->dirNameLabel, name, lastPixel );
 
 	const bool isMountPoint = dir->isMountPoint() && !dir->readError();

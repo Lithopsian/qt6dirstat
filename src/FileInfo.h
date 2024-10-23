@@ -243,12 +243,6 @@ namespace QDirStat
 	void setName( const QString & newName ) { _name = newName; }
 
 	/**
-	 * Returns the base name of this object, i.e. the last path component,
-	 * even if this is a toplevel item.
-	 **/
-	QString baseName() const;
-
-	/**
 	 * Returns the full URL of this object with full path.
 	 *
 	 * This is a (somewhat) expensive operation since it will recurse up
