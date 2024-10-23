@@ -116,12 +116,6 @@ namespace QDirStat
 	    { return access( command.toUtf8(), X_OK ) == 0; }
 
 	/**
-	 * Open a URL in the desktop's default browser (using the
-	 * /usr/bin/xdg-open command).
-	 **/
-//	void openInBrowser( const QString & url ); // replaced by DesktopServices::openUrl()
-
-	/**
 	 * Check if this program runs with root privileges, i.e. with effective
 	 * user ID 0.
 	 **/
@@ -145,12 +139,6 @@ namespace QDirStat
 	 * Return the home directory of the user with the specified user ID.
 	 **/
 	QString homeDir( uid_t uid );
-
-	/**
-	 * Return true if a symbolic link is broken, i.e. the (first level)
-	 * target of the symlink does not exist in the filesystem.
-	 **/
-//        bool isBrokenSymLink( const QString & path );
 
 	/**
 	 * Read the (first level) target of a symbolic link.
@@ -187,20 +175,17 @@ namespace QDirStat
 	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**
-	 * Return the last pathname component of a file name.
+	 * Return the last path component of a file name.
 	 *
 	 * Examples:
 	 *
 	 *	   "/home/bob/foo.txt"	-> "foo.txt"
 	 *	   "foo.txt"		-> "foo.txt"
 	 *	   "/usr/bin"		-> "bin"
-	 *	   "/usr/bin/"		-> "bin"
 	 *
-	 * Note that if 'pathName' ends with "/", including root (ie.
-	 * exactly "/") then this function will return an empty string.
-	 *
-	 * Note that FileInfo also has a member function baseName() which is
-	 * a lightweight wrapper for this function.
+	 * Note that if 'fileName' ends with "/" then this function will
+	 * return an empty string.  This will normally only happen for
+	 * root (ie. "/").
 	 **/
 	QString baseName( const QString & fileName );
 

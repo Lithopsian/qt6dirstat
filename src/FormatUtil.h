@@ -254,9 +254,10 @@ namespace QDirStat
 
     /**
      * Return a copy of 'text' with carriage return and linefeed
-     * characters replaced by spaces.  The string is tested first to
-     * avoid detaching in the 99.99% of cases that don't have these
-     * characters in 'text'.
+     * characters replaced by spaces.  Despite the apparent
+     * unconditional string copy, implicit sharing makes this
+     * reasonable fast for the 99.99% of cases where there are no
+     * CR/LF characters.
      **/
     QString replaceCrLf( const QString & text );
 
@@ -267,17 +268,19 @@ namespace QDirStat
         { return QRegularExpression{ "\\p{C}" }.match( text ).hasMatch(); }
 
     /**
-     * Return a regular expression excluding any Unicode control
-     * characters.
+     * Return a regular expression matching any string that doesn't
+     * include Unicode control characters.
      **/
-    inline QRegularExpression excludeControlCharacters()
+    inline QRegularExpression hasNoControlCharacters()
         { return QRegularExpression{ "[^\\p{C}]*" }; }
 
     /**
      * Return 'text', elided if necessary to fit 'maxSize' pixels
      * wide when rendered in 'font'.
      **/
-    inline QString elidedText( const QFont & font, const QString & text, int maxSize )
+    inline QString elidedText( const QFont       & font,
+                               const QString     & text,
+                               int                 maxSize )
         { return QFontMetrics{ font }.elidedText( text, Qt::ElideMiddle, maxSize ); }
 
     /**

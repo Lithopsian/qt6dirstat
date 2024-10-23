@@ -118,7 +118,7 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     //logDebug() << "MimeCategoryConfigPage constructor" << Qt::endl;
 
     _ui->setupUi( this );
-    _ui->nameLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+    _ui->nameLineEdit->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
 
     initListWidget();
 

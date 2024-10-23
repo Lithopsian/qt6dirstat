@@ -151,10 +151,8 @@ QString QDirStat::monthAbbreviation( short month )
 
 QString QDirStat::replaceCrLf( const QString & text )
 {
-    if ( !hasLineBreak( text ) )
-	return text;
-
-    return QString{ text }.replace( QRegularExpression{ "\r|\n" }, " " );
+//    return QString{ text }.replace( QRegularExpression{ "\r|\n" }, " " );
+    return QString{ text }.replace( u'\r', u' ' ).replace( u'\n', u' ' );
 }
 
 
@@ -165,8 +163,8 @@ QString & QDirStat::pathTooltip( QString & path )
 	path.insert( i, u'\u200B' ); // zero-width space
 
     // Stop the tooltip being treated as rich text even if it contains html
-    if ( Qt::mightBeRichText( path ) )
-	path.replace( u'<', "<\u200B" ); // this can't start an html tag
+    path.replace( u'<', "<\u200B" ).replace( u'&', "&\u200B" ); // this can't start an html tag
+//    path.replace( QRegularExpression{ "(<|&)" }, "\\1\u200B" );
 
     return path;
 }

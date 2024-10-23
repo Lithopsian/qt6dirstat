@@ -49,7 +49,7 @@ namespace
 
 	    logDebug() << "_breadcrumb[ " << i << " ]: "
 	               << " pathComponent: \"" << crumb.pathComponent
-	               << "\" displayName: \"" << crumb.elidedName
+	               << "\" elidedName: \"" << crumb.elidedName
 	               << "\" url: \"" << crumb.url << '"'
 	               << Qt::endl;
 	}
@@ -82,11 +82,7 @@ namespace
 
     /**
      * Return the longest breadcrumb that can still be elided (ie. more
-     * than one character) or 0 if there are no more.  Crumbs with
-     * three characters or less cannot (should not) be elided any
-     * further.  The first (root) breadcrumb has leading and trailing
-     * slashes (might be just "/", but that is less than 3 anyway) that
-     * are ignored in this comparison.
+     * than one character) or 0 if there are no more.
      *
      * Note that this isn't exact because it is just picking the most
      * characters rather than an actual text width, but that's good
@@ -94,7 +90,8 @@ namespace
      **/
     Breadcrumb * pickLongBreadcrumb( BreadcrumbList & breadcrumbs )
     {
-	int maxLen = 1;
+	int maxLen = 1; // only return crumbs with more than one character
+
 	Breadcrumb * longestCrumb = nullptr;
 
 	for ( Breadcrumb & crumb : breadcrumbs )
@@ -248,7 +245,7 @@ namespace
 	int depth = item->treeLevel();
 	BreadcrumbList breadcrumbs = BreadcrumbList( depth + 1 );
 
-	// Loop through the descendants of the root, starting at the leaf level
+	// Loop through the descendants of 'item', starting at the leaf level
 	while ( depth > 1 )
 	{
 	    if ( item->isDirInfo() )
@@ -261,14 +258,14 @@ namespace
 	    --depth;
 	}
 
-	// Add the root directory as the 2nd crumb
+	// Add the root directory as the 2nd crumb, the first hyperlink
 	QString name;
 	QString path;
 	SysUtil::splitPath( toplevel->name(), path, name );
 	breadcrumbs[ 1 ].pathComponent = replaceCrLf( name );
 	breadcrumbs[ 1 ].url           = toplevel->debugUrl();
 
-	// Add the whole tree above the root, if any, as the 1st crumb
+	// Add the whole tree above the root, if any, as the 1st, non-hyperlinked, crumb
 	if ( path.isEmpty() )
 	    breadcrumbs.removeFirst();
 	else

@@ -138,61 +138,6 @@ QString SysUtil::runCommand( const QString     & command,
     return output;
 }
 
-/*
-void SysUtil::openInBrowser( const QString & url )
-{
-    logDebug() << "Opening URL " << url << Qt::endl;
-
-    QProcess::startDetached( "/usr/bin/xdg-open", { url } );
-}
-*/
-/*
-bool SysUtil::isBrokenSymLink( const QString & path )
-{
-    const QByteArray target = readLink( path );
-
-    if ( target.size() == 0 )   // path is not a symlink
-        return false;           // so it's also not a broken symlink
-
-
-    // Start from the symlink's parent directory
-
-    QStringList pathSegments = path.split( u'/', Qt::SkipEmptyParts );
-    pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString{ path.startsWith( u'/' ) ? u'/' : QString{} } + pathSegments.join( u'/' );
-    const DirSaver dir( parentPath );
-
-    // We can't use access() here since that would follow symlinks.
-    // Let's use lstat() instead.
-
-    struct stat statBuf;
-    const int statResult = lstat( target, &statBuf );
-
-    if ( statResult == 0 )      // lstat() successful?
-    {
-        return false;           // -> the symlink is not broken.
-    }
-    else                        // lstat() failed
-    {
-        if ( errno == EACCES )  // permission denied for one of the dirs in target
-        {
-            logWarning() << "Permission denied for one of the directories"
-                         << " in symlink target " << QString::fromUtf8( target )
-                         << " of symlink " << path
-                         << Qt::endl;
-
-            return false;       // We don't know if the symlink is broken
-        }
-        else
-        {
-            logWarning() << "Broken symlink " << path
-                         << " errno: " << formatErrno()
-                         << Qt::endl;
-            return true;
-        }
-    }
-}
-*/
 
 QByteArray SysUtil::readLink( const QByteArray & path )
 {
@@ -233,11 +178,6 @@ QString SysUtil::baseName( const QString & fileName )
 	return fileName;
 
     return fileName.mid( delimeterIndex + 1 );
-//    const QStringList segments = fileName.split( u'/', Qt::SkipEmptyParts );
-//    if ( !segments.isEmpty() )
-//	return segments.last();
-
-//    return QString{};
 }
 
 

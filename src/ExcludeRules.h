@@ -10,10 +10,9 @@
 #ifndef ExcludeRules_h
 #define ExcludeRules_h
 
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QVector>
-
-#include "Wildcard.h"
 
 
 namespace QDirStat

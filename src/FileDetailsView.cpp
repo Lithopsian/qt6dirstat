@@ -42,7 +42,8 @@ namespace
      * is the full absolute pathname for 'item'.
      *
      * Note that for "/" (and any other path ending in "/"), this
-     * function will return an empty string.
+     * function will return an empty string so that "/" can be
+     * appended to any directory name for display, including root.
      **/
     QString baseName( const FileInfo * item )
     {

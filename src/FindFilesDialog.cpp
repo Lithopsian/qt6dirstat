@@ -138,7 +138,7 @@ FindFilesDialog::FindFilesDialog( QWidget * parent, const QString & pattern ):
 {
     _ui->setupUi( this );
 
-    _ui->patternField->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+    _ui->patternField->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
 
     readSettings( this, ui() );
 

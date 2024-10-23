@@ -11,6 +11,7 @@
 #include "FileInfoIterator.h"
 #include "Logger.h"
 #include "Settings.h"
+#include "Wildcard.h"
 
 
 #define VERBOSE_EXCLUDE_MATCHES 0

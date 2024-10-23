@@ -31,7 +31,7 @@ CleanupConfigPage::CleanupConfigPage( ConfigDialog * parent ):
     _outputWindowDefaultTimeout{ OutputWindow::defaultShowTimeout() }
 {
     _ui->setupUi( this );
-    _ui->titleLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+    _ui->titleLineEdit->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
 
     enableEditWidgets( false );
     initListWidget();
