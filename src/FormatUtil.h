@@ -262,17 +262,19 @@ namespace QDirStat
     QString replaceCrLf( const QString & text );
 
     /**
-     * Return whether 'text' contains any any Unicode control characters.
+     * Return whether 'text' contains any Unicode control characters.
      **/
     inline bool hasControlCharacter( const QString & text )
         { return QRegularExpression{ "\\p{C}" }.match( text ).hasMatch(); }
 
     /**
      * Return a regular expression matching any string that doesn't
-     * include Unicode control characters.
+     * include Unicode control characters.  It is intended for use
+     * with QValidator so the regular expression itself is not
+     * anchored.
      **/
     inline QRegularExpression hasNoControlCharacters()
-        { return QRegularExpression{ "[^\\p{C}]*" }; }
+        { return QRegularExpression{ "\\P{C}*" }; }
 
     /**
      * Return 'text', elided if necessary to fit 'maxSize' pixels
