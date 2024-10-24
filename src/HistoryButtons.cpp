@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QAction>
 #include <QActionGroup>
 #include <QMenu>
 
@@ -15,7 +14,9 @@
 #include "History.h"
 #include "DirInfo.h"
 #include "DirTree.h"
+#include "FormatUtil.h"
 #include "Logger.h"
+#include "QDirStatApp.h"
 
 
 using namespace QDirStat;
@@ -153,9 +154,13 @@ void HistoryButtons::updateHistoryMenu()
     QActionGroup * actionGroup = new QActionGroup{ menu };
 
     // Populate the menu, most recent entry first
-    for ( int i = _history->size() - 1; i >= 0; i-- )
+    for ( int i = _history->size() - 1; i >= 0; --i )
     {
-        QAction * action = new QAction{ _history->item( i ), actionGroup };
+        // Elide to the maximum dialog width, an appropriate value related to the screen width
+        QString elidedTitle = elidedText( menu->font(), _history->item( i ), app()->maxDialogWidth() );
+
+        // Escape ampersands so there aren't underlined characters in the menu
+        QAction * action = new QAction{ elidedTitle.replace( u'&', "&&"_L1 ), actionGroup };
         action->setCheckable( true );
         action->setChecked( i == _history->currentIndex() );
         action->setData( i );

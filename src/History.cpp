@@ -17,13 +17,14 @@
 using namespace QDirStat;
 
 
+#if VERBOSE_HISTORY
 namespace
 {
     /**
      * Dump the current history stack to the log.
      * This is meant for debugging.
      **/
-    [[gnu::unused]] void dump( const QStringList & items, int current )
+    void dump( const QStringList & items, int current )
     {
         if ( items.isEmpty() )
         {
@@ -44,7 +45,7 @@ namespace
     }
 
 } // namespace
-
+#endif
 
 QString History::goBack()
 {

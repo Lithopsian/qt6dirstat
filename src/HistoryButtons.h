@@ -12,10 +12,8 @@
 
 #include <memory>
 
+#include <QAction>
 #include <QObject>
-
-
-class QAction;
 
 
 namespace QDirStat
@@ -23,6 +21,17 @@ namespace QDirStat
     class FileInfo;
     class History;
 
+    /**
+     * Class for managing the actions for navigating the history stack.
+     * This class is the owner of the only History object.
+     *
+     * There are two buttons, each with a menu, two submenus from the
+     * main menubar, and their hotkeys, can be used to navigate
+     * backwards or forwards in the history, or to a specific url.
+     * The actions are enabled and disabled as appropriate for the
+     * stats of the DirTree.  The menus are constructed from scratch
+     * each time they are opened.
+     **/
     class HistoryButtons: public QObject
     {
 	Q_OBJECT
