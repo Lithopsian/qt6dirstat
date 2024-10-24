@@ -370,7 +370,7 @@ void MimeCategoryConfigPage::pickCategoryColor()
     {
 	const MimeCategory * category = CATEGORY_CAST( value( currentItem ) );
 	const QColor color =
-	    QColorDialog::getColor( category->color(), window(), tr( "Pick a category color" ) );
+	    QColorDialog::getColor( category->color(), window(), tr( "Pick a category colour" ) );
 	if ( color.isValid() )
 	    _ui->categoryColorEdit->setText( color.name() );
     }
@@ -386,7 +386,8 @@ void MimeCategoryConfigPage::tileColorChanged( const QString & newColor )
 
 void MimeCategoryConfigPage::pickTileColor()
 {
-    const QColor color = QColorDialog::getColor( color, window(), tr( "Pick a fixed tile color" ) );
+    const QColor color =
+	QColorDialog::getColor( _ui->tileColorEdit->text(), window(), tr( "Pick a fixed tile colour" ) );
     if ( color.isValid() )
 	_ui->tileColorEdit->setText( color.name() );
 }

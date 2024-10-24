@@ -140,7 +140,7 @@ namespace
 	TrashDir * newTrashDir;
 	try
 	{
-	    newTrashDir = new TrashDir{ trashPath, dev };
+	    newTrashDir = new TrashDir{ trashPath };
 	}
 	catch ( const FileException & ex )
 	{
@@ -195,7 +195,7 @@ Trash::Trash()
     // new TrashDir can throw, although very unlikely for the home device
     try
     {
-	_homeTrashDir = new TrashDir{ homeTrash, homeDevice };
+	_homeTrashDir = new TrashDir{ homeTrash };
     }
     catch ( const FileException & ex )
     {
@@ -219,7 +219,10 @@ TrashDir * Trash::trashDir( const QString & path )
 
     TrashDir * newTrashDir = createTrashDir( path, dev );
     if ( newTrashDir )
+    {
+	_trashDirs[ dev ] = newTrashDir;
 	return newTrashDir;
+    }
 
     logWarning() << "Falling back to home trash dir: " << _homeTrashDir->path() << Qt::endl;
 
@@ -274,9 +277,8 @@ void Trash::empty()
 
 
 
-TrashDir::TrashDir( const QString & path, dev_t device ):
-    _path{ path },
-    _device{ device }
+TrashDir::TrashDir( const QString & path ):
+    _path{ path }
 {
     // Will throw if a directory doesn't exist and cannot be created
     ensureDirExists( path        );
@@ -287,8 +289,7 @@ TrashDir::TrashDir( const QString & path, dev_t device ):
 }
 
 
-void TrashDir::createTrashInfo( const QString & path,
-				const QString & targetName )
+void TrashDir::createTrashInfo( const QString & path, const QString & targetName )
 {
     QFile trashInfo{ infoPath() % '/' % targetName % ".trashinfo"_L1 };
 
@@ -302,8 +303,7 @@ void TrashDir::createTrashInfo( const QString & path,
 }
 
 
-void TrashDir::move( const QString & path,
-		     const QString & targetName )
+void TrashDir::move( const QString & path, const QString & targetName )
 {
     QFile file{ path };
     const QString targetPath = filesPath() % '/' % targetName;

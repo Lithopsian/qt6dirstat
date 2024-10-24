@@ -498,7 +498,7 @@ void CacheReader::addItem()
     {
 	// No mode in old file formats,
 	// get the object type from the first field, but no permissions
-	mode = [ type, mode_str ]()
+	mode = [ type ]()
 	{
 	    switch ( toupper( *type ) )
 	    {

@@ -72,7 +72,7 @@ namespace QDirStat
 	 * Constructor from nullptr: returns an invalid iterator which
 	 * corresponds to a position past the last child.
 	 **/
-	FileInfoIterator( nullptr_t ):
+	FileInfoIterator( std::nullptr_t ):
 	    _current{ nullptr }
 	{}
 
@@ -143,7 +143,7 @@ namespace QDirStat
 	using pointer = DirInfo *;
 	using reference = DirInfo *;
 
-	DirInfoIterator( nullptr_t ):
+	DirInfoIterator( std::nullptr_t ):
 	    _current{ nullptr }
 	{}
 	DirInfoIterator( const FileInfo * parent ):
@@ -200,7 +200,7 @@ namespace QDirStat
 	using pointer = FileInfo *;
 	using reference = FileInfo *;
 
-	DotEntryIterator( nullptr_t ):
+	DotEntryIterator( std::nullptr_t ):
 	    _dotEntry{ nullptr },
 	    _current{ nullptr }
 	{}
@@ -265,7 +265,7 @@ namespace QDirStat
 	using pointer = FileInfo *;
 	using reference = FileInfo *;
 
-	AtticIterator( nullptr_t ):
+	AtticIterator( std::nullptr_t ):
 	    _dotEntry{ nullptr },
 	    _attic{ nullptr },
 	    _current{ nullptr }

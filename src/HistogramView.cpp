@@ -311,7 +311,7 @@ void HistogramView::addXStartEndLabels( QGraphicsScene * scene )
 
 void HistogramView::addYStartEndLabels( QGraphicsScene * scene )
 {
-    const auto addLabel = [ this, scene ]( qreal y, const QString & text)
+    const auto addLabel = [ scene ]( qreal y, const QString & text)
     {
 	QGraphicsTextItem * item = createTextItem( scene, text );
 	const QRectF rect = item->boundingRect();
@@ -345,7 +345,7 @@ void HistogramView::addQuartileText( QGraphicsScene * scene )
 	 * constructed from 'text' and 'size'.  'pos' is updated
 	 * to the end of the added text plus some spacing.
 	 **/
-	const auto addText = [ this, scene, &pos ]( const QString & text, FileSize size, const QColor & color )
+	const auto addText = [ scene, &pos ]( const QString & text, FileSize size, const QColor & color )
 	{
 	    QGraphicsTextItem * item = createBoldItem( scene, text % formatSize( size ) );
 	    item->setDefaultTextColor( color );
@@ -487,7 +487,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
      * the overflow panel.  nextPos is updated to the bottom left of
      * the margin.
      **/
-    const auto addText = [ this, scene, panelWidth, &nextPos ]( const QString & lines )
+    const auto addText = [ scene, panelWidth, &nextPos ]( const QString & lines )
     {
 	QGraphicsTextItem * textItem = createTextItem( scene, lines );
 	textItem->setPos( nextPos );
@@ -512,7 +512,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
      *
      * nextPos is updated by the height of the pie.
      **/
-    const auto addPie = [ this, scene, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
+    const auto addPie = [ scene, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
     {
 	if ( valPie == 0 && valSlice == 0 )
 	    return;

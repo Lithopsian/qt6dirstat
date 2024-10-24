@@ -19,9 +19,10 @@
 #include "Subtree.h"
 #include "Typedefs.h" // FileCount, FileSize
 
+
 namespace QDirStat
 {
-    class CountSize;
+    struct CountSize;
     class FileInfo;
 
     /**
