@@ -160,7 +160,7 @@ void HistoryButtons::updateHistoryMenu()
         QString elidedTitle = elidedText( menu->font(), _history->item( i ), app()->maxDialogWidth() );
 
         // Escape ampersands so there aren't underlined characters in the menu
-        QAction * action = new QAction{ elidedTitle.replace( u'&', "&&"_L1 ), actionGroup };
+        QAction * action = new QAction{ replaceAmpTab( elidedTitle ), actionGroup };
         action->setCheckable( true );
         action->setChecked( i == _history->currentIndex() );
         action->setData( i );

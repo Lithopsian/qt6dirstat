@@ -258,8 +258,21 @@ namespace QDirStat
      * unconditional string copy, implicit sharing makes this
      * reasonable fast for the 99.99% of cases where there are no
      * CR/LF characters.
+     *
+     * There is also a function to replace ampersands and horizontal
+     * tab characters, necessary for text to be displayed in a menu.
      **/
     QString replaceCrLf( const QString & text );
+
+    /**
+     * Replace ampersands and horizontal tab characters in 'text' and
+     * return a reference to it.  This used for menus, where a single
+     * ampersand will be interpreted as a mnemonic and underlined,
+     * and a horizontal tab is used internally to delimit columns in
+     * a menu item.
+     **/
+    inline QString & replaceAmpTab( QString & text )
+        { return text.replace( u'\t', u' ' ).replace( u'&', "&&"_L1 ); }
 
     /**
      * Return whether 'text' contains any Unicode control characters.
