@@ -50,6 +50,59 @@ namespace
 	return "/bin/rpm"_L1; // for old SUSE / Red Hat distros
     }
 
+
+    /**
+     * Show a warning that the RPM database should be rebuilt
+     * ("sudo rpm --rebuilddb").
+     **/
+    void rebuildRpmDbWarning()
+    {
+	static bool issuedWarning = false;
+
+	if ( !issuedWarning )
+	{
+	    const char * warning = "rpm is very slow. Run	  sudo rpm --rebuilddb";
+	    std::cerr << "WARNING: " << warning << '\n' << std::endl;
+	    logWarning()  << warning << Qt::endl;
+	}
+
+	// Add a panel message so the user is sure to see this message.
+	MainWindow * mainWindow = app()->mainWindow();
+	PanelMessage::showRpmMsg( mainWindow, mainWindow->messagePanelContainer() );
+
+	issuedWarning = true;
+    }
+
+
+    /**
+     * Parse a package list as output by "dpkg-query --show --showformat".
+     **/
+    PkgInfoList parsePkgList( const PkgManager * pkgManager, const QString & output )
+    {
+	PkgInfoList pkgList;
+
+	const QStringList splitOutput = output.split( u'\n', Qt::SkipEmptyParts );
+	for ( const QString & line : splitOutput )
+	{
+	    const QStringList fields = line.split( " | " );
+	    if ( fields.size() == 3 )
+	    {
+		const QString & name    = fields.at( 0 );
+		const QString & version = fields.at( 1 ); // includes release
+		const QString & arch    = fields.at( 3 );
+		const QString   pkgArch = arch == "(none)"_L1 ? "" : arch;
+
+		pkgList << new PkgInfo{ name, version, pkgArch, pkgManager };
+	    }
+	    else
+	    {
+		logError() << "Invalid rpm -qa output: " << line << '\n' << Qt::endl;
+	    }
+	}
+
+	return pkgList;
+    }
+
 } // namespace
 
 
@@ -93,38 +146,7 @@ PkgInfoList RpmPkgManager::installedPkg() const
     if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
 	rebuildRpmDbWarning();
 
-    return exitCode == 0 ? parsePkgList( output ) : PkgInfoList{};
-}
-
-
-PkgInfoList RpmPkgManager::parsePkgList( const QString & output ) const
-{
-    PkgInfoList pkgList;
-
-    const QStringList splitOutput = output.split( u'\n' );
-    for ( const QString & line : splitOutput )
-    {
-	if ( !line.isEmpty() )
-	{
-	    QStringList fields = line.split( " | " );
-
-	    if ( fields.size() != 3 )
-		logError() << "Invalid rpm -qa output: " << line << '\n' << Qt::endl;
-	    else
-	    {
-		const QString name    = fields.takeFirst();
-		const QString version = fields.takeFirst(); // includes release
-
-		QString arch = fields.takeFirst();
-		if ( arch == "(none)"_L1 )
-		    arch = "";
-
-		pkgList << new PkgInfo{ name, version, arch, this };
-	    }
-	}
-    }
-
-    return pkgList;
+    return exitCode == 0 ? parsePkgList( this, output ) : PkgInfoList{};
 }
 
 
@@ -170,7 +192,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
     if ( exitCode != 0 )
 	return nullptr;
 
-    const QStringList lines = output.split( u'\n' );
+    const QStringList lines = output.split( u'\n', Qt::SkipEmptyParts );
 
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
@@ -184,22 +206,19 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 
     for ( const QString & line : lines )
     {
-	if ( line.isEmpty() )
-	    continue;
+	const QStringList fields = line.split( " | " );
 
-	QStringList fields = line.split( " | " );
-
-	if ( fields.size() != 2 )
+	if ( fields.size() == 2 )
 	{
-	    logError() << "Unexpected file list line: \"" << line << '"' << Qt::endl;
-	}
-	else
-	{
-	    const QString pkgName = fields.takeFirst();
-	    const QString path    = fields.takeFirst();
+	    const QString & pkgName = fields.at( 0 );
+	    const QString & path    = fields.at( 1 );
 
 	    if ( !pkgName.isEmpty() && !path.isEmpty() )
 		cache->add( pkgName, path );
+	}
+	else
+	{
+	    logError() << "Unexpected file list line: \"" << line << '"' << Qt::endl;
 	}
     }
 
@@ -220,23 +239,4 @@ void RpmPkgManager::readSettings()
     // reliably be done in the destructor.
     settings.setDefaultValue( "GetRpmPkgListWarningSec", _getPkgListWarningSec );
     settings.endGroup();
-}
-
-
-void RpmPkgManager::rebuildRpmDbWarning() const
-{
-    static bool issuedWarning = false;
-
-    if ( !issuedWarning )
-    {
-	const char * warning = "rpm is very slow. Run	  sudo rpm --rebuilddb";
-	std::cerr << "WARNING: " << warning << '\n' << std::endl;
-	logWarning()  << warning << Qt::endl;
-    }
-
-    // Add a panel message so the user is sure to see this message.
-    MainWindow * mainWindow = app()->mainWindow();
-    PanelMessage::showRpmMsg( mainWindow, mainWindow->messagePanelContainer() );
-
-    issuedWarning = true;
 }
