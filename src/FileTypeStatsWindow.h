@@ -126,7 +126,7 @@ namespace QDirStat
 	/**
 	 * Enable or disable the actions.
 	 **/
-	void enableActions( bool enable );
+	inline void enableActions( bool enable );
 
 	/**
 	 * Return the suffix of the currently selected file type or an empty

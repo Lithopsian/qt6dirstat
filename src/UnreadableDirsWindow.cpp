@@ -65,6 +65,28 @@ namespace
 	tree->sortByColumn( UD_PathCol, Qt::AscendingOrder );
     }
 
+
+    /**
+     * Recursively find unreadable directories in 'subtree' and add an
+     * entry to 'treeWidget' for each one.
+     **/
+    void populateRecursive( FileInfo * subtree, QTreeWidget * treeWidget )
+    {
+	if ( !subtree || !subtree->isDirInfo() )
+	    return;
+
+	DirInfo * dir = subtree->toDirInfo();
+	if ( dir->readError() )
+	    treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
+
+	// Recurse through any subdirectories
+	for ( DirInfoIterator it{ subtree }; *it; ++it )
+	    populateRecursive( *it, treeWidget );
+
+	// Dot entries can't contain unreadable dirs, but attics can
+	populateRecursive( dir->attic(), treeWidget );
+    }
+
 } // namespace
 
 
@@ -114,7 +136,7 @@ void UnreadableDirsWindow::populate()
 
     //logDebug() << "Locating all unreadable dirs" << Qt::endl;
 
-    populateRecursive( app()->firstToplevel() );
+    populateRecursive( app()->firstToplevel(), _ui->treeWidget );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
     _ui->totalLabel->setText( rowCount > 1 ? tr( "%L1 directories" ).arg( rowCount ) : QString{} );
@@ -125,24 +147,6 @@ void UnreadableDirsWindow::populate()
     _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
 
     resizeTreeColumns( _ui->treeWidget );
-}
-
-
-void UnreadableDirsWindow::populateRecursive( FileInfo * subtree )
-{
-    if ( !subtree || !subtree->isDirInfo() )
-	return;
-
-    DirInfo * dir = subtree->toDirInfo();
-    if ( dir->readError() )
-	_ui->treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
-
-    // Recurse through any subdirectories
-    for ( DirInfoIterator it{ subtree }; *it; ++it )
-	populateRecursive( *it );
-
-    // Dot entries can't contain unreadable dirs, but attics can
-    populateRecursive( dir->attic() );
 }
 
 
