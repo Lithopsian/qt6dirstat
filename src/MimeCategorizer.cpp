@@ -222,12 +222,13 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	    return category;
     }
 
-    // Find the filename suffix, ignoring any leading '.' separator
-    // Ignore an initial dot and treat repeated dots as a single separator
-    QString suffix = filename.section( u'.', 1, -1, QString::SectionSkipEmpty );
+    // Find the longest filename suffix, ignoring any leading dot
+    int dotIndex = filename.indexOf( u'.', 1 );
 
-    while ( !suffix.isEmpty() )
+    while ( dotIndex >= 0 )
     {
+	const QString suffix = filename.mid( dotIndex + 1 );
+
         // logVerbose() << "Checking " << suffix << Qt::endl;
 
 	// Try case sensitive first (also ncludes upper- and lower-cased suffixes
@@ -245,11 +246,10 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	    return category;
         }
 
-	// No match so far? Try the next suffix. Some files might have more
-	// than one, e.g., "tar.bz2" - if there is no match for "tar.bz2",
-	// there might be one for just "bz2".
-
-	suffix = suffix.section( u'.', 1, -1, QString::SectionSkipEmpty );
+	// No match so far? Try for a shorter suffix, e.g. after "tar.bz2" try "bz2"
+	// Repeated dots within the filename (very rare) will be searched as extra suffixes:
+	// eg. "a..b" will lead to searches with suffixes ".b" and "b"
+	dotIndex = filename.indexOf( u'.', dotIndex + 1 );
     }
 
     // Go through all the plain regular expressions one by one
@@ -367,12 +367,19 @@ void MimeCategorizer::addExactKeys( const MimeCategory * category )
 
 void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
 {
+    // Return the portion of 'pattern' after the "*."
+    const auto getSuffix = []( const QString & pattern )
+    {
+	const int delimeterIndex = pattern.lastIndexOf( "*."_L1 );
+	return delimeterIndex < 0 ? pattern : pattern.mid( delimeterIndex + 2 );
+    };
+
     //logDebug() << "adding " << patternList << " to " << category << Qt::endl;
 
     // Add any case-insensitive regular expression, plus a case-sensitive lowercased version
     for ( const QString & pattern : category->caseInsensitiveWildcardSuffixList() )
     {
-	const QString suffix = pattern.section( "*."_L1, -1 ).toLower();
+	const QString suffix = getSuffix( pattern ).toLower();
 	const auto pair = WildcardPair{ CaseInsensitiveWildcard{ pattern }, category };
 	_caseInsensitiveSuffixes.insert( suffix, pair );
 	_caseSensitiveSuffixes.insert( suffix, pair );
@@ -381,8 +388,9 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
     // Add any case-sensitive regular expressions last so they are retrieved first
     for ( const QString & pattern : category->caseSensitiveWildcardSuffixList() )
     {
-	const QString suffix = pattern.section( "*."_L1, -1 );
-	_caseSensitiveSuffixes.insert( suffix, { CaseSensitiveWildcard{ pattern }, category } );
+	const QString suffix = getSuffix( pattern );
+	const auto pair = WildcardPair{ CaseSensitiveWildcard{ pattern }, category };
+	_caseSensitiveSuffixes.insert( suffix, pair );
     }
 }
 

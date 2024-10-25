@@ -78,7 +78,8 @@ namespace QDirStat
      * combined in a list with the plain suffix patterns.  If a match to a suffix is found
      * then all the entries in the list (usually just one) must be examined, any regular
      * expressions tested, and the last entry in the list will be an empty regular
-     * expression representing the plain suffix match (assuming there was one).
+     * expression representing the plain suffix match (assuming there was one).  The loop
+     * is optimized for the most common cases of a single suffix or no suffix.
      *
      * Finally, any file which has not been matched is tested against a list of regular
      * expressions in each category.  This is relatively very slow and hopefully there

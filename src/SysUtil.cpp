@@ -173,11 +173,11 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 QString SysUtil::baseName( const QString & fileName )
 {
     //logDebug() << fileName << Qt::endl;
-    const int delimeterIndex = fileName.lastIndexOf( u'/' );
-    if ( delimeterIndex < 0 )
+    const int delimiterIndex = fileName.lastIndexOf( u'/' );
+    if ( delimiterIndex < 0 )
 	return fileName;
 
-    return fileName.mid( delimeterIndex + 1 );
+    return fileName.mid( delimiterIndex + 1 );
 }
 
 

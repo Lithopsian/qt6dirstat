@@ -143,6 +143,9 @@ namespace QDirStat
          **/
         QString filesPath() const { return _path % "/files"_L1; }
 
+
+    protected:
+
         /**
          * Return the path of the "info" subdirectory of this trash dir.
          **/

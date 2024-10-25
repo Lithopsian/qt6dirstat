@@ -99,6 +99,17 @@ namespace QDirStat
     protected slots:
 
 	/**
+	 * Read parameters from the settings file.
+	 *
+	 * This only makes sense only when there are columns, i.e. after the
+	 * model is set and the parent QTreeView has requested header data.
+	 * It makes most sense to connect this slot with the header's
+	 * sectionCountChanged() signal, which is emitted once when the
+	 * header sections are first created.
+	 **/
+	void readSettings();
+
+	/**
 	 * Set auto size mode for all columns on.
 	 **/
 	void setAllColumnsAutoSize();
@@ -117,15 +128,6 @@ namespace QDirStat
 	 * Reset all columns to defaults: Column order, visibility, auto size.
 	 **/
 	void resetToDefaults();
-
-	/**
-	 * Initialize the header view. This only makes sense only when it has
-	 * columns, i.e. when the model is set, and the parent QTreeView has
-	 * requested header data. It makes most sense to connect this slot with
-	 * the header's sectionCountChanged() signal, which is emitted once
-	 * when the header sections are first created.
-	 **/
-//	void initHeader();
 
 	/**
 	 * Post a context menu for the header at 'pos'.
@@ -216,11 +218,6 @@ namespace QDirStat
 	 **/
 	void setResizeMode( int section, QHeaderView::ResizeMode resizeMode )
 	    { _header->setSectionResizeMode( section, resizeMode ); }
-
-	/**
-	 * Read parameters from the settings file.
-	 **/
-	void readSettings();
 
 
     private:

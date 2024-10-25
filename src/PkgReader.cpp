@@ -17,6 +17,7 @@
 #include "PkgQuery.h"
 #include "ProcessStarter.h"
 #include "Settings.h"
+#include "SysUtil.h"
 
 
 #define DEFAULT_PARALLEL_PROCESSES	10
@@ -169,6 +170,56 @@ namespace
 	return process;
     }
 
+
+    /**
+     * Create a read job for each package to read its file list from a file
+     * list cache and add it to the read job queue.
+     **/
+    void createCachePkgReadJobs( DirTree           * tree,
+                                 const PkgInfoList & pkgList,
+                                 bool                verboseMissingPkgFiles )
+    {
+	const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
+	CHECK_PTR( pkgManager );
+
+	// The shared pointer will delete the cache when the last job that uses it is destroyed
+	PkgFileListCachePtr fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
+	if ( !fileListCache )
+	{
+	    logError() << "Creating the file list cache failed" << Qt::endl;
+	    tree->sendFinished();
+	    return;
+	}
+
+	for ( PkgInfo * pkg : pkgList )
+	    tree->addJob( new CachePkgReadJob{ tree, pkg, verboseMissingPkgFiles, fileListCache } );
+    }
+
+
+    /**
+     * Create a read job for each package with a background process to read
+     * its file list and add it as a blocked job to the read job queue.
+     **/
+    void createAsyncPkgReadJobs( DirTree           * tree,
+                                 const PkgInfoList & pkgList,
+                                 int                 maxParallelProcesses,
+                                 bool                verboseMissingPkgFiles )
+    {
+	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses, true };
+
+	for ( PkgInfo * pkg : pkgList )
+	{
+	    QProcess * process = createReadFileListProcess( pkg );
+	    if ( process )
+	    {
+		tree->addBlockedJob( new AsyncPkgReadJob{ tree, pkg, verboseMissingPkgFiles, process } );
+		processStarter->add( process );
+	    }
+	}
+
+	processStarter->start();
+    }
+
 } // namespace
 
 
@@ -189,48 +240,10 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
     addToTree( tree, pkgList );
 
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-
     if ( pkgManager && pkgManager->supportsFileListCache() && pkgList.size() >= _minCachePkgListSize )
-	createCachePkgReadJobs( tree, pkgList );
+	createCachePkgReadJobs( tree, pkgList, _verboseMissingPkgFiles );
     else
-	createAsyncPkgReadJobs( tree, pkgList );
-}
-
-
-void PkgReader::createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgList )
-{
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    CHECK_PTR( pkgManager );
-
-    // The shared pointer will delete the cache when the last job that uses it is destroyed
-    PkgFileListCachePtr fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
-    if ( !fileListCache )
-    {
-	logError() << "Creating the file list cache failed" << Qt::endl;
-	tree->sendFinished();
-	return;
-    }
-
-    for ( PkgInfo * pkg : pkgList )
-	tree->addJob( new CachePkgReadJob{ tree, pkg, _verboseMissingPkgFiles, fileListCache } );
-}
-
-
-void PkgReader::createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList )
-{
-    ProcessStarter * processStarter = new ProcessStarter{ _maxParallelProcesses, true };
-
-    for ( PkgInfo * pkg : pkgList )
-    {
-	QProcess * process = createReadFileListProcess( pkg );
-	if ( process )
-	{
-	    tree->addBlockedJob( new AsyncPkgReadJob{ tree, pkg, _verboseMissingPkgFiles, process } );
-	    processStarter->add( process );
-	}
-    }
-
-    processStarter->start();
+	createAsyncPkgReadJobs( tree, pkgList, _maxParallelProcesses, _verboseMissingPkgFiles );
 }
 
 
@@ -407,10 +420,11 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 	// logDebug() << "Adding " << fileListPath << " to " << _pkg << Qt::endl;
 
 	// usually the DirInfo parent will already have been created, and usually just previous
+
 	if ( fileListPath.startsWith( lastDirPath ) )
 	{
 	    // Probably just created the directory for this file
-	    const QString fileName = fileListPath.section( u'/', -1 );
+	    const QString fileName = SysUtil::baseName( fileListPath );
 	    if ( fileListPath.size() == lastDirPath.size() + fileName.size() + 1 )
 	    {
 		// Definitely just created the directory for this file, so it exists

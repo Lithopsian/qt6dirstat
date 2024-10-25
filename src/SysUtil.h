@@ -220,8 +220,9 @@ namespace QDirStat
 	/**
 	 * Return a string with all occurrences of a single quote escaped, for
 	 * shells.  This means effectively closing the first part of the string
-	 * with a single quote, inserting a backslash to escape the single quote,
-	 * then opening the remaining part of the string with another single quote.
+	 * with a single quote, inserting a backslash to escape the single
+	 * quote, then opening the remaining part of the string with another
+	 * single quote.
 	 *
 	 * Thus, 'Don't do this' becomes 'Don'\''t do this'.
 	 *

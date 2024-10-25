@@ -41,9 +41,10 @@ namespace
     QString filenameExtension( const QString & filename )
     {
 	// See if there is a dot other than a leading dot
-	if ( filename.lastIndexOf( u'.' ) > 0 )
+	const int lastDot = filename.lastIndexOf( u'.' );
+	if ( lastDot > 0 )
 	    // Use the shortest extension
-	    return filename.section( u'.', -1 );
+	    return filename.mid( lastDot );
 
 	return QString{};
     }
@@ -169,11 +170,11 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 {
     if ( subtree && subtree->checkMagicNumber() )
     {
-        collect( subtree );
-        _totalSize = subtree->totalSize();
-        removeCruft( _categories, _suffixes, otherCategory() );
+	collect( subtree );
+	_totalSize = subtree->totalSize();
+	removeCruft( _categories, _suffixes, otherCategory() );
 #if VERBOSE_STATS
-        sanityCheck();
+	sanityCheck();
 #endif
     }
 
