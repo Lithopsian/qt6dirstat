@@ -419,15 +419,15 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 
 	// logDebug() << "Adding " << fileListPath << " to " << _pkg << Qt::endl;
 
-	// usually the DirInfo parent will already have been created, and usually just previous
-
+	// Usually the DirInfo parent will already have been created, and usually just previous
 	if ( fileListPath.startsWith( lastDirPath ) )
 	{
-	    // Probably just created the directory for this file
 	    const QString fileName = SysUtil::baseName( fileListPath );
+
+	    // Make sure the last directory is the direct parent of this item
 	    if ( fileListPath.size() == lastDirPath.size() + fileName.size() + 1 )
 	    {
-		// Definitely just created the directory for this file, so it exists
+		// Can just create this item in the existing parent
 		createItem( fileListPath, fileName, lastDir );
 		continue;
 	    }
@@ -452,16 +452,14 @@ void PkgReadJob::addFiles( const QStringList & fileList )
 		lastDir = parent;
 		lastDirPath = currentPath;
 	    }
-	    else if ( currentComponent != components.constLast() )
+	    else if ( currentComponent != components.last() )
 	    {
 		// Failure that used to occur a lot (for dpkg) when symlinks weren't resolved
 		logWarning() << newParent << " should be a directory, but is not" << Qt::endl;
-		continue;
 	    }
 	}
     }
 }
-
 
 
 
@@ -487,13 +485,13 @@ void AsyncPkgReadJob::readFileListFinished( int                  exitCode,
     QProcess * senderProcess = qobject_cast<QProcess *>( sender() );
     senderProcess->deleteLater();
 
-    if ( exitStatus != QProcess::NormalExit )
+    if ( exitStatus == QProcess::CrashExit )
     {
 	logError() << "Get file list command crashed for " << pkg() << Qt::endl;
     }
     else if ( exitCode != 0 )
     {
-	logError() << "Get file list command exit status " << exitStatus << " for " << pkg() << Qt::endl;
+	logError() << "Get file list command exit code " << exitCode << " for " << pkg() << Qt::endl;
     }
     else // ok
     {
@@ -507,8 +505,9 @@ void AsyncPkgReadJob::readFileListFinished( int                  exitCode,
     pkg()->setReadState( DirError );
     tree()->sendReadJobFinished( pkg() );
 
+    // Dequeue and delete this job
     finished();
-    // Don't add anything after finished() since this deletes this job!
+    // Don't add anything after finished()!
 }
 
 
