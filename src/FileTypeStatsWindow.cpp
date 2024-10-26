@@ -318,8 +318,8 @@ void FileTypeStatsWindow::locateCurrentFileType()
 
     // logDebug() << "Locating " << current->suffix() << Qt::endl;
 
-    // Use the shared LocateFileTypeWindow instance.  Let it pick its own parent
-    // so it doesn't get closed along with this window.
+    // Use the shared LocateFileTypeWindow instance.
+    // Let it pick its own parent so it doesn't get closed along with this window.
     LocateFileTypeWindow::populateSharedInstance( '.' % suffix, dir );
 }
 
