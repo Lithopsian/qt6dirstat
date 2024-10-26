@@ -311,7 +311,7 @@ void HistogramView::addXStartEndLabels( QGraphicsScene * scene )
 
 void HistogramView::addYStartEndLabels( QGraphicsScene * scene )
 {
-    const auto addLabel = [ this, scene ]( qreal y, const QString & text)
+    const auto addLabel = [ scene ]( qreal y, const QString & text)
     {
 	QGraphicsTextItem * item = createTextItem( scene, text );
 	const QRectF rect = item->boundingRect();
@@ -345,7 +345,7 @@ void HistogramView::addQuartileText( QGraphicsScene * scene )
 	 * constructed from 'text' and 'size'.  'pos' is updated
 	 * to the end of the added text plus some spacing.
 	 **/
-	const auto addText = [ this, scene, &pos ]( const QString & text, FileSize size, const QColor & color )
+	const auto addText = [ scene, &pos ]( const QString & text, FileSize size, const QColor & color )
 	{
 	    QGraphicsTextItem * item = createBoldItem( scene, text % formatSize( size ) );
 	    item->setDefaultTextColor( color );
@@ -487,7 +487,7 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
      * the overflow panel.  nextPos is updated to the bottom left of
      * the margin.
      **/
-    const auto addText = [ this, scene, panelWidth, &nextPos ]( const QString & lines )
+    const auto addText = [ scene, panelWidth, &nextPos ]( const QString & lines )
     {
 	QGraphicsTextItem * textItem = createTextItem( scene, lines );
 	textItem->setPos( nextPos );
@@ -512,28 +512,26 @@ void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
      *
      * nextPos is updated by the height of the pie.
      **/
-    const auto addPie = [ this, scene, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
+    const auto addPie = [ scene, panelWidth, &nextPos ]( FileSize valSlice, FileSize valPie )
     {
-	if ( valPie == 0 && valSlice == 0 )
-	    return;
-
 	// If pie is bigger than slice, swap them including the brushes
-	const bool swapped = valSlice > valPie;
-	if ( swapped )
+	const bool swap = valSlice > valPie;
+	if ( swap )
 	{
 	    FileSize val = valSlice;
 	    valSlice = valPie;
 	    valPie = val;
 	}
-	const QBrush brushSlice = swapped ? barBrush() : overflowSliceBrush();
-	const QBrush brushPie   = swapped ? overflowSliceBrush() : barBrush();
+	const QBrush brushSlice = swap ? barBrush() : overflowSliceBrush();
+	const QBrush brushPie   = swap ? overflowSliceBrush() : barBrush();
 
 	// Create the pie at the origin, so it can be rotated and then positioned afterwards
 	const QRectF rect{ -pieDiameter() / 2.0, -pieDiameter() / 2.0, pieDiameter(), pieDiameter() };
 
 	// Convert the slice value to a segment in Qt units of 1/16th degree
-	const int fullCircle = 360 * 16;
-	const int segment    = qRound( 1.0 * valSlice / ( valPie + valSlice ) * fullCircle );
+	const int    fullCircle  = 360 * 16;
+	const double denominator = valPie == 0 ? 1.0 : valSlice + valPie;
+	const int    segment     = qRound( valSlice / denominator * fullCircle );
 
 	// Create a circle with a segment missing
 	QGraphicsEllipseItem * ellipsePie = scene->addEllipse( rect );
