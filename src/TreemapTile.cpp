@@ -39,11 +39,12 @@ namespace
      **/
     const QColor & tileColor( const TreemapView * parentView, const FileInfo * file )
     {
-	if ( parentView->fixedColor().isValid() )
-	    return parentView->fixedColor();
+        if ( parentView->fixedColor().isValid() )
+            return parentView->fixedColor();
 
-	return MimeCategorizer::instance()->color( file );
+        return MimeCategorizer::instance()->color( file );
     }
+
 
     /**
      * Try to include members referred to by 'it' into 'rect' so that they achieve
@@ -226,6 +227,7 @@ TreemapTile::TreemapTile( TreemapView  * parentView,
 //    logDebug() << _stopwatch.restart() << "ms for " << threads << " threads to finish" << (_parentView->treemapCancelled() ? " (cancelled)" : QString{}) << Qt::endl;
 }
 
+
 // constructor for simple (non-squarified) children
 TreemapTile::TreemapTile( TreemapTile  * parentTile,
                           FileInfo     * orig,
@@ -244,6 +246,7 @@ TreemapTile::TreemapTile( TreemapTile  * parentTile,
     init();
 }
 
+
 HorizontalTreemapTile::HorizontalTreemapTile( TreemapTile  * parentTile,
                                               FileInfo     * orig,
                                               const QRectF & rect ) :
@@ -253,6 +256,7 @@ HorizontalTreemapTile::HorizontalTreemapTile( TreemapTile  * parentTile,
         createChildrenHorizontal( rect );
 }
 
+
 VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
                                           FileInfo     * orig,
                                           const QRectF & rect ) :
@@ -261,6 +265,7 @@ VerticalTreemapTile::VerticalTreemapTile( TreemapTile  * parentTile,
     if ( orig->isDirInfo() )
         createChildrenVertical( rect );
 }
+
 
 TreemapTile::TreemapTile( TreemapTile          * parentTile,
                           FileInfo             * orig,
@@ -298,6 +303,7 @@ void TreemapTile::init()
     if ( ( _orig->isDir() && _orig->totalSubDirsConst() == 0 ) || _orig->isDotEntry() )
         setAcceptHoverEvents( true );
 }
+
 
 void TreemapTile::createChildrenHorizontal( const QRectF & rect )
 {
@@ -340,6 +346,7 @@ void TreemapTile::createChildrenHorizontal( const QRectF & rect )
     }
 }
 
+
 void TreemapTile::createChildrenVertical( const QRectF & rect )
 {
     BySizeIterator it{ _orig };
@@ -380,6 +387,7 @@ void TreemapTile::createChildrenVertical( const QRectF & rect )
         ++it;
     }
 }
+
 
 void TreemapTile::createSquarifiedChildren( const QRectF & rect )
 {
@@ -430,6 +438,7 @@ void TreemapTile::createSquarifiedChildren( const QRectF & rect )
         remainingTotal -= rowTotal;
     }
 }
+
 
 void TreemapTile::layoutRow( Orientation      dir,
                              QRectF         & rect,
@@ -500,6 +509,7 @@ void TreemapTile::layoutRow( Orientation      dir,
     }
 }
 
+
 void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 {
     // If the tile's parent is smaller than the threshold and not the root tile, then no thread
@@ -526,6 +536,7 @@ void TreemapTile::addRenderThread( TreemapTile * tile, int minThreadTileSize )
 #endif
 }
 
+
 void TreemapTile::renderChildCushions()
 {
     if ( _parentView->treemapCancelled() )
@@ -546,6 +557,63 @@ void TreemapTile::renderChildCushions()
             tile->setBrush( tileColor( _parentView, tile->_orig ) );
     }
 }
+
+
+QPixmap TreemapTile::renderCushion( const QRectF & rect )
+{
+    //logDebug() << rect << Qt::endl;
+
+    const QColor & color = tileColor( _parentView, _orig );
+
+    // These don't need rounding, they're already whole pixels, but make the narrowing explicit
+    const int width = static_cast<int>( rect.width() );
+    const int height = static_cast<int>( rect.height() );
+    QImage image{ width, height, QImage::Format_RGB32 };
+    QRgb * data = reinterpret_cast<QRgb *>( image.bits() );
+
+    const double xx22 = 2.0 * _cushionSurface.xx2();
+    const double yy22 = 2.0 * _cushionSurface.yy2();
+    const double nx0 = _cushionSurface.xx1() + xx22 * ( rect.x() + 0.5 );
+    const double ny0 = _cushionSurface.yy1() + yy22 * ( rect.y() + 0.5 );
+
+    double nx, ny;
+    int x, y;
+    for ( y = 0, ny = ny0; y < rect.height(); ++y, ny += yy22 )
+    {
+        for ( x = 0, nx = nx0; x < rect.width(); ++data, ++x, nx += xx22 )
+        {
+            const double num   = _parentView->lightZ() + ny*_parentView->lightY() + nx*_parentView->lightX();
+            const double denom = sqrt( nx*nx + ny*ny + 1.0 );
+            const double cosa  = _parentView->ambientIntensity() + qMax( 0.0, num / denom );
+
+            const int red   = 0.5 + cosa * color.red();
+            const int green = 0.5 + cosa * color.green();
+            const int blue  = 0.5 + cosa * color.blue();
+            *data = qRgb( red, green, blue );
+        }
+    }
+
+//    if ( _parentView->enforceContrast() )
+//        enforceContrast( image );
+
+    return QPixmap::fromImage( image );
+}
+
+
+void TreemapTile::invalidateCushions()
+{
+    _cushion = QPixmap{};
+    setBrush( QBrush{} );
+
+    const auto items = childItems();
+    for ( QGraphicsItem * graphicsItem : items )
+    {
+        TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
+        if ( tile )
+            tile->invalidateCushions();
+    }
+}
+
 
 void TreemapTile::paint( QPainter                       * painter,
                          const QStyleOptionGraphicsItem * option,
@@ -631,59 +699,6 @@ void TreemapTile::paint( QPainter                       * painter,
 #endif
 }
 
-QPixmap TreemapTile::renderCushion( const QRectF & rect )
-{
-    //logDebug() << rect << Qt::endl;
-
-    const QColor & color = tileColor( _parentView, _orig );
-
-    // These don't need rounding, they're already whole pixels, but make the narrowing explicit
-    const int width = static_cast<int>( rect.width() );
-    const int height = static_cast<int>( rect.height() );
-    QImage image{ width, height, QImage::Format_RGB32 };
-    QRgb * data = reinterpret_cast<QRgb *>( image.bits() );
-
-    const double xx22 = 2.0 * _cushionSurface.xx2();
-    const double yy22 = 2.0 * _cushionSurface.yy2();
-    const double nx0 = _cushionSurface.xx1() + xx22 * ( rect.x() + 0.5 );
-    const double ny0 = _cushionSurface.yy1() + yy22 * ( rect.y() + 0.5 );
-
-    double nx, ny;
-    int x, y;
-    for ( y = 0, ny = ny0; y < rect.height(); ++y, ny += yy22 )
-    {
-        for ( x = 0, nx = nx0; x < rect.width(); ++data, ++x, nx += xx22 )
-        {
-            const double num   = _parentView->lightZ() + ny*_parentView->lightY() + nx*_parentView->lightX();
-            const double denom = sqrt( nx*nx + ny*ny + 1.0 );
-            const double cosa  = _parentView->ambientIntensity() + qMax( 0.0, num / denom );
-
-            const int red   = 0.5 + cosa * color.red();
-            const int green = 0.5 + cosa * color.green();
-            const int blue  = 0.5 + cosa * color.blue();
-            *data = qRgb( red, green, blue );
-        }
-    }
-
-//    if ( _parentView->enforceContrast() )
-//        enforceContrast( image );
-
-    return QPixmap::fromImage( image );
-}
-
-void TreemapTile::invalidateCushions()
-{
-    _cushion = QPixmap{};
-    setBrush( QBrush{} );
-
-    const auto items = childItems();
-    for ( QGraphicsItem * graphicsItem : items )
-    {
-        TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
-        if ( tile )
-            tile->invalidateCushions();
-    }
-}
 
 QVariant TreemapTile::itemChange( GraphicsItemChange   change,
                                   const QVariant     & value)
@@ -711,6 +726,7 @@ QVariant TreemapTile::itemChange( GraphicsItemChange   change,
 
     return QGraphicsRectItem::itemChange( change, value );
 }
+
 
 void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
@@ -764,6 +780,7 @@ void TreemapTile::mousePressEvent( QGraphicsSceneMouseEvent * event )
     }
 }
 
+
 void TreemapTile::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
 {
     if ( !_parentView->selectionModel() )
@@ -795,6 +812,7 @@ void TreemapTile::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
     }
 }
 
+
 void TreemapTile::mouseReleaseEvent( QGraphicsSceneMouseEvent * event )
 {
     if ( !_parentView->selectionModel() )
@@ -817,6 +835,7 @@ void TreemapTile::mouseReleaseEvent( QGraphicsSceneMouseEvent * event )
     _parentView->sendSelection( this );
 }
 
+
 void TreemapTile::wheelEvent( QGraphicsSceneWheelEvent * event )
 {
     if ( !_parentView->selectionModel() )
@@ -837,6 +856,7 @@ void TreemapTile::wheelEvent( QGraphicsSceneWheelEvent * event )
         _parentView->zoomIn();
     }
 }
+
 
 void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
 {
@@ -873,11 +893,13 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
     menu->exec( event->screenPos() );
 }
 
+
 void TreemapTile::hoverEnterEvent( QGraphicsSceneHoverEvent * )
 {
     // logDebug() << "Hovering over " << this << Qt::endl;
     _parentView->sendHoverEnter( _orig );
 }
+
 
 void TreemapTile::hoverLeaveEvent( QGraphicsSceneHoverEvent * )
 {

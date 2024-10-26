@@ -45,10 +45,10 @@ namespace QDirStat
     public:
 
 	CushionHeightSequence( double cushionHeight, double scaleFactor ):
-	    QVector<double>( 10 ), // ten elements, not onex10.0
-	    _constLast{ cend() - 1 } // iterator to last list entry
+	    QVector<double>( 10 ), // ten elements, not one element 10.0
+	    _constLast{ cend() - 1 } // iterator at last list entry
 	{
-	    // Start with the given cushion height, times 4 from the coefficients
+	    // Start with the given cushion height, times 4 from the coefficient formula
 	    double height = 4.0 * cushionHeight;
 
 	    // Fill the sequence with heights calculated from the given scale factor
@@ -283,6 +283,11 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Initialization common to all constructors.
+	 **/
+	void init();
+
+	/**
 	 * Create children (sub-tiles) using the simple treemap algorithm:
 	 * alternate between horizontal and vertical subdivision in each
 	 * level. Each child will get the entire height or width, respectively,
@@ -349,7 +354,7 @@ namespace QDirStat
 
 	/**
 	 * Lay out all members of 'row' within 'rect' along its longer side.
-	 * Returns the new rectangle with the layouted area subtracted.
+	 * 'rect' is modified with the layouted area subtracted.
 	 **/
 	void layoutRow( Orientation      dir,
 	                QRectF         & rect,
@@ -358,6 +363,18 @@ namespace QDirStat
 	                FileSize         rowTotal,
 	                double           primary,
 	                double           secondary );
+
+	/**
+	 * Render a cushion as described in "cushioned treemaps" by Jarke
+	 * J. van Wijk and Huub van de Wetering	 of the TU Eindhoven, NL.
+	 **/
+	QPixmap renderCushion( const QRectF & rect );
+
+	/**
+	 * Recursively iterate through all the children of this tile, rendering the cushions
+	 * of any leaf-level tiles.
+	 **/
+	void renderChildCushions();
 
 	/**
 	 * Paint this tile.
@@ -433,23 +450,6 @@ namespace QDirStat
 	 * Reimplemented from QGraphicsItem.
 	 **/
 	void hoverLeaveEvent( QGraphicsSceneHoverEvent * ) override;
-
-	/**
-	 * Render a cushion as described in "cushioned treemaps" by Jarke
-	 * J. van Wijk and Huub van de Wetering	 of the TU Eindhoven, NL.
-	 **/
-	QPixmap renderCushion( const QRectF & rect );
-
-	/**
-	 * Recursively iterate through all the children of this tile, rendering the cushions
-	 * of any leaf-level tiles.
-	 **/
-	void renderChildCushions();
-
-	/**
-	 * Initialization common to all constructors.
-	 **/
-	void init();
 
 
     private:
