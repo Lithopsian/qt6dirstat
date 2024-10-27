@@ -138,7 +138,7 @@ namespace
 	    // The next line should be a diversion to line
 	    if ( ++line != lines.end() && isDiversionTo( *line ) )
 	    {
-		const QString & divertingPkg = line->split( u' ' ).at( 2 );
+		const QString divertingPkg = line->split( u' ' ).at( 2 );
 
 #if VERBOSE_DIVERSIONS
 		logDebug() << *line << Qt::endl;
