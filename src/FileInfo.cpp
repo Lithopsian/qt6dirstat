@@ -257,7 +257,7 @@ FileInfo * FileInfo::locate( const QString & locateUrl )
 
 	if ( url.startsWith( u'/' ) )
 	    url.remove( 0, 1 ); // remove leading delimiters, we're not matching on those
-	else if ( _name.right(1) != "/"_L1 && !isPseudoDir() )
+	else if ( !_name.endsWith( u'/' ) && !isPseudoDir() )
 	    return nullptr; // not directory, not root, not pseudo-dir, url can't be one of our children
     }
 

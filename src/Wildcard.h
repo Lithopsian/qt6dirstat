@@ -82,6 +82,13 @@ namespace QDirStat
 	bool isEmpty() const { return pattern().isEmpty(); }
 
 	/**
+	 * Returns whether 'pattern' contains characters that would be interpreted as
+	 * wildcards.
+	 **/
+	static bool isWildcard( const QString & pattern )
+	    { return pattern.contains( u'*' ) || pattern.contains( u'?' ) || pattern.contains( u'[' ); }
+
+	/**
 	 * Helper for the rather long-winded way that a QRegularExpression is made
 	 * from a wildcard-style string.
 	 **/
@@ -129,6 +136,7 @@ namespace QDirStat
 	{}
 
     };	// class CaseSensitiveWildcard
+
 
 
     /**

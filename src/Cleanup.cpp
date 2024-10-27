@@ -395,7 +395,11 @@ namespace
 	QString dir = item->path();
 
 	if ( !item->isDir() && !item->isPseudoDir() )
-	    dir.remove( QRegularExpression{ "/[^/]*$" } );
+	{
+	    const int lastSlashIndex = dir.lastIndexOf( u'/' );
+	    if ( lastSlashIndex >= 0 )
+		dir.truncate( lastSlashIndex );
+	}
 
 	return dir;
     }

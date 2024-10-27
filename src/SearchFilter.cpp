@@ -106,16 +106,3 @@ bool SearchFilter::matches( const QString & str ) const
 
     return false;
 }
-
-/*
-void SearchFilter::setCaseSensitive( bool sensitive )
-{
-    _caseSensitive = sensitive;
-
-    if ( _regexp.isValid() )
-    {
-        QRegularExpression::PatternOptions options = _regexp.patternOptions();
-        _regexp.setPatternOptions( options.setFlag( QRegularExpression::CaseInsensitiveOption, !sensitive ) );
-    }
-}
-*/
