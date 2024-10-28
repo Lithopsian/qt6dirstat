@@ -19,9 +19,10 @@
 #include "Subtree.h"
 #include "Typedefs.h" // FileCount, FileSize
 
+
 namespace QDirStat
 {
-    class CountSize;
+    struct CountSize;
     class FileInfo;
 
     /**
@@ -125,7 +126,7 @@ namespace QDirStat
 	/**
 	 * Enable or disable the actions.
 	 **/
-	void enableActions( bool enable );
+	inline void enableActions( bool enable );
 
 	/**
 	 * Return the suffix of the currently selected file type or an empty

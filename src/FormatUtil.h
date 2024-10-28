@@ -254,30 +254,48 @@ namespace QDirStat
 
     /**
      * Return a copy of 'text' with carriage return and linefeed
-     * characters replaced by spaces.  The string is tested first to
-     * avoid detaching in the 99.99% of cases that don't have these
-     * characters in 'text'.
+     * characters replaced by spaces.  Despite the apparent
+     * unconditional string copy, implicit sharing makes this
+     * reasonable fast for the 99.99% of cases where there are no
+     * CR/LF characters.
+     *
+     * There is also a function to replace ampersands and horizontal
+     * tab characters, necessary for text to be displayed in a menu.
      **/
     QString replaceCrLf( const QString & text );
 
     /**
-     * Return whether 'text' contains any any Unicode control characters.
+     * Replace ampersands and horizontal tab characters in 'text' and
+     * return a reference to it.  This used for menus, where a single
+     * ampersand will be interpreted as a mnemonic and underlined,
+     * and a horizontal tab is used internally to delimit columns in
+     * a menu item.
+     **/
+    inline QString & replaceAmpTab( QString & text )
+        { return text.replace( u'\t', u' ' ).replace( u'&', "&&"_L1 ); }
+
+    /**
+     * Return whether 'text' contains any Unicode control characters.
      **/
     inline bool hasControlCharacter( const QString & text )
         { return QRegularExpression{ "\\p{C}" }.match( text ).hasMatch(); }
 
     /**
-     * Return a regular expression excluding any Unicode control
-     * characters.
+     * Return a regular expression matching any string that doesn't
+     * include Unicode control characters.  It is intended for use
+     * with QValidator so the regular expression itself is not
+     * anchored.
      **/
-    inline QRegularExpression excludeControlCharacters()
-        { return QRegularExpression{ "[^\\p{C}]*" }; }
+    inline QRegularExpression hasNoControlCharacters()
+        { return QRegularExpression{ "\\P{C}*" }; }
 
     /**
      * Return 'text', elided if necessary to fit 'maxSize' pixels
      * wide when rendered in 'font'.
      **/
-    inline QString elidedText( const QFont & font, const QString & text, int maxSize )
+    inline QString elidedText( const QFont       & font,
+                               const QString     & text,
+                               int                 maxSize )
         { return QFontMetrics{ font }.elidedText( text, Qt::ElideMiddle, maxSize ); }
 
     /**

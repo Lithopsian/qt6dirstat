@@ -46,9 +46,7 @@ namespace
     }
 
 
-    void qt_logger( QtMsgType                  msgType,
-                    const QMessageLogContext & context,
-                    const QString            & msg )
+    void qt_logger( QtMsgType msgType, const QMessageLogContext & context, const QString & msg )
     {
 	const QStringList lines = msg.split( u'\n' );
 	for ( QString line : lines )
@@ -174,28 +172,32 @@ namespace
 
 
     /**
-     * Return the name for an old log file based on 'filename' for old log
-     * no. 'no'.
+     * Return the portion of 'filename' excluding the ".log" suffix.
      **/
-    QString oldName( QString filename, int no )
+    QString logNameStem( const QString & filename )
     {
-	filename.remove( QRegularExpression{ "\\.log$" } );
-	filename += QString{ "-%1.old" }.arg( no, 2, 10, QChar{ u'0' } );
-
-	return filename;
+	return filename.endsWith( ".log" ) ? filename.left( filename.size() - 4 ) : filename;
     }
 
 
     /**
-     * Return the glob pattern for old log files based on 'filename'.
-     * This pattern can be used for QDir matches.
+     * Return the name for an old log file based on 'stem', the portion
+     * of the log filename before the ".log", for old log number 'no'.
      **/
-    QString oldNamePattern( QString filename )
+    QString oldName( const QString & stem, int no )
     {
-	filename.remove( QRegularExpression{ "\\.log$" } );
-	filename += "-??.old"_L1;
+	return QString{ "%1-%2.old" }.arg( stem ).arg( no, 2, 10, QChar{ u'0' } );
+    }
 
-	return filename;
+
+    /**
+     * Return the glob pattern for old log files based on 'stem', the
+     * portion of the log filename before the ".log". This pattern can be
+     * used for QDir matches.
+     **/
+    QString oldNamePattern( const QString & stem )
+    {
+	return stem % "-??.old"_L1;
     }
 
 
@@ -204,19 +206,15 @@ namespace
      * 'filename' (without path). Keep at most 'logRotateCount' old logs and
      * delete all other old logs.
      **/
-    void logRotate( const QString & logDir,
-                    const QString & filename,
-                    int             logRotateCount )
+    void logRotate( const QString & logDir, const QString & filename, int logRotateCount )
     {
+	const QString logStem = logNameStem( filename );
 	QDir dir{ logDir };
-	QStringList keepers;
-	keepers << filename;
+	QStringList keepers{ filename };
 
 	for ( int i = logRotateCount - 1; i >= 0; --i )
 	{
-	    const QString currentName = i > 0 ? oldName( filename, i-1 ) : filename;
-	    const QString newName = oldName( filename, i );
-
+	    const QString newName = oldName( logStem, i );
 	    if ( dir.exists( newName ) )
 	    {
 		const bool success = dir.remove( newName );
@@ -226,20 +224,21 @@ namespace
 #endif
 	    }
 
+	    const QString currentName = i > 0 ? oldName( logStem, i-1 ) : filename;
 	    if ( dir.exists( currentName ) )
 	    {
+		keepers << newName;
+
 		const bool success = dir.rename( currentName, newName );
 		Q_UNUSED( success );
 #if VERBOSE_ROTATE
 		logDebug() << "Renaming " << currentName << " to " << newName
 		           << ( success ? "" : " FAILED" ) << Qt::endl;
 #endif
-
-		keepers << newName;
 	    }
 	}
 
-	const auto matches = dir.entryList( QStringList{ oldNamePattern( filename ) }, QDir::Files );
+	const auto matches = dir.entryList( QStringList{ oldNamePattern( logStem ) }, QDir::Files );
 	for ( const QString & match : matches )
 	{
 	    if ( !keepers.contains( match ) )

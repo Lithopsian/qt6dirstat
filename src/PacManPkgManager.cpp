@@ -21,6 +21,41 @@ using SysUtil::tryRunCommand;
 using SysUtil::haveCommand;
 
 
+namespace
+{
+    /**
+     * Parse a package list as output by "/usr/bin/pacman -Qn".
+     **/
+    PkgInfoList parsePkgList( const PkgManager * pkgManager, const QString & output )
+    {
+        PkgInfoList pkgList;
+
+        const QStringList splitOutput = output.split( u'\n' );
+        for ( const QString & line : splitOutput )
+        {
+            if ( !line.isEmpty() )
+            {
+                const QStringList fields = line.split( u' ' );
+
+                if ( fields.size() == 2 )
+                {
+                    const QString & name    = fields.at( 0 );
+                    const QString & version = fields.at( 1 );
+                    pkgList << new PkgInfo{ name, version, "", pkgManager };
+                }
+                else
+                {
+                    logError() << "Invalid pacman -Qn output: \"" << line << '\n' << Qt::endl;
+                }
+            }
+        }
+
+        return pkgList;
+    }
+
+}
+
+
 bool PacManPkgManager::isPrimaryPkgManager() const
 {
     return tryRunCommand( "/usr/bin/pacman -Qo /usr/bin/pacman", ".*is owned by pacman.*" );
@@ -38,7 +73,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     int exitCode = -1;
     QString output = runCommand( "/usr/bin/pacman", { "-Qo", path }, &exitCode );
     if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
-	return QString{};
+        return QString{};
 
     // Sample output:
     //
@@ -49,7 +84,8 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     // name.
 
     output.remove( QRegularExpression{ "^.*is owned by " } );
-    const QString pkg = output.section( u' ', 0, 0 );
+    const int firstSpaceIndex = output.indexOf( u' ' );
+    const QString pkg = firstSpaceIndex < 0 ? output : output.left( firstSpaceIndex );
 
     return pkg;
 }
@@ -62,34 +98,7 @@ PkgInfoList PacManPkgManager::installedPkg() const
     int exitCode = -1;
     const QString output = runCommand( "/usr/bin/pacman", { "-Qn" }, &exitCode );
     if ( exitCode == 0 )
-        pkgList = parsePkgList( output );
-
-    return pkgList;
-}
-
-
-PkgInfoList PacManPkgManager::parsePkgList( const QString & output ) const
-{
-    PkgInfoList pkgList;
-
-    const QStringList splitOutput = output.split( u'\n' );
-    for ( const QString & line : splitOutput )
-    {
-        if ( !line.isEmpty() )
-        {
-            QStringList fields = line.split( u' ' );
-
-            if ( fields.size() != 2 )
-                logError() << "Invalid pacman -Qn output: \"" << line << '\n' << Qt::endl;
-            else
-            {
-                const QString name    = fields.takeFirst();
-                const QString version = fields.takeFirst();
-                const QString arch    = "";
-                pkgList << new PkgInfo{ name, version, arch, this };
-            }
-        }
-    }
+        pkgList = parsePkgList( this, output );
 
     return pkgList;
 }

@@ -289,7 +289,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         const QString & device = fields[0];
 
         QString & path = fields[1];
-        path.replace( "\\040"_L1, " "_L1 );
+        path.replace( "\\040"_L1, " "_L1 ); // escaped spaces
 
         QString & fsType = fields[2];
         handleFuseblk( fsType, ntfsDevices, device );

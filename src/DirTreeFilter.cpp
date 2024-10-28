@@ -30,12 +30,12 @@ const DirTreeFilter * DirTreePatternFilter::create( const QString & pattern )
 	// Remove the leading "*"
 	const QString suffix = QString{ pattern }.remove( 0, 1 );
 
-	// Use a suffix filter if the suffix contains only "word" characters
-	if ( QRegularExpression{ "\\A\\.(?:\\w+)\\z" }.match( suffix ).hasMatch() )
+	// Use a suffix filter if the suffix doesn't contain wildcard characters
+	if ( Wildcard::isWildcard( suffix ) )
 	    return new DirTreeSuffixFilter{ suffix };
     }
 
-    // Create a more general pattern filter if the pattern wasn't suitable for suffix matching
+    // Create a more general pattern filter if the pattern wasn't suitable for simple suffix matching
     return new DirTreePatternFilter{ pattern };
 }
 

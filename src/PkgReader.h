@@ -61,18 +61,6 @@ namespace QDirStat
         void read( DirTree * tree, const PkgFilter & filter );
 
         /**
-         * Create a read job for each package to read its file list from a file
-         * list cache and add it to the read job queue.
-         **/
-        void createCachePkgReadJobs( DirTree * tree, const PkgInfoList & pkgList );
-
-        /**
-         * Create a read job for each package with a background process to read
-         * its file list and add it as a blocked job to the read job queue.
-         **/
-        void createAsyncPkgReadJobs( DirTree * tree, const PkgInfoList & pkgList );
-
-        /**
          * Read parameters from the settings file.
          **/
         void readSettings();
@@ -132,7 +120,7 @@ namespace QDirStat
          *
          * Reimplemented from DirReadJob.
          **/
-        void startReading();
+        void startReading() override;
 
         /**
          * Return the parent PkgInfo node.

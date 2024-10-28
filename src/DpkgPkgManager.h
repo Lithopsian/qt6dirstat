@@ -233,14 +233,6 @@ namespace QDirStat
 	 **/
 	QString queryName( const PkgInfo * pkg ) const override;
 
-
-    protected:
-
-	/**
-	 * Parse a package list as output by "dpkg-query --show --showformat".
-	 **/
-	PkgInfoList parsePkgList( const QString & output ) const;
-
     };	// class DpkgPkgManager
 
 }	// namespace QDirStat

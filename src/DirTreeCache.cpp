@@ -15,6 +15,7 @@
 #include "Exception.h"
 #include "FileInfoIterator.h"
 #include "MountPoints.h"
+#include "SysUtil.h"
 
 
 #define KB 1024LL
@@ -275,29 +276,6 @@ namespace
 
 
     /**
-     * Split up a file name with path into its path and its name component
-     * and return them in path_ret and name_ret, respectively.
-     *
-     * Example:
-     *     "/some/dir/somewhere/myfile.obj"
-     * ->  "/some/dir/somewhere", "myfile.obj"
-     **/
-    void splitPath( const QString & fileNameWithPath, QString & pathRet, QString & nameRet )
-    {
-	QStringList components = fileNameWithPath.split( u'/', Qt::SkipEmptyParts );
-	if ( !components.isEmpty() )
-	{
-	    nameRet = components.takeLast();
-	    pathRet = components.join( u'/' );
-	}
-
-	// adjust absolute paths
-	if ( fileNameWithPath.startsWith( u'/' ) )
-	    pathRet.prepend( u'/' );
-    }
-
-
-    /**
      * Converts a string representing a number of bytes into a FileSize
      * return value.
      **/
@@ -520,7 +498,7 @@ void CacheReader::addItem()
     {
 	// No mode in old file formats,
 	// get the object type from the first field, but no permissions
-	mode = [ type, mode_str ]()
+	mode = [ type ]()
 	{
 	    switch ( toupper( *type ) )
 	    {
@@ -535,7 +513,7 @@ void CacheReader::addItem()
 	    }
 	}();
     }
-logDebug() << unread_str << Qt::endl;
+
     // Path
     if ( *raw_path == '/' )
 	_latestDir = nullptr;
@@ -544,7 +522,7 @@ logDebug() << unread_str << Qt::endl;
 
     QString pathRet;
     QString nameRet;
-    splitPath( fullPath, pathRet, nameRet );
+    SysUtil::splitPath( fullPath, pathRet, nameRet );
     const QString & path = pathRet;
     const QString & name = nameRet;
 

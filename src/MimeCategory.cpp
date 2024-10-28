@@ -9,6 +9,7 @@
 
 #include "MimeCategory.h"
 #include "Typedefs.h" // _L1
+#include "Wildcard.h"
 
 
 using namespace QDirStat;
@@ -17,11 +18,11 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return 'true' if 'pattern' contains no wildcard characters.
+     * Return 'true' if 'pattern' contains wildcard characters.
      **/
     bool isWildcard( const QString & pattern )
     {
-	return pattern.contains( u'*' ) || pattern.contains( u'?' ) || pattern.contains( u'[' );
+	return Wildcard::isWildcard( pattern );
     }
 
 
@@ -34,15 +35,15 @@ namespace
 	if ( !pattern.startsWith( "*."_L1 ) )
 	    return false;
 
-	const QString rest = pattern.mid( 2, -1 ); // Without leading "*."
+	const QString rest = pattern.mid( 2 ); // Without leading "*."
 
 	return ( !isWildcard( rest ) );
     }
 
 
     /**
-     * Return 'true' if 'pattern' includes a suffix plus other wildcards,
-     * e.g. "lib*.a"
+     * Return 'true' if 'pattern' includes a suffix with other characters,
+     * e.g. "lib*.a".
      **/
     bool isWildcardWithSuffix( const QString & pattern )
     {

@@ -301,7 +301,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
     _subtree = newSubtree;
 
-    _ui->headingLabel->setStatusTip( tr( "File type statistics for %1" ) % replaceCrLf( _subtree.url() ) );
+    _ui->headingLabel->setStatusTip( tr( "File type statistics for " ) % replaceCrLf( _subtree.url() ) );
     resizeEvent( nullptr );
 
     populateTree( _ui->treeWidget, _subtree() );

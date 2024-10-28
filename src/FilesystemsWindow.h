@@ -74,6 +74,12 @@ namespace QDirStat
     protected slots:
 
 	/**
+	 * Populate the window with all normal filesystems. Bind mounts,
+	 * filesystems mounted several times and Btrfs subvolumes are excluded.
+	 **/
+	void populate();
+
+	/**
 	 * Enable or disable widgets such as the "Read" button.
 	 **/
 	void enableActions();
@@ -86,12 +92,6 @@ namespace QDirStat
 
 
     protected:
-
-	/**
-	 * Populate the window with all normal filesystems. Bind mounts,
-	 * filesystems mounted several times and Btrfs subvolumes are excluded.
-	 **/
-	void populate();
 
 	/**
 	 * Clear all data and widget contents.

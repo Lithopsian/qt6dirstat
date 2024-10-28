@@ -18,7 +18,7 @@
 #include "SysUtil.h"
 
 
-#define VERBOSE_MIGRATE 1
+#define VERBOSE_MIGRATE 0
 
 
 using namespace QDirStat;

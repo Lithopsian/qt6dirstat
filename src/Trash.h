@@ -114,7 +114,7 @@ namespace QDirStat
          * This might throw a FileException if the corresponding disk directories
          * could not be created.
          **/
-        TrashDir( const QString & _path, dev_t device );
+        TrashDir( const QString & _path );
 
         /**
          * Return the full path for this trash directory.
@@ -143,6 +143,9 @@ namespace QDirStat
          **/
         QString filesPath() const { return _path % "/files"_L1; }
 
+
+    protected:
+
         /**
          * Return the path of the "info" subdirectory of this trash dir.
          **/
@@ -152,7 +155,6 @@ namespace QDirStat
     private:
 
         QString _path;
-        dev_t   _device;
 
     };  // class TrashDir
 

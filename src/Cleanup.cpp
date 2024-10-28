@@ -57,9 +57,12 @@ namespace
 	if ( paths.isEmpty() )
 	    return true;
 
+	const int firstSpaceIndex = app.indexOf( u' ' );
+	const QString appName = firstSpaceIndex < 0 ? app : app.left( firstSpaceIndex );
+
 	for ( const QString & appPath : paths )
 	{
-	    if ( SysUtil::haveCommand( appPath % '/' % app.section( u' ', 0, 0 ) ) )
+	    if ( SysUtil::haveCommand( appPath % '/' % appName ) )
 		return true;
 	}
 
@@ -392,7 +395,11 @@ namespace
 	QString dir = item->path();
 
 	if ( !item->isDir() && !item->isPseudoDir() )
-	    dir.remove( QRegularExpression{ "/[^/]*$" } );
+	{
+	    const int lastSlashIndex = dir.lastIndexOf( u'/' );
+	    if ( lastSlashIndex >= 0 )
+		dir.truncate( lastSlashIndex );
+	}
 
 	return dir;
     }

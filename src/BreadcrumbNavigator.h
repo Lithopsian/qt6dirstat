@@ -19,7 +19,18 @@ namespace QDirStat
     class FileInfo;
 
     /**
-     * Helper class to represent one single breadcrumb
+     * Helper class to represent one single breadcrumb.
+     *
+     * 'pathComponent' is the name of the path component
+     * represented by this Breadcrumb.  The root item has an
+     * absolute path which may be several directories deep
+     * (eg. "/" or "/usr/bin"); all others are just the
+     * name.
+     * 'elidedName' is 'pathComponent' shortened in order to
+     * fit the current window size; it may be an empty string
+     * to indicate it shouldn't be displayed at all.
+     * 'url' is the full path to this component, which can be
+     * used to search for or navigate to that item.
      **/
     struct Breadcrumb
     {
@@ -32,7 +43,7 @@ namespace QDirStat
 	QString url;
 
 	const QString & displayName() const
-	    { return elidedName.isEmpty() ? pathComponent : elidedName; }
+	    { return elidedName.isNull() ? pathComponent : elidedName; }
 
     };	// struct Breadcrumb
 
@@ -41,19 +52,18 @@ namespace QDirStat
 
 
     /**
-     * Widget for "breadcrumb" navigation in a directory tree:
-     *
-     * Show the current path with clickable components so the user can easily
-     * see where in the tree the currently selected item is and can easily
+     * Widget for "breadcrumb" navigation in a directory tree: show the
+     * current path with clickable components so the user can easily
+     * see where in the tree the currently selected item is and can
      * navigate upwards in the tree.
      *
-     * Each component is an individual hyperlink.
+     * Each component is an individual hyperlink.  Upwards navigation
+     * is limited to the root of the directory tree, i.e. the user can
+     * only navigate inside the current tree.
      *
-     * Upwards navigation is limited to the root of the directory tree,
-     * i.e. the user can only navigate inside the current tree.
-     *
-     * This widget does not hang on to any FileInfo or DirTree object; once a
-     * current path is set, it deals only with strings internally.
+     * This widget does not hang on to any FileInfo or DirTree object;
+     * once a current path is set, it deals only with strings
+     * internally.
      **/
     class BreadcrumbNavigator: public QLabel
     {
@@ -77,8 +87,8 @@ namespace QDirStat
 	/**
 	 * Notification that the user activated a path.
 	 *
-	 * Usually this should be connected to some navigation slot to select
-	 * the clicked directory in a view.
+	 * Usually this should be connected to a navigation slot to
+	 * select the clicked directory in a view.
 	 **/
 	void pathClicked( const QString & path );
 

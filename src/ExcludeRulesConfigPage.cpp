@@ -26,7 +26,7 @@ ExcludeRulesConfigPage::ExcludeRulesConfigPage( ConfigDialog * parent ):
     _ui{ new Ui::ExcludeRulesConfigPage }
 {
     _ui->setupUi( this );
-    _ui->patternLineEdit->setValidator( new QRegularExpressionValidator{ excludeControlCharacters(), this } );
+    _ui->patternLineEdit->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
 
     enableEditWidgets( false );
     initListWidget();

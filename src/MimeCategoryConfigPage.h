@@ -109,6 +109,18 @@ namespace QDirStat
 	 **/
 	void colourPreviewsTriggered( bool );
 
+	/**
+	 * The category list has been shown.  Adjust the colour shading.
+	 **/
+	void setShading();
+
+	/**
+	 * Signal handler for a change in the list widget current item.
+	 *
+	 * Reimplemented from ListEditor.
+	 **/
+	void currentItemChanged( QListWidgetItem * current, QListWidgetItem * previous) override;
+
 
     protected:
 
@@ -139,11 +151,6 @@ namespace QDirStat
 	 * Reimplemented from ListEditor.
 	 **/
 	void fillListWidget() override;
-
-	/**
-	 * The category list has been shown.  Adjust the colour shading.
-	 **/
-	void setShading();
 
 	/**
 	 * Set the background shading of a list item.
@@ -185,13 +192,6 @@ namespace QDirStat
 	 **/
 
 	QString valueText( void * value ) override;
-
-	/**
-	 * Signal handler for a change in the list widget current item.
-	 *
-	 * Reimplemented from ListEditor.
-	 **/
-	void currentItemChanged( QListWidgetItem * current, QListWidgetItem * previous) override;
 
 	/**
 	 * Update actions to match the current item properties.

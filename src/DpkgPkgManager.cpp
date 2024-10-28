@@ -99,9 +99,9 @@ namespace
     }
 
 
-	/**
-	 * Sub-query to find the original owning package of a renamed diverted file.
-	 **/
+    /**
+     * Sub-query to find the original owning package of a renamed diverted file.
+     **/
     QString originalOwningPkg( const QString & path )
     {
 	// Search with the filename from the (potentially symlinked) path
@@ -125,8 +125,12 @@ namespace
 	for ( auto line = lines.begin(); line != lines.end(); ++line )
 	{
 	    // Fast-forward to a diversion line
-	    while ( line != lines.end() && !isDiversionFrom( *line ) )
+	    while ( !isDiversionFrom( *line ) )
+	    {
 		++line;
+		if ( line == lines.end() ) // should never happen, but who knows
+		    return QString{};
+	    }
 
 #if VERBOSE_DIVERSIONS
 	    logDebug() << *line << Qt::endl;
@@ -134,7 +138,7 @@ namespace
 	    // The next line should be a diversion to line
 	    if ( ++line != lines.end() && isDiversionTo( *line ) )
 	    {
-		const QString & divertingPkg = line->split( u' ' ).at( 2 );
+		const QString divertingPkg = line->split( u' ' ).at( 2 );
 
 #if VERBOSE_DIVERSIONS
 		logDebug() << *line << Qt::endl;
@@ -168,12 +172,9 @@ namespace
      **/
     QString searchOwningPkg( const QString & path, const QString & output )
     {
-	const QStringList lines = output.trimmed().split( u'\n' );
+	const QStringList lines = output.trimmed().split( u'\n', Qt::SkipEmptyParts );
 	for ( auto line = lines.begin(); line != lines.end(); ++line )
 	{
-	    if ( line->isEmpty() )
-		continue;
-
 	    // For diversions, the line "diversion by ... from: ..." gives the current owning package
 	    // A line "diversion by ... to ..." should immediately follow and indicates a path that is
 	    // the divert target.  The file will not exist unless the diverted file has been renamed;
@@ -270,7 +271,7 @@ namespace
 	    if ( !pkgRealpath.isEmpty() && !pkgFilename.isNull() )
 	    {
 #if VERBOSE_PACKAGES
-		logDebug() << " " << pkgRealpath << Qt::endl;
+		logDebug() << " " << pkgRealpath << " " << pkgFilename << Qt::endl;
 #endif
 
 		// Is this the exact file we were looking for?
@@ -280,6 +281,45 @@ namespace
 	}
 
 	return QString{};
+    }
+
+
+    /**
+     * Parse a package list as output by "dpkg-query --show --showformat".
+     **/
+    PkgInfoList parsePkgList( const PkgManager * pkgManager, const QString & output )
+    {
+	PkgInfoList pkgList;
+
+	const QStringList splitOutput = output.split( u'\n', Qt::SkipEmptyParts );
+	for ( const QString & line : splitOutput )
+	{
+	    const QStringList fields = line.split( " | "_L1 );
+
+	    if ( fields.size() == 4 )
+	    {
+		const QString & name    = fields.at( 0 );
+		const QString & version = fields.at( 1 );
+		const QString & arch    = fields.at( 2 );
+		const QString & status  = fields.at( 3 );
+		if ( status == "install ok installed"_L1 || status == "hold ok installed"_L1 )
+		{
+		    pkgList << new PkgInfo{ name, version, arch, pkgManager };
+		}
+#if VERBOSE_PACKAGES
+		else
+		{
+		    logDebug() << "Ignoring " << line << Qt::endl;
+		}
+#endif
+	    }
+	    else
+	    {
+		logError() << "Invalid dpkg-query output: \"" << line << '\n' << Qt::endl;
+	    }
+	}
+
+	return pkgList;
     }
 
 } // namespace
@@ -329,47 +369,9 @@ PkgInfoList DpkgPkgManager::installedPkg() const
 	            &exitCode );
 
     if ( exitCode == 0 )
-	return parsePkgList( output );
+	return parsePkgList( this, output );
 
     return PkgInfoList{};
-}
-
-
-PkgInfoList DpkgPkgManager::parsePkgList( const QString & output ) const
-{
-    PkgInfoList pkgList;
-
-    const QStringList splitOutput = output.split( u'\n' );
-    for ( const QString & line : splitOutput )
-    {
-	if ( !line.isEmpty() )
-	{
-	    const QStringList fields = line.split( " | "_L1 );
-
-	    if ( fields.size() != 4 )
-		logError() << "Invalid dpkg-query output: \"" << line << Qt::endl << Qt::endl;
-	    else
-	    {
-		const QString & name    = fields.at( 0 );
-		const QString & version = fields.at( 1 );
-		const QString & arch    = fields.at( 2 );
-		const QString & status  = fields.at( 3 );
-
-		if ( status == "install ok installed"_L1 || status == "hold ok installed"_L1 )
-		{
-		    pkgList << new PkgInfo{ name, version, arch, this };
-		}
-#if VERBOSE_PACKAGES
-		else
-		{
-		    logDebug() << "Ignoring " << line << Qt::endl;
-		}
-#endif
-	    }
-	}
-    }
-
-    return pkgList;
 }
 
 
@@ -396,7 +398,9 @@ QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 		fileList << resolvePath( divertedFile );
 	}
 	else if ( line != "/."_L1 && !isPackageDivert( line ) )
+	{
 	    fileList << resolvePath( line );
+	}
     }
 
     return fileList;
@@ -430,7 +434,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     if ( exitCode != 0 )
 	return nullptr;
 
-    const QStringList lines = output.split( u'\n' );
+    const QStringList lines = output.split( u'\n', Qt::SkipEmptyParts );
 #if VERBOSE_PACKAGES
     logDebug() << lines.size() << " output lines" << Qt::endl;
 #endif
@@ -444,9 +448,6 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     //	   zlib1g:i386, zlib1g:amd64: /usr/share/doc/zlib1g
     for ( auto line = lines.begin(); line != lines.end(); ++line )
     {
-	if ( line->isEmpty() )
-	    continue;
-
 	QString pathname;
 	QString packages;
 

@@ -80,11 +80,11 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
                                           const QModelIndex          & index,
                                           float                        percent ) const
 {
-    const int depth       = index.data( TreeLevelRole ).toInt();
-    const int indentPixel = depth * _indentation / 2;
-
     const int xMargin = 4;
     const int yMargin = option.rect.height() / 6;
+
+    const int depth       = index.data( TreeLevelRole ).toInt();
+    const int indentPixel = qMin( depth * _indentation / 2.0, option.rect.width() * 0.9 );
 
     const int x = option.rect.x() + xMargin + indentPixel;
     const int y = option.rect.y() + yMargin;

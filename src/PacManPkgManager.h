@@ -104,14 +104,6 @@ namespace QDirStat
 	QStringList parseFileList( const QString & output ) const override
 	    { return output.split( u'\n' ); }
 
-
-    protected:
-
-	/**
-	 * Parse a package list as output by "dpkg-query --show --showformat".
-	 **/
-	PkgInfoList parsePkgList( const QString & output ) const;
-
     };	// class PacManPkgManager
 
 }	// namespace QDirStat

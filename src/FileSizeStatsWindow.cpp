@@ -261,7 +261,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
     const QString & url = fileInfo->debugUrl();
     const QString headerUrl = suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url );
-    _ui->headingLabel->setStatusTip( tr( "File size statistics for %1" ) % replaceCrLf( headerUrl ) );
+    _ui->headingLabel->setStatusTip( tr( "File size statistics for " ) % replaceCrLf( headerUrl ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
     loadStats( fileInfo, suffix );

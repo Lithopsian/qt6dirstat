@@ -138,61 +138,6 @@ QString SysUtil::runCommand( const QString     & command,
     return output;
 }
 
-/*
-void SysUtil::openInBrowser( const QString & url )
-{
-    logDebug() << "Opening URL " << url << Qt::endl;
-
-    QProcess::startDetached( "/usr/bin/xdg-open", { url } );
-}
-*/
-/*
-bool SysUtil::isBrokenSymLink( const QString & path )
-{
-    const QByteArray target = readLink( path );
-
-    if ( target.size() == 0 )   // path is not a symlink
-        return false;           // so it's also not a broken symlink
-
-
-    // Start from the symlink's parent directory
-
-    QStringList pathSegments = path.split( u'/', Qt::SkipEmptyParts );
-    pathSegments.removeLast(); // We already know it's a symlink, not a directory
-    const QString parentPath = QString{ path.startsWith( u'/' ) ? u'/' : QString{} } + pathSegments.join( u'/' );
-    const DirSaver dir( parentPath );
-
-    // We can't use access() here since that would follow symlinks.
-    // Let's use lstat() instead.
-
-    struct stat statBuf;
-    const int statResult = lstat( target, &statBuf );
-
-    if ( statResult == 0 )      // lstat() successful?
-    {
-        return false;           // -> the symlink is not broken.
-    }
-    else                        // lstat() failed
-    {
-        if ( errno == EACCES )  // permission denied for one of the dirs in target
-        {
-            logWarning() << "Permission denied for one of the directories"
-                         << " in symlink target " << QString::fromUtf8( target )
-                         << " of symlink " << path
-                         << Qt::endl;
-
-            return false;       // We don't know if the symlink is broken
-        }
-        else
-        {
-            logWarning() << "Broken symlink " << path
-                         << " errno: " << formatErrno()
-                         << Qt::endl;
-            return true;
-        }
-    }
-}
-*/
 
 QByteArray SysUtil::readLink( const QByteArray & path )
 {
@@ -228,13 +173,31 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 QString SysUtil::baseName( const QString & fileName )
 {
     //logDebug() << fileName << Qt::endl;
-    const QStringList segments = fileName.split( u'/', Qt::SkipEmptyParts );
-    if ( !segments.isEmpty() )
-	return segments.last();
+    const int delimiterIndex = fileName.lastIndexOf( u'/' );
+    if ( delimiterIndex < 0 )
+	return fileName;
 
-    return QString{};
+    return fileName.mid( delimiterIndex + 1 );
 }
 
+
+void SysUtil::splitPath( const QString & fileNameWithPath,
+                         QString       & path_ret, // return parameter
+                         QString       & name_ret )    // return parameter
+{
+    const int delimeterIndex = fileNameWithPath.lastIndexOf ( u'/' );
+    if ( delimeterIndex < 0 || delimeterIndex == fileNameWithPath.size() - 1 )
+    {
+	// Paths ending in "/" (notably root) or paths without any "/"
+	path_ret = QString();
+	name_ret = fileNameWithPath;
+
+	return;
+    }
+
+    path_ret = fileNameWithPath.left( qMax( 1, delimeterIndex ) ); // at least "/"
+    name_ret = fileNameWithPath.mid( delimeterIndex + 1 ); // everything after the last "/"
+}
 
 QString SysUtil::userName( uid_t uid )
 {

@@ -43,7 +43,6 @@ namespace
 	// See if there is a dot other than a leading or trailing dot
 	const int lastDot = filename.lastIndexOf( u'.', -2 );
 	if ( lastDot > 0 )
-	    // Use the shortest extension
 	    return filename.mid( lastDot + 1 );
 
 	return QString{};
@@ -61,33 +60,36 @@ namespace
                   int                        suffixCount,
                   int                        categoryCount,
                   const QRegularExpression & matchLetters,
-                  const QRegularExpression & matchControl )
+                  const QRegularExpression & matchSpaces )
     {
+	// Exclude extreme suffixes for any number of reasons
+	const auto len = suffix.size();
+	if ( len == 0 || len > 32 )
+	    return true;
+
 	// Just treat standard Latin letters as normal for suffixes
 	const int letters = suffix.count( matchLetters );
 	if ( letters == 0 )
 	    return true;
 
-	// The most common case: 3-letter suffix
-	const auto len = suffix.size();
-	if ( len == 3 && letters == 3 )
+	// Common cases: all letters (and numbers) and a sensible length
+	if ( len == letters && len >= 2 && len <= 6 )
 	    return false;
 
 	// Only apply the next two tests to suffixes that are both absolutely and relatively uncommon
 	if ( suffixCount == 1 || ( suffixCount < 10 && suffixCount * 1000 < categoryCount ) )
 	{
-	    // Arbitrary exclusion of very long uncommon suffixes
+	    // Arbitrary exclusion of long uncommon suffixes
 	    if ( len > 16 )
 		return true;
 
 	    // Forget uncommon suffixes with too many non-letters
-	    const float lettersPercent = len > 0 ? 100.0f * letters / len : 0.0f;
-	    if ( lettersPercent < 75.0f )
+	    if ( 4 * ( len - letters ) > len )
 		return true;
 	}
 
 	// Spaces and control characters in suffixes are just weird
-	if ( suffix.contains( u' ' ) || suffix.contains( matchControl ) )
+	if ( suffix.contains( matchSpaces ) )
 	    return true;
 
 	return false;
@@ -121,7 +123,7 @@ namespace
 
 	// Create these here so we only have to compile them once
 	const QRegularExpression matchLetters{ "[a-zA-Z]" };
-	const QRegularExpression matchControl{ "\\p{C}" };
+	const QRegularExpression matchSpaces{ "\\p{Z}|\\p{C}" };
 
 	QStringList cruftSuffixes;
 	for ( auto it = suffixes.cbegin(); it != suffixes.cend(); ++it )
@@ -134,7 +136,7 @@ namespace
 	    {
 		const int suffixCount = it.value().count;
 
-		if ( isCruft( suffix, suffixCount, otherCategoryCount, matchLetters, matchControl ) )
+		if ( isCruft( suffix, suffixCount, otherCategoryCount, matchLetters, matchSpaces ) )
 		{
 		    // copy the cruft values to the "no extension" entry in the "Other" category
 		    const FileSize suffixSize = it.value().size;

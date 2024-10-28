@@ -109,15 +109,6 @@ namespace QDirStat
 	void populate();
 
 
-    protected:
-
-	/**
-	 * Recursively find unreadable directories in a subtree and add an
-	 * entry to the tree widget for each one.
-	 **/
-	void populateRecursive( FileInfo * subtree );
-
-
     private:
 
 	std::unique_ptr<Ui::UnreadableDirsWindow> _ui;
