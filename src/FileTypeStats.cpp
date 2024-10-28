@@ -67,7 +67,7 @@ namespace
 	if ( len == 0 || len > 32 )
 	    return true;
 
-	// Only accept standard Latin letters and numbers as normal for suffixes
+	// Just treat standard Latin letters as normal for suffixes
 	const int letters = suffix.count( matchLetters );
 	if ( letters == 0 )
 	    return true;
