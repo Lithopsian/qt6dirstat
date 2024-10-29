@@ -419,7 +419,7 @@ void OutputWindow::timeoutShow()
 
 void OutputWindow::readSettings()
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "OutputWindow" );
 
@@ -449,7 +449,7 @@ void OutputWindow::readSettings()
 
 int OutputWindow::defaultShowTimeout()
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "OutputWindow" );
     int defaultShowTimeout = settings.value( "DefaultShowTimeoutMillisec", 500 ).toInt();

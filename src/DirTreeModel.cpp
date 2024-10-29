@@ -99,7 +99,7 @@ namespace
      **/
     QVariant formatPercentQVariant( float percent )
     {
-	const QString text = QDirStat::formatPercent( percent );
+	const QString text = formatPercent( percent );
 
 	return text.isEmpty() ? QVariant{} : text;
     }
@@ -1120,7 +1120,7 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 
 	logDebug() << "Clicked row " << index.row()
 	           << " col " << index.column()
-	           << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
+	           << " (" << DataColumns::fromViewCol( index.column() ) << ")"
 	           << "\t" << item
 	            << " data(0): " << this->data( index, 0 ).toString()
 	           << Qt::endl;

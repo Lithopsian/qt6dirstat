@@ -26,10 +26,6 @@ namespace QDirStat
      * and configuration of the tree view and adds support for synchronizing
      * current / selected items between the DirTree, the DirTreeMap and this
      * DirTreeView.
-     *
-     * The Qt model / view abstraction is kept up as good as possible, but this
-     * widget is really meant to be used with a QDirStat::DirTreeModel and not
-     * just any random subclass of QAbstractItemModel.
      **/
     class DirTreeView: public QTreeView
     {

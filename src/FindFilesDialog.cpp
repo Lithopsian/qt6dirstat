@@ -33,7 +33,7 @@ namespace
      **/
     void readSettings( FindFilesDialog * window, const Ui::FindFilesDialog * ui )
     {
-        QDirStat::Settings settings;
+        Settings settings;
 
         settings.beginGroup( "FindFilesDialog" );
 
@@ -61,7 +61,7 @@ namespace
      **/
     void writeSettings( const Ui::FindFilesDialog * ui )
     {
-        QDirStat::Settings settings;
+        Settings settings;
 
         settings.beginGroup( "FindFilesDialog" );
 

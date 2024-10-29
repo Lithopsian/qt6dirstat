@@ -301,7 +301,7 @@ void Settings::applyActionHotkey( QAction * action )
 
 void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup )
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( settingsGroup );
     const QPoint winPos  = settings.value( "WindowPos",  QPoint{ -99, -99 } ).toPoint();
@@ -318,7 +318,7 @@ void Settings::readWindowSettings( QWidget * widget, const char * settingsGroup 
 
 void Settings::writeWindowSettings( const QWidget * widget, const char * settingsGroup )
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( settingsGroup );
     settings.setValue( "WindowPos",  widget->pos()  );
