@@ -24,31 +24,6 @@ using namespace QDirStat;
 namespace
 {
     /**
-    * See if a filename has an extension; that is, a section
-    * of the name following a '.' character.  Ignore a
-    * leading dot which indicates a hidden file, not an
-    * extension.
-    *
-    * Use the last (i.e. the shortest) suffix if the MIME
-    * categorizer didn't know it: use section -1 (the last
-    * one, ignoring any trailing '.' separator).
-    *
-    * The downside is that this would not find a ".tar.bz",
-    * but just the ".bz" for a compressed tarball. But it's
-    * much better than getting a ".eab7d88df-git.deb" rather
-    * than a ".deb".
-    **/
-    QString filenameExtension( const QString & filename )
-    {
-	// See if there is a dot other than a leading or trailing dot
-	const int lastDot = filename.lastIndexOf( u'.', -2 );
-	if ( lastDot > 0 )
-	    return filename.mid( lastDot + 1 );
-
-	return QString{};
-    }
-
-    /**
      * Check if a suffix is cruft, i.e. a nonstandard suffix that is not
      * useful for classification.
      *
@@ -57,39 +32,24 @@ namespace
      * of uncommon extensions are hidden by the topX limit.
      **/
     bool isCruft( const QString            & suffix,
-                  int                        suffixCount,
-                  int                        categoryCount,
-                  const QRegularExpression & matchLetters,
-                  const QRegularExpression & matchSpaces )
+                  const QRegularExpression & matchUnusual,
+                  const QRegularExpression & matchInvalid )
     {
-	// Exclude extreme suffixes for any number of reasons
-	const auto len = suffix.size();
-	if ( len == 0 || len > 32 )
+	// Starting with anything other than a letter or number is odd
+//	const ushort ch = suffix.at( 0 ).unicode();
+//	if ( !( ch >= 'A' && ch <= 'Z' ) && !( ch >= 'a' && ch <= 'z' ) )
+	const QChar ch = suffix.at( 0 );
+	if ( !ch.isLetterOrNumber() )
 	    return true;
 
-	// Just treat standard Latin letters as normal for suffixes
-	const int letters = suffix.count( matchLetters );
-	if ( letters == 0 )
+	// Forget suffixes with too many non-word characters
+	const int len = suffix.size();
+	const int unusual = suffix.count( matchUnusual );
+	if ( 3 * unusual > len || unusual > 3 )
 	    return true;
 
-	// Common cases: all letters (and numbers) and a sensible length
-	if ( len == letters && len >= 2 && len <= 6 )
-	    return false;
-
-	// Only apply the next two tests to suffixes that are both absolutely and relatively uncommon
-	if ( suffixCount == 1 || ( suffixCount < 10 && suffixCount * 1000 < categoryCount ) )
-	{
-	    // Arbitrary exclusion of long uncommon suffixes
-	    if ( len > 16 )
-		return true;
-
-	    // Forget uncommon suffixes with too many non-letters
-	    if ( 4 * ( len - letters ) > len )
-		return true;
-	}
-
-	// Spaces and control characters in suffixes are just weird
-	if ( suffix.contains( matchSpaces ) )
+	// Any spaces and control characters at all in suffixes are just weird
+	if ( suffix.contains( matchInvalid ) )
 	    return true;
 
 	return false;
@@ -97,95 +57,101 @@ namespace
 
 
     /**
-     * Move entries that have a '.' in the name but do not have
-     * meaningful extensions into the "no extension" category map
-     * for the "Other" category". This includes extremely long
-     * extensions, those with no letters, uncommon extensions with
-     * a low proportion of letters, and anything at all with a
-     * space in it.
-     **/
-    void removeCruft( CategoryMap & categories, SuffixMap & suffixes, const MimeCategory * otherCategory)
+    * See if a filename has an extension; that is, a section
+    * of the name following a '.' character.  Ignore a
+    * leading dot which indicates a hidden file, not an
+    * extension.
+    *
+    * The rather complex loop here is an attempt to identify
+    * multiple suffixes which might form a single valid
+    * extension: eg. .tar.gz.  Starting at the end of the
+    * filename, when an entirely-numeric or short suffix is
+    * found, a search is made for a previous suffix.  This
+    * continues until either there are no more dots or the
+    * compound suffix becomes too long, or a suffix is found
+    * which is too long to be considered sensible in a
+    * compound suffix.
+    *
+    * This could probably be tuned further, but surprisingly
+    * few extra longer extensions are found and they usually
+    * get relegated to <other> anyway.
+    **/
+    QString filenameExtension( const QString            & filename,
+                               const QRegularExpression & matchUnusual,
+                               const QRegularExpression & matchInvalid )
     {
-	// Might be nothing at all in "Other"
-	if ( !categories.contains( otherCategory ) )
-	    return;
+	// Ignore leading and trailing dots and any suffix longer than 32 characters
+	const int lastDot = filename.lastIndexOf( u'.', -2 );
+	if ( lastDot <= 0 || filename.size() - lastDot > 32 )
+	    return QString{};
 
-	// Just get this once, isCruft needs it each time
-	const int otherCategoryCount = categories[ otherCategory ].count;
-
-	// QHash will default-construct (ie. zeroes) the entry if it don't exist yet
-	CountSize & noExtension = suffixes[ { QString{}, otherCategory } ];
-
-#if VERBOSE_STATS
-	FileSize totalMergedSize  = 0LL;
-	int      totalMergedCount = 0;
-#endif
-
-	// Create these here so we only have to compile them once
-	const QRegularExpression matchLetters{ "[a-zA-Z]" };
-	const QRegularExpression matchSpaces{ "\\p{Z}|\\p{C}" };
-
-	QStringList cruftSuffixes;
-	for ( auto it = suffixes.cbegin(); it != suffixes.cend(); ++it )
+	const int suffixIndex = [ &filename, lastDot ]()
 	{
-	    const QString      & suffix   = it.key().suffix;
-	    const MimeCategory * category = it.key().category;
-
-	    // Identify apparent suffixes with no category that are not sensible file extensions
-	    if ( category == otherCategory && !suffix.isEmpty() )
+	    /**
+	    * Return whether to look for another extension section,
+	    * based on the suffix between 'startDot' and 'endDot'.
+	    * If the suffix has four or fewer characters (excluding
+	    * the dots) or contains only numeric digits, then see if
+	    * another suffix can be found before it in 'filename'.
+	    **/
+	    const auto tryAgain = [ &filename ]( const int startDot, const int endDot )
 	    {
-		const int suffixCount = it.value().count;
+		if ( endDot - startDot < 6 )
+		    return true;
 
-		if ( isCruft( suffix, suffixCount, otherCategoryCount, matchLetters, matchSpaces ) )
+		for ( int i = startDot + 1; i < endDot; ++i )
 		{
-		    // copy the cruft values to the "no extension" entry in the "Other" category
-		    const FileSize suffixSize = it.value().size;
-		    noExtension.count += suffixCount;
-		    noExtension.size  += suffixSize;
-		    cruftSuffixes << suffix;
-
-#if VERBOSE_STATS
-		    totalMergedCount += suffixCount;
-		    totalMergedSize  += suffixSize;
-#endif
+		    if ( !isdigit( filename.at( i ).unicode() ) )
+			return false;
 		}
+
+		return true;
+	    };
+
+	    // Loop while the suffixes found so far contain only numbers or are very short
+	    int thisDot = lastDot;
+	    bool tryAnotherSuffix = tryAgain( thisDot, filename.size() );
+	    while ( tryAnotherSuffix )
+	    {
+		const int prevDot = thisDot;
+		thisDot = filename.lastIndexOf( u'.', prevDot - 1 );
+
+		// If no new suffix found, or the total extension length or this suffix is too big ...
+		// ... then return the extensions without this section
+		const int totalSuffixLen = filename.size() - thisDot - 1;
+		const int newSectionLen  = prevDot - thisDot - 1;
+		if ( thisDot <= 0 || totalSuffixLen > 16 || newSectionLen > 8 )
+		    return prevDot;
+
+		tryAnotherSuffix = tryAgain( thisDot, prevDot );
 	    }
-	}
+	    return thisDot;
+	}();
 
-	// Remove the merged suffixes
-	for ( const QString & cruftSuffix : asConst( cruftSuffixes ) )
-	    suffixes.remove( { cruftSuffix, otherCategory } );
+	const QString suffix = filename.mid( suffixIndex + 1 );
+	if ( isCruft( suffix, matchUnusual, matchInvalid ) )
+	    return QString{};
 
-#if VERBOSE_STATS
-	if ( cruftSuffixes.size() > 0 )
-	{
-	    logDebug() << "Merged " << cruftSuffixes.size() << " suffixes to <no extension>: "
-	               << "*." << cruftSuffixes.join( ", *."_L1 ) << Qt::endl;
-
-	    logDebug() << "Merged " << totalMergedCount << " files to <no extension> "
-	               << "(" << formatSize( totalMergedSize ) << ")" << Qt::endl;
-	}
-#endif
-
-	// The price of finding the cruft entry just once is having to delete it ...
-	// ... if it was default-constructed and is still empty
-	if ( noExtension.count == 0 )
-	    suffixes.remove( { QString{}, otherCategory } );
+	return suffix;
     }
 
 } // namespace
 
 
 FileTypeStats::FileTypeStats( FileInfo * subtree ):
-    _otherCategory{ new MimeCategory{ QObject::tr( "Other" ) } }
+    _nonCategory{ new MimeCategory{ QObject::tr( "<uncategorised>" ) } }
 {
     if ( subtree && subtree->checkMagicNumber() )
     {
-	collect( subtree );
-	_totalSize = subtree->totalSize();
-	removeCruft( _categories, _suffixes, otherCategory() );
+	const QRegularExpression matchUnusual{ "[^\\w]" };
+	const QRegularExpression matchInvalid{ "\\p{Z}|\\p{C}" };
+	collect( subtree, matchUnusual, matchInvalid );
+
+//	_totalSize = subtree->totalSize();
+//	removeCruft( _categories, _suffixes, nonCategory() );
+
 #if VERBOSE_STATS
-	sanityCheck();
+	sanityCheck( subtree );
 #endif
     }
 
@@ -193,7 +159,9 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 }
 
 
-void FileTypeStats::collect( const FileInfo * dir )
+void FileTypeStats::collect( const FileInfo           * dir,
+                             const QRegularExpression & matchUnusual,
+                             const QRegularExpression & matchInvalid )
 {
     MimeCategorizer * categorizer = MimeCategorizer::instance();
 
@@ -201,11 +169,12 @@ void FileTypeStats::collect( const FileInfo * dir )
     {
 	if ( it->hasChildren() )
 	{
-	    collect( *it );
+	    collect( *it, matchUnusual, matchInvalid );
 	}
 	else if ( it->isFileOrSymLink() )
 	{
 	    ++_totalCount;
+	    _totalSize += it->size();
 
 	    // First attempt: try the MIME categorizer.
 	    QString suffix;
@@ -222,9 +191,10 @@ void FileTypeStats::collect( const FileInfo * dir )
 	    }
 	    else // !category
 	    {
-		// Use the "Other" category with any filename extension as the suffix
-		addCategoryItem( otherCategory(), *it );
-		addSuffixItem( filenameExtension( it->name() ), otherCategory(), *it );
+		// Use "Uncategorised" with any filename extension as the suffix
+		addCategoryItem( nonCategory(), *it );
+		const QString suffix = filenameExtension( it->name(), matchUnusual, matchInvalid );
+		addSuffixItem( suffix, nonCategory(), *it );
 	    }
 
 	    // Disregard block devices and other special files
@@ -242,9 +212,9 @@ void FileTypeStats::addCategoryItem( const MimeCategory * category, const FileIn
 }
 
 
-void FileTypeStats::addSuffixItem( const QString & suffix,
+void FileTypeStats::addSuffixItem( const QString      & suffix,
                                    const MimeCategory * category,
-                                   const FileInfo * item )
+                                   const FileInfo     * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
     CountSize & countSize = _suffixes[ { suffix, category } ];
@@ -254,11 +224,9 @@ void FileTypeStats::addSuffixItem( const QString & suffix,
 
 
 #if VERBOSE_STATS
-void FileTypeStats::sanityCheck() const
+void FileTypeStats::sanityCheck( FileInfo * subtree ) const
 {
-    const FileSize sizeDiff =
-	std::accumulate( _categories.cbegin(), _categories.cend(), _totalSize,
-                        []( FileSize size, const CountSize & cat ) { return size - cat.size; } );
+    const FileSize sizeDiff = subtree->totalSize() - _totalSize;
     const float diffPercent = _totalSize ? 100.0f * sizeDiff / _totalSize : 100.0f;
 
     logDebug() << "Unaccounted in categories: "

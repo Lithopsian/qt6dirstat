@@ -25,9 +25,9 @@ namespace QDirStat
 
     /**
      * SuffixCategory and CountSize are defined instead of using
-     * QPair for the hash keys and values.  This just means that
-     * the pair members can be referred to by name rather than
-     * simply 'first' and 'second'.
+     * QPair for the hash keys and values.  This means that the
+     * pair members can be referred to by name rather than simply
+     * 'first' and 'second'.
      **/
     struct SuffixCategory
     {
@@ -93,10 +93,10 @@ namespace QDirStat
 	CategoryMap::const_iterator categoriesEnd()   const { return _categories.cend();   }
 
 	/**
-	 * Return the special category for "other", i.e. unclassified files.
-	 * This category is created and owned by the FileTypeStats object.
+	 * Return the special category for unclassified files.  This category
+	 * is created and owned by the FileTypeStats object.
 	 **/
-	const MimeCategory * otherCategory() const { return _otherCategory.get(); }
+	const MimeCategory * nonCategory() const { return _nonCategory.get(); }
 
 	/**
 	 * Return the total number of files collected or the total size of
@@ -114,7 +114,9 @@ namespace QDirStat
 	 * Recursively go through the tree and collect sizes for each file type
 	 * (filename extension) into the two maps.
 	 **/
-	void collect( const FileInfo * dir );
+	void collect( const FileInfo           * dir,
+                      const QRegularExpression & matchLetters,
+                      const QRegularExpression & matchSpaces );
 
 	/**
 	 * Aggregate category entries to a map of CountSize structs with
@@ -126,7 +128,9 @@ namespace QDirStat
 	 * Aggregate suffix entries to a map of CountSize structs with
 	 * SuffixCategory keys.
 	 **/
-	void addSuffixItem( const QString & suffix, const MimeCategory * category, const FileInfo * item );
+	void addSuffixItem( const QString      & suffix,
+	                    const MimeCategory * category,
+	                    const FileInfo     * item );
 
 	/**
 	 * Check if the sums add up and how much is unaccounted for.
@@ -134,12 +138,12 @@ namespace QDirStat
 	 * Note that this will never match exactly, because the map sizes don't
 	 * include directories.
 	 **/
-	void sanityCheck() const;
+	void sanityCheck( FileInfo * subtree ) const;
 
 
     private:
 
-	std::unique_ptr<const MimeCategory> _otherCategory;
+	std::unique_ptr<const MimeCategory> _nonCategory;
 
 	SuffixMap   _suffixes;
 	CategoryMap _categories;

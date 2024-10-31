@@ -34,6 +34,12 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns the name to use for the "other" item grouping all
+     * the smallest uncategorised suffixes.
+     **/
+    QString otherName() { return QObject::tr( "<other>" ); }
+
+    /**
      * Returns the current item in 'tree', cast as a
      * SuffixFileTypeItem, or 0 if there is no current item or it is
      * not a SuffixFileTypeItem.
@@ -41,35 +47,6 @@ namespace
     const SuffixFileTypeItem * currentItem( const QTreeWidget * treeWidget)
     {
 	return dynamic_cast<const SuffixFileTypeItem *>( treeWidget->currentItem() );
-    }
-
-
-    /**
-     * Process the "Other" category so that it contains no more than
-     * a configured "topX" number of different suffixes (including
-     * "<no extension>").  The pruned suffix items are still included
-     * in the category totals, but no longer appear in the tree.
-     **/
-    void topXOtherItems( FileTypeItem * otherCategoryItem )
-    {
-	// Find the maximum number of suffix items to show in the "Other" category
-	Settings settings;
-	settings.beginGroup( "FileTypeStatsWindow" );
-	const int topX = settings.value( "TopX", 50 ).toInt();
-	settings.setDefaultValue( "TopX", topX );
-	settings.endGroup();
-
-	// Do nothing if there are less than the configured topX suffixes
-	const int childCount = otherCategoryItem->childCount();
-	if ( childCount <= topX )
-	    return;
-
-	// Already sorted by size descending, so just truncate the list
-	for ( int i=childCount-1; i >= topX; --i )
-	    otherCategoryItem->removeChild( otherCategoryItem->child( i ) );
-
-	// Change the displayed category name to indicate it has been pruned
-	otherCategoryItem->setText( FT_NameCol, QObject::tr( "Other (top %1)" ).arg( topX ) );
     }
 
 
@@ -90,49 +67,93 @@ namespace
 
 
     /**
-     * Create a specialised tree item for the children of the top level
-     * category items.  Each item represents the total files in that
-     * category which were matched by a particular suffix, by a non-suffix
-     * rules, or that have no suffix.
+     * Create a tree item for a child of a top level category items.
+     * Each item represents the total files in that category which
+     * were matched by a particular suffix.
      *
      * The new item is added to 'parentItem'.
      **/
     void addSuffixItem( FileTypeItem    * parentItem,
-                        bool              otherCategory,
                         const QString   & suffix,
                         const CountSize & countSize )
     {
-	const FileCount parentCount = parentItem->count();
-	const FileSize  parentSize  = parentItem->totalSize();
-	auto item = new SuffixFileTypeItem{ otherCategory, suffix, countSize, parentCount, parentSize };
+	auto item = new SuffixFileTypeItem{ parentItem, suffix, countSize };
 	parentItem->addChild( item );
     }
 
 
     /**
-     * One-time initialization of the tree widget.
+     * Create a specialised tree item child of <uncategorised> which
+     * summarises either items with no extension or items smaller
+     * than the configured top X suffixes.
+     *
+     * The new item is added to 'parentItem'.
      **/
-    void initTree( QTreeWidget * tree )
+    QTreeWidgetItem * addNonSuffixItem( FileTypeItem    * parentItem,
+                                        const QString   & name,
+                                        const CountSize & countSize,
+                                        const QString   & tooltip )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
+	auto item = new FileTypeItem{ parentItem, name, countSize, tooltip };
+	parentItem->addChild( item );
 
-	QTreeWidgetItem * headerItem = tree->headerItem();
-	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );
-	headerItem->setText( FT_CountCol,           QObject::tr( "Files" ) );
-	headerItem->setText( FT_CountPercentBarCol, QObject::tr( "Files %" ) );
-	headerItem->setText( FT_CountPercentCol,    "%" );
-	headerItem->setText( FT_TotalSizeCol,       QObject::tr( "Total Size" ) );
-	headerItem->setText( FT_SizePercentBarCol,  QObject::tr( "Size %" ) );
-	headerItem->setText( FT_SizePercentCol,     "%" );
-	headerItem->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
+	return item;
+    }
 
-	QHeaderView * header = tree->header();
-	header->setDefaultAlignment( Qt::AlignCenter );
-	header->setSectionResizeMode( QHeaderView::ResizeToContents );
 
-	tree->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
+    /**
+     * Process the <uncategorised> items so that there are no more
+     * than a configured top X number of different suffixes.  The
+     * pruned suffix items are merged into a single <other> item.
+     **/
+    void topXItems( FileTypeItem * nonCategoryItem )
+    {
+	// Find the maximum number of separate suffix items to show in <uncategorised>
+	Settings settings;
+	settings.beginGroup( "FileTypeStatsWindow" );
+	const int topX = settings.value( "TopX", 20 ).toInt();
+	settings.setDefaultValue( "TopX", topX );
+	settings.endGroup();
 
-	PercentBarDelegate::createStatsDelegates( tree, FT_CountPercentBarCol, FT_SizePercentBarCol );
+	// Do nothing if there are less than the configured top X suffixes
+	// (plus one to avoid having a single item in <other>)
+	if ( topX < 0 || topX+1 >= nonCategoryItem->childCount() )
+	    return;
+
+	// Sort by size descending, so we can just merge the tail into one item
+	QTreeWidget * treeWidget = nonCategoryItem->treeWidget();
+	QHeaderView * header     = treeWidget->header();
+	const Qt::SortOrder sortOrder   = header->sortIndicatorOrder();
+	const int           sortSection = header->sortIndicatorSection();
+	treeWidget->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
+
+	// Loop through the tail, taking items into a list and keeping track of the counts
+	QList<QTreeWidgetItem *> otherItems;
+	FileCount otherCount = 0;
+	FileSize  otherSize  = 0;
+	while ( nonCategoryItem->childCount() > topX )
+	{
+	    QTreeWidgetItem * otherItem = nonCategoryItem->takeChild( topX );
+	    otherItems << otherItem;
+
+	    FileTypeItem * fileTypeItem = dynamic_cast<FileTypeItem *>( otherItem );
+	    if ( fileTypeItem )
+	    {
+		otherCount += fileTypeItem->count();
+		otherSize  += fileTypeItem->totalSize();
+	    }
+	}
+
+	// Create the <other> item and add the pruned items to it
+	const QString tooltip =
+	    QObject::tr( "Combined totals for all suffixes smaller than the top %1 (configurable)" );
+	const CountSize countSize{ otherCount, otherSize };
+	QTreeWidgetItem * otherParent =
+	    addNonSuffixItem( nonCategoryItem, otherName(), countSize, tooltip.arg( topX ) );
+	otherParent->addChildren( otherItems );
+
+	// Return to the original sort order in case the user had changed it
+	treeWidget->sortByColumn( sortSection, sortOrder );
     }
 
 
@@ -163,14 +184,29 @@ namespace
 	for ( auto it = stats.suffixesBegin(); it != stats.suffixesEnd(); ++it )
 	{
 	    const MimeCategory * category = it.key().category;
-
 	    if ( category )
 	    {
 		FileTypeItem * parentItem = categoryItem.value( category, nullptr );
 		if ( parentItem )
 		{
-		    const bool otherCategory = category == stats.otherCategory();
-		    addSuffixItem( parentItem, otherCategory, it.key().suffix, it.value() );
+		    const QString & suffix = it.key().suffix;
+		    if ( !suffix.isEmpty() )
+		    {
+			addSuffixItem( parentItem, suffix, it.value() );
+		    }
+		    else if ( category == stats.nonCategory() )
+		    {
+			const QString name = QObject::tr( "﻿<no extension>" );
+			const QString tooltip = QObject::tr( "Items with no recognised extension" );
+			addNonSuffixItem( parentItem, name, it.value(), tooltip );
+		    }
+		    else
+		    {
+			const QString name = QObject::tr( "﻿<non-suffix rule>" );
+			const QString tooltip =
+			    QObject::tr( "Items categorised by a rule other than a simple suffix rule" );
+			addNonSuffixItem( parentItem, name, it.value(), tooltip );
+		    }
 		}
 		else
 		{
@@ -183,12 +219,39 @@ namespace
 	    }
 	}
 
-	// Prune the <Other> category widgets to the configured TopX entries
-	FileTypeItem * otherCategoryItem = categoryItem.value( stats.otherCategory(), nullptr );
-	if ( otherCategoryItem )
-	    topXOtherItems( otherCategoryItem );
+	// Prune the "Uncategorised" widgets to the configured TopX entries
+	FileTypeItem * nonCategoryItem = categoryItem.value( stats.nonCategory(), nullptr );
+	if ( nonCategoryItem )
+	    topXItems( nonCategoryItem );
 
 	treeWidget->setCurrentItem( treeWidget->topLevelItem( 0 ) );
+    }
+
+
+    /**
+     * One-time initialization of the tree widget.
+     **/
+    void initTree( QTreeWidget * tree )
+    {
+	app()->dirTreeModel()->setTreeIconSize( tree );
+
+	QTreeWidgetItem * headerItem = tree->headerItem();
+	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );
+	headerItem->setText( FT_CountCol,           QObject::tr( "Files" ) );
+	headerItem->setText( FT_CountPercentBarCol, QObject::tr( "Files %" ) );
+	headerItem->setText( FT_CountPercentCol,    "%" );
+	headerItem->setText( FT_TotalSizeCol,       QObject::tr( "Total Size" ) );
+	headerItem->setText( FT_SizePercentBarCol,  QObject::tr( "Size %" ) );
+	headerItem->setText( FT_SizePercentCol,     "%" );
+	headerItem->setTextAlignment( FT_NameCol, Qt::AlignVCenter | Qt::AlignLeft );
+
+	QHeaderView * header = tree->header();
+	header->setDefaultAlignment( Qt::AlignCenter );
+	header->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	tree->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
+
+	PercentBarDelegate::createStatsDelegates( tree, FT_CountPercentBarCol, FT_SizePercentBarCol );
     }
 
 } // namespace
@@ -442,11 +505,11 @@ FileTypeItem::FileTypeItem( const QString   & name,
     if ( _totalSize > 999 )
 	setToolTip( FT_TotalSizeCol, formatByteSize( _totalSize ) );
 
-    setData( FT_CountPercentBarCol, PercentRole, countPercent );
-    setData( FT_SizePercentBarCol,  PercentRole, sizePercent  );
-
+    setData( FT_CountPercentBarCol, PercentRole,   countPercent );
     setData( FT_CountPercentBarCol, TreeLevelRole, treeLevel );
-    setData( FT_SizePercentBarCol,  TreeLevelRole, treeLevel );
+
+    setData( FT_SizePercentBarCol, PercentRole,   sizePercent  );
+    setData( FT_SizePercentBarCol, TreeLevelRole, treeLevel );
 }
 
 
@@ -459,6 +522,15 @@ bool FileTypeItem::operator<(const QTreeWidgetItem & rawOther) const
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
     const FileTypeItem & other = dynamic_cast<const FileTypeItem &>( rawOther );
+
+    // Always sort <other> at the "end" (for numeric descending or by name ascending)
+    if ( treeWidget()->sortColumn() != FT_NameCol )
+    {
+	if ( text( FT_NameCol ) == otherName() )
+	    return true;
+	else if ( other.text( FT_NameCol ) == otherName() )
+	    return false;
+    }
 
     switch ( treeWidget()->sortColumn() )
     {

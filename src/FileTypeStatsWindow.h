@@ -178,23 +178,37 @@ namespace QDirStat
 
 
     /**
-     * Item class for the file type tree widget, representing either a MIME
-     * category or a suffix.
+     * Item class for the file type tree widget, representing either a
+     * MIME category or a suffix.
      **/
     class FileTypeItem: public QTreeWidgetItem
     {
     public:
 
 	/**
-	 * Constructor. After creating, this item has to be inserted into the
-	 * tree at the appropriate place: toplevel for categories, below a
-	 * category for suffixes.
+	 * Constructor with explicit parent count and size. After
+	 * creating, this item has to be inserted into the tree at the
+	 * appropriate place: toplevel for categories, below a category
+	 * for suffixes.
 	 **/
 	FileTypeItem( const QString   & name,
 	              const CountSize & countSize,
 	              FileCount         parentCount,
 	              FileSize          parentSize,
 	              int               treeLevel = 0 );
+
+	/**
+	 * Constructor with a parent FileTypeItem and tooltip.  Used for
+	 * non-suffix child items: <no extension> and <other>.
+	 **/
+	FileTypeItem( FileTypeItem    * parentItem,
+	              const QString   & name,
+	              const CountSize & countSize,
+	              const QString   & tooltip ):
+	    FileTypeItem{ name, countSize, parentItem->count(), parentItem->totalSize(), 1 }
+	{
+	    setToolTip( FT_NameCol, tooltip );
+	}
 
 	/**
 	 * Return the files count for this category item.
@@ -234,14 +248,12 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor with a suffix.
 	 **/
-	SuffixFileTypeItem( bool              otherCategory,
+	SuffixFileTypeItem( FileTypeItem    * parentItem,
 	                    const QString   & suffix,
-	                    const CountSize & countSize,
-	                    FileCount         parentCount,
-	                    FileSize          parentSize ):
-	    FileTypeItem{ itemName( otherCategory, suffix ), countSize, parentCount, parentSize, 1 },
+	                    const CountSize & countSize ):
+	    FileTypeItem{ "*." + suffix, countSize, parentItem->count(), parentItem->totalSize(), 1 },
 	    _suffix{ suffix }
 	{}
 
@@ -249,32 +261,6 @@ namespace QDirStat
 	 * Return this file type's suffix.
 	 **/
 	const QString & suffix() const { return _suffix; }
-
-
-    protected:
-
-	/**
-	 * Returns the name to display for this tree item.  This
-	 * is "*." plus the suffix.  If there is no suffix, two
-	 * special names are used for the "Other" category and for
-	 * all other categories.
-	 **/
-	static QString itemName( bool otherCategory, const QString & suffix )
-	    { return suffix.isEmpty() ? otherCategory ? noExtension() : nonSuffix() : "*." + suffix; }
-
-	/**
-	 * Returns the name to be used for items with no suffix in
-	 * the "Other" category.
-	 **/
-	 static QString noExtension()
-	    { return QObject::tr( "<no extension>" ); }
-
-	/**
-	 * Returns the name to be used for items with no suffix in
-	 * categories except "Other".
-	 **/
-	 static QString nonSuffix()
-	    { return QObject::tr( "<non-suffix rule>" ); }
 
 
     private:
