@@ -45,7 +45,7 @@ namespace QDirStat
 	 * Constructor with a pattern.  The wildcard pattern is converted to an
 	 * anchored regular expression that doesn't capture any substrings.  The
 	 * default is case-sensitive and follows PCRE syntax with no modifiers.
-	 * Most pattern options don't match much sense in the case of wildcards,
+	 * Most pattern options don't make much sense in the case of wildcards,
 	 * and CaseInsensitiveOption is specified using the CaseInsensitiveWildcard
 	 * sub-class.
 	 *
@@ -53,7 +53,8 @@ namespace QDirStat
 	 * CaseSensitiveWildcard.
 	 **/
 	Wildcard( const QString & pattern, PatternOption options ):
-	    QRegularExpression{ wildcardRegularExpression( pattern, options ) }
+	    QRegularExpression{ wildcardRegularExpression( pattern, options ) },
+	    _pattern{ pattern }
 	{}
 
 
@@ -64,6 +65,18 @@ namespace QDirStat
 	 * constructors.
 	 **/
 	using QRegularExpression::QRegularExpression;
+
+	/**
+	 * Returns the original (unanchored, unconverted) pattern used yo
+	 * construct this instance.
+	 **/
+	const QString & pattern() const { return _pattern; }
+
+	/**
+	 * Returns whether this rule is case-sensitive.
+	 **/
+	bool caseInsensitive() const
+	    { return patternOptions() & QRegularExpression::CaseInsensitiveOption; }
 
 	/**
 	 * Returns whether the given string matches this regular expression.
@@ -116,6 +129,8 @@ namespace QDirStat
 	static QString wildcardToRegularExpression( const QString & pattern,
 	                                            QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
 #endif
+
+	QString _pattern;
 
     };	// class Wildcard
 

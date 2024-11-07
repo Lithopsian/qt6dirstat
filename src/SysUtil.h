@@ -171,7 +171,7 @@ namespace QDirStat
 	 *
 	 * This function assumes UTF-8 encoding of names in the filesystem.
 	 **/
-	inline QString symLinkTarget( const QString & path )
+	inline QString symlinkTarget( const QString & path )
 	    { return QString::fromUtf8( readLink( path ) ); }
 
 	/**

@@ -47,7 +47,7 @@ PkgFilter OpenPkgDialog::pkgFilter()
         return PkgFilter();
     }
 
-    const auto mode = FilterMode( _ui->filterModeComboBox->currentIndex() );
+    const auto mode = SearchFilter::FilterMode( _ui->filterModeComboBox->currentIndex() );
     PkgFilter filter{ _ui->pkgPatternField->text(), mode };
     // logDebug() << filter << Qt::endl;
 

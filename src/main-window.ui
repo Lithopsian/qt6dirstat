@@ -41,6 +41,9 @@
        </property>
        <widget class="QWidget" name="treeViewContainer" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -275,7 +278,7 @@
     <addaction name="actionDiscoverNewestFiles"/>
     <addaction name="actionDiscoverOldestFiles"/>
     <addaction name="actionDiscoverHardLinkedFiles"/>
-    <addaction name="actionDiscoverBrokenSymLinks"/>
+    <addaction name="actionDiscoverBrokenSymlinks"/>
     <addaction name="actionDiscoverSparseFiles"/>
     <addaction name="separator"/>
     <addaction name="actionFileSizeStats"/>
@@ -846,7 +849,7 @@
     <string>Files with Multiple &amp;Hard Links</string>
    </property>
   </action>
-  <action name="actionDiscoverBrokenSymLinks">
+  <action name="actionDiscoverBrokenSymlinks">
    <property name="text">
     <string>&amp;Broken Symbolic LInks</string>
    </property>

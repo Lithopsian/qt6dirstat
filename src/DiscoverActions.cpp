@@ -87,10 +87,10 @@ void DiscoverActions::discoverHardLinkedFiles()
 }
 
 
-void DiscoverActions::discoverBrokenSymLinks()
+void DiscoverActions::discoverBrokenSymlinks()
 {
     BusyPopup msg{ QObject::tr( "Checking symlinks..." ) };
-    discoverFiles( new BrokenSymLinksTreeWalker{},
+    discoverFiles( new BrokenSymlinksTreeWalker{},
                    LL_PathCol,
                    Qt::AscendingOrder,
                    QObject::tr( "Broken symbolic links in %1" ) );

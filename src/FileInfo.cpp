@@ -365,9 +365,9 @@ bool FileInfo::filesystemCanReportBlocks() const
 }
 
 
-QString FileInfo::symLinkTarget() const
+QString FileInfo::symlinkTarget() const
 {
-    return isSymLink() ? SysUtil::symLinkTarget( path() ) : QString{};
+    return isSymlink() ? SysUtil::symlinkTarget( path() ) : QString{};
 }
 
 

@@ -65,7 +65,7 @@ void LargestFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool LargestFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFileOrSymLink() && item->size() >= _threshold;
+    return item && item->isFileOrSymlink() && item->size() >= _threshold;
 }
 
 
@@ -81,7 +81,7 @@ void NewFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool NewFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFileOrSymLink() && item->mtime() >= _threshold;
+    return item && item->isFileOrSymlink() && item->mtime() >= _threshold;
 }
 
 
@@ -97,7 +97,7 @@ void OldFilesTreeWalker::prepare( FileInfo * subtree )
 
 bool OldFilesTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFileOrSymLink() && item->mtime() <= _threshold;
+    return item && item->isFileOrSymlink() && item->mtime() <= _threshold;
 }
 
 
@@ -109,9 +109,9 @@ bool HardLinkedFilesTreeWalker::check( const FileInfo * item )
 }
 
 
-bool BrokenSymLinksTreeWalker::check( const FileInfo * item )
+bool BrokenSymlinksTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isSymLink() && item->isBrokenSymLink();
+    return item && item->isSymlink() && item->isBrokenSymlink();
 }
 
 
@@ -127,7 +127,7 @@ bool SparseFilesTreeWalker::check( const FileInfo * item )
 
 bool FilesFromYearTreeWalker::check( const FileInfo * item )
 {
-    return item && item->isFileOrSymLink() && item->yearAndMonth().year == _year;
+    return item && item->isFileOrSymlink() && item->yearAndMonth().year == _year;
 }
 
 
@@ -135,7 +135,7 @@ bool FilesFromYearTreeWalker::check( const FileInfo * item )
 
 bool FilesFromMonthTreeWalker::check( const FileInfo * item )
 {
-    if ( !item || !item->isFileOrSymLink() )
+    if ( !item || !item->isFileOrSymlink() )
         return false;
 
     const auto yearAndMonth = item->yearAndMonth();
@@ -165,7 +165,7 @@ bool FindFilesTreeWalker::check( const FileInfo * item )
 
     if ( ( !_filter.findDirs()     || !item->isDir()     ) &&
          ( !_filter.findFiles()    || !item->isFile()    ) &&
-         ( !_filter.findSymLinks() || !item->isSymLink() ) &&
+         ( !_filter.findSymlinks() || !item->isSymlink() ) &&
          ( !_filter.findPkgs()     || !item->isPkgInfo() ) )
     {
         return false;

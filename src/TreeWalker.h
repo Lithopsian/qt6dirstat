@@ -176,13 +176,13 @@ namespace QDirStat
     /**
      * TreeWalker to find broken symlinks.
      **/
-    class BrokenSymLinksTreeWalker: public TreeWalker
+    class BrokenSymlinksTreeWalker: public TreeWalker
     {
     public:
 
         bool check( const FileInfo * item ) override;
 
-    };  // class BrokenSymLinksTreeWalker
+    };  // class BrokenSymlinksTreeWalker
 
 
 

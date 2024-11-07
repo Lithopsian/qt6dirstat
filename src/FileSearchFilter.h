@@ -46,13 +46,13 @@ namespace QDirStat
                           bool            caseSensitive,
                           bool            findFiles,
                           bool            findDirs,
-                          bool            findSymLinks,
+                          bool            findSymlinks,
                           bool            findPkgs ):
             SearchFilter{ pattern, filterMode, Contains, caseSensitive },
             _dir{ dir },
             _findFiles{ findFiles },
             _findDirs{ findDirs },
-            _findSymLinks{ findSymLinks },
+            _findSymlinks{ findSymlinks },
             _findPkgs{ findPkgs }
         {}
 
@@ -68,7 +68,7 @@ namespace QDirStat
          **/
         bool findFiles()    const { return _findFiles;    }
         bool findDirs()     const { return _findDirs;     }
-        bool findSymLinks() const { return _findSymLinks; }
+        bool findSymlinks() const { return _findSymlinks; }
         bool findPkgs()     const { return _findPkgs;     }
 
         /**
@@ -82,7 +82,7 @@ namespace QDirStat
         FileInfo * _dir;
         bool       _findFiles{ true };
         bool       _findDirs{ true };
-        bool       _findSymLinks{ true };
+        bool       _findSymlinks{ true };
         bool       _findPkgs{ true };
 
     };  // class FileSearchFilter
@@ -103,7 +103,7 @@ namespace QDirStat
         if ( filter.findPkgs() )
             findTypes << "pkgs";
 
-        if ( filter.findSymLinks() )
+        if ( filter.findSymlinks() )
             findTypes << "symlinks";
 
         stream << "<FileSearchFilter \""

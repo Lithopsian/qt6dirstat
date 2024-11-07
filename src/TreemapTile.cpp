@@ -37,7 +37,7 @@ namespace
      * This function is defined here primarily to let the compiler inline
      * it as a performance-critical call.
      **/
-    const QColor & tileColor( const TreemapView * parentView, const FileInfo * file )
+    QColor tileColor( const TreemapView * parentView, const FileInfo * file )
     {
         if ( parentView->fixedColor().isValid() )
             return parentView->fixedColor();
