@@ -11,6 +11,7 @@
 #include <QDateTime>
 #include <QHeaderView>
 #include <QLabel>
+#include <QLayout>
 #include <QLocale>
 #include <QScrollBar>
 #include <QTextDocument>
@@ -264,4 +265,13 @@ void QDirStat::tooltipForElided( QRect                      visualRect,
     }
 
     QToolTip::hideText();
+}
+
+
+void QDirStat::showHeaderLabel( QLabel * label, const QWidget * container )
+{
+    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+    const int lastPixel =
+	container->contentsRect().right() - container->layout()->contentsMargins().right();
+    elideLabel( label, label->statusTip(), lastPixel );
 }

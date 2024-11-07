@@ -43,7 +43,7 @@ namespace
         ui->findFilesRadioButton->setChecked       ( settings.value( "findFiles",      false  ).toBool() );
         ui->findDirectoriesRadioButton->setChecked ( settings.value( "findDirs",       false  ).toBool() );
         ui->findBothRadioButton->setChecked        ( settings.value( "findBoth",       true   ).toBool() );
-        ui->findSymLinksCheckBox->setChecked       ( settings.value( "findSymLinks",   true   ).toBool() );
+        ui->findSymlinksCheckBox->setChecked       ( settings.value( "findSymlinks",   true   ).toBool() );
 
         ui->wholeTreeRadioButton->setChecked       ( settings.value( "wholeTree",      true   ).toBool() );
         ui->currentSubtreeRadioButton->setChecked  ( settings.value( "currentSubtree", false  ).toBool() );
@@ -71,7 +71,7 @@ namespace
         settings.setValue( "findFiles",      ui->findFilesRadioButton->isChecked()       );
         settings.setValue( "findDirs",       ui->findDirectoriesRadioButton->isChecked() );
         settings.setValue( "findBoth",       ui->findBothRadioButton->isChecked()        );
-        settings.setValue( "findSymLinks",   ui->findSymLinksCheckBox->isChecked()       );
+        settings.setValue( "findSymlinks",   ui->findSymlinksCheckBox->isChecked()       );
 
         settings.setValue( "wholeTree",      ui->wholeTreeRadioButton->isChecked()       );
         settings.setValue( "currentSubtree", ui->currentSubtreeRadioButton->isChecked()  );
@@ -107,11 +107,11 @@ namespace
 
         return FileSearchFilter{ fileInfo,
                                 ui->patternField->text(),
-                                static_cast<FilterMode>( ui->filterModeComboBox->currentIndex() ),
+                                static_cast<SearchFilter::FilterMode>( ui->filterModeComboBox->currentIndex() ),
                                 ui->caseSensitiveCheckBox->isChecked(),
                                 findFiles,
                                 findDirs,
-                                ui->findSymLinksCheckBox->isChecked(),
+                                ui->findSymlinksCheckBox->isChecked(),
                                 findDirs };
     }
 

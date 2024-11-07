@@ -366,6 +366,13 @@ namespace QDirStat
                            QPoint                     pos );
 
     /**
+     * Elide 'label' with the text stored in a standardised way on
+     * the statusTip property.  The label is expected to be within
+     * 'container'.
+     **/
+    void showHeaderLabel( QLabel * label, const QWidget * container );
+
+    /**
      * Human-readable output of a file size in a debug stream.
      *
      * Removed because this overload is ambiguous between FileSize and
