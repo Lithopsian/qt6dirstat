@@ -17,7 +17,6 @@
 #include "DirTreeModel.h"
 #include "FileInfo.h"
 #include "FileSizeStatsWindow.h"
-#include "FileTypeStats.h"
 #include "FormatUtil.h"
 #include "LocateFileTypeWindow.h"
 #include "Logger.h"
@@ -34,19 +33,47 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Elide the header label to fit inside the current dialog width,
+     * so that it fills the available width but very long subtree paths
+     * don't stretch the dialog.  A little extra room is left for the
+     * user to shrink the dialog, which would then force the label to
+     * be elided further.
+    **/
+//    void showHeaderLabel( QLabel * label, const QWidget * container )
+  //  {
+//	// Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+//	const int lastPixel =
+//	    container->contentsRect().right() - container->layout()->contentsMargins().right();
+//	elideLabel( label, label->statusTip(), lastPixel );
+//    }
+
+
+    /**
+     * Returns a WildcardCategory constructed from 'patternCategory'.
+     **/
+    WildcardCategory wildcardCategory( const PatternCategory * patternCategory )
+    {
+	if ( patternCategory->caseInsensitive )
+	    return { CaseInsensitiveWildcard{ patternCategory->pattern }, patternCategory->category };
+	else
+	    return { CaseSensitiveWildcard{ patternCategory->pattern }, patternCategory->category };
+    }
+
+
+    /**
      * Returns the name to use for the "other" item grouping all
-     * the smallest uncategorised suffixes.
+     * the smallest uncategorised patterns.
      **/
     QString otherName() { return QObject::tr( "<other>" ); }
 
     /**
      * Returns the current item in 'tree', cast as a
-     * SuffixFileTypeItem, or 0 if there is no current item or it is
-     * not a SuffixFileTypeItem.
+     * PatternFileTypeItem, or 0 if there is no current item or it is
+     * not a PatternFileTypeItem.
      **/
-    const SuffixFileTypeItem * currentItem( const QTreeWidget * treeWidget)
+    const PatternFileTypeItem * currentItem( const QTreeWidget * treeWidget)
     {
-	return dynamic_cast<const SuffixFileTypeItem *>( treeWidget->currentItem() );
+	return dynamic_cast<const PatternFileTypeItem *>( treeWidget->currentItem() );
     }
 
 
@@ -67,17 +94,39 @@ namespace
 
 
     /**
-     * Create a tree item for a child of a top level category items.
+     * Create a tree item for a child of a top level category item.
      * Each item represents the total files in that category which
-     * were matched by a particular suffix.
+     * were matched by a particular pattern.
      *
      * The new item is added to 'parentItem'.
      **/
-    void addSuffixItem( FileTypeItem    * parentItem,
-                        const QString   & suffix,
-                        const CountSize & countSize )
+    void addPatternItem( FileTypeItem       * parentItem,
+                         const QString      & pattern,
+                         bool                 caseInsensitive,
+                         const MimeCategory * category,
+                         const CountSize    & countSize )
     {
-	auto item = new SuffixFileTypeItem{ parentItem, suffix, countSize };
+	const PatternCategory patternCategory{ pattern, caseInsensitive, category };
+	auto item = new PatternFileTypeItem{ parentItem, pattern, patternCategory, countSize };
+	parentItem->addChild( item );
+    }
+
+
+    /**
+     * Create a tree item for a child of a top level category items.
+     * Each item represents the total files in that category which
+     * were not matched by a pattern.  This used for categories such
+     * as executables and symlinks.
+     *
+     * The new item is added to 'parentItem'.
+     **/
+    void addNonPatternItem( FileTypeItem       * parentItem,
+                            const MimeCategory * category,
+                            const CountSize    & countSize )
+    {
+	const QString name = QObject::tr( "﻿<non-pattern rule>" );
+	const QString tooltip = QObject::tr( "Items not categorised by filename pattern" );
+	auto item = new PatternFileTypeItem{ parentItem, name, tooltip, category, countSize };
 	parentItem->addChild( item );
     }
 
@@ -85,16 +134,16 @@ namespace
     /**
      * Create a specialised tree item child of <uncategorised> which
      * summarises either items with no extension or items smaller
-     * than the configured top X suffixes.
+     * than the configured top X patterns.
      *
-     * The new item is added to 'parentItem'.
+     * The new item is added to 'parentItem' and returned.
      **/
-    QTreeWidgetItem * addNonSuffixItem( FileTypeItem    * parentItem,
-                                        const QString   & name,
-                                        const CountSize & countSize,
-                                        const QString   & tooltip )
+    QTreeWidgetItem * addNonItemItem( FileTypeItem    * parentItem,
+                                      const QString   & name,
+                                      const QString   & tooltip,
+                                      const CountSize & countSize )
     {
-	auto item = new FileTypeItem{ parentItem, name, countSize, tooltip };
+	auto item = new FileTypeItem{ parentItem, name, tooltip, countSize };
 	parentItem->addChild( item );
 
 	return item;
@@ -103,19 +152,19 @@ namespace
 
     /**
      * Process the <uncategorised> items so that there are no more
-     * than a configured top X number of different suffixes.  The
-     * pruned suffix items are merged into a single <other> item.
+     * than a configured top X number of different patterns.  The
+     * pruned pattern items are merged into a single <other> item.
      **/
     void topXItems( FileTypeItem * nonCategoryItem )
     {
-	// Find the maximum number of separate suffix items to show in <uncategorised>
+	// Find the maximum number of separate pattern items to show in <uncategorised>
 	Settings settings;
 	settings.beginGroup( "FileTypeStatsWindow" );
 	const int topX = settings.value( "TopX", 20 ).toInt();
 	settings.setDefaultValue( "TopX", topX );
 	settings.endGroup();
 
-	// Do nothing if there are less than the configured top X suffixes
+	// Do nothing if there are less than the configured top X patternes
 	// (plus one to avoid having a single item in <other>)
 	if ( topX < 0 || topX+1 >= nonCategoryItem->childCount() )
 	    return;
@@ -146,10 +195,10 @@ namespace
 
 	// Create the <other> item and add the pruned items to it
 	const QString tooltip =
-	    QObject::tr( "Combined totals for all suffixes smaller than the top %1 (configurable)" );
+	    QObject::tr( "Combined totals for all patterns smaller than the top %1 (configurable)" );
 	const CountSize countSize{ otherCount, otherSize };
 	QTreeWidgetItem * otherParent =
-	    addNonSuffixItem( nonCategoryItem, otherName(), countSize, tooltip.arg( topX ) );
+	    addNonItemItem( nonCategoryItem, otherName(), tooltip.arg( topX ), countSize );
 	otherParent->addChildren( otherItems );
 
 	// Return to the original sort order in case the user had changed it
@@ -167,60 +216,48 @@ namespace
 	// Collect statistics for 'subtree'
 	const FileTypeStats stats{ subtree };
 
-	// Create a map of toplevel items for finding suffix item parents
+	// Create a map of toplevel items for finding pattern item parents
 	QHash<const MimeCategory *, FileTypeItem *> categoryItem;
 	for ( auto it = stats.categoriesBegin(); it != stats.categoriesEnd(); ++it )
 	{
+	    // Add a category item
 	    const MimeCategory * category = it.key();
-	    if ( category )
-	    {
-		// Add a category item
-		const QString & name = category->name();
-		categoryItem[ category ] = addCategoryItem( treeWidget, stats, name, it.value() );
-	    }
+	    const QString name = category ? category->name() : QObject::tr( "<uncategorised>" );
+	    categoryItem[ category ] = addCategoryItem( treeWidget, stats, name, it.value() );
 	}
 
-	// Create items for each individual suffix (below a category)
-	for ( auto it = stats.suffixesBegin(); it != stats.suffixesEnd(); ++it )
+	// Create items for each individual pattern (below a category)
+	for ( auto it = stats.patternsBegin(); it != stats.patternsEnd(); ++it )
 	{
-	    const MimeCategory * category = it.key().category;
-	    if ( category )
+	    const PatternCategory key = it.key();
+	    const MimeCategory * category = key.category;
+	    FileTypeItem * parentItem = categoryItem.value( category, nullptr );
+	    if ( parentItem )
 	    {
-		FileTypeItem * parentItem = categoryItem.value( category, nullptr );
-		if ( parentItem )
+		const QString & pattern = key.pattern;
+		if ( !pattern.isEmpty() )
 		{
-		    const QString & suffix = it.key().suffix;
-		    if ( !suffix.isEmpty() )
-		    {
-			addSuffixItem( parentItem, suffix, it.value() );
-		    }
-		    else if ( category == stats.nonCategory() )
-		    {
-			const QString name = QObject::tr( "﻿<no extension>" );
-			const QString tooltip = QObject::tr( "Items with no recognised extension" );
-			addNonSuffixItem( parentItem, name, it.value(), tooltip );
-		    }
-		    else
-		    {
-			const QString name = QObject::tr( "﻿<non-suffix rule>" );
-			const QString tooltip =
-			    QObject::tr( "Items categorised by a rule other than a simple suffix rule" );
-			addNonSuffixItem( parentItem, name, it.value(), tooltip );
-		    }
+		    addPatternItem( parentItem, pattern, key.caseInsensitive, category, it.value() );
+		}
+		else if ( category )
+		{
+		    addNonPatternItem( parentItem, category, it.value() );
 		}
 		else
 		{
-		    logError() << "No parent category item for " << it.key().suffix << Qt::endl;
+		    const QString name = QObject::tr( "﻿<no extension>" );
+		    const QString tooltip = QObject::tr( "Items with no recognised extension" );
+		    addNonItemItem( parentItem, name, tooltip, it.value() );
 		}
 	    }
 	    else
 	    {
-		logError() << "No category for suffix " << it.key().suffix << Qt::endl;
+		logError() << "No parent category item for " << key.pattern << Qt::endl;
 	    }
 	}
 
 	// Prune the "Uncategorised" widgets to the configured TopX entries
-	FileTypeItem * nonCategoryItem = categoryItem.value( stats.nonCategory(), nullptr );
+	FileTypeItem * nonCategoryItem = categoryItem.value( nullptr, nullptr );
 	if ( nonCategoryItem )
 	    topXItems( nonCategoryItem );
 
@@ -365,7 +402,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _subtree = newSubtree;
 
     _ui->headingLabel->setStatusTip( tr( "File type statistics for " ) % replaceCrLf( _subtree.url() ) );
-    resizeEvent( nullptr );
+    showHeaderLabel( _ui->headingLabel, this );
 
     populateTree( _ui->treeWidget, _subtree() );
 }
@@ -373,54 +410,47 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 
 void FileTypeStatsWindow::locateCurrentFileType()
 {
-    // Make sure we have an item with a suffix that can be searched
-    const QString suffix = currentItemSuffix();
+    // Make sure we have an item with a pattern that can be searched
+    const PatternCategory * patternCategory = currentItemPattern();
     FileInfo * dir = _subtree();
-    if ( suffix.isEmpty() || !dir )
+    if ( !patternCategory || !dir )
 	return;
 
-    // logDebug() << "Locating " << current->suffix() << Qt::endl;
+    // logDebug() << "Locating " << patternCategory->pattern() << Qt::endl;
 
     // Use the shared LocateFileTypeWindow instance.
     // Let it pick its own parent so it doesn't get closed along with this window.
-    LocateFileTypeWindow::populateSharedInstance( '.' % suffix, dir );
+    LocateFileTypeWindow::populateSharedInstance( wildcardCategory( patternCategory ), dir );
 }
 
 
 void FileTypeStatsWindow::sizeStatsForCurrentFileType()
 {
-    // Make sure we have an item with a suffix that can be searched
-    const QString suffix = currentItemSuffix();
+    // Make sure we have an item with a pattern that can be searched
+    const PatternCategory * patternCategory = currentItemPattern();
     FileInfo * dir = _subtree();
-    if ( suffix.isEmpty() || !dir )
+    if ( !patternCategory || !dir )
 	return;
 
-    //logDebug() << "Size stats for " << suffix << " in " << dir << Qt::endl;
+    //logDebug() << "Size stats for " << patternCategory->pattern << " in " << dir << Qt::endl;
 
-    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, '.' % suffix );
+    FileSizeStatsWindow::populateSharedInstance( this->parentWidget(), dir, wildcardCategory( patternCategory ) );
 }
 
 
-QString FileTypeStatsWindow::currentItemSuffix() const
+const PatternCategory * FileTypeStatsWindow::currentItemPattern() const
 {
     const auto * item = currentItem( _ui->treeWidget );
-    if ( item && !item->suffix().isEmpty() )
-	return item->suffix();
+    if ( item )
+	return &item->patternCategory();
 
-    return QString{};
+    return nullptr;
 }
 
 
 void FileTypeStatsWindow::enableActions()
 {
-    enableActions( !currentItemSuffix().isEmpty() );
-}
-
-
-void FileTypeStatsWindow::enableActions( bool enable )
-{
-    _ui->locateButton->setEnabled( enable );
-    _ui->sizeStatsButton->setEnabled( enable );
+    enableActions( currentItemPattern() );
 }
 
 
@@ -431,12 +461,12 @@ void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 	return;
 
     // The clicked item will always be the current item now
-    const QString suffix = currentItemSuffix();
-    if ( suffix.isEmpty() )
+    const PatternCategory * patternCategory = currentItemPattern();
+    if ( !patternCategory )
 	return;
 
-    _ui->actionLocate->setText( tr( "&Locate files with suffix ." ) % suffix );
-    _ui->actionSizeStats->setText( tr( "&Size statistics for suffix ." ) % suffix );
+    _ui->actionLocate->setText( tr( "&Locate files matching " ) % patternCategory->pattern );
+    _ui->actionSizeStats->setText( tr( "&Size statistics matching " ) % patternCategory->pattern );
 
     QMenu menu;
     menu.addAction( _ui->actionLocate );
@@ -465,11 +495,12 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
-void FileTypeStatsWindow::resizeEvent( QResizeEvent * )
+bool FileTypeStatsWindow::event( QEvent * event )
 {
-    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel );
+    if ( event->type() == QEvent::FontChange || event->type() == QEvent::Resize )
+	showHeaderLabel( _ui->headingLabel, this );
+
+    return QDialog::event( event );
 }
 
 

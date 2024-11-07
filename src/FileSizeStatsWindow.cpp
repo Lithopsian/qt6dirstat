@@ -22,6 +22,7 @@
 #include "FormatUtil.h"
 #include "HistogramView.h"
 #include "Logger.h"
+#include "MimeCategory.h"
 #include "Settings.h"
 #include "SignalBlocker.h"
 
@@ -242,7 +243,7 @@ void FileSizeStatsWindow::connectActions()
     connect( _ui->actionAutoPercentiles,    &QAction::triggered,
              this,                          &FileSizeStatsWindow::autoPercentileRange );
 
-    connect( _ui->excludeSymLinksCheckBox,  &QCheckBox::toggled,
+    connect( _ui->excludeSymlinksCheckBox,  &QCheckBox::toggled,
              this,                          &FileSizeStatsWindow::refresh );
 
     const auto helpButtons = _ui->helpPage->findChildren<const QCommandLinkButton *>();
@@ -254,17 +255,29 @@ void FileSizeStatsWindow::connectActions()
 }
 
 
-void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix )
+void FileSizeStatsWindow::populate( FileInfo * fileInfo, const WildcardCategory & wildcardCategory )
 {
     _subtree = fileInfo;
-    _suffix = suffix;
+    _wildcardCategory = wildcardCategory;
+
+    // Confusing and pointless to exclude (or not) symlinks for a file-type-based dataset
+    const bool unfilteredResults = wildcardCategory.isEmpty();
+    _ui->excludeSymlinksCheckBox->setEnabled( unfilteredResults );
+    if ( !unfilteredResults )
+	_ui->excludeSymlinksCheckBox->setChecked( false );
 
     const QString & url = fileInfo->debugUrl();
-    const QString headerUrl = suffix.isEmpty() ? url : tr( "*%1 in %2" ).arg( suffix, url );
+    const auto filterName = [ &wildcardCategory ]()
+    {
+	const QString & pattern = wildcardCategory.wildcard.pattern();
+	const MimeCategory * category = wildcardCategory.category;
+	return pattern.isEmpty() && category ? category->name() : pattern;
+    };
+    const QString headerUrl = unfilteredResults ? url : filterName() % tr( " files in " ) % url;
     _ui->headingLabel->setStatusTip( tr( "File size statistics for " ) % replaceCrLf( headerUrl ) );
     resizeEvent( nullptr ); // sets the label from the status tip, to fit the window
 
-    loadStats( fileInfo, suffix );
+    loadStats( fileInfo );
 
     initHistogram();
 }
@@ -272,16 +285,19 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const QString & suffix 
 
 void FileSizeStatsWindow::refresh()
 {
-    loadStats( _subtree(), _suffix );
+    loadStats( _subtree() );
 
     setPercentileRange();
 }
 
 
-void FileSizeStatsWindow::loadStats( FileInfo * fileInfo, const QString & suffix )
+void FileSizeStatsWindow::loadStats( FileInfo * fileInfo )
 {
     // Existing stats are invalidated; be sure the model and histogram get new pointers promptly
-    _stats.reset( new FileSizeStats{ fileInfo, suffix, _ui->excludeSymLinksCheckBox->isChecked() } );
+    if ( _wildcardCategory.isEmpty() )
+	_stats.reset( new FileSizeStats{ fileInfo, _ui->excludeSymlinksCheckBox->isChecked() } );
+    else
+	_stats.reset( new FileSizeStats{ fileInfo, _wildcardCategory } );
     _stats->calculatePercentiles();
 
     const FileSizeStats * stats = _stats.get();

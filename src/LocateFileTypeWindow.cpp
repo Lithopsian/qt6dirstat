@@ -17,7 +17,8 @@
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"        // SelectionModel, mainWindow()
+#include "MimeCategory.h"
+#include "QDirStatApp.h" // selectionModel(), mainWindow()
 #include "SelectionModel.h"
 #include "Settings.h"
 
@@ -28,9 +29,9 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return all direct file children matching the given suffix.
+     * Return all direct file children matching the given WildcardCategory.
      **/
-    FileInfoSet matchingFiles( FileInfo * item, const QString & suffix )
+    FileInfoSet matchingFiles( FileInfo * item, const WildcardCategory & wildcardCategory )
     {
 	FileInfoSet result;
 
@@ -40,7 +41,7 @@ namespace
 	const DirInfo * dir = item->dotEntry() ? item->dotEntry() : item->toDirInfo();
 	for ( FileInfoIterator it{ dir }; *it; ++it )
 	{
-	    if ( it->isFile() && it->name().endsWith( suffix, Qt::CaseSensitive ) )
+	    if ( wildcardCategory.matches( *it ) )
 		result << *it;
 	}
 
@@ -56,16 +57,16 @@ namespace
 	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
-	headerItem->setText( SSR_CountCol,     QObject::tr( "Files" ) );
-	headerItem->setText( SSR_TotalSizeCol, QObject::tr( "Total Size" ) );
-	headerItem->setText( SSR_PathCol,      QObject::tr( "Directory" ) );
-	headerItem->setTextAlignment( SSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
+	headerItem->setText( PSR_CountCol,     QObject::tr( "Files" ) );
+	headerItem->setText( PSR_TotalSizeCol, QObject::tr( "Total Size" ) );
+	headerItem->setText( PSR_PathCol,      QObject::tr( "Directory" ) );
+	headerItem->setTextAlignment( PSR_PathCol, Qt::AlignLeft | Qt::AlignVCenter );
 
 	QHeaderView * header = tree->header();
 	header->setDefaultAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 	header->setSectionResizeMode( QHeaderView::ResizeToContents );
 
-	tree->sortByColumn( SSR_PathCol, Qt::AscendingOrder );
+	tree->sortByColumn( PSR_PathCol, Qt::AscendingOrder );
     }
 
 } // namespace
@@ -110,23 +111,24 @@ LocateFileTypeWindow * LocateFileTypeWindow::sharedInstance()
 }
 
 
-void LocateFileTypeWindow::populateSharedInstance( const QString & suffix, FileInfo * fileInfo )
+void LocateFileTypeWindow::populateSharedInstance( const WildcardCategory & wildcardCategory,
+                                                   FileInfo               * fileInfo )
 {
-    if ( suffix.isEmpty() || !fileInfo )
+    if ( !fileInfo )
         return;
 
     // Get the shared instance, creating it if necessary
     LocateFileTypeWindow * instance = sharedInstance();
 
-    instance->populate( suffix, fileInfo );
+    instance->populate( wildcardCategory, fileInfo );
     instance->show();
     instance->raise();
 }
 
 
-void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo )
+void LocateFileTypeWindow::populate( const WildcardCategory & wildcardCategory, FileInfo * fileInfo )
 {
-    _suffix  = suffix;
+    _wildcardCategory = wildcardCategory;
     _subtree = fileInfo;
 
     _ui->treeWidget->clear();
@@ -134,7 +136,9 @@ void LocateFileTypeWindow::populate( const QString & suffix, FileInfo * fileInfo
 
     const int count = _ui->treeWidget->topLevelItemCount();
     const QString intro = count == 1 ? tr( "1 directory" ) : tr( "%L1 directories" ).arg( count );
-    const QString heading = tr( " with *%1 files below %2" ).arg( suffix, replaceCrLf( _subtree.url() ) );
+    const QString & pattern = wildcardCategory.wildcard.pattern();
+    const QString & name = pattern.isEmpty() ? wildcardCategory.category->name() : pattern;
+    const QString heading = tr( " with %1 files below %2" ).arg( name, replaceCrLf( _subtree.url() ) );
 
     // Force a redraw of the header from the status tip
     _ui->heading->setStatusTip( intro % heading );
@@ -150,7 +154,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
     if ( !dir )
 	return;
 
-    const FileInfoSet matches = matchingFiles( dir, _suffix );
+    const FileInfoSet matches = matchingFiles( dir, _wildcardCategory );
     if ( !matches.isEmpty() )
     {
 	// Create a search result for this path
@@ -158,7 +162,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 	for ( const FileInfo * file : matches )
 	    totalSize += file->size();
 
-	_ui->treeWidget->addTopLevelItem( new SuffixSearchResultItem{ dir->url(), matches.size(), totalSize } );
+	_ui->treeWidget->addTopLevelItem( new PatternSearchResultItem{ dir->url(), matches.size(), totalSize } );
     }
 
     // Recurse through any subdirectories
@@ -172,7 +176,7 @@ void LocateFileTypeWindow::populateRecursive( FileInfo * dir )
 
 void LocateFileTypeWindow::refresh()
 {
-    populate( _suffix, _subtree() );
+    populate( _wildcardCategory, _subtree() );
 }
 
 
@@ -183,12 +187,12 @@ void LocateFileTypeWindow::selectResults() const
     if ( !tree || !item )
 	return;
 
-    const SuffixSearchResultItem * searchResult = dynamic_cast<const SuffixSearchResultItem *>( item );
-    CHECK_DYNAMIC_CAST( searchResult, "SuffixSearchResultItem" );
+    const PatternSearchResultItem * searchResult = dynamic_cast<const PatternSearchResultItem *>( item );
+    CHECK_DYNAMIC_CAST( searchResult, "PatternSearchResultItem" );
 
     FileInfo * dir = tree->locate( searchResult->path() );
 
-    const FileInfoSet matches = matchingFiles( dir, _suffix );
+    const FileInfoSet matches = matchingFiles( dir, _wildcardCategory );
     if ( !matches.isEmpty() )
 	app()->selectionModel()->setCurrentItem( matches.first(), false );
 
@@ -215,7 +219,7 @@ void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
 
 
 
-SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
+PatternSearchResultItem::PatternSearchResultItem( const QString & path,
                                                 int             count,
                                                 FileSize        totalSize ):
     QTreeWidgetItem{ UserType },
@@ -232,25 +236,25 @@ SuffixSearchResultItem::SuffixSearchResultItem( const QString & path,
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    set( SSR_CountCol,     Qt::AlignRight, formatCount( count ) );
-    set( SSR_TotalSizeCol, Qt::AlignRight, formatSize( totalSize ) );
-    set( SSR_PathCol,      Qt::AlignLeft,  replaceCrLf( path ) );
+    set( PSR_CountCol,     Qt::AlignRight, formatCount( count ) );
+    set( PSR_TotalSizeCol, Qt::AlignRight, formatSize( totalSize ) );
+    set( PSR_PathCol,      Qt::AlignLeft,  replaceCrLf( path ) );
 
-    setIcon( SSR_PathCol,  QIcon( app()->dirTreeModel()->dirIcon() ) );
+    setIcon( PSR_PathCol,  QIcon( app()->dirTreeModel()->dirIcon() ) );
 }
 
 
-QVariant SuffixSearchResultItem::data( int column, int role ) const
+QVariant PatternSearchResultItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are likely to be long and elided
-    if ( role != Qt::ToolTipRole || column != SSR_PathCol )
+    if ( role != Qt::ToolTipRole || column != PSR_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
-    return hasLineBreak( _path ) ? _path : tooltipForElided( this, SSR_PathCol, 0 );
+    return hasLineBreak( _path ) ? _path : tooltipForElided( this, PSR_PathCol, 0 );
 }
 
 
-bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
+bool PatternSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
 {
     if ( !treeWidget() )
 	return QTreeWidgetItem::operator<( rawOther );
@@ -258,12 +262,12 @@ bool SuffixSearchResultItem::operator<( const QTreeWidgetItem & rawOther ) const
     // Since this is a reference, the dynamic_cast will throw a std::bad_cast
     // exception if it fails. Not catching this here since this is a genuine
     // error which should not be silently ignored.
-    const SuffixSearchResultItem & other = dynamic_cast<const SuffixSearchResultItem &>( rawOther );
+    const PatternSearchResultItem & other = dynamic_cast<const PatternSearchResultItem &>( rawOther );
 
     switch ( treeWidget()->sortColumn() )
     {
-	case SSR_CountCol:     return _count     < other.count();
-	case SSR_TotalSizeCol: return _totalSize < other.totalSize();
+	case PSR_CountCol:     return _count     < other.count();
+	case PSR_TotalSizeCol: return _totalSize < other.totalSize();
 	default:               return QTreeWidgetItem::operator<( rawOther );
     }
 }

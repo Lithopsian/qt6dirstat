@@ -13,6 +13,7 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MimeCategorizer.h"
+#include "MimeCategory.h"
 
 
 #define VERBOSE_STATS 0
@@ -24,8 +25,8 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Check if a suffix is cruft, i.e. a nonstandard suffix that is not
-     * useful for classification.
+     * Check if a file extension is cruft, i.e. a nonstandard suffix
+     * that is not useful for classification.
      *
      * The criteria are deliberately extreme, so only really odd
      * extensions are treated as "non-extensions".  Most of the mass
@@ -36,8 +37,6 @@ namespace
                   const QRegularExpression & matchInvalid )
     {
 	// Starting with anything other than a letter or number is odd
-//	const ushort ch = suffix.at( 0 ).unicode();
-//	if ( !( ch >= 'A' && ch <= 'Z' ) && !( ch >= 'a' && ch <= 'z' ) )
 	const QChar ch = suffix.at( 0 );
 	if ( !ch.isLetterOrNumber() )
 	    return true;
@@ -85,6 +84,7 @@ namespace
 	if ( lastDot <= 0 || filename.size() - lastDot > 32 )
 	    return QString{};
 
+//	return filename.mid( lastDot + 1 ); // just return the shortest extension
 	const int suffixIndex = [ &filename, lastDot ]()
 	{
 	    /**
@@ -132,14 +132,13 @@ namespace
 	if ( isCruft( suffix, matchUnusual, matchInvalid ) )
 	    return QString{};
 
-	return suffix;
+	return "*."_L1 % suffix;
     }
 
 } // namespace
 
 
-FileTypeStats::FileTypeStats( FileInfo * subtree ):
-    _nonCategory{ new MimeCategory{ QObject::tr( "<uncategorised>" ) } }
+FileTypeStats::FileTypeStats( FileInfo * subtree )
 {
     if ( subtree && subtree->checkMagicNumber() )
     {
@@ -147,15 +146,12 @@ FileTypeStats::FileTypeStats( FileInfo * subtree ):
 	const QRegularExpression matchInvalid{ "\\p{Z}|\\p{C}" };
 	collect( subtree, matchUnusual, matchInvalid );
 
-//	_totalSize = subtree->totalSize();
-//	removeCruft( _categories, _suffixes, nonCategory() );
-
 #if VERBOSE_STATS
 	sanityCheck( subtree );
 #endif
     }
 
-    logDebug() << _suffixes.size() << " suffixes in " << _categories.size() << " categories" << Qt::endl;
+    logDebug() << _patterns.size() << " patterns in " << _categories.size() << " categories" << Qt::endl;
 }
 
 
@@ -171,30 +167,26 @@ void FileTypeStats::collect( const FileInfo           * dir,
 	{
 	    collect( *it, matchUnusual, matchInvalid );
 	}
-	else if ( it->isFileOrSymLink() )
+	else if ( it->isFileOrSymlink() )
 	{
 	    ++_totalCount;
 	    _totalSize += it->size();
 
 	    // First attempt: try the MIME categorizer.
-	    QString suffix;
-	    const MimeCategory * category = categorizer->category( *it, &suffix );
+	    QString pattern;
+	    bool caseInsensitive;
+	    const MimeCategory * category = categorizer->category( *it, pattern, caseInsensitive );
 	    if ( category )
 	    {
-		// The suffixes the MIME categorizer returns are the exact ones
-		// used to match a category.  That could be one of multiple
-		// possible suffixies.  When the category is matched using a
-		// non-suffix rule, there may be no suffix here even though the
-		// file has a suffix.
 		addCategoryItem( category, *it );
-		addSuffixItem( suffix, category, *it );
+		addPatternItem( pattern, caseInsensitive, category, *it );
 	    }
 	    else // !category
 	    {
 		// Use "Uncategorised" with any filename extension as the suffix
-		addCategoryItem( nonCategory(), *it );
+		addCategoryItem( nullptr, *it );
 		const QString suffix = filenameExtension( it->name(), matchUnusual, matchInvalid );
-		addSuffixItem( suffix, nonCategory(), *it );
+		addPatternItem( suffix, false, nullptr, *it );
 	    }
 
 	    // Disregard block devices and other special files
@@ -212,12 +204,13 @@ void FileTypeStats::addCategoryItem( const MimeCategory * category, const FileIn
 }
 
 
-void FileTypeStats::addSuffixItem( const QString      & suffix,
-                                   const MimeCategory * category,
-                                   const FileInfo     * item )
+void FileTypeStats::addPatternItem( const QString      & pattern,
+                                    bool                 caseInsensitive,
+                                    const MimeCategory * category,
+                                    const FileInfo     * item )
 {
     // Qt will create a value-initialised (ie. all zeroes) entry if it doesn't exist yet
-    CountSize & countSize = _suffixes[ { suffix, category } ];
+    CountSize & countSize = _patterns[ { pattern, caseInsensitive, category } ];
     ++countSize.count;
     countSize.size += item->size();
 }

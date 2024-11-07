@@ -9,57 +9,50 @@
 
 #include "FileSizeStats.h"
 #include "FileInfoIterator.h"
-#include "FormatUtil.h"
+#include "MimeCategorizer.h" // WildcardCategory
 
 
 using namespace QDirStat;
 
 
-namespace
-{
-    bool canCollect( const FileInfo * subtree, bool excludeSymLinks )
-    {
-        return ( !excludeSymLinks && subtree->isSymLink() ) || subtree->isFile();
-    }
-
-}
-
-
-FileSizeStats::FileSizeStats( FileInfo * subtree, const QString & suffix, bool excludeSymLinks ):
+FileSizeStats::FileSizeStats( FileInfo * subtree, bool excludeSymlinks ):
     PercentileStats{}
 {
     if ( !subtree || !subtree->checkMagicNumber() )
         return;
 
-    if ( suffix.isEmpty() )
-    {
-        reserve( subtree->totalNonDirItems() );
-        collect( subtree, excludeSymLinks );
-    }
-    else
-    {
-        collect( subtree, suffix, excludeSymLinks );
-    }
-
+    reserve( subtree->totalNonDirItems() );
+    collect( subtree, excludeSymlinks );
     sort();
 }
 
 
-void FileSizeStats::collect( const FileInfo * subtree, bool excludeSymLinks )
+FileSizeStats::FileSizeStats( FileInfo * subtree, const WildcardCategory & wildcardCategory ):
+    PercentileStats{}
 {
-    if ( canCollect( subtree, excludeSymLinks ) )
-        append( subtree->size() );
+    if ( !subtree || !subtree->checkMagicNumber() )
+        return;
 
-    for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it, excludeSymLinks );
+    collect( subtree, wildcardCategory );
+    sort();
 }
 
 
-void FileSizeStats::collect( const FileInfo * subtree, const QString & suffix, bool excludeSymLinks )
+void FileSizeStats::collect( const FileInfo * subtree, bool excludeSymlinks )
 {
-    if ( canCollect( subtree, excludeSymLinks ) && subtree->name().endsWith( suffix ) )
+    if ( ( !excludeSymlinks && subtree->isSymlink() ) || subtree->isFile() )
         append( subtree->size() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )
-        collect( *it, suffix, excludeSymLinks );
+        collect( *it, excludeSymlinks );
+}
+
+
+void FileSizeStats::collect( const FileInfo * subtree, const WildcardCategory & wildcardCategory )
+{
+    if ( wildcardCategory.matches( subtree ) )
+        append( subtree->size() );
+
+    for ( DotEntryIterator it{ subtree }; *it; ++it )
+        collect( *it, wildcardCategory );
 }
