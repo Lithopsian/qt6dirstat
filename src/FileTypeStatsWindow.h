@@ -143,11 +143,11 @@ namespace QDirStat
 	void keyPressEvent( QKeyEvent * event ) override;
 
 	/**
-	 * Resize event: elide the title to fit inside the current dialog width,
-	 * so that they fill the available width but very long paths don't
-	 * stretch the dialog.  A little extra room is left for the user to
-	 * shrink the dialog, which would then force the label to be elided
-	 * further.
+	 * Event handler: elide the title to fit inside the current dialog
+	 * width, so that they fill the available width but very long paths
+	 * don't stretch the dialog.  A little extra room is left for the
+	 * user to shrink the dialog, which would then force the label to
+	 * be elided further.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/

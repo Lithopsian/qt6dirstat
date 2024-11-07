@@ -370,7 +370,7 @@ namespace QDirStat
      * the statusTip property.  The label is expected to be within
      * 'container'.
      **/
-    void showHeaderLabel( QLabel * label, const QWidget * container );
+    void showElidedLabel( QLabel * label, const QWidget * container );
 
     /**
      * Human-readable output of a file size in a debug stream.

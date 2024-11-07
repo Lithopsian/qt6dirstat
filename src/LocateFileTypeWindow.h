@@ -106,7 +106,7 @@ namespace QDirStat
 	void populateRecursive( FileInfo * dir );
 
 	/**
-	 * Resize event, reimplemented from QWidget.
+	 * Event handler, reimplemented from QDialog/QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
@@ -114,7 +114,7 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * ) override;
+	bool event( QEvent * event ) override;
 
 
     private:

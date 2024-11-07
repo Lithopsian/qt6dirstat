@@ -120,6 +120,14 @@ namespace QDirStat
 	void populateRecursive( FileInfo * dir );
 
 	/**
+	 * Detect theme changes.  Font changes result in the header label
+	 * being re-elided.
+	 *
+	 * Reimplemented from QDialog/QWidget.
+	 **/
+	void changeEvent( QEvent * event ) override;
+
+	/**
 	 * Resize event, reimplemented from QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that

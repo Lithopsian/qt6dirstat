@@ -268,7 +268,7 @@ void QDirStat::tooltipForElided( QRect                      visualRect,
 }
 
 
-void QDirStat::showHeaderLabel( QLabel * label, const QWidget * container )
+void QDirStat::showElidedLabel( QLabel * label, const QWidget * container )
 {
     // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
     const int lastPixel =

@@ -12,7 +12,7 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsView>
-#include <QResizeEvent>
+#include <QEvent>
 
 #include "Typedefs.h" // FileSize
 
@@ -316,18 +316,11 @@ namespace QDirStat
 	static QBrush overflowSliceBrush() { return QColor{ 0xD0, 0x40, 0x20 }; }
 
 	/**
-	 * Resize the view.
+	 * Detect palette and font changes, and dialog resizes.
 	 *
 	 * Reimplemented from QGraphicsView (from QWidget).
 	 **/
-	void resizeEvent( QResizeEvent * ) override;
-
-	/**
-	 * Detect palette changes.
-	 *
-	 * Reimplemented from QGraphicsView (from QWidget).
-	 **/
-	void changeEvent( QEvent * event ) override;
+	bool event( QEvent * event ) override;
 
 
     private:

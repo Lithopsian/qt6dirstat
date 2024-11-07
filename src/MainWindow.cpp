@@ -1091,16 +1091,22 @@ void MainWindow::updateActions()
 
 bool MainWindow::event( QEvent * event )
 {
-    const auto type = event->type();
-    if ( type == QEvent::Close )
+    switch ( event->type() )
     {
-	// Stop in-progress reads cleanly
-	stopReading();
-	return true;
-    }
+	case QEvent::Close:
+	    // Stop in-progress reads cleanly
+	    stopReading();
+	    return true;
 
-    if ( type == QEvent::FontChange || type == QEvent::Resize )
-	_ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+	case QEvent::FontChange:
+	case QEvent::PaletteChange:
+	case QEvent::Resize:
+	    _ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+	    break;
+
+	default:
+	    break;
+    }
 
     return QMainWindow::event( event );
 }

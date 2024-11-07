@@ -39,7 +39,7 @@ namespace
      * user to shrink the dialog, which would then force the label to
      * be elided further.
     **/
-//    void showHeaderLabel( QLabel * label, const QWidget * container )
+//    void showElidedLabel( QLabel * label, const QWidget * container )
   //  {
 //	// Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
 //	const int lastPixel =
@@ -402,7 +402,7 @@ void FileTypeStatsWindow::populate( FileInfo * newSubtree )
     _subtree = newSubtree;
 
     _ui->headingLabel->setStatusTip( tr( "File type statistics for " ) % replaceCrLf( _subtree.url() ) );
-    showHeaderLabel( _ui->headingLabel, this );
+    showElidedLabel( _ui->headingLabel, this );
 
     populateTree( _ui->treeWidget, _subtree() );
 }
@@ -498,7 +498,7 @@ void FileTypeStatsWindow::keyPressEvent( QKeyEvent * event )
 bool FileTypeStatsWindow::event( QEvent * event )
 {
     if ( event->type() == QEvent::FontChange || event->type() == QEvent::Resize )
-	showHeaderLabel( _ui->headingLabel, this );
+	showElidedLabel( _ui->headingLabel, this );
 
     return QDialog::event( event );
 }

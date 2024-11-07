@@ -59,21 +59,7 @@ namespace
     * See if a filename has an extension; that is, a section
     * of the name following a '.' character.  Ignore a
     * leading dot which indicates a hidden file, not an
-    * extension.
-    *
-    * The rather complex loop here is an attempt to identify
-    * multiple suffixes which might form a single valid
-    * extension: eg. .tar.gz.  Starting at the end of the
-    * filename, when an entirely-numeric or short suffix is
-    * found, a search is made for a previous suffix.  This
-    * continues until either there are no more dots or the
-    * compound suffix becomes too long, or a suffix is found
-    * which is too long to be considered sensible in a
-    * compound suffix.
-    *
-    * This could probably be tuned further, but surprisingly
-    * few extra longer extensions are found and they usually
-    * get relegated to <other> anyway.
+    * extension and ignore very long extensions.
     **/
     QString filenameExtension( const QString            & filename,
                                const QRegularExpression & matchUnusual,
@@ -84,51 +70,7 @@ namespace
 	if ( lastDot <= 0 || filename.size() - lastDot > 32 )
 	    return QString{};
 
-//	return filename.mid( lastDot + 1 ); // just return the shortest extension
-	const int suffixIndex = [ &filename, lastDot ]()
-	{
-	    /**
-	    * Return whether to look for another extension section,
-	    * based on the suffix between 'startDot' and 'endDot'.
-	    * If the suffix has four or fewer characters (excluding
-	    * the dots) or contains only numeric digits, then see if
-	    * another suffix can be found before it in 'filename'.
-	    **/
-	    const auto tryAgain = [ &filename ]( const int startDot, const int endDot )
-	    {
-		if ( endDot - startDot < 6 )
-		    return true;
-
-		for ( int i = startDot + 1; i < endDot; ++i )
-		{
-		    if ( !isdigit( filename.at( i ).unicode() ) )
-			return false;
-		}
-
-		return true;
-	    };
-
-	    // Loop while the suffixes found so far contain only numbers or are very short
-	    int thisDot = lastDot;
-	    bool tryAnotherSuffix = tryAgain( thisDot, filename.size() );
-	    while ( tryAnotherSuffix )
-	    {
-		const int prevDot = thisDot;
-		thisDot = filename.lastIndexOf( u'.', prevDot - 1 );
-
-		// If no new suffix found, or the total extension length or this suffix is too big ...
-		// ... then return the extensions without this section
-		const int totalSuffixLen = filename.size() - thisDot - 1;
-		const int newSectionLen  = prevDot - thisDot - 1;
-		if ( thisDot <= 0 || totalSuffixLen > 16 || newSectionLen > 8 )
-		    return prevDot;
-
-		tryAnotherSuffix = tryAgain( thisDot, prevDot );
-	    }
-	    return thisDot;
-	}();
-
-	const QString suffix = filename.mid( suffixIndex + 1 );
+	const QString suffix = filename.mid( lastDot + 1 ); // just return the shortest extension
 	if ( isCruft( suffix, matchUnusual, matchInvalid ) )
 	    return QString{};
 

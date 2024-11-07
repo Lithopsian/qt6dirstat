@@ -29,6 +29,22 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Elide the header label to fit inside the current dialog width,
+     * so that it fills the available width but very long subtree paths
+     * don't stretch the dialog.  A little extra room is left for the
+     * user to shrink the dialog, which would then force the label to
+     * be elided further.
+    **/
+//    void showElidedLabel( QLabel * label, const QWidget * container )
+//    {
+//	// Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
+//	const int lastPixel =
+//	    container->contentsRect().right() - container->layout()->contentsMargins().right();
+//	elideLabel( label, label->statusTip(), lastPixel );
+//    }
+
+
+    /**
      * Return all direct file children matching the given WildcardCategory.
      **/
     FileInfoSet matchingFiles( FileInfo * item, const WildcardCategory & wildcardCategory )
@@ -142,7 +158,7 @@ void LocateFileTypeWindow::populate( const WildcardCategory & wildcardCategory, 
 
     // Force a redraw of the header from the status tip
     _ui->heading->setStatusTip( intro % heading );
-    resizeEvent( nullptr );
+    showElidedLabel( _ui->heading, this );
 
     _ui->treeWidget->setCurrentItem( _ui->treeWidget->topLevelItem( 0 ) );
 //    logDebug() << count << " directories" << Qt::endl;
@@ -209,11 +225,12 @@ void LocateFileTypeWindow::selectResult() const
 }
 
 
-void LocateFileTypeWindow::resizeEvent( QResizeEvent * )
+bool LocateFileTypeWindow::event( QEvent * event )
 {
-    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
-    elideLabel( _ui->heading, _ui->heading->statusTip(), lastPixel );
+    if ( event->type() == QEvent::FontChange || event->type() == QEvent::Resize )
+	showElidedLabel( _ui->heading, this );
+
+    return QDialog::event( event );
 }
 
 

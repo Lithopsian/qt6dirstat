@@ -279,7 +279,7 @@ void FileAgeStatsWindow::populate( FileInfo * fileInfo )
     _subtree = fileInfo;
 
     _ui->headingLabel->setStatusTip( tr( "File age statistics for " ) % replaceCrLf( _subtree.url() ) );
-    resizeEvent( nullptr );
+    showElidedLabel( _ui->headingLabel, this );
 
     populateTree(_subtree(), _ui->treeWidget, yearsWithMonths() );
 
@@ -325,11 +325,12 @@ void FileAgeStatsWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
-void FileAgeStatsWindow::resizeEvent( QResizeEvent * )
+bool FileAgeStatsWindow::event( QEvent * event )
 {
-    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
-    elideLabel( _ui->headingLabel, _ui->headingLabel->statusTip(), lastPixel );
+    if ( event->type() == QEvent::FontChange || event->type() == QEvent::Resize )
+	showElidedLabel( _ui->headingLabel, this );
+
+    return QDialog::event( event );
 }
 
 

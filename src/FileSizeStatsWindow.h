@@ -183,16 +183,11 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 *
-	 * Reimplemented from QDialog/QWidget.
-	 **/
-	void resizeEvent( QResizeEvent * ) override;
-
-	/**
-	 * Detect palette changes.
+	 * Also dect palette changes which affect the table shading.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/
-	void changeEvent( QEvent * event ) override;
+	bool event( QEvent * event ) override;
 
 	/**
 	 * Context menu event.  Build and show a context menu.
