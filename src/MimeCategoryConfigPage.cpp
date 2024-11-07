@@ -13,11 +13,13 @@
 #include "MimeCategoryConfigPage.h"
 #include "ConfigDialog.h"
 #include "DirTree.h"
+#include "DirTreeModel.h"
 #include "DirInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
 #include "MimeCategorizer.h"
+#include "MimeCategory.h"
 #include "QDirStatApp.h"
 
 
@@ -29,6 +31,26 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Find the toplevel dialog window and cast it to ConfigDialog.
+     **/
+    ConfigDialog * configDialog( const QWidget * tabPage )
+    {
+	return static_cast<ConfigDialog *>( tabPage->window() );
+    }
+
+
+    /**
+     * Re-calculate the elision and style (text color) for the
+     * duplicate pattern warning label.
+     **/
+    void elideDuplicateLabel( QLabel * label )
+    {
+	showElidedLabel( label, label->parentWidget() );
+	label->setStyleSheet( app()->dirTreeModel()->errorStyleSheet() );
+    }
+
+
     /**
      * Add demo content to the tremap view.
      **/
@@ -95,6 +117,36 @@ namespace
 
 
     /**
+     * Populate the widgets.
+     **/
+    void initWidgets( Ui::MimeCategoryConfigPage * ui )
+    {
+	populateTreemapView( ui->treemapView );
+
+	// Get the treemap configuration settings from the main treemapView
+	// The settings in ui->treemapView will be from diak and possibly out of date
+	const MainWindow * mainWindow = app()->mainWindow();
+	ui->squarifiedCheckBox->setChecked    ( mainWindow->treemapView()->squarify() );
+	ui->cushionShadingCheckBox->setChecked( mainWindow->treemapView()->doCushionShading() );
+	ui->cushionHeightSpinBox->setValue    ( mainWindow->treemapView()->cushionHeight() );
+	ui->heightScaleFactorSpinBox->setValue( mainWindow->treemapView()->heightScaleFactor() );
+	ui->minTileSizeSpinBox->setValue      ( mainWindow->treemapView()->minTileSize() );
+
+	if ( mainWindow->treemapView()->fixedColor().isValid() )
+	    ui->tileColorEdit->setText( mainWindow->treemapView()->fixedColor().name() );
+
+	ui->cushionHeightLabel->setEnabled      ( ui->cushionShadingCheckBox->isChecked() );
+	ui->cushionHeightSpinBox->setEnabled    ( ui->cushionShadingCheckBox->isChecked() );
+	ui->heightScaleFactorLabel->setEnabled  ( ui->cushionShadingCheckBox->isChecked() );
+	ui->heightScaleFactorSpinBox->setEnabled( ui->cushionShadingCheckBox->isChecked() );
+
+	ui->caseInsensitivePatterns->setTabChangesFocus( true );
+	ui->caseSensitivePatterns->setTabChangesFocus( true );
+	ui->duplicateLabel->hide();
+    }
+
+
+    /**
      * Convert 'patternList' into a newline-separated string and set it as
      * text of 'textEdit'.
      **/
@@ -120,7 +172,13 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
     _ui->setupUi( this );
     _ui->nameLineEdit->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
 
-    initListWidget();
+    connect( _ui->caseInsensitivePatterns,  &QPlainTextEdit::textChanged,
+             this,                          &MimeCategoryConfigPage::caseInsensitiveTextChanged );
+
+    connect( _ui->caseSensitivePatterns,    &QPlainTextEdit::textChanged,
+             this,                          &MimeCategoryConfigPage::caseSensitiveTextChanged );
+
+    initListWidget(); // in ListEditor
 
     connect( _ui->nameLineEdit,             &QLineEdit::textChanged,
              this,                          &MimeCategoryConfigPage::nameChanged );
@@ -165,7 +223,7 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
              this,                          &MimeCategoryConfigPage::applyChanges );
 
     // Do this now so the correct settings will be sent to the mini-treemap
-    populateTreemapTab();
+    initWidgets( _ui.get() );
 }
 
 
@@ -179,33 +237,8 @@ MimeCategoryConfigPage::~MimeCategoryConfigPage()
 }
 
 
-void MimeCategoryConfigPage::populateTreemapTab()
-{
-    populateTreemapView( _ui->treemapView );
-
-    // Get the treemap configuration settings from the main treemapView
-    // The settings in _ui->treemapView will be from diak and possibly out of date
-    const MainWindow * mainWindow = app()->mainWindow();
-    _ui->squarifiedCheckBox->setChecked    ( mainWindow->treemapView()->squarify() );
-    _ui->cushionShadingCheckBox->setChecked( mainWindow->treemapView()->doCushionShading() );
-    _ui->cushionHeightSpinBox->setValue    ( mainWindow->treemapView()->cushionHeight() );
-    _ui->heightScaleFactorSpinBox->setValue( mainWindow->treemapView()->heightScaleFactor() );
-    _ui->minTileSizeSpinBox->setValue      ( mainWindow->treemapView()->minTileSize() );
-
-    if ( mainWindow->treemapView()->fixedColor().isValid() )
-	_ui->tileColorEdit->setText( mainWindow->treemapView()->fixedColor().name() );
-
-    _ui->cushionHeightLabel->setEnabled      ( _ui->cushionShadingCheckBox->isChecked() );
-    _ui->cushionHeightSpinBox->setEnabled    ( _ui->cushionShadingCheckBox->isChecked() );
-    _ui->heightScaleFactorLabel->setEnabled  ( _ui->cushionShadingCheckBox->isChecked() );
-    _ui->heightScaleFactorSpinBox->setEnabled( _ui->cushionShadingCheckBox->isChecked() );
-}
-
-
 void MimeCategoryConfigPage::applyChanges()
 {
-    //logDebug() << Qt::endl;
-
     // Save the treemap settings first, there might not be anything else to do
     app()->mainWindow()->treemapView()->configChanged( QColor{ _ui->tileColorEdit->text() },
                                                        _ui->squarifiedCheckBox->isChecked(),
@@ -228,6 +261,8 @@ void MimeCategoryConfigPage::applyChanges()
 
     // Pass the working category list to the categorizer to save
     MimeCategorizer::instance()->replaceCategories( categories );
+
+    _dirty = false;
 }
 
 
@@ -255,72 +290,6 @@ void MimeCategoryConfigPage::currentItemChanged( QListWidgetItem * current,
 
     setBackground( current );
     setBackground( previous );
-}
-
-
-void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
-{
-    if ( !item )
-	return;
-
-    const MimeCategory * category = CATEGORY_CAST( value( item ) );
-    if ( !category )
-	return;
-
-    const bool previews = app()->mainWindow()->treemapView()->colourPreviews();
-
-    const qreal width         = _ui->listWidget->width();
-    const qreal backgroundEnd = previews ? ( width - 21 ) / width : width;
-    const qreal shadingStart  = ( width - 20 ) / width;
-    const qreal shadingMiddle = ( width - 10 ) / width;
-
-    const bool     current         = item == _ui->listWidget->currentItem();
-    const QColor & backgroundColor = current ? palette().highlight().color() : palette().base().color();
-
-    QLinearGradient gradient{ 0, 0, 1, 0 };
-    gradient.setCoordinateMode( QGradient::ObjectMode );
-    gradient.setColorAt( 0, backgroundColor );
-    gradient.setColorAt( backgroundEnd, backgroundColor );
-    if ( previews )
-    {
-	if ( _ui->cushionShadingCheckBox->isChecked() )
-	{
-	    const QColor shadeColor = category->color().darker( 300 );
-	    gradient.setColorAt( shadingStart,  shadeColor );
-	    gradient.setColorAt( shadingMiddle, category->color() );
-	    gradient.setColorAt( 1, shadeColor );
-	}
-	else
-	    gradient.setColorAt( shadingStart, category->color() );
-    }
-
-    item->setBackground( gradient );
-    item->setForeground( current ? palette().highlightedText() : palette().text() );
-}
-
-
-void MimeCategoryConfigPage::updateActions()
-{
-    const QListWidgetItem * currentItem = _ui->listWidget->currentItem();
-
-    const bool isSymLink =
-	currentItem && currentItem->text() == MimeCategorizer::symlinkCategoryName();
-    const bool isExecutable =
-	currentItem && currentItem->text() == MimeCategorizer::executableCategoryName();
-
-    // Name can't be changed for symlinks and executables
-    _ui->nameLineEdit->setEnabled( currentItem && !isSymLink && !isExecutable );
-    _ui->categoryColorEdit->setEnabled( currentItem );
-
-    // Patterns can't be changed for symlinks
-    _ui->patternsTopWidget->setEnabled( currentItem && !isSymLink );
-    _ui->patternsBottomWidget->setEnabled( currentItem && !isSymLink );
-
-    // Symlinks and executables can't be removed
-    actionRemove()->setEnabled( currentItem && !isSymLink && !isExecutable );
-
-    // Any category can have a colour
-    _ui->categoryColorButton->setEnabled( currentItem );
 }
 
 
@@ -393,6 +362,142 @@ void MimeCategoryConfigPage::pickTileColor()
 }
 
 
+void MimeCategoryConfigPage::setDuplicate( const QString & pattern, const MimeCategory * category )
+{
+    const QString msg{ QObject::tr( "Duplicate '%1' in '%2'" ).arg( pattern, category->name() ) };
+    _ui->duplicateLabel->setStatusTip( msg );
+    elideDuplicateLabel( _ui->duplicateLabel );
+    _ui->duplicateLabel->show();
+
+    _ui->listWidget->setEnabled( false );
+    configDialog( this )->disableAcceptButtons();
+    setShading();
+}
+
+
+void MimeCategoryConfigPage::checkForDuplicates( const QStringList & patterns,
+                                                 const QStringList & otherPatterns,
+                                                 Qt::CaseSensitivity caseSensitivity )
+{
+    QListWidgetItem * currentItem = _ui->listWidget->currentItem();
+    if ( !currentItem )
+	return;
+
+    const MimeCategory * currentCategory = CATEGORY_CAST( value( currentItem ) );
+
+    // Look for duplicate entries from 'patterns' in the two current lists
+    QStringList prunePatterns{ patterns };
+    for ( const QString & rawPattern : patterns )
+    {
+	const QString pattern = rawPattern.trimmed();
+
+	// There is obviously one of these, so remove it and look for another
+	prunePatterns.removeOne( pattern );
+	if ( otherPatterns.contains( pattern, Qt::CaseInsensitive ) ||
+	     prunePatterns.contains( pattern, caseSensitivity ) )
+	{
+	    setDuplicate( pattern, currentCategory );
+	    return;
+	}
+    }
+
+    // Look for any duplicate from 'patterns' or 'otherPatterns' in any other category
+    for ( int i = 0; i < _ui->listWidget->count(); ++i )
+    {
+	const MimeCategory * category = CATEGORY_CAST( value( _ui->listWidget->item( i ) ) );
+	if ( category != currentCategory )
+	{
+	    const QStringList caseInsensitive = category->humanReadablePatternList( Qt::CaseInsensitive );
+	    const QStringList caseSensitive   = category->humanReadablePatternList( Qt::CaseSensitive );
+
+	    const auto duplicateInCategory =
+		[ this, &caseInsensitive, &caseSensitive, caseSensitivity, category ]
+		( const QStringList & patternsToCheck )
+	    {
+		for ( const QString & rawPattern : patternsToCheck )
+		{
+		    const QString pattern = rawPattern.trimmed();
+		    if ( caseInsensitive.contains( pattern, Qt::CaseInsensitive ) ||
+			 caseSensitive.contains( pattern, caseSensitivity ) )
+		    {
+			setDuplicate( pattern, category );
+			return true;
+		    }
+		}
+		return false;
+	    };
+
+	    if ( duplicateInCategory( patterns ) || duplicateInCategory( otherPatterns ) )
+		return;
+	}
+    }
+
+    _ui->duplicateLabel->hide();
+    _ui->listWidget->setEnabled( true );
+    configDialog( this )->enableAcceptButtons();
+    setShading();
+}
+
+
+void MimeCategoryConfigPage::caseInsensitiveTextChanged()
+{
+    const QStringList caseInsensitivePatterns = currentCaseInsensitivePatterns();
+    const QStringList caseSensitivePatterns   = currentCaseSensitivePatterns();
+    checkForDuplicates( caseInsensitivePatterns, caseSensitivePatterns, Qt::CaseInsensitive );
+}
+
+
+void MimeCategoryConfigPage::caseSensitiveTextChanged()
+{
+    const QStringList caseInsensitivePatterns = currentCaseInsensitivePatterns();
+    const QStringList caseSensitivePatterns   = currentCaseSensitivePatterns();
+    checkForDuplicates( caseSensitivePatterns, caseInsensitivePatterns, Qt::CaseSensitive );
+}
+
+
+void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
+{
+    if ( !item )
+	return;
+
+    const MimeCategory * category = CATEGORY_CAST( value( item ) );
+    if ( !category )
+	return;
+
+    const bool previews = app()->mainWindow()->treemapView()->colourPreviews();
+
+    const qreal width         = _ui->listWidget->width();
+    const qreal backgroundEnd = previews ? ( width - 21 ) / width : width;
+    const qreal shadingStart  = ( width - 20 ) / width;
+    const qreal shadingMiddle = ( width - 10 ) / width;
+
+    const bool current = item == _ui->listWidget->currentItem();
+    const bool useDisabledColors = !current && !_ui->listWidget->isEnabled();
+    const QPalette::ColorGroup group = useDisabledColors ? QPalette::Disabled : QPalette::Active;
+    const QColor & backgroundColor = palette().color( group, current ? QPalette::Highlight : QPalette::Base );
+
+    QLinearGradient gradient{ 0, 0, 1, 0 };
+    gradient.setCoordinateMode( QGradient::ObjectMode );
+    gradient.setColorAt( 0, backgroundColor );
+    gradient.setColorAt( backgroundEnd, backgroundColor );
+    if ( previews )
+    {
+	if ( _ui->cushionShadingCheckBox->isChecked() )
+	{
+	    const QColor shadeColor = category->color().darker( 300 );
+	    gradient.setColorAt( shadingStart,  shadeColor );
+	    gradient.setColorAt( shadingMiddle, category->color() );
+	    gradient.setColorAt( 1, shadeColor );
+	}
+	else
+	    gradient.setColorAt( shadingStart, category->color() );
+    }
+    item->setBackground( gradient );
+
+    item->setForeground( palette().color( group, current ? QPalette::HighlightedText : QPalette::Text ) );
+}
+
+
 void MimeCategoryConfigPage::cushionShadingChanged( bool state )
 {
     //logDebug() << state << Qt::endl;
@@ -423,13 +528,9 @@ void MimeCategoryConfigPage::save( void * value )
     if ( !category )
 	return;
 
-    // Make a list of the patterns, one per line, and remove the empty entry caused by the trailing newline
-    QStringList caseSensitivePatterns = _ui->caseSensitivePatternsTextEdit->toPlainText().split( u'\n' );
-    if ( !caseSensitivePatterns.isEmpty() && caseSensitivePatterns.last().isEmpty() )
-	caseSensitivePatterns.removeLast();
-    QStringList caseInsensitivePatterns = _ui->caseInsensitivePatternsTextEdit->toPlainText().split( u'\n' );
-    if ( !caseInsensitivePatterns.isEmpty() && caseInsensitivePatterns.last().isEmpty() )
-	caseInsensitivePatterns.removeLast();
+    // Make a list of the patterns, one per line, skipping empty lines
+    QStringList caseInsensitivePatterns = currentCaseInsensitivePatterns();
+    QStringList caseSensitivePatterns = currentCaseSensitivePatterns();
 
     // If they're different to the current patterns on the category, update the category
     if ( caseSensitivePatterns != category->humanReadablePatternList( Qt::CaseSensitive ) ||
@@ -451,11 +552,13 @@ void MimeCategoryConfigPage::load( void * value )
     // Populate the name and pattern fields from this category
     _ui->nameLineEdit->setText( category ? category->name() : QString{} );
 
-    QStringList patternList = category ? category->humanReadablePatternList( Qt::CaseSensitive ) : QStringList{};
-    setPatternList( _ui->caseSensitivePatternsTextEdit, patternList );
+    const QStringList caseInsensitivePatterns =
+	category ? category->humanReadablePatternList( Qt::CaseInsensitive ) : QStringList{};
+    setPatternList( _ui->caseInsensitivePatterns, caseInsensitivePatterns );
 
-    patternList = category ? category->humanReadablePatternList( Qt::CaseInsensitive ) : QStringList{};
-    setPatternList( _ui->caseInsensitivePatternsTextEdit, patternList );
+    const QStringList caseSensitivePatterns =
+	category ? category->humanReadablePatternList( Qt::CaseSensitive ) : QStringList{};
+    setPatternList( _ui->caseSensitivePatterns, caseSensitivePatterns );
 
     // Set this category colour in the form and mini-treemap
     const QColor color = category ? category->color() : QColor{};
@@ -500,25 +603,6 @@ void MimeCategoryConfigPage::setShading()
 }
 
 
-void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
-{
-    //logDebug() << Qt::endl;
-
-    if ( _ui->listWidget->underMouse() )
-    {
-        _ui->actionColourPreviews->setChecked( app()->mainWindow()->treemapView()->colourPreviews() );
-
-        QMenu menu;
-        menu.addAction( actionAdd() );
-        menu.addAction( actionRemove() );
-        menu.addSeparator();
-        menu.addAction( _ui->actionColourPreviews );
-
-        menu.exec( event->globalPos() );
-    }
-}
-
-
 void MimeCategoryConfigPage::colourPreviewsTriggered( bool checked )
 {
     // Context menu colour previews toggle action
@@ -538,11 +622,65 @@ void MimeCategoryConfigPage::add()
 }
 
 
+void MimeCategoryConfigPage::updateActions()
+{
+    const QListWidgetItem * currentItem = _ui->listWidget->currentItem();
+
+    const bool isSymlink =
+	currentItem && currentItem->text() == MimeCategorizer::symlinkCategoryName();
+    const bool isExecutable =
+	currentItem && currentItem->text() == MimeCategorizer::executableCategoryName();
+
+    // Name can't be changed for symlinks and executables
+    _ui->nameLineEdit->setEnabled( currentItem && !isSymlink && !isExecutable );
+    _ui->categoryColorEdit->setEnabled( currentItem );
+
+    // Patterns can't be changed for symlinks
+    _ui->patternsTopWidget->setEnabled( currentItem && !isSymlink );
+    _ui->patternsBottomWidget->setEnabled( currentItem && !isSymlink );
+
+    // Symlinks and executables can't be removed
+    actionRemove()->setEnabled( currentItem && !isSymlink && !isExecutable );
+
+    // Any category can have a colour
+    _ui->categoryColorButton->setEnabled( currentItem );
+}
+
+
+void MimeCategoryConfigPage::contextMenuEvent( QContextMenuEvent * event )
+{
+    //logDebug() << Qt::endl;
+
+    if ( _ui->listWidget->underMouse() )
+    {
+        _ui->actionColourPreviews->setChecked( app()->mainWindow()->treemapView()->colourPreviews() );
+
+        QMenu menu;
+        menu.addAction( actionAdd() );
+        menu.addAction( actionRemove() );
+        menu.addSeparator();
+        menu.addAction( _ui->actionColourPreviews );
+
+        menu.exec( event->globalPos() );
+    }
+}
+
+
 bool MimeCategoryConfigPage::event( QEvent * event )
 {
-    const auto type = event->type();
-    if ( type == QEvent::PaletteChange || type == QEvent::Show || type == QEvent::Resize )
-	setShading();
+    switch( event->type() )
+    {
+	case QEvent::FontChange:
+	case QEvent::PaletteChange:
+	case QEvent::Resize:
+	case QEvent::Show:
+	    elideDuplicateLabel( _ui->duplicateLabel );
+	    setShading();
+	    break;
+
+	default:
+	    break;
+    }
 
     return ListEditor::event( event );
 }
