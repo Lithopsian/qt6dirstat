@@ -31,12 +31,12 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a MimeCategory with the specified name and default color.
+	 * Create a MimeCategory with an empty name and default color.
 	 **/
-	MimeCategory():
-	    _name{ "" },
-	    _color{ Qt::white }
-	{}
+	MimeCategory() = default;
+//	    _name{ "" },
+//	    _color{ Qt::white }
+//	{}
 
 	/**
 	 * Create a MimeCategory with the specified name and default color.
@@ -156,40 +156,75 @@ namespace QDirStat
 	 **/
 	QStringList humanReadablePatternList( Qt::CaseSensitivity caseSensitivity ) const;
 
+//	bool contains( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity ) const;
+
 
     protected:
 
 	/**
-	 * Add a pattern that contains no wildcard characters.
+	 * Return the exact pattern list for 'caseSensitivity' as a
+	 * reference or const reference.
 	 **/
-	void addExactMatch( const QString & suffix, Qt::CaseSensitivity caseSensitivity );
+	const QStringList & exactList( Qt::CaseSensitivity caseSensitivity ) const
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
+	}
+	QStringList & exactList( Qt::CaseSensitivity caseSensitivity )
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
+	}
 
 	/**
-	 * Add a filename suffix (extension) to this category.
-	 * A leading "*." or "*" is cut off.
+	 * Return the suffix pattern list for 'caseSensitivity' as a
+	 * reference or const reference.
 	 **/
-	void addSuffix( const QString & rawSuffix, Qt::CaseSensitivity caseSensitivity );
+	const QStringList & suffixList( Qt::CaseSensitivity caseSensitivity ) const
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
+	}
+	QStringList & suffixList( Qt::CaseSensitivity caseSensitivity )
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
+	}
 
 	/**
-	 * Add a filename suffix (extension) to this category.
-	 * A leading "*." or "*" is cut off.
+	 * Return the wildcard suffix pattern list for 'caseSensitivity' as a
+	 * reference or const reference.
 	 **/
-	void addWildcardSuffix( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity );
+	const QStringList & wildcardSuffixList( Qt::CaseSensitivity caseSensitivity ) const
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
+	}
+	QStringList & wildcardSuffixList( Qt::CaseSensitivity caseSensitivity )
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
+	}
 
 	/**
-	 * Add a pattern to this category which consists of a suffix plus
-	 * other wildcards.
+	 * Return the wildcard pattern list for 'caseSensitivity' as a
+	 * reference or const reference.
 	 **/
-	void addWildcard( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity );
+	const QStringList & wildcardList( Qt::CaseSensitivity caseSensitivity ) const
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
+	}
+	QStringList & wildcardList( Qt::CaseSensitivity caseSensitivity )
+	{
+	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+	    return caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
+	}
 
 	/**
-	 * Add a filename pattern to this category. If the pattern contains no wildcard
-	 * characters, add it as an exact match.  If it starts with "*." and does not
-	 * contain any other wildcard characters, add it as a suffix.  If has a suffix
-	 * and contains other wildcard characters before the suffix, add it as a wildcard
-	 * suffix.  Otherwise, this will become a regular expression.
+	 * Add 'pattern' to 'patternList'.
 	 **/
-	void addPattern( const QString & pattern, Qt::CaseSensitivity caseSensitivity );
+	void addPattern( QStringList & patternList, const QString & pattern );
 
 
     private:

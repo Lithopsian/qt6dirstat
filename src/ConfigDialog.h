@@ -13,6 +13,8 @@
 #include <memory>
 
 #include <QDialog>
+#include <QPushButton>
+
 #include "ui_config-dialog.h"
 
 
@@ -56,6 +58,21 @@ namespace QDirStat
 	 * settings dialog window.
 	 **/
 	static void showSharedInstance( QWidget * parent );
+
+	/**
+	 * Convenience function for creating, if necessary, and showing the
+	 * settings dialog window.
+	 **/
+	void disableAcceptButtons()
+	{
+	    _ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( false );
+	    _ui->buttonBox->button( QDialogButtonBox::Apply )->setEnabled( false );
+	}
+	void enableAcceptButtons()
+	{
+	    _ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+	    _ui->buttonBox->button( QDialogButtonBox::Apply )->setEnabled( true );
+	}
 
 
     signals:
