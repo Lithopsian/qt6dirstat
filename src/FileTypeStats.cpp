@@ -57,17 +57,18 @@ namespace
 
     /**
     * See if a filename has an extension; that is, a section
-    * of the name following a '.' character.  Ignore a
-    * leading dot which indicates a hidden file, not an
-    * extension and ignore very long extensions.
+    * of the name following a '.' character.  Ignore a trailing
+    * dot, a leading dot, which indicates a hidden file, and
+    * ignore very long extensions.
     **/
     QString filenameExtension( const QString            & filename,
                                const QRegularExpression & matchUnusual,
                                const QRegularExpression & matchInvalid )
     {
 	// Ignore leading and trailing dots and any suffix longer than 32 characters
-	const int lastDot = filename.lastIndexOf( u'.', -2 );
-	if ( lastDot <= 0 || filename.size() - lastDot > 32 )
+	const int lastDot = filename.lastIndexOf( u'.' );
+	const int lastIndex = filename.size() - 1;
+	if ( lastDot <= 0 || lastDot + 32 < lastIndex || lastDot == lastIndex )
 	    return QString{};
 
 	const QString suffix = filename.mid( lastDot + 1 ); // just return the shortest extension

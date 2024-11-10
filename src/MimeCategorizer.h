@@ -127,12 +127,20 @@ namespace QDirStat
 	/**
 	 * Return the category name for a FileInfo item or an empty string if
 	 * it doesn't fit into any of the available categories.
+	 *
+	 * This function is mutex-protected against modification of the
+	 * pattern maps because it will be called from inside treemap render
+	 * threads.
 	 **/
 	QString name( const FileInfo * item );
 
 	/**
 	 * Return the color for a FileInfo item or white if it doesn't fit
 	 * into any of the available categories.
+	 *
+	 * This function is mutex-protected although it is only currently
+	 * called from the main thread, the same thread that makes any
+	 * modifications,
 	 **/
 	QColor color( const FileInfo * item );
 
@@ -140,14 +148,17 @@ namespace QDirStat
 	 * Return the MimeCategory for a filename or 0 if it doesn't fit into
 	 * any of the available categories.
 	 *
-	 * If 'pattern_ret' is non-null, it returns the suffix used if the
-	 * category was found by a suffix rule. If the category was not found
-	 * or if a wildcard (rather than a suffix rule) matched, this returns
-	 * an empty string.
+	 * The exact raw pattern used to categorise the file is returned in
+	 * 'pattern' and 'caseInsensitive' is set to indicate whether pattern
+	 * was matched case-insensitively or not.
 	 *
 	 * Extra checks are made for symlinks and executable files.  These
 	 * always return an empty string for the suffix even if the file has
 	 * an extension.
+	 *
+	 * This function is mutex-protected although it is only currently
+	 * called from the main thread, the same thread that makes any
+	 * modifications,
 	 **/
 	const MimeCategory * category( const FileInfo * item,
 	                               QString        & pattern,
@@ -258,7 +269,7 @@ namespace QDirStat
 	 * reduces the need for matching filenames individually against every regular
 	 * expression.
 	 **/
-	void addWildcardKeys( const MimeCategory * category );
+	void addWildcardSuffixKeys( const MimeCategory * category );
 
 	/**
 	 * Add regular expression patterns which do not include a suffix pattern to a
@@ -325,7 +336,6 @@ namespace QDirStat
 
 	const MimeCategory * _executableCategory;
 	const MimeCategory * _symlinkCategory;
-//	const MimeCategory   _emptyCategory;
 
 	ExactMatches        _caseInsensitiveExact;
 	ExactMatches        _caseSensitiveExact;

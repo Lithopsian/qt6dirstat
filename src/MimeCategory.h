@@ -34,9 +34,6 @@ namespace QDirStat
 	 * Create a MimeCategory with an empty name and default color.
 	 **/
 	MimeCategory() = default;
-//	    _name{ "" },
-//	    _color{ Qt::white }
-//	{}
 
 	/**
 	 * Create a MimeCategory with the specified name and default color.
@@ -75,14 +72,12 @@ namespace QDirStat
 	void setColor( const QColor & color ) { _color = color; }
 
 	/**
-	 * Add a list of patterns. See addPattern() for details.
+	 * Set all the patterns for this category.  Replace any
+	 * existing patterns with 'caseInsensitivePatterns' and
+	 * 'caseSensitivePatterns'.
 	 **/
-	void addPatterns( const QStringList & patterns, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Clear any suffixes or patterns for this category.
-	 **/
-	void clear();
+	void setPatterns( const QStringList & caseInsensitivePatterns,
+	                  const QStringList & caseSensitivePatterns );
 
 	/**
 	 * Return the list of case-insensitive exact filename matches.
@@ -98,16 +93,12 @@ namespace QDirStat
 
 	/**
 	 * Return the list of case-insensitive suffixes for this category.
-	 * The suffixes do not contain any leading wildcard or dot,
-	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseInsensitiveSuffixList() const
 	    { return _caseInsensitiveSuffixList; }
 
 	/**
 	 * Return the list of case-sensitive suffixes for this category.
-	 * The suffixes do not contain any leading wildcard or dot,
-	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseSensitiveSuffixList() const
 	    { return _caseSensitiveSuffixList; }
@@ -142,21 +133,13 @@ namespace QDirStat
 
 	/**
 	 * Return a sorted list of all either case sensitive or case
-	 * insensitive suffixes and patterns for this category in human
-	 * readable form, i.e. prepend suffixes with "*.":
-	 * "tar.bz2" -> "*.tar.bz2".
+	 * insensitive suffixes and patterns for this category.
 	 *
 	 * The patterns are grouped: exact matches first, then wildcard
 	 * suffixes, then suffixes, and lastly any non-suffix wildcard
 	 * patterns.
-	 *
-	 * This is relatively expensive; the individual pattern lists are
-	 * not stored sorted and must be sorted by this function.  However,
-	 * this will be used relatively infrequently, by the config dialog.
 	 **/
-	QStringList humanReadablePatternList( Qt::CaseSensitivity caseSensitivity ) const;
-
-//	bool contains( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity ) const;
+	QStringList patterns( Qt::CaseSensitivity caseSensitivity ) const;
 
 
     protected:
@@ -166,11 +149,6 @@ namespace QDirStat
 	 * reference or const reference.
 	 **/
 	const QStringList & exactList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
-	}
-	QStringList & exactList( Qt::CaseSensitivity caseSensitivity )
 	{
 	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
 	    return caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
@@ -185,22 +163,12 @@ namespace QDirStat
 	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
 	    return caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
 	}
-	QStringList & suffixList( Qt::CaseSensitivity caseSensitivity )
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
-	}
 
 	/**
 	 * Return the wildcard suffix pattern list for 'caseSensitivity' as a
 	 * reference or const reference.
 	 **/
 	const QStringList & wildcardSuffixList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
-	}
-	QStringList & wildcardSuffixList( Qt::CaseSensitivity caseSensitivity )
 	{
 	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
 	    return caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
@@ -215,29 +183,15 @@ namespace QDirStat
 	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
 	    return caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
 	}
-	QStringList & wildcardList( Qt::CaseSensitivity caseSensitivity )
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
-	}
-
-	/**
-	 * Add 'pattern' to 'patternList'.
-	 **/
-	void addPattern( QStringList & patternList, const QString & pattern );
 
 
     private:
 
+	// The category name and treemap color
 	QString _name;
 	QColor  _color;
 
-	/**
-	 * The raw patterns are categorised into different lists for the convenience of the
-	 * categorizer.  The raw patterns themselves are not stored, but are reconstructed
-	 * when needed as a single (per case-sensitivity) sorted comma-delimited string by the
-	 * humanReadablePatternList() method.
-	 **/
+	// The raw patterns categorised into lists according to format and case-sensitivity
 	QStringList _caseInsensitiveExactList;
 	QStringList _caseSensitiveExactList;
 	QStringList _caseInsensitiveSuffixList;
@@ -254,7 +208,7 @@ namespace QDirStat
     /**
      * Human-readable output of a MimeCategory in a debug stream.
      **/
-    inline QTextStream & operator<<( QTextStream & str, MimeCategory * category )
+    inline QTextStream & operator<<( QTextStream & str, const MimeCategory * category )
     {
 	if ( category )
 	    str << "<MimeCategory " << category->name() << ">";

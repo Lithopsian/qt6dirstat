@@ -32,6 +32,42 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns the index of 'needle' within 'stack', matching
+     * according to 'cs', or -1 if there is no match.
+     *
+     * This is essentially a backport of the Qt 6.7
+     * QStringList::indexOf function.
+     **/
+    int indexOf( const QStringList & stack, const QString & needle, Qt::CaseSensitivity cs )
+    {
+        for ( int i = 0; i < stack.size(); ++i)
+        {
+            if ( needle.compare( stack.at(i), cs ) == 0 )
+                return i;
+        }
+        return -1;
+    }
+
+
+    /**
+     * Returns the last index of 'needle' within 'stack', matching
+     * according to 'cs', or -1 if there is no match.
+     *
+     * This is essentially a backport of the Qt 6.7
+     * QStringList::lastIndexOf function.
+     **/
+    int lastIndexOf( const QStringList & stack, const QString & needle, Qt::CaseSensitivity cs )
+    {
+        for ( int i = stack.size()-1; i >= 0; --i)
+        {
+            if ( needle.compare( stack.at(i), cs ) == 0 )
+                return i;
+        }
+        return -1;
+    }
+
+
+    /**
      * Find the toplevel dialog window and cast it to ConfigDialog.
      **/
     ConfigDialog * configDialog( const QWidget * tabPage )
@@ -139,10 +175,6 @@ namespace
 	ui->cushionHeightSpinBox->setEnabled    ( ui->cushionShadingCheckBox->isChecked() );
 	ui->heightScaleFactorLabel->setEnabled  ( ui->cushionShadingCheckBox->isChecked() );
 	ui->heightScaleFactorSpinBox->setEnabled( ui->cushionShadingCheckBox->isChecked() );
-
-	ui->caseInsensitivePatterns->setTabChangesFocus( true );
-	ui->caseSensitivePatterns->setTabChangesFocus( true );
-	ui->duplicateLabel->hide();
     }
 
 
@@ -171,7 +203,9 @@ MimeCategoryConfigPage::MimeCategoryConfigPage( ConfigDialog * parent ):
 
     _ui->setupUi( this );
     _ui->nameLineEdit->setValidator( new QRegularExpressionValidator{ hasNoControlCharacters(), this } );
+    _ui->duplicateLabel->hide();
 
+    // Put these first so that patterns are duplicate-checked when they are first loaded
     connect( _ui->caseInsensitivePatterns,  &QPlainTextEdit::textChanged,
              this,                          &MimeCategoryConfigPage::caseInsensitiveTextChanged );
 
@@ -386,15 +420,11 @@ void MimeCategoryConfigPage::checkForDuplicates( const QStringList & patterns,
     const MimeCategory * currentCategory = CATEGORY_CAST( value( currentItem ) );
 
     // Look for duplicate entries from 'patterns' in the two current lists
-    QStringList prunePatterns{ patterns };
-    for ( const QString & rawPattern : patterns )
+    for ( const QString & pattern : patterns )
     {
-	const QString pattern = rawPattern.trimmed();
-
-	// There is obviously one of these, so remove it and look for another
-	prunePatterns.removeOne( pattern );
 	if ( otherPatterns.contains( pattern, Qt::CaseInsensitive ) ||
-	     prunePatterns.contains( pattern, caseSensitivity ) )
+	     indexOf( patterns, pattern, caseSensitivity ) !=
+	     lastIndexOf( patterns, pattern, caseSensitivity ) )
 	{
 	    setDuplicate( pattern, currentCategory );
 	    return;
@@ -407,16 +437,15 @@ void MimeCategoryConfigPage::checkForDuplicates( const QStringList & patterns,
 	const MimeCategory * category = CATEGORY_CAST( value( _ui->listWidget->item( i ) ) );
 	if ( category != currentCategory )
 	{
-	    const QStringList caseInsensitive = category->humanReadablePatternList( Qt::CaseInsensitive );
-	    const QStringList caseSensitive   = category->humanReadablePatternList( Qt::CaseSensitive );
+	    const QStringList caseInsensitive = category->patterns( Qt::CaseInsensitive );
+	    const QStringList caseSensitive   = category->patterns( Qt::CaseSensitive );
 
 	    const auto duplicateInCategory =
 		[ this, &caseInsensitive, &caseSensitive, caseSensitivity, category ]
 		( const QStringList & patternsToCheck )
 	    {
-		for ( const QString & rawPattern : patternsToCheck )
+		for ( const QString & pattern : patternsToCheck )
 		{
-		    const QString pattern = rawPattern.trimmed();
 		    if ( caseInsensitive.contains( pattern, Qt::CaseInsensitive ) ||
 			 caseSensitive.contains( pattern, caseSensitivity ) )
 		    {
@@ -533,12 +562,10 @@ void MimeCategoryConfigPage::save( void * value )
     QStringList caseSensitivePatterns = currentCaseSensitivePatterns();
 
     // If they're different to the current patterns on the category, update the category
-    if ( caseSensitivePatterns != category->humanReadablePatternList( Qt::CaseSensitive ) ||
-         caseInsensitivePatterns != category->humanReadablePatternList( Qt::CaseInsensitive ) )
+    if ( caseSensitivePatterns != category->patterns( Qt::CaseSensitive ) ||
+         caseInsensitivePatterns != category->patterns( Qt::CaseInsensitive ) )
     {
-	category->clear();
-	category->addPatterns( caseSensitivePatterns, Qt::CaseSensitive );
-	category->addPatterns( caseInsensitivePatterns, Qt::CaseInsensitive );
+	category->setPatterns( caseInsensitivePatterns, caseSensitivePatterns );
 	_dirty = true;
     }
 }
@@ -553,11 +580,11 @@ void MimeCategoryConfigPage::load( void * value )
     _ui->nameLineEdit->setText( category ? category->name() : QString{} );
 
     const QStringList caseInsensitivePatterns =
-	category ? category->humanReadablePatternList( Qt::CaseInsensitive ) : QStringList{};
+	category ? category->patterns( Qt::CaseInsensitive ) : QStringList{};
     setPatternList( _ui->caseInsensitivePatterns, caseInsensitivePatterns );
 
     const QStringList caseSensitivePatterns =
-	category ? category->humanReadablePatternList( Qt::CaseSensitive ) : QStringList{};
+	category ? category->patterns( Qt::CaseSensitive ) : QStringList{};
     setPatternList( _ui->caseSensitivePatterns, caseSensitivePatterns );
 
     // Set this category colour in the form and mini-treemap

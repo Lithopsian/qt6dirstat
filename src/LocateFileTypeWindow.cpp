@@ -29,22 +29,6 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Elide the header label to fit inside the current dialog width,
-     * so that it fills the available width but very long subtree paths
-     * don't stretch the dialog.  A little extra room is left for the
-     * user to shrink the dialog, which would then force the label to
-     * be elided further.
-    **/
-//    void showElidedLabel( QLabel * label, const QWidget * container )
-//    {
-//	// Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-//	const int lastPixel =
-//	    container->contentsRect().right() - container->layout()->contentsMargins().right();
-//	elideLabel( label, label->statusTip(), lastPixel );
-//    }
-
-
-    /**
      * Return all direct file children matching the given WildcardCategory.
      **/
     FileInfoSet matchingFiles( FileInfo * item, const WildcardCategory & wildcardCategory )

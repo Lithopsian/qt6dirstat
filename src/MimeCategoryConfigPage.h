@@ -145,12 +145,16 @@ namespace QDirStat
 	 * Reimplemented from ListEditor.  The default implementations
 	 * return 0.
 	 **/
-	QToolButton * addButton()    const override { return _ui->addButton;      };
-	QToolButton * removeButton() const override { return _ui->removeButton;   };
+	QToolButton * addButton()    const override { return _ui->addButton; };
+	QToolButton * removeButton() const override { return _ui->removeButton; };
 
 	/**
 	 * Return a list of the case-sensitive or case-insensitive
 	 * patterns for the current item.
+	 *
+	 * The plain text is split at linefeed characters.  In
+	 * QPlainTextEdit, carriage return characters are
+	 * converted to linefeeds,
 	 **/
 	QStringList currentCaseInsensitivePatterns()
 	    { return _ui->caseInsensitivePatterns->toPlainText().split( u'\n', Qt::SkipEmptyParts ); }
@@ -260,7 +264,9 @@ namespace QDirStat
 
 	/**
 	 * Detect when the category list background needs to be reset
-	 * because of palette or size changes.
+	 * because of font, palette, or size changes.
+	 *
+	 * Reimplemented from QDialog/QWidget.
 	 **/
 	bool event( QEvent * event ) override;
 

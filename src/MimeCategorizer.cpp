@@ -17,6 +17,9 @@
 #include "Settings.h"
 
 
+#define VERBOSE_CATEGORIZER 0
+
+
 using namespace QDirStat;
 
 
@@ -30,24 +33,17 @@ namespace
                       const QString       & key,
                       const MimeCategory  * category )
     {
-	//logDebug() << "adding " << keyList << " to " << category << Qt::endl;
-//	if ( keys.contains( key ) )
-//	{
-//	    logWarning() << "Duplicate key: " << key
-//	                  << " for " << keys.value( key )->name() << " and " << category->name()
-//	                 << Qt::endl;
-//	}
-//	else
-	{
-	    // Add this pattern with no wildcards into a hash map
-	    keys.insert( key, category );
+#if VERBOSE_CATEGORIZER
+	logDebug() << "adding " << key << " to " << category << Qt::endl;
+#endif
+	// Add this pattern with no wildcards into a hash map
+	keys.insert( key, category );
 
-	    // Mark the length pf this pattern so we only try to match filenames wih the right length
-	    const auto length = key.size();
-	    if ( length >= lengths.size() )
-		lengths.resize( length + 1 );
-	    lengths.setBit( length );
-	}
+	// Mark the length pf this pattern so we only try to match filenames wih the right length
+	const auto length = key.size();
+	if ( length >= lengths.size() )
+	    lengths.resize( length + 1 );
+	lengths.setBit( length );
     }
 
 
@@ -59,17 +55,11 @@ namespace
                        const Wildcard     & wildcard,
                        const MimeCategory * category )
     {
+#if VERBOSE_CATEGORIZER
+	logDebug() << "adding " << suffix << " to " << category << Qt::endl;
+#endif
 	const WildcardCategory pair{ wildcard, category };
-//	if ( suffixes.contains( suffix, pair ) )
-//	{
-//	    logWarning() << "Duplicate pattern: " << ( wildcard.isEmpty() ? suffix : wildcard.pattern() )
-//	                 << " for " << suffixes.value( suffix ).category->name() << " and " << category->name()
-//	                 << Qt::endl;
-//	}
-//	else
-	{
-	    suffixes.insert( suffix, pair );
-	}
+	suffixes.insert( suffix.mid( 2 ), pair );
     }
 
 
@@ -78,8 +68,6 @@ namespace
      **/
     void writeSettings( const MimeCategoryList & categoryList )
     {
-	//logDebug() << Qt::endl;
-
 	MimeCategorySettings settings;
 
 	// Remove all leftover cleanup descriptions
@@ -90,23 +78,20 @@ namespace
 	    settings.beginListGroup( i+1 );
 
 	    const MimeCategory * category = categoryList.at(i);
-	    //logDebug() << "Adding " << category->name() << Qt::endl;
-
+#if VERBOSE_CATEGORIZER
+	    logDebug() << "Adding " << category << Qt::endl;
+#endif
 	    settings.setValue     ( "Name",  category->name()  );
 	    settings.setColorValue( "Color", category->color() );
 
-	    QStringList patterns = category->humanReadablePatternList( Qt::CaseInsensitive );
-
+	    QStringList patterns = category->patterns( Qt::CaseInsensitive );
 	    if ( patterns.isEmpty() )
 		patterns << QString{};
-
 	    settings.setValue( "PatternsCaseInsensitive", patterns );
 
-	    patterns = category->humanReadablePatternList( Qt::CaseSensitive );
-
+	    patterns = category->patterns( Qt::CaseSensitive );
 	    if ( patterns.isEmpty() )
 		patterns << QString{};
-
 	    settings.setValue( "PatternsCaseSensitive", patterns );
 
 	    settings.endListGroup(); // [MimeCategory_01], [MimeCategory_02], ...
@@ -295,9 +280,6 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
 	    *pattern_ret = pair->wildcard.pattern();
 	}
 	const MimeCategory * category = pair->category;
-#if 0
-	logVerbose() << "Found " << category << " for " << filename << Qt::endl;
-#endif
 
 	return category;
     }
@@ -340,9 +322,11 @@ const MimeCategory * MimeCategorizer::addCategory ( const QString     & name,
                                                     const QStringList & caseSensitivePatterns )
 {
     MimeCategory * category = new MimeCategory{ name, color };
-    category->addPatterns( caseInsensitivePatterns, Qt::CaseInsensitive );
-    category->addPatterns( caseSensitivePatterns,   Qt::CaseSensitive   );
+    category->setPatterns( caseInsensitivePatterns, caseSensitivePatterns );
 
+#if VERBOSE_CATEGORIZER
+    logDebug() << "Adding " << category << Qt::endl;
+#endif
     _categories << category;
 
     return category;
@@ -378,7 +362,7 @@ void MimeCategorizer::buildMaps()
     {
 	addExactKeys( category ); // exact matches with no wildcards
 	addSuffixKeys( category ); // simple suffix matches
-	addWildcardKeys( category ); // wildcards with a suffix, added last so they are retrieved first
+	addWildcardSuffixKeys( category ); // wildcards with a suffix, added last so they are retrieved first
 	buildWildcardLists( category ); // regular expressions with no suffix
     }
 
@@ -389,7 +373,6 @@ void MimeCategorizer::buildMaps()
 
 void MimeCategorizer::addExactKeys( const MimeCategory * category )
 {
-    //logDebug() << "adding " << keyList << " to " << category << Qt::endl;
     for ( const QString & key : category->caseSensitiveExactList() )
 	// Add key to the case-sensitive map and record this length
 	addExactKey( _caseSensitiveExact, _caseSensitiveLengths, key, category );
@@ -407,16 +390,14 @@ void MimeCategorizer::addExactKeys( const MimeCategory * category )
 }
 
 
-void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
+void MimeCategorizer::addWildcardSuffixKeys( const MimeCategory * category )
 {
     // Return the portion of 'pattern' after the "*."
     const auto getSuffix = []( const QString & pattern )
     {
 	const int delimeterIndex = pattern.lastIndexOf( "*."_L1 );
-	return delimeterIndex < 0 ? pattern : pattern.mid( delimeterIndex + 2 );
+	return delimeterIndex < 0 ? pattern : pattern.mid( delimeterIndex );
     };
-
-    //logDebug() << "adding " << patternList << " to " << category << Qt::endl;
 
     // Add any case-insensitive regular expression, plus a case-sensitive lowercased version
     for ( const QString & pattern : category->caseInsensitiveWildcardSuffixList() )
@@ -439,8 +420,6 @@ void MimeCategorizer::addWildcardKeys( const MimeCategory * category )
 
 void MimeCategorizer::addSuffixKeys( const MimeCategory * category )
 {
-    //logDebug() << "adding " << keyList << " to " << category << Qt::endl;
-
     // Add simple suffix matches into case-sensitive and case-insensitive hash maps
     for ( const QString & suffix : category->caseInsensitiveSuffixList() )
     {
@@ -462,12 +441,21 @@ void MimeCategorizer::addSuffixKeys( const MimeCategory * category )
 
 void MimeCategorizer::buildWildcardLists( const MimeCategory * category )
 {
-    //logDebug() << "adding " << keyList << " to " << category << Qt::endl;
     for ( const QString & pattern : category->caseSensitiveWildcardList() )
+    {
+#if VERBOSE_CATEGORIZER
+	logDebug() << "adding " << pattern << " to " << category << Qt::endl;
+#endif
 	_wildcards << WildcardCategory{ CaseSensitiveWildcard{ pattern }, category };
+    }
 
     for ( const QString & pattern : category->caseInsensitiveWildcardList() )
+    {
+#if VERBOSE_CATEGORIZER
+	logDebug() << "adding " << pattern << " to " << category << Qt::endl;
+#endif
 	_wildcards << WildcardCategory{ CaseInsensitiveWildcard{ pattern }, category };
+    }
 }
 
 
@@ -488,7 +476,6 @@ void MimeCategorizer::readSettings()
 	QStringList patternsCaseSensitive   = settings.value( "PatternsCaseSensitive"   ).toStringList();
 	settings.endGroup(); // [MimeCategory_01], [MimeCategory_02], ...
 
-	//logDebug() << name << Qt::endl;
 	addCategory( name, color, patternsCaseInsensitive, patternsCaseSensitive );
     }
 

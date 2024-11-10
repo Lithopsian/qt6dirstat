@@ -201,6 +201,12 @@
               <property name="toolTip">
                <string>&lt;p style='white-space:pre'&gt;Add filename patterns here, each one on a separate line.&lt;br/&gt;Use * or ? as wildcards and [] for matching sets of characters.&lt;/p&gt;</string>
               </property>
+              <property name="tabChangesFocus">
+               <bool>true</bool>
+              </property>
+              <property name="lineWrapMode">
+               <enum>QPlainTextEdit::NoWrap</enum>
+              </property>
              </widget>
             </item>
            </layout>
@@ -227,6 +233,12 @@
               </property>
               <property name="toolTip">
                <string>&lt;p style='white-space:pre'&gt;Add filename patterns here, each one on a separate line.&lt;br/&gt;Use * or ? as wildcards and [] for matching sets of characters.&lt;/p&gt;</string>
+              </property>
+              <property name="tabChangesFocus">
+               <bool>true</bool>
+              </property>
+              <property name="lineWrapMode">
+               <enum>QPlainTextEdit::NoWrap</enum>
               </property>
              </widget>
             </item>
