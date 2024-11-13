@@ -16,6 +16,9 @@
 
 namespace QDirStat
 {
+    class FileInfo;
+    class MimeCategory;
+
     /* An enum for the backported function wildcardToRegularExpression only added
      * in 5.12.  It also includes NonPathWildcardConversion added in 6.6.  Can be
      * added here unconditionally and only used as required.
@@ -169,6 +172,23 @@ namespace QDirStat
 	{}
 
     };	// class CaseInsensitiveWildcard
+
+
+
+    /**
+     * Replacement for QPair so that the members can be accessed by
+     * meaningful names rather than just 'first' and 'second'.
+     *
+     * isEmpty() is a shorthand for wildcard.pattern().isEmpty && category = 0
+     * matches() checks that 'item' matches both the wildcard and category
+     **/
+    struct WildcardCategory
+    {
+	Wildcard wildcard;
+	const MimeCategory * category;
+	bool isEmpty() const { return wildcard.isEmpty() and !category; }
+	bool matches( const FileInfo * item ) const;
+    };
 
 }	// namespace QDirStat
 

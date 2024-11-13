@@ -15,8 +15,8 @@
 #include <QDialog>
 
 #include "ui_file-size-stats-window.h"
-#include "MimeCategorizer.h" // WildcardCategory
 #include "Subtree.h"
+#include "Wildcard.h"
 
 
 namespace QDirStat
