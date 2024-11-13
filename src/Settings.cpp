@@ -377,6 +377,15 @@ void Settings::migrate()
 
 
 
+MimeCategorySettings::MimeCategorySettings():
+    Settings{ "-mime" }
+{
+    migrate();
+}
+
+
+
+
 CleanupSettings::CleanupSettings():
     Settings{ "-cleanup" }
 {
@@ -391,14 +400,3 @@ ExcludeRuleSettings::ExcludeRuleSettings():
 {
     migrate();
 }
-
-
-
-
-MimeCategorySettings::MimeCategorySettings():
-    Settings{ "-mime" }
-{
-    migrate();
-}
-
-

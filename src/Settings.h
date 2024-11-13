@@ -240,6 +240,30 @@ namespace QDirStat
 
 
     /**
+     * Specialized settings class for MIME categories.
+     *
+     * These settings are stored in a separate file so that the entire file
+     * can easily be replaced by a site administrator.
+     **/
+    class MimeCategorySettings: public Settings
+    {
+    public:
+
+	/**
+	 * Constructor.
+	 **/
+	MimeCategorySettings();
+
+	/**
+	 * Prefix used to construct section names such as MimeCategory_01.
+	 **/
+	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
+
+    };	// class MimeCategorySettings
+
+
+
+    /**
      * Specialized settings class for cleanup actions.
      *
      * These settings are stored in a separate file so that the entire file
@@ -284,30 +308,6 @@ namespace QDirStat
 	const QLatin1String listGroupPrefix() const override { return "ExcludeRule"_L1; }
 
     };	// class ExcludeRuleSettings
-
-
-
-    /**
-     * Specialized settings class for MIME categories.
-     *
-     * These settings are stored in a separate file so that the entire file
-     * can easily be replaced by a site administrator.
-     **/
-    class MimeCategorySettings: public Settings
-    {
-    public:
-
-	/**
-	 * Constructor.
-	 **/
-	MimeCategorySettings();
-
-	/**
-	 * Prefix used to construct section names such as MimeCategory_01.
-	 **/
-	const QLatin1String listGroupPrefix() const override { return "MimeCategory"_L1; }
-
-    };	// class MimeCategorySettings
 
 }	// namespace QDirStat
 
