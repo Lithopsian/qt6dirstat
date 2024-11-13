@@ -49,9 +49,9 @@ namespace QDirStat
 	HeaderTweaker * headerTweaker() const { return _headerTweaker; }
 
 	/**
-	 * Expand or collapse an item based on a FileInfo pointer.
+	 * Expand an item based on a FileInfo pointer.
 	 **/
-	void setExpandedItem( FileInfo * item, bool expanded = true );
+	void expandItem( FileInfo * item );
 
 	/**
 	 * Scroll to the current item (index).  This will open any necessary
@@ -61,7 +61,7 @@ namespace QDirStat
 
 	/**
 	 * Helpers to get model data or headerData values directly from
-	 * DirTreView.
+	 * DirTreeView.
 	 **/
 	QVariant data( const QModelIndex & index, int role ) const
 	    { return model()->data( index, role ); }
@@ -112,18 +112,6 @@ namespace QDirStat
 	 * Read the settings.  Currently just for the percent bar delegate.
 	 **/
 	void readSettings();
-
-	/**
-	 * Return the list of items that are currently expanded.
-	 **/
-	QModelIndexList expandedIndexes() const;
-
-	/**
-	 * Keyboard event handler.
-	 *
-	 * Reimplemented from QTreeView.
-	 **/
-        void keyPressEvent( QKeyEvent * event ) override;
 
 	/**
 	 * Mouse button handler.
