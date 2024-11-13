@@ -44,8 +44,6 @@ SelectionModel::SelectionModel( DirTreeModel * dirTreeModel, QObject * parent ):
 void SelectionModel::clear()
 {
     _currentItem = nullptr;
-
-//    _selectedItems.clear();
     _selectedItemsDirty = true;
     clearSelection();
 }
@@ -55,10 +53,9 @@ FileInfoSet SelectionModel::selectedItems()
 {
     if ( _selectedItemsDirty )
     {
-	// Build set of selected items from the selected model indexes
-
 	_selectedItems.clear();
 
+	// Build set of selected items from the selected model indexes
 	const QModelIndexList indexes = selectedIndexes();
 	_selectedItems.reserve( indexes.size() );
 	for ( const QModelIndex & index : indexes )
@@ -198,8 +195,6 @@ void SelectionModel::setCurrentItemPath( const QString & path )
     if ( item )
 	// Set the current item and select it
 	setCurrentItem( item, true );
-//    else
-//	logDebug() << "No item with path " << path << Qt::endl;
 }
 
 
@@ -251,7 +246,6 @@ void SelectionModel::prepareForRefresh( const FileInfoSet & refreshSet )
 void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
 {
     _selectedItemsDirty = true;
-//    _selectedItems.clear();
 
     // When the last child is deleted, the current item is lost (by QAbstractItemModel?)
     if ( !_currentItem )
