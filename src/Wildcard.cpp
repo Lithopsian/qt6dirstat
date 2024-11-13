@@ -7,6 +7,9 @@
  */
 
 #include "Wildcard.h"
+#include "FileInfo.h"
+#include "MimeCategorizer.h"
+
 
 using namespace QDirStat;
 
@@ -133,3 +136,31 @@ QString Wildcard::wildcardToRegularExpression( const QString & pattern,
     return rx;
 }
 #endif
+
+
+
+bool WildcardCategory::matches( const FileInfo * item ) const
+{
+    // We only deal with regular files and symlinks
+    if ( !item->isFileOrSymlink() )
+	return false;
+
+    // If there is a Wildcard pattern, but it doesn't match ...
+    const QString & pattern = wildcard.pattern();
+    if ( !pattern.isEmpty() && !wildcard.isMatch( item->name() ) )
+	return false;
+
+    // Re-categorise any item matching the wildcard so we can compare the actual categoriser match
+    QString matchPattern;
+    bool matchCaseInsensitive;
+    const MimeCategory * matchCategory =
+	MimeCategorizer::instance()->category( item, matchPattern, matchCaseInsensitive );
+
+    // Uncategorised files match if we are looking for uncategorised files
+    if ( !matchCategory && !category )
+	return true;
+
+    // Check that the categoriser result matches the one we're looking for
+    const bool caseInsensitive = wildcard.patternOptions() & Wildcard::CaseInsensitiveOption;
+    return matchCategory == category && matchCaseInsensitive == caseInsensitive && matchPattern == pattern;
+}

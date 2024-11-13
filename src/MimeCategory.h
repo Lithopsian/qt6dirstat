@@ -31,20 +31,14 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a MimeCategory with an empty name and default color.
+	 * Default constructor: create a MimeCategory with an empty
+	 * name and default color.
 	 **/
 	MimeCategory() = default;
 
 	/**
-	 * Create a MimeCategory with the specified name and default color.
-	 **/
-	MimeCategory( const QString & name ):
-	    _name{ name },
-	    _color{ Qt::white }
-	{}
-
-	/**
-	 * Create a MimeCategory with the specified name and color.
+	 * Constructor with name and colour: create a MimeCategory
+	 * with the specified name and color.
 	 **/
 	MimeCategory( const QString & name, const QColor  & color ):
 	    _name{ name },
@@ -132,57 +126,14 @@ namespace QDirStat
 	    { return _caseSensitiveWildcardList; }
 
 	/**
-	 * Return a sorted list of all either case sensitive or case
+	 * Return a sorted list of all either case-sensitive or case-
 	 * insensitive suffixes and patterns for this category.
 	 *
 	 * The patterns are grouped: exact matches first, then wildcard
 	 * suffixes, then suffixes, and lastly any non-suffix wildcard
-	 * patterns.
+	 * patterns.  Within each group they are sorted alphabetically.
 	 **/
 	QStringList patterns( Qt::CaseSensitivity caseSensitivity ) const;
-
-
-    protected:
-
-	/**
-	 * Return the exact pattern list for 'caseSensitivity' as a
-	 * reference or const reference.
-	 **/
-	const QStringList & exactList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
-	}
-
-	/**
-	 * Return the suffix pattern list for 'caseSensitivity' as a
-	 * reference or const reference.
-	 **/
-	const QStringList & suffixList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
-	}
-
-	/**
-	 * Return the wildcard suffix pattern list for 'caseSensitivity' as a
-	 * reference or const reference.
-	 **/
-	const QStringList & wildcardSuffixList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
-	}
-
-	/**
-	 * Return the wildcard pattern list for 'caseSensitivity' as a
-	 * reference or const reference.
-	 **/
-	const QStringList & wildcardList( Qt::CaseSensitivity caseSensitivity ) const
-	{
-	    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
-	    return caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
-	}
 
 
     private:

@@ -9,7 +9,7 @@
 
 #include "FileSizeStats.h"
 #include "FileInfoIterator.h"
-#include "MimeCategorizer.h" // WildcardCategory
+#include "Wildcard.h"
 
 
 using namespace QDirStat;

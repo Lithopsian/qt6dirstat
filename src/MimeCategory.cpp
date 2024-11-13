@@ -125,10 +125,15 @@ void MimeCategory::setPatterns( const QStringList & caseInsensitivePatterns,
 
 QStringList MimeCategory::patterns( Qt::CaseSensitivity caseSensitivity ) const
 {
-    const QStringList & exact            = exactList( caseSensitivity );
-    const QStringList & wildcardSuffixes = wildcardSuffixList( caseSensitivity );
-    const QStringList & suffixes         = suffixList( caseSensitivity );
-    const QStringList & wildcards        = wildcardList( caseSensitivity );
+    const bool caseSensitive = caseSensitivity == Qt::CaseSensitive;
+    const QStringList & exact =
+	caseSensitive ? _caseSensitiveExactList : _caseInsensitiveExactList;
+    const QStringList & wildcardSuffixes =
+	caseSensitive ? _caseSensitiveWildcardSuffixList : _caseInsensitiveWildcardSuffixList;
+    const QStringList & suffixes =
+	caseSensitive ? _caseSensitiveSuffixList : _caseInsensitiveSuffixList;
+    const QStringList & wildcards =
+	caseSensitive ? _caseSensitiveWildcardList : _caseInsensitiveWildcardList;
 
     return exact + wildcardSuffixes + suffixes + wildcards;
 }

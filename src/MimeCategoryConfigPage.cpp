@@ -21,6 +21,7 @@
 #include "MimeCategorizer.h"
 #include "MimeCategory.h"
 #include "QDirStatApp.h"
+#include "SignalBlocker.h"
 
 
 #define CATEGORY_CAST(VOID_PTR) (static_cast<MimeCategory *>(VOID_PTR))
@@ -31,6 +32,18 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * Clears the text in a QPlainTextEdit widget.  Signals
+     * are blocked while this is done to avoid triggering
+     * duplicate detection.
+     **/
+    void clearPlainTextEdit( QPlainTextEdit * plainTextEdit )
+    {
+	SignalBlocker blocker{ plainTextEdit };
+	plainTextEdit->clear();
+    }
+
+
     /**
      * Returns the index of 'needle' within 'stack', matching
      * according to 'cs', or -1 if there is no match.
@@ -184,11 +197,11 @@ namespace
      **/
     void setPatternList( QPlainTextEdit * textEdit, const QStringList & patternList )
     {
-	QString text = patternList.join( u'\n' );
+	if ( patternList.isEmpty() )
+	    return;
 
-	if ( !text.isEmpty() )
-	    text += u'\n'; // Let the user begin writing on a new line
-
+	// Let the user begin writing on a new line
+	const QString text = patternList.join( u'\n' ) % u'\n';
 	textEdit->setPlainText( text );
     }
 
@@ -493,6 +506,11 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     if ( !category )
 	return;
 
+    const bool current = item == _ui->listWidget->currentItem();
+    const bool useDisabledColors = !current && !_ui->listWidget->isEnabled();
+    const QPalette::ColorGroup group = useDisabledColors ? QPalette::Disabled : QPalette::Active;
+    item->setForeground( palette().color( group, current ? QPalette::HighlightedText : QPalette::Text ) );
+
     const bool previews = app()->mainWindow()->treemapView()->colourPreviews();
 
     const qreal width         = _ui->listWidget->width();
@@ -500,9 +518,6 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
     const qreal shadingStart  = ( width - 20 ) / width;
     const qreal shadingMiddle = ( width - 10 ) / width;
 
-    const bool current = item == _ui->listWidget->currentItem();
-    const bool useDisabledColors = !current && !_ui->listWidget->isEnabled();
-    const QPalette::ColorGroup group = useDisabledColors ? QPalette::Disabled : QPalette::Active;
     const QColor & backgroundColor = palette().color( group, current ? QPalette::Highlight : QPalette::Base );
 
     QLinearGradient gradient{ 0, 0, 1, 0 };
@@ -522,8 +537,6 @@ void MimeCategoryConfigPage::setBackground( QListWidgetItem * item )
 	    gradient.setColorAt( shadingStart, category->color() );
     }
     item->setBackground( gradient );
-
-    item->setForeground( palette().color( group, current ? QPalette::HighlightedText : QPalette::Text ) );
 }
 
 
@@ -573,24 +586,25 @@ void MimeCategoryConfigPage::save( void * value )
 
 void MimeCategoryConfigPage::load( void * value )
 {
+    clearPlainTextEdit( _ui->caseInsensitivePatterns );
+    clearPlainTextEdit( _ui->caseSensitivePatterns );
+
     const MimeCategory * category = CATEGORY_CAST( value );
     //logDebug() << category << " (" << value << ")" << Qt::endl;
 
-    // Populate the name and pattern fields from this category
-    _ui->nameLineEdit->setText( category ? category->name() : QString{} );
+    if ( category )
+    {
+	_ui->nameLineEdit->setText( category->name() );
+	setPatternList( _ui->caseInsensitivePatterns, category->patterns( Qt::CaseInsensitive ) );
+	setPatternList( _ui->caseSensitivePatterns, category->patterns( Qt::CaseSensitive ) );
+    }
+    else
+    {
+	_ui->nameLineEdit->clear();
+    }
 
-    const QStringList caseInsensitivePatterns =
-	category ? category->patterns( Qt::CaseInsensitive ) : QStringList{};
-    setPatternList( _ui->caseInsensitivePatterns, caseInsensitivePatterns );
-
-    const QStringList caseSensitivePatterns =
-	category ? category->patterns( Qt::CaseSensitive ) : QStringList{};
-    setPatternList( _ui->caseSensitivePatterns, caseSensitivePatterns );
-
-    // Set this category colour in the form and mini-treemap
-    const QColor color = category ? category->color() : QColor{};
-    _ui->categoryColorEdit->setText( color.isValid() ? category->color().name() : QString{} );
-    _ui->treemapView->setFixedColor( color );
+    const QString color = category && category->color().isValid() ? category->color().name() : QString{};
+    _ui->categoryColorEdit->setText( color );
 }
 
 

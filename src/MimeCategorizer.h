@@ -24,29 +24,6 @@ namespace QDirStat
     class MimeCategory;
 
     /**
-     * Replacement for QPair so that the members can be accessed by
-     * meaningful names rather than just 'first' and 'second'.
-     *
-     * isEmpty() is a shorthand for wildcard.pattern().isEmpty && category = 0
-     * matches() checks that 'item' matches both the wildcard and category
-     **/
-    struct WildcardCategory
-    {
-	Wildcard wildcard;
-	const MimeCategory * category;
-	bool isEmpty() const { return wildcard.isEmpty() and !category; }
-	bool matches( const FileInfo * item ) const;
-    };
-
-    /**
-     * Define operator== for WildcardCategory.  This deliberately only
-     * performs a partial match because it is used for duplicate-checking
-     * the map and only the suffix/wildcard combination is relevant.
-     **/
-    inline bool operator==( const WildcardCategory & lhs, const WildcardCategory & rhs )
-	{ return lhs.wildcard == rhs.wildcard; }
-
-    /**
      * Suffix matches return a list (possibly with only one entry) of pairs.
      * Each pair contains a regular expression and the category it matches to.
      * The regular expression may be empty, indicating a plain suffix that

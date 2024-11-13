@@ -16,9 +16,9 @@
 #include <QTreeWidgetItem>
 
 #include "ui_locate-file-type-window.h"
-#include "MimeCategorizer.h" // WildcardCategory
 #include "Subtree.h"
 #include "Typedefs.h" // FileSize
+#include "Wildcard.h"
 
 
 namespace QDirStat
