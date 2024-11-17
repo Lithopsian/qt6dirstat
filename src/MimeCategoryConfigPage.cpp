@@ -417,6 +417,8 @@ void MimeCategoryConfigPage::setDuplicate( const QString & pattern, const MimeCa
     _ui->duplicateLabel->show();
 
     _ui->listWidget->setEnabled( false );
+    actionRemove()->setEnabled( false );
+    actionAdd()->setEnabled( false );
     configDialog( this )->disableAcceptButtons();
     setShading();
 }
@@ -476,6 +478,8 @@ void MimeCategoryConfigPage::checkForDuplicates( const QStringList & patterns,
 
     _ui->duplicateLabel->hide();
     _ui->listWidget->setEnabled( true );
+    updateActions(); // for actionRemove()
+    actionAdd()->setEnabled( true );
     configDialog( this )->enableAcceptButtons();
     setShading();
 }
