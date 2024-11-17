@@ -35,8 +35,6 @@ namespace
      **/
     void writeLayoutSettings( const ColumnLayout * layout )
     {
-	CHECK_PTR( layout );
-
 	Settings settings;
 	settings.beginGroup( "TreeViewLayout_" + layout->name );
 	settings.setValue( "Columns", DataColumns::toStringList( layout->columns ) );
@@ -64,8 +62,6 @@ namespace
      **/
     void readLayoutSettings( ColumnLayout * layout )
     {
-	CHECK_PTR( layout );
-
 	Settings settings;
 
 	settings.beginGroup( "TreeViewLayout_" + layout->name );
@@ -122,6 +118,41 @@ namespace
 	    header->setSectionHidden( section, !columns.contains( DataColumns::fromViewCol( section ) ) );
     }
 
+
+    /**
+     * Create the column layouts.
+     **/
+    void createColumnLayouts( ColumnLayoutList & layouts )
+    {
+	/**
+	 * Create one column layout.
+	 **/
+	const auto createColumnLayout = [ &layouts ]( const QString & layoutName )
+	{
+	    layouts[ layoutName ] = new ColumnLayout{ layoutName };
+	};
+
+	// Layout L1: Short
+	createColumnLayout( HeaderTweaker::l1Name() );
+
+	// L2: Classic QDirStat Style
+	createColumnLayout( HeaderTweaker::l2Name() );
+
+	// L3: Full
+	createColumnLayout( HeaderTweaker::l3Name() );
+    }
+
+
+    /**
+     * Apply the settings from 'layout'.
+     **/
+    void applyLayout( QHeaderView * header, ColumnLayout * layout )
+    {
+	fixupLayout( layout );
+	setColumnOrder( header, layout->columns );
+	setColumnVisibility( header, layout->columns );
+    }
+
 } // namespace
 
 
@@ -136,7 +167,7 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
     _header->setContextMenuPolicy( Qt::CustomContextMenu );
     _header->setDefaultAlignment( Qt::AlignVCenter | Qt::AlignHCenter );
 
-    createColumnLayouts();
+    createColumnLayouts( _layouts );
 
     connect( _header, &QHeaderView::sectionCountChanged,
              this,    &HeaderTweaker::readSettings );
@@ -149,27 +180,6 @@ HeaderTweaker::HeaderTweaker( QHeaderView * header, DirTreeView * parent ):
 HeaderTweaker::~HeaderTweaker()
 {
     qDeleteAll( _layouts );
-}
-
-
-void HeaderTweaker::createColumnLayouts()
-{
-    /**
-     * Create one column layout.
-     **/
-    const auto createColumnLayout = [ this ]( const QString & layoutName )
-    {
-	_layouts[ layoutName ] = new ColumnLayout{ layoutName };
-    };
-
-    // Layout L1: Short
-    createColumnLayout( l1Name() );
-
-    // L2: Classic QDirStat Style
-    createColumnLayout( l2Name() );
-
-    // L3: Full
-    createColumnLayout( l3Name() );
 }
 
 
@@ -189,8 +199,8 @@ void HeaderTweaker::contextMenu( const QPoint & pos )
     if ( _currentSection == -1 )
 	return;
 
-    const QString colName = this->colName( _currentSection );
-    //logDebug() << colName << Qt::endl;
+    const QString currentColName = colName( _currentSection );
+    //logDebug() << currentColName << Qt::endl;
 
     QMenu menu;
     QAction * autoSizeCurrentCol = createAction( &menu,
@@ -200,7 +210,7 @@ void HeaderTweaker::contextMenu( const QPoint & pos )
     autoSizeCurrentCol->setChecked( autoSizeCol( _currentSection ) );
 
     QAction * hideCurrentCol = createAction( &menu,
-                                             tr( "&Hide \"%1\"" ).arg( colName ),
+                                             tr( "&Hide \"%1\"" ).arg( currentColName ),
                                              &HeaderTweaker::hideCurrentCol );
     hideCurrentCol->setEnabled( _currentSection );
 
@@ -226,7 +236,7 @@ QMenu * HeaderTweaker::createHiddenColMenu( QWidget * parent )
     {
 	if ( _header->isSectionHidden( section ) )
 	{
-	    const QString text = tr( "Show Column \"%1\"" ).arg( this->colName( section ) );
+	    const QString text = tr( "Show Column \"%1\"" ).arg( colName( section ) );
 	    QAction * showAction = createAction( hiddenColMenu, text, &HeaderTweaker::showHiddenCol );
 	    showAction->setData( section );
 	    ++actionCount;
@@ -335,7 +345,7 @@ void HeaderTweaker::resetToDefaults()
     if ( _currentLayout )
     {
 	_currentLayout->columns = _currentLayout->defaultColumns();
-	applyLayout( _currentLayout );
+	applyLayout( _header, _currentLayout );
     }
 }
 
@@ -376,6 +386,8 @@ void HeaderTweaker::readSettings()
 
 void HeaderTweaker::writeSettings()
 {
+    saveLayout();
+
     Settings settings;
     settings.beginGroup( "TreeViewColumns" );
 
@@ -418,14 +430,12 @@ void HeaderTweaker::changeLayout( const QString & layoutName )
 
     saveLayout();
     _currentLayout = _layouts[ layoutName ];
-    applyLayout( _currentLayout );
+    applyLayout( _header, _currentLayout );
 }
 
 
 void HeaderTweaker::saveLayout( ColumnLayout * layout )
 {
-    CHECK_PTR( layout );
-
     layout->columns.clear();
 
     for ( int visualIndex = 0; visualIndex < _header->count(); ++visualIndex )
@@ -437,16 +447,6 @@ void HeaderTweaker::saveLayout( ColumnLayout * layout )
 		layout->columns << DataColumns::fromViewCol( logicalIndex );
 	}
     }
-}
-
-
-void HeaderTweaker::applyLayout( ColumnLayout * layout )
-{
-    CHECK_PTR( layout );
-
-    fixupLayout( layout );
-    setColumnOrder( _header, layout->columns );
-    setColumnVisibility( _header, layout->columns );
 }
 
 
