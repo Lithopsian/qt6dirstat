@@ -872,7 +872,7 @@ void MainWindow::copyCurrentPathToClipboard()
 }
 
 
-void MainWindow::expandTreeToLevel( int level )
+void MainWindow::expandTreeToLevel( int level ) const
 {
     //logDebug() << "Expanding tree to level " << level << Qt::endl;
 

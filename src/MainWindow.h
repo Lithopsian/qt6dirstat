@@ -39,7 +39,7 @@ namespace QDirStat
      * This is the MainWindow object for the QDirStat application. It
      * creates and manages the main application window.
      **/
-    class MainWindow: public QMainWindow
+    class MainWindow final : public QMainWindow
     {
         Q_OBJECT
 
@@ -482,7 +482,7 @@ namespace QDirStat
         /**
          * Expand the directory tree's branches to depth 'level'.
          **/
-        void expandTreeToLevel( int level );
+        void expandTreeToLevel( int level ) const;
 
         /**
          * Read parameters from the settings file.
