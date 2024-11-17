@@ -395,8 +395,8 @@ void MimeCategorizer::addWildcardSuffixKeys( const MimeCategory * category )
     // Return the portion of 'pattern' after the "*."
     const auto getSuffix = []( const QString & pattern )
     {
-	const int delimeterIndex = pattern.lastIndexOf( "*."_L1 );
-	return delimeterIndex < 0 ? pattern : pattern.mid( delimeterIndex );
+	const int delimiterIndex = pattern.lastIndexOf( "*."_L1 );
+	return delimiterIndex < 0 ? pattern : pattern.mid( delimiterIndex );
     };
 
     // Add any case-insensitive regular expression, plus a case-sensitive lowercased version

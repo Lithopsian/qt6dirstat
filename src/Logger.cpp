@@ -18,7 +18,6 @@
 
 #include <QDateTime>
 #include <QDir>
-#include <QRegularExpression>
 
 #include "Logger.h"
 #include "SysUtil.h"
