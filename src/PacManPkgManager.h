@@ -18,7 +18,7 @@ namespace QDirStat
     /**
      * Interface to 'pacman' for Manjaro / Arch Linux.
      **/
-    class PacManPkgManager: public PkgManager
+    class PacManPkgManager final : public PkgManager
     {
     public:
 
@@ -52,12 +52,12 @@ namespace QDirStat
 	 *
 	 * This basically executes this command:
 	 *
-	 *   /usr/bin/rpm -qf ${path}
+	 *   /usr/bin/pacman -Qo ${path}
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
 	//-----------------------------------------------------------------
-	//                     Optional Features
+	//                    Optional Features
 	//-----------------------------------------------------------------
 
 	/**
@@ -66,8 +66,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	bool supportsGetInstalledPkg() const override
-	    { return true; }
+	bool supportsGetInstalledPkg() const override { return true; }
 
 	/**
 	 * Return the list of installed packages.
@@ -84,8 +83,12 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	bool supportsFileList() const override
-	    { return true; }
+	bool supportsFileList() const override { return true; }
+
+	/**
+	 * Return the command for querying pacman for files and directories.
+	 **/
+	static QString pacmanCommand() { return "/usr/bin/pacman"; }
 
 	/**
 	 * Return the command for getting the list of files and directories
@@ -93,8 +96,8 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	QString fileListCommand( const PkgInfo * pkg ) const override
-	    { return "/usr/bin/pacman -Qlq " + pkg->baseName(); }
+	PkgCommand fileListCommand( const PkgInfo * pkg ) const override
+	    { return PkgCommand{ pacmanCommand(), QStringList{ "-Qlq", pkg->baseName() } }; }
 
 	/**
 	 * Parse the output of the file list command.

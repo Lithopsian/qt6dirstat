@@ -111,7 +111,7 @@ namespace QDirStat
      * However, the location of that file is configurable and there will typically be only a handful
      * of diversions on a computer (although some rename multiple files, such as glx-diversions).
      **/
-    class DpkgPkgManager: public PkgManager
+    class DpkgPkgManager final : public PkgManager
     {
     public:
 
@@ -154,7 +154,7 @@ namespace QDirStat
 	QString owningPkg( const QString & path ) const override;
 
 	//-----------------------------------------------------------------
-	//		       Optional Features
+	//                    Optional Features
 	//-----------------------------------------------------------------
 
 	/**
@@ -183,18 +183,23 @@ namespace QDirStat
 	bool supportsFileList() const override { return true; }
 
 	/**
-	 * Return the command for getting the list of files and directories
-	 * owned by an individual package, or querying a sequence of up to
-	 * about 200 packages one by one.
-	 *
-	 * Re
-	 * Reimplemented from PkgManager.
+	 * Return the command for querying dpkg for files and directories.
 	 **/
-	QString fileListCommand( const PkgInfo * pkg ) const override
-	    { return "/usr/bin/dpkg-query --listfiles " + queryName( pkg ); }
+	static QString dpkgQueryCommand() { return "/usr/bin/dpkg-query"; }
 
 	/**
-	 * Parse the output of the file list command.
+	 * Return the command for getting the list of files and directories
+	 * owned by an individual package, or querying a sequence of up to
+	 * about 300 packages one by one.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	PkgCommand fileListCommand( const PkgInfo * pkg ) const override
+	    { return PkgCommand{ dpkgQueryCommand(), QStringList{ "--listfiles", queryName( pkg ) } }; }
+
+	/**
+	 * Parse the output of the file list command and return a list
+	 * of file names.
 	 *
 	 * Reimplemented from PkgManager.
 	 **/

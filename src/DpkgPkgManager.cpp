@@ -18,10 +18,6 @@
 
 using namespace QDirStat;
 
-using SysUtil::runCommand;
-using SysUtil::tryRunCommand;
-using SysUtil::haveCommand;
-
 
 #define VERBOSE_DIVERSIONS 0
 #define VERBOSE_PACKAGES   0
@@ -83,19 +79,28 @@ namespace
     }
 
     /**
+     * Return the command for the dpkg manager program.
+     **/
+    QString dpkgCommand()
+    {
+	return "/usr/bin/dpkg";
+    }
+
+
+    /**
      * Runs dpkg -S against the given path and returns the output.
      *
      * exitCode indicates the success or failure of the command.
     */
     QString runDpkg( const QString & path, int &exitCode, bool logError )
     {
-	return runCommand( "/usr/bin/dpkg",
-	                   { "-S", path },
-	                   &exitCode,
-	                   1,		// better not to lock the whole program for 15 seconds
-	                   false,	// don't log command
-	                   false,	// don't log output
-	                   logError );
+	return SysUtil::runCommand( dpkgCommand(),
+	                            { "-S", path },
+	                            &exitCode,
+	                            1,		// better not to lock the whole program for 15 seconds
+	                            false,	// don't log command
+	                            false,	// don't log output
+	                            logError );
     }
 
 
@@ -116,7 +121,7 @@ namespace
 
 	const QString pathResolved = resolvePath( path );
 
-	int exitCode = -1;
+	int exitCode;
 	const QString output = runDpkg( path, exitCode, true ); // don't ignore error codes
 	if ( exitCode != 0 )
 	    return QString{};
@@ -327,20 +332,20 @@ namespace
 
 bool DpkgPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( "/usr/bin/dpkg -S /usr/bin/dpkg", "^dpkg:.*" );
+    return SysUtil::tryRunCommand( dpkgCommand(), { "-S", dpkgCommand() }, "^dpkg:.*" );
 }
 
 
 bool DpkgPkgManager::isAvailable() const
 {
-    return haveCommand( "/usr/bin/dpkg" );
+    return SysUtil::haveCommand( dpkgCommand() );
 }
 
 
 QString DpkgPkgManager::owningPkg( const QString & path ) const
 {
     // Try first with the full (possibly symlinked) path
-    int exitCode = -1;
+    int exitCode;
     const QString fullPathOutput = runDpkg( path, exitCode, false ); // error code likely, ignore
     if ( exitCode == 0 )
     {
@@ -362,11 +367,11 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
 
 PkgInfoList DpkgPkgManager::installedPkg() const
 {
-    int exitCode = -1;
+    int exitCode;
     const QString output =
-	runCommand( "/usr/bin/dpkg-query",
-	            { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
-	            &exitCode );
+	SysUtil::runCommand( dpkgCommand(),
+	                     { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
+	                     &exitCode );
 
     if ( exitCode == 0 )
 	return parsePkgList( this, output );
@@ -429,7 +434,7 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 
 PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
 {
-    int exitCode = -1;
+    int exitCode;
     QString output = runDpkg( "*", exitCode, true ); // don't ignore error codes
     if ( exitCode != 0 )
 	return nullptr;

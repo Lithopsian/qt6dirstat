@@ -145,24 +145,17 @@ namespace
      **/
     QProcess * createReadFileListProcess( PkgInfo * pkg )
     {
-	const QString command = pkg->pkgManager()->fileListCommand( pkg );
-
-	if ( command.isEmpty() )
+	const PkgCommand pkgCommand = pkg->pkgManager()->fileListCommand( pkg );
+	if ( pkgCommand.isEmpty() )
 	{
 	    logError() << "Empty file list command for " << pkg << Qt::endl;
 	    return nullptr;
 	}
 
-	QStringList args       = command.split( QRegularExpression{ "\\s+" } );
-	const QString program = args.takeFirst();
-
-	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-	env.insert( "LANG", "C" ); // Prevent output in translated languages
-
 	QProcess * process = new QProcess{};
-	process->setProgram( program );
-	process->setArguments( args );
-	process->setProcessEnvironment( env );
+	process->setProgram( pkgCommand.command );
+	process->setArguments( pkgCommand.args );
+	process->setProcessEnvironment( SysUtil::cProcessEnvironment() );
 	process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
 
 	// Intentionally NOT starting the process yet
@@ -183,7 +176,7 @@ namespace
 	CHECK_PTR( pkgManager );
 
 	// The shared pointer will delete the cache when the last job that uses it is destroyed
-	PkgFileListCachePtr fileListCache( pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) );
+	PkgFileListCachePtr fileListCache{ pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) };
 	if ( !fileListCache )
 	{
 	    logError() << "Creating the file list cache failed" << Qt::endl;
@@ -383,8 +376,10 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     {
 	parent->insertChild( newItem );
 	tree()->childAddedNotify( newItem );
+	return newItem;
     }
-    else if ( errno == EACCES )
+
+    if ( errno == EACCES )
     {
 	// No permissions, expected error
 	parent->markAsDirty();
@@ -399,11 +394,11 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     }
     else if ( _verboseMissingPkgFiles )
     {
-	// Packaged file not present, just log it
+	// Packaged file not present, log it
 	logWarning() << _pkg << " missing " << path << Qt::endl;
     }
 
-    return newItem;
+    return nullptr;
 }
 
 

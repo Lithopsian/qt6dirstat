@@ -16,10 +16,6 @@
 
 using namespace QDirStat;
 
-using SysUtil::runCommand;
-using SysUtil::tryRunCommand;
-using SysUtil::haveCommand;
-
 
 namespace
 {
@@ -58,20 +54,22 @@ namespace
 
 bool PacManPkgManager::isPrimaryPkgManager() const
 {
-    return tryRunCommand( "/usr/bin/pacman -Qo /usr/bin/pacman", ".*is owned by pacman.*" );
+    return SysUtil::tryRunCommand( pacmanCommand(),
+                                   QStringList{ "-Qo", pacmanCommand() },
+                                   ".*is owned by pacman.*" );
 }
 
 
 bool PacManPkgManager::isAvailable() const
 {
-    return haveCommand( "/usr/bin/pacman" );
+    return SysUtil::haveCommand( pacmanCommand() );
 }
 
 
 QString PacManPkgManager::owningPkg( const QString & path ) const
 {
-    int exitCode = -1;
-    QString output = runCommand( "/usr/bin/pacman", { "-Qo", path }, &exitCode );
+    int exitCode;
+    QString output = SysUtil::runCommand( pacmanCommand(), { "-Qo", path }, &exitCode );
     if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
         return QString{};
 
@@ -93,12 +91,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
 
 PkgInfoList PacManPkgManager::installedPkg() const
 {
-    PkgInfoList pkgList;
-
-    int exitCode = -1;
-    const QString output = runCommand( "/usr/bin/pacman", { "-Qn" }, &exitCode );
-    if ( exitCode == 0 )
-        pkgList = parsePkgList( this, output );
-
-    return pkgList;
+    int exitCode;
+    const QString output = SysUtil::runCommand( pacmanCommand(), { "-Qn" }, &exitCode );
+    return exitCode == 0 ? parsePkgList( this, output ) : PkgInfoList{};
 }
