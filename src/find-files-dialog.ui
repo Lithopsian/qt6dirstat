@@ -171,7 +171,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="findSymLinksCheckBox">
+       <widget class="QCheckBox" name="findSymlinksCheckBox">
         <property name="text">
          <string>Find &amp;symbolic links</string>
         </property>
@@ -258,7 +258,7 @@
   <tabstop>findFilesRadioButton</tabstop>
   <tabstop>findDirectoriesRadioButton</tabstop>
   <tabstop>findBothRadioButton</tabstop>
-  <tabstop>findSymLinksCheckBox</tabstop>
+  <tabstop>findSymlinksCheckBox</tabstop>
   <tabstop>wholeTreeRadioButton</tabstop>
   <tabstop>currentSubtreeRadioButton</tabstop>
  </tabstops>

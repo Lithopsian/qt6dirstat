@@ -99,7 +99,7 @@ namespace
      **/
     QVariant formatPercentQVariant( float percent )
     {
-	const QString text = QDirStat::formatPercent( percent );
+	const QString text = formatPercent( percent );
 
 	return text.isEmpty() ? QVariant{} : text;
     }
@@ -156,7 +156,7 @@ namespace
     bool useSmallFileSizeText( FileInfo * item )
     {
 	// Not a regular file or symlink doesn't count
-	if ( !item || item->blocks() == 0 || !item->isFileOrSymLink() )
+	if ( !item || item->blocks() == 0 || !item->isFileOrSymlink() )
 	    return false;
 
 	// If no cluster size has been determined yet, we can't say what is a small file
@@ -907,7 +907,7 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
     if ( item->isDir()      ) return item->isMountPoint() ? _mountPointIcon : _dirIcon;
     // else FileInfo
     if ( item->isFile()        ) return _fileIcon;
-    if ( item->isSymLink()     ) return _symlinkIcon;
+    if ( item->isSymlink()     ) return _symlinkIcon;
     if ( item->isBlockDevice() ) return _blockDeviceIcon;
     if ( item->isCharDevice()  ) return _charDeviceIcon;
     if ( item->isSpecial()     ) return _specialIcon;
@@ -1120,7 +1120,7 @@ void DirTreeModel::itemClicked( const QModelIndex & index )
 
 	logDebug() << "Clicked row " << index.row()
 	           << " col " << index.column()
-	           << " (" << QDirStat::DataColumns::fromViewCol( index.column() ) << ")"
+	           << " (" << DataColumns::fromViewCol( index.column() ) << ")"
 	           << "\t" << item
 	            << " data(0): " << this->data( index, 0 ).toString()
 	           << Qt::endl;

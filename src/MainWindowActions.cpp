@@ -124,7 +124,7 @@ void MainWindow::connectMenuActions()
     connectFunctorAction( _ui->actionDiscoverNewestFiles,     &DiscoverActions::discoverNewestFiles );
     connectFunctorAction( _ui->actionDiscoverOldestFiles,     &DiscoverActions::discoverOldestFiles );
     connectFunctorAction( _ui->actionDiscoverHardLinkedFiles, &DiscoverActions::discoverHardLinkedFiles );
-    connectFunctorAction( _ui->actionDiscoverBrokenSymLinks,  &DiscoverActions::discoverBrokenSymLinks );
+    connectFunctorAction( _ui->actionDiscoverBrokenSymlinks,  &DiscoverActions::discoverBrokenSymlinks );
     connectFunctorAction( _ui->actionDiscoverSparseFiles,     &DiscoverActions::discoverSparseFiles );
 }
 

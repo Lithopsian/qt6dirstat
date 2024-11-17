@@ -16,24 +16,24 @@
 
 namespace QDirStat
 {
-    enum FilterMode
-    {
-        Auto,       // Guess from pattern (see below)
-        Contains,   // Fixed string
-        StartsWith, // Fixed string
-        ExactMatch, // Fixed string
-        Wildcard,
-        RegExp,
-        SelectAll   // Pattern is irrelevant
-    };
-
-
     /**
      * Base class for search filters like PkgFilter or FileSearchFilter.
      **/
     class SearchFilter
     {
     public:
+
+        enum FilterMode
+        {
+          Auto,       // Guess from pattern (see below)
+          Contains,   // Fixed string
+          StartsWith, // Fixed string
+          ExactMatch, // Fixed string
+          WildcardMode,
+          RegExp,
+          SelectAll   // Pattern is irrelevant
+        };
+
 
         /**
          * Constructor: Create a search filter with the specified pattern and
@@ -87,13 +87,13 @@ namespace QDirStat
         {
             switch ( filterMode )
             {
-                case Contains:   return "Contains";
-                case StartsWith: return "StartsWith";
-                case ExactMatch: return "ExactMatch";
-                case Wildcard:   return "Wildcard";
-                case RegExp:     return "Regexp";
-                case SelectAll:  return "SelectAll";
-                case Auto:       return "Auto";
+                case Contains:     return "Contains";
+                case StartsWith:   return "StartsWith";
+                case ExactMatch:   return "ExactMatch";
+                case WildcardMode: return "Wildcard";
+                case RegExp:       return "Regexp";
+                case SelectAll:    return "SelectAll";
+                case Auto:         return "Auto";
             }
 
             return QString{ "<Unknown FilterMode %1" }.arg( filterMode );

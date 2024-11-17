@@ -16,13 +16,13 @@
 #include <QTreeWidgetItem>
 
 #include "ui_file-type-stats-window.h"
+#include "FileTypeStats.h" // CountSize, PatternCategory
 #include "Subtree.h"
 #include "Typedefs.h" // FileCount, FileSize
 
 
 namespace QDirStat
 {
-    struct CountSize;
     class FileInfo;
 
     /**
@@ -63,7 +63,7 @@ namespace QDirStat
 	 * Populate the shared singleton instance of this window for 'subtree'.
 	 * Create a new instance if there isn't one currently.
 	 **/
-	static void populateSharedInstance( QWidget  * mainWindow, FileInfo * subtree )
+	static void populateSharedInstance( QWidget * mainWindow, FileInfo * subtree )
 	    { if ( subtree ) sharedInstance( mainWindow )->populate( subtree ); }
 
 
@@ -126,13 +126,14 @@ namespace QDirStat
 	/**
 	 * Enable or disable the actions.
 	 **/
-	inline void enableActions( bool enable );
+	void enableActions( bool enable )
+	    { _ui->locateButton->setEnabled( enable ); _ui->sizeStatsButton->setEnabled( enable ); }
 
 	/**
-	 * Return the suffix of the currently selected file type or an empty
-	 * string if no suffix is selected.
+	 * Return a PatternCategory struct for the currently selected
+	 * file type or 0 if no PatternFileTypeItem is selected.
 	 **/
-	QString currentItemSuffix() const;
+	const PatternCategory * currentItemPattern() const;
 
 	/**
 	 * Key press event for detecting enter/return.
@@ -142,15 +143,15 @@ namespace QDirStat
 	void keyPressEvent( QKeyEvent * event ) override;
 
 	/**
-	 * Resize event: elide the title to fit inside the current dialog width,
-	 * so that they fill the available width but very long paths don't
-	 * stretch the dialog.  A little extra room is left for the user to
-	 * shrink the dialog, which would then force the label to be elided
-	 * further.
+	 * Event handler: elide the title to fit inside the current dialog
+	 * width, so that they fill the available width but very long paths
+	 * don't stretch the dialog.  A little extra room is left for the
+	 * user to shrink the dialog, which would then force the label to
+	 * be elided further.
 	 *
-	 * Reimplemented from QWidget.
+	 * Reimplemented from QDialog/QWidget.
 	 **/
-	void resizeEvent( QResizeEvent * ) override;
+	bool event( QEvent * event ) override;
 
 
     private:
@@ -178,23 +179,37 @@ namespace QDirStat
 
 
     /**
-     * Item class for the file type tree widget, representing either a MIME
-     * category or a suffix.
+     * Item class for the file type tree widget, representing either a
+     * MIME category or a pattern.
      **/
     class FileTypeItem: public QTreeWidgetItem
     {
     public:
 
 	/**
-	 * Constructor. After creating, this item has to be inserted into the
-	 * tree at the appropriate place: toplevel for categories, below a
-	 * category for suffixes.
+	 * Constructor with explicit parent count and size. After
+	 * creating, this item has to be inserted into the tree at the
+	 * appropriate place: toplevel for categories, below a category
+	 * for patterns.
 	 **/
 	FileTypeItem( const QString   & name,
 	              const CountSize & countSize,
 	              FileCount         parentCount,
 	              FileSize          parentSize,
 	              int               treeLevel = 0 );
+
+	/**
+	 * Constructor with a parent FileTypeItem and tooltip.  Used for
+	 * non-pattern child items: <no extension> and <other>.
+	 **/
+	FileTypeItem( FileTypeItem    * parentItem,
+	              const QString   & name,
+	              const QString   & tooltip,
+	              const CountSize & countSize ):
+	    FileTypeItem{ name, countSize, parentItem->count(), parentItem->totalSize(), 1 }
+	{
+	    setToolTip( FT_NameCol, tooltip );
+	}
 
 	/**
 	 * Return the files count for this category item.
@@ -227,61 +242,49 @@ namespace QDirStat
 
 
     /**
-     * Specialized item class for suffix file types.
+     * Specialized item class for children of a top-level category
+     * item.  These can be used as the basis for searches such as
+     * by LocateFileTypeWindow and FileSizeStatsWindow.
      **/
-    class SuffixFileTypeItem: public FileTypeItem
+    class PatternFileTypeItem: public FileTypeItem
     {
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor with a PatternCategory, a (possibly
+	 * case-insensitive) pattern and a category.
 	 **/
-	SuffixFileTypeItem( bool              otherCategory,
-	                    const QString   & suffix,
-	                    const CountSize & countSize,
-	                    FileCount         parentCount,
-	                    FileSize          parentSize ):
-	    FileTypeItem{ itemName( otherCategory, suffix ), countSize, parentCount, parentSize, 1 },
-	    _suffix{ suffix }
+	PatternFileTypeItem( FileTypeItem          * parentItem,
+	                     const QString         & name,
+	                     const PatternCategory & patternCategory,
+	                     const CountSize       & countSize ):
+	    FileTypeItem{ name, countSize, parentItem->count(), parentItem->totalSize(), 1 },
+	    _patternCategory{ patternCategory }
 	{}
 
 	/**
-	 * Return this file type's suffix.
+	 * Constructor with no pattern.
 	 **/
-	const QString & suffix() const { return _suffix; }
-
-
-    protected:
+	PatternFileTypeItem( FileTypeItem       * parentItem,
+	                     const QString      & name,
+	                     const QString      & tooltip,
+	                     const MimeCategory * category,
+	                     const CountSize    & countSize ):
+	    FileTypeItem{ parentItem, name, tooltip, countSize },
+	    _patternCategory{ QString{}, false, category }
+	{}
 
 	/**
-	 * Returns the name to display for this tree item.  This
-	 * is "*." plus the suffix.  If there is no suffix, two
-	 * special names are used for the "Other" category and for
-	 * all other categories.
+	 * Return this file type item's PatternCategory struct.
 	 **/
-	static QString itemName( bool otherCategory, const QString & suffix )
-	    { return suffix.isEmpty() ? otherCategory ? noExtension() : nonSuffix() : "*." + suffix; }
-
-	/**
-	 * Returns the name to be used for items with no suffix in
-	 * the "Other" category.
-	 **/
-	 static QString noExtension()
-	    { return QObject::tr( "<no extension>" ); }
-
-	/**
-	 * Returns the name to be used for items with no suffix in
-	 * categories except "Other".
-	 **/
-	 static QString nonSuffix()
-	    { return QObject::tr( "<non-suffix rule>" ); }
+	const PatternCategory & patternCategory() const { return _patternCategory; }
 
 
     private:
 
-	QString _suffix;
+	const PatternCategory _patternCategory;
 
-    };	// class SuffixFileTypeItem
+    };	// class PatternFileTypeItem
 
 }	// namespace QDirStat
 

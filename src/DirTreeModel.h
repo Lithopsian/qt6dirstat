@@ -78,6 +78,13 @@ namespace QDirStat
 	    { return QAbstractItemModel::persistentIndexList(); }
 
 	/**
+	 * Return a stylesheet string to set a label text to the configured
+	 * directory read error colour.
+	 **/
+	QString errorStyleSheet() const
+	    { return QString{ "QLabel { color: %1; }" }.arg( dirReadErrColor().name() ); }
+
+	/**
 	 * Return the color configured for directories with a read error.
 	 **/
 	const QColor & dirReadErrColor() const

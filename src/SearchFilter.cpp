@@ -17,19 +17,19 @@ using namespace QDirStat;
 
 namespace
 {
-    FilterMode guessFilterMode( QString & pattern, FilterMode defaultFilterMode )
+    SearchFilter::FilterMode guessFilterMode( QString & pattern, SearchFilter::FilterMode defaultFilterMode )
     {
         if ( pattern.isEmpty() )
-            return SelectAll;
+            return SearchFilter::SelectAll;
 
         if ( pattern.startsWith( u'=' ) )
         {
             pattern.remove( 0, 1 );
-            return ExactMatch;
+            return SearchFilter::ExactMatch;
         }
 
         if ( pattern.startsWith( u'*' ) || pattern.contains( "*.*"_L1 ) )
-            return Wildcard;
+            return SearchFilter::WildcardMode;
 
         if ( pattern.contains( ".*"_L1 ) ||
              pattern.contains( u'^'    ) ||
@@ -38,14 +38,14 @@ namespace
              pattern.contains( u'|'    ) ||
              pattern.contains( u'['    ) )
         {
-            return RegExp;
+            return SearchFilter::RegExp;
         }
 
         if ( pattern.contains( u'*' ) || pattern.contains( u'?' ) )
-            return Wildcard;
+            return SearchFilter::WildcardMode;
 
-        if ( defaultFilterMode == Auto )
-            return StartsWith;
+        if ( defaultFilterMode == SearchFilter::Auto )
+            return SearchFilter::StartsWith;
 
         return defaultFilterMode;
     }
@@ -74,7 +74,7 @@ SearchFilter::SearchFilter( const QString & pattern,
     if ( !caseSensitive )
         patternOptions = QRegularExpression::CaseInsensitiveOption;
 
-    if ( _filterMode == Wildcard )
+    if ( _filterMode == WildcardMode )
         _regexp = Wildcard::wildcardRegularExpression( pattern, patternOptions );
     else if ( _filterMode == RegExp )
         _regexp = QRegularExpression{ pattern, patternOptions };
@@ -91,12 +91,12 @@ bool SearchFilter::matches( const QString & str ) const
 
     switch ( _filterMode )
     {
-        case Contains:   return str.contains  ( _pattern, caseSensitivity );
-        case StartsWith: return str.startsWith( _pattern, caseSensitivity );
-        case ExactMatch: return QString::compare( str, _pattern, caseSensitivity ) == 0;
-        case Wildcard:   return _regexp.match( str ).hasMatch();
-        case RegExp:     return _regexp.isValid() && _regexp.match( str ).hasMatch();
-        case SelectAll:  return true;
+        case Contains:     return str.contains  ( _pattern, caseSensitivity );
+        case StartsWith:   return str.startsWith( _pattern, caseSensitivity );
+        case ExactMatch:   return QString::compare( str, _pattern, caseSensitivity ) == 0;
+        case WildcardMode: return _regexp.match( str ).hasMatch();
+        case RegExp:       return _regexp.isValid() && _regexp.match( str ).hasMatch();
+        case SelectAll:    return true;
         case Auto:
             logWarning() << "Unexpected filter mode 'Auto' - assuming 'Contains'" << Qt::endl;
             return str.contains( _pattern, caseSensitivity );

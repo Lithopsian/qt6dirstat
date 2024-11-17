@@ -104,7 +104,7 @@ namespace
     {
 	const PkgInfoList pkgList = PkgQuery::installedPkg();
 
-	if ( filter.filterMode() == SelectAll )
+	if ( filter.filterMode() == SearchFilter::SelectAll )
 	    return pkgList;
 
 	PkgInfoList filteredList;

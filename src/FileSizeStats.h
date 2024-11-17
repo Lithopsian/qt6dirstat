@@ -16,6 +16,7 @@
 namespace QDirStat
 {
     class FileInfo;
+    struct WildcardCategory;
 
     /**
      * Helper class for extended file size statistics.
@@ -28,11 +29,16 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor with a subtree and optional suffix.
-	 *
-	 * 'suffix' may be empty, or should start with ".", e.g. ".jpg".
+	 * Constructor with a subtree and optional flag whether to exclude
+	 * symlinks.
 	 **/
-	FileSizeStats( FileInfo * subtree, const QString & suffix = QString{}, bool excludeSymLinks = false );
+	FileSizeStats( FileInfo * subtree, bool excludeSymlinks = false );
+
+	/**
+	 * Constructor with a subtree and WildcardCategory.  Used with
+	 * calls from FileTypeStatsWindow.
+	 **/
+	FileSizeStats( FileInfo * subtree, const WildcardCategory & wildcardCategory );
 
 
     protected:
@@ -42,18 +48,17 @@ namespace QDirStat
 	 * size for each file to the data collection. Note that the data are
 	 * unsorted after this.
 	 **/
-	void collect( const FileInfo * subtree, bool excludeSymLinks );
+	void collect( const FileInfo * subtree, bool excludeSymlinks );
 
 	/**
 	 * Recurse through all file elements in the subtree and append the own
-	 * size for each file with the specified suffix to the data
+	 * size for each file matching 'wildcardCategory' to the data
 	 * collection. Note that the data are unsorted after this.
 	 **/
-	void collect( const FileInfo * subtree, const QString & suffix, bool excludeSymLinks );
+	void collect( const FileInfo * subtree, const WildcardCategory & wildcardCategory );
 
     };	// class FileSizeStats
 
 }	// namespace QDirStat
 
 #endif	// ifndef FileSizeStats_h
-

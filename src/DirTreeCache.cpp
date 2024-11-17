@@ -55,7 +55,7 @@ namespace
     {
 	if ( item->isFile()        ) return "F";
 	if ( item->isDir()         ) return "D";
-	if ( item->isSymLink()     ) return "L";
+	if ( item->isSymlink()     ) return "L";
 	if ( item->isBlockDevice() ) return "BlockDev";
 	if ( item->isCharDevice()  ) return "CharDev";
 	if ( item->isFifo()        ) return "FIFO";

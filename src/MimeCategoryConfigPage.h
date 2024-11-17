@@ -14,6 +14,7 @@
 
 #include "ListEditor.h"
 #include "ui_mime-category-config-page.h"
+#include "Typedefs.h" // SkipEmptyParts
 
 
 class QListWidget;
@@ -22,6 +23,7 @@ class QListWidget;
 namespace QDirStat
 {
     class ConfigDialog;
+    class MimeCategory;
 
     /**
      * Configuration page (tab) for MimeCategories:
@@ -100,6 +102,12 @@ namespace QDirStat
 	void cushionShadingChanged( bool state );
 
 	/**
+	 * Checks the current list of case-sensitive patterns for duplicates.
+	 **/
+	void caseInsensitiveTextChanged();
+	void caseSensitiveTextChanged();
+
+	/**
 	 * Updates the treemapView when something changes in the configuration.
 	 **/
 	void configChanged();
@@ -137,13 +145,65 @@ namespace QDirStat
 	 * Reimplemented from ListEditor.  The default implementations
 	 * return 0.
 	 **/
-	QToolButton * addButton()    const override { return _ui->addButton;      };
-	QToolButton * removeButton() const override { return _ui->removeButton;   };
+	QToolButton * addButton()    const override { return _ui->addButton; };
+	QToolButton * removeButton() const override { return _ui->removeButton; };
 
 	/**
-	 * Populate the widgets.
+	 * Return a list of the case-sensitive or case-insensitive
+	 * patterns for the current item.
+	 *
+	 * The plain text is split at linefeed characters.  In
+	 * QPlainTextEdit, carriage return characters are
+	 * converted to linefeeds,
 	 **/
-	void populateTreemapTab();
+	QStringList currentCaseInsensitivePatterns()
+	    { return _ui->caseInsensitivePatterns->toPlainText().split( u'\n', Qt::SkipEmptyParts ); }
+	QStringList currentCaseSensitivePatterns()
+	    { return _ui->caseSensitivePatterns->toPlainText().split( u'\n', Qt::SkipEmptyParts ); }
+
+	/**
+	 * Sets the duplicate label for 'pattern' and 'category'.
+	 * Also disable the list widget, to prevent the user
+	 * navigating to another category leaving duplicates in a
+	 * category's patterns, and the Ok and Apply buttons to
+	 * prevent duplicate patterns bwing written to settings.
+	 **/
+	void setDuplicate( const QString & pattern, const MimeCategory * category );
+
+	/**
+	 * Tests 'patterns' and 'otherPatterns' for duplicates.
+	 * These will be the case-insensitive patterns and
+	 * case-sensitive patterns for one category.  Either or
+	 * both may have been edited compared to the settings and
+	 * eachother or both may have duplicates.  The two lists
+	 * are compared to eachother and to all categories other
+	 * than the currently-selected one.
+	 *
+	 * If a duplicate is found, a label is set identifying
+	 * the duplicate and the user is prevented from saving
+	 * the patterns.
+	 *
+	 * The order of the checks is designed to make it likely
+	 * that the message will relate to text that was just
+	 * edited, but may relate to text elsewhere or even in the
+	 * other box if a duplicate pattern has just been
+	 * corrected or removed.
+	 *
+	 * Note that when the current category is changed, a check
+	 * will be triggered as each edit box is loaded; the first
+	 * check when one still contains the patterns for the
+	 * previous category is likely to find a false duplicate.
+	 * The second check will be OK and reset everything.
+	 *
+	 **/
+	void checkForDuplicates( const QStringList & patterns,
+	                         const QStringList & otherPatterns,
+	                         Qt::CaseSensitivity caseSensitivity );
+
+	/**
+	 * Set the background shading of a list item.
+	 **/
+	void setBackground( QListWidgetItem * item );
 
 	/**
 	 * Fill the category list widget from the category collection.
@@ -151,11 +211,6 @@ namespace QDirStat
 	 * Reimplemented from ListEditor.
 	 **/
 	void fillListWidget() override;
-
-	/**
-	 * Set the background shading of a list item.
-	 **/
-	void setBackground( QListWidgetItem * item );
 
 	/**
 	 * Save the patterns from the dialog to the specified category.
@@ -209,7 +264,9 @@ namespace QDirStat
 
 	/**
 	 * Detect when the category list background needs to be reset
-	 * because of palette or size changes.
+	 * because of font, palette, or size changes.
+	 *
+	 * Reimplemented from QDialog/QWidget.
 	 **/
 	bool event( QEvent * event ) override;
 

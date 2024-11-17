@@ -16,6 +16,9 @@
 
 namespace QDirStat
 {
+    class FileInfo;
+    class MimeCategory;
+
     /* An enum for the backported function wildcardToRegularExpression only added
      * in 5.12.  It also includes NonPathWildcardConversion added in 6.6.  Can be
      * added here unconditionally and only used as required.
@@ -45,7 +48,7 @@ namespace QDirStat
 	 * Constructor with a pattern.  The wildcard pattern is converted to an
 	 * anchored regular expression that doesn't capture any substrings.  The
 	 * default is case-sensitive and follows PCRE syntax with no modifiers.
-	 * Most pattern options don't match much sense in the case of wildcards,
+	 * Most pattern options don't make much sense in the case of wildcards,
 	 * and CaseInsensitiveOption is specified using the CaseInsensitiveWildcard
 	 * sub-class.
 	 *
@@ -53,7 +56,8 @@ namespace QDirStat
 	 * CaseSensitiveWildcard.
 	 **/
 	Wildcard( const QString & pattern, PatternOption options ):
-	    QRegularExpression{ wildcardRegularExpression( pattern, options ) }
+	    QRegularExpression{ wildcardRegularExpression( pattern, options ) },
+	    _pattern{ pattern }
 	{}
 
 
@@ -64,6 +68,18 @@ namespace QDirStat
 	 * constructors.
 	 **/
 	using QRegularExpression::QRegularExpression;
+
+	/**
+	 * Returns the original (unanchored, unconverted) pattern used yo
+	 * construct this instance.
+	 **/
+	const QString & pattern() const { return _pattern; }
+
+	/**
+	 * Returns whether this rule is case-sensitive.
+	 **/
+	bool caseInsensitive() const
+	    { return patternOptions() & QRegularExpression::CaseInsensitiveOption; }
 
 	/**
 	 * Returns whether the given string matches this regular expression.
@@ -117,6 +133,8 @@ namespace QDirStat
 	                                            QDirStat::WildcardConversionOptions options = NonPathWildcardConversion);
 #endif
 
+	QString _pattern;
+
     };	// class Wildcard
 
 
@@ -154,6 +172,23 @@ namespace QDirStat
 	{}
 
     };	// class CaseInsensitiveWildcard
+
+
+
+    /**
+     * Replacement for QPair so that the members can be accessed by
+     * meaningful names rather than just 'first' and 'second'.
+     *
+     * isEmpty() is a shorthand for wildcard.pattern().isEmpty && category = 0
+     * matches() checks that 'item' matches both the wildcard and category
+     **/
+    struct WildcardCategory
+    {
+	Wildcard wildcard;
+	const MimeCategory * category;
+	bool isEmpty() const { return wildcard.isEmpty() and !category; }
+	bool matches( const FileInfo * item ) const;
+    };
 
 }	// namespace QDirStat
 

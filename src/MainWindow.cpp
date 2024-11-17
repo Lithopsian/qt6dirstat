@@ -670,7 +670,7 @@ void MainWindow::applyFutureSelection()
 
 	// A bit annoying to open every refreshed directory, so just the top level
 //        if ( sel->parent() == app()->dirTree()->root() )
-            _ui->dirTreeView->setExpandedItem( sel, true );
+            _ui->dirTreeView->expandItem( sel );
 
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }
@@ -917,7 +917,7 @@ void MainWindow::navigateToUrl( const QString & url )
     if ( sel )
     {
 	app()->selectionModel()->setCurrentItem( sel, true ); // select
-	_ui->dirTreeView->setExpandedItem( sel, true );
+	_ui->dirTreeView->expandItem( sel );
     }
 }
 
@@ -1091,16 +1091,22 @@ void MainWindow::updateActions()
 
 bool MainWindow::event( QEvent * event )
 {
-    const auto type = event->type();
-    if ( type == QEvent::Close )
+    switch ( event->type() )
     {
-	// Stop in-progress reads cleanly
-	stopReading();
-	return true;
-    }
+	case QEvent::Close:
+	    // Stop in-progress reads cleanly
+	    stopReading();
+	    return true;
 
-    if ( type == QEvent::FontChange || type == QEvent::Resize )
-	_ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+	case QEvent::FontChange:
+	case QEvent::PaletteChange:
+	case QEvent::Resize:
+	    _ui->breadcrumbNavigator->setPath( app()->selectionModel()->currentItem() );
+	    break;
+
+	default:
+	    break;
+    }
 
     return QMainWindow::event( event );
 }

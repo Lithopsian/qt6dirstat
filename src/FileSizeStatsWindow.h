@@ -16,6 +16,8 @@
 
 #include "ui_file-size-stats-window.h"
 #include "Subtree.h"
+#include "Wildcard.h"
+
 
 namespace QDirStat
 {
@@ -56,20 +58,18 @@ namespace QDirStat
 	/**
 	 * Convenience function for creating, populating and showing the shared
 	 * instance.
-	 *
-	 * Any suffix should start with '.', but not '*.".
 	 **/
-	static void populateSharedInstance( QWidget       * mainWindow,
-	                                    FileInfo      * fileInfo,
-	                                    const QString & suffix = QString{} )
-	    { if ( fileInfo ) sharedInstance( mainWindow )->populate( fileInfo, suffix ); }
+	static void populateSharedInstance( QWidget                * mainWindow,
+	                                    FileInfo               * fileInfo,
+	                                    const WildcardCategory & wildcardCategory = WildcardCategory{} )
+	    { if ( fileInfo ) sharedInstance( mainWindow )->populate( fileInfo, wildcardCategory ); }
 
 
     protected slots:
 
 	/**
-	 * Re-populate with the existing subtree, suffix, and dialog
-	 * settings.  This is used when excludeSymLinks is changed.
+	 * Re-populate with the existing subtree, pattern, and dialog
+	 * settings.  This is used when excludeSymlinks is changed.
 	 * The statistics are reloaded, the buckets are re-filled,
 	 * the models are all reset, and the histogram is rebuilt,
 	 * but the percentile range is not changed.
@@ -158,7 +158,7 @@ namespace QDirStat
 	 * are all reset, the percentile range is set automatically,
 	 * and the histogram is rebuilt.
 	 **/
-	void populate( FileInfo * fileInfo, const QString & suffix );
+	void populate( FileInfo * fileInfo, const WildcardCategory & wildcardCategory );
 
 	/**
 	 * (Re-)load the statistics from disk, including calculating
@@ -169,7 +169,7 @@ namespace QDirStat
 	 * model is not reset, and the histogram is not rebuilt.  These
 	 * must all be done immediately after a call to loadStats().
 	 **/
-	void loadStats( FileInfo * fileInfo, const QString & suffix );
+	void loadStats( FileInfo * fileInfo );
 
 	/**
 	 * Initialise the histogram data.
@@ -183,16 +183,11 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 *
-	 * Reimplemented from QDialog/QWidget.
-	 **/
-	void resizeEvent( QResizeEvent * ) override;
-
-	/**
-	 * Detect palette changes.
+	 * Also dect palette changes which affect the table shading.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/
-	void changeEvent( QEvent * event ) override;
+	bool event( QEvent * event ) override;
 
 	/**
 	 * Context menu event.  Build and show a context menu.
@@ -209,8 +204,8 @@ namespace QDirStat
 	std::unique_ptr<Ui::FileSizeStatsWindow> _ui;
 	std::unique_ptr<FileSizeStats>           _stats;
 
-	Subtree _subtree;
-	QString _suffix;
+	Subtree          _subtree;
+	WildcardCategory _wildcardCategory;
 
     };	// class FileSizeStatsWindow
 

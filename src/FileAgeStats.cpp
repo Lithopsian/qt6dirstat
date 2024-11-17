@@ -35,7 +35,7 @@ void FileAgeStats::collectRecursive( const FileInfo * dir )
         {
             collectRecursive( item );
         }
-        else if ( item->isFileOrSymLink() )
+        else if ( item->isFileOrSymlink() )
         {
             ++_totalCount;
             _totalSize += item->size();

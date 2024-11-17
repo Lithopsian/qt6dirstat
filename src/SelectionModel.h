@@ -89,11 +89,6 @@ namespace QDirStat
 	void setSelectedItems( const FileInfoSet & selectedItems );
 
 	/**
-	 * Clear all contents.
-	 **/
-	void clear();
-
-	/**
 	 * Prepare refreshing a set of items: Select a suitable item that will
 	 * still be in the tree after refreshing is finished.
 	 *
@@ -131,6 +126,16 @@ namespace QDirStat
 
 
     public slots:
+
+	/**
+	 * Clear all contents.  Set the current item to 0, mark the
+	 * selection as dirty, and clear the QItemSelectionModel selection.
+	 *
+	 * The QItemSelectionModel current item is deliberately not cleared
+	 * because it will automatically get reset to something unexpected
+	 * and this messes up things like parent highlighting.
+	 **/
+	void clear() override;
 
 	/**
 	 * Replace the current selection with one item.

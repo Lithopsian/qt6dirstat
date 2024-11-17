@@ -912,12 +912,12 @@ namespace QDirStat
 	/**
 	 * Returns true if this is a symbolic link.
 	 **/
-	bool isSymLink() const { return S_ISLNK( _mode ); }
+	bool isSymlink() const { return S_ISLNK( _mode ); }
 
 	/**
 	 * Returns true if this is a regular file or a symbolic link.
 	 **/
-	bool isFileOrSymLink() const { return isFile() || isSymLink(); }
+	bool isFileOrSymlink() const { return isFile() || isSymlink(); }
 
 	/**
 	 * Returns true if this is a (block or character) device.
@@ -956,8 +956,8 @@ namespace QDirStat
 	 * i.e. it does not check if the target is also a symlink if the target
 	 * of that also exists.
 	 **/
-	bool isBrokenSymLink() const
-	    { return isSymLink() ? !QFileInfo{ QFileInfo{ path() }.symLinkTarget() }.exists() : false; }
+	bool isBrokenSymlink() const
+	    { return isSymlink() ? !QFileInfo{ QFileInfo{ path() }.symLinkTarget() }.exists() : false; }
 
 	/**
 	 * Return the (direct) target path if this is a symlink. This does not
@@ -965,7 +965,7 @@ namespace QDirStat
 	 *
 	 * If this is not a symlink, an empty string is returned.
 	 **/
-	QString symLinkTarget() const;
+	QString symlinkTarget() const;
 
 	/**
 	 * Return whether a FileInfo item offers a reliable cluster size.

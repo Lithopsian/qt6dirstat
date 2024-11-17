@@ -35,7 +35,7 @@ namespace
 
 void UnpkgSettings::read()
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "UnpkgSettings" );
     _startingDir      = settings.value( "StartingDir",      defaultStartingDir()      ).toString();
@@ -48,7 +48,7 @@ void UnpkgSettings::read()
 
 void UnpkgSettings::write() const
 {
-    QDirStat::Settings settings;
+    Settings settings;
 
     settings.beginGroup( "UnpkgSettings" );
     settings.setValue( "StartingDir",      _startingDir      );

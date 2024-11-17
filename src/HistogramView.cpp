@@ -624,19 +624,19 @@ bool HistogramView::needOverflowPanel() const
 }
 
 
-void HistogramView::resizeEvent( QResizeEvent * )
+bool HistogramView::event( QEvent * event )
 {
-    //logDebug() << "Event size: " << event->oldSize() << Qt::endl;
-    //logDebug() << "Event size: " << event->size() << Qt::endl;
+    switch ( event->type() )
+    {
+	case QEvent::FontChange:
+	case QEvent::PaletteChange:
+	case QEvent::Resize:
+	    rebuildDirty();
+	    break;
 
-    rebuildDirty();
-}
+	default:
+	    break;
+    }
 
-
-void HistogramView::changeEvent( QEvent * event )
-{
-    QGraphicsView::changeEvent( event );
-
-    if ( event->type() == QEvent::PaletteChange )
-	rebuildDirty();
+    return QGraphicsView::event( event );
 }

@@ -29,6 +29,31 @@
 using namespace QDirStat;
 
 
+namespace
+{
+    /**
+     * Return the list of items that are currently expanded.
+     **/
+    QModelIndexList expandedIndexes( const DirTreeView * dirTreeView, const DirTreeModel * model )
+    {
+	QModelIndexList expandedIndexes;
+
+	if ( model )
+	{
+	    const auto indexList = model->persistentIndexList();
+	    for ( const QModelIndex & index : indexList )
+	    {
+		if ( dirTreeView->isExpanded( index ) )
+		    expandedIndexes << index;
+	    }
+	}
+
+	return expandedIndexes;
+    }
+
+}
+
+
 DirTreeView::DirTreeView( QWidget * parent ):
     QTreeView{ parent },
     _headerTweaker{ new HeaderTweaker{ header(), this } }
@@ -54,20 +79,20 @@ DirTreeView::~DirTreeView()
 
 void DirTreeView::readSettings()
 {
-    const auto percentBarDefaultColors = []()
+    const auto barDefaultColors = []()
     {
 	return ColorList{ QColor{   0,   0, 255 },
-	                  QColor{  34,  34, 255 },
-	                  QColor{  68,  68, 255 },
-	                  QColor{  85,  85, 255 },
-	                  QColor{ 102, 102, 255 },
-	                  QColor{ 119, 119, 255 },
-	                  QColor{ 136, 136, 255 },
-	                  QColor{ 153, 153, 255 },
-	                  QColor{ 170, 170, 255 },
-	                  QColor{ 187, 187, 255 },
-	                  QColor{ 204, 204, 255 },
-	                };
+			  QColor{  34,  34, 255 },
+			  QColor{  68,  68, 255 },
+			  QColor{  85,  85, 255 },
+			  QColor{ 102, 102, 255 },
+			  QColor{ 119, 119, 255 },
+			  QColor{ 136, 136, 255 },
+			  QColor{ 153, 153, 255 },
+			  QColor{ 170, 170, 255 },
+			  QColor{ 187, 187, 255 },
+			  QColor{ 204, 204, 255 },
+			};
     };
 
     Settings settings;
@@ -76,7 +101,7 @@ void DirTreeView::readSettings()
 
     const int barWidth         = settings.value         ( "PercentBarWidth",      150 ).toInt();
     const QColor barBackground = settings.colorValue    ( "PercentBarBackground", QColor{ 160, 160, 160 } );
-    const ColorList barColors  = settings.colorListValue( "PercentBarColors",     percentBarDefaultColors() );
+    const ColorList barColors  = settings.colorListValue( "PercentBarColors",     barDefaultColors() );
 
     settings.setDefaultValue( "PercentBarWidth",      barWidth );
     settings.setDefaultValue( "PercentBarBackground", barBackground );
@@ -132,7 +157,7 @@ void DirTreeView::scrolled( int )
 
 void DirTreeView::contextMenu( const QPoint & pos )
 {
-    QModelIndex index = indexAt( pos );
+    const QModelIndex index = indexAt( pos );
     if ( !index.isValid() )
     {
 	//logDebug() << "No item at this position" << Qt::endl;
@@ -166,11 +191,7 @@ void DirTreeView::contextMenu( const QPoint & pos )
 
 const DirTreeModel * DirTreeView::dirTreeModel() const
 {
-    auto abstractItemModel = model();
-    if ( !abstractItemModel )
-	return nullptr;
-
-    const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( abstractItemModel );
+    const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( model() );
     if ( dirTreeModel )
 	return dirTreeModel;
 
@@ -179,28 +200,9 @@ const DirTreeModel * DirTreeView::dirTreeModel() const
 }
 
 
-QModelIndexList DirTreeView::expandedIndexes() const
-{
-    QModelIndexList expandedList;
-
-    const DirTreeModel * model = dirTreeModel();
-    if ( model )
-    {
-	const auto indexList = model->persistentIndexList();
-	for ( const QModelIndex & index : indexList )
-	{
-	    if ( isExpanded( index ) )
-		expandedList << index;
-	}
-    }
-
-    return expandedList;
-}
-
-
 void DirTreeView::closeAllExcept( const QModelIndex & branch )
 {
-    QModelIndexList branchesToClose = expandedIndexes();
+    QModelIndexList branchesToClose = expandedIndexes( this, dirTreeModel() );
 
     // Remove all ancestors of 'branch' from branchesToClose
     for ( QModelIndex index = branch; index.isValid(); index = index.parent() )
@@ -245,26 +247,20 @@ void DirTreeView::closeAllExcept( const QModelIndex & branch )
 }
 
 
-void DirTreeView::setExpandedItem( FileInfo * item, bool expanded )
+void DirTreeView::expandItem( FileInfo * item )
 {
     const DirTreeModel * model = dirTreeModel();
     if ( model )
     {
 	const QModelIndex index = model->modelIndex( item );
 	if ( index.isValid() )
-	    setExpanded( index, expanded );
+	    expand( index );
     }
 }
 
 
 void DirTreeView::mousePressEvent( QMouseEvent * event )
 {
-    // By default, the QTreeView parent class uses the back / forward buttons
-    // on the mouse to cursor up / cursor down in the tree.
-    //
-    // This makes sure those events are immediately propagated up to the
-    // parent widget, where they can act like the history back / forward
-    // buttons in the tool bar.
     if ( event && ( event->button() == Qt::BackButton || event->button() == Qt::ForwardButton ) )
     {
 	event->ignore();
@@ -272,21 +268,6 @@ void DirTreeView::mousePressEvent( QMouseEvent * event )
     }
 
     QTreeView::mousePressEvent( event );
-}
-
-
-void DirTreeView::keyPressEvent( QKeyEvent * event )
-{
-    // By default, this opens all tree branches which completely
-    // kills our performance, negating all our lazy sorting in
-    // each branch in the DirTreeModel / DirInfo classes.
-    //
-    // So let's just ignore this key; we have better alternatives
-    // with "Tree" -> "Expand to Level" -> "Level 0" .. "Level 5".
-    if ( event && event->key() == Qt::Key_Asterisk )
-	return;
-
-    QTreeView::keyPressEvent( event );
 }
 
 

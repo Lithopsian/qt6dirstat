@@ -30,7 +30,7 @@ FileMTimeStats::FileMTimeStats( FileInfo * subtree ):
 void FileMTimeStats::collect( FileInfo * subtree )
 {
     // Disregard block devices and other special files
-    if ( subtree->isFileOrSymLink() )
+    if ( subtree->isFileOrSymlink() )
         append( subtree->mtime() );
 
     for ( DotEntryIterator it{ subtree }; *it; ++it )

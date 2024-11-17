@@ -214,7 +214,7 @@ namespace
     QString formatFileInfoType( const FileInfo * file )
     {
 	if ( file->isFile()        ) return QObject::tr( "file"             );
-	if ( file->isSymLink()     ) return QObject::tr( "symbolic link"    );
+	if ( file->isSymlink()     ) return QObject::tr( "symbolic link"    );
 	if ( file->isBlockDevice() ) return QObject::tr( "block device"     );
 	if ( file->isCharDevice()  ) return QObject::tr( "character device" );
 	if ( file->isFifo()        ) return QObject::tr( "named pipe"       );
@@ -251,19 +251,12 @@ namespace
      * Return a stylesheet string to set a label text to the configured
      * directory read error colour.
      **/
-    QString errorStyleSheet()
-    {
-	return QString{ "QLabel { color: %1; }" }.arg( app()->dirTreeModel()->dirReadErrColor().name() );
-    }
-
-
-    /**
-     * Return a stylesheet string to set a label text to the configured
-     * directory read error colour.
-     **/
     QString dirColorStyle( const DirInfo * dir )
     {
-	return dir->readState() == DirPermissionDenied ? errorStyleSheet() : QString{};
+	if ( dir->readState() == DirPermissionDenied )
+	    return app()->dirTreeModel()->errorStyleSheet();
+
+	return QString{};
     }
 
 
@@ -286,7 +279,7 @@ namespace
      **/
     void setMimeCategory( const Ui::FileDetailsView * ui, const FileInfo * fileInfo )
     {
-	const QString & categoryName = MimeCategorizer::instance()->name( fileInfo );
+	const QString categoryName = MimeCategorizer::instance()->name( fileInfo );
 	ui->fileMimeCaption->setEnabled( !categoryName.isEmpty() );
 	ui->fileMimeLabel->setEnabled( !categoryName.isEmpty() );
 	ui->fileMimeLabel->setText( categoryName );
@@ -401,35 +394,35 @@ namespace
     void showFileInfo( const Ui::FileDetailsView * ui, const FileInfo * file, int lastPixel )
     {
 	const bool isSpecial = file->isSpecial();
-	const bool isSymLink = file->isSymLink();
+	const bool isSymlink = file->isSymlink();
 
 	setLabelLimited(ui->fileNameLabel, baseName( file ), lastPixel );
 	ui->fileTypeLabel->setText( formatFileInfoType( file ) );
 
 	// Set an indicator icon for the type of file
-	ui->symlinkIcon->setVisible( isSymLink );
+	ui->symlinkIcon->setVisible( isSymlink );
 	ui->fileIcon->setVisible( file->isFile() );
 	ui->blockIcon->setVisible( file->isBlockDevice() );
 	ui->charIcon->setVisible( file->isCharDevice() );
 	ui->specialIcon->setVisible( file->isFifo() || file->isSocket() );
 
 	// Mime category for regular files, or target for symlinks
-	ui->fileMimeCaption->setVisible( !isSymLink );
-	ui->fileMimeLabel->setVisible( !isSymLink );
-	ui->fileLinkCaption->setVisible( isSymLink );
-	ui->fileLinkLabel->setVisible( isSymLink );
+	ui->fileMimeCaption->setVisible( !isSymlink );
+	ui->fileMimeLabel->setVisible( !isSymlink );
+	ui->fileLinkCaption->setVisible( isSymlink );
+	ui->fileLinkLabel->setVisible( isSymlink );
 
-	if ( isSymLink )
+	if ( isSymlink )
 	{
 	    // Shorten long targets that include a path component to the base name
-	    QString fullTarget  = file->symLinkTarget();
+	    QString fullTarget  = file->symlinkTarget();
 	    const bool shorten = fullTarget.length() > MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' );
 	    const QString shortTarget{ shorten ? "…/" % SysUtil::baseName( fullTarget ) : fullTarget };
 	    setLabelLimited( ui->fileLinkLabel, shortTarget, lastPixel ); // don't set tooltip yet
 
-	    if ( file->isBrokenSymLink() )
+	    if ( file->isBrokenSymlink() )
 	    {
-		ui->fileLinkLabel->setStyleSheet( errorStyleSheet() );
+		ui->fileLinkLabel->setStyleSheet( app()->dirTreeModel()->errorStyleSheet() );
 		ui->fileLinkLabel->setToolTip( QObject::tr( "Broken symlink:\n" ) % pathTooltip( fullTarget ) );
 	    }
 	    else

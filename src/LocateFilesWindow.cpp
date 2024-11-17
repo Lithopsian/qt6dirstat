@@ -220,6 +220,15 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 }
 
 
+void LocateFilesWindow::changeEvent( QEvent * event )
+{
+    if ( event->type() == QEvent::FontChange )
+	resizeEvent( nullptr );
+
+    QDialog::changeEvent( event );
+}
+
+
 void LocateFilesWindow::resizeEvent( QResizeEvent * )
 {
     // Format the heading with the current url, which may be a fallback

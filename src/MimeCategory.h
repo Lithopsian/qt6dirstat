@@ -31,23 +31,14 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a MimeCategory with the specified name and default color.
+	 * Default constructor: create a MimeCategory with an empty
+	 * name and default color.
 	 **/
-	MimeCategory():
-	    _name{ "" },
-	    _color{ Qt::white }
-	{}
+	MimeCategory() = default;
 
 	/**
-	 * Create a MimeCategory with the specified name and default color.
-	 **/
-	MimeCategory( const QString & name ):
-	    _name{ name },
-	    _color{ Qt::white }
-	{}
-
-	/**
-	 * Create a MimeCategory with the specified name and color.
+	 * Constructor with name and colour: create a MimeCategory
+	 * with the specified name and color.
 	 **/
 	MimeCategory( const QString & name, const QColor  & color ):
 	    _name{ name },
@@ -75,14 +66,12 @@ namespace QDirStat
 	void setColor( const QColor & color ) { _color = color; }
 
 	/**
-	 * Add a list of patterns. See addPattern() for details.
+	 * Set all the patterns for this category.  Replace any
+	 * existing patterns with 'caseInsensitivePatterns' and
+	 * 'caseSensitivePatterns'.
 	 **/
-	void addPatterns( const QStringList & patterns, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Clear any suffixes or patterns for this category.
-	 **/
-	void clear();
+	void setPatterns( const QStringList & caseInsensitivePatterns,
+	                  const QStringList & caseSensitivePatterns );
 
 	/**
 	 * Return the list of case-insensitive exact filename matches.
@@ -98,16 +87,12 @@ namespace QDirStat
 
 	/**
 	 * Return the list of case-insensitive suffixes for this category.
-	 * The suffixes do not contain any leading wildcard or dot,
-	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseInsensitiveSuffixList() const
 	    { return _caseInsensitiveSuffixList; }
 
 	/**
 	 * Return the list of case-sensitive suffixes for this category.
-	 * The suffixes do not contain any leading wildcard or dot,
-	 * i.e. it will be "tar.bz2", not ".tar.bz2" or "*.tar.bz2".
 	 **/
 	const QStringList & caseSensitiveSuffixList() const
 	    { return _caseSensitiveSuffixList; }
@@ -141,68 +126,23 @@ namespace QDirStat
 	    { return _caseSensitiveWildcardList; }
 
 	/**
-	 * Return a sorted list of all either case sensitive or case
-	 * insensitive suffixes and patterns for this category in human
-	 * readable form, i.e. prepend suffixes with "*.":
-	 * "tar.bz2" -> "*.tar.bz2".
+	 * Return a sorted list of all either case-sensitive or case-
+	 * insensitive suffixes and patterns for this category.
 	 *
 	 * The patterns are grouped: exact matches first, then wildcard
 	 * suffixes, then suffixes, and lastly any non-suffix wildcard
-	 * patterns.
-	 *
-	 * This is relatively expensive; the individual pattern lists are
-	 * not stored sorted and must be sorted by this function.  However,
-	 * this will be used relatively infrequently, by the config dialog.
+	 * patterns.  Within each group they are sorted alphabetically.
 	 **/
-	QStringList humanReadablePatternList( Qt::CaseSensitivity caseSensitivity ) const;
-
-
-    protected:
-
-	/**
-	 * Add a pattern that contains no wildcard characters.
-	 **/
-	void addExactMatch( const QString & suffix, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Add a filename suffix (extension) to this category.
-	 * A leading "*." or "*" is cut off.
-	 **/
-	void addSuffix( const QString & rawSuffix, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Add a filename suffix (extension) to this category.
-	 * A leading "*." or "*" is cut off.
-	 **/
-	void addWildcardSuffix( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Add a pattern to this category which consists of a suffix plus
-	 * other wildcards.
-	 **/
-	void addWildcard( const QString & rawPattern, Qt::CaseSensitivity caseSensitivity );
-
-	/**
-	 * Add a filename pattern to this category. If the pattern contains no wildcard
-	 * characters, add it as an exact match.  If it starts with "*." and does not
-	 * contain any other wildcard characters, add it as a suffix.  If has a suffix
-	 * and contains other wildcard characters before the suffix, add it as a wildcard
-	 * suffix.  Otherwise, this will become a regular expression.
-	 **/
-	void addPattern( const QString & pattern, Qt::CaseSensitivity caseSensitivity );
+	QStringList patterns( Qt::CaseSensitivity caseSensitivity ) const;
 
 
     private:
 
+	// The category name and treemap color
 	QString _name;
 	QColor  _color;
 
-	/**
-	 * The raw patterns are categorised into different lists for the convenience of the
-	 * categorizer.  The raw patterns themselves are not stored, but are reconstructed
-	 * when needed as a single (per case-sensitivity) sorted comma-delimited string by the
-	 * humanReadablePatternList() method.
-	 **/
+	// The raw patterns categorised into lists according to format and case-sensitivity
 	QStringList _caseInsensitiveExactList;
 	QStringList _caseSensitiveExactList;
 	QStringList _caseInsensitiveSuffixList;
@@ -219,7 +159,7 @@ namespace QDirStat
     /**
      * Human-readable output of a MimeCategory in a debug stream.
      **/
-    inline QTextStream & operator<<( QTextStream & str, MimeCategory * category )
+    inline QTextStream & operator<<( QTextStream & str, const MimeCategory * category )
     {
 	if ( category )
 	    str << "<MimeCategory " << category->name() << ">";

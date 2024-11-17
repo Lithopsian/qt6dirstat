@@ -16,9 +16,9 @@
 #include <QTreeWidgetItem>
 
 #include "ui_locate-file-type-window.h"
-#include "FileInfoSet.h"
 #include "Subtree.h"
 #include "Typedefs.h" // FileSize
+#include "Wildcard.h"
 
 
 namespace QDirStat
@@ -28,7 +28,7 @@ namespace QDirStat
      * file type stats window.
      *
      * This window shows a directory entry for each directory that contains
-     * files of the requested type (with the requested suffix). When the user
+     * files of the requested type (with the requested pattern). When the user
      * clicks on a search result, that directory is opened in the QDirStat main
      * window's tree view (and all other open branches of the tree are closed),
      * and the matching files in that directory are selected.
@@ -65,9 +65,9 @@ namespace QDirStat
 
 	/**
 	 * Convenience function for creating, populating and showing the shared
-	 * instance.  The suffix should start with '.', but not '*.".
+	 * instance.
 	 **/
-	static void populateSharedInstance( const QString & suffix, FileInfo * fileInfo );
+	static void populateSharedInstance( const WildcardCategory & wildcardCategory, FileInfo * fileInfo );
 
 
     protected slots:
@@ -90,22 +90,23 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Populate the window: Locate files with 'suffix' in 'fileInfo'.
+	 * Populate the window: Locate files with 'wildcardCategory' in
+	 * 'fileInfo'.
 	 *
 	 * This clears the old search results first, then searches the subtree
 	 * and populates the search result list with the directories where
 	 * matching files were found.
 	 **/
-	void populate( const QString & suffix, FileInfo * fileInfo = nullptr );
+	void populate( const WildcardCategory & wildcardCategory, FileInfo * fileInfo = nullptr );
 
 	/**
 	 * Recursively locate directories that contain files matching the
-	 * search suffix and create a search result item for each one.
+	 * sWildcardCategory and create a search result item for each one.
 	 **/
 	void populateRecursive( FileInfo * dir );
 
 	/**
-	 * Resize event, reimplemented from QWidget.
+	 * Event handler, reimplemented from QDialog/QWidget.
 	 *
 	 * Elide the title to fit inside the current dialog width, so that
 	 * they fill the available width but very long paths don't stretch
@@ -113,15 +114,15 @@ namespace QDirStat
 	 * shrink the dialog, which would then force the label to be elided
 	 * further.
 	 **/
-	void resizeEvent( QResizeEvent * ) override;
+	bool event( QEvent * event ) override;
 
 
     private:
 
 	std::unique_ptr<Ui::LocateFileTypeWindow> _ui;
 
-	Subtree _subtree;
-	QString _suffix;
+	Subtree          _subtree;
+	WildcardCategory _wildcardCategory;
 
     };	// class LocateFileTypeWindow
 
@@ -129,18 +130,19 @@ namespace QDirStat
     /**
      * Column numbers for the file type tree widget
      **/
-    enum SuffixSearchResultColumns
+    enum PatternSearchResultColumns
     {
-	SSR_CountCol = 0,
-	SSR_TotalSizeCol,
-	SSR_PathCol,
-	SSR_ColumnCount,
+	PSR_CountCol = 0,
+	PSR_TotalSizeCol,
+	PSR_PathCol,
+	PSR_ColumnCount,
     };
 
 
     /**
      * Item class for the locate list (which is really a tree widget),
-     * representing one directory that contains files with the desired suffix.
+     * representing one directory that contains files with the desired
+     * pattern.
      *
      * This item intentionally does not store a FileInfo or DirInfo pointer
      * for each search result, but its path. This is more expensive to store,
@@ -156,14 +158,14 @@ namespace QDirStat
      * DirInfo * anymore (if that directory branch was deleted), but for sure
      * it will not crash.
      **/
-    class SuffixSearchResultItem: public QTreeWidgetItem
+    class PatternSearchResultItem: public QTreeWidgetItem
     {
     public:
 
 	/**
 	 * Constructor.
 	 **/
-	SuffixSearchResultItem( const QString & path,
+	PatternSearchResultItem( const QString & path,
 	                        int             count,
 	                        FileSize        totalSize );
 
@@ -195,7 +197,7 @@ namespace QDirStat
 	int      _count;
 	FileSize _totalSize;
 
-    };	// class SuffixSearchResultItem
+    };	// class PatternSearchResultItem
 
 }	// namespace QDirStat
 

@@ -755,12 +755,14 @@ void TreemapView::sendSelection( const TreemapTile * tile)
     const QList<QGraphicsItem *> selectedTiles = scene()->selectedItems();
     if ( selectedTiles.size() == 1 && selectedTiles.first() == tile )
     {
+        logDebug() << Qt::endl;
         // For just one selected tile that is the current item, only send one signal
         _selectionModel->setCurrentItem( tile->orig(),
                                          true ); // select
     }
     else // Multi-selection
     {
+        logDebug() << Qt::endl;
         FileInfoSet selectedItems;
 
         for ( const QGraphicsItem * selectedItem : selectedTiles )
@@ -812,15 +814,16 @@ void TreemapView::highlightParents( const TreemapTile * tile )
 
     // Simplest to start from scratch even if some of the ancestors are the same
     clearParentsHighlight();
-
+logDebug() << Qt::endl;
     while ( parent && parent != _rootTile )
     {
         _parentHighlightList << new ParentTileHighlighter{ this, parent, parent->orig()->debugUrl() };
         parent = parent->parentTile();
     }
-
+logDebug() << Qt::endl;
     if ( !_parentHighlightList.isEmpty() )
         _sceneMask = new SceneMask{ _parentHighlightList.last()->tile(), qRound( 0.6 * 255 ) };
+logDebug() << Qt::endl;
 }
 
 
@@ -892,7 +895,7 @@ QPainterPath ParentTileHighlighter::shape() const
 
 
 SceneMask::SceneMask( const TreemapTile * tile, int opacity ):
-    QGraphicsPathItem{ this }
+    QGraphicsPathItem{}
 {
     // logDebug() << "Adding scene mask for " << tile->orig() << Qt::endl;
     CHECK_PTR( tile );

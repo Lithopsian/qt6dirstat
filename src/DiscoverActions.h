@@ -37,7 +37,7 @@ namespace QDirStat
         void discoverNewestFiles();
         void discoverOldestFiles();
         void discoverHardLinkedFiles();
-        void discoverBrokenSymLinks();
+        void discoverBrokenSymlinks();
         void discoverSparseFiles();
 
         /**
