@@ -369,7 +369,7 @@ PkgInfoList DpkgPkgManager::installedPkg() const
 {
     int exitCode;
     const QString output =
-	SysUtil::runCommand( dpkgCommand(),
+	SysUtil::runCommand( dpkgQueryCommand(),
 	                     { "--show", "--showformat=${Package} | ${Version} | ${Architecture} | ${Status}\n" },
 	                     &exitCode );
 
