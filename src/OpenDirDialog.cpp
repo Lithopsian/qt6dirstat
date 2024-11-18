@@ -16,7 +16,7 @@
 
 #include "OpenDirDialog.h"
 #include "DirTreeModel.h"
-#include "ExistingDir.h"
+#include "ExistingDirValidator.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "QDirStatApp.h" // DirTreeModel

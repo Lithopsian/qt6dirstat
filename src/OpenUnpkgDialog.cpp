@@ -7,11 +7,13 @@
  *              Ian Nartowicz
  */
 
-#include <QPushButton>
+#include <QCompleter>
+#include <QFileSystemModel>
 #include <QLineEdit>
+#include <QPushButton>
 
 #include "OpenUnpkgDialog.h"
-#include "ExistingDir.h"
+#include "ExistingDirValidator.h"
 #include "Logger.h"
 #include "Settings.h"
 
@@ -51,14 +53,18 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 {
     _ui->setupUi( this );
 
-    _ui->startingDirComboBox->setCompleter( new ExistingDirCompleter{ this } );
-
-    ExistingDirValidator * validator = new ExistingDirValidator{ this };
-    _ui->startingDirComboBox->setValidator( validator );
-
     QLineEdit * lineEdit = _ui->startingDirComboBox->lineEdit();
     if ( lineEdit )
         lineEdit->setClearButtonEnabled( true );
+
+    QFileSystemModel * model = new QFileSystemModel{ this };
+    model->setRootPath( "/" );
+    model->setFilter( QDir::Dirs );
+    model->setReadOnly( true );
+    _ui->startingDirComboBox->setCompleter( new QCompleter{ model, this } );
+
+    ExistingDirValidator * validator = new ExistingDirValidator{ this };
+    _ui->startingDirComboBox->setValidator( validator );
 
     const QPushButton * resetButton = _ui->buttonBox->button( QDialogButtonBox::RestoreDefaults );
     const QPushButton * okButton    = _ui->buttonBox->button( QDialogButtonBox::Ok );

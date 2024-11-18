@@ -30,12 +30,13 @@ INSTALLS	+= TARGET desktop icons
 # QMAKE_CXXFLAGS	+=  -Wno-deprecated -Wno-deprecated-declarations
 # QMAKE_CXXFLAGS	+=  -std=c++11
 # QMAKE_CXXFLAGS	+=  -Wconversion
+QMAKE_CXXFLAGS	+=  -Wsuggest-override
 # QMAKE_CXXFLAGS	+=  -flto=auto
 # QMAKE_LDDFLAGS	+=  -flto=auto
 
 
 SOURCES =   main.cpp			\
-            QDirStatApp.cpp             \
+            QDirStatApp.cpp		\
 	    ActionManager.cpp		\
 	    AdaptiveTimer.cpp		\
 	    Attic.cpp			\
@@ -59,7 +60,7 @@ SOURCES =   main.cpp			\
 	    Exception.cpp		\
 	    ExcludeRules.cpp		\
 	    ExcludeRulesConfigPage.cpp	\
-	    ExistingDir.cpp		\
+	    ExistingDirValidator.cpp	\
 	    FileAgeStats.cpp		\
 	    FileAgeStatsWindow.cpp	\
 	    FileDetailsView.cpp		\
@@ -153,7 +154,7 @@ HEADERS =   QDirStatApp.h		\
 	    Exception.h			\
 	    ExcludeRules.h		\
 	    ExcludeRulesConfigPage.h	\
-	    ExistingDir.h		\
+	    ExistingDirValidator.h	\
 	    FileDetailsView.h		\
 	    FileInfo.h			\
 	    FileInfoIterator.h		\
