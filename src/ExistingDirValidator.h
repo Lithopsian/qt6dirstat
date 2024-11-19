@@ -1,5 +1,5 @@
 /*
- *   File name: ExistingDir.h
+ *   File name: ExistingDirValidator.h
  *   Summary:   QDirStat widget support classes
  *   License:   GPL V2 - See file LICENSE for details.
  *
@@ -7,8 +7,8 @@
  *              Ian Nartowicz
  */
 
-#ifndef ExistingDir_h
-#define ExistingDir_h
+#ifndef ExistingDirValidator_h
+#define ExistingDirValidator_h
 
 #include <QValidator>
 
@@ -49,4 +49,4 @@ namespace QDirStat
 
 }	// namespace QDirStat
 
-#endif	// ExistingDir_h
+#endif	// ExistingDirValidator_h

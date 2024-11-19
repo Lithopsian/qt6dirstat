@@ -43,7 +43,7 @@ namespace QDirStat
      * setModels().  They will become invalid once MainWindow and its
      * children are destroyed and should not be accessed.
      **/
-    class QDirStatApp: public QApplication
+    class QDirStatApp final : public QApplication
     {
     public:
 

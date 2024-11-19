@@ -20,7 +20,7 @@ namespace QDirStat
     /**
      * Class to select packages from the complete set of installed packages.
      **/
-    class PkgFilter: public SearchFilter
+    class PkgFilter final : public SearchFilter
     {
     public:
 

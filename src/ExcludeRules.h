@@ -22,7 +22,7 @@ namespace QDirStat
     /**
      * One single exclude rule to check text (file names) against.
      **/
-    class ExcludeRule
+    class ExcludeRule final
     {
     public:
 
@@ -214,7 +214,7 @@ namespace QDirStat
      * rules list.  The config dialog maintains a working list of ExcludeRule
      * instances, but not an instance of this class.
      **/
-    class ExcludeRules: public ExcludeRuleList
+    class ExcludeRules final : public ExcludeRuleList
     {
     public:
 

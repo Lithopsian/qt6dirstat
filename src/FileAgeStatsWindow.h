@@ -28,7 +28,7 @@ namespace QDirStat
      * Modeless dialog to display file age statistics, i.e. statistics about
      * the years of last modification times of files in a subtree.
      **/
-    class FileAgeStatsWindow: public QDialog
+    class FileAgeStatsWindow final : public QDialog
     {
 	Q_OBJECT
 
@@ -164,7 +164,7 @@ namespace QDirStat
      * Item class for the years list (which is really a tree widget),
      * representing one year (or month) with accumulated values.
      **/
-    class YearListItem: public QTreeWidgetItem
+    class YearListItem final : public QTreeWidgetItem
     {
     public:
 

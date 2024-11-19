@@ -28,7 +28,7 @@ namespace QDirStat
      * Configuration page (tab) for cleanups:
      * Edit, add, delete, reorder cleanups in the cleanup collection.
      **/
-    class CleanupConfigPage: public ListEditor
+    class CleanupConfigPage final : public ListEditor
     {
 	Q_OBJECT
 

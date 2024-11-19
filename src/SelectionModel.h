@@ -31,7 +31,7 @@ namespace QDirStat
      * selection; this subclass fetches that QModelIndex selection and
      * translates each item into a FileInfo pointer on demand.
      **/
-    class SelectionModel: public QItemSelectionModel
+    class SelectionModel final : public QItemSelectionModel
     {
 	Q_OBJECT
 
@@ -234,7 +234,7 @@ namespace QDirStat
      * Each view has to create and set up its own proxy. They cannot
      * be shared among views.  This is currently only used by TreemapView.
      **/
-    class SelectionModelProxy: public QObject
+    class SelectionModelProxy final : public QObject
     {
 	Q_OBJECT
 

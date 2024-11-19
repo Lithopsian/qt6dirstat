@@ -43,7 +43,7 @@ namespace QDirStat
      * and the tree indentation, and a  different color may be used for each
      * indentation level.
      **/
-    class PercentBarDelegate: public QStyledItemDelegate
+    class PercentBarDelegate final : public QStyledItemDelegate
     {
 	Q_OBJECT
 

@@ -17,7 +17,7 @@
  * The old signal blocking state is automatically restored once the
  * SignalBlocker goes out of scope.
  */
-class SignalBlocker
+class SignalBlocker final
 {
     public:
 

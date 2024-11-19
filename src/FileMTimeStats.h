@@ -24,7 +24,7 @@ namespace QDirStat
      * This collects file mtime data for trees or subtrees for later use for
      * calculating a median or quantiles or histograms.
      **/
-    class FileMTimeStats: public PercentileStats
+    class FileMTimeStats final : public PercentileStats
     {
     public:
 

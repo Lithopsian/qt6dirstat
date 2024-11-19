@@ -36,7 +36,7 @@ namespace QDirStat
      * As a next step, the user can then start cleanup actions on those files
      * from the main window - in the tree view or in the treemap view.
      **/
-    class LocateFileTypeWindow: public QDialog
+    class LocateFileTypeWindow final : public QDialog
     {
 	Q_OBJECT
 
@@ -158,7 +158,7 @@ namespace QDirStat
      * DirInfo * anymore (if that directory branch was deleted), but for sure
      * it will not crash.
      **/
-    class PatternSearchResultItem: public QTreeWidgetItem
+    class PatternSearchResultItem final : public QTreeWidgetItem
     {
     public:
 

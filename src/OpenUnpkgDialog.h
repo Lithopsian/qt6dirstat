@@ -13,7 +13,6 @@
 #include <memory>
 
 #include <QDialog>
-#include <QStringList>
 
 #include "ui_open-unpkg-dialog.h"
 #include "UnpkgSettings.h"
@@ -41,7 +40,7 @@ namespace QDirStat
      *	       readUnpkgFiles( dir, excludeDirs );
      *	   }
      **/
-    class OpenUnpkgDialog: public QDialog
+    class OpenUnpkgDialog final : public QDialog
     {
 	Q_OBJECT
 

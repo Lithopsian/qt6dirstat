@@ -29,7 +29,7 @@ namespace QDirStat
      *
      * Each page is pretty much self-sufficient.
      **/
-    class ConfigDialog: public QDialog
+    class ConfigDialog final : public QDialog
     {
 	Q_OBJECT
 

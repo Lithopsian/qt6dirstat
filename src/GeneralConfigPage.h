@@ -19,7 +19,7 @@ namespace QDirStat
 {
     class ConfigDialog;
 
-    class GeneralConfigPage: public QWidget
+    class GeneralConfigPage final : public QWidget
     {
 	Q_OBJECT
 

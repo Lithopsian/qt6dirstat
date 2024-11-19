@@ -31,7 +31,7 @@ namespace QDirStat
      * A working set of new MimeCategory objects is copied from the
      * live categories and used to populate the list widget.
      **/
-    class MimeCategoryConfigPage: public ListEditor
+    class MimeCategoryConfigPage final : public ListEditor
     {
 	Q_OBJECT
 

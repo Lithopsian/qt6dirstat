@@ -32,7 +32,7 @@ namespace QDirStat
      * This shows detailed information such as sizes, permissions, mtime
      * etc. depending on what type of object and how many of them are selected.
      **/
-    class FileDetailsView: public QStackedWidget
+    class FileDetailsView final : public QStackedWidget
     {
 	Q_OBJECT
 

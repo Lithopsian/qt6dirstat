@@ -23,7 +23,7 @@ namespace QDirStat
      * Container for FileInfo pointers. This is a wrapper around QSet with a
      * few add-on functions.
      **/
-    class FileInfoSet: public QSet<FileInfo *>
+    class FileInfoSet final : public QSet<FileInfo *>
     {
     public:
 

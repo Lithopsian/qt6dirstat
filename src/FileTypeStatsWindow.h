@@ -29,7 +29,7 @@ namespace QDirStat
      * Modeless dialog to display file type statistics, such as how much disk
      * space is used for each kind of filename extension (*.jpg, *.mp4 etc.).
      **/
-    class FileTypeStatsWindow: public QDialog
+    class FileTypeStatsWindow final : public QDialog
     {
 	Q_OBJECT
 
@@ -182,7 +182,7 @@ namespace QDirStat
      * Item class for the file type tree widget, representing either a
      * MIME category or a pattern.
      **/
-    class FileTypeItem: public QTreeWidgetItem
+    class FileTypeItem : public QTreeWidgetItem
     {
     public:
 
@@ -246,7 +246,7 @@ namespace QDirStat
      * item.  These can be used as the basis for searches such as
      * by LocateFileTypeWindow and FileSizeStatsWindow.
      **/
-    class PatternFileTypeItem: public FileTypeItem
+    class PatternFileTypeItem final : public FileTypeItem
     {
     public:
 

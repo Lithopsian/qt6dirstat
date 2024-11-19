@@ -57,7 +57,7 @@ namespace QDirStat
      * the header's context menu and the corresponding actions and saving and
      * restoring state.
      **/
-    class HeaderTweaker : public QObject
+    class HeaderTweaker final : public QObject
     {
 	Q_OBJECT
 

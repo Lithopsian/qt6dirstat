@@ -36,7 +36,7 @@ namespace QDirStat
      * Set of Cleanup actions to be performed for DirTree items, consisting of
      * a number of predefined and a number of user-defined cleanups.
      **/
-    class CleanupCollection: public QObject
+    class CleanupCollection final : public QObject
     {
 	Q_OBJECT
 

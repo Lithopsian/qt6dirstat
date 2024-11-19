@@ -28,7 +28,7 @@ namespace QDirStat
      * have sorted children, they will only be generated when the model
      * needs to display the children in the tree.
      **/
-    class DirSortInfo
+    class DirSortInfo final
     {
 	friend class DirInfo;
 
@@ -75,7 +75,7 @@ namespace QDirStat
      * methods to integrate seamlessly with the abstraction of a file /
      * directory tree; this class fills those stubs with life.
      **/
-    class DirInfo: public FileInfo
+    class DirInfo : public FileInfo
     {
     public:
 

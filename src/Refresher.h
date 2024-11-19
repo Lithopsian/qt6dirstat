@@ -32,7 +32,7 @@ namespace QDirStat
      * forever, so give it a QObject parent (so it will be destroyed when its
      * parent is destroyed) to avoid a memory leak.
      **/
-    class Refresher: public QObject
+    class Refresher final : public QObject
     {
 	Q_OBJECT
 

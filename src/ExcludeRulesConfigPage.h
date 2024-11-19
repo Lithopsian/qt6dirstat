@@ -27,7 +27,7 @@ namespace QDirStat
      * Configuration page (tab) for exclude rules:
      * Edit, add, delete, and reorder exclude rules.
      **/
-    class ExcludeRulesConfigPage: public ListEditor
+    class ExcludeRulesConfigPage final : public ListEditor
     {
 	Q_OBJECT
 

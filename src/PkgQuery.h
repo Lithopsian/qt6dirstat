@@ -23,7 +23,7 @@ namespace QDirStat
      * Singleton class for simple queries to the system's package manager.
      * Only normally accessed by the public static functions.
      **/
-    class PkgQuery
+    class PkgQuery final
     {
 	/**
 	 * Constructor. For internal use only; use the static methods instead.

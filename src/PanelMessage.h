@@ -27,7 +27,7 @@ namespace QDirStat
      * The close button calls deleteLater on the panel, so it is completely
      * self-sufficient once set up.
      **/
-    class PanelMessage: public QWidget
+    class PanelMessage final : public QWidget
     {
 	Q_OBJECT
 

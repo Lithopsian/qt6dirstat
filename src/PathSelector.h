@@ -21,7 +21,7 @@ namespace QDirStat
     /**
      * Item for a PathSelector widget.
      **/
-    class PathSelectorItem: public QListWidgetItem
+    class PathSelectorItem final : public QListWidgetItem
     {
     public:
 
@@ -62,7 +62,7 @@ namespace QDirStat
      * list in file selection boxes. This widget also supports mount points
      * (see MountPoints.h) with more information than just the path.
      **/
-    class PathSelector: public QListWidget
+    class PathSelector final : public QListWidget
     {
 	Q_OBJECT
 

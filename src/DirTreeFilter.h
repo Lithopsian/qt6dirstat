@@ -63,7 +63,7 @@ namespace QDirStat
      * This uses QRegularExpression in wildcard mode through the
      * Wildcard wrapper class.
      **/
-    class DirTreePatternFilter: public DirTreeFilter
+    class DirTreePatternFilter final : public DirTreeFilter
     {
 	/**
 	 * Constructor.  Private, use the static create() method for
@@ -115,7 +115,7 @@ namespace QDirStat
      * "*.suffix". This is more efficient than the full-fledged wildcard match
      * that DirTreePatternFilter supports.
      **/
-    class DirTreeSuffixFilter: public DirTreeFilter
+    class DirTreeSuffixFilter final : public DirTreeFilter
     {
     public:
 
@@ -148,7 +148,7 @@ namespace QDirStat
      * Concrete DirTreeFilter class to ignore files that belong to any
      * installed package during directory reading.
      **/
-    class DirTreePkgFilter: public DirTreeFilter
+    class DirTreePkgFilter final : public DirTreeFilter
     {
     public:
 

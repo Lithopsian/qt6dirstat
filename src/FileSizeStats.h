@@ -24,7 +24,7 @@ namespace QDirStat
      * This collects file size data for trees or subtrees for later use for
      * calculating a median or quantiles or histograms.
      **/
-    class FileSizeStats: public PercentileStats
+    class FileSizeStats final : public PercentileStats
     {
     public:
 

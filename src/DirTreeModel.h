@@ -45,7 +45,7 @@ namespace QDirStat
     };
 
 
-    class DirTreeModel: public QAbstractItemModel
+    class DirTreeModel final : public QAbstractItemModel
     {
 	Q_OBJECT
 

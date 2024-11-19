@@ -39,7 +39,7 @@ namespace QDirStat
      * configurable factor is stored as a single-precision float, so accurate to
      * about 1 second in 2.8 hours.
      **/
-    class AdaptiveTimer: public QObject
+    class AdaptiveTimer final : public QObject
     {
         Q_OBJECT
 

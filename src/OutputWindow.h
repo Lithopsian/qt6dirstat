@@ -36,7 +36,7 @@ namespace QDirStat
      * If this dialog is created, but not shown, it will (by default) show itself
      * as soon as there is any output on stderr.
      **/
-    class OutputWindow: public QDialog
+    class OutputWindow final : public QDialog
     {
         Q_OBJECT
 

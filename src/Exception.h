@@ -44,10 +44,8 @@ public:
     /**
      * Return the class name of this exception as string.  This is used
      * in the log message.
-     *
-     * Derived classes could reimplement this and return their own name.
      */
-    virtual QLatin1String className() const { return "Exception"_L1; }
+    QLatin1String className() const { return "Exception"_L1; }
 
 
 private:
@@ -61,7 +59,7 @@ private:
  * Exception class for null pointers.
  * Use with CHECK_PTR().
  */
-class NullPointerException: public Exception
+class NullPointerException final : public Exception
 {
 public:
 
@@ -77,7 +75,7 @@ public:
 /**
  * Exception class for file handling exception
  **/
-class FileException: public Exception
+class FileException final : public Exception
 {
 public:
 
@@ -99,7 +97,7 @@ private:
 /**
  * Exception class for system call failed
  **/
-class SysCallFailedException: public Exception
+class SysCallFailedException final : public Exception
 {
 public:
 
@@ -134,7 +132,7 @@ private:
  * Exception class for "index out of range"
  * Use with CHECK_DYNAMIC_CAST().
  **/
-class DynamicCastException: public Exception
+class DynamicCastException final : public Exception
 {
 public:
 
@@ -151,7 +149,7 @@ public:
  * Exception class for magic number check failed
  * Use with CHECK_MAGIC().
  **/
-class BadMagicNumberException: public Exception
+class BadMagicNumberException final : public Exception
 {
 public:
 
@@ -169,7 +167,7 @@ public:
  * Exception class for "index out of range"
  * Use with CHECK_INDEX()
  **/
-class IndexOutOfRangeException: public Exception
+class IndexOutOfRangeException final : public Exception
 {
 public:
 
@@ -201,7 +199,7 @@ public:
 /**
  * Exception class for "too many files"
  **/
-class TooManyFilesException: public Exception
+class TooManyFilesException final : public Exception
 {
 public:
 
@@ -225,7 +223,7 @@ public:
 /**
  * Exception class for "filesystem too big"
  **/
-class FilesystemTooBigException: public Exception
+class FilesystemTooBigException final : public Exception
 {
 public:
 

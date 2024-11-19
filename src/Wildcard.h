@@ -40,7 +40,7 @@ namespace QDirStat
      * the original pattern.
      **/
 
-    class Wildcard: public QRegularExpression
+    class Wildcard : public QRegularExpression
     {
     protected:
 
@@ -142,7 +142,7 @@ namespace QDirStat
     /**
      * Convenience class for making a case-sensitive wildcard regular expression.
      **/
-    class CaseSensitiveWildcard: public Wildcard
+    class CaseSensitiveWildcard final : public Wildcard
     {
     public:
 
@@ -160,7 +160,7 @@ namespace QDirStat
     /**
      * Convenience class for making a case-insensitive wildcard regular expression.
      **/
-    class CaseInsensitiveWildcard: public Wildcard
+    class CaseInsensitiveWildcard final : public Wildcard
     {
     public:
 

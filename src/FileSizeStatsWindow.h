@@ -28,7 +28,7 @@ namespace QDirStat
      * Modeless dialog to display file size statistics:
      * median, min, max, quartiles; histogram; percentiles table.
      **/
-    class FileSizeStatsWindow: public QDialog
+    class FileSizeStatsWindow final : public QDialog
     {
 	Q_OBJECT
 

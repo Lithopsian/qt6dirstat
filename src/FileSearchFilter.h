@@ -21,7 +21,7 @@ namespace QDirStat
     /**
      * Filter class for searching for files and/or directories.
      **/
-    class FileSearchFilter: public SearchFilter
+    class FileSearchFilter final : public SearchFilter
     {
     public:
 

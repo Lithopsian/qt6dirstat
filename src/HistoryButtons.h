@@ -32,7 +32,7 @@ namespace QDirStat
      * stats of the DirTree.  The menus are constructed from scratch
      * each time they are opened.
      **/
-    class HistoryButtons: public QObject
+    class HistoryButtons final : public QObject
     {
 	Q_OBJECT
 

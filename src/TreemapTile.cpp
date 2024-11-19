@@ -10,7 +10,6 @@
 #include <cmath> // round(), sqrt()
 
 #include <QElapsedTimer>
-#include <QGraphicsSceneMouseEvent>
 #include <QImage>
 #include <QMenu>
 #include <QPainter>

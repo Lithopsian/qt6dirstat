@@ -57,7 +57,7 @@ namespace
     {
         app()->dirTreeModel()->setTreeIconSize( dirTreeView );
 
-        const auto filter = QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks | QDir::Drives;
+        const auto filter = QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Drives;
         filesystemModel->setFilter( filter );
         filesystemModel->setRootPath( "/" );
 
