@@ -15,20 +15,20 @@
 #include "QDirStatApp.h"
 
 
-#define PROCESS_EVENTS_MILLISEC 500
-
-
 using namespace QDirStat;
 
 
 namespace
 {
     /**
-     * Process events (except user input events) for the specified time.
+     * Process events until the label has been painted.  This will
+     * block the main event loop.
      **/
-    void processEvents()
+    void processEvents( const BusyPopup * busyPopup )
     {
-	QEventLoop{}.processEvents( QEventLoop::ExcludeUserInputEvents, PROCESS_EVENTS_MILLISEC );
+	QEventLoop eventLoop;
+	QObject::connect( busyPopup, &BusyPopup::painted, &eventLoop, &QEventLoop::quit );
+	eventLoop.exec();
     }
 
 } // namespace
@@ -40,17 +40,31 @@ BusyPopup::BusyPopup( const QString & text ):
     setMargin( 15 );
     setWindowTitle( QString{} );
     show();
-    processEvents();
+    processEvents( this );
 }
 
 
-void BusyPopup::showEvent( QShowEvent * )
+bool BusyPopup::event( QEvent * event )
 {
-    if ( parentWidget() )
+    switch ( event->type() )
     {
-	const int x = ( parentWidget()->width()  - width()  ) / 2;
-	const int y = ( parentWidget()->height() - height() ) / 2;
+	case QEvent::Paint:
+	    emit painted();
+	    break;
 
-	move( parentWidget()->x() + x, parentWidget()->y() + y );
+	case QEvent::Show:
+	    if ( parentWidget() )
+	    {
+		const int x = ( parentWidget()->width()  - width()  ) / 2;
+		const int y = ( parentWidget()->height() - height() ) / 2;
+
+		move( parentWidget()->x() + x, parentWidget()->y() + y );
+	    }
+	    break;
+
+	default:
+	    break;
     }
+
+    return QLabel::event( event );
 }
