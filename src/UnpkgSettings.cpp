@@ -67,13 +67,12 @@ UnpkgSettings UnpkgSettings::defaultSettings()
                           defaultCrossFilesystems() );
 }
 
-
+#if ENABLE_DUMP
 void UnpkgSettings::dump() const
 {
-#if 0
     logDebug() << "startingDir:      " << _startingDir      << Qt::endl;
     logDebug() << "excludeDirs:      " << _excludeDirs      << Qt::endl;
     logDebug() << "ignorePatterns:   " << _ignorePatterns   << Qt::endl;
     logDebug() << "crossFilesystems: " << _crossFilesystems << Qt::endl;
-#endif
 }
+#endif
