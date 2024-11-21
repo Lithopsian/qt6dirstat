@@ -119,7 +119,7 @@ void OutputWindow::addStderr( const QString & output )
 {
     ++_errorCount;
     addText( output, _stderrColor );
-    logWarning() << output << ( output.endsWith( u'\n' ) ? "" : "\n" );
+    logWarning() << output.trimmed() << Qt::endl;
 
     if ( _showOnStderr && !isVisible() && !_closed )
 	show();
