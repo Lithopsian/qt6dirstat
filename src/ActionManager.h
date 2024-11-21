@@ -10,12 +10,10 @@
 #ifndef ActionManager_h
 #define ActionManager_h
 
+#include <QAction>
+#include <QMenu>
 #include <QPointer>
-
-
-class QAction;
-class QMenu;
-class QToolBar;
+#include <QToolBar>
 
 
 namespace QDirStat
@@ -32,7 +30,7 @@ namespace QDirStat
      * that tree to this class; the ActionManager uses Qt's introspection to find
      * the matching QActions.  Use the static functions for all access.
      **/
-    class ActionManager
+    class ActionManager final
     {
 	/**
 	 * Constructor. Private because this is a singleton class.

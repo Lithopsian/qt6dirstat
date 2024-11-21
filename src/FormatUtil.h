@@ -16,8 +16,11 @@
 
 #include <QAbstractItemModel>
 #include <QFontMetrics>
+#include <QLabel>
 #include <QRegularExpression>
 #include <QStringBuilder>
+#include <QTreeView>
+#include <QTreeWidgetItem>
 
 #include "Typedefs.h" // FileSize, _L1
 
@@ -43,9 +46,6 @@
 #endif
 
 
-class QLabel;
-class QTreeView;
-class QTreeWidgetItem;
 
 
 namespace QDirStat

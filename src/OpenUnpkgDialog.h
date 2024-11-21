@@ -12,13 +12,11 @@
 
 #include <memory>
 
+#include <QContextMenuEvent>
 #include <QDialog>
 
 #include "ui_open-unpkg-dialog.h"
 #include "UnpkgSettings.h"
-
-
-class QContextMenuEvent;
 
 
 namespace QDirStat
@@ -26,7 +24,11 @@ namespace QDirStat
     /**
      * Dialog to let the user select parameters for showing unpackaged
      * files. This is very much like a "get existing directory" dialog with
-     * some more widgets.
+     * some more widgets.  There is a dedicated UnpkgSettings class for
+     * getting and saving the dialog values.  The starting directory,
+     * exclude directory patterns, ignore file patterns, and read cross-
+     * filesystems flag are saved to the config file and reloaded next
+     * time the dialog is opened.
      *
      * Usage:
      *
@@ -34,10 +36,9 @@ namespace QDirStat
      *
      *	   if ( dialog.exec() == QDialog::Accepted )
      *	   {
-     *	       QString dir = dialog.startingDir();
-     *	       QStringList excludeDirs = dialog.excludeDirs();
+     *	       UnpkgSettings unpkgSettings = dialog.values();
      *
-     *	       readUnpkgFiles( dir, excludeDirs );
+     *	       readUnpkgFiles( unpkgSettings );
      *	   }
      **/
     class OpenUnpkgDialog final : public QDialog

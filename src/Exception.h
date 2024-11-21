@@ -282,10 +282,10 @@ protected:
  *     {
  *	   CAUGHT( exception );
  *	   ...clean up to prevent memory leaks etc. ...
- *	   RETHROW( exception ); // equivalent of   throw   without args
+ *	   RETHROW( exception ); // equivalent of THROW without args
  *     }
  *
- * This will leave 3 lines for that exception in the log file: One for
+ * This will leave 3 lines for that exception in the log file: one for
  * THROW, one for CAUGHT, one for RETHROW. Each log line contains the
  * source file, the line number, and the function of the THROW or CAUGHT
  * or RETHROW calls.

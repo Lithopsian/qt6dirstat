@@ -12,12 +12,10 @@
 
 #include <memory>
 
+#include <QMenu>
 #include <QObject>
+#include <QToolBar>
 #include <QVector>
-
-
-class QMenu;
-class QToolBar;
 
 
 namespace QDirStat

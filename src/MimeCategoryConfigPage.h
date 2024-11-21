@@ -12,12 +12,11 @@
 
 #include <memory>
 
+#include <QListWidget>
+
 #include "ListEditor.h"
 #include "ui_mime-category-config-page.h"
 #include "Typedefs.h" // SkipEmptyParts
-
-
-class QListWidget;
 
 
 namespace QDirStat

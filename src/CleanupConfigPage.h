@@ -12,11 +12,10 @@
 
 #include <memory>
 
+#include <QListWidget>
+
 #include "ListEditor.h"
 #include "ui_cleanup-config-page.h"
-
-
-class QListWidget;
 
 
 namespace QDirStat

@@ -10,14 +10,12 @@
 #ifndef HeaderTweaker_h
 #define HeaderTweaker_h
 
+#include <QAction>
 #include <QHeaderView>
+#include <QMenu>
+#include <QTreeView>
 
 #include "DataColumns.h"
-
-
-class QAction;
-class QMenu;
-class QTreeView;
 
 
 namespace QDirStat

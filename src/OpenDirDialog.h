@@ -13,13 +13,11 @@
 #include <memory>
 
 #include <QDialog>
+#include <QFileSystemModel>
+#include <QHelpEvent>
 #include <QStyledItemDelegate>
 
 #include "ui_open-dir-dialog.h"
-
-
-class QFileSystemModel;
-class QHelpEvent;
 
 
 namespace QDirStat

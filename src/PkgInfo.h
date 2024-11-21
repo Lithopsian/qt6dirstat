@@ -180,7 +180,7 @@ namespace QDirStat
     };  // class PkgInfo
 
 
-    typedef QList<PkgInfo *> PkgInfoList;
+    typedef QList<PkgInfo *> PkgInfoList; // QList from QMultiMap::values
 
 
     /**
