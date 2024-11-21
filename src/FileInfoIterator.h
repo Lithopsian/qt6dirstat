@@ -54,7 +54,7 @@ namespace QDirStat
      * Note that the iterator may return 0 when it is first created if
      * there are no children.
      **/
-    class FileInfoIterator
+    class FileInfoIterator final
     {
     public:
 
@@ -133,7 +133,7 @@ namespace QDirStat
     /**
      * Iterator for DirInfo children.  The dot entry is not returned.
      **/
-    class DirInfoIterator
+    class DirInfoIterator final
     {
     public:
 
@@ -190,7 +190,7 @@ namespace QDirStat
      * dot entry.  Although the children are not returned in any
      * particular order, the dot entry will always be returned last.
      **/
-    class DotEntryIterator
+    class DotEntryIterator final
     {
     public:
 
@@ -255,7 +255,7 @@ namespace QDirStat
      * dot entry and attic.  Although the children are not returned in
      * any particular order, the dot entry and attic will always be last.
      **/
-    class AtticIterator
+    class AtticIterator final
     {
     public:
 
@@ -339,7 +339,7 @@ namespace QDirStat
      * Note that unlike the other iterators, it is safe (although pointless)
      * to dereference or increment an invalid (past the end) iterator.
      **/
-    class BySizeIterator
+    class BySizeIterator final
     {
     public:
 

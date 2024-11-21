@@ -31,7 +31,7 @@ namespace QDirStat
     class DirTree;
     class FileInfo;
 
-    class CacheWriter
+    class CacheWriter final
     {
     public:
 
@@ -67,7 +67,7 @@ namespace QDirStat
 
 
 
-    class CacheReader
+    class CacheReader final
     {
 	/**
 	 * Private constructor.  Opens the cache file and checks that it is

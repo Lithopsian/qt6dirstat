@@ -72,7 +72,7 @@ namespace QDirStat
      * This class exists only to support FileTypeStatsWindow.  Access to the
      * completed statistics is through the iterators.
      **/
-    class FileTypeStats
+    class FileTypeStats final
     {
     public:
 

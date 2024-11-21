@@ -39,7 +39,7 @@ namespace QDirStat
      * be created on the heap with 'new', and they can be aggregated in other
      * classes.
      **/
-    class Subtree
+    class Subtree final
     {
     public:
 

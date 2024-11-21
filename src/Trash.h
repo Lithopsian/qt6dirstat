@@ -30,7 +30,7 @@ namespace QDirStat
      * appear in the desktop's native trashcan implementation (the window you get
      * when you click on the trashcan icon on the desktop or in the file manager).
      **/
-    class Trash
+    class Trash final
     {
     public:
 
@@ -103,7 +103,7 @@ namespace QDirStat
      * - If $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
      *   $TOPLEVEL/.Trash-$UID
      **/
-    class TrashDir
+    class TrashDir final
     {
     public:
 

@@ -26,7 +26,7 @@ namespace QDirStat
      * common attributes like the QDirStat treemap color so the user can get an
      * impression how much disk space each type consumes.
      **/
-    class MimeCategory
+    class MimeCategory final
     {
     public:
 
