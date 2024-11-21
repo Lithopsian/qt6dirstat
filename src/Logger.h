@@ -46,11 +46,11 @@ enum LogSeverity
 // These macros all use the default logger. Create similar macros to use your
 // own class-specific logger.
 
-#define logVerbose() Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityVerbose   )
-#define logDebug()   Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityDebug     )
-#define logInfo()    Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityInfo      )
-#define logWarning() Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityWarning   )
-#define logError()   Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityError     )
+#define logVerbose() Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityVerbose )
+#define logDebug()   Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityDebug   )
+#define logInfo()    Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityInfo    )
+#define logWarning() Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityWarning )
+#define logError()   Logger::log( 0, __FILE__, __LINE__, __func__, LogSeverityError   )
 #define logNewline() Logger::newline( 0 )
 
 
@@ -67,7 +67,7 @@ enum LogSeverity
  *
  * This class also redirects Qt logging (qDebug() etc.) to the same log file.
  */
-class Logger
+class Logger final
 {
 public:
 
@@ -75,11 +75,13 @@ public:
      * Constructor: Create a logger that logs to the specified file.
      * The first logger created is also implicitly used as the default
      * logger. This can be changed later with setDefaultLogger().
+     *
+     * Not used.
      */
-    Logger( const QString & filename );
+//    Logger( const QString & filename );
 
     /**
-     * Constructor: Create a logger that logs to 'filename' in directory
+     * Constructor: create a logger that logs to 'filename' in directory
      * 'logDir'. $USER and $UID are expanded in both to the login user name or
      * the numeric user ID, respectively.
      *
@@ -129,35 +131,14 @@ public:
 protected:
 
     /**
-     * Common initialization for all constructors.
-     **/
-    void init();
-
-    /**
-     * Create the null log stream to suppress messages below the current log
-     * level.
-     **/
-    void createNullStream();
-
-    /**
      * Actually open the log file.
      **/
     void openLogFile( const QString & filename );
 
     /**
-     * Set this as the default logger. That one will be used whenever log() is
-     * called with a 0 'logger' argument.
-     *
-     * The first logger created will implicitly be the default logger until
-     * another one is set with setDefaultLogger.
-     */
-    void setDefaultLogger();
-
-    /**
-     * Return the default logger.
-     *
-     * If no default logger is explicitly set, this is the first logger that
-     * was created.
+     * Return the default logger.  This is the first logger to be created,
+     * or the first to be created after the previous default logger was
+     * closed.
      */
     static Logger * defaultLogger() { return _defaultLogger; }
 
@@ -187,21 +168,21 @@ protected:
     /**
      * Set the log level.
      */
-    void setLogLevel( LogSeverity newLevel ) { _logLevel = newLevel; }
+//    void setLogLevel( LogSeverity newLevel ) { _logLevel = newLevel; }
 
     /**
      * Return the log level of the specified logger.
      *
      * If 'logger' is 0, the default logger is used.
      */
-    static LogSeverity logLevel( Logger * logger );
+//    static LogSeverity logLevel( Logger * logger );
 
     /**
      * Set the log level of the specified logger.
      *
      * If 'logger' is 0, the default logger is used.
      */
-    static void setLogLevel( Logger * logger, LogSeverity newLevel );
+//    static void setLogLevel( Logger * logger, LogSeverity newLevel );
 
     /**
      * Internal logging function.  Use the static function or the
@@ -214,7 +195,7 @@ protected:
 
     /**
      * Log a plain newline without any prefix (timestamp, source filename,
-     * line number).  This is the interval version; use the static
+     * line number).  This is the internal version; use the static
      * version instead.
      */
     void newline() { _logStream << Qt::endl; }
@@ -223,11 +204,12 @@ protected:
 private:
 
     static Logger * _defaultLogger;
-    QFile           _logFile;
-    QTextStream     _logStream{ stderr, QIODevice::WriteOnly };
-    QFile           _nullDevice;
-    QTextStream     _nullStream{ stderr, QIODevice::WriteOnly };
-    LogSeverity     _logLevel{ LogSeverityVerbose };
+
+    QFile       _logFile;
+    QTextStream _logStream{ stderr, QIODevice::WriteOnly };
+    QFile       _nullDevice;
+    QTextStream _nullStream{ stderr, QIODevice::WriteOnly };
+    LogSeverity _logLevel{ LogSeverityVerbose };
 
 }; // class Logger
 

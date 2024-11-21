@@ -28,6 +28,9 @@
 
 namespace
 {
+    /**
+     * Return the Logger severity enum corresponding to a QtMsgType 'msgType'.
+     **/
     LogSeverity toLogSeverity( QtMsgType msgType )
     {
 	switch ( msgType )
@@ -36,7 +39,7 @@ namespace
 	    case QtWarningMsg:  return LogSeverityWarning;
 	    case QtCriticalMsg: return LogSeverityError;
 	    case QtFatalMsg:    return LogSeverityError;
-#if QT_VERSION >= 0x050500
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0 )
 	    case QtInfoMsg:     return LogSeverityInfo;
 #endif
 	}
@@ -45,6 +48,9 @@ namespace
     }
 
 
+    /**
+     * A message handler for Qt logging (aka QtMessageHandler)
+     **/
     void qt_logger( QtMsgType msgType, const QMessageLogContext & context, const QString & msg )
     {
 	const QStringList lines = msg.split( u'\n' );
@@ -266,25 +272,47 @@ namespace
 	return unexpanded;
     }
 
+
+    /**
+     * Create the null log stream to suppress messages below the current log
+     * level.
+     **/
+    void createNullStream( QTextStream & nullStream, QFile & nullDevice )
+    {
+	// Open the null device to suppress output below the log level: this is
+	// necessary because each call to operator<<() for QTextStream returns the
+	// QTextStream, so we really need to return _nullStream (connected with
+	// /dev/null) to actually suppress anything; otherwise, it's just the
+	// logger time stamp etc. that gets suppressed, not the real logging
+	// output.
+
+	nullDevice.setFileName( "/dev/null" );
+	if ( nullDevice.open( QIODevice::WriteOnly | QIODevice::Text ) )
+	    nullStream.setDevice( &nullDevice );
+	else
+	    fprintf( stderr, "ERROR: Can't open /dev/null to suppress log output\n" );
+    }
+
 } // namespace
 
 
 Logger * Logger::_defaultLogger = nullptr;
 
-
+/*
 Logger::Logger( const QString & filename )
 {
-    init();
+    createNullStream( _nullStream, _nullDevice );
+
     openLogFile( filename );
 }
-
+*/
 
 Logger::Logger( const QString & rawLogDir,
                 const QString & rawFilename,
                 bool            doRotate,
                 int             logRotateCount )
 {
-    init();
+    createNullStream( _nullStream, _nullDevice );
 
     const QString filename = expandVariables( rawFilename );
     QString logDir = expandVariables( rawLogDir );
@@ -301,7 +329,7 @@ Logger::~Logger()
 {
     if ( _logFile.isOpen() )
     {
-	logInfo() << "-- Log End --\n" << Qt::endl;
+	logInfo() << "-- Log End --\n";
 	_logFile.close();
     }
 
@@ -310,29 +338,6 @@ Logger::~Logger()
 	_defaultLogger = nullptr;
 	qInstallMessageHandler( nullptr ); // Restore default message handler
     }
-}
-
-
-void Logger::init()
-{
-    _nullDevice.setFileName( "/dev/null" );
-    createNullStream();
-}
-
-
-void Logger::createNullStream()
-{
-    // Open the null device to suppress output below the log level: This is
-    // necessary because each call to operator<<() for QTextStream returns the
-    // QTextStream, so we really need to return _nullStream (connected with
-    // /dev/null) to actually suppress anything; otherwise, it's just the
-    // logger time stamp etc. that gets suppressed, not the real logging
-    // output.
-
-    if ( _nullDevice.open( QIODevice::WriteOnly | QIODevice::Text ) )
-	_nullStream.setDevice( &_nullDevice );
-    else
-	fprintf( stderr, "ERROR: Can't open /dev/null to suppress log output\n" );
 }
 
 
@@ -345,26 +350,21 @@ void Logger::openLogFile( const QString & filename )
 	if ( _logFile.open( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append ) )
 	{
 	    if ( !_defaultLogger )
-		setDefaultLogger();
+	    {
+		_defaultLogger = this;
+		qInstallMessageHandler( qt_logger );
+	    }
 
 	    fprintf( stderr, "Logging to %s\n", qPrintable( filename ) );
 	    _logStream.setDevice( &_logFile );
 	    _logStream << "\n\n";
-	    log( __FILE__, __LINE__, __func__, LogSeverityInfo )
-		<< "-- Log Start --" << Qt::endl;
+	    log( __FILE__, __LINE__, __func__, LogSeverityInfo ) << "-- Log Start --" << Qt::endl;
 	}
 	else
 	{
 	    fprintf( stderr, "ERROR: Can't open log file %s\n", qPrintable( filename ) );
 	}
     }
-}
-
-
-void Logger::setDefaultLogger()
-{
-    _defaultLogger = this;
-    qInstallMessageHandler( qt_logger );
 }
 
 
@@ -437,7 +437,7 @@ void Logger::newline( Logger * logger )
 	logger->newline();
 }
 
-
+/*
 LogSeverity Logger::logLevel( Logger * logger )
 {
     if ( !logger )
@@ -458,3 +458,4 @@ void Logger::setLogLevel( Logger * logger, LogSeverity newLevel )
     if ( logger )
 	logger->setLogLevel( newLevel );
 }
+*/
