@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QActionGroup>
-
 #include "MainWindow.h"
 #include "ActionManager.h"
 #include "FileDetailsView.h"
@@ -36,12 +34,6 @@ QAction * MainWindow::layoutAction( const QString & layoutName ) const
     if ( layoutName == HeaderTweaker::l2Name() ) return _ui->actionLayout2;
     if ( layoutName == HeaderTweaker::l3Name() ) return _ui->actionLayout3;
     return nullptr;
-}
-
-
-QString MainWindow::currentLayoutName() const
-{
-    return layoutName( _layoutActionGroup->checkedAction() );
 }
 
 

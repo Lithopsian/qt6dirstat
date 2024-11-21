@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include <QActionGroup>
 #include <QContextMenuEvent>
 #include <QElapsedTimer>
 #include <QMainWindow>
@@ -22,7 +23,6 @@
 #include "Typedefs.h" // _L1
 
 
-class QActionGroup;
 class SysCallFailedException;
 
 
@@ -480,6 +480,17 @@ namespace QDirStat
         void showDirPermissionsWarning();
 
         /**
+         * Enable or disable the directory permissions panel message.  This is
+         * only shown once when a directory is read, then not again after limited
+         * refreshes such as Refresh Selected or Cleanups.  If the Refresh All or
+         * different directory (or Package) read is done, the message will be
+         * displayed again.  The ShowDirPermissionsMsg setting can be used to
+         * prevent the message being shown at all.
+         **/
+        void enableDirPermissionsMsg() { _enableDirPermissionsMsg = _showDirPermissionsMsg; }
+        void disableDirPermissionsMsg() { _enableDirPermissionsMsg = false; }
+
+        /**
          * Expand the directory tree's branches to depth 'level'.
          **/
         void expandTreeToLevel( int level ) const;
@@ -518,7 +529,8 @@ namespace QDirStat
         /**
          * Return the action or name string (eg. "L2") of the current layout.
          **/
-        QString currentLayoutName() const;
+        QString currentLayoutName() const
+            { return layoutName( _layoutActionGroup->checkedAction() ); }
 
         /**
          * Change the main window layout.
@@ -529,17 +541,6 @@ namespace QDirStat
          * Show or hide the menu bar and status bar.
          **/
         void showBars();
-
-        /**
-         * Enable or disable the directory permissions panel message.  This is
-         * only shown once when a directory is read, then not again after limited
-         * refreshes such as Refresh Selected or Cleanups.  If the Refresh All or
-         * different directory (or Package) read is done, the message will be
-         * displayed again.  The ShowDirPermissionsMsg setting can be used to
-         * prevent the message being shown at all.
-         **/
-        void enableDirPermissionsMsg() { _enableDirPermissionsMsg = _showDirPermissionsMsg; }
-        void disableDirPermissionsMsg() { _enableDirPermissionsMsg = false; }
 
         /**
          * Create the different top layouts.
