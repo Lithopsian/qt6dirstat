@@ -7,7 +7,6 @@
  *              Ian Nartowicz
  */
 
-#include <QCloseEvent>
 #include <QTimer>
 #include <QtMath> // qFloor()
 
@@ -18,6 +17,46 @@
 
 
 using namespace QDirStat;
+
+
+namespace
+{
+    /**
+     * Add one or more lines of text in text color 'textColor' to 'terminal'.
+     **/
+    void addText( QTextEdit * terminal, const QString & rawText, const QColor & textColor )
+    {
+	if ( rawText.isEmpty() )
+	    return;
+
+	terminal->moveCursor( QTextCursor::End );
+	QTextCursor cursor{ terminal->textCursor() };
+
+	QTextCharFormat format;
+	format.setForeground( QBrush{ textColor } );
+	cursor.setCharFormat( format );
+
+	cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
+    }
+
+
+    /**
+     * Zoom the 'terminal' font by the specified factor.  The operation is
+     * performed in pixels from QFontInfo, with a minimum of 1 pixel.
+     **/
+    void zoom( QTextEdit * terminal, qreal factor )
+    {
+	QFont font = terminal->font();
+	QFontInfo fontInfo{ font };
+
+	const int oldPixelSize = fontInfo.pixelSize();
+	const int newPixelSize = qFloor( oldPixelSize * factor );
+	font.setPixelSize( newPixelSize == oldPixelSize ? newPixelSize + 1 : qMax( newPixelSize, 1 ) );
+
+	terminal->setFont( font );
+    }
+
+}
 
 
 OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
@@ -105,20 +144,20 @@ void OutputWindow::addProcess( QProcess * process )
 
 void OutputWindow::addCommandLine( const QString & commandline )
 {
-    addText( commandline, _commandTextColor );
+    addText( _ui->terminal, commandline, _commandTextColor );
 }
 
 
 void OutputWindow::addStdout( const QString & output )
 {
-    addText( output, _stdoutColor );
+    addText( _ui->terminal, output, _stdoutColor );
 }
 
 
 void OutputWindow::addStderr( const QString & output )
 {
     ++_errorCount;
-    addText( output, _stderrColor );
+    addText( _ui->terminal, output, _stderrColor );
     logWarning() << output.trimmed() << Qt::endl;
 
     if ( _showOnStderr && !isVisible() && !_closed )
@@ -126,35 +165,21 @@ void OutputWindow::addStderr( const QString & output )
 }
 
 
-void OutputWindow::addText( const QString & rawText, const QColor & textColor )
-{
-    if ( rawText.isEmpty() )
-	return;
-
-    _ui->terminal->moveCursor( QTextCursor::End );
-    QTextCursor cursor{ _ui->terminal->textCursor() };
-
-    QTextCharFormat format;
-    format.setForeground( QBrush{ textColor } );
-    cursor.setCharFormat( format );
-    cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
-}
-
-
 QProcess * OutputWindow::senderProcess( const char * function ) const
 {
-    QProcess * process = qobject_cast<QProcess *>( sender() );
+    QObject * signalSender = sender();
+    if ( !signalSender )
+    {
+	logError() << "NULL sender() in " << function << Qt::endl;
+	return nullptr;
+    }
+
+    QProcess * process = qobject_cast<QProcess *>( signalSender );
     if ( !process )
     {
-	if ( sender() )
-	{
-	    logError() << "Expecting QProcess as sender() in " << function
-	               <<" , got " << sender()->metaObject()->className() << Qt::endl;
-	}
-	else
-	{
-	    logError() << "NULL sender() in " << function << Qt::endl;
-	}
+	logError() << "Expecting QProcess as sender() in " << function
+	           <<" , got " << signalSender->metaObject()->className() << Qt::endl;
+	return nullptr;
     }
 
     return process;
@@ -165,7 +190,7 @@ void OutputWindow::readStdout()
 {
     QProcess * process = senderProcess( __func__ );
     if ( process )
-	addStdout( QString::fromUtf8( process->readAllStandardOutput() ) );
+	addStdout( QString{ process->readAllStandardOutput() } );
 }
 
 
@@ -173,7 +198,7 @@ void OutputWindow::readStderr()
 {
     QProcess * process = senderProcess( __func__ );
     if ( process )
-	addStderr( QString::fromUtf8( process->readAllStandardError() ) );
+	addStderr( QString{ process->readAllStandardError() } );
 }
 
 
@@ -237,7 +262,7 @@ void OutputWindow::processFinished( QProcess * process )
 
     if ( _processList.isEmpty() && _noMoreProcesses )
     {
-	//logDebug() << "Emitting lastProcessFinished() err: " << _errorCount << Qt::endl;
+	//logDebug() << "Emitting lastProcessFinished() with error count: " << _errorCount << Qt::endl;
 	emit lastProcessFinished( _errorCount );
     }
 }
@@ -249,8 +274,8 @@ void OutputWindow::closeIfDone()
     {
 	if ( ( autoClose() && _errorCount == 0 ) || _closed || !isVisible() )
 	{
-	    logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
-	    this->deleteLater(); // It is safe to call this multiple times
+	    //logDebug() << "No more processes to watch. Auto-closing." << Qt::endl;
+	    deleteLater(); // It is safe to call this multiple times
 	}
     }
 }
@@ -262,7 +287,7 @@ void OutputWindow::noMoreProcesses()
 
     if ( _processList.isEmpty() )
     {
-	//logDebug() << "Emitting lastProcessFinished() err: " << _errorCount << Qt::endl;
+	//logDebug() << "Emitting lastProcessFinished() with error count=" << _errorCount << Qt::endl;
 	emit lastProcessFinished( _errorCount );
     }
 
@@ -270,28 +295,15 @@ void OutputWindow::noMoreProcesses()
 }
 
 
-void OutputWindow::zoom( qreal factor )
-{
-    QFont font = _ui->terminal->font();
-    QFontInfo fontInfo{ font };
-
-    const int oldPixelSize = fontInfo.pixelSize();
-    const int newPixelSize = qFloor( oldPixelSize * factor );
-    font.setPixelSize( newPixelSize == oldPixelSize ? newPixelSize + 1 : qMax( newPixelSize, 1 ) );
-
-    _ui->terminal->setFont( font );
-}
-
-
 void OutputWindow::zoomIn()
 {
-    zoom( 1.1_qr );
+    zoom( _ui->terminal, 1.1_qr );
 }
 
 
 void OutputWindow::zoomOut()
 {
-    zoom( 1.0_qr / 1.1_qr );
+    zoom( _ui->terminal, 1.0_qr / 1.1_qr );
 }
 
 
@@ -304,14 +316,13 @@ void OutputWindow::resetZoom()
 
 void OutputWindow::killAll()
 {
-    int killCount = 0;
+    const int killCount = _processList.size();
 
     for ( QProcess * process : asConst( _processList ) )
     {
 	//logInfo() << "Killing process " << process << Qt::endl;
 	process->kill();
 	process->deleteLater();
-	++killCount;
     }
 
     _processList.clear();
@@ -334,18 +345,18 @@ bool OutputWindow::hasActiveProcess() const
 }
 
 
-QProcess * OutputWindow::startNextProcess()
+void OutputWindow::startNextProcess()
 {
-    QProcess * process = [ this ]() -> QProcess *
+    QProcess * process = []( const ProcessList & processList ) -> QProcess *
     {
-	for ( QProcess * process : asConst( _processList ) )
+	for ( QProcess * process : processList )
 	{
 	    if ( process->state() == QProcess::NotRunning )
 		return process;
 	}
 
 	return nullptr;
-    }();
+    }( _processList );
 
     if ( process )
     {
@@ -363,39 +374,25 @@ QProcess * OutputWindow::startNextProcess()
     }
 
     updateActions();
-
-    return process;
 }
 
 
-QString OutputWindow::command( QProcess * process )
+QString OutputWindow::command( const QProcess * process )
 {
-    // The common case is to start an external command with
+    // Detect the case where an external command is started in a shell:
     //	  /bin/sh -c theRealCommand arg1 arg2 arg3 ...
     QStringList args = process->arguments();
-
-    if ( !args.isEmpty() )
-	args.removeFirst();		// Remove the "-c"
-
-    if ( args.isEmpty() )		// Nothing left?
-	return process->program();	// Ok, use the program name
+    if ( args.size() < 2 || args.first() != shellCommandArg() )
+    {
+	// Not a shell, just use the program name
+	return process->program();
+    }
     else
-	return args.join( u' ' );	// output only the real command and its args
-}
-
-
-void OutputWindow::hideEvent( QHideEvent * event )
-{
-    // Ignore iconification or placing in another workspace
-    if ( event->spontaneous() )
-	return;
-
-    // Flag as "logically closed"
-    _closed = true;
-
-    // Wait until the last process is finished and then delete this window
-    if ( _processList.isEmpty() && _noMoreProcesses )
-	this->deleteLater();
+    {
+	// Likely shell, output only the real command and its args
+	args.removeFirst();
+	return args.join( u' ' );
+    }
 }
 
 
@@ -457,4 +454,19 @@ int OutputWindow::defaultShowTimeout()
     settings.endGroup();
 
     return defaultShowTimeout;
+}
+
+
+void OutputWindow::hideEvent( QHideEvent * event )
+{
+    // Ignore iconification or placing in another workspace
+    if ( event->spontaneous() )
+	return;
+
+    // Flag as "logically" closed
+    _closed = true;
+
+    // Wait until the last process is finished and then delete this window
+    if ( _processList.isEmpty() && _noMoreProcesses )
+	this->deleteLater();
 }

@@ -424,7 +424,7 @@ namespace
 	// Deliberately create with no parent so they aren't destroyed untidily at shutdown
 	QProcess * process = new QProcess{};
 	process->setProgram( shell );
-	process->setArguments( { "-c", expandVariables( item, command ) } );
+	process->setArguments( { OutputWindow::shellCommandArg(), expandVariables( item, command ) } );
 	process->setWorkingDirectory( itemDir( item ) );
 	// logDebug() << "New process \"" << process << Qt::endl;
 

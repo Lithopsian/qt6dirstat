@@ -25,16 +25,19 @@ namespace QDirStat
 {
     /**
      * Terminal-like window to watch output of external processes started via
-     * QProcess. The command invoked by the process, its stdout and stderr output
-     * are displayed in different colors.
+     * QProcess. The command invoked by the process, as well as its stdout and
+     * stderr output are displayed in different colors.  An OutputWindow may
+     * also be created and no processes added, as in moveToTrash().
      *
-     * This class can watch more than one process: It can watch a sequence of
-     * processes, such as QDirStat cleanup actions as they are invoked for each
-     * selected item one after another, or even multiple processes running in
-     * parallel (which may make the output a bit messy, of course).
+     * This class can watch more than one process: it can watch a sequence of
+     * processes, such as cleanup actions as they are invoked for each selected
+     * item one after another.
      *
-     * If this dialog is created, but not shown, it will (by default) show itself
-     * as soon as there is any output on stderr.
+     * This dialog can be configured to show immediately, after a timeout (but
+     * only if there are still running processes), only if there is output on
+     * stderr, or never.  If the dialog is configured to show after a timeout,
+     * it will (by default) show itself immediately if there is output on
+     * stderr, although this can be overridden to not show on error.
      **/
     class OutputWindow final : public QDialog
     {
@@ -46,130 +49,93 @@ namespace QDirStat
     public:
 
         /**
-         * Constructor.
+         * Constructor.  Initialises the dialog window, buttons, actions,
+         * and settings.  The class is created with an empty process list.
          **/
         OutputWindow( QWidget * parent, bool autoClose );
 
         /**
-         * Destructor.
+         * Destructor.  Saves the window geometry, empties the process
+         * queue, and forcibly kills any processes still running,
          **/
         ~OutputWindow() override;
 
         /**
-         * Add a process to watch. Ownership of the process is transferred to this
-         * object. If the process is not started yet, it will be started as soon as
-         * there is no other one running.
+         * Add a process to watch. Ownership of the process is transferred to
+         * this object. If the process is not started yet, it will be started
+         * as soon as there is no other process running.  Processes are started
+         * in the ordet they are added.
+         *
+         * Note that starting or running processes may be added.  These will
+         * continue to run, in parallel with any other already-running process,
+         * but more processes will not be started by this class until there are
+         * no longer any starting or running processes.
          **/
         void addProcess( QProcess * process );
 
         /**
-         * Tell this dialog that no more processes will be added, so when the last
-         * one is finished and the "auto close" checkbox is checked, it may close
-         * itself.
+         * Tell this dialog that no more processes will be added, so when the
+         * last one is finished and the "auto close" checkbox is checked, it
+         * may close itself.
          **/
         void noMoreProcesses();
 
         /**
-         * Return the number of errors the processes reported.
-         **/
-        int errorCount() const { return _errorCount; }
-
-        /**
          * Set if this dialog should show itself if there is any output on
-         * stderr. The default is 'true'.
+         * stderr. This means an application can create the dialog and leave it
+         * hidden, and if there is any error output, it will automatically show
+         * itself -- with all previous output of the watched processes on stdout
+         * and stderr.
          *
-         * This means an application can create the dialog and leave it hidden, and
-         * if there is any error output, it will automatically show itself -- with
-         * all previous output of the watched processes on stdout and stderr.
-         * If the user closes the dialog, however, it will remain closed.
+         * If the user explicitly closes an open dialog, it will remain closed
+         * even if output appears on stderr afterwards, and even if this
+         * setting is true.
          **/
         void setShowOnStderr( bool show ) { _showOnStderr = show; }
 
         /**
-         * Return 'true' if this dialog shows itself if there is any output on
-         * stderr.
-         **/
-        bool showOnStderr() const { return _showOnStderr; }
-
-        /**
          * Show window (if not already shown) after the specified timeout has
-         * elapsed. This is useful for operations that might be very short, so no
-         * output window is desired, but that sometimes might also take a while.
+         * elapsed. This is useful for operations that might be very short, so
+         * no output window is desired, but that sometimes might also take a
+         * long time.  If this is set, then the dialog will immediately show
+         * if there is output on stderr.
          *
          * If 'timeoutMillisec' is 0, defaultShowTimeout() is used.
          **/
         void showAfterTimeout( int timeoutMillisec = 0 );
 
         /**
-         * Return the default window show timeout in milliseconds.  This is used
-         * by CleanupConfigPage as well as within this class.
+         * Return the default window show timeout in milliseconds.  This is
+         * used by CleanupConfigPage as well as within this class.
          **/
         static int defaultShowTimeout();
 
         /**
-         * Set the default show timeout (in milliseconds).  Not currently used, no
-         * user interface to this.
+         * Return the argument used with a shell command to indicate that
+         * it should use the following arguments as input to the shell.
          **/
-//        void setDefaultShowTimeout( int newTimeoutMillisec )
-//            { _defaultShowTimeout = newTimeoutMillisec; }
+        static QLatin1String shellCommandArg() { return QLatin1String{ "-c" }; }
 
         /**
-         * Return the text color for commands in the terminal area.
+         * Get the command of 'process'. Since processes are usually started
+         * via a shell ("/bin/sh -c theRealCommand arg1 arg2 ..."), this is
+         * typically not QProcess::program(), but the arguments minus the "-c".
+         *
+         * Note that while it is possible in some shells that "-c" may not be
+         * the first argument, or that arguments following "-c" may not be
+         * part of the underlying program, the Cleanup class always constructs
+         * processes with a first argument of "-c" and a second argument
+         * containing the program and all of its arguments.
          **/
-        const QColor & commandTextColor() const { return _commandTextColor; }
-
-        /**
-         * Set the text color for commands in the terminal area.
-         **/
-        void setCommandTextColor( const QColor & newColor )
-            { _commandTextColor = newColor; }
-
-        /**
-         * Return the text color for stdout output in the terminal area.
-         **/
-        const QColor & stdoutColor() const { return _stdoutColor; }
-
-        /**
-         * Set the text color for stdout output in the terminal area.
-         **/
-        void setStdoutColor( const QColor & newColor )
-            { _stdoutColor = newColor; }
-
-        /**
-         * Return the text color for stderr output in the terminal area.
-         **/
-        const QColor & stderrColor() const { return _stderrColor; }
-
-        /**
-         * Set the text color for stderr output in the terminal area.
-         **/
-        void setStderrColor( const QColor & newColor )
-            { _stderrColor = newColor; }
-
-        /**
-         * Return the internal process list.
-         **/
-//        const ProcessList & processList() const { return _processList; }
-
-        /**
-         * Return 'true' if any process in the internal process is still active.
-         **/
-        bool hasActiveProcess() const;
-
-        /**
-         * Get the command of the process. Since usually processes are started via
-         * a shell ("/bin/sh -c theRealCommand arg1 arg2 ..."), this is typically
-         * not QProcess::program(), but the arguments minus the "-c".
-         **/
-        static QString command( QProcess * process );
+        static QString command( const QProcess * process );
 
 
     signals:
 
         /**
-         * Emitted when the last process finished, no matter if that was successful
-         * or with an error. 'totalErrorCount' is the accumulated error count of
-         * all processes this OutputWindow watched.
+         * Emitted when the last process finished, whether that was successful
+         * or with an error. 'totalErrorCount' is the accumulated error count
+         * of all processes this OutputWindow watched.
          **/
         void lastProcessFinished( int totalErrorCount );
 
@@ -177,25 +143,19 @@ namespace QDirStat
     public slots:
 
         /**
-         * Add one or more lines of stdout to show in the output area.
-         * This is typically displayed in amber.
+         * Add one or more lines of stdout to show in the output area. This
+         * is typically displayed in amber, but the colour is configurable.
          **/
         void addStdout( const QString & output );
 
         /**
-         * Add one or more lines of stderr to show in the output area.
-         * This is typically displayed in red.
+         * Add one or more lines of stderr to show in the output area. This
+         * is typically displayed in red, but the colour is configurable.
          **/
         void addStderr( const QString & output );
 
 
     protected slots:
-
-        /**
-         * Add a command line to show in the output area.
-         * This is typically displayed in white.
-         **/
-        void addCommandLine( const QString & commandline );
 
         /**
          * Kill all processes this class watches.
@@ -238,8 +198,8 @@ namespace QDirStat
         void resetZoom();
 
         /**
-         * Show after timeout has elapsed (unless the user closed this dialog
-         * before)
+         * Show after timeout has elapsed, unless the user closed this dialog
+         * already.
          **/
         void timeoutShow();
 
@@ -264,10 +224,49 @@ namespace QDirStat
             { _ui->autoCloseCheckBox->setChecked( autoClose ); }
 
         /**
-         * Enable or disable actions based on the internal status of this object.
+         * Enable or disable actions based on the internal status of this
+         * object.
          **/
         void updateActions()
             { _ui->killButton->setEnabled( hasActiveProcess() ); }
+
+        /**
+         * Return 'true' if any process in the internal process is still
+         * active.
+         **/
+        bool hasActiveProcess() const;
+
+        /**
+         * Remove a finished process and signal it is done.
+         **/
+        void processFinished( QProcess * process );
+
+        /**
+         * Close if there are no more processes and there is no error to show.
+         **/
+        void closeIfDone();
+
+        /**
+         * Obtain the process to use from sender(). Return 0 if this is not a
+         * QProcess.
+         **/
+        QProcess * senderProcess( const char * callingFunctionName ) const;
+
+        /**
+         * Try to start the next inactive process, if there is any.
+         **/
+        void startNextProcess();
+
+        /**
+         * Return whether the auto-close checkbox is checked.
+         **/
+        bool autoClose() const { return _ui->autoCloseCheckBox->isChecked(); }
+
+        /**
+         * Add a command line to show in the output area.  This is typically
+         * displayed in white, but the colour is configurable.
+         **/
+        void addCommandLine( const QString & commandline );
 
         /**
          * Hide event: invoked upon QDialog::close() (i.e. the "Close" button),
@@ -285,74 +284,31 @@ namespace QDirStat
          **/
         void hideEvent( QHideEvent * ) override;
 
-        /**
-         * Remove a finished process and signal it is done.
-         **/
-        void processFinished( QProcess * process );
-
-        /**
-         * Close if there are no more processes and there is no error to show.
-         **/
-        void closeIfDone();
-
-        /**
-         * Add one or more lines of text in text color 'textColor' to the output
-         * area.
-         **/
-        void addText( const QString & text, const QColor & textColor );
-
-        /**
-         * Obtain the process to use from sender(). Return 0 if this is not a
-         * QProcess.
-         **/
-        QProcess * senderProcess( const char * callingFunctionName ) const;
-
-        /**
-         * Pick the next inactive process that can be started. Return 0 if there is
-         * none.
-         **/
-//        QProcess * pickQueuedProcess();
-
-        /**
-         * Try to start the next inactive process, if there is any. Return that
-         * process or 0 if there is none.
-         **/
-        QProcess * startNextProcess();
-
-        /**
-         * Zoom the terminal font by the specified factor.  The operation is
-         * performed in pixels from QFontInfo, with a minimum of 1 pixel.
-         **/
-        void zoom( qreal factor );
-
-        /**
-         * Return whether the auto-close checkbox is checked.
-         **/
-        bool autoClose() const { return _ui->autoCloseCheckBox->isChecked(); }
-
 
     private:
 
         std::unique_ptr<Ui::OutputWindow > _ui;
 
         ProcessList _processList;
-        bool        _showOnStderr{ false };
-        bool        _noMoreProcesses{ false };
-        bool        _closed{ false };
-        bool        _killedAll{ false };
-        int         _errorCount{ 0 };
-        QString     _lastWorkingDir;
-        QColor      _terminalBackground;
-        QColor      _commandTextColor;
-        QColor      _stdoutColor;
-        QColor      _stderrColor;
-        QFont       _terminalDefaultFont;
+
+        bool    _noMoreProcesses{ false };
+        bool    _closed{ false };
+        bool    _killedAll{ false };
+        int     _errorCount{ 0 };
+        QString _lastWorkingDir;
+
+        bool   _showOnStderr{ false };
+        QColor _terminalBackground;
+        QColor _commandTextColor;
+        QColor _stdoutColor;
+        QColor _stderrColor;
+        QFont  _terminalDefaultFont;
 
     };  // class OutputWindow
 
 
 
-    inline QTextStream & operator<<( QTextStream & stream, QProcess * process )
+    inline QTextStream & operator<<( QTextStream & stream, const QProcess * process )
     {
         if ( process )
             stream << OutputWindow::command( process );
