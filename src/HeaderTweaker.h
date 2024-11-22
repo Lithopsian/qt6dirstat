@@ -79,9 +79,9 @@ namespace QDirStat
 	/**
 	 * Return the names of the three layouts.
 	 **/
-	constexpr static QLatin1String l1Name() { return "L1"_L1; }
-	constexpr static QLatin1String l2Name() { return "L2"_L1; }
-	constexpr static QLatin1String l3Name() { return "L3"_L1; }
+	constexpr static QLatin1String l1Name() { return QLatin1String{ "L1" }; }
+	constexpr static QLatin1String l2Name() { return QLatin1String{ "L2" }; }
+	constexpr static QLatin1String l3Name() { return QLatin1String{ "L3" }; }
 
 	/**
 	 * Write parameters to the settings file.

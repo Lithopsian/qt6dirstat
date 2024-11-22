@@ -21,6 +21,7 @@
 #include <QTreeView>
 
 #include "DataColumns.h"
+#include "Typedefs.h" // _L1
 
 
 namespace QDirStat

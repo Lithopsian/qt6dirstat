@@ -301,7 +301,7 @@ void CleanupCollection::execute()
 	    break;
 
 	case Cleanup::ShowAfterTimeout:
-	    outputWindow->showAfterTimeout( cleanup->outputWindowTimeout() );
+	    outputWindow->showAfterTimeout( cleanup->outputWindowTimeout() ); // also implies ShowIfErrorOutput
 	    break;
 
 	case Cleanup::ShowIfErrorOutput:

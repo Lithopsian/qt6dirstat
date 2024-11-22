@@ -16,8 +16,6 @@
 #include <QProcessEnvironment>
 #include <QStringBuilder>
 
-#include "Typedefs.h" // _L1
-
 
 #define COMMAND_TIMEOUT_SEC 15
 
@@ -187,7 +185,7 @@ namespace QDirStat
 	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
-	    { return QString{ unescaped }.replace( u'\'', "'\\''"_L1 ); }
+	    { return QString{ unescaped }.replace( u'\'', QLatin1String{ "'\\''" } ); }
 
 	/**
 	 * Return a string in single quotes, with single quotes in the string

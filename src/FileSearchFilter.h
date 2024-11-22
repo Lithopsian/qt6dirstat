@@ -11,7 +11,6 @@
 #define FileSearchFilter_h
 
 #include "SearchFilter.h"
-#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -111,7 +110,7 @@ namespace QDirStat
                << "\" mode \""
                << SearchFilter::toString( filter.filterMode() )
                << "\" for "
-               << findTypes.join( " + "_L1 )
+               << findTypes.join( QLatin1String{ " + " } )
                << ( filter.isCaseSensitive() ? " case sensitive>" : ">" );
 
         return stream;

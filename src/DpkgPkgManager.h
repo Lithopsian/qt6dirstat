@@ -11,7 +11,6 @@
 #define DpkgPkgManager_h
 
 #include "PkgManager.h"
-#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -120,7 +119,7 @@ namespace QDirStat
 	 *
 	 * Implemented from PkgManager.
 	 **/
-	QLatin1String name() const override { return "dpkg"_L1; }
+	QLatin1String name() const override { return QLatin1String{ "dpkg" }; }
 
 	/**
 	 * Check if dpkg is active on the currently running system.

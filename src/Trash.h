@@ -10,8 +10,6 @@
 #ifndef Trash_h
 #define Trash_h
 
-#include "Typedefs.h" // _L1
-
 
 namespace QDirStat
 {
@@ -141,7 +139,7 @@ namespace QDirStat
         /**
          * Return the path of the "files" subdirectory of this trash dir.
          **/
-        QString filesPath() const { return _path % "/files"_L1; }
+        QString filesPath() const { return _path % QLatin1String{ "/files" }; }
 
 
     protected:
@@ -149,7 +147,7 @@ namespace QDirStat
         /**
          * Return the path of the "info" subdirectory of this trash dir.
          **/
-        QString infoPath() const { return _path % "/info"_L1; }
+        QString infoPath() const { return _path % QLatin1String{ "/info" }; }
 
 
     private:
