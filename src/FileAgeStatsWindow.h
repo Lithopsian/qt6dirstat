@@ -105,13 +105,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return the number of recent years for which to display monthly
-	 * statistics.
-	 **/
-	constexpr static short yearsWithMonths()
-	    { return 5; }
-
-	/**
 	 * Populate the window.
 	 **/
 	void populate( FileInfo * fileInfo );

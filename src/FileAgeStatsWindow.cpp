@@ -35,6 +35,25 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Return the number of recent years for which to display monthly
+     * statistics.  This is configurable by manually editing the config
+     * file.
+     **/
+    int yearsWithMonths()
+    {
+	const int defaultValue = 5;
+
+	Settings settings;
+	settings.beginGroup( "FileAgeStatsWindow" );
+	const int yearsWithMonths = settings.value( "YearsWithMonths", defaultValue ).toInt();
+	settings.setDefaultValue( "YearsWithMonths", defaultValue );
+	settings.endGroup();
+
+	return yearsWithMonths;
+    }
+
+
+    /**
      * Read settings from the config file
      **/
     void readSettings( FileAgeStatsWindow * window, QCheckBox * syncCheckBox  )
