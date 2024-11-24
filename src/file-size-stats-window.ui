@@ -19,6 +19,12 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="headingLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="font">
       <font>
        <weight>75</weight>
@@ -255,8 +261,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>276</width>
-            <height>658</height>
+            <width>500</width>
+            <height>532</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
