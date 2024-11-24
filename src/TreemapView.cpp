@@ -48,27 +48,27 @@ namespace
      **/
     TreemapTile * findTile( TreemapTile * rootTile, const FileInfo * node )
     {
-	if ( !node || !rootTile )
-	    return nullptr;
+        if ( !node || !rootTile )
+            return nullptr;
 
-	// common case that is easy
-	if ( rootTile->orig() == node )
-	    return rootTile;
+        // common case that is easy
+        if ( rootTile->orig() == node )
+            return rootTile;
 
-	// loop recursively through the children of each tile
-	const auto childItems = rootTile->childItems();
-	for ( QGraphicsItem * graphicsItem : childItems )
-	{
-	    TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
-	    if ( tile )
-	    {
-		tile = findTile( tile, node );
-		if ( tile )
-		    return tile;
-	    }
-	}
+        // loop recursively through the children of each tile
+        const auto childItems = rootTile->childItems();
+        for ( QGraphicsItem * graphicsItem : childItems )
+        {
+            TreemapTile * tile = dynamic_cast<TreemapTile *>( graphicsItem );
+            if ( tile )
+            {
+                tile = findTile( tile, node );
+                if ( tile )
+                    return tile;
+            }
+        }
 
-	return nullptr;
+        return nullptr;
     }
 
 } // namespace
@@ -693,7 +693,7 @@ void TreemapView::setCurrentItem( FileInfo * node )
             treemapRoot->parent() != _tree->root() )
         treemapRoot = treemapRoot->parent(); // try one level higher
 
-    if ( treemapRoot != _rootTile->orig() )          // need to zoom out?
+    if ( treemapRoot != _rootTile->orig() ) // need to zoom out?
     {
         //logDebug() << "Zooming out to " << treemapRoot << " to make current item visible" << Qt::endl;
         rebuildTreemap( treemapRoot );
@@ -755,14 +755,12 @@ void TreemapView::sendSelection( const TreemapTile * tile)
     const QList<QGraphicsItem *> selectedTiles = scene()->selectedItems();
     if ( selectedTiles.size() == 1 && selectedTiles.first() == tile )
     {
-        logDebug() << Qt::endl;
         // For just one selected tile that is the current item, only send one signal
         _selectionModel->setCurrentItem( tile->orig(),
                                          true ); // select
     }
     else // Multi-selection
     {
-        logDebug() << Qt::endl;
         FileInfoSet selectedItems;
 
         for ( const QGraphicsItem * selectedItem : selectedTiles )
@@ -814,16 +812,15 @@ void TreemapView::highlightParents( const TreemapTile * tile )
 
     // Simplest to start from scratch even if some of the ancestors are the same
     clearParentsHighlight();
-logDebug() << Qt::endl;
+
     while ( parent && parent != _rootTile )
     {
         _parentHighlightList << new ParentTileHighlighter{ this, parent, parent->orig()->debugUrl() };
         parent = parent->parentTile();
     }
-logDebug() << Qt::endl;
+
     if ( !_parentHighlightList.isEmpty() )
         _sceneMask = new SceneMask{ _parentHighlightList.last()->tile(), qRound( 0.6 * 255 ) };
-logDebug() << Qt::endl;
 }
 
 

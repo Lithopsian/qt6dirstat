@@ -1,5 +1,5 @@
 /*
- *   File name: ExistingDir.h
+ *   File name: ExistingDirValidator.h
  *   Summary:   QDirStat widget support classes
  *   License:   GPL V2 - See file LICENSE for details.
  *
@@ -7,11 +7,10 @@
  *              Ian Nartowicz
  */
 
-#ifndef ExistingDir_h
-#define ExistingDir_h
+#ifndef ExistingDirValidator_h
+#define ExistingDirValidator_h
 
 #include <QValidator>
-#include <QCompleter>
 
 
 namespace QDirStat
@@ -22,7 +21,7 @@ namespace QDirStat
      *
      * See OpenUnpkgDialog for a usage example.
      **/
-    class ExistingDirValidator: public QValidator
+    class ExistingDirValidator final : public QValidator
     {
 	Q_OBJECT
 
@@ -48,26 +47,6 @@ namespace QDirStat
 
     };	// class ExistingDirValidator
 
-
-    /**
-     * Completer class for QCombobox and related to complete names of existing
-     * directories.
-     *
-     * See OpenUnpkgDialog for a usage example.
-     **/
-    class ExistingDirCompleter: public QCompleter
-    {
-	Q_OBJECT
-
-    public:
-
-	/**
-	 * Constructor.
-	 **/
-	ExistingDirCompleter( QObject * parent );
-
-    };	// class ExistingDirCompleter
-
 }	// namespace QDirStat
 
-#endif	// ExistingDir_h
+#endif	// ExistingDirValidator_h

@@ -38,7 +38,6 @@ namespace QDirStat
     class FileInfoSet;
     class SelectionModel;
     class SelectionModelProxy;
-    class Settings;
 
     enum TreemapLayers
     {
@@ -56,7 +55,7 @@ namespace QDirStat
     /**
      * View widget that displays a DirTree as a treemap.
      **/
-    class TreemapView: public QGraphicsView
+    class TreemapView final : public QGraphicsView
     {
 	Q_OBJECT
 
@@ -664,7 +663,7 @@ namespace QDirStat
      * (i.e., great z-height) of everything else. The rectangle is transparent,
      * so the treemap tile contents remain visible.
      **/
-    class HighlightRect: public QGraphicsRectItem
+    class HighlightRect : public QGraphicsRectItem
     {
     public:
 
@@ -688,7 +687,7 @@ namespace QDirStat
      * is not selected, solid if it is.  It is red by default.
      *
      **/
-    class CurrentTileHighlighter: public HighlightRect
+    class CurrentTileHighlighter final : public HighlightRect
     {
     public:
 
@@ -717,7 +716,7 @@ namespace QDirStat
      * tile will mostly be obscured by its children. This highlighter hovers
      * above the children as long as the directory is selected.
      **/
-    class SelectedTileHighlighter: public HighlightRect
+    class SelectedTileHighlighter final : public HighlightRect
     {
     public:
 
@@ -743,7 +742,7 @@ namespace QDirStat
      * the immediate parent of the current tile, the highlight is 2 pixels wide, all
      * the others just 1 pixel.
      **/
-    class ParentTileHighlighter: public HighlightRect
+    class ParentTileHighlighter final : public HighlightRect
     {
     public:
 
@@ -793,7 +792,7 @@ namespace QDirStat
      * Semi-transparent mask that covers the complete scene except for one
      * tile.
      **/
-    class SceneMask: public QGraphicsPathItem
+    class SceneMask final : public QGraphicsPathItem
     {
     public:
 

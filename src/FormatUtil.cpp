@@ -33,8 +33,8 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
                               QObject::tr( " TB" ),
                               QObject::tr( " PB" ),
                               QObject::tr( " EB" ),
-                              QObject::tr( " ZB" ),
-                              QObject::tr( " YB" ),
+                              QObject::tr( " ZB" ), // > FileSizeMax bytes
+                              QObject::tr( " YB" ), // > FileSizeMax bytes
                             };
 
     if ( lSize < 1000 )
@@ -133,19 +133,19 @@ QString QDirStat::monthAbbreviation( short month )
 {
     switch ( month )
     {
-        case  1: return QObject::tr( "Jan" );
-        case  2: return QObject::tr( "Feb" );
-        case  3: return QObject::tr( "Mar" );
-        case  4: return QObject::tr( "Apr" );
-        case  5: return QObject::tr( "May" );
-        case  6: return QObject::tr( "Jun" );
-        case  7: return QObject::tr( "Jul" );
-        case  8: return QObject::tr( "Aug" );
-        case  9: return QObject::tr( "Sep" );
-        case 10: return QObject::tr( "Oct" );
-        case 11: return QObject::tr( "Nov" );
-        case 12: return QObject::tr( "Dec" );
-        default: return QString{};
+	case  1: return QObject::tr( "Jan" );
+	case  2: return QObject::tr( "Feb" );
+	case  3: return QObject::tr( "Mar" );
+	case  4: return QObject::tr( "Apr" );
+	case  5: return QObject::tr( "May" );
+	case  6: return QObject::tr( "Jun" );
+	case  7: return QObject::tr( "Jul" );
+	case  8: return QObject::tr( "Aug" );
+	case  9: return QObject::tr( "Sep" );
+	case 10: return QObject::tr( "Oct" );
+	case 11: return QObject::tr( "Nov" );
+	case 12: return QObject::tr( "Dec" );
+	default: return QString{};
     }
 }
 

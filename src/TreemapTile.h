@@ -11,16 +11,14 @@
 #define TreemapTile_h
 
 #include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QTextStream>
 #include <QVector>
 
 #include "Typedefs.h" // FileSize
 
 
 #define PAINT_DEBUGGING 0 // not completely thread-safe, do not use in release versions
-
-
-class QGraphicsSceneMouseEvent;
-class QTextStream;
 
 
 namespace QDirStat
@@ -40,7 +38,7 @@ namespace QDirStat
      * there is very little visible change in cushion shading beyond that
      * point, if the tiles are even large enough to be visible.
      **/
-    class CushionHeightSequence: public QVector<double>
+    class CushionHeightSequence final : public QVector<double>
     {
     public:
 
@@ -82,7 +80,7 @@ namespace QDirStat
      *
      * to better keep track of which coefficient belongs where.
      **/
-    class CushionSurface
+    class CushionSurface final
     {
     public:
 
@@ -203,7 +201,7 @@ namespace QDirStat
      * one tile (one rectangle) of the treemap. If it has children, it will be
      * subdivided again.
      **/
-    class TreemapTile: public QGraphicsRectItem
+    class TreemapTile : public QGraphicsRectItem
     {
 
 	enum Orientation

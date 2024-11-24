@@ -11,6 +11,7 @@
 #define PkgQuery_h
 
 #include <QCache>
+#include <QVector>
 
 #include "PkgInfo.h" // PkgInfoList
 
@@ -19,11 +20,14 @@ namespace QDirStat
 {
     class PkgManager;
 
+    typedef QVector<const PkgManager *> PkgManagerList;
+    typedef QCache<QString, QString>    PkgManagerCache;
+
     /**
      * Singleton class for simple queries to the system's package manager.
      * Only normally accessed by the public static functions.
      **/
-    class PkgQuery
+    class PkgQuery final
     {
 	/**
 	 * Constructor. For internal use only; use the static methods instead.
@@ -132,24 +136,11 @@ namespace QDirStat
 	 **/
 	bool checkFileListSupport() const;
 
-	/**
-	 * Check which supported package managers are available and add them to
-	 * the internal list.
-	 **/
-	void checkPkgManagers();
-
-	/**
-	 * Check if a package manager is available; add it to one of the
-	 * internal lists if it is, or delete it if not.
-	 **/
-	void checkPkgManager( const PkgManager * pkgManager );
-
 
     private:
 
-	QVector<const PkgManager *> _pkgManagers; // primary and secondary package managers found
-
-	QCache<QString, QString> _cache; // mapping of paths and package names
+	PkgManagerList  _pkgManagers; // primary and secondary package managers found
+	PkgManagerCache _cache; // mapping of paths and package names
 
     };	// class PkgQuery
 

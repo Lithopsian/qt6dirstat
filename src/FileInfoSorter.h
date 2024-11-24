@@ -39,7 +39,7 @@ namespace QDirStat
      * Note that the sorter can be called on any container of FileInfo pointers
      * that satisfies the basic iterator requirements.
      **/
-    class FileInfoSorter
+    class FileInfoSorter final
     {
     public:
 

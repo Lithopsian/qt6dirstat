@@ -29,7 +29,7 @@ namespace QDirStat
      * point of it. Yet, the user can open the attic (the <Ignored> pseudo
      * entry) in the tree view.
      **/
-    class Attic: public DirInfo
+    class Attic final : public DirInfo
     {
     public:
 

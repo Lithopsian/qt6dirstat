@@ -79,7 +79,7 @@ namespace QDirStat
     /**
      * TreeWalker to find the largest files.
      **/
-    class LargestFilesTreeWalker: public TreeWalker
+    class LargestFilesTreeWalker final : public TreeWalker
     {
     public:
 
@@ -107,7 +107,7 @@ namespace QDirStat
     /**
      * TreeWalker to find new files.
      **/
-    class NewFilesTreeWalker: public TreeWalker
+    class NewFilesTreeWalker final : public TreeWalker
     {
     public:
 
@@ -135,7 +135,7 @@ namespace QDirStat
     /**
      * TreeWalker to find old files.
      **/
-    class OldFilesTreeWalker: public TreeWalker
+    class OldFilesTreeWalker final : public TreeWalker
     {
     public:
 
@@ -163,7 +163,7 @@ namespace QDirStat
     /**
      * TreeWalker to find files with multiple hard links.
      **/
-    class HardLinkedFilesTreeWalker: public TreeWalker
+    class HardLinkedFilesTreeWalker final : public TreeWalker
     {
     public:
 
@@ -176,7 +176,7 @@ namespace QDirStat
     /**
      * TreeWalker to find broken symlinks.
      **/
-    class BrokenSymlinksTreeWalker: public TreeWalker
+    class BrokenSymlinksTreeWalker final : public TreeWalker
     {
     public:
 
@@ -189,7 +189,7 @@ namespace QDirStat
     /**
      * TreeWalker to find sparse files.
      **/
-    class SparseFilesTreeWalker: public TreeWalker
+    class SparseFilesTreeWalker final : public TreeWalker
     {
     public:
 
@@ -202,7 +202,7 @@ namespace QDirStat
     /**
      * TreeWalker to find files with the specified modification year.
      **/
-    class FilesFromYearTreeWalker: public TreeWalker
+    class FilesFromYearTreeWalker final : public TreeWalker
     {
     public:
 
@@ -225,7 +225,7 @@ namespace QDirStat
     /**
      * TreeWalker to find files with the specified modification year and month.
      **/
-    class FilesFromMonthTreeWalker: public TreeWalker
+    class FilesFromMonthTreeWalker final : public TreeWalker
     {
     public:
 
@@ -250,7 +250,7 @@ namespace QDirStat
     /**
      * TreeWalker to find files and/or directories that match a pattern.
      **/
-    class FindFilesTreeWalker: public TreeWalker
+    class FindFilesTreeWalker final : public TreeWalker
     {
     public:
 

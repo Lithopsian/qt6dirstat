@@ -13,13 +13,11 @@
 #include <memory>
 
 #include <QDialog>
+#include <QFileSystemModel>
+#include <QHelpEvent>
 #include <QStyledItemDelegate>
 
 #include "ui_open-dir-dialog.h"
-
-
-class QFileSystemModel;
-class QHelpEvent;
 
 
 namespace QDirStat
@@ -29,7 +27,7 @@ namespace QDirStat
     /**
      * Dialog to let the user select a directory to read.
      **/
-    class OpenDirDialog: public QDialog
+    class OpenDirDialog final : public QDialog
     {
 	Q_OBJECT
 
@@ -128,7 +126,7 @@ namespace QDirStat
      * This delegate exists solely to provide a tooltip for
      * elided items in the open directory tree.
      **/
-    class OpenDirDelegate : public QStyledItemDelegate
+    class OpenDirDelegate final : public QStyledItemDelegate
     {
 	Q_OBJECT
 

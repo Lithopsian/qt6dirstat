@@ -16,22 +16,8 @@
 #include <QProcessEnvironment>
 #include <QStringBuilder>
 
-#include "Typedefs.h" // _L1
 
-
-// Override these before #include
-
-#ifndef LOG_COMMANDS
-#  define LOG_COMMANDS true
-#endif
-
-#ifndef LOG_OUTPUT
-#  define LOG_OUTPUT false
-#endif
-
-#ifndef COMMAND_TIMEOUT_SEC
-#  define COMMAND_TIMEOUT_SEC 15
-#endif
+#define COMMAND_TIMEOUT_SEC 15
 
 
 namespace QDirStat
@@ -42,59 +28,33 @@ namespace QDirStat
     namespace SysUtil
     {
 	/**
-	 * Try running a command and compare it against an expected result.
-	 * Return true if ok, false if not.
-	 *
-	 * Log the command that is executed if 'logCommand' is true,
-	 * log the command's output if 'logOutput' is true.
+	 * Return true if the specified command is available and executable.
 	 **/
-	bool tryRunCommand( const QString & commandLine,
-	                    const QString & expectedResult,
-	                    bool            logCommand = LOG_COMMANDS,
-	                    bool            logOutput  = LOG_OUTPUT );
+	inline bool haveCommand( const QString & command )
+	    { return access( command.toUtf8(), X_OK ) == 0; }
 
 	/**
-	 * Run a command line and return its output. If exitCode_ret is
-	 * non-null, return the command's exit code in exitCode_ret.
+	 * Try running a command and compare it against an expected result.
+	 * Return true if the command output matches the regular expression
+	 * 'expectedResult', false if it doesn't.
 	 *
 	 * Log the command that is executed if 'logCommand' is true,
 	 * log the command's output if 'logOutput' is true.
-	 *
-	 * If the command exits with a non-zero exit code, both the command and
-	 * the output are logged anyway unless 'ignoreErrCode' is true.
-	 *
-	 * This function uses a very basic command line parser; it simply
-	 * splits the command up wherever whitespace might occur. If any of
-	 * the arguments (no matter how sophisticated they might be quoted)
-	 * possibly contains any whitespace, this is unsafe; in that case, use
-	 * the overloaded version instead that accepts a QStringList as
-	 * arguments.
-	 *
-	 * The command is not executed in a shell; the command is run directly
-	 * so only binaries can be executed, no shell scripts or scripts of
-	 * other interpreted languages. If that is desired, wrap the command
-	 * into "/bin/sh -c".
 	 **/
-	QString runCommand( const QString & commandLine,
-	                    int           * exitCode_ret = nullptr,
-	                    int             timeout_sec  = COMMAND_TIMEOUT_SEC,
-	                    bool            logCommand   = LOG_COMMANDS,
-	                    bool            logOutput    = LOG_OUTPUT,
-	                    bool            logError     = true );
+	bool tryRunCommand( const QString     & command,
+	                    const QStringList & args,
+	                    const QString     & expectedResult );
 
 	/**
 	 * Run a command with arguments 'args' and return its output. If
 	 * exitCode_ret is non-null, return the command's exit code in
 	 * exitCode_ret.
 	 *
-	 * Use this version to avoid any side effects due to command line
-	 * parsing.
-	 *
 	 * Log the command that is executed if 'logCommand' is true,
 	 * log the command's output if 'logOutput' is true.
 	 *
 	 * If the command exits with a non-zero exit code, both the command and
-	 * the output are logged anyway unless 'ignoreErrCode' is true.
+	 * the output are logged anyway unless 'logError' is false.
 	 *
 	 * The command is not executed in a shell; the command is run directly
 	 * so only binaries can be executed, no shell scripts or scripts of
@@ -104,16 +64,22 @@ namespace QDirStat
 	QString runCommand( const QString     & command,
 	                    const QStringList & args,
 	                    int               * exitCode_ret = nullptr,
-	                    int                 timeout_sec  = COMMAND_TIMEOUT_SEC,
-	                    bool                logCommand   = LOG_COMMANDS,
-	                    bool                logOutput    = LOG_OUTPUT,
+	                    int                 timeoutSec   = COMMAND_TIMEOUT_SEC,
+	                    bool                logCommand   = true,
+	                    bool                logOutput    = false,
 	                    bool                logError     = true );
 
 	/**
-	 * Return true if the specified command is available and executable.
+	 * Return a QProcessEnvironment object with the C locale added.  This
+	 * is necessary when running some commands to avoid problems trying
+	 * to parse localised output.
 	 **/
-	inline bool haveCommand( const QString & command )
-	    { return access( command.toUtf8(), X_OK ) == 0; }
+	inline QProcessEnvironment cProcessEnvironment()
+	{
+	    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	    env.insert( "LANG", "C" ); // Prevent output in translated languages
+	    return env;
+	}
 
 	/**
 	 * Check if this program runs with root privileges, i.e. with effective
@@ -141,26 +107,15 @@ namespace QDirStat
 	QString homeDir( uid_t uid );
 
 	/**
-	 * Read the (first level) target of a symbolic link.
-	 * Unlike readLink( const QString & ) above, this does not make any
-	 * assumptions of name encoding in the filessytem; it just uses bytes.
+	 * Read the (first level) target of a symbolic link. Unlike
+	 * symlinkTarget(), this does not make any assumptions of name
+	 * encoding in the filesystem; it just uses bytes.
 	 *
 	 * This is a more user-friendly version of readlink(2).
 	 *
 	 * This returns an empty QByteArray if 'path' is not a symlink.
 	 **/
 	QByteArray readLink( const QByteArray & path );
-
-	/**
-	 * Read the (first level) target of a symbolic link, assuming UTF-8
-	 * encoding of names in the filesystem.
-	 *
-	 * This is a more user-friendly version of readlink(2).
-	 *
-	 * This returns an empty QByteArray if 'path' is not a symlink.
-	 **/
-	inline QByteArray readLink( const QString & path )
-	    { return readLink( path.toUtf8() ); }
 
 	/**
 	 * Return the (first level) target of a symbolic link, i.e. the path
@@ -172,7 +127,7 @@ namespace QDirStat
 	 * This function assumes UTF-8 encoding of names in the filesystem.
 	 **/
 	inline QString symlinkTarget( const QString & path )
-	    { return QString::fromUtf8( readLink( path ) ); }
+	    { return readLink( path.toUtf8() ); }
 
 	/**
 	 * Return the last path component of a file name.
@@ -230,7 +185,7 @@ namespace QDirStat
 	 * or it would be interpreted as escaping the following character.
 	 **/
 	inline QString escaped( const QString & unescaped )
-	    { return QString{ unescaped }.replace( u'\'', "'\\''"_L1 ); }
+	    { return QString{ unescaped }.replace( u'\'', QLatin1String{ "'\\''" } ); }
 
 	/**
 	 * Return a string in single quotes, with single quotes in the string

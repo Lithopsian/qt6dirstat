@@ -58,7 +58,7 @@ namespace QDirStat
      * This window is meant to be connected to a panel message's "Details"
      * hyperlink.
      **/
-    class UnreadableDirsWindow: public QDialog
+    class UnreadableDirsWindow final : public QDialog
     {
 	Q_OBJECT
 
@@ -120,7 +120,7 @@ namespace QDirStat
     /**
      * Item class for the filesystems list.
      **/
-    class UnreadableDirsItem: public QTreeWidgetItem
+    class UnreadableDirsItem final : public QTreeWidgetItem
     {
     public:
 

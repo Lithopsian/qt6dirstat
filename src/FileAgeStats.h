@@ -35,14 +35,14 @@ namespace QDirStat
 
     typedef QHash<short, YearMonthStats> YearStatsHash;
     typedef QHash<int,   YearMonthStats> MonthStatsHash;
-    typedef QList<short>                 YearsList;
+    typedef QList<short>                 YearsList; // QList from QHash::keys
 
 
     /**
      * Class for calculating and storing file age statistics, i.e. statistics
      * about the years of the last modification times of files in a subtree.
      **/
-    class FileAgeStats
+    class FileAgeStats final
     {
     public:
 
@@ -104,21 +104,12 @@ namespace QDirStat
         float sizePercent( FileSize size ) const
             { return _totalSize == 0 ? 100.0 : 100.0f * size / _totalSize; }
 
-
-    protected:
-
         /**
          * Return a unique value for the combination 'year' and 'month', to
          * be used as the hash key for MonthStats.
          **/
         static int yearMonthHash( short year, short month )
             { return year * 12 + month; }
-
-        /**
-         * Recurse through all file elements in the subtree and calculate the
-         * data for that subtree.
-         **/
-        void collectRecursive( const FileInfo * subtree );
 
 
     private:

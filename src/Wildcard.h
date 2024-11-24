@@ -11,8 +11,6 @@
 
 #include <QRegularExpression>
 
-#include "Typedefs.h" // _L1
-
 
 namespace QDirStat
 {
@@ -40,7 +38,7 @@ namespace QDirStat
      * the original pattern.
      **/
 
-    class Wildcard: public QRegularExpression
+    class Wildcard : public QRegularExpression
     {
     protected:
 
@@ -119,7 +117,7 @@ namespace QDirStat
 	 **/
 #if QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 )
 	static QString anchoredPattern( const QString & expression )
-	    { return "\\A(?:"_L1 + expression + ")\\z"_L1; }
+	    { return QLatin1String{ "\\A(?:" } + expression + QLatin1String{ ")\\z" }; }
 #endif
 
 	/**
@@ -142,7 +140,7 @@ namespace QDirStat
     /**
      * Convenience class for making a case-sensitive wildcard regular expression.
      **/
-    class CaseSensitiveWildcard: public Wildcard
+    class CaseSensitiveWildcard final : public Wildcard
     {
     public:
 
@@ -160,7 +158,7 @@ namespace QDirStat
     /**
      * Convenience class for making a case-insensitive wildcard regular expression.
      **/
-    class CaseInsensitiveWildcard: public Wildcard
+    class CaseInsensitiveWildcard final : public Wildcard
     {
     public:
 

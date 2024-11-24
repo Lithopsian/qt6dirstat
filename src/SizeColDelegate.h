@@ -22,7 +22,7 @@ namespace QDirStat
      *
      * This class can handle different font attributes and colors.
      **/
-    class SizeColDelegate: public QStyledItemDelegate
+    class SizeColDelegate final : public QStyledItemDelegate
     {
 	Q_OBJECT
 

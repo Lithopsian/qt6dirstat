@@ -24,7 +24,7 @@ namespace QDirStat
      * Dialog to let the user select installed packages to open, very much like
      * a "get existing directory" dialog, but returning a PkgFilter instead.
      **/
-    class OpenPkgDialog: public QDialog
+    class OpenPkgDialog final : public QDialog
     {
 	Q_OBJECT
 

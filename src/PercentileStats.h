@@ -64,7 +64,7 @@ namespace QDirStat
      * explicitly as they are not needed in all cases and so are not
      * automatically filled.
      **/
-    class PercentileStats: public PercentileValueList
+    class PercentileStats : public PercentileValueList
     {
     public:
 

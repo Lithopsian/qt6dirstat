@@ -16,7 +16,7 @@
 
 #include "OpenDirDialog.h"
 #include "DirTreeModel.h"
-#include "ExistingDir.h"
+#include "ExistingDirValidator.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "QDirStatApp.h" // DirTreeModel
@@ -57,7 +57,7 @@ namespace
     {
         app()->dirTreeModel()->setTreeIconSize( dirTreeView );
 
-        const auto filter = QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks | QDir::Drives;
+        const auto filter = QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Drives;
         filesystemModel->setFilter( filter );
         filesystemModel->setRootPath( "/" );
 

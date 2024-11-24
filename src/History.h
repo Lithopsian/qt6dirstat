@@ -27,7 +27,7 @@ namespace QDirStat
      * back). As more and more items are added, from a certain point on, the
      * oldest are removed, so there is a limit how far you can go back.
      **/
-    class History
+    class History final
     {
     public:
 

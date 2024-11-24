@@ -29,7 +29,7 @@ namespace QDirStat
      *
      * Use PkgManager::createFileListCache() to create and fill such a cache.
      **/
-    class PkgFileListCache
+    class PkgFileListCache final
     {
     public:
 

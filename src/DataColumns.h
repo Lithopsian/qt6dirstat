@@ -14,8 +14,6 @@
 #include <QTextStream>
 #include <QVector>
 
-#include "Typedefs.h" // _L1
-
 
 // For use in loops
 #define DataColumnBegin NameCol
@@ -145,7 +143,7 @@ namespace QDirStat
     inline QTextStream & operator<<( QTextStream &          stream,
                                      const DataColumnList & colList )
     {
-	stream << "[ " << DataColumns::toStringList( colList ).join( ", "_L1 ) << " ]";
+	stream << "[ " << DataColumns::toStringList( colList ).join( QLatin1String{ ", " } ) << " ]";
 
 	return stream;
     }

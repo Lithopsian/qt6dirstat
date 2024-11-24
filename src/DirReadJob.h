@@ -151,7 +151,7 @@ namespace QDirStat
      * one filesystem - which is desirable when that one filesystem runs
      * out of space.
      **/
-    class LocalDirReadJob: public DirReadJob
+    class LocalDirReadJob final : public DirReadJob
     {
     public:
 
@@ -237,7 +237,7 @@ namespace QDirStat
 
 
 
-    class CacheReadJob: public DirReadJob
+    class CacheReadJob final : public DirReadJob
     {
     public:
 

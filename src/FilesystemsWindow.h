@@ -36,7 +36,7 @@ namespace QDirStat
      * The sizes may not be available on all platforms (no Qt 4 support!) or
      * for some filesystem types.
      **/
-    class FilesystemsWindow: public QDialog
+    class FilesystemsWindow final : public QDialog
     {
 	Q_OBJECT
 
@@ -141,7 +141,7 @@ namespace QDirStat
     /**
      * Item class for the filesystems list.
      **/
-    class FilesystemItem: public QTreeWidgetItem
+    class FilesystemItem final : public QTreeWidgetItem
     {
     public:
 

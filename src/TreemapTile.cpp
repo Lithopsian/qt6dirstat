@@ -10,7 +10,6 @@
 #include <cmath> // round(), sqrt()
 
 #include <QElapsedTimer>
-#include <QGraphicsSceneMouseEvent>
 #include <QImage>
 #include <QMenu>
 #include <QPainter>
@@ -687,8 +686,7 @@ void TreemapTile::paint( QPainter                       * painter,
         // that for every tile, so we draw that highlight frame manually
         // if this is a leaf tile.
         painter->setBrush( Qt::NoBrush );
-        QRectF selectionRect{ rect };
-        selectionRect.setSize( rect.size() - QSizeF{ 1.0, 1.0 } );
+        const QRectF selectionRect{ rect.adjusted( 0.0, 0.0, -1.0, -1.0 ) };
         painter->setPen( QPen{ _parentView->selectedItemsColor(), 1 } );
         painter->drawRect( selectionRect );
     }
@@ -874,8 +872,7 @@ void TreemapTile::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
     //logDebug() << "Context menu for " << this << Qt::endl;
 
     // The first action should not be a destructive one like "move to trash":
-    // It's just too easy to select and execute the first action accidentially,
-    // especially on a laptop touchpad.
+    // It's just too easy to select and execute the first action accidentially
     const QStringList actions{ "actionTreemapZoomTo",
                                "actionTreemapZoomIn",
                                "actionTreemapZoomOut",

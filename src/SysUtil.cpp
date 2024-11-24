@@ -9,7 +9,7 @@
 
 #include <pwd.h>	// getpwuid()
 #include <grp.h>	// getgrgid()
-#include <sys/stat.h>   // lstat()
+#include <sys/stat.h>	// lstat()
 
 #include <QRegularExpression>
 
@@ -20,120 +20,98 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const QString & commandLine,
-                             const QString & expectedResult,
-                             bool            logCommand,
-                             bool            logOutput )
+bool SysUtil::tryRunCommand( const QString     & command,
+                             const QStringList & args,
+                             const QString     & expectedResult )
 {
-    int exitCode = -1;
-    QString output = runCommand( commandLine,
+    int exitCode;
+    QString output = runCommand( command,
+                                 args,
                                  &exitCode,
                                  COMMAND_TIMEOUT_SEC,
-                                 logCommand,
-                                 logOutput,
-                                 true ); // ignoreErrCode
+                                 false, // don't log command
+                                 false, // don't log output
+                                 false ); // don't log errors, just return false
 
     if ( exitCode != 0 )
     {
-	//logDebug() << "Exit code: " << exitCode << " command line: \"" << commandLine << '"' << Qt::endl;
+	//logDebug() << "Exit code: " << exitCode
+	//           << " command line: \"" << command << " " << args.join( u' ' ) << '"' << Qt::endl;
 	return false;
     }
 
-    const bool expected = QRegularExpression{ expectedResult }.match( output ).hasMatch();
-
-    return expected;
-}
-
-
-QString SysUtil::runCommand( const QString & commandLine,
-                             int           * exitCode_ret,
-                             int             timeout_sec,
-                             bool            logCommand,
-                             bool            logOutput,
-                             bool            logError )
-{
-    if ( exitCode_ret )
-	*exitCode_ret = -1;
-
-    QStringList args = commandLine.split( QRegularExpression{ "\\s+" } );
-
-    if ( args.size() < 1 )
-    {
-	logError() << "Bad command line: \"" << commandLine << '"' << Qt::endl;
-	return "ERROR: Bad command line";
-    }
-
-    const QString command = args.takeFirst();
-
-    return runCommand( command, args, exitCode_ret, timeout_sec, logCommand, logOutput, logError );
+    return QRegularExpression{ expectedResult }.match( output ).hasMatch();
 }
 
 
 QString SysUtil::runCommand( const QString     & command,
                              const QStringList & args,
                              int               * exitCode_ret,
-                             int                 timeout_sec,
+                             int                 timeoutSec,
                              bool                logCommand,
                              bool                logOutput,
                              bool                logError )
 {
-    if ( exitCode_ret )
-	*exitCode_ret = -1;
-
-    if ( !haveCommand( command ) )
-    {
-	//logInfo() << "Command not found: " << command << Qt::endl;
-	return "ERROR: Command not found";
-    }
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert( "LANG", "C" ); // Prevent output in translated languages
-
-    QProcess process;
-    process.setProgram( command );
-    process.setArguments( args );
-    process.setProcessEnvironment( env );
-    process.setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
+    int exitCode = -1;
 
     if ( logCommand )
 	logDebug() << command << " " << args.join( u' ' ) << Qt::endl;
 
-    process.start();
-    const bool success = process.waitForFinished( timeout_sec * 1000 );
-    QByteArray output = process.readAll();
-
-    if ( success )
+    const QString output = [ &command, &args, timeoutSec, logError, &exitCode ]() -> QString
     {
-	if ( process.exitStatus() == QProcess::NormalExit )
-	{
-	    if ( exitCode_ret )
-		*exitCode_ret = process.exitCode();
+	if ( !haveCommand( command ) )
+	    return "ERROR: Command not found\n\n";
 
-	    if ( logError && process.exitCode() )
+	QProcess process;
+	process.setProgram( command );
+	process.setArguments( args );
+	process.setProcessEnvironment( cProcessEnvironment() );
+	process.setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
+	process.start();
+
+	const bool finished = process.waitForFinished( timeoutSec * 1000 );
+	const QString output{ process.readAll() };
+	if ( finished )
+	{
+	    if ( process.exitStatus() == QProcess::NormalExit )
 	    {
-		logError() << "Command exited with exit code " << process.exitCode() << ": "
-			   << command << "\" args: " << args << Qt::endl;
+		exitCode = process.exitCode();
+
+		if ( logError && exitCode != 0)
+		{
+		    logError() << "Command exited with exit code " << process.exitCode()
+		               << ": " << command << "\" args: " << args << Qt::endl;
+		}
+
+		return output;
+	    }
+	    else
+	    {
+		logError() << "Command crashed: \"" << command << "\" args: " << args << Qt::endl;
+		return "ERROR: Command crashed\n\n" % output;
 	    }
 	}
 	else
 	{
-	    logError() << "Command crashed: \"" << command << "\" args: " << args << Qt::endl;
-	    output.prepend( "ERROR: Command crashed\n\n" );
+	    logError() << "Timeout or error: \"" << command << "\" args: " << args << Qt::endl;
+	    return "ERROR: Timeout or error\n\n" % output;
 	}
-    }
-    else
+    }();
+
+    if ( logOutput || ( exitCode != 0 && logError ) )
     {
-	logError() << "Timeout or crash: \"" << command << "\" args: " << args << Qt::endl;
-	output.prepend( "ERROR: Timeout or crash\n\n" );
+	const auto formatOutput = [ &output ]() -> QString
+	{
+	    if ( output.contains( u'\n' ) )
+		return '\n' % output;
+	    else
+		return '"' % output.trimmed() % '"';
+	};
+	logInfo() << "Output: " << formatOutput() << Qt::endl;
     }
 
-    if ( logOutput || ( process.exitCode() != 0 && logError ) )
-    {
-        if ( output.contains( u'\n' ) )
-            logDebug() << "Output: \n" << output << Qt::endl;
-        else
-            logDebug() << "Output: \"" << output.trimmed() << '"' << Qt::endl;
-    }
+    if ( exitCode_ret )
+	*exitCode_ret = exitCode;
 
     return output;
 }
@@ -153,17 +131,17 @@ QByteArray SysUtil::readLink( const QByteArray & path )
 
     auto len = ::readlink( path, buf.data(), buf.size() );
     while ( len == buf.size() ) {
-        // readlink(2) will fill our buffer and not necessarily terminate with NUL;
-        if ( buf.size() >= maxLen )
-            return QByteArray{};
+	// readlink(2) will fill our buffer and not necessarily terminate with NUL;
+	if ( buf.size() >= maxLen )
+	    return QByteArray{};
 
-        // double the size and try again
-        buf.resize( buf.size() * 2 );
-        len = ::readlink( path, buf.data(), buf.size() );
+	// double the size and try again
+	buf.resize( buf.size() * 2 );
+	len = ::readlink( path, buf.data(), buf.size() );
     }
 
     if (len == -1)
-        return QByteArray{};
+	return QByteArray{};
 
     buf.resize( len );
     return buf;
@@ -185,8 +163,8 @@ void SysUtil::splitPath( const QString & fileNameWithPath,
                          QString       & path_ret, // return parameter
                          QString       & name_ret )    // return parameter
 {
-    const int delimeterIndex = fileNameWithPath.lastIndexOf ( u'/' );
-    if ( delimeterIndex < 0 || delimeterIndex == fileNameWithPath.size() - 1 )
+    const int delimiterIndex = fileNameWithPath.lastIndexOf ( u'/' );
+    if ( delimiterIndex < 0 || delimiterIndex == fileNameWithPath.size() - 1 )
     {
 	// Paths ending in "/" (notably root) or paths without any "/"
 	path_ret = QString();
@@ -195,8 +173,8 @@ void SysUtil::splitPath( const QString & fileNameWithPath,
 	return;
     }
 
-    path_ret = fileNameWithPath.left( qMax( 1, delimeterIndex ) ); // at least "/"
-    name_ret = fileNameWithPath.mid( delimeterIndex + 1 ); // everything after the last "/"
+    path_ret = fileNameWithPath.left( qMax( 1, delimiterIndex ) ); // at least "/"
+    name_ret = fileNameWithPath.mid( delimiterIndex + 1 ); // everything after the last "/"
 }
 
 QString SysUtil::userName( uid_t uid )

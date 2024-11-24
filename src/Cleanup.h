@@ -23,7 +23,7 @@ namespace QDirStat
     /**
      * Cleanup action to be performed for DirTree items.
      **/
-    class Cleanup: public QAction
+    class Cleanup final : public QAction
     {
 	Q_OBJECT
 

@@ -25,7 +25,7 @@ namespace QDirStat
      * When all processes are started and the 'autoDelete' flag is set, this
      * class will delete itself.
      **/
-    class ProcessStarter: public QObject
+    class ProcessStarter final : public QObject
     {
         Q_OBJECT
 
@@ -41,8 +41,8 @@ namespace QDirStat
         {}
 
         /**
-         * Add another process. This class does not take over ownership of the
-         * process objects.
+         * Add a process to the _waiting list. This class does not take
+         * ownership of 'process'.
          **/
         void add( QProcess * process );
 
@@ -54,29 +54,6 @@ namespace QDirStat
          * first processes finish very quickly.
          **/
         void start();
-
-        /**
-         * Return the maximum number of processes running in parallel.
-         **/
-//        int maxParallel() const { return _maxParallel; }
-
-        /**
-         * Set the maximum number of processes running in parallel.
-         **/
-//        void setMaxParallel( int newVal ) { _maxParallel = newVal; }
-
-        /**
-         * Return 'true' if this object will automatically delete itself when
-         * the last process is started, 'false' otherwise.
-         **/
-//        bool autoDelete() const { return _autoDelete; }
-
-        /**
-         * Set the autoDelete flag: If set, this object will automatically
-         * delete itself when the last process is started. The default is
-         * 'false'.
-         **/
-//        void setAutoDelete( bool newVal ) { _autoDelete = newVal; }
 
 
     protected slots:
@@ -90,7 +67,7 @@ namespace QDirStat
     protected:
 
         /**
-         * Start more processes until the limit (_maxParallel) is reached.
+         * Start more processes until _maxParallel processes are running.
          **/
         void startProcesses();
 

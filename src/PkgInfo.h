@@ -23,7 +23,7 @@ namespace QDirStat
     /**
      * Information about one (installed) package.
      **/
-    class PkgInfo: public DirInfo
+    class PkgInfo final : public DirInfo
     {
         /**
          * Private constructor, the public ones delegate to this.  Note that the
@@ -180,7 +180,7 @@ namespace QDirStat
     };  // class PkgInfo
 
 
-    typedef QList<PkgInfo *> PkgInfoList;
+    typedef QList<PkgInfo *> PkgInfoList; // QList from QMultiMap::values
 
 
     /**

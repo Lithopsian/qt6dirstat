@@ -10,8 +10,6 @@
 #ifndef Trash_h
 #define Trash_h
 
-#include "Typedefs.h" // _L1
-
 
 namespace QDirStat
 {
@@ -30,7 +28,7 @@ namespace QDirStat
      * appear in the desktop's native trashcan implementation (the window you get
      * when you click on the trashcan icon on the desktop or in the file manager).
      **/
-    class Trash
+    class Trash final
     {
     public:
 
@@ -103,7 +101,7 @@ namespace QDirStat
      * - If $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
      *   $TOPLEVEL/.Trash-$UID
      **/
-    class TrashDir
+    class TrashDir final
     {
     public:
 
@@ -141,7 +139,7 @@ namespace QDirStat
         /**
          * Return the path of the "files" subdirectory of this trash dir.
          **/
-        QString filesPath() const { return _path % "/files"_L1; }
+        QString filesPath() const { return _path % QLatin1String{ "/files" }; }
 
 
     protected:
@@ -149,7 +147,7 @@ namespace QDirStat
         /**
          * Return the path of the "info" subdirectory of this trash dir.
          **/
-        QString infoPath() const { return _path % "/info"_L1; }
+        QString infoPath() const { return _path % QLatin1String{ "/info" }; }
 
 
     private:

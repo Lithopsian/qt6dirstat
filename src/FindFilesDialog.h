@@ -24,7 +24,7 @@ namespace QDirStat
     /**
      * Model dialog for searching files in the scanned directory tree.
      **/
-    class FindFilesDialog: public QDialog
+    class FindFilesDialog final : public QDialog
     {
 	Q_OBJECT
 

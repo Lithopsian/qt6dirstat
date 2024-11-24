@@ -7,15 +7,12 @@
  *              Ian Nartowicz
  */
 
-#include <QApplication>
 #include <QMenu>
-#include <QKeyEvent>
-#include <QScreen>
+#include <QMouseEvent>
 #include <QScrollBar>
 
 #include "DirTreeView.h"
 #include "ActionManager.h"
-#include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfo.h"
 #include "FormatUtil.h"
@@ -72,7 +69,6 @@ DirTreeView::~DirTreeView()
 {
     // Must be called here rather than the HeaderTweaker destructor
     // QTreeView virtual methods will no longer be available
-    _headerTweaker->saveLayout();
     _headerTweaker->writeSettings();
 }
 
@@ -191,6 +187,9 @@ void DirTreeView::contextMenu( const QPoint & pos )
 
 const DirTreeModel * DirTreeView::dirTreeModel() const
 {
+    if ( !model() )
+	return nullptr;
+
     const DirTreeModel * dirTreeModel = qobject_cast<const DirTreeModel *>( model() );
     if ( dirTreeModel )
 	return dirTreeModel;
@@ -259,32 +258,41 @@ void DirTreeView::expandItem( FileInfo * item )
 }
 
 
-void DirTreeView::mousePressEvent( QMouseEvent * event )
-{
-    if ( event && ( event->button() == Qt::BackButton || event->button() == Qt::ForwardButton ) )
-    {
-	event->ignore();
-	return;
-    }
-
-    QTreeView::mousePressEvent( event );
-}
-
-
 bool DirTreeView::viewportEvent( QEvent * event )
 {
-    if ( event && event->type() == QEvent::ToolTip )
+    if ( event )
     {
-	QHelpEvent * helpEvent = static_cast<QHelpEvent *>( event );
-	QModelIndex index = indexAt( helpEvent->pos() );
-	if ( index.isValid() )
+	switch( event->type() )
 	{
-	    // Show a tooltip when the model provides one or when the column is elided
-	    const QRect rect     = visualRect( index );
-	    const QSize sizeHint = sizeHintForIndex( index );
-	    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
+	    case QEvent::ToolTip:
+	    {
+		const QHelpEvent * helpEvent = static_cast<QHelpEvent *>( event );
+		QModelIndex index = indexAt( helpEvent->pos() );
+		if ( index.isValid() )
+		{
+		    // Show a tooltip when the model provides one or when the column is elided
+		    const QRect rect     = visualRect( index );
+		    const QSize sizeHint = sizeHintForIndex( index );
+		    tooltipForElided( rect, sizeHint, model(), index, helpEvent->globalPos() );
 
-	    return true;
+		    return true;
+		}
+
+		break;
+	    }
+
+	    case QEvent::MouseButtonPress:
+	    {
+		const QMouseEvent * mouseEvent = static_cast<QMouseEvent *>( event );
+		const auto button = mouseEvent->button();
+		if ( button == Qt::BackButton || button == Qt::ForwardButton )
+		    return false;
+
+		break;
+	    }
+
+	    default:
+		break;
 	}
     }
 

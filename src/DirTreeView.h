@@ -27,7 +27,7 @@ namespace QDirStat
      * current / selected items between the DirTree, the DirTreeMap and this
      * DirTreeView.
      **/
-    class DirTreeView: public QTreeView
+    class DirTreeView final : public QTreeView
     {
 	Q_OBJECT
 
@@ -57,7 +57,8 @@ namespace QDirStat
 	 * Scroll to the current item (index).  This will open any necessary
 	 * branches and attempt to center the item in the viewport.
 	 **/
-	void scrollToCurrent() { scrollTo( currentIndex(), QAbstractItemView::PositionAtCenter ); }
+	void scrollToCurrent()
+	    { scrollTo( currentIndex(), QAbstractItemView::PositionAtCenter ); }
 
 	/**
 	 * Helpers to get model data or headerData values directly from
@@ -114,22 +115,14 @@ namespace QDirStat
 	void readSettings();
 
 	/**
-	 * Mouse button handler.
-	 *
-	 * Don't let QTreeView take the mouse back/forward buttons; we
-	 * want consistent history buttons throughout the application.
-	 *
-	 * Reimplemented from QTreeView.
-	 **/
-	void mousePressEvent( QMouseEvent * event ) override;
-
-	/**
-	 * Tooltip event handler.
-	 *
-	 * This is implemented here to detect elided text in the name
+	 * Tooltip event handler: detect elided text in the name
 	 * column.  This can't be done from the model where other
 	 * tooltips are handled because the actual tree geometry can't
 	 * be accessed.
+	 *
+	 * Mouse button handler: don't let QTreeView take the mouse
+	 * back/forward buttons; we want consistent history buttons
+	 * throughout the application.
 	 *
 	 * Reimplemented from QTreeView.
 	 **/

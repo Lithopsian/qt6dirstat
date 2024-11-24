@@ -10,14 +10,12 @@
 #ifndef HeaderTweaker_h
 #define HeaderTweaker_h
 
+#include <QAction>
 #include <QHeaderView>
+#include <QMenu>
+#include <QTreeView>
 
 #include "DataColumns.h"
-
-
-class QAction;
-class QMenu;
-class QTreeView;
 
 
 namespace QDirStat
@@ -57,7 +55,7 @@ namespace QDirStat
      * the header's context menu and the corresponding actions and saving and
      * restoring state.
      **/
-    class HeaderTweaker: public QObject
+    class HeaderTweaker final : public QObject
     {
 	Q_OBJECT
 
@@ -81,14 +79,9 @@ namespace QDirStat
 	/**
 	 * Return the names of the three layouts.
 	 **/
-	constexpr static QLatin1String l1Name() { return "L1"_L1; }
-	constexpr static QLatin1String l2Name() { return "L2"_L1; }
-	constexpr static QLatin1String l3Name() { return "L3"_L1; }
-
-	/**
-	 * Save the current status in 'layout'.
-	 **/
-	void saveLayout() { if ( _currentLayout ) saveLayout( _currentLayout ); }
+	constexpr static QLatin1String l1Name() { return QLatin1String{ "L1" }; }
+	constexpr static QLatin1String l2Name() { return QLatin1String{ "L2" }; }
+	constexpr static QLatin1String l3Name() { return QLatin1String{ "L3" }; }
 
 	/**
 	 * Write parameters to the settings file.
@@ -158,11 +151,6 @@ namespace QDirStat
 	QAction * createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) );
 
 	/**
-	 * Create the column layouts.
-	 **/
-	void createColumnLayouts();
-
-	/**
 	 * Create a submenu for the currently hidden columns.
 	 **/
 	QMenu * createHiddenColMenu( QWidget * parent );
@@ -187,14 +175,14 @@ namespace QDirStat
 	    { return autoSize ? QHeaderView::ResizeToContents : QHeaderView::Interactive; }
 
 	/**
+	 * Save the current layout status.
+	 **/
+	void saveLayout() { if ( _currentLayout ) saveLayout( _currentLayout ); }
+
+	/**
 	 * Save the current status in 'layout'.
 	 **/
 	void saveLayout( ColumnLayout * layout );
-
-	/**
-	 * Apply the settings from 'layout'.
-	 **/
-	void applyLayout( ColumnLayout * layout );
 
 	/**
 	 * Return the column name for the specified logical section number.

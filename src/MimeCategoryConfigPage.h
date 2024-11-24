@@ -12,12 +12,11 @@
 
 #include <memory>
 
+#include <QListWidget>
+
 #include "ListEditor.h"
 #include "ui_mime-category-config-page.h"
 #include "Typedefs.h" // SkipEmptyParts
-
-
-class QListWidget;
 
 
 namespace QDirStat
@@ -31,7 +30,7 @@ namespace QDirStat
      * A working set of new MimeCategory objects is copied from the
      * live categories and used to populate the list widget.
      **/
-    class MimeCategoryConfigPage: public ListEditor
+    class MimeCategoryConfigPage final : public ListEditor
     {
 	Q_OBJECT
 

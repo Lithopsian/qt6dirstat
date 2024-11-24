@@ -28,7 +28,7 @@ namespace QDirStat
      * highlight a bucket and get a tooltip, and a visible child
      * rectangle to display the bucket height.
      **/
-    class HistogramBar: public QGraphicsRectItem
+    class HistogramBar final : public QGraphicsRectItem
     {
     public:
 

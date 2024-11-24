@@ -10,16 +10,20 @@
 #ifndef PkgManager_h
 #define PkgManager_h
 
-#define LOG_COMMANDS true
-#define LOG_OUTPUT   false
-
-
 #include "PkgInfo.h"          // PkgInfoList
 #include "PkgFileListCache.h" // lookup types
 
 
 namespace QDirStat
 {
+    struct PkgCommand
+    {
+	QString command;
+	QStringList args;
+	bool isEmpty() const { return command.isEmpty(); }
+    };
+
+
     /**
      * Abstract base class for all package managers.
      *
@@ -45,8 +49,6 @@ namespace QDirStat
 
 	/**
 	 * Return the name of this package manager.
-	 *
-	 * Derived classes are required to implement this.
 	 **/
 	virtual QLatin1String name() const = 0;
 
@@ -89,18 +91,23 @@ namespace QDirStat
 	/**
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
-	 *
-	 * Derived classes are required to implement this.
 	 **/
 	virtual QString owningPkg( const QString & path ) const = 0;
 
 	//-----------------------------------------------------------------
-	//		       Optional Features
+	//                    Optional Features
 	//-----------------------------------------------------------------
+
+	/**
+	 * Return the list of files and directories owned by a package.
+	 **/
+	QStringList fileList( const PkgInfo * pkg ) const;
 
 	/**
 	 * Return 'true' if this package manager supports getting the list of
 	 * installed packages.
+	 *
+	 * The default implementation returns 'false'.
 	 **/
 	virtual bool supportsGetInstalledPkg() const { return false; }
 
@@ -112,39 +119,37 @@ namespace QDirStat
 	 * This is an optional feature; a package manager that implements this
 	 * should also return 'true' in supportsGetInstalledPkg().
 	 *
-	 * This default implementation returns nothing.
+	 * The default implementation returns nothing.
 	 **/
 	virtual PkgInfoList installedPkg() const { return PkgInfoList{}; }
 
 	/**
-	 * Return the list of files and directories owned by a package.
-	 **/
-	QStringList fileList( const PkgInfo * pkg ) const;
-
-	/**
 	 * Return 'true' if this package manager supports getting the file list
 	 * for a package.
+	 *
+	 * The default implementation returns 'false'.
 	 *
 	 ** See also supportsFileListCache().
 	 **/
 	virtual bool supportsFileList() const { return false; }
 
 	/**
-	 * Return the command for getting the list of files and directories
-	 * owned by a package.
+	 * Return the command and arguments for getting the list of files and
+	 * directories owned by a package, as a PkgCommand struct.
 	 *
 	 * This is an optional feature; a package manager that implements this
 	 * should also return 'true' in supportsGetFileList().
 	 *
-	 * This default implementation returns nothing.
+	 * The default implementation returns nothing.
 	 **/
-	virtual QString fileListCommand( const PkgInfo * ) const
-	    { return ""; }
+	virtual PkgCommand fileListCommand( const PkgInfo * ) const
+	    { return PkgCommand{}; };
 
 	/**
-	 * Parse the output of the file list command.
+	 * Parse the output of the file list command and return a list of
+	 * strings, each of which is a file name.
 	 *
-	 * This default implementation does nothing.
+	 * The default implementation does nothing.
 	 **/
 	virtual QStringList parseFileList( const QString & ) const
 	    { return QStringList{}; }
@@ -152,6 +157,8 @@ namespace QDirStat
 	/**
 	 * Return 'true' if this package manager supports building a file list
 	 * cache for getting all file lists for all packages.
+	 *
+	 * The default implementation returns 'false'.
 	 **/
 	virtual bool supportsFileListCache() const { return false; }
 

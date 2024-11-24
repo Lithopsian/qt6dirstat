@@ -75,7 +75,7 @@ namespace QDirStat
      * will be both few regular expressions that don't include suffixes and few file
      * which need to be tested against them.
      **/
-    class MimeCategorizer: public QObject
+    class MimeCategorizer final : public QObject
     {
 	Q_OBJECT
 

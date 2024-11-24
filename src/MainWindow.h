@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include <QActionGroup>
 #include <QContextMenuEvent>
 #include <QElapsedTimer>
 #include <QMainWindow>
@@ -19,10 +20,8 @@
 
 #include "ui_main-window.h"
 #include "Subtree.h"
-#include "Typedefs.h" // _L1
 
 
-class QActionGroup;
 class SysCallFailedException;
 
 
@@ -39,7 +38,7 @@ namespace QDirStat
      * This is the MainWindow object for the QDirStat application. It
      * creates and manages the main application window.
      **/
-    class MainWindow: public QMainWindow
+    class MainWindow final : public QMainWindow
     {
         Q_OBJECT
 
@@ -442,7 +441,7 @@ namespace QDirStat
         /**
          * Return the url prefix for the top- level unpackaged view (ie. "Unpkg:/").
          **/
-        static QLatin1String unpkgScheme() { return "Unpkg:/"_L1; }
+        static QLatin1String unpkgScheme() { return QLatin1String{ "Unpkg:/" }; }
 
         /**
          * Disable the treemap, reset the permissions warning, breadcrumbs,
@@ -480,9 +479,20 @@ namespace QDirStat
         void showDirPermissionsWarning();
 
         /**
+         * Enable or disable the directory permissions panel message.  This is
+         * only shown once when a directory is read, then not again after limited
+         * refreshes such as Refresh Selected or Cleanups.  If the Refresh All or
+         * different directory (or Package) read is done, the message will be
+         * displayed again.  The ShowDirPermissionsMsg setting can be used to
+         * prevent the message being shown at all.
+         **/
+        void enableDirPermissionsMsg() { _enableDirPermissionsMsg = _showDirPermissionsMsg; }
+        void disableDirPermissionsMsg() { _enableDirPermissionsMsg = false; }
+
+        /**
          * Expand the directory tree's branches to depth 'level'.
          **/
-        void expandTreeToLevel( int level );
+        void expandTreeToLevel( int level ) const;
 
         /**
          * Read parameters from the settings file.
@@ -518,7 +528,8 @@ namespace QDirStat
         /**
          * Return the action or name string (eg. "L2") of the current layout.
          **/
-        QString currentLayoutName() const;
+        QString currentLayoutName() const
+            { return layoutName( _layoutActionGroup->checkedAction() ); }
 
         /**
          * Change the main window layout.
@@ -529,17 +540,6 @@ namespace QDirStat
          * Show or hide the menu bar and status bar.
          **/
         void showBars();
-
-        /**
-         * Enable or disable the directory permissions panel message.  This is
-         * only shown once when a directory is read, then not again after limited
-         * refreshes such as Refresh Selected or Cleanups.  If the Refresh All or
-         * different directory (or Package) read is done, the message will be
-         * displayed again.  The ShowDirPermissionsMsg setting can be used to
-         * prevent the message being shown at all.
-         **/
-        void enableDirPermissionsMsg() { _enableDirPermissionsMsg = _showDirPermissionsMsg; }
-        void disableDirPermissionsMsg() { _enableDirPermissionsMsg = false; }
 
         /**
          * Create the different top layouts.

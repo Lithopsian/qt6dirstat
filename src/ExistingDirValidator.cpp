@@ -1,5 +1,5 @@
 /*
- *   File name: ExistingDir.h
+ *   File name: ExistingDirValidator.cpp
  *   Summary:   QDirStat widget support classes
  *   License:   GPL V2 - See file LICENSE for details.
  *
@@ -8,9 +8,8 @@
  */
 
 #include <QDir>
-#include <QFileSystemModel>
 
-#include "ExistingDir.h"
+#include "ExistingDirValidator.h"
 #include "Logger.h"
 
 
@@ -30,17 +29,4 @@ QValidator::State ExistingDirValidator::validate( QString & input, int & ) const
     emit const_cast<ExistingDirValidator *>( this )->isOk( ok );
 
     return ok ? QValidator::Acceptable : QValidator::Intermediate;
-}
-
-
-
-ExistingDirCompleter::ExistingDirCompleter( QObject * parent ):
-    QCompleter{ parent }
-{
-    QFileSystemModel * model = new QFileSystemModel{ this };
-    model->setRootPath( "/" );
-    model->setFilter( QDir::Dirs );
-    model->setReadOnly( true );
-
-    setModel( model );
 }

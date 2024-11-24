@@ -24,7 +24,7 @@ namespace QDirStat
      * Data model for the buckets table in the file size statistics window.
      * This displays the data of that window's histogram view in a table.
      **/
-    class BucketsTableModel: public QAbstractTableModel
+    class BucketsTableModel final : public QAbstractTableModel
     {
         Q_OBJECT
 
@@ -112,7 +112,7 @@ namespace QDirStat
      * Data model for the buckets table in the file size statistics window.
      * This displays the data of that window's histogram view in a table.
      **/
-    class PercentileTableModel: public QAbstractTableModel
+    class PercentileTableModel final : public QAbstractTableModel
     {
 	Q_OBJECT
 
@@ -222,7 +222,7 @@ namespace QDirStat
 
 
 
-    class PercentileTableHeader: public QHeaderView
+    class PercentileTableHeader final : public QHeaderView
     {
         Q_OBJECT
 

@@ -43,7 +43,7 @@ namespace QDirStat
      * median and the 1st and the 3rd quartiles (Q1 and Q3) can be displayed as
      * overlays on the histogram.
      **/
-    class HistogramView: public QGraphicsView
+    class HistogramView final : public QGraphicsView
     {
 	Q_OBJECT
 

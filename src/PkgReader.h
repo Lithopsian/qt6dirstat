@@ -34,14 +34,14 @@ namespace QDirStat
      * and then one by one the file list for each of those packages in a read
      * job very much like DirReadJob.
      **/
-    class PkgReader
+    class PkgReader final
     {
     public:
 
         /**
          * Constructor. Even though this object creates a PkgReadJob for each
          * package it finds, it is not necessary to keep this reader around
-         * longer than after read() is finished: Once created and queued, the
+         * longer than after read() is finished: once created and queued, the
          * PkgReadJobs are self-sufficient. They don't need this reader.
          **/
         PkgReader( DirTree * tree, const PkgFilter & filter ) { read( tree, filter); }
@@ -90,7 +90,7 @@ namespace QDirStat
      * used for getting the file list when needed and then waits for it to
      * return a result.
      **/
-    class PkgReadJob: public DirReadJob
+    class PkgReadJob : public DirReadJob
     {
     public:
 
@@ -142,9 +142,9 @@ namespace QDirStat
 
         /**
          * Obtain information about the file or directory specified in
-         * 'pathComponents' and create a new FileInfo or a DirInfo (whatever is
-         * appropriate) from that information. Use FileInfo::isDirInfo() to
-         * find out which.
+         * 'path' and 'name' and create a new FileInfo or a DirInfo (whatever
+         * is appropriate) from that information. Use FileInfo::isDirInfo()
+         * to find out which.
          *
          * If the underlying syscall fails, this returns 0.
          **/
@@ -176,7 +176,7 @@ namespace QDirStat
      * waiting for the result each time (which is what the more generic
      * PkgReadJob does).
      **/
-    class AsyncPkgReadJob: public QObject, public PkgReadJob
+    class AsyncPkgReadJob final : public QObject, public PkgReadJob
     {
         Q_OBJECT
 
@@ -231,7 +231,7 @@ namespace QDirStat
 
 
 
-    class CachePkgReadJob: public PkgReadJob
+    class CachePkgReadJob final : public PkgReadJob
     {
     public:
 

@@ -161,7 +161,7 @@ namespace
 	treeWidget->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
 
 	// Loop through the tail, taking items into a list and keeping track of the counts
-	QList<QTreeWidgetItem *> otherItems;
+	QList<QTreeWidgetItem *> otherItems; // QList for QTreeWidgetItem::addChildren
 	FileCount otherCount = 0;
 	FileSize  otherSize  = 0;
 	while ( nonCategoryItem->childCount() > topX )

@@ -36,7 +36,7 @@ namespace QDirStat
      *
      * Handles time-sliced reading automatically.
      **/
-    class DirReadJobQueue: public QObject
+    class DirReadJobQueue final : public QObject
     {
 	Q_OBJECT
 
@@ -178,7 +178,7 @@ namespace QDirStat
      * notion of tree views and the corresponding data models: they use an
      * invisible root item to support multiple toplevel items.
      **/
-    class DirTree: public QObject
+    class DirTree final : public QObject
     {
 	Q_OBJECT
 

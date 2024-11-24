@@ -31,7 +31,7 @@ namespace QDirStat
     /**
      * Helper class to represent one mount point of a Linux/Unix filesystem.
      **/
-    class MountPoint
+    class MountPoint final
     {
     public:
 
@@ -234,7 +234,7 @@ namespace QDirStat
      * The class is instantiated when it is first accessed and the map
      * of mount points is populated.
      **/
-    class MountPoints: public MountPointMap
+    class MountPoints final : public MountPointMap
     {
 	/**
 	 * Constructor. Not for public use. Use the static methods instead.
@@ -398,7 +398,7 @@ namespace QDirStat
      * or algorithms, not least because the sinlgeton object is not
      * public.
      **/
-    class MountPointIterator
+    class MountPointIterator final
     {
     public:
 

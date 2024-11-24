@@ -12,11 +12,10 @@
 
 #include <memory>
 
+#include <QListWidget>
+
 #include "ListEditor.h"
 #include "ui_exclude-rules-config-page.h"
-
-
-class QListWidget;
 
 
 namespace QDirStat
@@ -27,7 +26,7 @@ namespace QDirStat
      * Configuration page (tab) for exclude rules:
      * Edit, add, delete, and reorder exclude rules.
      **/
-    class ExcludeRulesConfigPage: public ListEditor
+    class ExcludeRulesConfigPage final : public ListEditor
     {
 	Q_OBJECT
 

@@ -19,11 +19,11 @@ QStringList PkgManager::fileList( const PkgInfo * pkg ) const
 {
     CHECK_PTR( pkg );
 
-    const QString command = fileListCommand( pkg );
-    if ( !command.isEmpty() )
+    const PkgCommand pkgCommand = fileListCommand( pkg );
+    if ( !pkgCommand.isEmpty() )
     {
-        int exitCode = -1;
-        const QString output = SysUtil::runCommand( command, &exitCode );
+        int exitCode;
+        const QString output = SysUtil::runCommand( pkgCommand.command, pkgCommand.args, &exitCode );
         if ( exitCode == 0 )
             return parseFileList( output );
     }

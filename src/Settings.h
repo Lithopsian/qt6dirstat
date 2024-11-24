@@ -45,7 +45,7 @@ namespace QDirStat
      * (cleanups, mime categories) were moved out from the main config
      * file to specialized config files.
      **/
-    class Settings: public QSettings
+    class Settings : public QSettings
     {
     protected:
 
@@ -245,7 +245,7 @@ namespace QDirStat
      * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
-    class MimeCategorySettings: public Settings
+    class MimeCategorySettings final : public Settings
     {
     public:
 
@@ -269,7 +269,7 @@ namespace QDirStat
      * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
-    class CleanupSettings: public Settings
+    class CleanupSettings final : public Settings
     {
     public:
 
@@ -293,7 +293,7 @@ namespace QDirStat
      * These settings are stored in a separate file so that the entire file
      * can easily be replaced by a site administrator.
      **/
-    class ExcludeRuleSettings: public Settings
+    class ExcludeRuleSettings final : public Settings
     {
     public:
 

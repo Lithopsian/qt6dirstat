@@ -59,7 +59,7 @@ namespace
 	{
 	    logError() << "stat( " << path << " ) failed: " << formatErrno() << Qt::endl;
 
-	    return dev_t( -1 );
+	    return static_cast< dev_t >( -1 );
 	}
 
 	return statBuf.st_dev;

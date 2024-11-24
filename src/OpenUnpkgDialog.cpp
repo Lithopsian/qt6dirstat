@@ -7,11 +7,13 @@
  *              Ian Nartowicz
  */
 
-#include <QPushButton>
+#include <QCompleter>
+#include <QFileSystemModel>
 #include <QLineEdit>
+#include <QPushButton>
 
 #include "OpenUnpkgDialog.h"
-#include "ExistingDir.h"
+#include "ExistingDirValidator.h"
 #include "Logger.h"
 #include "Settings.h"
 
@@ -42,6 +44,28 @@ namespace
 	return lines;
     }
 
+
+    /**
+     * Create and apply an ExistingDirValidator, set a completer using
+     * QFileSystemModel, enable the clear button, and set the current
+     * combo-box text in the line edit.
+     **/
+    const ExistingDirValidator * initStartingDirComboBox( QComboBox * startingDirComboBox )
+    {
+	QLineEdit * lineEdit = startingDirComboBox->lineEdit();
+	if ( lineEdit )
+	    lineEdit->setClearButtonEnabled( true );
+
+	QFileSystemModel * model = new QFileSystemModel{ startingDirComboBox };
+	model->setRootPath( "/" );
+	model->setFilter( QDir::Dirs | QDir::NoDotAndDotDot );
+	startingDirComboBox->setCompleter( new QCompleter{ model, startingDirComboBox } );
+
+	const ExistingDirValidator * validator = new ExistingDirValidator{ startingDirComboBox };
+	startingDirComboBox->setValidator( validator );
+	return validator;
+    }
+
 } // namespace
 
 
@@ -51,14 +75,7 @@ OpenUnpkgDialog::OpenUnpkgDialog( QWidget * parent ):
 {
     _ui->setupUi( this );
 
-    _ui->startingDirComboBox->setCompleter( new ExistingDirCompleter{ this } );
-
-    ExistingDirValidator * validator = new ExistingDirValidator{ this };
-    _ui->startingDirComboBox->setValidator( validator );
-
-    QLineEdit * lineEdit = _ui->startingDirComboBox->lineEdit();
-    if ( lineEdit )
-        lineEdit->setClearButtonEnabled( true );
+    const ExistingDirValidator * validator = initStartingDirComboBox( _ui->startingDirComboBox );
 
     const QPushButton * resetButton = _ui->buttonBox->button( QDialogButtonBox::RestoreDefaults );
     const QPushButton * okButton    = _ui->buttonBox->button( QDialogButtonBox::Ok );

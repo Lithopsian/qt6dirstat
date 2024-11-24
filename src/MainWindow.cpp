@@ -872,7 +872,7 @@ void MainWindow::copyCurrentPathToClipboard()
 }
 
 
-void MainWindow::expandTreeToLevel( int level )
+void MainWindow::expandTreeToLevel( int level ) const
 {
     //logDebug() << "Expanding tree to level " << level << Qt::endl;
 
@@ -1124,19 +1124,18 @@ void MainWindow::toggleVerboseSelection( bool verboseSelection)
 	app()->selectionModel()->setVerbose( verboseSelection );
 
     logInfo() << "Verbose selection is now " << ( verboseSelection ? "on" : "off" )
-	      << ". Change this with Shift-F7." << Qt::endl;
+              << ". Change this with Shift-F7." << Qt::endl;
 }
 
 
 void MainWindow::dumpSelectedItems()
 {
-    logDebug() << "Current item: " << app()->selectionModel()->currentItem() << Qt::endl;
+    logInfo() << "Current item: " << app()->selectionModel()->currentItem() << Qt::endl;
 
     const FileInfoSet items = app()->selectionModel()->selectedItems();
-    logDebug() << items.size() << " items selected" << Qt::endl;
-
+    logInfo() << items.size() << " items selected" << Qt::endl;
     for ( const FileInfo * item : items )
-	logDebug() << "	 Selected: " << item << Qt::endl;
+	logInfo() << "	 Selected: " << item << Qt::endl;
 
     logNewline();
 }

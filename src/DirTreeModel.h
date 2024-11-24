@@ -21,6 +21,7 @@
 #include <QTreeView>
 
 #include "DataColumns.h"
+#include "Typedefs.h" // _L1
 
 
 namespace QDirStat
@@ -45,7 +46,7 @@ namespace QDirStat
     };
 
 
-    class DirTreeModel: public QAbstractItemModel
+    class DirTreeModel final : public QAbstractItemModel
     {
 	Q_OBJECT
 

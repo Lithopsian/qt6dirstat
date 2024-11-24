@@ -23,7 +23,7 @@ namespace QDirStat
      * idea is keep the direct file children of a directory in one container
      * so their total size can easily be compared to any of the subdirectories.
      **/
-    class DotEntry: public DirInfo
+    class DotEntry final : public DirInfo
     {
     public:
 

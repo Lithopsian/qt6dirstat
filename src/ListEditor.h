@@ -35,7 +35,7 @@ namespace QDirStat
      * 2016 Qt's moc cannot handle templates, ugly void * and nightmarish
      * type casts had to be used.
      **/
-    class ListEditor: public QWidget
+    class ListEditor : public QWidget
     {
 	Q_OBJECT
 

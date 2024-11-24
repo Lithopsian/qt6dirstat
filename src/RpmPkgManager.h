@@ -24,7 +24,7 @@ namespace QDirStat
      * specialized version for 'zypper' or 'yum' or any higher-level rpm-based
      * package managers.
      **/
-    class RpmPkgManager: public PkgManager
+    class RpmPkgManager final : public PkgManager
     {
     public:
 
@@ -68,7 +68,7 @@ namespace QDirStat
 	QString owningPkg( const QString & path ) const override;
 
 	//-----------------------------------------------------------------
-	//		       Optional Features
+	//                    Optional Features
 	//-----------------------------------------------------------------
 
 	/**
@@ -77,8 +77,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	bool supportsGetInstalledPkg() const override
-	    { return true; }
+	bool supportsGetInstalledPkg() const override { return true; }
 
 	/**
 	 * Return the list of installed packages.
@@ -95,8 +94,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	bool supportsFileList() const override
-	    { return true; }
+	bool supportsFileList() const override { return true; }
 
 	/**
 	 * Return the command for getting the list of files and directories
@@ -104,7 +102,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	QString fileListCommand( const PkgInfo * pkg ) const override;
+	PkgCommand fileListCommand( const PkgInfo * pkg ) const override;
 
 	/**
 	 * Parse the output of the file list command.
@@ -119,8 +117,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	bool supportsFileListCache() const override
-	    { return true; }
+	bool supportsFileListCache() const override { return true; }
 
 	/**
 	 * Create a file list cache with the specified lookup type for all
