@@ -12,13 +12,10 @@
 
 #include <QGraphicsRectItem>
 
-#include "Typedefs.h" // FileSize
-
 
 namespace QDirStat
 {
     class FileSizeStats;
-    class HistogramView;
 
     /**
      * QGraphicsItem class for a histogram bar: a class to be able

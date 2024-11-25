@@ -33,22 +33,46 @@ namespace
     }
 
     /**
-     * Return rich text of the form "Pn". The percentile index is
-     * subscripted, but Qt subscripting can be tiny so use a value
-     * in between the standard subscript and the full-size font.
+     * Calculate the width of the overflow panel based on the width of the
+     * headline text, which may vary depending on the theme font (and possibly
+     * a translation).  The width will be set to fit the pie if that is wider
+     * then the headline.
+     *
+     * The width returned from this function includes a border on both sides.
+     * The border is not expected to normally contain any text or graphics, but
+     * does allow for, for example, the margin around graphics text items.
+     *
+     * Note that any text line (including its margins) longer than the headline
+     * (plus the borders) will wrap and not affect the required width, although
+     * it will increase the height required for the overflow panel.
      **/
-    QString pText( int n )
+    qreal overflowWidth( qreal pieDiameter, qreal pieSliceOffset, qreal border )
     {
-	return QObject::tr( "P<span style='font-size: large; vertical-align: sub;'>%1</span>" ).arg( n );
+	QFont font;
+	font.setBold( true );
+	const qreal headlineWidth = textWidth( font, overflowHeadline() );
+
+	return qMax( pieDiameter + pieSliceOffset * 2, headlineWidth ) + 2 * border;
     }
 
 
     /**
-     * Return the base-2 logarithm of 'value' if 'logScale' is
-     * true.  Otherwise just return 'value'.
+     * Return rich text of the form "Pn". The percentile index is subscripted,
+     * but Qt subscripting can be tiny so use a value in between the standard
+     * subscript and the full-size font.
+     **/
+    QString pText( int n )
+    {
+	return QObject::tr( "P<span style='font-size: large;'><sub>%1</sub></span>" ).arg( n );
+    }
+
+
+    /**
+     * Return the base-2 logarithm of 'value' if 'logScale' is true.  Otherwise
+     * just return 'value'.
      *
-     * Nite that the input value is a 64-but integer and the
-     * output is floating point qreal.
+     * Note that the input value is a 64-but integer and the output is floating
+     * point qreal.
      **/
     qreal log2( bool logScale, qint64 value )
     {
@@ -57,8 +81,8 @@ namespace
 
 
     /**
-     * Return the percentage represented by 'count' wrt 'total',
-     * returning 0.0 if 'total' is 0.
+     * Return the percentage represented by 'count' wrt 'total', returning 0.0
+     * if 'total' is 0.
      **/
     double percent( qint64 count, qint64 total )
     {
@@ -92,8 +116,8 @@ namespace
 
 
     /**
-     * Create a text item and make it bold.  The text is added to 'scene'
-     * but not positioned.
+     * Create a text item and make it bold.  The text is added to 'scene' but
+     * not positioned.
      **/
     QGraphicsTextItem * createBoldItem( QGraphicsScene * scene, const QString & text )
     {
@@ -224,7 +248,7 @@ void HistogramView::rebuild()
 
     //logInfo() << "Really building histogram" << Qt::endl;
 
-    const qreal overflowPanelWidth = overflowWidth();
+    const qreal overflowPanelWidth = overflowWidth( pieDiameter(), pieSliceOffset(), overflowBorder() );
 
     // Delay deleting the old scene to reduce delay and avoid crashing during a show event
     QGraphicsScene * oldScene = scene();
@@ -455,16 +479,6 @@ void HistogramView::addMarkers( QGraphicsScene * scene )
 }
 
 
-qreal HistogramView::overflowWidth()
-{
-    QFont font;
-    font.setBold( true );
-    const qreal headlineWidth = textWidth( font, overflowHeadline() );
-
-    return qMax( pieDiameter() + pieSliceOffset() * 2, headlineWidth ) + 2 * overflowBorder();
-}
-
-
 void HistogramView::addOverflowPanel( QGraphicsScene * scene, qreal panelWidth )
 {
     if ( !needOverflowPanel() )
@@ -631,6 +645,8 @@ bool HistogramView::event( QEvent * event )
 	case QEvent::FontChange:
 	case QEvent::PaletteChange:
 	case QEvent::Resize:
+	    // The viewport is not yet resized, so do it before rebuilding
+	    viewport()->resize( size() - QSize{ 2, 2 } );
 	    rebuildDirty();
 	    break;
 
