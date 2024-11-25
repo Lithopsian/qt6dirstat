@@ -8,7 +8,6 @@
  */
 
 #include <QPointer>
-#include <QResizeEvent>
 
 #include "LocateFilesWindow.h"
 #include "ActionManager.h"
@@ -162,7 +161,7 @@ void LocateFilesWindow::populateSharedInstance( TreeWalker    * treeWalker,
 
     // Set the heading and sort order for each new populate command
     instance->_ui->treeWidget->sortByColumn( sortCol, sortOrder );
-    instance->_ui->heading->setStatusTip( replaceCrLf( headingText ) );
+    instance->setHeadingText( headingText );
     instance->populate( fileInfo );
 
     // Show now so the BusyPopup is not obscured
@@ -178,13 +177,14 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
     _ui->treeWidget->clear();
 
     _subtree = fileInfo;
-    _treeWalker->prepare( _subtree() );
+    _treeWalker->prepare( fileInfo );
 
     populateRecursive( fileInfo );
     showResultsCount( _ui->treeWidget->topLevelItemCount(), _treeWalker->overflow(), _ui->resultsLabel );
 
     // Force a redraw of the header from the status tip
-    resizeEvent( nullptr );
+    _ui->heading->setStatusTip( _headingText.arg( fileInfo ? fileInfo->url() : QString{} ) );
+    showElidedLabel( _ui->heading, this );
 
     // Select the first row after a delay so it (and its signals) doesn't slow down the list showing
     QTimer::singleShot( 50, this, [ this ]()
@@ -220,31 +220,12 @@ void LocateFilesWindow::itemContextMenu( const QPoint & pos )
 }
 
 
-void LocateFilesWindow::changeEvent( QEvent * event )
+bool LocateFilesWindow::event( QEvent * event )
 {
-    if ( event->type() == QEvent::FontChange )
-	resizeEvent( nullptr );
+    if ( event->type() == QEvent::FontChange || event->type() == QEvent::Resize )
+	showElidedLabel( _ui->heading, this );
 
-    QDialog::changeEvent( event );
-}
-
-
-void LocateFilesWindow::resizeEvent( QResizeEvent * )
-{
-    // Format the heading with the current url, which may be a fallback
-    const QString heading = [ this ]()
-    {
-	const QString statusTip = _ui->heading->statusTip();
-	if ( statusTip.isEmpty() )
-	    return QString{};
-
-	const FileInfo * fileInfo = _subtree();
-	return statusTip.arg( fileInfo ? fileInfo->url() : QString{} );
-    }();
-
-    // Calculate the last available pixel from the edge of the dialog less the right-hand layout margin
-    const int lastPixel = contentsRect().right() - layout()->contentsMargins().right();
-    elideLabel( _ui->heading, heading, lastPixel );
+    return QDialog::event( event );
 }
 
 

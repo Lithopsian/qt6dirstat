@@ -94,17 +94,15 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Obtain the subtree from the last used URL or 0 if none was found.
+	 * Set the text to be used to construct the heading for the list.  This
+	 * should include "%1" which will be subsrituted with the url being
+	 * searched.
 	 **/
-//	const Subtree & subtree() const { return _subtree; }
+	void setHeadingText( const QString & headingText )
+	    { _headingText = headingText; }
 
 	/**
-	 * Return the TreeWalker of this window.
-	 **/
-//	TreeWalker * treeWalker() const { return _treeWalker.get(); }
-
-	/**
-	 * Populate the window: Use the TreeWalker to find matching tree items
+	 * Populate the window: use the TreeWalker to find matching tree items
 	 * in 'fileInfo'.
 	 *
 	 * This clears the old search results first, then searches the subtree
@@ -120,23 +118,12 @@ namespace QDirStat
 	void populateRecursive( FileInfo * dir );
 
 	/**
-	 * Detect theme changes.  Font changes result in the header label
-	 * being re-elided.
+	 * Detect theme changes and resize events.  These changes result in the
+	 * header label being re-elided.
 	 *
 	 * Reimplemented from QDialog/QWidget.
 	 **/
-	void changeEvent( QEvent * event ) override;
-
-	/**
-	 * Resize event, reimplemented from QWidget.
-	 *
-	 * Elide the title to fit inside the current dialog width, so that
-	 * they fill the available width but very long paths don't stretch
-	 * the dialog.  A little extra room is left for the user to
-	 * shrink the dialog, which would then force the label to be elided
-	 * further.
-	 **/
-	void resizeEvent( QResizeEvent *) override;
+	bool event( QEvent * event ) override;
 
 
     private:
@@ -145,6 +132,7 @@ namespace QDirStat
 
 	std::unique_ptr<TreeWalker> _treeWalker;
 	Subtree                     _subtree;
+	QString                     _headingText;
 
     };	// class LocateFilesWindow
 
