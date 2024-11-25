@@ -181,16 +181,21 @@ void FindFilesDialog::askFindFiles( QWidget * parent )
 }
 
 
-void FindFilesDialog::resizeEvent( QResizeEvent * event )
+bool FindFilesDialog::event( QEvent * event )
 {
-    // The first resize event is before the layouts are done, so ignore it
-    if ( event && event->oldSize().isValid() )
-        showEvent( nullptr );
-}
+    const auto type = event->type();
 
+    const auto resizeWithValidOldSize = [ event, type ]()
+    {
+        if ( type != QEvent::Resize )
+            return false;
 
-void FindFilesDialog::showEvent( QShowEvent * )
-{
-    // (Re-)display the path label
-    showPathLabel( _ui->currentSubtreePathLabel, _ui->pathHBox );
+        return static_cast<QResizeEvent *>( event )->oldSize().isValid();
+    };
+
+    if ( type == QEvent::Show || type == QEvent::FontChange || resizeWithValidOldSize() )
+        // (Re-)display the path label
+        showPathLabel( _ui->currentSubtreePathLabel, _ui->pathHBox );
+
+    return QDialog::event( event );
 }
