@@ -9,7 +9,7 @@
 
 #include <dirent.h> // opendir(), etc
 #include <fcntl.h>  // AT_ constants (fstatat() flags)
-#include <unistd.h> // access(), R_OK, X_OK
+#include <unistd.h> // faccessat(), R_OK, X_OK
 
 #include "DirReadJob.h"
 #include "DirTree.h"
@@ -150,13 +150,12 @@ LocalDirReadJob::LocalDirReadJob( DirTree * tree,
 
 void LocalDirReadJob::startReading()
 {
-    static bool _warnedAboutNtfsHardLinks = false;
-
     DIR * diskDir = nullptr;
 
     // logDebug() << dir() << Qt::endl;
 
-    if ( access( _dirName.toUtf8(), X_OK | R_OK ) != 0 )
+    // Don't need AT_SYMLINK_NOFOLLOW because _dirName is never a symlink
+    if ( faccessat( AT_FDCWD, _dirName.toUtf8(), X_OK | R_OK, AT_EACCESS ) != 0 )
     {
 	switch ( errno )
 	{
@@ -238,24 +237,27 @@ void LocalDirReadJob::startReading()
 		    }
 
 #if DONT_TRUST_NTFS_HARD_LINKS
-                    if ( statInfo.st_nlink > 1 && isNtfs() )
-                    {
-#if !VERBOSE_NTFS_HARD_LINKS
-                        // NTFS seems to return bogus hard link counts; use 1 instead.
-                        // See  https://github.com/shundhammer/qdirstat/issues/88
-                        if ( !_warnedAboutNtfsHardLinks )
-#endif
-                        {
-                            logWarning() << "Not trusting NTFS with hard links: \""
-                                         << dir()->url() << "/" << entryName
-                                         << "\" links: " << statInfo.st_nlink
-                                         << " -> resetting to 1"
-                                         << Qt::endl;
-                            _warnedAboutNtfsHardLinks = true;
-                        }
+		    if ( statInfo.st_nlink > 1 && isNtfs() )
+		    {
+			// NTFS seems to return bogus hard link counts; use 1 instead.
+			// See  https://github.com/shundhammer/qdirstat/issues/88
+			statInfo.st_nlink = 1;
 
-                        statInfo.st_nlink = 1;
-                    }
+#if VERBOSE_NTFS_HARD_LINKS
+			logWarning() << "Not trusting NTFS with hard links: \""
+			             << dir()->url() << "/" << entryName
+			             << "\" links: " << statInfo.st_nlink
+			             << " -> resetting to 1"
+			             << Qt::endl;
+#else
+			static bool _warnedAboutNtfsHardLinks = false;
+			if ( !_warnedAboutNtfsHardLinks )
+			{
+			    logWarning() << "Not trusting NTFS with hard links: always assume 1" << Qt::endl;
+			    _warnedAboutNtfsHardLinks = true;
+			}
+#endif
+		    }
 #endif
 		    FileInfo * child = new FileInfo{ dir(), tree(), entryName, statInfo };
 
