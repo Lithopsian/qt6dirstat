@@ -50,17 +50,20 @@ namespace
     /**
      * Show a warning that the RPM database should be rebuilt
      * ("sudo rpm --rebuilddb").
+     *
+     * Only do this once, although subsequent calls with a cached database
+     * will probably not be so slow.
      **/
-    void rebuildRpmDbWarning()
+    void rebuildDbWarning()
     {
 	static bool issuedWarning = false;
+	if ( issuedWarning )
+	    return;
 
-	if ( !issuedWarning )
-	{
-	    const char * warning = "rpm is very slow. Run	  sudo rpm --rebuilddb";
-	    std::cerr << "WARNING: " << warning << '\n' << std::endl;
-	    logWarning()  << warning << Qt::endl;
-	}
+	// Warn on both the command line and the log stream
+	const char * warning = "rpm is very slow. Run	  sudo rpm --rebuilddb";
+	std::cerr << "WARNING: " << warning << '\n' << std::endl;
+	logWarning() << warning << Qt::endl;
 
 	// Add a panel message so the user is sure to see this message.
 	MainWindow * mainWindow = app()->mainWindow();
@@ -141,7 +144,7 @@ PkgInfoList RpmPkgManager::installedPkg() const
                              LONG_CMD_TIMEOUT_SEC );
 
     if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
-	rebuildRpmDbWarning();
+	rebuildDbWarning();
 
     return exitCode == 0 ? parsePkgList( this, output ) : PkgInfoList{};
 }
