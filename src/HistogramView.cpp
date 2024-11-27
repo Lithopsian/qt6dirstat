@@ -645,7 +645,7 @@ bool HistogramView::event( QEvent * event )
 	case QEvent::FontChange:
 	case QEvent::PaletteChange:
 	case QEvent::Resize:
-	    // The viewport is not yet resized, so do it before rebuilding
+	    // The viewport is not yet resized, so do it before we try to rebuild
 	    viewport()->resize( size() - QSize{ 2, 2 } );
 	    rebuildDirty();
 	    break;
