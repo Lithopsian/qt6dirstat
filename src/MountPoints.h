@@ -307,13 +307,8 @@ namespace QDirStat
 	static bool isDuplicate( const QString & url );
 
 	/**
-	 * Return 'true' if any mount point has filesystem type "btrfs".
-	 **/
-	static bool hasBtrfs()
-	    { return instance()->_hasBtrfs; }
-
-	/**
-	 * Return 'true' if any mount point has filesystem type "btrfs".
+	 * Return 'true' if any mount point has filesystem type starting with
+	 * "ntfs".
 	 **/
 	static bool hasNtfs()
 	    { return instance()->_hasNtfs; };
@@ -368,11 +363,6 @@ namespace QDirStat
 #endif
 
 	/**
-	 * Post-process a mount point and add it to the map.
-	 **/
-	void postProcess( MountPoint * mountPoint );
-
-	/**
 	 * Add a mount point to the map.
 	 **/
 	void add( MountPoint * mountPoint )
@@ -381,7 +371,6 @@ namespace QDirStat
 
     private:
 
-	bool _hasBtrfs;
 	bool _hasNtfs;
 
     };	// class MountPoints

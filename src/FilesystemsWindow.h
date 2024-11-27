@@ -74,8 +74,8 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Populate the window with all normal filesystems. Bind mounts,
-	 * filesystems mounted several times and Btrfs subvolumes are excluded.
+	 * Populate the window with all normal filesystems. Bind mounts and
+	 * filesystems mounted several times.
 	 **/
 	void populate();
 

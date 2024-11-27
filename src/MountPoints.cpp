@@ -119,17 +119,27 @@ namespace
 
 
     /**
-     * Check if any of the mount points has filesystem type "btrfs".
+     * Post-process a mount point: check for duplicate mounts and Snap
+     * packages.
      **/
-    bool checkForBtrfs( const MountPoints * mountPoints )
+    void postProcess( MountPoint * mountPoint, MountPoints * mountPoints )
     {
-        for ( const MountPoint * mountPoint : *mountPoints )
+        //logDebug() << mountPoint << Qt::endl;
+
+        if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), *mountPoints ) )
         {
-            if ( mountPoint && mountPoint->isBtrfs() )
-            return true;
+            mountPoint->setDuplicate();
+
+            //logInfo() << "Found duplicate mount of " << mountPoint->device()
+            //          << " at " << mountPoint->path()
+            //          << Qt::endl;
         }
 
-        return false;
+        if ( mountPoint->isSnapPackage() )
+        {
+            const QString pkgName = mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty );
+            logInfo() << "Found snap package \"" << pkgName << "\" at " << mountPoint->path() << Qt::endl;
+        }
     }
 
 } // namespace
@@ -195,7 +205,6 @@ void MountPoints::init()
 {
     clear();
 
-    _hasBtrfs        = false;
     _hasNtfs         = false;
 
     populate();
@@ -242,8 +251,6 @@ void MountPoints::populate()
     if ( isEmpty() )
         logError() << "Could not read either /proc/mounts or /etc/mtab" << Qt::endl;
 #endif
-
-    _hasBtrfs = checkForBtrfs( this );
 
 #if HAVE_Q_STORAGE_INFO
     if ( isEmpty() )
@@ -298,7 +305,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         // ignoring fsck and dump order (0 0)
 
         MountPoint * mountPoint = new MountPoint{ device, path, fsType, mountOpts };
-        postProcess( mountPoint );
+        postProcess( mountPoint, this );
         add( mountPoint );
 
         line = in.readLine();
@@ -314,27 +321,6 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
     return true;
 }
 
-
-void MountPoints::postProcess( MountPoint * mountPoint )
-{
-//    logDebug() << mountPoint << Qt::endl;
-
-    if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), *this ) )
-    {
-        mountPoint->setDuplicate();
-
-//        logInfo() << "Found duplicate mount of " << mountPoint->device()
-//                  << " at " << mountPoint->path()
-//                  << Qt::endl;
-    }
-
-    if ( mountPoint->isSnapPackage() )
-    {
-        const QString pkgName = mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty );
-        logInfo() << "Found snap package \"" << pkgName << "\" at " << mountPoint->path() << Qt::endl;
-    }
-}
-
 #if HAVE_Q_STORAGE_INFO
 void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
 {
@@ -348,7 +334,7 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
         handleFuseblk( fsType, ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint{ device, mount.rootPath(), fsType, mountOptions };
-        postProcess( mountPoint );
+        postProcess( mountPoint, this );
         add( mountPoint );
     }
 

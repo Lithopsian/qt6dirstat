@@ -144,15 +144,16 @@ void FilesystemsWindow::populate()
 
     const bool showAll = !_ui->normalCheckBox->isChecked();
     for ( MountPointIterator it{ showAll }; *it; ++it )
+    {
 	_ui->fsTree->addTopLevelItem( new FilesystemItem{ *it } );
+	if ( !_warnedAboutBtrfs && it->isBtrfs() )
+	{
+	    _warnedAboutBtrfs = true;
+	    PanelMessage::showFilesystemsMsg( this, _ui->vBox );
+	}
+    }
 
     _ui->fsTree->setCurrentItem( _ui->fsTree->topLevelItem( 0 ) );
-
-    if ( MountPoints::hasBtrfs() && !_warnedAboutBtrfs )
-    {
-	_warnedAboutBtrfs = true;
-	PanelMessage::showFilesystemsMsg( this, _ui->vBox );
-    }
 
     resizeTreeColumns( _ui->fsTree );
 }
