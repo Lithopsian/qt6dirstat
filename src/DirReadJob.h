@@ -145,7 +145,7 @@ namespace QDirStat
      * directory.
      *
      * This will use lstat() system calls rather than KDE's network transparent
-     * directory services since lstat() unlike the KDE services can obtain
+     * directory services since lstat(), unlike the KDE services, can obtain
      * information about the device (i.e. filesystem) a file or directory
      * resides on. This is important if you wish to limit directory scans to
      * one filesystem - which is desirable when that one filesystem runs
@@ -184,8 +184,7 @@ namespace QDirStat
 	/**
 	 * Process one subdirectory entry.
 	 **/
-	void processSubDir( const QString & entryName,
-	                    DirInfo       * subDir );
+	void processSubDir( const QString & entryName, DirInfo * subDir );
 
 	/**
 	 * Read a cache file that was picked up along the way:
@@ -210,14 +209,25 @@ namespace QDirStat
 	QString fullName( const QString & entryName ) const;
 
 	/**
-	 * Return 'true' if the current filesystem is NTFS, only
-	 * checking once and then returning a cached value.
+	 * Return 'true' if the current filesystem is NTFS.  The check is only
+	 * done once per read job (ie. per directory) and the value is cached.
 	 **/
 	bool isNtfs() { return _checkedForNtfs ? _isNtfs : checkForNtfs(); }
 
 	/**
 	 * Checks if the current filesystem is NTFS and returns the result.
 	 * The result is then cached for subsequent queries.
+	 *
+	 * This check is very fast if there are no NTFS filesystems because
+	 * MountPoints has a flag, but if there are NTFS mounts then the check
+	 * is relatively expensive.  This function should be called
+	 * infrequently, only when a file has multiple hard links.  If
+	 * performance becomes an issue, for example with modern NTFS mounts
+	 * having a lot of hard links, then whether the filesystem is NTFS
+	 * could be passed down to the LocalDirReadJob constructor instead of
+	 * being derived for every directory.  Or it could be bypassed
+	 * completely; if the TrustNtfsHardLinks setting is true, then this
+	 * check is only needed to log a one-off message.
 	 **/
 	bool checkForNtfs();
 
@@ -244,17 +254,13 @@ namespace QDirStat
 	/**
 	 * Constructor that reads the file contents into an empty tree.
 	 **/
-	CacheReadJob( DirTree       * tree,
-	              const QString & cacheFileName );
+	CacheReadJob( DirTree * tree, const QString & cacheFileName );
 
 	/**
 	 * Constructor that checks that the cache file contents match the
 	 * given toplevel.
 	 **/
-	CacheReadJob( DirTree       * tree,
-	              DirInfo       * dir,
-	              DirInfo       * parent,
-	              const QString & cacheFileName );
+	CacheReadJob( DirTree * tree, DirInfo * dir, DirInfo * parent, const QString & cacheFileName );
 
 	/**
 	 * Start reading the cache. Prior to this nothing happens.

@@ -19,8 +19,7 @@
 #include "MountPoints.h"
 
 
-#define DONT_TRUST_NTFS_HARD_LINKS      1
-#define VERBOSE_NTFS_HARD_LINKS         0
+#define VERBOSE_NTFS_HARD_LINKS 0
 
 
 using namespace QDirStat;
@@ -28,6 +27,55 @@ using namespace QDirStat;
 
 namespace
 {
+    /**
+     * The ntfs-3g driver may report an incorrect number of hard links.  This
+     * can be fixed by mounting with option posix_nlink although this may slow
+     * down accesses to some directories.  The newer ntfs3 driver should work
+     * correctly.
+     *
+     * To work around this issue, there is a bool setting whether to trust the
+     * number of hard links reported for NTFS files.  If they are not trusted,
+     * then the number of hard links is always set to 1 even when the driver
+     * reports more than 1.
+     **/
+#if VERBOSE_NTFS_HARD_LINKS
+    void handleNtfsHardLinks( const DirTree * tree, const QString & name, struct stat * statInfo )
+#else
+    void handleNtfsHardLinks( const DirTree * tree, const QString &, struct stat * statInfo )
+#endif
+    {
+	// Just warn once unless untrusted and verbose
+	static bool warned = false;
+
+	if ( tree->trustNtfsHardLinks() )
+	{
+	    if ( !warned )
+	    {
+		logInfo() << "Trusting NTFS hard link counts: edit settings file to change" << Qt::endl;
+		warned = true;
+	    }
+	}
+	else
+	{
+	    // ntfs-3g can return bogus hard link counts; use 1 instead
+	    // See  https://github.com/shundhammer/qdirstat/issues/88
+	    statInfo->st_nlink = 1;
+
+#if VERBOSE_NTFS_HARD_LINKS
+	    logWarning() << "Not trusting NTFS hard links for \"" << name
+	                 << "\" links: " << statInfo->st_nlink << " -> resetting to 1"
+	                 << Qt::endl;
+#else
+	    if ( !warned )
+	    {
+		logWarning() << "Not trusting NTFS hard link counts: always assume 1" << Qt::endl;
+		warned = true;
+	    }
+#endif
+	}
+    }
+
+
     /**
      * Check if we really should cross into a mounted filesystem; don't do
      * it if this is a system mount, a bind mount, a filesystem mounted
@@ -48,8 +96,8 @@ namespace
 	                     !mountPoint->isDuplicate()   &&	//  bind mount or multiple mounted
 	                     !mountPoint->isNetworkMount();	//  NFS or CIFS (Samba)
 
-//        logDebug() << ( doCross ? "Reading" : "Not reading" )
-//	             << " mounted filesystem " << mountPoint->path() << Qt::endl;
+//	logDebug() << ( doCross ? "Reading" : "Not reading" )
+//	           << " mounted filesystem " << mountPoint->path() << Qt::endl;
 
 	return doCross;
     }
@@ -60,11 +108,11 @@ namespace
      **/
     void handleStatError( const QString & entryName, const QString & fullName, DirInfo * dir, DirTree * tree )
     {
-	logWarning() << "lstat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
+	logWarning() << "fstatat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
 
 	/*
-	 * Not much we can do when lstat() didn't work; let's at
-	 * least create an (almost empty) entry as a placeholder.
+	 * Not much we can do when fstatat() didn't work; just
+	 * create an (almost empty) entry as a placeholder
 	 */
 	DirInfo * child = new DirInfo{ dir, tree, entryName };
 	child->finalizeLocal();
@@ -75,16 +123,14 @@ namespace
 
 
     /**
-     * Exclude the directory of this read job after it is almost completely
-     * read. This is used when checking for exclude rules matching direct
-     * file children of a directory.
-     *
-     * The main purpose of having this as a separate function is to have a
-     * clear backtrace if it segfaults.
+     * Exclude the directory of this read job after it has been read.  This is
+     * used when checking for exclude rules matching direct file children of a
+     * directory. The check is made after all children have been read and
+     * created as children of 'dir'.
      **/
     void excludeDirLate( DirReadJobQueue * queue, DirTree * tree, DirInfo * dir, LocalDirReadJob * except )
     {
-	logDebug() << "Excluding dir " << dir << Qt::endl;
+	//logDebug() << "Excluding dir " << dir << Qt::endl;
 
 	// Kill all queued jobs for this dir except 'except'
 	queue->killSubtree( dir, except );
@@ -215,17 +261,17 @@ void LocalDirReadJob::startReading()
 	for ( const QString & entryName : asConst( entryMap ) )
 	{
 	    struct stat statInfo;
-	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 )	// OK
+	    if ( fstatat( dirFd, entryName.toUtf8(), &statInfo, flags ) == 0 ) // OK
 	    {
-		if ( S_ISDIR( statInfo.st_mode ) )	// directory child
+		if ( S_ISDIR( statInfo.st_mode ) ) // directory child
 		{
 		    processSubDir( entryName, new DirInfo{ dir(), tree(), entryName, statInfo } );
 		}
 		else  // non-directory child
 		{
-		    if ( entryName == QLatin1String{ DEFAULT_CACHE_NAME } )	// .qdirstat.cache.gz found
+		    if ( entryName == QLatin1String{ DEFAULT_CACHE_NAME } ) // .qdirstat.cache.gz found
 		    {
-			logDebug() << "Found cache file " << DEFAULT_CACHE_NAME << Qt::endl;
+			//logDebug() << "Found cache file " << DEFAULT_CACHE_NAME << Qt::endl;
 
 			// Try to read the cache file. If that was successful and the toplevel
 			// path in that cache file matches the path of the directory we are
@@ -236,29 +282,9 @@ void LocalDirReadJob::startReading()
 			    return;
 		    }
 
-#if DONT_TRUST_NTFS_HARD_LINKS
 		    if ( statInfo.st_nlink > 1 && isNtfs() )
-		    {
-			// NTFS seems to return bogus hard link counts; use 1 instead.
-			// See  https://github.com/shundhammer/qdirstat/issues/88
-			statInfo.st_nlink = 1;
+			handleNtfsHardLinks( tree(), fullName( entryName ), &statInfo );
 
-#if VERBOSE_NTFS_HARD_LINKS
-			logWarning() << "Not trusting NTFS with hard links: \""
-			             << dir()->url() << "/" << entryName
-			             << "\" links: " << statInfo.st_nlink
-			             << " -> resetting to 1"
-			             << Qt::endl;
-#else
-			static bool _warnedAboutNtfsHardLinks = false;
-			if ( !_warnedAboutNtfsHardLinks )
-			{
-			    logWarning() << "Not trusting NTFS with hard links: always assume 1" << Qt::endl;
-			    _warnedAboutNtfsHardLinks = true;
-			}
-#endif
-		    }
-#endif
 		    FileInfo * child = new FileInfo{ dir(), tree(), entryName, statInfo };
 
 		    if ( tree()->checkIgnoreFilters( fullName( entryName ) ) )
@@ -269,7 +295,7 @@ void LocalDirReadJob::startReading()
 		    tree()->childAddedNotify( child );
 		}
 	    }
-	    else  // fstatat() error
+	    else // fstatat() error
 	    {
 		handleStatError( entryName, fullName( entryName ), dir(), tree() );
 	    }
@@ -333,11 +359,11 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 
     CacheReadJob * cacheReadJob = new CacheReadJob{ tree(), dir(), parent, cacheFullName };
 
-    if ( cacheReadJob->reader() ) // Does this cache file match this directory?
+    if ( cacheReadJob->reader() ) // does this cache file match this directory?
     {
-	logDebug() << "Using cache file " << cacheFullName << " for " << _dirName << Qt::endl;
+	logInfo() << "Using cache file " << cacheFullName << " for " << _dirName << Qt::endl;
 
-	DirTree * treeLocal = tree();	// Copy data members to local variables:
+	DirTree * treeLocal = tree();	// copy data members to local variables:
 	DirInfo * dirLocal  = dir();	// this object might be deleted soon by killSubtree()
 
 	if ( isToplevel )
@@ -358,29 +384,25 @@ bool LocalDirReadJob::readCacheFile( const QString & cacheFileName )
 	    dirLocal->parent()->setReadState( DirReading );
 
 	    // Clean up partially read directory content
-	    queue()->killSubtree( dirLocal, cacheReadJob );	// Will delete this job as well!
+	    queue()->killSubtree( dirLocal, cacheReadJob ); // will delete this job as well!
 	    // All data members of this object are invalid from here on!
 
 	    treeLocal->deleteSubtree( dirLocal );
 	}
 
-	treeLocal->addJob( cacheReadJob );     // The job queue will assume ownership of cacheReadJob
+	treeLocal->addJob( cacheReadJob ); // the job queue will assume ownership of cacheReadJob
 
 	return true;
     }
     else
     {
-	logWarning() << "NOT using cache file " << cacheFullName
-		     << " for " << _dirName
-		     << Qt::endl;
+	logInfo() << "NOT using cache file " << cacheFullName << " for " << _dirName << Qt::endl;
 
 	delete cacheReadJob;
 
 	return false;
     }
 }
-
-
 
 
 QString LocalDirReadJob::fullName( const QString & entryName ) const
@@ -413,8 +435,7 @@ bool LocalDirReadJob::checkForNtfs()
 
 
 
-CacheReadJob::CacheReadJob( DirTree       * tree,
-                            const QString & cacheFileName ):
+CacheReadJob::CacheReadJob( DirTree * tree, const QString & cacheFileName ):
     DirReadJob{ tree, nullptr },
     _reader{ new CacheReader{ cacheFileName, tree } }
 {
@@ -422,10 +443,7 @@ CacheReadJob::CacheReadJob( DirTree       * tree,
 }
 
 
-CacheReadJob::CacheReadJob( DirTree       * tree,
-                            DirInfo       * dir,
-                            DirInfo       * parent,
-                            const QString & cacheFileName ):
+CacheReadJob::CacheReadJob( DirTree * tree, DirInfo * dir, DirInfo * parent, const QString & cacheFileName ):
     DirReadJob{ tree, parent },
     _reader{ new CacheReader{ cacheFileName, tree, dir, parent } }
 {

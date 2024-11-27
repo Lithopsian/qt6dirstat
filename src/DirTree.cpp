@@ -712,7 +712,7 @@ void DirTree::setIgnoreHardLinks( bool ignore )
 bool DirTree::crossingFilesystems( const DirInfo * parent, const DirInfo * child )
 {
     /**
-     * Return the device name where 'dir' is on if it's a mount point.
+     * Return the device name that 'dir' is on if it's a mount point.
      * This uses MountPoints which reads /proc/mounts.
      **/
     const auto device = []( const DirInfo * dir ) { return MountPoints::device( dir->url() ); };

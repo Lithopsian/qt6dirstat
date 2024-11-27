@@ -29,7 +29,7 @@ using namespace QDirStat;
 
 namespace
 {
-    // Debug helpers: static so they should disappear if they aren't being used.
+    // Debug helpers: should be optimised away if they aren't being used.
     // Verbose logging functions, all callers might be commented out
     [[gnu::unused]] QStringList modelTreeAncestors( const QModelIndex & index )
     {
@@ -507,11 +507,12 @@ void DirTreeModel::readSettings()
     Settings settings;
 
     settings.beginGroup( "DirectoryTree" );
-    _crossFilesystems        = settings.value( "CrossFilesystems",    false ).toBool();
-    _useBoldForDominantItems = settings.value( "UseBoldForDominant",  true  ).toBool();
-    _updateTimerMillisec     = settings.value( "UpdateTimerMillisec", 250  ).toInt();
-    _slowUpdateMillisec      = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
-    _tree->setIgnoreHardLinks( settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool() );
+    _crossFilesystems         = settings.value( "CrossFilesystems",    false ).toBool();
+    _useBoldForDominantItems  = settings.value( "UseBoldForDominant",  true  ).toBool();
+    _updateTimerMillisec      = settings.value( "UpdateTimerMillisec", 250  ).toInt();
+    _slowUpdateMillisec       = settings.value( "SlowUpdateMillisec",  3000 ).toInt();
+    const bool ignoreLinks    = settings.value( "IgnoreHardLinks",     _tree->ignoreHardLinks() ).toBool();
+    const bool trustNtfsLinks = settings.value( "TrustNtfsHardLinks",  _tree->trustNtfsHardLinks() ).toBool();
     _treeItemSize =
 	dirTreeItemSize( settings.value( "TreeIconDir", DirTreeModel::treeIconDir( DTIS_Small ) ).toString() );
     settings.endGroup();
@@ -527,6 +528,8 @@ void DirTreeModel::readSettings()
     settings.endGroup();
 
     _tree->setCrossFilesystems( _crossFilesystems );
+    _tree->setIgnoreHardLinks( ignoreLinks );
+    _tree->setTrustNtfsHardLinks( trustNtfsLinks );
 }
 
 
@@ -535,12 +538,13 @@ void DirTreeModel::writeSettings()
     Settings settings;
 
     settings.beginGroup( "DirectoryTree" );
-    settings.setValue( "SlowUpdateMillisec",  _slowUpdateMillisec      );
-    settings.setValue( "CrossFilesystems",    _crossFilesystems        );
-    settings.setValue( "UseBoldForDominant",  _useBoldForDominantItems );
-    settings.setValue( "IgnoreHardLinks",     _tree->ignoreHardLinks() );
-    settings.setValue( "TreeIconDir",         treeIconDir()            );
-    settings.setValue( "UpdateTimerMillisec", _updateTimerMillisec     );
+    settings.setValue( "SlowUpdateMillisec",  _slowUpdateMillisec         );
+    settings.setValue( "CrossFilesystems",    _crossFilesystems           );
+    settings.setValue( "UseBoldForDominant",  _useBoldForDominantItems    );
+    settings.setValue( "IgnoreHardLinks",     _tree->ignoreHardLinks()    );
+    settings.setValue( "TrustNtfsHardLinks",  _tree->trustNtfsHardLinks() );
+    settings.setValue( "TreeIconDir",         treeIconDir()               );
+    settings.setValue( "UpdateTimerMillisec", _updateTimerMillisec        );
     settings.endGroup();
 
     settings.beginGroup( "TreeTheme-light" );
