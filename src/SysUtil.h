@@ -10,7 +10,8 @@
 #ifndef SysUtil_h
 #define SysUtil_h
 
-#include <unistd.h>    // access(), getuid(), geteduid(), readlink()
+#include <fcntl.h> // AT_EACCESS
+#include <unistd.h> // faccessat(), getuid(), geteduid(), readlink()
 #include <sys/types.h> // uid_t
 
 #include <QProcessEnvironment>
@@ -31,7 +32,7 @@ namespace QDirStat
 	 * Return true if the specified command is available and executable.
 	 **/
 	inline bool haveCommand( const QString & command )
-	    { return access( command.toUtf8(), X_OK ) == 0; }
+	    { return faccessat( AT_FDCWD, command.toUtf8(), X_OK, AT_EACCESS ) == 0; }
 
 	/**
 	 * Try running a command and compare it against an expected result.
