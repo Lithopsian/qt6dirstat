@@ -19,7 +19,7 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const QString     & command,
+bool SysUtil::tryRunCommand( const char        * command,
                              const QStringList & args,
                              const QString     & expectedResult )
 {

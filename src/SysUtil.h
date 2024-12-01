@@ -73,7 +73,7 @@ namespace QDirStat
 	 * Log the command that is executed if 'logCommand' is true,
 	 * log the command's output if 'logOutput' is true.
 	 **/
-	bool tryRunCommand( const QString     & command,
+	bool tryRunCommand( const char        * command,
 	                    const QStringList & args,
 	                    const QString     & expectedResult );
 

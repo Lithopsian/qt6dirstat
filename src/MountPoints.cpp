@@ -213,7 +213,7 @@ void MountPoints::init()
 {
     clear();
 
-    _hasNtfs         = false;
+    _hasNtfs = false;
 
     populate();
 }
