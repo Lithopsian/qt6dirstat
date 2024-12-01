@@ -43,6 +43,20 @@ namespace
 
 
     /**
+     * Return the path of the currently selected filesystem or an empty
+     * string if there is none.
+     **/
+    QString selectedPath( const QTreeWidget * tree )
+    {
+	const FilesystemItem * item = currentItem( tree );
+	if ( item )
+	    return item->mountPath();
+
+	return QString{};
+    }
+
+
+    /**
      * Returns the icon filename for the given type of mount point.
      **/
     const char * iconName( const MountPoint * mountPoint )
@@ -161,25 +175,15 @@ void FilesystemsWindow::populate()
 
 void FilesystemsWindow::enableActions()
 {
-    _ui->readButton->setEnabled( !selectedPath().isEmpty() );
+    _ui->readButton->setEnabled( !selectedPath( _ui->fsTree ).isEmpty() );
 }
 
 
 void FilesystemsWindow::readSelectedFilesystem()
 {
-    const QString path = selectedPath();
+    const QString path = selectedPath( _ui->fsTree );
     if ( !path.isEmpty() )
 	app()->mainWindow()->readFilesystem( path );
-}
-
-
-QString FilesystemsWindow::selectedPath() const
-{
-    const FilesystemItem * item = currentItem( _ui->fsTree );
-    if ( item )
-	return item->mountPath();
-
-    return QString{};
 }
 
 

@@ -65,7 +65,7 @@ namespace
                  if ( SysUtil::haveCommand( "/bin/lsblk" ) )
                     return "/bin/lsblk"_L1;
 
-                if ( !SysUtil::haveCommand( "/usr/bin/lsblk" ) )
+                if ( SysUtil::haveCommand( "/usr/bin/lsblk" ) )
                     return "/usr/bin/lsblk"_L1;
 
                 return QLatin1String{};
@@ -79,7 +79,7 @@ namespace
 
         int exitCode;
         const QString output = SysUtil::runCommand( lsblkCommand,
-                                                    { "--noheadings", "--list", "--output", "name,fstype" },
+                                                    { "-n", "-l", "-o", "NAME,FSTYPE" },
                                                     &exitCode,
                                                     LSBLK_TIMEOUT_SEC,
                                                     false,        // logCommand
@@ -88,15 +88,23 @@ namespace
         if ( exitCode != 0 )
             return QStringList{};
 
-        const QStringList lines = output.split( u'\n' )
-            .filter( QRegularExpression{ "\\s+ntfs", QRegularExpression::CaseInsensitiveOption } );
-
         QStringList ntfsDevices;
+
+        const QRegularExpression whitespace{ "\\s+" };
+        const QStringList lines = output.split( u'\n' );
         for ( const QString & line : lines )
         {
-            const QString device = "/dev/"_L1 % line.split( QRegularExpression{ "\\s+" } ).first();
-            logDebug() << "NTFS on " << device << Qt::endl;
-            ntfsDevices << device;
+            const QStringList fields = line.split( whitespace, Qt::SkipEmptyParts );
+            if ( fields.size() == 2 )
+            {
+                const QString & device = fields[ 0 ];
+                const QString & fsType = fields[ 1 ];
+                if ( fsType.startsWith( "ntfs"_L1, Qt::CaseInsensitive ) )
+                {
+                    logDebug() << fsType << " on " << device << Qt::endl;
+                    ntfsDevices << device;
+                }
+            }
         }
 
         return ntfsDevices;
@@ -269,6 +277,8 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         return false;
     }
 
+    const QRegularExpression whitespace{ "\\s+" };
+
     QTextStream in{ &file };
     int lineNo = 0;
     QString line = in.readLine();
@@ -276,7 +286,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
     while ( !line.isNull() ) // in.atEnd() always returns true for /proc/*
     {
         ++lineNo;
-        QStringList fields = line.split( QRegularExpression{ "\\s+" }, Qt::SkipEmptyParts );
+        QStringList fields = line.split( whitespace, Qt::SkipEmptyParts );
 
         if ( fields.isEmpty() ) // allow empty lines
             continue;
