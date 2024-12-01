@@ -7,9 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <pwd.h>	// getpwuid()
-#include <grp.h>	// getgrgid()
-#include <sys/stat.h>	// lstat()
+#include <pwd.h> // getpwuid()
+#include <grp.h> // getgrgid()
 
 #include <QRegularExpression>
 

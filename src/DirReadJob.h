@@ -139,17 +139,20 @@ namespace QDirStat
     };	// class DirReadJob
 
 
+    /**
+     * Enum for caching whether this job/directory is on an NTFS mount.
+     **/
+    enum IsNtfs
+    {
+	NotChecked,
+	NotNtfs,
+	Ntfs,
+    };
+
 
     /**
-     * Implementation of the abstract DirReadJob class that reads a local
+     * Implementation of the abstract DirReadJob class that reads one local
      * directory.
-     *
-     * This will use lstat() system calls rather than KDE's network transparent
-     * directory services since lstat(), unlike the KDE services, can obtain
-     * information about the device (i.e. filesystem) a file or directory
-     * resides on. This is important if you wish to limit directory scans to
-     * one filesystem - which is desirable when that one filesystem runs
-     * out of space.
      **/
     class LocalDirReadJob final : public DirReadJob
     {
@@ -166,8 +169,6 @@ namespace QDirStat
 	 * second-level read jobs, not for the starting point of a directory
 	 * scan, so it is easily possible to continue reading at an excluded
 	 * directory.
-	 *
-	 * The default is 'false'.
 	 **/
 	bool applyFileChildExcludeRules() const { return _applyFileChildExcludeRules; }
 
@@ -181,56 +182,6 @@ namespace QDirStat
 	 **/
 	void startReading() override;
 
-	/**
-	 * Process one subdirectory entry.
-	 **/
-	void processSubDir( const QString & entryName, DirInfo * subDir );
-
-	/**
-	 * Read a cache file that was picked up along the way:
-	 *
-	 * If one of the non-directory entries of this directory was
-	 * ".qdirstat.cache.gz", open it, and if the toplevel entry in that
-	 * file matches the current path, read all the cache contents, kill all
-	 * pending read jobs for subdirectories of this directory and return
-	 * 'true'. In that case, the current read job is finished and deleted
-	 * (!), control needs to be returned to the caller, and using any data
-	 * members of this object is no longer safe (since they have just been
-	 * deleted).
-	 *
-	 * In all other cases, consider that entry as a plain file and return
-	 * 'false'.
-	 **/
-	bool readCacheFile( const QString & cacheFileName );
-
-	/**
-	 * Return the full name with path of an entry of this directory.
-	 **/
-	QString fullName( const QString & entryName ) const;
-
-	/**
-	 * Return 'true' if the current filesystem is NTFS.  The check is only
-	 * done once per read job (ie. per directory) and the value is cached.
-	 **/
-	bool isNtfs() { return _checkedForNtfs ? _isNtfs : checkForNtfs(); }
-
-	/**
-	 * Checks if the current filesystem is NTFS and returns the result.
-	 * The result is then cached for subsequent queries.
-	 *
-	 * This check is very fast if there are no NTFS filesystems because
-	 * MountPoints has a flag, but if there are NTFS mounts then the check
-	 * is relatively expensive.  This function should be called
-	 * infrequently, only when a file has multiple hard links.  If
-	 * performance becomes an issue, for example with modern NTFS mounts
-	 * having a lot of hard links, then whether the filesystem is NTFS
-	 * could be passed down to the LocalDirReadJob constructor instead of
-	 * being derived for every directory.  Or it could be bypassed
-	 * completely; if the TrustNtfsHardLinks setting is true, then this
-	 * check is only needed to log a one-off message.
-	 **/
-	bool checkForNtfs();
-
 
     private:
 
@@ -240,8 +191,7 @@ namespace QDirStat
 
 	QString _dirName;
 	bool    _applyFileChildExcludeRules;
-	bool    _checkedForNtfs{ false };
-	bool    _isNtfs{ false };
+	IsNtfs  _isNtfs{ NotChecked };
 
     };	// LocalDirReadJob
 

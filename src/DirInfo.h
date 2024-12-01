@@ -80,7 +80,7 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor from a stat buffer (i.e. based on an lstat() call).
+	 * Constructor from a stat buffer.
 	 **/
 	DirInfo( DirInfo           * parent,
 	         DirTree           * tree,

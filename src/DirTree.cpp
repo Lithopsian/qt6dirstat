@@ -34,25 +34,35 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * For NTFS mounts, log a message about how hard links are being handled
+     **/
+    void processMount( const MountPoint * mountPoint, bool trustNtfsHardLinks )
+    {
+	// Log a message for NTFS mounts about how hard links are being handled
+	if ( mountPoint->isNtfs() )
+	{
+	    if ( trustNtfsHardLinks )
+		logInfo() << "Trusting NTFS hard link counts: edit settings file to change" << Qt::endl;
+	    else
+		logWarning() << "Not trusting NTFS hard link counts: always assume 1" << Qt::endl;
+	}
+    }
+
+
+    /**
      * Obtain information about the URL specified and create a new FileInfo
      * or a DirInfo (whatever is appropriate) from that information. Use
      * FileInfo::isDirInfo() to find out which.
      *
-     * If the underlying syscall fails, this throws a SysCallException if
-     * 'doThrow' is 'true', and it just returns 0 if it is 'false'.
+     * If the underlying syscall fails, this throws a SysCallException.
      **/
-    FileInfo * stat( const QString & url,
-                     DirTree       * tree,
-                     DirInfo       * parent )
+    FileInfo * createItem( const QString & url, DirTree * tree, DirInfo * parent )
     {
 	// logDebug() << "url: \"" << url << '"' << Qt::endl;
 
 	struct stat statInfo;
-	if ( lstat( url.toUtf8(), &statInfo ) != 0 ) // lstat() failed
-	{
-	    THROW( ( SysCallFailedException{ "lstat", url } ) );
-	    return nullptr;
-	}
+	if ( SysUtil::stat( url, statInfo ) != 0 ) // fstatat() failed
+	    THROW( ( SysCallFailedException{ "fstatat", url } ) );
 
 	const bool isRoot = parent == tree->root();
 	const QString name = isRoot ? url : SysUtil::baseName( url );
@@ -311,13 +321,15 @@ void DirTree::startReading( const QString & rawUrl )
 	return fileInfo.absoluteFilePath(); // return nonexistent input file which should throw
     }();
 
+    // Find the nearest ancestor that is a mount point and log its details
     const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _url );
     logInfo() << "url:    " << _url << Qt::endl;
     logInfo() << "device: " << ( mountPoint ? mountPoint->device() : QString{} ) << Qt::endl;
+    processMount( mountPoint, _trustNtfsHardLinks );
 
     sendStartingReading();
 
-    FileInfo * item = stat( _url, this, root() );
+    FileInfo * item = createItem( _url, this, root() );
     if ( item ) // should always be an item, will throw if there is an error
     {
 	childAddedNotify( item );
@@ -346,8 +358,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	{
 	    // Check the item is still accessible on disk
 	    // Pseudo-dirs (shouldn't be here) will implicitly fail the check
-	    struct stat statInfo;
-	    while ( lstat( item->url().toUtf8(), &statInfo ) != 0 )
+	    while ( faccessat( AT_FDCWD, item->url().toUtf8(), F_OK, AT_SYMLINK_NOFOLLOW ) != 0 )
 	    {
 		if ( item == root() || item->parent() == root() )
 		{
@@ -396,6 +407,11 @@ void DirTree::refresh( DirInfo * subtree )
     }
     else // refresh subtree with a parent
     {
+	// If this is an NTFS mountpoint, log a message about it
+	const MountPoint * mountPoint = MountPoints::findByPath( subtree->path() );
+	if ( mountPoint )
+	    processMount( mountPoint, _trustNtfsHardLinks );
+
 	// A full startingReading signal would reset all the tree branches to level 1
 	emit startingRefresh();
 	_isBusy = true;
@@ -407,14 +423,14 @@ void DirTree::refresh( DirInfo * subtree )
 	if ( subtree->isIgnored() )
 	    unatticOne( this, findAtticChild( subtree ) );
 
-	//  Make copies of some key information before the objects are deleted
+	// Make copies of some key information before the objects are deleted
 	const QString url = subtree->url();
 	DirInfo * parent = subtree->parent(); // the parent can't be an attic now
 
 	deleteSubtree( subtree );
 
 	// Recreate the deleted subtree
-	FileInfo * item = stat( url, this, parent );
+	FileInfo * item = createItem( url, this, parent );
 	if ( item ) // should always be an item, stat() will throw if there is an error
 	{
 	    childAddedNotify( item );
