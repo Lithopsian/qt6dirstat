@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <sys/stat.h> // mkdir(), struct stat, S_ISDIR(), etc.
+#include <sys/stat.h> // mkdir(), stat(), struct stat, S_ISDIR(), etc.
 #include <unistd.h> // getuid()
 
 #include <QDir>

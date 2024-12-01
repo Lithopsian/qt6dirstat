@@ -81,7 +81,7 @@ namespace
     /**
      * Return the command for the dpkg manager program.
      **/
-    QString dpkgCommand()
+    const char * dpkgCommand()
     {
 	return "/usr/bin/dpkg";
     }

@@ -33,17 +33,17 @@ namespace
      * Determine the path to the rpm command for this system - may not
      * actually exist.
      **/
-    QLatin1String rpmCommand()
+    const char * rpmCommand()
     {
 	// Note that it is not enough to rely on a symlink /bin/rpm ->
 	// /usr/bin/rpm: While recent SUSE distros have that symlink (and maybe Red
 	// Hat and Fedora as well?), rpm as a secondary package manager on Ubuntu
 	// does not have such a link; they only have /usr/bin/rpm.
-	if ( SysUtil::haveCommand( "/usr/bin/rpm"_L1 ) )
-	    return "/usr/bin/rpm"_L1;
+	if ( SysUtil::haveCommand( "/usr/bin/rpm" ) )
+	    return "/usr/bin/rpm";
 
 	// Return something to try although it may not exist
-	return "/bin/rpm"_L1; // for old SUSE / Red Hat distros
+	return "/bin/rpm"; // for old SUSE / Red Hat distros
     }
 
 

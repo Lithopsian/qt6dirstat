@@ -60,6 +60,8 @@ namespace QDirStat
 	/**
 	 * Return true if the specified command is available and executable.
 	 **/
+	inline bool haveCommand( const char * command )
+	    { return faccessat( AT_FDCWD, command, X_OK, AT_EACCESS ) == 0; }
 	inline bool haveCommand( const QString & command )
 	    { return faccessat( AT_FDCWD, command.toUtf8(), X_OK, AT_EACCESS ) == 0; }
 
