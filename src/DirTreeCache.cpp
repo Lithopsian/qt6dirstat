@@ -37,14 +37,16 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Format a file size as string - with trailing "G", "M", "K" for
-     * "Gigabytes", "Megabytes, "Kilobytes", respectively (provided there
-     * is no fractional part - 27M is OK, 27.2M is not).
+     * Format a file size as a string.  Abbreviate exact multiples of 1024 to
+     * nK, otherwise just convert the number to a string.
      **/
     QString formatSize( FileSize size )
     {
-	// Multiples of 1024 are common, any larger multiple freakishly rare
-	return size >= KB && size % KB == 0 ? QString::number( size / KB ) % 'K' : QString::number( size );
+	// Exact multiples of 1024 are fairly common, any larger multiple freakishly rare
+	if ( size >= KB && size % KB == 0 )
+	    return QString::number( size / KB ) % 'K';
+
+	return QString::number( size );
     }
 
 
@@ -66,7 +68,7 @@ namespace
 
 
     /**
-     * Return the 'path' in an URL-encoded form, i.e. with some special
+     * Return 'path' in a URL-encoded form, i.e. with some special
      * characters escaped in percent notation (" " -> "%20").
      **/
     QByteArray urlEncoded( const QString & path )
@@ -96,13 +98,13 @@ namespace
 	    return;
 
 	// Write file type
-	gzprintf( cache, fileType( item ) );
+	gzputs( cache, fileType( item ) );
 
 	// Write name
 	if ( item->isDirInfo() )
-	    gzprintf( cache, " %-40s", urlEncoded( item->url() ).data() ); // absolute path
+	    gzprintf( cache, " %-40s", urlEncoded( item->url() ).constData() ); // absolute path
 	else
-	    gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).data() ); // relative path
+	    gzprintf( cache, "\t%-36s", urlEncoded( item->name() ).constData() ); // relative path
 
 	// Write size
 	gzprintf( cache, "\t%s", formatSize( item->rawByteSize() ).toUtf8().constData() );
@@ -118,13 +120,13 @@ namespace
 
 	// Optional fields
 	if ( item->isExcluded() )
-	    gzprintf( cache, "\tunread: %s", "excluded" );
+	    gzputs( cache, "\tunread: excluded" );
 	else if ( item->readState() == DirPermissionDenied )
-	    gzprintf( cache, "\tunread: %s", "permissions" );
+	    gzputs( cache, "\tunread: permissions" );
 	else if ( item->readState() == DirError )
-	    gzprintf( cache, "\tunread: %s", "readerror" );
+	    gzputs( cache, "\tunread: readerror" );
 	else if ( item->isMountPoint() && item->readState() == DirOnRequestOnly )
-	    gzprintf( cache, "\tunread: %s", "mountpoint" );
+	    gzputs( cache, "\tunread: mountpoint" );
 	if ( item->isSparseFile() )
 	    gzprintf( cache, "\tblocks: %lld", item->blocks() );
 	if ( item->isFile() && item->links() > 1 )
@@ -172,7 +174,7 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
 	return false;
     }
 
-    gzFile cache = gzopen( (const char *) fileName.toUtf8().constData(), "w" );
+    gzFile cache = gzopen( fileName.toUtf8().constData(), "w" );
     if ( cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
@@ -278,9 +280,15 @@ namespace
     /**
      * Converts a string representing a number of bytes into a FileSize
      * return value.
+     *
+     * Note that the CacheWriter in this file only uses the 'K' suffix, but
+     * older versions may use 'M', 'F', or 'T'.
      **/
     FileSize readSize( const char * size_str )
     {
+	if ( !size_str )
+	    return 0;
+
 	char * end = nullptr;
 	FileSize size = strtoll( size_str, &end, 10 );
 	if ( end )
@@ -432,8 +440,8 @@ void CacheReader::addItem()
     if ( _fieldsCount < 4 )
     {
 	logError() << "Syntax error at line " << _lineNo
-		   << ": Expected at least 4 fields, saw only " << _fieldsCount
-		   << Qt::endl;
+	           << ": Expected at least 4 fields, saw only " << _fieldsCount
+	           << Qt::endl;
 
 	setReadError( _latestDir, _toplevel );
 
@@ -599,7 +607,7 @@ void CacheReader::addItem()
 #if VERBOSE_LOCATE_PARENT
 	    THROW( Exception{ "Could not locate cache item parent" } );
 #endif
-	    return;	// Ignore this cache line completely
+	    return; // Ignore this cache line completely
 	}
     }
 
@@ -763,13 +771,17 @@ void CacheReader::checkHeader()
 
     if ( _ok )
     {
-	const QString version = field( 1 );
+	const char * version = field( 1 );
 
 	// currently not checking version number
 	// for future use
 
 	if ( !_ok )
-	    logError() << "Line " << _lineNo << ": Incompatible cache file version" << Qt::endl;
+	{
+	    logError() << "Line " << _lineNo
+	               << ": incompatible cache file version " << version
+	               << Qt::endl;
+	}
     }
 
     //logDebug() << "Cache file header check OK: " << _ok << Qt::endl;
@@ -798,8 +810,9 @@ bool CacheReader::readLine()
 	    if ( !gzeof( _cache ) )
 	    {
 		_ok = false;
-		logError() << "Line " << _lineNo <<
-		    ( buf == Z_NULL ? ": read error" : ": line too long" ) << Qt::endl;
+		logError() << "Line " << _lineNo
+		           << ( buf == Z_NULL ? ": read error" : ": line too long" )
+		           << Qt::endl;
 	    }
 
 	    return false;
@@ -810,9 +823,7 @@ bool CacheReader::readLine()
 
 	// logDebug() << "line[ " << _lineNo << "]: \"" << _line << '"' << Qt::endl;
 
-    } while ( !gzeof( _cache ) &&
-	      ( *line == '\0' ||	// empty line
-	        *line == '#' ) );	// comment line
+    } while ( !gzeof( _cache ) && ( *line == '\0' || *line == '#' ) );
 
     _fieldsCount = _ok && line ? splitLine( line, _fields ) : 0;
 
