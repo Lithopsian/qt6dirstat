@@ -823,7 +823,7 @@ void DirReadJobQueue::jobFinishedNotify( DirReadJob * job )
     if ( _queue.isEmpty() && _blocked.isEmpty() )
     {
 	// The timer will fire again and then stop itself
-	logDebug() << "No more jobs - finishing" << Qt::endl;
+	logInfo() << "No more jobs - finishing" << Qt::endl;
 	emit finished();
     }
 }

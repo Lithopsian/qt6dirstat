@@ -101,7 +101,7 @@ namespace
                 const QString & fsType = fields[ 1 ];
                 if ( fsType.startsWith( "ntfs"_L1, Qt::CaseInsensitive ) )
                 {
-                    logDebug() << fsType << " on " << device << Qt::endl;
+                    logInfo() << fsType << " on " << device << Qt::endl;
                     ntfsDevices << device;
                 }
             }

@@ -482,7 +482,7 @@ const QStringList & Cleanup::defaultShells()
 	}
 
 	if ( !shells.isEmpty() )
-	    logDebug() << "Default shell: " << shells.first() << Qt::endl;
+	    logInfo() << "Default shell: " << shells.first() << Qt::endl;
 
 	return shells;
     }();

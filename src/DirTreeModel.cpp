@@ -872,9 +872,9 @@ void DirTreeModel::sort( int column, Qt::SortOrder order )
     updatePersistentIndexes();
     emit layoutChanged( QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint );
 
-    logDebug() << "Sorting by " << _sortCol
-               << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
-               << Qt::endl;
+    logInfo() << "Sorting by " << _sortCol
+              << ( order == Qt::AscendingOrder ? " ascending" : " descending" )
+              << Qt::endl;
 
     //logDebug() << "After layoutChanged()" << Qt::endl;
     //dumpPersistentIndexList( persistentIndexList() );
