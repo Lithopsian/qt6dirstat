@@ -45,36 +45,26 @@ namespace
 
 
     /**
-     * Change filesystem type "fuseblk" to "ntfs" for NTFS devices.
-     **/
-    void handleFuseblk( QString & fsType, const QStringList & ntfsDevices, const QString & device )
-    {
-        if ( fsType == "fuseblk"_L1 && ntfsDevices.contains( device ) )
-            fsType = "ntfs";
-    }
-
-
-    /**
      * Try to check with the external "lsblk" command (if available) what
      * block devices use NTFS and return a list of them.
      **/
-    QStringList findNtfsDevices()
+    void findNtfsDevices( QStringList & ntfsDevices )
     {
         const QLatin1String lsblkCommand = []()
-            {
-                 if ( SysUtil::haveCommand( "/bin/lsblk" ) )
-                    return "/bin/lsblk"_L1;
+        {
+            if ( SysUtil::haveCommand( "/bin/lsblk" ) )
+                return "/bin/lsblk"_L1;
 
-                if ( SysUtil::haveCommand( "/usr/bin/lsblk" ) )
-                    return "/usr/bin/lsblk"_L1;
+            if ( SysUtil::haveCommand( "/usr/bin/lsblk" ) )
+                return "/usr/bin/lsblk"_L1;
 
-                return QLatin1String{};
-            }();
+            return QLatin1String{};
+        }();
 
         if ( lsblkCommand.isEmpty() )
         {
             logInfo() << "No lsblk command available" << Qt::endl;
-            return QStringList{};
+            return;
         }
 
         int exitCode;
@@ -86,9 +76,7 @@ namespace
                                                     false,        // logOutput
                                                     true );       // logError
         if ( exitCode != 0 )
-            return QStringList{};
-
-        QStringList ntfsDevices;
+            return;
 
         const QRegularExpression whitespace{ "\\s+" };
         const QStringList lines = output.split( u'\n' );
@@ -101,20 +89,68 @@ namespace
                 const QString & fsType = fields[ 1 ];
                 if ( fsType.startsWith( "ntfs"_L1, Qt::CaseInsensitive ) )
                 {
-                    logInfo() << fsType << " on " << device << Qt::endl;
-                    ntfsDevices << device;
+                    const QString fullDevice = "/dev/"_L1 % device;
+                    logInfo() << fsType << " on " << fullDevice << Qt::endl;
+                    ntfsDevices << fullDevice;
                 }
             }
         }
+    }
 
-        return ntfsDevices;
+
+    /**
+     * Change filesystem type "fuseblk" to "ntfs-3g" for NTFS devices.  The
+     * ntfs-3g driver uses FUSE to mount NTFS filesystems and they appear as
+     * "fuseblk", but we want to show them as "ntfs-3g".
+     *
+     * findNtfsDevices() calls lsblk and this is (relatively) slow, so do that
+     * only if a fuseblk mount is found.  Then return immediately if there are
+     * no NTFS devices.
+     *
+     * Note that the newer native ntfs3 driver mounts filesystems as "ntfs3"
+     * and they are not touched here.
+     **/
+    void checkForFuseblk( MountPointMap & mountPointMap )
+    {
+        QStringList ntfsDevices;
+
+        for ( MountPoint * mountPoint : mountPointMap )
+        {
+            if ( mountPoint->filesystemType() == "fuseblk"_L1 )
+            {
+                if ( ntfsDevices.isEmpty() )
+                {
+                    findNtfsDevices( ntfsDevices );
+                    if (ntfsDevices.isEmpty() )
+                        return;
+                }
+
+                if ( ntfsDevices.contains( mountPoint->device() ) )
+                    mountPoint->setFilesystemType( "ntfs-3g" );
+            }
+        }
+    }
+
+
+    /**
+     * Change filesystem type "fuseblk" to "ntfs" for NTFS devices.
+     **/
+    bool checkForNtfs( const MountPointMap & mountPointMap )
+    {
+        for ( const MountPoint * mountPoint : mountPointMap )
+        {
+            if ( mountPoint->isNtfs() )
+                return true;
+        }
+
+        return false;
     }
 
 
     /**
      * Return 'true' if 'device' is mounted.
      **/
-    bool isDeviceMounted( const QString & device, MountPointMap & mountPointMap )
+    bool isDeviceMounted( const QString & device, const MountPointMap & mountPointMap )
     {
         for ( const MountPoint * mountPoint : mountPointMap )
         {
@@ -130,11 +166,11 @@ namespace
      * Post-process a mount point: check for duplicate mounts and Snap
      * packages.
      **/
-    void postProcess( MountPoint * mountPoint, MountPoints * mountPoints )
+    void postProcess( MountPoint * mountPoint, const MountPointMap & mountPointMap )
     {
         //logDebug() << mountPoint << Qt::endl;
 
-        if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), *mountPoints ) )
+        if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), mountPointMap ) )
         {
             mountPoint->setDuplicate();
 
@@ -189,7 +225,7 @@ const QStorageInfo & MountPoint::storageInfo()
     if ( !_storageInfo )
     {
         if ( isNetworkMount() )
-            logDebug() << "Creating QStorageInfo for " << _path << Qt::endl;
+            logInfo() << "Creating QStorageInfo for " << _path << Qt::endl;
 
         _storageInfo.reset( new QStorageInfo{ _path } );
     }
@@ -209,16 +245,6 @@ MountPoints * MountPoints::instance()
 }
 
 
-void MountPoints::init()
-{
-    clear();
-
-    _hasNtfs = false;
-
-    populate();
-}
-
-
 const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath )
 {
     const QFileInfo fileInfo{ startPath };
@@ -228,11 +254,9 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 //        logDebug() << startPath << " canonicalized is " << path << Qt::endl;
 
     const MountPoint * mountPoint = findByPath( path );
-
     if ( !mountPoint )
     {
         QStringList pathComponents = startPath.split( u'/', Qt::SkipEmptyParts );
-
         while ( !mountPoint && !pathComponents.isEmpty() )
         {
             // Try one level upwards
@@ -251,23 +275,21 @@ const MountPoint * MountPoints::findNearestMountPoint( const QString & startPath
 
 void MountPoints::populate()
 {
-    QStringList ntfsDevices = findNtfsDevices();
-    _hasNtfs = !ntfsDevices.isEmpty();
-
 #if USE_PROC_MOUNTS
-    read( "/proc/mounts", ntfsDevices ) || read( "/etc/mtab", ntfsDevices );
-    if ( isEmpty() )
-        logError() << "Could not read either /proc/mounts or /etc/mtab" << Qt::endl;
+    read( "/proc/mounts" ) || read( "/etc/mtab" );
 #endif
 
 #if HAVE_Q_STORAGE_INFO
     if ( isEmpty() )
-        readStorageInfo( ntfsDevices );
+        readStorageInfo();
 #endif
+
+    checkForFuseblk( *this );
+    _hasNtfs = checkForNtfs( *this );
 }
 
 
-bool MountPoints::read( const QString & filename, const QStringList & ntfsDevices )
+bool MountPoints::read( const QString & filename )
 {
     QFile file{ filename };
 
@@ -308,14 +330,13 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
         QString & path = fields[1];
         path.replace( "\\040"_L1, " "_L1 ); // escaped spaces
 
-        QString & fsType = fields[2];
-        handleFuseblk( fsType, ntfsDevices, device );
+        const QString & fsType = fields[2];
 
         const QString & mountOpts = fields[3];
         // ignoring fsck and dump order (0 0)
 
         MountPoint * mountPoint = new MountPoint{ device, path, fsType, mountOpts };
-        postProcess( mountPoint, this );
+        postProcess( mountPoint, *this );
         add( mountPoint );
 
         line = in.readLine();
@@ -332,7 +353,7 @@ bool MountPoints::read( const QString & filename, const QStringList & ntfsDevice
 }
 
 #if HAVE_Q_STORAGE_INFO
-void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
+void MountPoints::readStorageInfo()
 {
     const auto mountedVolumes = QStorageInfo::mountedVolumes();
     for ( const QStorageInfo & mount : mountedVolumes )
@@ -341,10 +362,9 @@ void MountPoints::readStorageInfo( const QStringList & ntfsDevices )
         const QLatin1String mountOptions = mount.isReadOnly() ? "ro"_L1 : QLatin1String{};
 
         QString fsType = QString::fromUtf8( mount.fileSystemType() );
-        handleFuseblk( fsType, ntfsDevices, device );
 
         MountPoint * mountPoint = new MountPoint{ device, mount.rootPath(), fsType, mountOptions };
-        postProcess( mountPoint, this );
+        postProcess( mountPoint, *this );
         add( mountPoint );
     }
 

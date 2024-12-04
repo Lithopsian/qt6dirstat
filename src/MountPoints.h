@@ -17,7 +17,6 @@
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
 #  define HAVE_Q_STORAGE_INFO 0
-typedef void * QStorageInfo;
 #else
 #  define HAVE_Q_STORAGE_INFO 1
 #  include <QStorageInfo>
@@ -60,10 +59,11 @@ namespace QDirStat
 	const QString & path() const { return _path; }
 
 	/**
-	 * Return the filesystem type as a string (eg. "ext4", "btrfs",
+	 * Get or set the filesystem type as a string (eg. "ext4", "btrfs",
 	 * or "none").
 	 **/
 	const QString & filesystemType() const { return _filesystemType; }
+	void setFilesystemType( const QString & fsType ) { _filesystemType = fsType; }
 
 	/**
 	 * Return the individual mount options as a list of strings (eg.
@@ -240,7 +240,7 @@ namespace QDirStat
 	 * Constructor. Not for public use. Use the static methods instead.
 	 **/
 	MountPoints()
-	    { init(); }
+	    { populate(); }
 
 	/**
 	 * Destructor.
@@ -265,7 +265,8 @@ namespace QDirStat
 	/**
 	 * Initialise the member variables and mount point map.
 	 **/
-	void init();
+	void init()
+	    { clear(); populate(); }
 
 	/**
 	 * Clear the map and delete all the mountpoints.
@@ -352,14 +353,14 @@ namespace QDirStat
 	 * the mount points with the content. Return 'true' on success, 'false'
 	 * on failure.
 	 **/
-	bool read( const QString & filename, const QStringList & ntfsDevices );
+	bool read( const QString & filename );
 
 #if HAVE_Q_STORAGE_INFO
 	/**
 	 * Fallback method if neither /proc/mounts nor /etc/mtab is available:
 	 * Try using QStorageInfo. Return 'true' if any mount point was found.
 	 **/
-	void readStorageInfo( const QStringList & ntfsDevices );
+	void readStorageInfo();
 #endif
 
 	/**
