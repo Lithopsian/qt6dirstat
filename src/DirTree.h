@@ -292,7 +292,14 @@ namespace QDirStat
 	/**
 	 * Return 'true' if 'item' is the (invisible) root item.
 	 **/
-//	bool isRoot( const DirInfo * dir ) const { return dir && dir == root(); }
+	bool isRoot( const DirInfo * dir ) const { return dir && dir == root(); }
+
+	/**
+	 * Clear all items of this tree.  This should only be called from
+	 * DirTreeModel unless you have some other special way of ensuring that
+	 * the model is aware that the tree is being emptied.
+	 **/
+	void prepare();
 
 	/**
 	 * Clear all items of this tree.  This should only be called from

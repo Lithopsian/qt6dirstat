@@ -470,7 +470,6 @@ void MainWindow::openDir( const QString & url )
     try
     {
 	DirTree * tree = app()->dirTree();
-	tree->clear();
 	tree->startReading( url );
 	const QString & dirTreeUrl = tree->url(); // canonical version of url
 	updateWindowTitle( dirTreeUrl );
@@ -517,6 +516,7 @@ void MainWindow::askOpenDir()
     if ( !path.isEmpty() )
     {
 	_historyButtons->clear();
+	tree->clear();
 	tree->reset();
 	tree->setCrossFilesystems( crossFilesystems );
 	openDir( path );
@@ -560,7 +560,7 @@ void MainWindow::pkgQuerySetup()
     _ui->statusBar->clearMessage();
     _ui->breadcrumbNavigator->clear();
     _ui->fileDetailsView->clear();
-    app()->dirTree()->clear();
+    app()->dirTree()->prepare();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
     enableDirPermissionsMsg();
 }
@@ -605,7 +605,7 @@ void MainWindow::refreshAll()
 	// This will throw if the url no longer exists or is inaccessible
 	try
 	{
-	    tree->clear();
+	    tree->prepare();
 	    tree->startReading( url );
 	}
 	catch ( const SysCallFailedException & ex )
@@ -968,8 +968,10 @@ void MainWindow::showFilesystems()
 void MainWindow::readFilesystem( const QString & path )
 {
     _historyButtons->clear();
-     app()->dirTree()->reset();
-     openDir( path );
+    DirTree * tree = app()->dirTree();
+    tree->clear();
+    tree->reset();
+    openDir( path );
 }
 
 

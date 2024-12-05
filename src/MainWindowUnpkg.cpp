@@ -59,7 +59,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     if ( !pkgManager )
     {
-	logError() << "No supported primary package manager" << Qt::endl;
+	logWarning() << "No supported primary package manager" << Qt::endl;
 	return;
     }
 

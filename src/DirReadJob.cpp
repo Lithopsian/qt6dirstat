@@ -436,24 +436,6 @@ void LocalDirReadJob::startReading()
     // Don't add anything after finished() since this deletes this job!
 }
 
-/*
-bool LocalDirReadJob::checkForNtfs()
-{
-    _checkedForNtfs = true;
-
-    if ( !MountPoints::hasNtfs() )
-    {
-	_isNtfs = false;
-    }
-    else if ( !_dirName.isEmpty() )
-    {
-	const MountPoint * mountPoint = MountPoints::findNearestMountPoint( _dirName );
-	_isNtfs = mountPoint && mountPoint->isNtfs();
-    }
-
-    return _isNtfs;
-}
-*/
 
 
 

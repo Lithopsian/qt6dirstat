@@ -284,6 +284,13 @@ bool DirTree::isToplevel( const FileInfo * item ) const
 }
 */
 
+void DirTree::prepare()
+{
+    MountPoints::reload();
+    clear();
+}
+
+
 void DirTree::clear()
 {
     _jobQueue.clear();
