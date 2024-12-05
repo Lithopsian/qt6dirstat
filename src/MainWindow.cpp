@@ -82,9 +82,11 @@ MainWindow::MainWindow( bool slowUpdate ):
     _sortCol{ DataColumns::toViewCol( SizeCol ) },
     _sortOrder{ Qt::DescendingOrder }
 {
+    logDebug() << Qt::endl;
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel{ MENUBAR_VERSION } );
     _updateTimer.setInterval( UPDATE_MILLISEC );
+    logDebug() << Qt::endl;
 
     // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
     // Before this, the app() getters will return 0
@@ -92,6 +94,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     DirTreeModel * dirTreeModel = new DirTreeModel{ this };
     SelectionModel * selectionModel = new SelectionModel{ dirTreeModel, this };
     QDirStatApp::setModels( this, dirTreeModel, selectionModel );
+    logDebug() << Qt::endl;
 
     if ( slowUpdate )
         dirTreeModel->setSlowUpdate();
@@ -532,7 +535,9 @@ void MainWindow::askOpenPkg()
     if ( !cancelled )
     {
 	_historyButtons->clear();
-	app()->dirTree()->reset();
+	DirTree * tree = app()->dirTree();
+	tree->prepare();
+	tree->reset();
 	readPkg( pkgFilter );
     }
 }
@@ -560,7 +565,6 @@ void MainWindow::pkgQuerySetup()
     _ui->statusBar->clearMessage();
     _ui->breadcrumbNavigator->clear();
     _ui->fileDetailsView->clear();
-    app()->dirTree()->prepare();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
     enableDirPermissionsMsg();
 }

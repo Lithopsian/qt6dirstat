@@ -40,6 +40,7 @@ void MainWindow::askOpenUnpkg()
 
     if ( dialog.exec() == QDialog::Accepted )
     {
+	app()->dirTree()->prepare();
 	_historyButtons->clear();
 	showUnpkgFiles( dialog.values() );
     }
