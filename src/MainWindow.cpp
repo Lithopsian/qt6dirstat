@@ -82,11 +82,9 @@ MainWindow::MainWindow( bool slowUpdate ):
     _sortCol{ DataColumns::toViewCol( SizeCol ) },
     _sortOrder{ Qt::DescendingOrder }
 {
-    logDebug() << Qt::endl;
     _ui->setupUi( this );
     _ui->menubar->setCornerWidget( new QLabel{ MENUBAR_VERSION } );
     _updateTimer.setInterval( UPDATE_MILLISEC );
-    logDebug() << Qt::endl;
 
     // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
     // Before this, the app() getters will return 0
@@ -94,7 +92,6 @@ MainWindow::MainWindow( bool slowUpdate ):
     DirTreeModel * dirTreeModel = new DirTreeModel{ this };
     SelectionModel * selectionModel = new SelectionModel{ dirTreeModel, this };
     QDirStatApp::setModels( this, dirTreeModel, selectionModel );
-    logDebug() << Qt::endl;
 
     if ( slowUpdate )
         dirTreeModel->setSlowUpdate();
