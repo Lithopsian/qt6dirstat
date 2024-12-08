@@ -366,7 +366,7 @@ void MimeCategorizer::buildMaps()
 	buildWildcardLists( category ); // regular expressions with no suffix
     }
 
-    logDebug() << "maps built in " << stopwatch.restart() << "ms ("
+    logInfo() << "maps built in " << stopwatch.restart() << "ms ("
                << _wildcards.size() << " naked regular expressions)" << Qt::endl;
 }
 

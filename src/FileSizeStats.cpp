@@ -27,7 +27,7 @@ FileSizeStats::FileSizeStats( FileInfo * subtree, bool excludeSymlinks ):
 }
 
 
-FileSizeStats::FileSizeStats( FileInfo * subtree, const WildcardCategory & wildcardCategory ):
+FileSizeStats::FileSizeStats( const FileInfo * subtree, const WildcardCategory & wildcardCategory ):
     PercentileStats{}
 {
     if ( !subtree || !subtree->checkMagicNumber() )

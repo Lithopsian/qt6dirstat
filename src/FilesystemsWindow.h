@@ -74,8 +74,8 @@ namespace QDirStat
     protected slots:
 
 	/**
-	 * Populate the window with all normal filesystems. Bind mounts,
-	 * filesystems mounted several times and Btrfs subvolumes are excluded.
+	 * Populate the window with all normal filesystems. Bind mounts and
+	 * filesystems mounted several times.
 	 **/
 	void populate();
 
@@ -96,13 +96,8 @@ namespace QDirStat
 	/**
 	 * Clear all data and widget contents.
 	 **/
-	void clear() { _ui->fsTree->clear(); }
-
-	/**
-	 * Read the path of the currently selected filesystem or an empty
-	 * string if there is none.
-	 **/
-	QString selectedPath() const;
+	void clear()
+	    { _ui->fsTree->clear(); }
 
 	/**
 	 * Key press event for detecting evnter/return.

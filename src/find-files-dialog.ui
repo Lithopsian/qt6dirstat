@@ -213,6 +213,12 @@
         </property>
         <item>
          <widget class="QLabel" name="currentSubtreePathLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Panel</enum>
           </property>

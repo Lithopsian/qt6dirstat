@@ -65,7 +65,7 @@ namespace QDirStat
      * The most basic building block of a DirTree:
      *
      * Information about one single directory entry. This is the type of info
-     * typically obtained by stat() / lstat() or similar calls.
+     * typically obtained by stat() or similar calls.
      *
      * This class is tuned for size rather than speed: A typical Linux system
      * easily has 150,000+ filesystem objects, and at least one entry of this
@@ -180,8 +180,8 @@ namespace QDirStat
 	{}
 
 	/**
-	 * Constructor from a stat buffer (i.e. based on an lstat() call).  It is
-	 * expected that this will be used for all "real" files.
+	 * Constructor from a stat buffer.  It is expected that this will be used
+	 * for all "real" files.
 	 **/
 	FileInfo( DirInfo           * parent,
 	          DirTree           * tree,
@@ -197,12 +197,12 @@ namespace QDirStat
 	/**
 	 * Destructor.
 	 *
-	 * The destructor should also take care of unlinking this object from
-	 * its parent's children list, but regrettably that just doesn't work: At
-	 * this point (within the destructor) parts of the object are already
-	 * destroyed, e.g., the virtual table - virtual methods don't work any
-	 * more. Thus, somebody from outside must call unlinkChild() just prior
-	 * to the actual "delete".
+	 * The destructor should also take care of unlinking this object from its
+	 * parent's children list, but regrettably that just doesn't work: At this
+	 * point (within the destructor) parts of the object are already destroyed,
+	 * e.g., the virtual table - virtual methods don't work any more. Thus,
+	 * somebody from outside must call unlinkChild() just prior to the actual
+	 * "delete".
 	 **/
 	virtual ~FileInfo();
 
@@ -296,9 +296,9 @@ namespace QDirStat
 	void setRowNumber( DirSize rowNumber ) { _rowNumber = rowNumber; }
 
 	/**
-	 * The file permissions and object type as returned by lstat().
-	 * You might want to use the respective convenience methods instead:
-	 * isDir(), isFile(), ...
+	 * The file permissions and object type as returned by stat().  You
+	 * might want to use the respective convenience methods instead: isDir(),
+	 * isFile(), etc.
 	 *
 	 * See also symbolicPermissions(), octalPermissions()
 	 **/

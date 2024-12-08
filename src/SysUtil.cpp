@@ -7,9 +7,8 @@
  *              Ian Nartowicz
  */
 
-#include <pwd.h>	// getpwuid()
-#include <grp.h>	// getgrgid()
-#include <sys/stat.h>	// lstat()
+#include <pwd.h> // getpwuid()
+#include <grp.h> // getgrgid()
 
 #include <QRegularExpression>
 
@@ -20,7 +19,7 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const QString     & command,
+bool SysUtil::tryRunCommand( const char        * command,
                              const QStringList & args,
                              const QString     & expectedResult )
 {

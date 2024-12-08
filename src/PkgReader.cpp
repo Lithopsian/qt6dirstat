@@ -7,6 +7,8 @@
  *              Ian Nartowicz
  */
 
+#include <sys/stat.h> // fstatat(), struct stat
+
 #include "PkgReader.h"
 #include "DirTree.h"
 #include "FileInfoIterator.h"
@@ -278,17 +280,17 @@ namespace
 
 
     /**
-     * Do an lstat() syscall for 'path' or fetch the result from a cache.
-     * Return false if lstat() fails.
+     * Do an fstatat() syscall for 'path' or fetch the result from a cache.
+     * Return false if fstatat() fails.
      **/
-    bool lstat( struct stat & statInfo, const QString & path )
+    bool stat( struct stat & statInfo, const QString & path )
     {
-	const int result = ::lstat( path.toUtf8(), &statInfo );
+	const int result = SysUtil::stat( path, statInfo );
 
 	if ( result != 0 )
-	    return false;	// lstat() failed
+	    return false; // fstatat() failed
 
-	if ( S_ISDIR( statInfo.st_mode ) )	// directory
+	if ( S_ISDIR( statInfo.st_mode ) ) // directory
 	{
 	    // Zero the directory's own size fields to prevent them from
 	    // distorting the total sums.  Otherwise the directory would be
@@ -306,7 +308,7 @@ namespace
 
 
     /**
-     * Create a DirInfo or FileInfo node from a path and lstat call.
+     * Create a DirInfo or FileInfo node from a path and stat call.
      **/
     FileInfo * createItem( const QString & path,
                            const QString & name,
@@ -316,7 +318,7 @@ namespace
 	// logDebug() << "path: \"" << path << '"' << Qt::endl;
 
 	struct stat statInfo;
-	if ( !lstat( statInfo, path ) ) // lstat() failed
+	if ( !stat( statInfo, path ) ) // fstatat() failed
 	    return nullptr;
 
 	if ( S_ISDIR( statInfo.st_mode ) )	// directory
@@ -381,7 +383,7 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 
     if ( errno == EACCES )
     {
-	// No permissions, expected error
+	// No permissions, unexpected (for a package!) but non-fatal error
 	parent->markAsDirty();
 	parent->setReadState( DirPermissionDenied );
     }

@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QToolTip>
 
 #include "HistogramItems.h"

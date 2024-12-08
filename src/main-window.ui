@@ -20,7 +20,7 @@
     <item alignment="Qt::AlignTop">
      <widget class="QDirStat::BreadcrumbNavigator" name="breadcrumbNavigator">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -111,7 +111,7 @@
            <x>0</x>
            <y>0</y>
            <width>79</width>
-           <height>188</height>
+           <height>186</height>
           </rect>
          </property>
         </widget>

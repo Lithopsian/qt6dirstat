@@ -88,7 +88,7 @@ namespace QDirStat
 	/**
 	 * Return the command for querying pacman for files and directories.
 	 **/
-	static QString pacmanCommand() { return "/usr/bin/pacman"; }
+	static const char * pacmanCommand() { return "/usr/bin/pacman"; }
 
 	/**
 	 * Return the command for getting the list of files and directories

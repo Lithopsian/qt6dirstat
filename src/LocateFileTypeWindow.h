@@ -97,7 +97,7 @@ namespace QDirStat
 	 * and populates the search result list with the directories where
 	 * matching files were found.
 	 **/
-	void populate( const WildcardCategory & wildcardCategory, FileInfo * fileInfo = nullptr );
+	void populate( const WildcardCategory & wildcardCategory, FileInfo * fileInfo );
 
 	/**
 	 * Recursively locate directories that contain files matching the

@@ -40,6 +40,7 @@ void MainWindow::askOpenUnpkg()
 
     if ( dialog.exec() == QDialog::Accepted )
     {
+	app()->dirTree()->prepare();
 	_historyButtons->clear();
 	showUnpkgFiles( dialog.values() );
     }
@@ -59,7 +60,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
     if ( !pkgManager )
     {
-	logError() << "No supported primary package manager" << Qt::endl;
+	logWarning() << "No supported primary package manager" << Qt::endl;
 	return;
     }
 

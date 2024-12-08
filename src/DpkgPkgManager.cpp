@@ -81,7 +81,7 @@ namespace
     /**
      * Return the command for the dpkg manager program.
      **/
-    QString dpkgCommand()
+    const char * dpkgCommand()
     {
 	return "/usr/bin/dpkg";
     }
@@ -97,7 +97,7 @@ namespace
 	return SysUtil::runCommand( dpkgCommand(),
 	                            { "-S", path },
 	                            &exitCode,
-	                            1,		// better not to lock the whole program for 15 seconds
+	                            5,		// better not to lock the whole program for 15 seconds
 	                            false,	// don't log command
 	                            false,	// don't log output
 	                            logError );

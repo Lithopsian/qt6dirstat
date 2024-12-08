@@ -38,7 +38,7 @@ namespace QDirStat
 	 * Constructor with a subtree and WildcardCategory.  Used with
 	 * calls from FileTypeStatsWindow.
 	 **/
-	FileSizeStats( FileInfo * subtree, const WildcardCategory & wildcardCategory );
+	FileSizeStats( const FileInfo * subtree, const WildcardCategory & wildcardCategory );
 
 
     protected:

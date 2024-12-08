@@ -8,6 +8,7 @@
  */
 
 #include <QEventLoop>
+#include <QTimer>
 
 #include "BusyPopup.h"
 #include "Logger.h"
@@ -21,13 +22,15 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Process events until the label has been painted.  This will
-     * block the main event loop.
+     * Process events until the label has been painted.  This will block
+     * the main event loop, so exit after a second even if the label hasn't
+     * been painted, just in case it is hidden or otherwise never painted.
      **/
     void processEvents( const BusyPopup * busyPopup )
     {
 	QEventLoop eventLoop;
 	QObject::connect( busyPopup, &BusyPopup::painted, &eventLoop, &QEventLoop::quit );
+	QTimer::singleShot( 1000, &eventLoop, &QEventLoop::quit );
 	eventLoop.exec();
     }
 

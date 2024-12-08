@@ -32,7 +32,7 @@ namespace QDirStat
      * 'url' is the full path to this component, which can be
      * used to search for or navigate to that item.
      **/
-    struct Breadcrumb final
+    struct Breadcrumb
     {
 	Breadcrumb( const QString & path = QString{} ):
 	    pathComponent{ path }

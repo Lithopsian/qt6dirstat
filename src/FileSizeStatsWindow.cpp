@@ -115,6 +115,62 @@ namespace
 	percentilesContextMenu( menu, ui );
     }
 
+
+    /**
+     * One-time initialization of the widgets in 'window'.
+     **/
+    void initWidgets( FileSizeStatsWindow * window, Ui::FileSizeStatsWindow * ui )
+    {
+	// Start with the options panel closed
+	ui->optionsPanel->hide();
+
+	// Set these here so they can be based on the PercentileStats constants
+	const short firstStartPercentile = PercentileStats::minPercentile();
+	const short lastStartPercentile  = PercentileStats::quartile1() - 1;
+	const short firstEndPercentile   = PercentileStats::quartile3() + 1;
+	const short lastEndPercentile    = PercentileStats::maxPercentile();
+	ui->startPercentileSpinBox->setRange( firstStartPercentile, lastStartPercentile );
+	ui->startPercentileSlider->setRange( firstStartPercentile, lastStartPercentile );
+	ui->endPercentileSpinBox->setRange( firstEndPercentile, lastEndPercentile );
+	ui->endPercentileSlider->setRange( firstEndPercentile, lastEndPercentile );
+	ui->actionStartMin->setText( ui->actionStartMin->text().arg( firstStartPercentile ) );
+	ui->actionEndMax->setText( ui->actionEndMax->text().arg( lastEndPercentile ) );
+
+	// Put the percentile marker actions in a group so only one is ever checked
+	QComboBox * comboBox = ui->markersComboBox;
+	QActionGroup * group = new QActionGroup{ window };
+	const auto markersAction = [ comboBox, group ]( QAction * action, int step )
+	{
+	    action->setCheckable( true );
+	    action->setData( step );
+	    group->addAction( action );
+
+	    // Create a combo-box entry from the action text, with a pointer to the action in userData()
+	    comboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
+
+	    // Each action simply selects the combo-box entry just created from it
+	    const int index = comboBox->count() - 1;
+	    QObject::connect( action, &QAction::triggered,
+	                      [ comboBox, index ](){ comboBox->setCurrentIndex( index ); } );
+	};
+	markersAction( ui->actionNoPercentiles, 0 );
+	markersAction( ui->actionEvery10th, 10 );
+	markersAction( ui->actionEvery5th, 5 );
+	markersAction( ui->actionEvery2nd, 2 );
+	markersAction( ui->actionEveryPercentile, 1 );
+	ui->actionNoPercentiles->setChecked( true );
+
+	// Set up the percentile and buckets tables
+	ui->bucketsTable->setModel( new BucketsTableModel{ window } );
+	ui->bucketsTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	QTableView * table = ui->percentileTable;
+	table->setModel( new PercentileTableModel{ window } );
+	table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
+	table->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
+    }
+
 } // namespace
 
 
@@ -129,7 +185,7 @@ FileSizeStatsWindow::FileSizeStatsWindow( QWidget * parent ):
 
     _ui->setupUi( this );
 
-    initWidgets();
+    initWidgets( this, _ui.get() );
     connectActions();
 
     Settings::readWindowSettings( this, "FileSizeStatsWindow" );
@@ -157,55 +213,6 @@ FileSizeStatsWindow * FileSizeStatsWindow::sharedInstance( QWidget * mainWindow 
 	_sharedInstance = new FileSizeStatsWindow{ mainWindow };
 
     return _sharedInstance;
-}
-
-
-void FileSizeStatsWindow::initWidgets()
-{
-    // Start with the options panel closed
-    _ui->optionsPanel->hide();
-
-    // Set these here so they can be based on the PercentileStats constants
-    _ui->startPercentileSpinBox->setRange( PercentileStats::minPercentile(), PercentileStats::quartile1() - 1 );
-    _ui->startPercentileSlider->setRange( PercentileStats::minPercentile(), PercentileStats::quartile1() - 1 );
-    _ui->endPercentileSpinBox->setRange( PercentileStats::quartile3() + 1, PercentileStats::maxPercentile() );
-    _ui->endPercentileSlider->setRange( PercentileStats::quartile3() + 1, PercentileStats::maxPercentile() );
-    _ui->actionStartMin->setText( _ui->actionStartMin->text().arg( PercentileStats::minPercentile() ) );
-    _ui->actionEndMax->setText( _ui->actionEndMax->text().arg( PercentileStats::maxPercentile() ) );
-
-    // Put the percentile marker actions in a group so only one is ever checked
-    QComboBox * comboBox = _ui->markersComboBox;
-    QActionGroup * group = new QActionGroup{ this };
-    const auto markersAction = [ comboBox, group ]( QAction * action, int step )
-    {
-	action->setCheckable( true );
-	action->setData( step );
-	group->addAction( action );
-
-	// Create a combo-box entry from the action text, with a pointer to the action in userData()
-	comboBox->addItem( action->text().remove( u'&' ), QVariant::fromValue( action ) );
-
-	// Each action simply selects the combo-box entry just created from it
-	const int index = comboBox->count() - 1;
-	connect( action, &QAction::triggered,
-	         [ comboBox, index ](){ comboBox->setCurrentIndex( index ); } );
-    };
-    markersAction( _ui->actionNoPercentiles, 0 );
-    markersAction( _ui->actionEvery10th, 10 );
-    markersAction( _ui->actionEvery5th, 5 );
-    markersAction( _ui->actionEvery2nd, 2 );
-    markersAction( _ui->actionEveryPercentile, 1 );
-    _ui->actionNoPercentiles->setChecked( true );
-
-    // Set up the percentile and buckets tables
-    _ui->bucketsTable->setModel( new BucketsTableModel{ this } );
-    _ui->bucketsTable->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
-
-    QTableView * table = _ui->percentileTable;
-    table->setModel( new PercentileTableModel{ this } );
-    table->setHorizontalHeader( new PercentileTableHeader{ Qt::Horizontal, table } );
-    table->horizontalHeader()->setSectionResizeMode( QHeaderView::ResizeToContents );
-    table->setVerticalHeader( new PercentileTableHeader{ Qt::Vertical, table } );
 }
 
 
@@ -261,20 +268,22 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const WildcardCategory 
     _wildcardCategory = wildcardCategory;
 
     // Confusing and pointless to exclude (or not) symlinks for a file-type-based dataset
-    const bool unfilteredResults = wildcardCategory.isEmpty();
-    _ui->excludeSymlinksCheckBox->setEnabled( unfilteredResults );
-    if ( !unfilteredResults )
+    const bool filteredResults = wildcardCategory.isEmpty();
+    _ui->excludeSymlinksCheckBox->setEnabled( !filteredResults );
+    if ( filteredResults )
 	_ui->excludeSymlinksCheckBox->setChecked( false );
 
-    const QString & url = fileInfo->debugUrl();
-    const auto filterName = [ &wildcardCategory ]()
+    const QString header = [ filteredResults, fileInfo, &wildcardCategory ]()
     {
+	if ( filteredResults )
+	    return tr( "File size statistics for " );
+
 	const QString & pattern = wildcardCategory.wildcard.pattern();
 	const MimeCategory * category = wildcardCategory.category;
-	return pattern.isEmpty() && category ? category->name() : pattern;
-    };
-    const QString headerUrl = unfilteredResults ? url : filterName() % tr( " files in " ) % url;
-    _ui->headingLabel->setStatusTip( tr( "File size statistics for " ) % replaceCrLf( headerUrl ) );
+	const QString patternName = pattern.isEmpty() && category ? category->name() : pattern;
+	return tr( "File size statistics for %1 files in " ).arg( patternName );
+    }();
+    _ui->headingLabel->setStatusTip( header % replaceCrLf( fileInfo->debugUrl() ));
     showElidedLabel( _ui->headingLabel, this ); // sets the label from the status tip, to fit the window
 
     loadStats( fileInfo );
@@ -293,17 +302,16 @@ void FileSizeStatsWindow::refresh()
 
 void FileSizeStatsWindow::loadStats( FileInfo * fileInfo )
 {
-    // Existing stats are invalidated; be sure the model and histogram get new pointers promptly
-    if ( _wildcardCategory.isEmpty() )
-	_stats.reset( new FileSizeStats{ fileInfo, _ui->excludeSymlinksCheckBox->isChecked() } );
-    else
-	_stats.reset( new FileSizeStats{ fileInfo, _wildcardCategory } );
-    _stats->calculatePercentiles();
+    FileSizeStats * stats = _wildcardCategory.isEmpty() ?
+                            new FileSizeStats{ fileInfo, _ui->excludeSymlinksCheckBox->isChecked() } :
+                            new FileSizeStats{ fileInfo, _wildcardCategory };
+    stats->calculatePercentiles();
 
-    const FileSizeStats * stats = _stats.get();
     bucketsTableModel( _ui->bucketsTable )->setStats( stats );
     percentileTableModel( _ui->percentileTable )->setStats( stats );
     _ui->histogramView->init( stats );
+
+    _stats.reset( stats );
 
     setPercentileTable();
 }

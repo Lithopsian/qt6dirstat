@@ -10,7 +10,9 @@
 #ifndef SysUtil_h
 #define SysUtil_h
 
-#include <unistd.h>    // access(), getuid(), geteduid(), readlink()
+#include <fcntl.h> // AT_FDCWD, AT_EACCESS
+#include <unistd.h> // faccessat(), getuid(), geteduid(), readlink()
+#include <sys/stat.h> // fstatat()
 #include <sys/types.h> // uid_t
 
 #include <QProcessEnvironment>
@@ -28,10 +30,40 @@ namespace QDirStat
     namespace SysUtil
     {
 	/**
+	 * Return the flags to use with fstatat():
+	 * - AT_SYMLINK_NOFOLLOW means that the call behaves link lstat(), that
+	 * is it returns information about symbolic links, and not about the
+	 * target of the link;
+	 * - AT_NO_AUTOMOUNT means that directories with auto-mounts should not
+	 * be mounted, and information is returned about the directory itself
+	 * unless it is already mounted.  This flag did not exists before
+	 * kernel 2.6.38, was ignored starting with kernel 3.1, and became the
+	 * default with kernel 4.11, so almost pointless.
+	 **/
+	inline int statFlags()
+#ifdef AT_NO_AUTOMOUNT
+	    { return AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT; }
+#else
+	    { return AT_SYMLINK_NOFOLLOW; }
+#endif
+
+	/**
+	 * Populate 'statInfo' and return whether the status code from this
+	 * command.  Symlinks are not followed and, as far as is possible,
+	 * auto-mounts are not mounted.
+	 **/
+	inline int stat( int dirFd, const QString & path, struct stat & statInfo )
+	    { return fstatat( dirFd, path.toUtf8(), &statInfo, statFlags() ); }
+	inline int stat( const QString & path, struct stat & statInfo )
+	    { return fstatat( AT_FDCWD, path.toUtf8(), &statInfo, statFlags() ); }
+
+	/**
 	 * Return true if the specified command is available and executable.
 	 **/
+	inline bool haveCommand( const char * command )
+	    { return faccessat( AT_FDCWD, command, X_OK, AT_EACCESS ) == 0; }
 	inline bool haveCommand( const QString & command )
-	    { return access( command.toUtf8(), X_OK ) == 0; }
+	    { return faccessat( AT_FDCWD, command.toUtf8(), X_OK, AT_EACCESS ) == 0; }
 
 	/**
 	 * Try running a command and compare it against an expected result.
@@ -41,7 +73,7 @@ namespace QDirStat
 	 * Log the command that is executed if 'logCommand' is true,
 	 * log the command's output if 'logOutput' is true.
 	 **/
-	bool tryRunCommand( const QString     & command,
+	bool tryRunCommand( const char        * command,
 	                    const QStringList & args,
 	                    const QString     & expectedResult );
 

@@ -292,7 +292,14 @@ namespace QDirStat
 	/**
 	 * Return 'true' if 'item' is the (invisible) root item.
 	 **/
-//	bool isRoot( const DirInfo * dir ) const { return dir && dir == root(); }
+	bool isRoot( const DirInfo * dir ) const { return dir && dir == root(); }
+
+	/**
+	 * Clear all items of this tree.  This should only be called from
+	 * DirTreeModel unless you have some other special way of ensuring that
+	 * the model is aware that the tree is being emptied.
+	 **/
+	void prepare();
 
 	/**
 	 * Clear all items of this tree.  This should only be called from
@@ -506,14 +513,15 @@ namespace QDirStat
 
 	/**
 	 * Set the policy for how hard links are handled: by default, for files
-	 * with multiple hard links, the size is distributed among each
+	 * with multiple hard links, the total size is distributed among each
 	 * individual hard link for that file. So a file with a size of 4 kB
-	 * and 4 hard links reports 1 kB to its parent directory.
+	 * and 4 hard links reports 1 kB to its parent directory.  This avoids
+	 * counting the same disk allocation multiple times.
 	 *
 	 * When this flag is set to 'true', it will report the full 4 kB each
 	 * time, so all 4 hard links together will now add up to 16 kB. While
 	 * this is probably a very bad idea if those links are all in the same
-	 * directory (or subtree), it might even be useful if there are several
+	 * directory (or subtree), it might be useful if there are several
 	 * separate subtrees that all share hard links between each other, but
 	 * not within the same subtree. Some backup systems use this strategy
 	 * to save disk space.
@@ -527,6 +535,27 @@ namespace QDirStat
 	 * Return the current hard links accounting policy.
 	 **/
 	bool ignoreHardLinks() const { return _ignoreHardLinks; }
+
+	/**
+	 * Set whether to trust the number of hard links reported for an NTFS
+	 * file.  If not, then the hard links count is always set to 1; hard
+	 * links will not be reported and total disk allocations will be shown
+	 * too high.
+	 *
+	 * The ntfs-3g legacy driver can report excessive hard link counts if
+	 * it is not configured with the posix_nlink option.  This is
+	 * increasingly less common, so this option now defaults to true.
+	 *
+	 * This flag will be read from the config file from the outside
+	 * (DirTreeModel) and set from there using this function.
+	 **/
+	void setTrustNtfsHardLinks( bool trust )
+	    { _trustNtfsHardLinks = trust; }
+
+	/**
+	 * Return whether to trust hatd link counts reported by NTFS.
+	 **/
+	bool trustNtfsHardLinks() const { return _trustNtfsHardLinks; }
 
 	/**
 	 * Check if going from 'parent' to 'child' would cross a filesystem
@@ -664,6 +693,7 @@ namespace QDirStat
 	bool _crossFilesystems{ false };
 	bool _isBusy{ false };
 	bool _ignoreHardLinks{ false };
+	bool _trustNtfsHardLinks{ true };
 	int  _blocksPerCluster{ -1 };
 
     };	// class DirTree

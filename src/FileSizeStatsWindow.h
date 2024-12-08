@@ -56,12 +56,14 @@ namespace QDirStat
     public:
 
 	/**
-	 * Convenience function for creating, populating and showing the shared
-	 * instance.
+	 * Convenience functions for creating, populating and showing the
+	 * shared instance.
 	 **/
+	static void populateSharedInstance( QWidget * mainWindow, FileInfo * fileInfo )
+	    { if ( fileInfo ) sharedInstance( mainWindow )->populate( fileInfo, WildcardCategory{} ); }
 	static void populateSharedInstance( QWidget                * mainWindow,
 	                                    FileInfo               * fileInfo,
-	                                    const WildcardCategory & wildcardCategory = WildcardCategory{} )
+	                                    const WildcardCategory & wildcardCategory )
 	    { if ( fileInfo ) sharedInstance( mainWindow )->populate( fileInfo, wildcardCategory ); }
 
 
@@ -147,9 +149,8 @@ namespace QDirStat
     protected:
 
 	/**
-	 * One-time initialization of the widgets in this window
+	 * Connect the widget actions.
 	 **/
-	void initWidgets();
 	void connectActions();
 
 	/**

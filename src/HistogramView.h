@@ -10,7 +10,7 @@
 #ifndef HistogramView_h
 #define HistogramView_h
 
-#include <QGraphicsItem>
+#include <QGraphicsRectItem>
 #include <QGraphicsView>
 #include <QEvent>
 
@@ -161,7 +161,8 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Return the stored value for percentile no. 'index' (0..100).
+	 * Return the value for percentile no. 'index' (0..100) in the
+	 * current stats.
 	 **/
 	FileSize percentile( int index ) const;
 
@@ -266,25 +267,6 @@ namespace QDirStat
 	 **/
 	qreal fullWidth()  const { return _size.width()  + leftBorder() + rightBorder();  }
 	qreal fullHeight() const { return _size.height() + topBorder()  + bottomBorder(); }
-
-	/**
-	 * Calculate the width of the overflow panel based on the
-	 * width of the headline text, which may vary depending
-	 * on the theme font (and possibly a translation).  The
-	 * width may be set to fit the pie if that is wider then
-	 * the headline.
-	 *
-	 * The width returned from this function includes a border
-	 * on both sides.  The border is not expected to normally
-	 * contain any text or graphics, but does allow for, for
-	 * example, the margin around graphics text items.
-	 *
-	 * Note that any text line (including its margins) longer
-	 * than the headline (plus the borders) will wrap and not
-	 * affect the required width, although it will increase
-	 * the height required for the overflow panel.
-	 **/
-	static qreal overflowWidth();
 
 	/**
 	 * Return a brush for a background area.

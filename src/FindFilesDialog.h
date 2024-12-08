@@ -62,20 +62,14 @@ namespace QDirStat
 	const Ui::FindFilesDialog * ui() const { return _ui.get(); }
 
 	/**
-	 * Resize event, reimplemented from QDialog/QWidget.
+	 * Event handler, reimplemented from QDialog/QWidget.
 	 *
-	 * This makes a call to showEvent() which re-displays the path
-	 * label, elided to the new dialog width.
+	 * This detects resize events, font change events, and show events.
+	 * Resize events are ignored if the old size was not valid as this
+	 * means the layouts have not been done yet.  The path label is
+	 * elided to fit the dialog width and displayed.
 	 **/
-	void resizeEvent( QResizeEvent * event ) override;
-
-	/**
-	 * Resize event, reimplemented from QDialog/QWidget.
-	 *
-	 * This displays the path label after the layouts have been
-	 * completed, so that it is elided correctly.
-	 **/
-	void showEvent( QShowEvent * ) override;
+	bool event( QEvent * event ) override;
 
 
     private:

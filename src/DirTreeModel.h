@@ -110,11 +110,6 @@ namespace QDirStat
 	QIcon itemTypeIcon( FileInfo * item ) const;
 
 	/**
-	 * Open a directory URL.
-	 **/
-//	void openUrl( const QString & url );
-
-	/**
 	 * Open a pkg URL: Read installed packages that match the specified
 	 * PkgFilter and their file lists from the system's package manager(s).
 	 *
