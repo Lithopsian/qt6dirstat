@@ -209,8 +209,7 @@ namespace QDirStat
         /**
          * Notification that the attached read file list process is finished.
          **/
-        void readFileListFinished( int                  exitCode,
-                                   QProcess::ExitStatus exitStatus );
+        void readFileListFinished( int exitCode, QProcess::ExitStatus exitStatus );
 
 
     protected:

@@ -31,7 +31,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	RpmPkgManager() { readSettings(); }
+	RpmPkgManager();
 
 	/**
 	 * Return the name of this package manager.
@@ -39,21 +39,6 @@ namespace QDirStat
 	 * Implemented from PkgManager.
 	 **/
 	QLatin1String name() const override { return "rpm"_L1; }
-
-	/**
-	 * Check if RPM is active on the currently running system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isPrimaryPkgManager() const override;
-
-	/**
-	 * Check if the rpm command is available on the currently running
-	 * system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isAvailable() const override;
 
 	/**
 	 * Return the owning package of a file or directory with full path
@@ -67,18 +52,6 @@ namespace QDirStat
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
-	//-----------------------------------------------------------------
-	//                    Optional Features
-	//-----------------------------------------------------------------
-
-	/**
-	 * Return 'true' if this package manager supports getting the list of
-	 * installed packages.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsGetInstalledPkg() const override { return true; }
-
 	/**
 	 * Return the list of installed packages.
 	 *
@@ -87,14 +60,6 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	PkgInfoList installedPkg() const override;
-
-	/**
-	 * Return 'true' if this package manager supports getting the file list
-	 * for a package.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsFileList() const override { return true; }
 
 	/**
 	 * Return the command for getting the list of files and directories
@@ -110,14 +75,6 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	QStringList parseFileList( const QString & output ) const override;
-
-	/**
-	 * Return 'true' if this package manager supports building a file list
-	 * cache for getting all file lists for all packages.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsFileListCache() const override { return true; }
 
 	/**
 	 * Create a file list cache with the specified lookup type for all
@@ -152,10 +109,53 @@ namespace QDirStat
 	 **/
 	void readSettings();
 
+	/**
+	 * Return the program and arguments for a command to test if this is a
+	 * primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	PkgCommand isPrimaryCommand() const override
+	    { return PkgCommand{ _rpmCommand, { "-qf", _rpmCommand } }; }
+
+	/**
+	 * Returns a regular expression string to test whether the output of a
+	 * process from isPrimaryCommand() matches that expected if rpm is the
+	 * primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	QString isPrimaryRegExp() const override { return "^rpm.*"; };
+
+	/**
+	 * Return 'true' if this package manager supports getting the list of
+	 * installed packages.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsGetInstalledPkg() const override { return true; }
+
+	/**
+	 * Return 'true' if this package manager supports getting the file list
+	 * for a package.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsFileList() const override { return true; }
+
+	/**
+	 * Return 'true' if this package manager supports building a file list
+	 * cache for getting all file lists for all packages.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsFileListCache() const override { return true; }
+
 
     private:
 
 	int _getPkgListWarningSec;
+	const char * _rpmCommand;
 
     };	// class RpmPkgManager
 

@@ -136,6 +136,18 @@ namespace QDirStat
          **/
         FileDetailsView * fileDetailsView() const { return _ui->fileDetailsView; }
 
+        /**
+         * Enable the action for a packaged read.
+         **/
+        void enableOpenPkg()
+            { _ui->actionOpenPkg->setEnabled( true ); }
+
+        /**
+         * Enable the action for an unpackage dread.
+         **/
+        void enableOpenUnpkg()
+            { _ui->actionOpenUnpkg->setEnabled( true ); }
+
 
     public slots:
 
@@ -606,12 +618,6 @@ namespace QDirStat
          * _futureSelection, open that branch and clear _futureSelection.
          **/
         void applyFutureSelection();
-
-        /**
-         * Check for package manager support and enable or disable some of the
-         * related actions in the menus accordingly.
-         **/
-        void checkPkgManagerSupport();
 
         /**
          * Apply the exclude rules from 'unpkgSettings' to the DirTree.

@@ -19,31 +19,38 @@
 using namespace QDirStat;
 
 
-bool SysUtil::tryRunCommand( const char        * command,
-                             const QStringList & args,
-                             const QString     & expectedResult )
+namespace
 {
-    int exitCode;
-    QString output = runCommand( command,
-                                 args,
-                                 &exitCode,
-                                 COMMAND_TIMEOUT_SEC,
-                                 false, // don't log command
-                                 false, // don't log output
-                                 false ); // don't log errors, just return false
-
-    if ( exitCode != 0 )
+    /**
+     * Return a QProcessEnvironment object with the C locale added.  This
+     * is necessary when running some commands to avoid problems trying
+     * to parse localised output.
+     **/
+    QProcessEnvironment cProcessEnvironment()
     {
-	//logDebug() << "Exit code: " << exitCode
-	//           << " command line: \"" << command << " " << args.join( u' ' ) << '"' << Qt::endl;
-	return false;
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	env.insert( "LANG", "C" ); // Prevent output in translated languages
+	return env;
     }
 
-    return QRegularExpression{ expectedResult }.match( output ).hasMatch();
 }
 
 
-QString SysUtil::runCommand( const QString     & command,
+QProcess * SysUtil::commandProcess( const QString & program, const QStringList & args )
+{
+
+    QProcess * process = new QProcess;
+
+    process->setProgram( program );
+    process->setArguments( args );
+    process->setProcessEnvironment( cProcessEnvironment() );
+    process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
+
+    return process;
+}
+
+
+QString SysUtil::runCommand( const QString     & program,
                              const QStringList & args,
                              int               * exitCode_ret,
                              int                 timeoutSec,
@@ -54,50 +61,45 @@ QString SysUtil::runCommand( const QString     & command,
     int exitCode = -1;
 
     if ( logCommand )
-	logDebug() << command << " " << args.join( u' ' ) << Qt::endl;
+	logDebug() << program << " " << args.join( u' ' ) << Qt::endl;
 
-    const QString output = [ &command, &args, timeoutSec, logError, &exitCode ]() -> QString
+    const QString output = [ &program, &args, timeoutSec, logError, &exitCode ]() -> QString
     {
-	if ( !haveCommand( command ) )
+	if ( !haveCommand( program ) )
 	    return "ERROR: Command not found\n\n";
 
-	QProcess process;
-	process.setProgram( command );
-	process.setArguments( args );
-	process.setProcessEnvironment( cProcessEnvironment() );
-	process.setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
-	process.start();
+	const auto logErrorMsg = [ &program, &args ]( const QString msg )
+	    { logError() << msg << ": \"" << program << "\" args: " << args << Qt::endl; };
 
-	const bool finished = process.waitForFinished( timeoutSec * 1000 );
-	const QString output{ process.readAll() };
+	QProcess * process = commandProcess( program, args );
+	process->start();
+
+	const bool finished = process->waitForFinished( timeoutSec * 1000 );
+	const QString output{ process->readAll() };
 	if ( finished )
 	{
-	    if ( process.exitStatus() == QProcess::NormalExit )
+	    if ( process->exitStatus() == QProcess::NormalExit )
 	    {
-		exitCode = process.exitCode();
-
-		if ( logError && exitCode != 0)
-		{
-		    logError() << "Command exited with exit code " << process.exitCode()
-		               << ": " << command << "\" args: " << args << Qt::endl;
-		}
-
-		return output;
+		exitCode = process->exitCode();
+		if ( logError && exitCode != 0 )
+		    logErrorMsg( "Command exited with exit code " % QString::number( exitCode ) );
 	    }
 	    else
 	    {
-		logError() << "Command crashed: \"" << command << "\" args: " << args << Qt::endl;
-		return "ERROR: Command crashed\n\n" % output;
+		logErrorMsg( "Command crashed" );
 	    }
 	}
 	else
 	{
-	    logError() << "Timeout or error: \"" << command << "\" args: " << args << Qt::endl;
-	    return "ERROR: Timeout or error\n\n" % output;
+	    logErrorMsg( "Timeout or error" );
 	}
+
+	delete process;
+
+	return output;
     }();
 
-    if ( logOutput || ( exitCode != 0 && logError ) )
+    if ( logOutput )
     {
 	const auto formatOutput = [ &output ]() -> QString
 	{

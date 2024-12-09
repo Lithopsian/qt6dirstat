@@ -78,14 +78,6 @@ namespace
 	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath % '/' % filename : pathname;
     }
 
-    /**
-     * Return the command for the dpkg manager program.
-     **/
-    const char * dpkgCommand()
-    {
-	return "/usr/bin/dpkg";
-    }
-
 
     /**
      * Runs dpkg -S against the given path and returns the output.
@@ -94,7 +86,7 @@ namespace
     */
     QString runDpkg( const QString & path, int &exitCode, bool logError )
     {
-	return SysUtil::runCommand( dpkgCommand(),
+	return SysUtil::runCommand( DpkgPkgManager::dpkgCommand(),
 	                            { "-S", path },
 	                            &exitCode,
 	                            5,		// better not to lock the whole program for 15 seconds
@@ -328,18 +320,6 @@ namespace
     }
 
 } // namespace
-
-
-bool DpkgPkgManager::isPrimaryPkgManager() const
-{
-    return SysUtil::tryRunCommand( dpkgCommand(), { "-S", dpkgCommand() }, "^dpkg:.*" );
-}
-
-
-bool DpkgPkgManager::isAvailable() const
-{
-    return SysUtil::haveCommand( dpkgCommand() );
-}
 
 
 QString DpkgPkgManager::owningPkg( const QString & path ) const

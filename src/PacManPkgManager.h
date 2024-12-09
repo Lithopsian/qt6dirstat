@@ -30,21 +30,6 @@ namespace QDirStat
 	QLatin1String name() const override { return "pacman"_L1; }
 
 	/**
-	 * Check if RPM is active on the currently running system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isPrimaryPkgManager() const override;
-
-	/**
-	 * Check if the rpm command is available on the currently running
-	 * system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isAvailable() const override;
-
-	/**
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
 	 *
@@ -56,18 +41,6 @@ namespace QDirStat
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
-	//-----------------------------------------------------------------
-	//                    Optional Features
-	//-----------------------------------------------------------------
-
-	/**
-	 * Return 'true' if this package manager supports getting the list of
-	 * installed packages.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsGetInstalledPkg() const override { return true; }
-
 	/**
 	 * Return the list of installed packages.
 	 *
@@ -76,14 +49,6 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	PkgInfoList installedPkg() const override;
-
-	/**
-	 * Return 'true' if this package manager supports getting the file list
-	 * for a package.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsFileList() const override { return true; }
 
 	/**
 	 * Return the command for querying pacman for files and directories.
@@ -106,6 +71,43 @@ namespace QDirStat
 	 **/
 	QStringList parseFileList( const QString & output ) const override
 	    { return output.split( u'\n' ); }
+
+
+    protected:
+
+	/**
+	 * Return the program and arguments for a command to test if this is a
+	 * primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	PkgCommand isPrimaryCommand() const override
+	    { return PkgCommand{ pacmanCommand(), { "-Qo", pacmanCommand() } }; }
+
+	/**
+	 * Returns a regular expression string to test whether the output of a
+	 * process from isPrimaryCommand() matches that expected if pacman is
+	 * the primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	QString isPrimaryRegExp() const override { return ".*is owned by pacman.*"; };
+
+	/**
+	 * Return 'true' if this package manager supports getting the list of
+	 * installed packages.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsGetInstalledPkg() const override { return true; }
+
+	/**
+	 * Return 'true' if this package manager supports getting the file list
+	 * for a package.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsFileList() const override { return true; }
 
     };	// class PacManPkgManager
 

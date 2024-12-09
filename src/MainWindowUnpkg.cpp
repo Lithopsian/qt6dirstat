@@ -29,7 +29,6 @@ using namespace QDirStat;
 void MainWindow::askOpenUnpkg()
 {
     const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-
     if ( !pkgManager )
     {
 	logError() << "No supported primary package manager" << Qt::endl;
@@ -37,7 +36,6 @@ void MainWindow::askOpenUnpkg()
     }
 
     OpenUnpkgDialog dialog{ this };
-
     if ( dialog.exec() == QDialog::Accepted )
     {
 	app()->dirTree()->prepare();

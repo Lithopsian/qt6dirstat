@@ -154,12 +154,7 @@ namespace
 	    return nullptr;
 	}
 
-	QProcess * process = new QProcess{};
-	process->setProgram( pkgCommand.command );
-	process->setArguments( pkgCommand.args );
-	process->setProcessEnvironment( SysUtil::cProcessEnvironment() );
-	process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
-
+	QProcess * process = SysUtil::commandProcess( pkgCommand.program, pkgCommand.args );
 	// Intentionally NOT starting the process yet
 
 	return process;
@@ -172,11 +167,9 @@ namespace
      **/
     void createCachePkgReadJobs( DirTree           * tree,
                                  const PkgInfoList & pkgList,
+                                 const PkgManager  * pkgManager,
                                  bool                verboseMissingPkgFiles )
     {
-	const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-	CHECK_PTR( pkgManager );
-
 	// The shared pointer will delete the cache when the last job that uses it is destroyed
 	PkgFileListCachePtr fileListCache{ pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) };
 	if ( !fileListCache )
@@ -234,9 +227,9 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
     handleMultiPkg( pkgList );
     addToTree( tree, pkgList );
 
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    if ( pkgManager && pkgManager->supportsFileListCache() && pkgList.size() >= _minCachePkgListSize )
-	createCachePkgReadJobs( tree, pkgList, _verboseMissingPkgFiles );
+    const PkgManager * primaryPkgManager = PkgQuery::primaryPkgManager();
+    if ( primaryPkgManager && pkgList.size() >= _minCachePkgListSize )
+	createCachePkgReadJobs( tree, pkgList, primaryPkgManager, _verboseMissingPkgFiles );
     else
 	createAsyncPkgReadJobs( tree, pkgList, _maxParallelProcesses, _verboseMissingPkgFiles );
 }
@@ -474,8 +467,7 @@ AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
 }
 
 
-void AsyncPkgReadJob::readFileListFinished( int                  exitCode,
-                                            QProcess::ExitStatus exitStatus )
+void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus exitStatus )
 {
     // Always get this job out of the blocked queue and clean up the file list process
     tree()->unblock( this );

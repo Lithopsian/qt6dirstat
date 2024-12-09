@@ -8,11 +8,11 @@
  */
 
 #include "PkgQuery.h"
-#include "PkgManager.h"
 #include "DpkgPkgManager.h"
-#include "RpmPkgManager.h"
-#include "PacManPkgManager.h"
 #include "Logger.h"
+#include "PacManPkgManager.h"
+#include "PkgManager.h"
+#include "RpmPkgManager.h"
 
 
 #define CACHE_SIZE 1000
@@ -27,62 +27,44 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Check if 'pkgManager' is available; add it to the 'pkgManagers'
-     * list if it is, or delete it if not.
+     * Initiate an external process to see if the PkgManager object is a
+     * primary package manager.  If the externel process program exists and is
+     * executable, then 'pkgManager' is added to the list of package managers.
+     * Otherwise it is deleted.
      **/
-    void checkPkgManager( PkgManagerList & pkgManagers, const PkgManager * pkgManager )
+    void startPkgManagerCheck( PkgManagerList & pkgManagers, PkgManager * pkgManager )
     {
-        if ( pkgManager->isPrimaryPkgManager() )
-        {
-            // Primaries at the start of the list
-            logInfo() << "Found primary package manager " << pkgManager->name() << Qt::endl;
-            pkgManagers.prepend( pkgManager );
-        }
-        else if ( pkgManager->isAvailable() )
-        {
-            // Secondaries at the end of the list
-            logInfo() << "Found secondary package manager " << pkgManager->name() << Qt::endl;
-            pkgManagers.append( pkgManager) ;
-        }
+        if ( pkgManager->check() )
+            pkgManagers << pkgManager;
         else
-        {
-            // Not in the list at all
             delete pkgManager;
-        }
     }
 
 
     /**
-     * Check which supported package managers are available and add them to
-     * the internal list.
+     * Wait for all the package managers still in the checking list have
+     * finished their checks.  The list will then be emptied; further calls
+     * to this function will return immediately.
      **/
-    void checkPkgManagers( PkgManagerList & pkgManagers )
+    void waitForPkgManagers( const PkgManagerList & pkgManagers )
     {
-        logInfo() << "Checking available supported package managers..." << Qt::endl;
-
-        checkPkgManager( pkgManagers, new DpkgPkgManager   );
-        checkPkgManager( pkgManagers, new RpmPkgManager    );
-        checkPkgManager( pkgManagers, new PacManPkgManager );
-
-        // The following is just for logging
-        if ( pkgManagers.isEmpty() )
+        for ( PkgManager * pkgManager : pkgManagers )
         {
-            logInfo() << "No supported package manager found." << Qt::endl;
+            if ( !pkgManager->waitForFinished() )
+                logWarning() << pkgManager->name() << " check timed out" << Qt::endl;
         }
+
 #if VERBOSE_PKG_QUERY
-        else
-        {
-            QStringList available;
+        QStringList available;
 
-            for ( const PkgManager * pkgManager : asConst( pkgManagers ) )
-                available << pkgManager->name();
+        for ( const PkgManager * pkgManager : pkgManagers )
+            available << pkgManager->name();
 
-            logInfo() << "Found " << available.join( ", "_L1 )  << Qt::endl;
-        }
+        logDebug() << "Found " << available.join( ", "_L1 )  << Qt::endl;
 #endif
     }
 
-}
+} // namespace
 
 
 PkgQuery * PkgQuery::instance()
@@ -96,13 +78,26 @@ PkgQuery * PkgQuery::instance()
 PkgQuery::PkgQuery()
 {
     _cache.setMaxCost( CACHE_SIZE );
-    checkPkgManagers( _pkgManagers );
+
+    logInfo() << "Checking available supported package managers..." << Qt::endl;
+    startPkgManagerCheck( _pkgManagers, new DpkgPkgManager );
+    startPkgManagerCheck( _pkgManagers, new PacManPkgManager );
+    startPkgManagerCheck( _pkgManagers, new RpmPkgManager );
 }
 
 
 PkgQuery::~PkgQuery()
 {
     qDeleteAll( _pkgManagers );
+}
+
+
+const PkgManager * PkgQuery::getPrimary() const
+{
+    if ( !_primaryPkgManager )
+        waitForPkgManagers( _pkgManagers );
+
+    return _primaryPkgManager;
 }
 
 
@@ -119,24 +114,26 @@ QString PkgQuery::getOwningPackage( const QString & path )
         return *pkg;
     }
 
-    QString pkg;
-
-    for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
+    const QString pkg = [ &path ]( const PkgManagerList & pkgManagers )
     {
-        pkg = pkgManager->owningPkg( path );
-        if ( !pkg.isEmpty() )
+        for ( const PkgManager * pkgManager : pkgManagers )
         {
+            const QString pkg = pkgManager->owningPkg( path );
+            if ( !pkg.isEmpty() )
+            {
 #if VERBOSE_PKG_QUERY
-            logDebug() << pkgManager->name() << ": package " << pkg << " owns " << path << Qt::endl;
+                logDebug() << pkgManager->name() << ": package " << pkg << " owns " << path << Qt::endl;
 #endif
-            break;
+                return pkg;
+            }
         }
-    }
 
 #if VERBOSE_PKG_QUERY
-    if ( pkg.isEmpty() )
         logDebug() << "No package owns " << path << Qt::endl;
 #endif
+
+        return QString{};
+    }( _pkgManagers );
 
     // Insert package name (even if empty) into the cache
     _cache.insert( path, new QString{ pkg }, CACHE_COST );
@@ -166,28 +163,4 @@ QStringList PkgQuery::getFileList( const PkgInfo * pkg ) const
     }
 
     return QStringList{};
-}
-
-
-bool PkgQuery::checkGetInstalledPkgSupport() const
-{
-    for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
-    {
-        if ( pkgManager->supportsGetInstalledPkg() )
-            return true;
-    }
-
-    return false;
-}
-
-
-bool PkgQuery::checkFileListSupport() const
-{
-    for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
-    {
-        if ( pkgManager->supportsFileList() )
-            return true;
-    }
-
-    return false;
 }

@@ -33,8 +33,7 @@
 #include "OpenDirDialog.h"
 #include "OpenPkgDialog.h"
 #include "PanelMessage.h"
-#include "PkgManager.h"
-#include "PkgQuery.h"
+#include "PkgInfo.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
@@ -86,6 +85,10 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->menubar->setCornerWidget( new QLabel{ MENUBAR_VERSION } );
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
+    // Disable Pkg and Unpkg until package managers have been detected
+    _ui->actionOpenPkg->setEnabled( false );
+    _ui->actionOpenUnpkg->setEnabled( false );
+
     // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
     // Before this, the app() getters will return 0
     // After this (ie. once MainWindow is constructed), they will always return a non-zero pointer
@@ -120,8 +123,6 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->toolBar->setMovable( false );
 #endif
 
-    checkPkgManagerSupport();
-
     updateActions();
 }
 
@@ -136,25 +137,6 @@ MainWindow::~MainWindow()
     QDirStatApp::resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
-}
-
-
-void MainWindow::checkPkgManagerSupport()
-{
-    if ( !PkgQuery::haveGetInstalledPkgSupport() || !PkgQuery::haveFileListSupport() )
-    {
-	logInfo() << "No package manager support for getting installed packages or file lists" << Qt::endl;
-
-	_ui->actionOpenPkg->setEnabled( false );
-    }
-
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    if ( !pkgManager || !pkgManager->supportsFileListCache() )
-    {
-	logInfo() << "No package manager support for getting a file lists cache" << Qt::endl;
-
-	_ui->actionOpenUnpkg->setEnabled( false );
-    }
 }
 
 
@@ -546,6 +528,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
+    app()->dirTree()->prepare();
     pkgQuerySetup();
     BusyPopup msg{ tr( "Reading package database..." ) };
 

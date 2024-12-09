@@ -11,6 +11,7 @@
 
 #include "Logger.h"
 #include "MainWindow.h"
+#include "PkgQuery.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
 #include "Version.h"
@@ -103,6 +104,7 @@ namespace
      **/
     void mainLoop( bool slowUpdate, bool openCache, bool dontAsk, const QStringList & argList )
     {
+	QDirStat::PkgQuery::init();
 	QDirStat::MainWindow mainWin{ slowUpdate };
 	mainWin.show();
 

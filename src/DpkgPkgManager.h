@@ -115,26 +115,17 @@ namespace QDirStat
     public:
 
 	/**
+	 * Return the command for the dpkg manager program.
+	 **/
+	static const char * dpkgCommand()
+	    { return "/usr/bin/dpkg"; }
+
+	/**
 	 * Return the name of this package manager.
 	 *
 	 * Implemented from PkgManager.
 	 **/
 	QLatin1String name() const override { return QLatin1String{ "dpkg" }; }
-
-	/**
-	 * Check if dpkg is active on the currently running system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isPrimaryPkgManager() const override;
-
-	/**
-	 * Check if the dpkg command is available on the currently running
-	 * system.
-	 *
-	 * Implemented from PkgManager.
-	 **/
-	bool isAvailable() const override;
 
 	/**
 	 * Return the owning package of a file or directory with full path
@@ -152,18 +143,6 @@ namespace QDirStat
 	 **/
 	QString owningPkg( const QString & path ) const override;
 
-	//-----------------------------------------------------------------
-	//                    Optional Features
-	//-----------------------------------------------------------------
-
-	/**
-	 * Return 'true' if this package manager supports getting the list of
-	 * installed packages.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsGetInstalledPkg() const override { return true; }
-
 	/**
 	 * Return the list of installed packages.
 	 *
@@ -174,17 +153,9 @@ namespace QDirStat
 	PkgInfoList installedPkg() const override;
 
 	/**
-	 * Return 'true' if this package manager supports getting the file list
-	 * for a package.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsFileList() const override { return true; }
-
-	/**
 	 * Return the command for querying dpkg for files and directories.
 	 **/
-	static QString dpkgQueryCommand() { return "/usr/bin/dpkg-query"; }
+	static const char * dpkgQueryCommand() { return "/usr/bin/dpkg-query"; }
 
 	/**
 	 * Return the command for getting the list of files and directories
@@ -203,14 +174,6 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	QStringList parseFileList( const QString & output ) const override;
-
-	/**
-	 * Return 'true' if this package manager supports building a file list
-	 * cache for getting all file lists for all packages.
-	 *
-	 * Reimplemented from PkgManager.
-	 **/
-	bool supportsFileListCache() const override { return true; }
 
 	/**
 	 * Create a file list cache with the specified lookup type for all
@@ -236,6 +199,51 @@ namespace QDirStat
 	 * Reimplemented from PkgManager.
 	 **/
 	QString queryName( const PkgInfo * pkg ) const override;
+
+
+    protected:
+
+	/**
+	 * Return the program and arguments for a command to test if this is a
+	 * primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	PkgCommand isPrimaryCommand() const override
+	    { return PkgCommand{ DpkgPkgManager::dpkgCommand(), { "-S", dpkgCommand() } }; }
+
+	/**
+	 * Returns a regular expression string to test whether the output of a
+	 * process from isPrimaryCommand() matches that expected if dpkg is
+	 * the primary package manager.
+	 *
+	 * Implemented from PkgManager.
+	 **/
+	QString isPrimaryRegExp() const override { return "^dpkg:.*"; };
+
+	/**
+	 * Return 'true' if this package manager supports getting the list of
+	 * installed packages.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsGetInstalledPkg() const override { return true; }
+
+	/**
+	 * Return 'true' if this package manager supports getting the file list
+	 * for a package.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsFileList() const override { return true; }
+
+	/**
+	 * Return 'true' if this package manager supports building a file list
+	 * cache for getting all file lists for all packages.
+	 *
+	 * Reimplemented from PkgManager.
+	 **/
+	bool supportsFileListCache() const override { return true; }
 
     };	// class DpkgPkgManager
 

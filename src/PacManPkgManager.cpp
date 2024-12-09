@@ -52,24 +52,10 @@ namespace
 }
 
 
-bool PacManPkgManager::isPrimaryPkgManager() const
-{
-    return SysUtil::tryRunCommand( pacmanCommand(),
-                                   QStringList{ "-Qo", pacmanCommand() },
-                                   ".*is owned by pacman.*" );
-}
-
-
-bool PacManPkgManager::isAvailable() const
-{
-    return SysUtil::haveCommand( pacmanCommand() );
-}
-
-
 QString PacManPkgManager::owningPkg( const QString & path ) const
 {
     int exitCode;
-    QString output = SysUtil::runCommand( pacmanCommand(), { "-Qo", path }, &exitCode );
+    QString output = SysUtil::runCommand( pacmanCommand(), { "-Qo", path }, &exitCode, 5 );
     if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
         return QString{};
 
