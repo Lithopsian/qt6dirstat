@@ -18,6 +18,7 @@
 
 namespace QDirStat
 {
+    class GlobalFileListCache;
     class PkgManager;
 
     typedef QVector<PkgManager *>    PkgManagerList;
@@ -117,6 +118,16 @@ namespace QDirStat
 	static QStringList fileList( const PkgInfo * pkg )
 	    { return instance()->getFileList( pkg ); }
 
+	/**
+	 * Return the list of all package files, from all package managers.
+	 * Files are only found from package managers which support
+	 * creating a file list cache.  The list is returned as a QSet, so
+	 * the filenames are unique and can be located very quickly.
+	 * Ownership is transferred to the caller.
+	 **/
+	static GlobalFileListCache * fileList()
+	    { return instance()->getFileList(); }
+
 
     protected:
 
@@ -151,6 +162,13 @@ namespace QDirStat
 	 * Return the list of files and directories owned by a package.
 	 **/
 	QStringList getFileList( const PkgInfo * pkg ) const;
+
+	/**
+	 * Return a list of all package files.  This is found using a
+	 * PkgFileListCache from each package manager that supports it, with
+	 * the resulting file lists merged into a single QSet.
+	 **/
+	GlobalFileListCache * getFileList() const;
 
 
     private:

@@ -43,7 +43,7 @@ bool PkgManager::check()
     {
         const auto isPrimaryPkgManager = [ this ]( int exitCode )
         {
-            if ( exitCode != 0 )
+            if ( exitCode != 0 || !supportsFileListCache() )
                 return false;
 
             return QRegularExpression{ isPrimaryRegExp() }.match( _process->readAll() ).hasMatch();
@@ -55,15 +55,10 @@ bool PkgManager::check()
             return;
         }
 
-        if ( supportsGetInstalledPkg() && supportsFileList() )
-            app()->mainWindow()->enableOpenPkg();
-
-        const bool isPrimary = isPrimaryPkgManager( exitCode );
-        if ( isPrimary && supportsFileListCache() )
+        if ( isPrimaryPkgManager( exitCode ) )
         {
-            logInfo() << "Found primary package manager " << name() << Qt::endl;
+            logInfo() << name() << " is the primary package manager" << Qt::endl;
             PkgQuery::setPrimaryPkgManager( this );
-            app()->mainWindow()->enableOpenUnpkg();
         }
 
         delete _process;
@@ -74,7 +69,13 @@ bool PkgManager::check()
     if ( !SysUtil::haveCommand( command.program ) )
         return false;
 
-    logInfo() << "Found package manager " << name() << Qt::endl;
+    logInfo() << "... found package manager " << name() << Qt::endl;
+
+    if ( supportsGetInstalledPkg() && supportsFileList() )
+        app()->mainWindow()->enableOpenPkg();
+
+    if ( supportsFileListCache() )
+        app()->mainWindow()->enableOpenUnpkg();
 
     _process = SysUtil::commandProcess( command.program, command.args );
     QObject::connect( _process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ), finished );

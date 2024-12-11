@@ -286,8 +286,8 @@ bool DirTree::isToplevel( const FileInfo * item ) const
 
 void DirTree::prepare()
 {
-    MountPoints::reload();
     clear();
+    MountPoints::reload();
 }
 
 

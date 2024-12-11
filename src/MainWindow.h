@@ -30,7 +30,6 @@ namespace QDirStat
     class FileDetailsView;
     class HistoryButtons;
     class PkgFilter;
-    class PkgManager;
     class TreemapView;
     class UnpkgSettings;
 
@@ -629,8 +628,7 @@ namespace QDirStat
          * - Ignore all files that belong to an installed package
          * - Ignore all file patterns ("*.pyc" etc.) the user wishes to ignore
          **/
-        void setUnpkgFilters( const UnpkgSettings & unpkgSettings,
-                              const PkgManager    * pkgManager );
+        void setUnpkgFilters( const UnpkgSettings & unpkgSettings );
 
         /**
          * Apply the cross-filesystem settings to the tree.

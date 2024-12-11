@@ -11,6 +11,7 @@
 #include "DpkgPkgManager.h"
 #include "Logger.h"
 #include "PacManPkgManager.h"
+#include "PkgFileListCache.h"
 #include "PkgManager.h"
 #include "RpmPkgManager.h"
 
@@ -31,6 +32,9 @@ namespace
      * primary package manager.  If the externel process program exists and is
      * executable, then 'pkgManager' is added to the list of package managers.
      * Otherwise it is deleted.
+     *
+     * The check must be started externally because it calls virtual functions
+     * from the base class.
      **/
     void startPkgManagerCheck( PkgManagerList & pkgManagers, PkgManager * pkgManager )
     {
@@ -42,9 +46,8 @@ namespace
 
 
     /**
-     * Wait for all the package managers still in the checking list have
-     * finished their checks.  The list will then be emptied; further calls
-     * to this function will return immediately.
+     * Wait until all the package managers still in the list have finished
+     * their checks, or until waitForFinished() times out after 30 seconds.
      **/
     void waitForPkgManagers( const PkgManagerList & pkgManagers )
     {
@@ -53,15 +56,6 @@ namespace
             if ( !pkgManager->waitForFinished() )
                 logWarning() << pkgManager->name() << " check timed out" << Qt::endl;
         }
-
-#if VERBOSE_PKG_QUERY
-        QStringList available;
-
-        for ( const PkgManager * pkgManager : pkgManagers )
-            available << pkgManager->name();
-
-        logDebug() << "Found " << available.join( ", "_L1 )  << Qt::endl;
-#endif
     }
 
 } // namespace
@@ -103,15 +97,13 @@ const PkgManager * PkgQuery::getPrimary() const
 
 QString PkgQuery::getOwningPackage( const QString & path )
 {
-    if ( _cache.contains( path ) )
+    const QString * cachePkg = _cache[ path ];
+    if ( cachePkg )
     {
-        const QString * pkg = _cache[ path ];
-
 #if VERBOSE_PKG_QUERY
-        logDebug() << "Cache: package " << *pkg << " owns " << path << Qt::endl;
+        logDebug() << "Cache: package " << cachePkg << " owns " << path << Qt::endl;
 #endif
-
-        return *pkg;
+        return *cachePkg;
     }
 
     const QString pkg = [ &path ]( const PkgManagerList & pkgManagers )
@@ -131,7 +123,6 @@ QString PkgQuery::getOwningPackage( const QString & path )
 #if VERBOSE_PKG_QUERY
         logDebug() << "No package owns " << path << Qt::endl;
 #endif
-
         return QString{};
     }( _pkgManagers );
 
@@ -146,7 +137,7 @@ PkgInfoList PkgQuery::getInstalledPkg() const
 {
     PkgInfoList pkgList;
 
-    for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
+    for ( const PkgManager * pkgManager : _pkgManagers )
         pkgList.append( pkgManager->installedPkg() );
 
     return pkgList;
@@ -155,7 +146,7 @@ PkgInfoList PkgQuery::getInstalledPkg() const
 
 QStringList PkgQuery::getFileList( const PkgInfo * pkg ) const
 {
-    for ( const PkgManager * pkgManager : asConst( _pkgManagers ) )
+    for ( const PkgManager * pkgManager : _pkgManagers )
     {
         const QStringList fileList = pkgManager->fileList( pkg );
         if ( !fileList.isEmpty() )
@@ -163,4 +154,19 @@ QStringList PkgQuery::getFileList( const PkgInfo * pkg ) const
     }
 
     return QStringList{};
+}
+
+
+GlobalFileListCache * PkgQuery::getFileList() const
+{
+    GlobalFileListCache * fileList = new GlobalFileListCache{};
+
+    for ( const PkgManager * pkgManager : _pkgManagers )
+    {
+        const PkgFileListCache * pkgFileListCache = pkgManager->createFileListCache();
+        fileList->add( *pkgFileListCache );
+        delete pkgFileListCache;
+    }
+
+    return fileList;
 }

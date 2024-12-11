@@ -95,12 +95,11 @@ namespace QDirStat
     public:
 
         /**
-         * Constructor: Prepare to read the file list of existing PkgInfo node
+         * Constructor: prepare to read the file list of existing PkgInfo node
          * 'pkg' and create a DirInfo or FileInfo node for each item in the
          * file list below 'pkg'.
 
-         * process.  Reading is then started from the outside with
-         * startReading().
+         * Reading is then started from the outside with startReading().
          **/
         PkgReadJob( DirTree   * tree,
                     PkgInfo   * pkg,
@@ -156,7 +155,7 @@ namespace QDirStat
          * Add all files belonging to 'path' to this package.
          * Create all directories as needed.
          **/
-        void addFiles( const QStringList & fileIst );
+        void addFiles( QStringList fileList );
 
 
     private:

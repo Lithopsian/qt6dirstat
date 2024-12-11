@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#define DEFAULT_WARNING_SEC 10	// for SysUtil.h
+#define DEFAULT_WARNING_SEC 10
 
 #include <iostream> // cerr/endl;
 
@@ -160,7 +160,7 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
 }
 
 
-PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
+PkgFileListCache * RpmPkgManager::createFileListCache() const
 {
     int exitCode;
     QString output =
@@ -175,7 +175,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
-    PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
+    PkgFileListCache * cache = new PkgFileListCache{ this };
 
     // Sample output:
     //

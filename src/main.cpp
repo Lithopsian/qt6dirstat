@@ -97,15 +97,15 @@ namespace
 
 
     /**
-     * Create MainWindow, call the requested functions, and run the
+     * Create MainWindow, call the requested function, and run the
      * application event loop.
      *
      * Note that MainWindow is destroyed when this function exits.
      **/
     void mainLoop( bool slowUpdate, bool openCache, bool dontAsk, const QStringList & argList )
     {
-	QDirStat::PkgQuery::init();
 	QDirStat::MainWindow mainWin{ slowUpdate };
+	QDirStat::PkgQuery::init();
 	mainWin.show();
 
 	if ( !argList.isEmpty() )

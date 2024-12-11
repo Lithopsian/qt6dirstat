@@ -513,10 +513,7 @@ void MainWindow::askOpenPkg()
 
     if ( !cancelled )
     {
-	_historyButtons->clear();
-	DirTree * tree = app()->dirTree();
-	tree->prepare();
-	tree->reset();
+	app()->dirTree()->reset();
 	readPkg( pkgFilter );
     }
 }
@@ -526,13 +523,14 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 {
     // logInfo() << "URL: " << pkgFilter.url() << Qt::endl;
 
+    DirTree * tree = app()->dirTree();
+    tree->clear();
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
-    app()->dirTree()->prepare();
     pkgQuerySetup();
     BusyPopup msg{ tr( "Reading package database..." ) };
 
-    app()->dirTree()->readPkg( pkgFilter );
+    tree->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
 }
 
@@ -547,6 +545,7 @@ void MainWindow::pkgQuerySetup()
     _ui->fileDetailsView->clear();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
     enableDirPermissionsMsg();
+    _historyButtons->clear();
 }
 
 

@@ -89,7 +89,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	PkgFileListCache * createFileListCache( PkgFileListCache::LookupType lookupType ) const override;
+	PkgFileListCache * createFileListCache() const override;
 
 	/**
 	 * Return a name suitable for a detailed queries for 'pkg'.

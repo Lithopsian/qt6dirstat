@@ -12,12 +12,14 @@
 
 #include <QProcess>
 
-#include "PkgInfo.h"          // PkgInfoList
-#include "PkgFileListCache.h" // lookup types
+#include "PkgInfo.h" // PkgInfoList
 
 
 namespace QDirStat
 {
+    class PkgFileListCache;
+
+
     /**
      * Simple pair structure for passing a program name and list of arguments,
      * typically to be used for running an extermal process.
@@ -88,7 +90,7 @@ namespace QDirStat
 	 * exceeded.  At this point, package manager functions can be used.
 	 **/
 	bool waitForFinished()
-	    { return _process ? _process->waitForFinished( 10 ) : true; }
+	    { return _process ? _process->waitForFinished() : true; }
 
 	/**
 	 * Return the owning package of a file or directory with full path
@@ -146,7 +148,7 @@ namespace QDirStat
 	 * Ownership of the cache is transferred to the caller; make sure to
 	 * delete it when you are done with it.
 	 **/
-	virtual PkgFileListCache * createFileListCache( PkgFileListCache::LookupType ) const
+	virtual PkgFileListCache * createFileListCache() const
 	    { return nullptr; }
 
 	/**

@@ -11,8 +11,8 @@
 
 #include "PkgReader.h"
 #include "DirTree.h"
-#include "FileInfoIterator.h"
 #include "Exception.h"
+#include "FileInfoIterator.h"
 #include "PkgFileListCache.h"
 #include "PkgFilter.h"
 #include "PkgManager.h"
@@ -22,8 +22,8 @@
 #include "SysUtil.h"
 
 
-#define DEFAULT_PARALLEL_PROCESSES	10
-#define DEFAULT_CACHE_PKG_LIST_SIZE	300
+#define DEFAULT_PARALLEL_PROCESSES   10
+#define DEFAULT_CACHE_PKG_LIST_SIZE 300
 
 
 using namespace QDirStat;
@@ -171,7 +171,7 @@ namespace
                                  bool                verboseMissingPkgFiles )
     {
 	// The shared pointer will delete the cache when the last job that uses it is destroyed
-	PkgFileListCachePtr fileListCache{ pkgManager->createFileListCache( PkgFileListCache::LookupByPkg ) };
+	PkgFileListCachePtr fileListCache{ pkgManager->createFileListCache() };
 	if ( !fileListCache )
 	{
 	    logError() << "Creating the file list cache failed" << Qt::endl;
@@ -397,12 +397,15 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 }
 
 
-void PkgReadJob::addFiles( const QStringList & fileList )
+void PkgReadJob::addFiles( QStringList fileList )
 {
+    // The tree creation works best with a sorted list
+    fileList.sort();
+
     DirInfo * lastDir = _pkg;
     QString lastDirPath{ u'/' };
 
-    for ( const QString & fileListPath : fileList )
+    for ( const QString & fileListPath : asConst( fileList ) )
     {
 	if ( fileListPath.isEmpty() )
 	    continue;

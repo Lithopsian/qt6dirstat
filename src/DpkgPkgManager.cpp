@@ -382,7 +382,7 @@ QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 	    if ( fields.size() == 2 && !divertedFile.isEmpty() )
 		fileList << resolvePath( divertedFile );
 	}
-	else if ( line != "/."_L1 && !isPackageDivert( line ) )
+	else if ( !line.isEmpty() && line != "/."_L1 && !isPackageDivert( line ) )
 	{
 	    fileList << resolvePath( line );
 	}
@@ -412,7 +412,7 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 }
 
 
-PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
+PkgFileListCache * DpkgPkgManager::createFileListCache() const
 {
     int exitCode;
     QString output = runDpkg( "*", exitCode, true ); // don't ignore error codes
@@ -424,7 +424,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
     logDebug() << lines.size() << " output lines" << Qt::endl;
 #endif
 
-    PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
+    PkgFileListCache * cache = new PkgFileListCache{ this };
 
     // Sample output:
     //

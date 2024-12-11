@@ -347,6 +347,7 @@ void LocalDirReadJob::startReading()
 	// Don't add anything after finished() since this deletes this job!
 	return;
     }
+    int dirFd = dirfd( diskDir );
 
     dir()->setReadState( DirReading );
 
@@ -360,8 +361,6 @@ void LocalDirReadJob::startReading()
     // in the same directory, a QMap would store only one of them, all others
     // would go missing in the DirTree.
     QMultiMap<ino_t, QString> entryMap;
-
-    int dirFd = dirfd( diskDir );
     struct dirent * entry;
     while ( ( entry = readdir( diskDir ) ) )
     {

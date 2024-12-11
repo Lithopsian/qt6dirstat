@@ -105,7 +105,6 @@ SOURCES =   main.cpp			\
 	    PathSelector.cpp		\
 	    PercentBar.cpp		\
 	    PercentileStats.cpp		\
-	    PkgFileListCache.cpp	\
 	    PkgFilter.cpp		\
 	    PkgManager.cpp		\
 	    PkgQuery.cpp		\
