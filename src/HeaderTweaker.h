@@ -146,16 +146,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Create one action and connect to the given slot.
-	 **/
-	QAction * createAction( QMenu * menu, const QString & title, void( HeaderTweaker::*slot )( void ) );
-
-	/**
-	 * Create a submenu for the currently hidden columns.
-	 **/
-	QMenu * createHiddenColMenu( QWidget * parent );
-
-	/**
 	 * Set auto size mode for all columns on or off.
 	 **/
 	void setAllColumnsResizeMode( bool autoSize )
@@ -177,17 +167,7 @@ namespace QDirStat
 	/**
 	 * Save the current layout status.
 	 **/
-	void saveLayout() { if ( _currentLayout ) saveLayout( _currentLayout ); }
-
-	/**
-	 * Save the current status in 'layout'.
-	 **/
-	void saveLayout( ColumnLayout * layout );
-
-	/**
-	 * Return the column name for the specified logical section number.
-	 **/
-	QString colName( int section ) const;
+	void saveCurrentLayout();
 
 	/**
 	 * Return 'true' if logical section no. 'section' has auto resize mode.
@@ -210,11 +190,11 @@ namespace QDirStat
 
     private:
 
-	DirTreeView      * _treeView;
-	QHeaderView      * _header;
-	int                _currentSection{ -1 };
-	ColumnLayoutList   _layouts;
-	ColumnLayout     * _currentLayout{ nullptr };
+	const DirTreeView * _treeView;
+	QHeaderView       * _header;
+	int                 _currentSection{ -1 };
+	ColumnLayoutList    _layouts;
+	ColumnLayout      * _currentLayout{ nullptr };
 
     };	// class HeaderTweaker
 

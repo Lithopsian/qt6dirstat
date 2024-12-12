@@ -24,6 +24,7 @@ QString MainWindow::layoutName( const QAction * action ) const
     if ( action == _ui->actionLayout1 ) return HeaderTweaker::l1Name();
     if ( action == _ui->actionLayout2 ) return HeaderTweaker::l2Name();
     if ( action == _ui->actionLayout3 ) return HeaderTweaker::l3Name();
+
     return QString{};
 }
 
@@ -33,6 +34,7 @@ QAction * MainWindow::layoutAction( const QString & layoutName ) const
     if ( layoutName == HeaderTweaker::l1Name() ) return _ui->actionLayout1;
     if ( layoutName == HeaderTweaker::l2Name() ) return _ui->actionLayout2;
     if ( layoutName == HeaderTweaker::l3Name() ) return _ui->actionLayout3;
+
     return nullptr;
 }
 
