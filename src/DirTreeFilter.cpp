@@ -75,7 +75,7 @@ DirTreePkgFilter::DirTreePkgFilter():
     DirTreeFilter{},
     _fileListCache{ PkgQuery::fileList() }
 {
-    //logInfo() << "Done." << Qt::endl;
+    logInfo() << _fileListCache->size() << " files in filter" << Qt::endl;
 }
 
 

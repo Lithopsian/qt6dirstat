@@ -129,12 +129,6 @@ PkgInfoList RpmPkgManager::installedPkg() const
 }
 
 
-PkgCommand RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
-{
-    return PkgCommand{ _rpmCommand, QStringList{ "-ql", queryName( pkg ) } };
-}
-
-
 QStringList RpmPkgManager::parseFileList( const QString & output ) const
 {
     QStringList fileList = output.split( u'\n' );
@@ -201,7 +195,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache() const
 	}
     }
 
-    logDebug() << "file list cache finished." << Qt::endl;
+    //logDebug() << "file list cache finished." << Qt::endl;
 
     return cache;
 }

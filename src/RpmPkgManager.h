@@ -67,7 +67,8 @@ namespace QDirStat
 	 *
 	 * Reimplemented from PkgManager.
 	 **/
-	PkgCommand fileListCommand( const PkgInfo * pkg ) const override;
+	PkgCommand fileListCommand( const PkgInfo * pkg ) const override
+	    { return PkgCommand{ _rpmCommand, QStringList{ "-ql", queryName( pkg ) } }; }
 
 	/**
 	 * Parse the output of the file list command.

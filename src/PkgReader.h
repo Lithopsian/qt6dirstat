@@ -60,22 +60,6 @@ namespace QDirStat
          **/
         void read( DirTree * tree, const PkgFilter & filter );
 
-        /**
-         * Read parameters from the settings file.
-         **/
-        void readSettings();
-
-
-    private:
-
-        /**
-         * These can be set manually in the [Pkg] section of the config file at
-         * ~/.config/QDirStat/QDirStat.config.
-         **/
-        int  _maxParallelProcesses;
-        int  _minCachePkgListSize;
-        bool _verboseMissingPkgFiles;
-
     };  // class PkgReader
 
 
@@ -137,7 +121,7 @@ namespace QDirStat
          * using a background process (AsyncPkgReader) or a file list cache
          * (CachePkgReader).
          **/
-        virtual QStringList fileList();
+        virtual QStringList fileList() = 0;
 
         /**
          * Obtain information about the file or directory specified in

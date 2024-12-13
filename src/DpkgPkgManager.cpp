@@ -532,7 +532,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache() const
 	}
     }
 
-    logDebug() << "file list cache finished." << Qt::endl;
+    //logDebug() << "file list cache finished." << Qt::endl;
 
     return cache;
 }

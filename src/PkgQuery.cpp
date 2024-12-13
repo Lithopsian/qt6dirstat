@@ -144,19 +144,6 @@ PkgInfoList PkgQuery::getInstalledPkg() const
 }
 
 
-QStringList PkgQuery::getFileList( const PkgInfo * pkg ) const
-{
-    for ( const PkgManager * pkgManager : _pkgManagers )
-    {
-        const QStringList fileList = pkgManager->fileList( pkg );
-        if ( !fileList.isEmpty() )
-            return fileList;
-    }
-
-    return QStringList{};
-}
-
-
 GlobalFileListCache * PkgQuery::getFileList() const
 {
     GlobalFileListCache * fileList = new GlobalFileListCache{};

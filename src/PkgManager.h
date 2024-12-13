@@ -99,11 +99,6 @@ namespace QDirStat
 	virtual QString owningPkg( const QString & path ) const = 0;
 
 	/**
-	 * Return the list of files and directories owned by a package.
-	 **/
-	QStringList fileList( const PkgInfo * pkg ) const;
-
-	/**
 	 * Return the list of installed packages.
 	 *
 	 * Ownership of the list elements is transferred to the caller.
@@ -143,7 +138,7 @@ namespace QDirStat
 	 *
 	 * This is a best-effort approach; the cache might still not contain
 	 * all desired packages. Check with PkgFileListCache::contains() and
-	 * use PkgManager::fileList() as a fallback.
+	 * use PkgManager::fileListCommand() as a fallback.
 	 *
 	 * Ownership of the cache is transferred to the caller; make sure to
 	 * delete it when you are done with it.
@@ -183,7 +178,7 @@ namespace QDirStat
 
 	/**
 	 * Return 'true' if this package manager supports getting the file list
-	 * for a package.
+	 * for a package; with fileListCommand().
 	 *
 	 * The default implementation returns 'false'.
 	 *

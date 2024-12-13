@@ -113,12 +113,6 @@ namespace QDirStat
 	    { return instance()->getInstalledPkg(); }
 
 	/**
-	 * Return the list of files and directories owned by a package.
-	 **/
-	static QStringList fileList( const PkgInfo * pkg )
-	    { return instance()->getFileList( pkg ); }
-
-	/**
 	 * Return the list of all package files, from all package managers.
 	 * Files are only found from package managers which support
 	 * creating a file list cache.  The list is returned as a QSet, so
@@ -157,11 +151,6 @@ namespace QDirStat
 	 * Ownership of the list elements is transferred to the caller.
 	 **/
 	PkgInfoList getInstalledPkg() const;
-
-	/**
-	 * Return the list of files and directories owned by a package.
-	 **/
-	QStringList getFileList( const PkgInfo * pkg ) const;
 
 	/**
 	 * Return a list of all package files.  This is found using a

@@ -20,23 +20,6 @@
 using namespace QDirStat;
 
 
-QStringList PkgManager::fileList( const PkgInfo * pkg ) const
-{
-    CHECK_PTR( pkg );
-
-    const PkgCommand pkgCommand = fileListCommand( pkg );
-    if ( !pkgCommand.isEmpty() )
-    {
-        int exitCode;
-        const QString output = SysUtil::runCommand( pkgCommand.program, pkgCommand.args, &exitCode );
-        if ( exitCode == 0 )
-            return parseFileList( output );
-    }
-
-    return QStringList{};
-}
-
-
 bool PkgManager::check()
 {
     const auto finished = [ this ]( int exitCode, QProcess::ExitStatus exitStatus )

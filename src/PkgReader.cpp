@@ -32,6 +32,27 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Read parameters from the settings file.
+     **/
+    void readSettings( int & maxParallelProcesses, int & minCachePkgListSize, bool & verboseMissingPkgFiles )
+    {
+	Settings settings;
+
+	settings.beginGroup( "Pkg" );
+
+	maxParallelProcesses   = settings.value( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  ).toInt();
+	minCachePkgListSize    = settings.value( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
+	verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
+
+	settings.setDefaultValue( "MaxParallelProcesses",   maxParallelProcesses   );
+	settings.setDefaultValue( "MinCachePkgListSize",    minCachePkgListSize    );
+	settings.setDefaultValue( "VerboseMissingPkgFiles", verboseMissingPkgFiles );
+
+	settings.endGroup();
+    }
+
+
+    /**
      * Create a suitable display name for a package: packages that are
      * only installed in one version or for one architecture will simply
      * keep their base name; others will have the version and/or the
@@ -143,7 +164,8 @@ namespace
 
     /**
      * Create a process for reading the file list for 'pkg' with the
-     * appropriate external command. The process is not started yet.
+     * appropriate external command. The processes will be started by the
+     * ProcessStarter.
      **/
     QProcess * createReadFileListProcess( PkgInfo * pkg )
     {
@@ -154,8 +176,8 @@ namespace
 	    return nullptr;
 	}
 
-	QProcess * process = SysUtil::commandProcess( pkgCommand.program, pkgCommand.args );
 	// Intentionally NOT starting the process yet
+	QProcess * process = SysUtil::commandProcess( pkgCommand.program, pkgCommand.args );
 
 	return process;
     }
@@ -163,24 +185,43 @@ namespace
 
     /**
      * Create a read job for each package to read its file list from a file
-     * list cache and add it to the read job queue.
+     * list cache, and add it to the read job queue.  This requires a primary
+     * package manager, one that should own the majority of packages and
+     * support generating a file list cache.  Packages added as a
+     * CachePkgReadJob will be removed from 'pkgList' so that the remainder
+     * can be processed using external process read jobs.
      **/
-    void createCachePkgReadJobs( DirTree           * tree,
-                                 const PkgInfoList & pkgList,
-                                 const PkgManager  * pkgManager,
-                                 bool                verboseMissingPkgFiles )
+    void createCachePkgReadJobs( DirTree * tree, PkgInfoList & pkgList, bool verboseMissingPkgFiles )
     {
+	const PkgManager * primaryPkgManager = PkgQuery::primaryPkgManager();
+	if ( !primaryPkgManager )
+	    return;
+
 	// The shared pointer will delete the cache when the last job that uses it is destroyed
-	PkgFileListCachePtr fileListCache{ pkgManager->createFileListCache() };
+	PkgFileListCachePtr fileListCache{ primaryPkgManager->createFileListCache() };
 	if ( !fileListCache )
 	{
-	    logError() << "Creating the file list cache failed" << Qt::endl;
-	    tree->sendFinished();
+	    logWarning() << "Creating file list cache failed - fall back to AsyncPkgReadJob" << Qt::endl;
 	    return;
 	}
 
-	for ( PkgInfo * pkg : pkgList )
-	    tree->addJob( new CachePkgReadJob{ tree, pkg, verboseMissingPkgFiles, fileListCache } );
+	// Keep a list of packages not in the file list cache
+	PkgInfoList nonCachePkgList;
+
+	for ( PkgInfo * pkg : asConst( pkgList ) )
+	{
+	    if ( pkg->pkgManager() == primaryPkgManager )
+		tree->addJob( new CachePkgReadJob{ tree, pkg, verboseMissingPkgFiles, fileListCache } );
+	    else
+		nonCachePkgList << pkg;
+	}
+
+	logInfo() << "File list cache created with "
+	          << pkgList.size() - nonCachePkgList.size() << " packages and "
+	          << fileListCache->size() << " files" << Qt::endl;
+
+	// Return any remaining packages to be processed asynchronously
+	pkgList.swap( nonCachePkgList );
     }
 
 
@@ -215,8 +256,6 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
 {
     //logInfo() << "Reading " << filter << Qt::endl;
 
-    readSettings();
-
     PkgInfoList pkgList = filteredPkgList( filter );
     if ( pkgList.isEmpty() )
     {
@@ -227,29 +266,18 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
     handleMultiPkg( pkgList );
     addToTree( tree, pkgList );
 
-    const PkgManager * primaryPkgManager = PkgQuery::primaryPkgManager();
-    if ( primaryPkgManager && pkgList.size() >= _minCachePkgListSize )
-	createCachePkgReadJobs( tree, pkgList, primaryPkgManager, _verboseMissingPkgFiles );
-    else
-	createAsyncPkgReadJobs( tree, pkgList, _maxParallelProcesses, _verboseMissingPkgFiles );
-}
+    int maxParallelProcesses;
+    int minCachePkgListSize;
+    bool verboseMissingPkgFiles;
+    readSettings( maxParallelProcesses, minCachePkgListSize, verboseMissingPkgFiles );
 
+    // Use a cache for the primary package manager if there are enough packages to make it worthwhile
+    if ( pkgList.size() >= minCachePkgListSize )
+	createCachePkgReadJobs( tree, pkgList, verboseMissingPkgFiles );
 
-void PkgReader::readSettings()
-{
-    Settings settings;
-
-    settings.beginGroup( "Pkg" );
-
-    _maxParallelProcesses   = settings.value( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  ).toInt();
-    _minCachePkgListSize    = settings.value( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
-    _verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
-
-    settings.setDefaultValue( "MaxParallelProcesses",   _maxParallelProcesses   );
-    settings.setDefaultValue( "MinCachePkgListSize",    _minCachePkgListSize    );
-    settings.setDefaultValue( "VerboseMissingPkgFiles", _verboseMissingPkgFiles );
-
-    settings.endGroup();
+    // Otherwise, or for non-primary packages, use external process reads
+    if ( !pkgList.isEmpty() )
+	createAsyncPkgReadJobs( tree, pkgList, maxParallelProcesses, verboseMissingPkgFiles );
 }
 
 
@@ -351,14 +379,6 @@ void PkgReadJob::startReading()
 
     finished();
     // Don't add anything after finished() since this deletes this job!
-}
-
-
-QStringList PkgReadJob::fileList()
-{
-    logDebug() << "Using default PkgQuery::fileList() for " << _pkg << Qt::endl;
-
-    return PkgQuery::fileList( _pkg );
 }
 
 
@@ -507,16 +527,16 @@ void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus e
 
 QStringList CachePkgReadJob::fileList()
 {
-    if ( !_fileListCache || _fileListCache->pkgManager() != pkg()->pkgManager() )
-	return PkgReadJob::fileList();
+    if ( _fileListCache && _fileListCache->pkgManager() == pkg()->pkgManager() )
+    {
+	const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
 
-    const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
+	if ( _fileListCache->containsPkg( pkgName ) )
+	    return _fileListCache->fileList( pkgName );
 
-    if ( _fileListCache->containsPkg( pkgName ) )
-	return _fileListCache->fileList( pkgName );
-
-    if ( _fileListCache->containsPkg( pkg()->name() ) )
-	return _fileListCache->fileList( pkg()->name() );
+	if ( _fileListCache->containsPkg( pkg()->name() ) )
+	    return _fileListCache->fileList( pkg()->name() );
+    }
 
     return QStringList{};
 }

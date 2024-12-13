@@ -50,7 +50,7 @@ namespace QDirStat
 
         /**
          * Public constructor: used by the package managers for creating a
-         * package list. without a tree or parent until it is inserted by
+         * package list, without a tree or parent until it is inserted by
          * PkgReader.
          **/
         PkgInfo( const QString    & name,
