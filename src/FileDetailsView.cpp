@@ -62,6 +62,20 @@ namespace
 
 
     /**
+     * Format the mode (the permissions bits) returned from the stat() system
+     * call in the commonly used formats, both symbolic and octal, e.g.
+     *           drwxr-xr-x  0755
+     **/
+    QString formatPermissions( const FileInfo * item )
+    {
+	if ( !item->hasPerm() )
+	    return QString{};
+
+	return symbolicMode( item->mode() ) % "  "_L1 % formatOctal( ALLPERMS & item->mode() );
+    }
+
+
+    /**
      * Set the font bold property for 'label' to 'bold'.
      **/
     void setBold( QLabel * label, bool bold )
@@ -340,9 +354,12 @@ namespace
 	ui->dirOwnSizeLabel->setVisible  ( dir->size() > 0 );
 	setSizeLabel( ui->dirOwnSizeLabel, dir->size() );
 
+	ui->dirUserCaption->setEnabled( dir->hasUid() );
 	ui->dirUserLabel->setText( dir->userName() );
+	ui->dirGroupCaption->setEnabled( dir->hasUid() );
 	ui->dirGroupLabel->setText( dir->groupName() );
-	ui->dirPermissionsLabel->setText( formatPermissions( dir->mode() ) );
+	ui->dirPermissionsCaption->setEnabled( dir->hasPerm() );
+	ui->dirPermissionsLabel->setText( formatPermissions( dir ) );
 
 	ui->dirMTimeCaption->setVisible( dir->mtime() > 0 );
 	ui->dirMTimeLabel->setVisible( dir->mtime() > 0);
@@ -454,9 +471,12 @@ namespace
 	    setAllocated( ui->fileAllocatedLabel, file );
 	}
 
+	ui->fileUserCaption->setEnabled( file->hasUid() );
 	ui->fileUserLabel->setText( file->userName() );
+	ui->fileGroupCaption->setEnabled( file->hasGid() );
 	ui->fileGroupLabel->setText( file->groupName() );
-	ui->filePermissionsLabel->setText( formatPermissions( file->mode() ) );
+	ui->filePermissionsCaption->setEnabled( file->hasPerm() );
+	ui->filePermissionsLabel->setText( formatPermissions( file ) );
 	ui->fileMTimeLabel->setText( formatTime( file->mtime() ) );
     }
 
