@@ -244,7 +244,7 @@ namespace
 	 */
 	DirInfo * child = new DirInfo{ dir, tree, entryName };
 	child->finalizeLocal();
-	child->setReadState( DirError );
+	child->setReadState( errno == EACCES ? DirPermissionDenied : DirError );
 	dir->insertChild( child );
 	tree->childAddedNotify( child );
     }

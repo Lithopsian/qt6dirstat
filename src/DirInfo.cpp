@@ -276,13 +276,13 @@ void DirInfo::recalc()
 	if ( !it->isDotEntry() )
 	    ++_totalItems;
 
+	if ( it->readError() )
+	    ++_errSubDirs;
+
 	if ( it->isDir() )
 	{
 	    // Count this as a sub-directory
 	    ++_totalSubDirs;
-
-	    if ( it->readError() )
-		++_errSubDirs;
 	}
 	else
 	{
