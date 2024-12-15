@@ -57,46 +57,44 @@ namespace
      * only installed in one version or for one architecture will simply
      * keep their base name; others will have the version and/or the
      * architecture appended so the user can tell them apart.
+     *
+     * Note that there is no specific logic for disambiguating packages
+     * with the same name in different pakage managers, but these will
+     * hopefully have either a different architecture or different version.
      **/
-    void createDisplayName( const QString & pkgName, const PkgInfoList & pkgList )
+    void createDisplayName( const PkgInfoList & pkgList )
     {
 	if ( pkgList.size() < 2 )
 	    return;
 
-	const QString & version = pkgList.first()->version();
-	const QString & arch    = pkgList.first()->arch();
-
-	bool sameVersion = true;
-	bool sameArch    = true;
-
-	for ( const PkgInfo * pkg : pkgList )
+	const QString & arch = pkgList.first()->arch();
+	for ( auto it = pkgList.cbegin() + 1; it != pkgList.cend(); ++it )
 	{
-	    if ( pkg->version() != version )
-		sameVersion = false;
+	    if ( (*it)->arch() != arch )
+	    {
+		const QString & pkgName = (*it)->name();
+		//logDebug() << "Found multi-arch package " << pkgName << Qt::endl;
 
-	    if ( pkg->arch() != arch )
-		sameArch = false;
+		for ( PkgInfo * pkg : pkgList )
+		    pkg->setName( pkgName % ':' % pkg->arch() );
+
+		break;
+	    }
 	}
 
-	//logDebug() << "Found multi version pkg " << pkgName << " same arch: " << sameArch << Qt::endl;
-
-	for ( PkgInfo * pkg : pkgList )
+	const QString & version = pkgList.first()->version();
+	for ( auto it = pkgList.cbegin() + 1; it != pkgList.cend(); ++it )
 	{
-	    QString name = pkgName;
-
-	    if ( !sameVersion )
+	    if ( (*it)->version() != version )
 	    {
-		name += '-' % pkg->version();
-		pkg->setMultiVersion();
-	    }
+		const QString & pkgName = (*it)->name();
+		//logDebug() << "Found multi-version package " << pkgName << Qt::endl;
 
-	    if ( !sameArch )
-	    {
-		name += ':' % pkg->arch();
-		pkg->setMultiArch();
-	    }
+		for ( PkgInfo * pkg : pkgList )
+		    pkg->setName( pkgName % '=' % pkg->version() );
 
-	    pkg->setName( name );
+		break;
+	    }
 	}
     }
 
@@ -108,15 +106,14 @@ namespace
      **/
     void handleMultiPkg( const PkgInfoList & pkgList )
     {
-	// QMultiHash is slightly faster, but uniqueKeys() isn't available before 5.13
-	QMultiMap<QString, PkgInfo *> multiPkg;
+	QMultiHash<QString, PkgInfo *> multiPkg;
 
 	for ( PkgInfo * pkg : pkgList )
 	    multiPkg.insert( pkg->baseName(), pkg );
 
 	const auto uniqueKeys = multiPkg.uniqueKeys();
 	for ( const QString & pkgName : uniqueKeys )
-	    createDisplayName( pkgName, multiPkg.values( pkgName ) );
+	    createDisplayName( multiPkg.values( pkgName ) );
     }
 
 
@@ -527,10 +524,9 @@ void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus e
 
 QStringList CachePkgReadJob::fileList()
 {
-    if ( _fileListCache && _fileListCache->pkgManager() == pkg()->pkgManager() )
+    if ( _fileListCache )
     {
 	const QString pkgName = pkg()->pkgManager()->queryName( pkg() );
-
 	if ( _fileListCache->containsPkg( pkgName ) )
 	    return _fileListCache->fileList( pkgName );
 

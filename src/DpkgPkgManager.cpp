@@ -84,12 +84,12 @@ namespace
      *
      * exitCode indicates the success or failure of the command.
     */
-    QString runDpkg( const QString & path, int &exitCode, bool logError )
+    QString runDpkg( const QString & path, int & exitCode, bool logError, int timeoutSecs = 5 )
     {
 	return SysUtil::runCommand( DpkgPkgManager::dpkgCommand(),
 	                            { "-S", path },
 	                            &exitCode,
-	                            5,		// better not to lock the whole program for 15 seconds
+	                            timeoutSecs,
 	                            false,	// don't log command
 	                            false,	// don't log output
 	                            logError );
@@ -114,7 +114,7 @@ namespace
 	const QString pathResolved = resolvePath( path );
 
 	int exitCode;
-	const QString output = runDpkg( path, exitCode, true ); // don't ignore error codes
+	const QString output = runDpkg( path, exitCode, true ); // log error codes
 	if ( exitCode != 0 )
 	    return QString{};
 
@@ -415,16 +415,16 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 PkgFileListCache * DpkgPkgManager::createFileListCache() const
 {
     int exitCode;
-    QString output = runDpkg( "*", exitCode, true ); // don't ignore error codes
+    QString output = runDpkg( "*", exitCode, true, 30 ); // log error codes
     if ( exitCode != 0 )
 	return nullptr;
 
     const QStringList lines = output.split( u'\n', Qt::SkipEmptyParts );
-#if VERBOSE_PACKAGES
+#if 1
     logDebug() << lines.size() << " output lines" << Qt::endl;
 #endif
 
-    PkgFileListCache * cache = new PkgFileListCache{ this };
+    PkgFileListCache * cache = new PkgFileListCache{};
 
     // Sample output:
     //

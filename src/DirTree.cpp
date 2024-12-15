@@ -9,6 +9,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QMultiHash>
 
 #include "DirTree.h"
 #include "Attic.h"
@@ -524,7 +525,7 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	return;
 
     // Create a map to group the items by parent
-    QMultiMap<DirInfo *, FileInfo *>parentMap;
+    QMultiHash<DirInfo *, FileInfo *>parentMap;
     for ( FileInfo * subtree : subtrees )
     {
 	// Check if the item has already been deleted, by us or someone else

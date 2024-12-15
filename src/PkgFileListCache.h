@@ -29,22 +29,8 @@ namespace QDirStat
      *
      * Use PkgManager::createFileListCache() to create and fill such a cache.
      **/
-    class PkgFileListCache final : public QMultiHash<QString, QString>
+    struct PkgFileListCache final : public QMultiHash<QString, QString>
     {
-    public:
-
-	/**
-	 * Constructor.
-	 **/
-	PkgFileListCache( const PkgManager * pkgManager ):
-	    _pkgManager{ pkgManager }
-	{}
-
-	/**
-	 * Return the package manager parent of this cache.
-	 **/
-	const PkgManager * pkgManager() const { return _pkgManager; }
-
 	/**
 	 * Add one file for one package.
 	 **/
@@ -64,11 +50,6 @@ namespace QDirStat
 	 **/
 	QStringList fileList( const QString & pkgName ) const { return values( pkgName ); }
 
-
-    private:
-
-	const PkgManager * _pkgManager;
-
     };	// class PkgFileListCache
 
 
@@ -83,9 +64,8 @@ namespace QDirStat
      * This is constructed by PkgQuery and used by DirTreePkgFilter for
      * unpackaged queries.
      **/
-    class GlobalFileListCache final : public QSet<QString>
+    struct GlobalFileListCache final : public QSet<QString>
     {
-    public:
 	void add( const PkgFileListCache & pkgFileListCache )
 	    { for ( const QString & filename : pkgFileListCache ) insert( filename ); }
 

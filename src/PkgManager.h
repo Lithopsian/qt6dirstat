@@ -147,7 +147,7 @@ namespace QDirStat
 	    { return nullptr; }
 
 	/**
-	 * Return a name suitable for a detailed queries for 'pkg'.
+	 * Return a name suitable for detailed queries for 'pkg'.
 	 */
 	virtual QString queryName( const PkgInfo * pkg ) const
 	    { return pkg->name(); }

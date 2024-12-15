@@ -169,7 +169,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache() const
 
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
-    PkgFileListCache * cache = new PkgFileListCache{ this };
+    PkgFileListCache * cache = new PkgFileListCache{};
 
     // Sample output:
     //
