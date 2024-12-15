@@ -148,7 +148,7 @@ namespace QDirStat
      * Format a number in octal with a leading zero.
      **/
     inline QString formatOctal( int number )
-        { return '0' % QString::number( number, 8 ); }
+        { return '0' % QString{ "%1" }.arg( number, 3, 8, QChar{ '0' } ); }
 
     /**
      * Format a file stat mode as octal.
