@@ -393,7 +393,8 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 
     if ( errno == EACCES )
     {
-	// No permissions, unexpected (for a package!) but non-fatal error
+	// No permissions, uncommon (for a package!) but non-fatal error
+	//logDebug() << _pkg << ": permission denied for " << path << Qt::endl;
 	parent->markAsDirty();
 	parent->setReadState( DirPermissionDenied );
     }
@@ -461,11 +462,6 @@ void PkgReadJob::addFiles( QStringList fileList )
 		parent = newParent->toDirInfo();
 		lastDir = parent;
 		lastDirPath = currentPath;
-	    }
-	    else if ( currentComponent != components.last() )
-	    {
-		// Failure that used to occur a lot (for dpkg) when symlinks weren't resolved
-		logWarning() << newParent << " should be a directory, but is not" << Qt::endl;
 	    }
 	}
     }
