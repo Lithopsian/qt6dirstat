@@ -151,8 +151,11 @@ GlobalFileListCache * PkgQuery::getFileList() const
     for ( const PkgManager * pkgManager : _pkgManagers )
     {
         const PkgFileListCache * pkgFileListCache = pkgManager->createFileListCache();
-        fileList->add( *pkgFileListCache );
-        delete pkgFileListCache;
+        if ( pkgFileListCache )
+        {
+            fileList->add( *pkgFileListCache );
+            delete pkgFileListCache;
+        }
     }
 
     return fileList;
