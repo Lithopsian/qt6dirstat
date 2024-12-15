@@ -9,6 +9,8 @@
 
 #include <sys/stat.h> // fstatat(), struct stat
 
+#include <QThread>
+
 #include "PkgReader.h"
 #include "DirTree.h"
 #include "Exception.h"
@@ -20,10 +22,6 @@
 #include "ProcessStarter.h"
 #include "Settings.h"
 #include "SysUtil.h"
-
-
-#define DEFAULT_PARALLEL_PROCESSES   10
-#define DEFAULT_CACHE_PKG_LIST_SIZE 300
 
 
 using namespace QDirStat;
@@ -40,8 +38,10 @@ namespace
 
 	settings.beginGroup( "Pkg" );
 
-	maxParallelProcesses   = settings.value( "MaxParallelProcesses",   DEFAULT_PARALLEL_PROCESSES  ).toInt();
-	minCachePkgListSize    = settings.value( "MinCachePkgListSize",    DEFAULT_CACHE_PKG_LIST_SIZE ).toInt();
+	const int defaultParallelProcesses = QThread::idealThreadCount();
+	const int defaultCachePkgListSize = defaultParallelProcesses * 40;
+	maxParallelProcesses   = settings.value( "MaxParallelProcesses",   defaultParallelProcesses ).toInt();
+	minCachePkgListSize    = settings.value( "MinCachePkgListSize",    defaultCachePkgListSize  ).toInt();
 	verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
 
 	settings.setDefaultValue( "MaxParallelProcesses",   maxParallelProcesses   );
