@@ -236,7 +236,8 @@ namespace
      **/
     void handleStatError( const QString & entryName, const QString & fullName, DirInfo * dir, DirTree * tree )
     {
-	logWarning() << "fstatat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
+	if ( errno != EACCES )
+	    logWarning() << "fstatat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
 
 	/*
 	 * Not much we can do when fstatat() didn't work; just
