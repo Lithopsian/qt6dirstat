@@ -236,7 +236,8 @@ namespace
      **/
     void handleStatError( const QString & entryName, const QString & fullName, DirInfo * dir, DirTree * tree )
     {
-	logWarning() << "fstatat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
+	if ( errno != EACCES )
+	    logWarning() << "fstatat(" << fullName << ") failed: " << formatErrno() << Qt::endl;
 
 	/*
 	 * Not much we can do when fstatat() didn't work; just
@@ -244,7 +245,7 @@ namespace
 	 */
 	DirInfo * child = new DirInfo{ dir, tree, entryName };
 	child->finalizeLocal();
-	child->setReadState( DirError );
+	child->setReadState( errno == EACCES ? DirPermissionDenied : DirError );
 	dir->insertChild( child );
 	tree->childAddedNotify( child );
     }
@@ -347,6 +348,7 @@ void LocalDirReadJob::startReading()
 	// Don't add anything after finished() since this deletes this job!
 	return;
     }
+    int dirFd = dirfd( diskDir );
 
     dir()->setReadState( DirReading );
 
@@ -360,8 +362,6 @@ void LocalDirReadJob::startReading()
     // in the same directory, a QMap would store only one of them, all others
     // would go missing in the DirTree.
     QMultiMap<ino_t, QString> entryMap;
-
-    int dirFd = dirfd( diskDir );
     struct dirent * entry;
     while ( ( entry = readdir( diskDir ) ) )
     {
