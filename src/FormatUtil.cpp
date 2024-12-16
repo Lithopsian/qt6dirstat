@@ -81,7 +81,7 @@ QString QDirStat::symbolicMode( mode_t mode )
 	if ( S_ISFIFO( mode ) ) return u'p';
 	if ( S_ISLNK ( mode ) ) return u'l';
 	if ( S_ISSOCK( mode ) ) return u's';
-	return u' ';
+	return u'​';
     }();
 
     // User

@@ -276,7 +276,8 @@ namespace
 
     /**
      * Set the owning package details for a file.  This happens
-     * asynchronously, trieggered by AdaptiveTimer.
+     * asynchronously, triggered by AdaptiveTimer, although the external
+     * process itself runs synchronously after a variable delay.
      **/
     void updatePkgInfo( const Ui::FileDetailsView * ui, const QString & path, int lastPixel )
     {
