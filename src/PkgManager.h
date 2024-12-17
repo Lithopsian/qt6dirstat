@@ -86,10 +86,13 @@ namespace QDirStat
 	bool check();
 
 	/**
-	 * Wait until the checking process has finished, or the timeout
-	 * exceeded.  At this point, package manager functions can be used.
+	 * Wait until the primary package manager checking process has
+	 * finished, or the timeout is exceeded.  Returns whether the process
+	 * finishes successfully. If '_process' is null, for example it was
+	 * never set or has been reset by the finished() signal handler, then
+	 * true is returned immediately.
 	 **/
-	bool waitForFinished()
+	bool waitForPrimary()
 	    { return _process ? _process->waitForFinished() : true; }
 
 	/**
@@ -170,7 +173,8 @@ namespace QDirStat
 
 	/**
 	 * Return 'true' if this package manager supports getting the list of
-	 * installed packages.
+	 * installed packages.  Implies that the function installedPkg() is
+	 * defined
 	 *
 	 * The default implementation returns 'false'.
 	 **/
@@ -178,7 +182,8 @@ namespace QDirStat
 
 	/**
 	 * Return 'true' if this package manager supports getting the file list
-	 * for a package; with fileListCommand().
+	 * for a package; implies that the functions fileListCommand() and
+	 * parseFileList() are defined.
 	 *
 	 * The default implementation returns 'false'.
 	 *
@@ -188,7 +193,8 @@ namespace QDirStat
 
 	/**
 	 * Return 'true' if this package manager supports building a file list
-	 * cache for getting all file lists for all packages.
+	 * cache for getting all file lists for all packages: implies that the
+	 * function createFileListCache() is defined.
 	 *
 	 * The default implementation returns 'false'.
 	 **/

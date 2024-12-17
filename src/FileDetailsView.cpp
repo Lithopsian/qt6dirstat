@@ -283,9 +283,9 @@ namespace
     {
 	// logDebug() << "Updating pkg info for " << path << Qt::endl;
 
-	const QString pkg = PkgQuery::owningPkg( path );
-	setLabelLimited( ui->filePackageLabel, pkg, lastPixel );
-	ui->filePackageCaption->setEnabled( !pkg.isEmpty() );
+	const QString * pkg = PkgQuery::owningPkg( path );
+	ui->filePackageCaption->setEnabled( !pkg->isEmpty() );
+	setLabelLimited( ui->filePackageLabel, *pkg, lastPixel );
     }
 
 
@@ -296,7 +296,7 @@ namespace
     {
 	const QString categoryName = MimeCategorizer::instance()->name( fileInfo );
 	ui->fileMimeCaption->setEnabled( !categoryName.isEmpty() );
-	ui->fileMimeLabel->setEnabled( !categoryName.isEmpty() );
+//	ui->fileMimeLabel->setEnabled( !categoryName.isEmpty() );
 	ui->fileMimeLabel->setText( categoryName );
     }
 
@@ -357,7 +357,7 @@ namespace
 
 	ui->dirUserCaption->setEnabled( dir->hasUid() );
 	ui->dirUserLabel->setText( dir->userName() );
-	ui->dirGroupCaption->setEnabled( dir->hasUid() );
+	ui->dirGroupCaption->setEnabled( dir->hasGid() );
 	ui->dirGroupLabel->setText( dir->groupName() );
 	ui->dirPermissionsCaption->setEnabled( dir->hasPerm() );
 	ui->dirPermissionsLabel->setText( formatPermissions( dir ) );
@@ -453,7 +453,7 @@ namespace
 	else if ( isSpecial )
 	{
 	    ui->fileMimeCaption->setEnabled( false );
-	    ui->fileMimeLabel->setEnabled( false );
+//	    ui->fileMimeLabel->setEnabled( false );
 	    clearLabel( ui->fileMimeLabel );
 	    clearLabel( ui->fileSizeLabel );
 	    clearLabel( ui->fileAllocatedLabel );

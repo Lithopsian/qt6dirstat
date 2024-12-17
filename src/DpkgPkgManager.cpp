@@ -13,6 +13,7 @@
 #include "DpkgPkgManager.h"
 #include "Exception.h"
 #include "PkgFileListCache.h"
+#include "PkgQuery.h"
 #include "SysUtil.h"
 
 
@@ -84,7 +85,7 @@ namespace
      *
      * exitCode indicates the success or failure of the command.
     */
-    QString runDpkg( const QString & path, int & exitCode, bool logError, int timeoutSecs = 5 )
+    QString runDpkg( const QString & path, int & exitCode, bool logError, int timeoutSecs )
     {
 	return SysUtil::runCommand( DpkgPkgManager::dpkgCommand(),
 	                            { "-S", path },
@@ -114,7 +115,7 @@ namespace
 	const QString pathResolved = resolvePath( path );
 
 	int exitCode;
-	const QString output = runDpkg( path, exitCode, true ); // log error codes
+	const QString output = runDpkg( path, exitCode, true, PkgQuery::owningPkgTimeoutSecs() );
 	if ( exitCode != 0 )
 	    return QString{};
 
@@ -324,9 +325,11 @@ namespace
 
 QString DpkgPkgManager::owningPkg( const QString & path ) const
 {
+    const int timeoutSecs = PkgQuery::owningPkgTimeoutSecs();
+
     // Try first with the full (possibly symlinked) path
     int exitCode;
-    const QString fullPathOutput = runDpkg( path, exitCode, false ); // error code likely, ignore
+    const QString fullPathOutput = runDpkg( path, exitCode, false, timeoutSecs );
     if ( exitCode == 0 )
     {
 	const QString package = searchOwningPkg( path, fullPathOutput );
@@ -337,7 +340,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
     // Search again just by filename in case part of the directory path is symlinked
     // (this may produce a lot of rows)
     const QFileInfo fileInfo{ path };
-    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false ); // error code likely, ignore
+    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false, timeoutSecs );
     if ( exitCode != 0 )
 	return QString{};
 

@@ -11,6 +11,7 @@
 
 #include "PacManPkgManager.h"
 #include "Logger.h"
+#include "PkgQuery.h"
 #include "SysUtil.h"
 
 
@@ -55,7 +56,10 @@ namespace
 QString PacManPkgManager::owningPkg( const QString & path ) const
 {
     int exitCode;
-    QString output = SysUtil::runCommand( pacmanCommand(), { "-Qo", path }, &exitCode, 5 );
+    QString output = SysUtil::runCommand( pacmanCommand(),
+                                          { "-Qo", path },
+                                          &exitCode,
+                                          PkgQuery::owningPkgTimeoutSecs() );
     if ( exitCode != 0 || output.contains( "No package owns"_L1 ) )
         return QString{};
 

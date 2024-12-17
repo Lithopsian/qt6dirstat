@@ -7,8 +7,6 @@
  *              Ian Nartowicz
  */
 
-#define DEFAULT_WARNING_SEC 10
-
 #include <iostream> // cerr/endl;
 
 #include <QElapsedTimer>
@@ -18,8 +16,8 @@
 #include "MainWindow.h"
 #include "PanelMessage.h"
 #include "PkgFileListCache.h"
+#include "PkgQuery.h"
 #include "QDirStatApp.h"
-#include "Settings.h"
 #include "SysUtil.h"
 
 
@@ -88,8 +86,6 @@ namespace
 
 RpmPkgManager::RpmPkgManager()
 {
-    readSettings();
-
     // Note that it is not enough to rely on a symlink /bin/rpm ->
     // /usr/bin/rpm.  Always provide a string here, even if it doesn't exist.
     _rpmCommand = SysUtil::haveCommand( "/usr/bin/rpm" ) ? "/usr/bin/rpm" : "/bin/rpm";
@@ -102,7 +98,7 @@ QString RpmPkgManager::owningPkg( const QString & path ) const
     const QString output = SysUtil::runCommand( _rpmCommand,
                                                 { "-qf", "--queryformat", "%{name}", path },
                                                 &exitCode,
-                                                5 );
+                                                PkgQuery::owningPkgTimeoutSecs() );
 
     if ( exitCode != 0 || output.contains( "not owned by any package"_L1 ) )
 	return QString{};
@@ -122,7 +118,7 @@ PkgInfoList RpmPkgManager::installedPkg() const
                              { "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
                              &exitCode );
 
-    if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
+    if ( timer.hasExpired( PkgQuery::pkgListWarningSecs() * 1000 ) )
 	rebuildDbWarning();
 
     return exitCode == 0 ? parsePkgList( this, output ) : PkgInfoList{};
@@ -198,18 +194,4 @@ PkgFileListCache * RpmPkgManager::createFileListCache() const
     //logDebug() << "file list cache finished." << Qt::endl;
 
     return cache;
-}
-
-
-void RpmPkgManager::readSettings()
-{
-    Settings settings;
-    settings.beginGroup( "Pkg" );
-    _getPkgListWarningSec = settings.value( "GetRpmPkgListWarningSec", DEFAULT_WARNING_SEC ).toInt();
-
-    // Write the value back to the settings if it isn't there already:
-    // since package manager objects are never destroyed, this can't
-    // reliably be done in the destructor.
-    settings.setDefaultValue( "GetRpmPkgListWarningSec", _getPkgListWarningSec );
-    settings.endGroup();
 }

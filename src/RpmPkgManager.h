@@ -106,11 +106,6 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Read parameters from the settings file.
-	 **/
-	void readSettings();
-
-	/**
 	 * Return the program and arguments for a command to test if this is a
 	 * primary package manager.
 	 *
@@ -155,7 +150,6 @@ namespace QDirStat
 
     private:
 
-	int _getPkgListWarningSec;
 	const char * _rpmCommand;
 
     };	// class RpmPkgManager

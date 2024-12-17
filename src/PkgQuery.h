@@ -80,6 +80,19 @@ namespace QDirStat
 	    { instance(); }
 
 	/**
+	 * Return the elapsed query time that will trigger a warning message.
+	 * This is currently only used by rpm.
+	 **/
+	static int pkgListWarningSecs()
+	    { return instance()->getPkgListWarningSecs(); }
+
+	/**
+	 * Return the process timeout for owning package commands.
+	 **/
+	static int owningPkgTimeoutSecs()
+	    { return instance()->getOwningPkgTimeoutSecs(); }
+
+	/**
 	 * Set the primary package manager to 'pkgManager'.
 	 **/
 	static void setPrimaryPkgManager( const PkgManager * pkgManager )
@@ -101,7 +114,7 @@ namespace QDirStat
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
 	 **/
-	static QString owningPkg( const QString & path )
+	static const QString * owningPkg( const QString & path )
 	    { return instance()->getOwningPackage( path ); }
 
 	/**
@@ -126,6 +139,19 @@ namespace QDirStat
     protected:
 
 	/**
+	 * Return the elapsed query time that will trigger a warning message.
+	 * This is currently only used by rpm.
+	 **/
+	int getPkgListWarningSecs() const
+	    { return _pkgListWarningSecs; }
+
+	/**
+	 * Return the process timeout for owning package commands.
+	 **/
+	int getOwningPkgTimeoutSecs() const
+	    { return _owningPkgTimeoutSecs; }
+
+	/**
 	 * Set the primary package manager to 'pkgManager'.
 	 **/
 	void setPrimary( const PkgManager * pkgManager )
@@ -143,7 +169,7 @@ namespace QDirStat
 	 *
 	 * The result is also inserted into the cache.
 	 **/
-	QString getOwningPackage( const QString & path );
+	const QString * getOwningPackage( const QString & path );
 
 	/**
 	 * Return the list of installed packages.
@@ -161,6 +187,9 @@ namespace QDirStat
 
 
     private:
+
+	int _pkgListWarningSecs;
+	int _owningPkgTimeoutSecs;
 
 	const PkgManager * _primaryPkgManager{ nullptr };
 	PkgManagerList     _pkgManagers; // primary and secondary package managers found

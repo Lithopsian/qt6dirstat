@@ -14,10 +14,8 @@
 #include "PkgFileListCache.h"
 #include "PkgManager.h"
 #include "RpmPkgManager.h"
+#include "Settings.h"
 
-
-#define CACHE_SIZE 1000
-#define CACHE_COST    1
 
 #define VERBOSE_PKG_QUERY 0
 
@@ -28,10 +26,34 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Read the configuration settings for the package managers.
+     *
+     * This is a singleton object which is not destroyed during the Qt main
+     * exec loop, so default values are written immediately to the settings
+     * file.  The only way to change the settings is to edit the config file.
+     **/
+    void readSettings( int & cacheSize, int & pkgListWarningSecs, int & owningPkgTimeoutSecs)
+    {
+        Settings settings;
+        settings.beginGroup( "Pkg" );
+
+        cacheSize            = settings.value( "OwningPkgCacheSize", 1000 ).toInt();
+        pkgListWarningSecs   = settings.value( "PkgListWarningSecs",   10 ).toInt();
+        owningPkgTimeoutSecs = settings.value( "OwningPkgTimeoutSecs",  5 ).toInt();
+
+        settings.setDefaultValue( "OwningPkgCacheSize",   cacheSize           );
+        settings.setDefaultValue( "PkgListWarningSecs",   pkgListWarningSecs   );
+        settings.setDefaultValue( "OwningPkgTimeoutSecs", owningPkgTimeoutSecs );
+
+        settings.endGroup();
+    }
+
+
+    /**
      * Initiate an external process to see if the PkgManager object is a
-     * primary package manager.  If the externel process program exists and is
-     * executable, then 'pkgManager' is added to the list of package managers.
-     * Otherwise it is deleted.
+     * primary package manager.  If the external process is started
+     * successfully, then 'pkgManager' is added to the list of package
+     * managers.  Otherwise it is deleted.
      *
      * The check must be started externally because it calls virtual functions
      * from the base class.
@@ -53,8 +75,8 @@ namespace
     {
         for ( PkgManager * pkgManager : pkgManagers )
         {
-            if ( !pkgManager->waitForFinished() )
-                logWarning() << pkgManager->name() << " check timed out" << Qt::endl;
+            if ( !pkgManager->waitForPrimary() )
+                logWarning() << pkgManager->name() << " check timed out or error" << Qt::endl;
         }
     }
 
@@ -71,7 +93,9 @@ PkgQuery * PkgQuery::instance()
 
 PkgQuery::PkgQuery()
 {
-    _cache.setMaxCost( CACHE_SIZE );
+    int cacheSize;
+    readSettings( cacheSize, _pkgListWarningSecs, _owningPkgTimeoutSecs );
+    _cache.setMaxCost( cacheSize );
 
     logInfo() << "Checking available supported package managers..." << Qt::endl;
     startPkgManagerCheck( _pkgManagers, new DpkgPkgManager );
@@ -95,7 +119,7 @@ const PkgManager * PkgQuery::getPrimary() const
 }
 
 
-QString PkgQuery::getOwningPackage( const QString & path )
+const QString * PkgQuery::getOwningPackage( const QString & path )
 {
     const QString * cachePkg = _cache[ path ];
     if ( cachePkg )
@@ -103,7 +127,7 @@ QString PkgQuery::getOwningPackage( const QString & path )
 #if VERBOSE_PKG_QUERY
         logDebug() << "Cache: package " << cachePkg << " owns " << path << Qt::endl;
 #endif
-        return *cachePkg;
+        return cachePkg;
     }
 
     const QString pkg = [ &path ]( const PkgManagerList & pkgManagers )
@@ -126,10 +150,11 @@ QString PkgQuery::getOwningPackage( const QString & path )
         return QString{};
     }( _pkgManagers );
 
+    QString * newPkg = new QString{ pkg };
     // Insert package name (even if empty) into the cache
-    _cache.insert( path, new QString{ pkg }, CACHE_COST );
+    _cache.insert( path, newPkg );
 
-    return pkg;
+    return newPkg;
 }
 
 
