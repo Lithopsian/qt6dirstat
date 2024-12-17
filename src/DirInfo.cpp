@@ -511,22 +511,25 @@ void DirInfo::childAdded( FileInfo * newChild )
 	// Don't propagate the other counts from ignored items to non-ignored ancestors
 	if ( !newChild->isIgnored() || isIgnored() || isAttic() )
 	{
+	    const FileSize size          = newChild->size();
+	    const FileSize allocatedSize = newChild->allocatedSize();
+
 	    // Watch for overflows at the top-level directory which should have the biggest numbers
 	    if ( parent() && parent() == tree()->root() )
 	    {
 		if ( _totalItems == FileCountMax )
 		    THROW( TooManyFilesException{} );
 
-		if ( _totalSize          > FileSizeMax - newChild->size() ||
-		     _totalAllocatedSize > FileSizeMax - newChild->allocatedSize() )
+		if ( ( size >= 0          && _totalSize          > FileSizeMax - size ) ||
+		     ( allocatedSize >= 0 && _totalAllocatedSize > FileSizeMax - allocatedSize ) )
 		    THROW( FilesystemTooBigException{} );
 	    }
 
 	    if ( newChild->mtime() > _latestMTime )
 		_latestMTime = newChild->mtime();
 
-	    _totalSize          += newChild->size();
-	    _totalAllocatedSize += newChild->allocatedSize();
+	    _totalSize          += size;
+	    _totalAllocatedSize += allocatedSize;
 	    _totalBlocks        += newChild->blocks();
 	    ++_totalItems;
 

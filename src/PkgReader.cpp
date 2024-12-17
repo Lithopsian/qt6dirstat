@@ -39,7 +39,7 @@ namespace
 	settings.beginGroup( "Pkg" );
 
 	const int defaultParallelProcesses = QThread::idealThreadCount();
-	const int defaultCachePkgListSize = defaultParallelProcesses * 40;
+	const int defaultCachePkgListSize  = defaultParallelProcesses * 40;
 	maxParallelProcesses   = settings.value( "MaxParallelProcesses",   defaultParallelProcesses ).toInt();
 	minCachePkgListSize    = settings.value( "MinCachePkgListSize",    defaultCachePkgListSize  ).toInt();
 	verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
@@ -395,15 +395,13 @@ FileInfo * PkgReadJob::createItem( const QString & path,
     {
 	// No permissions, uncommon (for a package!) but non-fatal error
 	//logDebug() << _pkg << ": permission denied for " << path << Qt::endl;
-	parent->markAsDirty();
-	parent->setReadState( DirPermissionDenied );
+	parent->setReadError( DirPermissionDenied );
     }
     else if ( errno != ENOENT )
     {
 	// Unexpected error, probably serious
 	logError() << _pkg << ": can't stat " << path << Qt::endl;
-	parent->markAsDirty();
-	parent->setReadState( DirError );
+	parent->setReadError( DirError );
     }
     else if ( _verboseMissingPkgFiles )
     {
