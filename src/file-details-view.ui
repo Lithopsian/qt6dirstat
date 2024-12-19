@@ -19,7 +19,7 @@
      <number>4</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <layout class="QHBoxLayout" name="fileHeadingHBox" stretch="0,0,0,0,0,1">
         <item>
@@ -333,19 +333,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="dirDetailsPage">
@@ -460,7 +447,7 @@
          </widget>
         </item>
         <item row="1" column="1" rowspan="2">
-         <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">
            <number>8</number>
           </property>
@@ -756,19 +743,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <spacer name="dirRightStretch">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="pkgDetailsPage">
@@ -1025,19 +999,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <spacer name="pkgRightStretch">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="pkgSummaryPage">
@@ -1246,19 +1207,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <spacer name="pkgSummaryRightStretch">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="selectionSummaryPage">
@@ -1286,7 +1234,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QGridLayout" name="selGridLayout" columnstretch="0,0">
+       <layout class="QGridLayout" name="selGridLayout" columnstretch="0,1">
         <property name="topMargin">
          <number>10</number>
         </property>
@@ -1401,19 +1349,6 @@
        </spacer>
       </item>
      </layout>
-    </item>
-    <item>
-     <spacer name="selRightStretch">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>
