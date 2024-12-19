@@ -236,7 +236,7 @@ namespace
      **/
     QVariant columnText( DirTree * tree, FileInfo * item, int col )
     {
-	if ( item->isPkgInfo() || item->isPseudoDir() )
+	if ( item->isPkgInfo() || item->isPseudoDir() || item->readError() )
 	{
 	    if ( col == UserCol || col == GroupCol || col == PermissionsCol || col == OctalPermissionsCol )
 		return QVariant{};
