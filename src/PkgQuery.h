@@ -84,19 +84,13 @@ namespace QDirStat
 	 * This is currently only used by rpm.
 	 **/
 	static int pkgListWarningSecs()
-	    { return instance()->getPkgListWarningSecs(); }
+	    { return instance()->_pkgListWarningSecs; }
 
 	/**
 	 * Return the process timeout for owning package commands.
 	 **/
 	static int owningPkgTimeoutSecs()
-	    { return instance()->getOwningPkgTimeoutSecs(); }
-
-	/**
-	 * Set the primary package manager to 'pkgManager'.
-	 **/
-	static void setPrimaryPkgManager( const PkgManager * pkgManager )
-	    { return instance()->setPrimary( pkgManager ); }
+	    { return instance()->_owningPkgTimeoutSecs; }
 
 	/**
 	 * Return 'true' if any of the supported package managers was found.
@@ -109,6 +103,12 @@ namespace QDirStat
 	 **/
 	static const PkgManager * primaryPkgManager()
 	    { return instance()->getPrimary(); }
+
+	/**
+	 * Set the primary package manager to 'pkgManager'.
+	 **/
+	static void setPrimaryPkgManager( const PkgManager * pkgManager )
+	    { instance()->_primaryPkgManager = pkgManager; }
 
 	/**
 	 * Return the owning package of a file or directory with full path
@@ -135,31 +135,17 @@ namespace QDirStat
 	static GlobalFileListCache * fileList()
 	    { return instance()->getFileList(); }
 
+	/**
+	 * Delete all objects from the owning package cache.
+	 **/
+	static void clearOwningPkgCache()
+	    { return instance()->_cache.clear(); }
+
 
     protected:
 
 	/**
-	 * Return the elapsed query time that will trigger a warning message.
-	 * This is currently only used by rpm.
-	 **/
-	int getPkgListWarningSecs() const
-	    { return _pkgListWarningSecs; }
-
-	/**
-	 * Return the process timeout for owning package commands.
-	 **/
-	int getOwningPkgTimeoutSecs() const
-	    { return _owningPkgTimeoutSecs; }
-
-	/**
-	 * Set the primary package manager to 'pkgManager'.
-	 **/
-	void setPrimary( const PkgManager * pkgManager )
-	    { _primaryPkgManager = pkgManager; }
-
-	/**
-	 * Return the (first) primary package manager if there is one or 0 if
-	 * not.
+	 * Return the primary package manager if there is one or 0 if not.
 	 **/
 	const PkgManager * getPrimary() const;
 
