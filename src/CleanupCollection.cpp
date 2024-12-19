@@ -245,11 +245,7 @@ void CleanupCollection::updateActions()
     const bool itemBusy         = sel.containsBusyItem();
     const bool treeBusy         = sel.treeIsBusy();
     const bool canCleanup       = !isBusy() && !atticSelected && !pkgSelected && !itemBusy && !empty;
-    const bool pkgView = empty ? false : [ &sel ]()
-    {
-	const FileInfo * firstToplevel = sel.first()->tree()->firstToplevel();
-	return firstToplevel && firstToplevel->isPkgInfo();
-    }();
+    const bool pkgView          = empty ? false : app()->isPkgView();
 
     for ( Cleanup * cleanup : asConst( _cleanupList ) )
     {

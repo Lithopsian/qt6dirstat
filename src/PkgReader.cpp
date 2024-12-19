@@ -290,7 +290,7 @@ namespace
 	for ( DirInfoIterator it{ subtree }; *it; ++it )
 	    finalizeAll( *it );
 
-	if ( !subtree->readError() )
+	if ( !subtree->subtreeReadError() )
 	    subtree->setReadState( DirFinished );
 
 	subtree->finalizeLocal();
@@ -310,9 +310,9 @@ namespace
 
 	if ( S_ISDIR( statInfo.st_mode ) ) // directory
 	{
-	    // Zero the directory's own size fields to prevent them from
-	    // distorting the total sums.  Otherwise the directory would be
-	    // counted in each package that uses the directory.
+	    // Zero the directory's own size fields.  These may represent, in
+	    // part, files from other packages and, when they occur in multiple
+	    // packages they will be counted multiple times in the total.
 	    statInfo.st_size   = 0;
 	    statInfo.st_blocks = 0;
 

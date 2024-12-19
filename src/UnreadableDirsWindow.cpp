@@ -76,7 +76,7 @@ namespace
 	    return;
 
 	DirInfo * dir = subtree->toDirInfo();
-	if ( dir->readError() )
+	if ( dir->subtreeReadError() )
 	    treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
 
 	// Recurse through any subdirectories

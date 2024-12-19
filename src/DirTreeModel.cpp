@@ -187,7 +187,7 @@ namespace
      **/
     QVariant sizeColText( FileInfo * item )
     {
-	if ( item->isSpecial() )
+	if ( item->isSpecial() || item->size() < 0 )
 	    return QVariant{};
 
 	if ( item->isDirInfo() )
@@ -236,6 +236,12 @@ namespace
      **/
     QVariant columnText( DirTree * tree, FileInfo * item, int col )
     {
+	if ( item->isPkgInfo() || item->isPseudoDir() )
+	{
+	    if ( col == UserCol || col == GroupCol || col == PermissionsCol || col == OctalPermissionsCol )
+		return QVariant{};
+	}
+
 	if ( item->isPkgInfo() && item->readState() == DirAborted )
 	{
 	    if ( col == PercentBarCol )
@@ -291,7 +297,7 @@ namespace
 	    if ( item->isDotEntry() && col == TotalSubDirsCol )
 		return QVariant{};
 
-	    if ( item->readError() )
+	    if ( item->subtreeReadError() )
 	    {
 		switch ( col )
 		{
@@ -718,8 +724,9 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 		break;
 
 	    case DirError:
+	    case DirNoAccess:
 	    case DirPermissionDenied:
-		// This is a hybrid case: Depending on the dir reader, the dir may
+		// This is a hybrid case: depending on the dir reader, the dir may
 		// or may not be finished at this time. For a local dir, it most
 		// likely is; for a cache reader, there might be more to come.
 		if ( !_tree->isBusy() )
@@ -761,7 +768,7 @@ QVariant DirTreeModel::data( const QModelIndex & index, int role ) const
 	    if ( item->isIgnored() || item->isAttic() )
 		return QGuiApplication::palette().brush( QPalette::Disabled, QPalette::WindowText );
 
-	    if ( item->readError() )
+	    if ( item->subtreeReadError() )
 		return dirReadErrColor();
 
 	    if ( item->errSubDirs() > 0 )
@@ -903,12 +910,12 @@ QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
     if ( item->readState() == DirAborted )
 	return _stopIcon;
 
-    if ( item->isDotEntry() ) return _dotEntryIcon;
-    if ( item->isAttic()    ) return _atticIcon;
-    if ( item->isPkgInfo()  ) return _pkgIcon;
-    if ( item->isExcluded() ) return _excludedIcon;
-    if ( item->readError()  ) return _unreadableDirIcon;
-    if ( item->isDir()      ) return item->isMountPoint() ? _mountPointIcon : _dirIcon;
+    if ( item->isDotEntry()       ) return _dotEntryIcon;
+    if ( item->isAttic()          ) return _atticIcon;
+    if ( item->isPkgInfo()        ) return _pkgIcon;
+    if ( item->isExcluded()       ) return _excludedIcon;
+    if ( item->subtreeReadError() ) return _unreadableDirIcon;
+    if ( item->isDir()            ) return item->isMountPoint() ? _mountPointIcon : _dirIcon;
     // else FileInfo
     if ( item->isFile()        ) return _fileIcon;
     if ( item->isSymlink()     ) return _symlinkIcon;

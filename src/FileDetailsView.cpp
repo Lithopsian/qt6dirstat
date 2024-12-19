@@ -38,7 +38,7 @@ namespace
 {
     /**
      * Return the last component of the path for 'item'.  In most
-     * cases this will simply be the item name, but the root item
+     * cases this will simply be the item name, but for the root item
      * is the full absolute pathname for 'item'.
      *
      * Note that for "/" (and any other path ending in "/"), this
@@ -174,6 +174,15 @@ namespace
 
 
     /**
+     * Set the text for 'label' to a formatted timestamp 'time'.
+     **/
+    void setTimeLabel( QLabel * label, time_t time )
+    {
+	label->setText( formatTime( time ) );
+    }
+
+
+    /**
      * Set the text for 'label' to a number with an optional prefix.
      **/
     void setCountLabel( QLabel * label, FileCount number, QLatin1String prefix = QLatin1String{} )
@@ -235,6 +244,7 @@ namespace
 	if ( file->isSocket()      ) return QObject::tr( "socket"           );
 
 	logWarning() << " unexpected mode: " << file->mode() << Qt::endl;
+
 	return QString{};
     }
 
@@ -244,8 +254,9 @@ namespace
      **/
     QString formatDirInfoType( const DirInfo * dir )
     {
-	if ( dir->isMountPoint() ) return QObject::tr( "mount point" );
-	if ( dir->isPseudoDir()  ) return QObject::tr( "pseudo directory" );
+	if ( dir->readError()    ) return QObject::tr( "unknown"          );
+	if ( dir->isMountPoint() ) return QObject::tr( "mount point"      );
+	if ( dir->isPseudoDir()  ) return QObject::tr( "pseudo-directory" );
 	return QObject::tr( "directory" );
     }
 
@@ -296,7 +307,6 @@ namespace
     {
 	const QString categoryName = MimeCategorizer::instance()->name( fileInfo );
 	ui->fileMimeCaption->setEnabled( !categoryName.isEmpty() );
-//	ui->fileMimeLabel->setEnabled( !categoryName.isEmpty() );
 	ui->fileMimeLabel->setText( categoryName );
     }
 
@@ -347,24 +357,41 @@ namespace
 
 
     /**
-     * Show the directory section details for a DirInfo item.
+     * Show the directory section details for a DirInfo item.  The own row size
+     * is completely removed for directories in package views since it is
+     * somewhat meaningless and always zero.  When the uid, gid, and
+     * permissions are marked as missing, usually from an old-version cache
+     * read, the captions are disabled.  If there was an error accessing details
+     * about 'dir', then the fields are left empty.
      **/
     void showDirNodeInfo( const Ui::FileDetailsView * ui, const DirInfo * dir )
     {
-	ui->dirOwnSizeCaption->setVisible( dir->size() > 0 );
-	ui->dirOwnSizeLabel->setVisible  ( dir->size() > 0 );
-	setSizeLabel( ui->dirOwnSizeLabel, dir->size() );
+	if ( app()->isPkgView() )
+	{
+	    ui->dirOwnSizeCaption->hide();
+	    ui->dirOwnSizeLabel->hide();
+	}
 
 	ui->dirUserCaption->setEnabled( dir->hasUid() );
-	ui->dirUserLabel->setText( dir->userName() );
 	ui->dirGroupCaption->setEnabled( dir->hasGid() );
-	ui->dirGroupLabel->setText( dir->groupName() );
 	ui->dirPermissionsCaption->setEnabled( dir->hasPerm() );
-	ui->dirPermissionsLabel->setText( formatPermissions( dir ) );
 
-	ui->dirMTimeCaption->setVisible( dir->mtime() > 0 );
-	ui->dirMTimeLabel->setVisible( dir->mtime() > 0);
-	ui->dirMTimeLabel->setText( formatTime( dir->mtime() ) );
+	if ( dir->readError() )
+	{
+	    clearLabel( ui->dirOwnSizeLabel );
+	    clearLabel( ui->dirUserLabel );
+	    clearLabel( ui->dirGroupLabel );
+	    clearLabel( ui->dirPermissionsLabel );
+	    clearLabel( ui->dirMTimeLabel );
+	}
+	else
+	{
+	    setSizeLabel( ui->dirOwnSizeLabel, dir->size() );
+	    ui->dirUserLabel->setText( dir->userName() );
+	    ui->dirGroupLabel->setText( dir->groupName() );
+	    ui->dirPermissionsLabel->setText( formatPermissions( dir ) );
+	    setTimeLabel( ui->dirMTimeLabel, dir->mtime() );
+	}
 
 	// Show permissions in "red" if there was a permission denied error reading this directory
 	// Using (and removing) a stylesheet better respects theme changes
@@ -373,8 +400,8 @@ namespace
 
 
     /**
-     * Show the subtree section details for a DirInfo item, size
-     * and count totals for all the items below this directory.
+     * Show the subtree section details for a DirInfo item, size and count
+     * totals for all the items below this directory.
      **/
     void showSubtreeInfo( const Ui::FileDetailsView * ui, DirInfo * dir )
     {
@@ -388,7 +415,7 @@ namespace
 	    setCountLabel( ui->dirItemCountLabel,   dir->totalItems(),         prefix );
 	    setCountLabel( ui->dirFileCountLabel,   dir->totalFiles(),         prefix );
 	    setCountLabel( ui->dirSubDirCountLabel, dir->totalSubDirs(),       prefix );
-	    ui->dirLatestMTimeLabel->setText( formatTime( dir->latestMTime() ) );
+	    setTimeLabel ( ui->dirLatestMTimeLabel, dir->latestMTime() );
 
 	    setBold( ui->dirAllocatedLabel, totalUsedPercent( dir ) < ALLOCATED_FAT_PERCENT );
 	}
@@ -453,7 +480,6 @@ namespace
 	else if ( isSpecial )
 	{
 	    ui->fileMimeCaption->setEnabled( false );
-//	    ui->fileMimeLabel->setEnabled( false );
 	    clearLabel( ui->fileMimeLabel );
 	    clearLabel( ui->fileSizeLabel );
 	    clearLabel( ui->fileAllocatedLabel );
@@ -478,7 +504,7 @@ namespace
 	ui->fileGroupLabel->setText( file->groupName() );
 	ui->filePermissionsCaption->setEnabled( file->hasPerm() );
 	ui->filePermissionsLabel->setText( formatPermissions( file ) );
-	ui->fileMTimeLabel->setText( formatTime( file->mtime() ) );
+	setTimeLabel( ui->fileMTimeLabel, file->mtime() );
     }
 
 
@@ -536,26 +562,27 @@ namespace
     {
 	// logDebug() << "Showing dir details about " << dir << Qt::endl;
 
-	const QString name = dir->isPseudoDir() ? dir->name() : ( baseName( dir ) % '/' );
+	const bool isPseudoDir = dir->isPseudoDir();
+	const QString name = isPseudoDir ? dir->name() : ( baseName( dir ) % '/' );
 	setLabelLimited( ui->dirNameLabel, name, lastPixel );
 
-	const bool isMountPoint = dir->isMountPoint() && !dir->readError();
-	ui->dirUnreadableIcon->setVisible( dir->readError() );
+	const bool readError = dir->subtreeReadError();
+	const bool isMountPoint = dir->isMountPoint() && !readError;
+	ui->dirUnreadableIcon->setVisible( readError );
 	ui->mountPointIcon->setVisible( isMountPoint );
-	ui->dotEntryIcon->setVisible( dir->isDotEntry() && !dir->readError() );
-	ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !dir->readError() );
+	ui->dotEntryIcon->setVisible( dir->isDotEntry() && !readError );
+	ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !readError );
 
 	ui->dirTypeLabel->setText( formatDirInfoType( dir ) );
-	ui->dirTypeLabel->setStyleSheet( dir->isPseudoDir() ? QString{} : "QToolTip { max-width: 0px }" );
+	ui->dirTypeLabel->setStyleSheet( isPseudoDir ? QString{} : "QToolTip { max-width: 0px }" );
 
 	ui->dirFromCacheIcon->setVisible( dir->isFromCache() );
 	ui->dirDuplicateIcon->setVisible( isMountPoint && MountPoints::isDuplicate( dir->url() ) );
 
-	// Set the row visibilities before showing the page to avoid briefly showing the ...
-	// ... wrong rows, then hiding them and shuffling the mtime about
-	setDirBlockVisibility( ui, !dir->isPseudoDir() );
 	showSubtreeInfo( ui, dir );
-	if ( !dir->isPseudoDir() )
+
+	setDirBlockVisibility( ui, !isPseudoDir );
+	if ( !isPseudoDir )
 	    showDirNodeInfo( ui, dir );
     }
 
@@ -592,7 +619,7 @@ namespace
 	    clearLabel( ui->pkgSubDirCountLabel );
 	}
 
-	ui->pkgLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
+	setTimeLabel( ui->pkgLatestMTimeLabel, pkg->latestMTime() );
     }
 
 
@@ -624,7 +651,7 @@ namespace
 	    clearLabel( ui->pkgSummarySubDirCountLabel );
 	}
 
-	ui->pkgSummaryLatestMTimeLabel->setText( formatTime( pkg->latestMTime() ) );
+	setTimeLabel( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
     }
 
 
@@ -723,14 +750,15 @@ void FileDetailsView::showDetails( FileInfo * file )
     }
     else if ( file->isPkgInfo() )
     {
-	if ( file->url() == PkgInfo::pkgSummaryUrl() )
+	PkgInfo * pkgInfo = file->toPkgInfo();
+	if ( pkgInfo == app()->firstToplevel() )
 	{
-	    showPkgSummary( ui(), file->toPkgInfo() );
+	    showPkgSummary( ui(), pkgInfo );
 	    setCurrentPage( _ui->pkgSummaryPage );
 	}
 	else
 	{
-	    showPkgInfo( ui(), file->toPkgInfo(), _lastPixel );
+	    showPkgInfo( ui(), pkgInfo, _lastPixel );
 	    setCurrentPage( _ui->pkgDetailsPage );
 	}
     }
@@ -754,11 +782,12 @@ QString FileDetailsView::readStateMsg( int readState )
     switch ( readState )
     {
 	case DirQueued:
-	case DirReading:          return tr( "[reading]" );
-	case DirPermissionDenied: return tr( "[permission denied]" );
-	case DirError:            return tr( "[read error]" );
-	case DirOnRequestOnly:    return tr( "[not read]" );
-	case DirAborted:          return tr( "[aborted]" );
+	case DirReading:       return tr( "[reading]" );
+	case DirPermissionDenied:
+	case DirNoAccess:      return tr( "[permission denied]" );
+	case DirError:         return tr( "[read error]" );
+	case DirOnRequestOnly: return tr( "[not read]" );
+	case DirAborted:       return tr( "[aborted]" );
 //	case DirFinished:
 //	case DirCached:
 	default: break;

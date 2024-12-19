@@ -756,7 +756,7 @@ void MainWindow::showCurrent( FileInfo * item )
 	QString msg = QString{ "%1  (%2%3)" }
 	    .arg( item->debugUrl(), item->sizePrefix(), formatSize( item->totalSize() ) );
 
-	if ( item->readState() == DirPermissionDenied || item->readState() == DirError )
+	if ( item->readError() )
 	    msg += "  " + _ui->fileDetailsView->readStateMsg( item->readState() );
 
 	_ui->statusBar->showMessage( msg );

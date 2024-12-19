@@ -122,7 +122,7 @@ void DirInfo::initCounts()
 
     _totalSize           = size();
     _totalAllocatedSize  = allocatedSize();
-    _totalBlocks         = blocks();
+//    _totalBlocks         = blocks();
     _totalItems          = 0;
     _totalSubDirs        = 0;
     _totalFiles          = 0;
@@ -264,7 +264,7 @@ void DirInfo::recalc()
 	++_childCount;
 	_totalSize           += it->totalSize();
 	_totalAllocatedSize  += it->totalAllocatedSize();
-	_totalBlocks         += it->totalBlocks();
+//	_totalBlocks         += it->totalBlocks();
 	_totalItems          += it->totalItems();
 	_totalSubDirs        += it->totalSubDirs();
 	_errSubDirs          += it->errSubDirs();
@@ -276,7 +276,7 @@ void DirInfo::recalc()
 	if ( !it->isDotEntry() )
 	    ++_totalItems;
 
-	if ( it->readError() )
+	if ( it->subtreeReadError() )
 	    ++_errSubDirs;
 
 	if ( it->isDir() )
@@ -338,13 +338,13 @@ FileSize DirInfo::totalAllocatedSize()
     return _totalAllocatedSize;
 }
 
-
+/*
 FileSize DirInfo::totalBlocks()
 {
     ensureClean();
     return _totalBlocks;
 }
-
+*/
 
 FileCount DirInfo::totalItems()
 {
@@ -520,8 +520,7 @@ void DirInfo::childAdded( FileInfo * newChild )
 		if ( _totalItems == FileCountMax )
 		    THROW( TooManyFilesException{} );
 
-		if ( ( size >= 0          && _totalSize          > FileSizeMax - size ) ||
-		     ( allocatedSize >= 0 && _totalAllocatedSize > FileSizeMax - allocatedSize ) )
+		if ( _totalSize > FileSizeMax - size || _totalAllocatedSize > FileSizeMax - allocatedSize )
 		    THROW( FilesystemTooBigException{} );
 	    }
 
@@ -530,7 +529,7 @@ void DirInfo::childAdded( FileInfo * newChild )
 
 	    _totalSize          += size;
 	    _totalAllocatedSize += allocatedSize;
-	    _totalBlocks        += newChild->blocks();
+//	    _totalBlocks        += newChild->blocks();
 	    ++_totalItems;
 
 	    if ( newChild->parent() == this )
@@ -652,7 +651,7 @@ void DirInfo::readJobFinished( DirInfo * dir )
     if ( _sortInfo && _sortInfo->_sortedCol == ReadJobsCol )
 	dropSortCache();
 
-    if ( dir && dir != this && dir->readError() )
+    if ( dir && dir != this && dir->subtreeReadError() )
 	++_errSubDirs;
 
     if ( parent() )
@@ -675,6 +674,7 @@ QLatin1String DirInfo::sizePrefix() const
     {
 	case DirError:
 	case DirAborted:
+	case DirNoAccess:
 	case DirPermissionDenied:
 	    return "> "_L1;
 

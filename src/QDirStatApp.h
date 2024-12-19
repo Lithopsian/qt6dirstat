@@ -127,6 +127,12 @@ namespace QDirStat
         FileInfo * firstToplevel() const;
 
         /**
+         * Return whether the current tree is a package tree or a normal
+         * directory view.
+         **/
+        bool isPkgView() const;
+
+        /**
          * Return the current selected directory, or the parent of the current
          * selected file, or 0 if there is no current item.
          **/

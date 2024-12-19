@@ -245,7 +245,7 @@ namespace
 	 */
 	DirInfo * child = new DirInfo{ dir, tree, entryName };
 	child->finalizeLocal();
-	child->setReadError( errno == EACCES ? DirPermissionDenied : DirError );
+	child->setReadError( errno == EACCES ? DirNoAccess : DirError );
 	dir->insertChild( child );
 	tree->childAddedNotify( child );
     }
@@ -327,6 +327,7 @@ void LocalDirReadJob::startReading()
 {
     // logDebug() << dir() << Qt::endl;
 
+    // Directories without 'x' permission can be opened here, but stat will fail on the contents
     DIR * diskDir = ::opendir( _dirName.toUtf8() );
     if ( !diskDir )
     {

@@ -169,7 +169,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	FileSize totalBlocks() override;
+//	FileSize totalBlocks() override;
 
 	/**
 	 * Returns the total number of children in this subtree, excluding this
@@ -736,7 +736,7 @@ namespace QDirStat
 	FileCount      _errSubDirs;
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
-	FileSize       _totalBlocks;
+//	FileSize       _totalBlocks;
 	time_t         _latestMTime;
 	time_t         _oldestFileMTime;
 
