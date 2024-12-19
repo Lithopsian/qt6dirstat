@@ -306,7 +306,6 @@ namespace
     void setMimeCategory( const Ui::FileDetailsView * ui, const FileInfo * fileInfo )
     {
 	const QString categoryName = MimeCategorizer::instance()->name( fileInfo );
-	ui->fileMimeCaption->setEnabled( !categoryName.isEmpty() );
 	ui->fileMimeLabel->setText( categoryName );
     }
 
@@ -486,6 +485,7 @@ namespace
 	}
 	else // regular file
 	{
+	    ui->fileMimeCaption->setEnabled( true );
 	    setMimeCategory( ui, file );
 	}
 
