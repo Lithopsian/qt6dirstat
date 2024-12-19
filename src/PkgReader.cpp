@@ -415,16 +415,19 @@ FileInfo * PkgReadJob::createItem( const QString & path,
 
 void PkgReadJob::addFiles( QStringList fileList )
 {
-    // The tree creation works best with a sorted list
+    // The parent-finding and duplicate-checking works best with a sorted list
     fileList.sort();
 
     DirInfo * lastDir = _pkg;
     QString lastDirPath{ u'/' };
+    QString prevFileListPath;
 
     for ( const QString & fileListPath : asConst( fileList ) )
     {
-	if ( fileListPath.isEmpty() )
+	if ( fileListPath.isEmpty() || fileListPath == prevFileListPath )
 	    continue;
+
+	prevFileListPath = fileListPath;
 
 	// logDebug() << "Adding " << fileListPath << " to " << _pkg << Qt::endl;
 
