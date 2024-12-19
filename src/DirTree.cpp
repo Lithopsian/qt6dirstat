@@ -22,6 +22,7 @@
 #include "FormatUtil.h"
 #include "MountPoints.h"
 #include "PkgFilter.h"
+#include "PkgQuery.h"
 #include "PkgReader.h"
 #include "SysUtil.h"
 
@@ -289,6 +290,7 @@ void DirTree::prepare()
 {
     clear();
     MountPoints::reload();
+    PkgQuery::clearOwningPkgCache();
 }
 
 

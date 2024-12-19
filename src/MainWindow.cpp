@@ -498,7 +498,7 @@ void MainWindow::askOpenDir()
     if ( !path.isEmpty() )
     {
 	_historyButtons->clear();
-	tree->clear();
+	tree->prepare();
 	tree->reset();
 	tree->setCrossFilesystems( crossFilesystems );
 	openDir( path );
