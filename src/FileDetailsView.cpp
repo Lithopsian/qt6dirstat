@@ -250,14 +250,28 @@ namespace
 
 
     /**
-     * Return a string describing the type of a DirInfo object.
+     * Set a label describing the type of a DirInfo object, and possibly a
+     * tooltip with more information.
      **/
-    QString formatDirInfoType( const DirInfo * dir )
+    inline void setDirInfoType( QLabel * label, const DirInfo * dir )
     {
-	if ( dir->readError()    ) return QObject::tr( "unknown"          );
-	if ( dir->isMountPoint() ) return QObject::tr( "mount point"      );
-	if ( dir->isPseudoDir()  ) return QObject::tr( "pseudo-directory" );
-	return QObject::tr( "directory" );
+	const QString fileType = [ dir ]()
+	{
+	    if ( dir->readError()    ) return QObject::tr( "unknown"          );
+	    if ( dir->isMountPoint() ) return QObject::tr( "mount point"      );
+	    if ( dir->isPseudoDir()  ) return QObject::tr( "pseudo-directory" );
+	    return QObject::tr( "directory" );
+	}();
+
+	const QString tooltip = [ dir ]()
+	{
+	    if ( dir->readError()    ) return QObject::tr( "Filesystem object type can't be determined" );
+	    if ( dir->isPseudoDir()  ) return QObject::tr( "Virtual container for real filesystem items" );
+	    return QString{};
+	}();
+
+	label->setText( fileType );
+	label->setToolTip( tooltip );
     }
 
 
@@ -573,8 +587,7 @@ namespace
 	ui->dotEntryIcon->setVisible( dir->isDotEntry() && !readError );
 	ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !readError );
 
-	ui->dirTypeLabel->setText( formatDirInfoType( dir ) );
-	ui->dirTypeLabel->setStyleSheet( isPseudoDir ? QString{} : "QToolTip { max-width: 0px }" );
+	setDirInfoType( ui->dirTypeLabel, dir );
 
 	ui->dirFromCacheIcon->setVisible( dir->isFromCache() );
 	ui->dirDuplicateIcon->setVisible( isMountPoint && MountPoints::isDuplicate( dir->url() ) );
@@ -791,7 +804,6 @@ QString FileDetailsView::readStateMsg( int readState )
 	case DirOnRequestOnly: return tr( "[not read]" );
 	case DirAborted:       return tr( "[aborted]" );
 //	case DirFinished:
-//	case DirCached:
 	default: break;
     }
 

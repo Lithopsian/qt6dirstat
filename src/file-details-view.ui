@@ -696,9 +696,6 @@
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="dirTypeLabel">
-          <property name="toolTip">
-           <string>Virtual container for real objects</string>
-          </property>
           <property name="text">
            <string notr="true">directory</string>
           </property>
