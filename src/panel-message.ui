@@ -66,7 +66,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Some directories could not be read</string>
+               <string>Some filesystem items could not be accessed</string>
               </property>
              </widget>
             </item>
@@ -80,7 +80,7 @@
             <item>
              <widget class="QLabel" name="detailsLinkLabel">
               <property name="text">
-               <string notr="true">&lt;a href&gt;Show unreadable directories...&lt;/a&gt;</string>
+               <string notr="true">&lt;a href&gt;Show directories with unreadable items...&lt;/a&gt;</string>
               </property>
               <property name="textInteractionFlags">
                <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
