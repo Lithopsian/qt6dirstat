@@ -719,11 +719,11 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 	{
 	    case DirQueued:
 	    case DirReading:
-		// Better keep it simple: Don't report any children until they
-		// are complete.
+		// Better keep it simple: Don't report any children until they are complete
 		break;
 
 	    case DirError:
+	    case DirMissing:
 	    case DirNoAccess:
 	    case DirPermissionDenied:
 		// This is a hybrid case: depending on the dir reader, the dir may
@@ -735,12 +735,10 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 
 	    case DirFinished:
 	    case DirOnRequestOnly:
-//	    case DirCached:
 	    case DirAborted:
 		return childCount( item );
 
-	    // intentionally omitting 'default' case so the compiler can report
-	    // missing enum values
+	    // intentionally omitting 'default' case so the compiler can report missing enum values
 	}
     }
 

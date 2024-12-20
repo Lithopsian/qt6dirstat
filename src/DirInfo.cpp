@@ -673,13 +673,13 @@ QLatin1String DirInfo::sizePrefix() const
     switch ( _readState )
     {
 	case DirError:
-	case DirAborted:
+	case DirMissing:
 	case DirNoAccess:
 	case DirPermissionDenied:
+	case DirAborted:
 	    return "> "_L1;
 
 	case DirFinished:
-//	case DirCached:
 	    if ( _errSubDirs > 0 )
 		return "> "_L1;
 	    break;

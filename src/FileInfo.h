@@ -54,7 +54,6 @@ namespace QDirStat
 	DirReading,		// Reading in progress
 	DirFinished,		// Reading finished and OK
 	DirOnRequestOnly,	// Will be read upon explicit request only (mount points)
-//	DirCached,		// Content was read from a cache, obsolete
 	DirAborted,		// Reading aborted upon user request
 	DirPermissionDenied,	// Insufficient permissions for reading children
 	DirNoAccess,		// Insufficient permissions for readng
