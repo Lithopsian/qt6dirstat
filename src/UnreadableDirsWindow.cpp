@@ -177,7 +177,6 @@ UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
 QVariant UnreadableDirsItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are likely to be long and elided
-//    if ( role != Qt::ToolTipRole || column != UD_PathCol )
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 

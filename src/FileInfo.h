@@ -58,6 +58,7 @@ namespace QDirStat
 	DirAborted,		// Reading aborted upon user request
 	DirPermissionDenied,	// Insufficient permissions for reading children
 	DirNoAccess,		// Insufficient permissions for readng
+	DirMissing,		// Item in package not found on disk
 	DirError		// Error while reading
     };
 
@@ -811,6 +812,7 @@ namespace QDirStat
 	 **/
 	bool subtreeReadError() const
 	    { return readState() == DirError ||
+	             readState() == DirMissing ||
 	             readState() == DirNoAccess ||
 	             readState() == DirPermissionDenied; }
 
@@ -819,7 +821,9 @@ namespace QDirStat
 	 * either for insufficient permissions or an unknown other error.
 	 **/
 	bool readError() const
-	    { return readState() == DirError || readState() == DirNoAccess; }
+	    { return readState() == DirError ||
+	             readState() == DirMissing ||
+	             readState() == DirNoAccess; }
 
 	/**
 	 * Return a prefix for the total size (and similar accumulated fields)

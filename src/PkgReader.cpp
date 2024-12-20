@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <sys/stat.h> // fstatat(), struct stat
+#include <sys/stat.h> // struct stat
 
 #include <QThread>
 
@@ -32,7 +32,7 @@ namespace
     /**
      * Read parameters from the settings file.
      **/
-    void readSettings( int & maxParallelProcesses, int & minCachePkgListSize, bool & verboseMissingPkgFiles )
+    void readSettings( int & maxParallelProcesses, int & minCachePkgListSize )
     {
 	Settings settings;
 
@@ -42,11 +42,9 @@ namespace
 	const int defaultCachePkgListSize  = defaultParallelProcesses * 40;
 	maxParallelProcesses   = settings.value( "MaxParallelProcesses",   defaultParallelProcesses ).toInt();
 	minCachePkgListSize    = settings.value( "MinCachePkgListSize",    defaultCachePkgListSize  ).toInt();
-	verboseMissingPkgFiles = settings.value( "VerboseMissingPkgFiles", false ).toBool();
 
 	settings.setDefaultValue( "MaxParallelProcesses",   maxParallelProcesses   );
 	settings.setDefaultValue( "MinCachePkgListSize",    minCachePkgListSize    );
-	settings.setDefaultValue( "VerboseMissingPkgFiles", verboseMissingPkgFiles );
 
 	settings.endGroup();
     }
@@ -188,7 +186,7 @@ namespace
      * CachePkgReadJob will be removed from 'pkgList' so that the remainder
      * can be processed using external process read jobs.
      **/
-    void createCachePkgReadJobs( DirTree * tree, PkgInfoList & pkgList, bool verboseMissingPkgFiles )
+    void createCachePkgReadJobs( DirTree * tree, PkgInfoList & pkgList )
     {
 	const PkgManager * primaryPkgManager = PkgQuery::primaryPkgManager();
 	if ( !primaryPkgManager )
@@ -208,7 +206,7 @@ namespace
 	for ( PkgInfo * pkg : asConst( pkgList ) )
 	{
 	    if ( pkg->pkgManager() == primaryPkgManager )
-		tree->addJob( new CachePkgReadJob{ tree, pkg, verboseMissingPkgFiles, fileListCache } );
+		tree->addJob( new CachePkgReadJob{ tree, pkg, fileListCache } );
 	    else
 		nonCachePkgList << pkg;
 	}
@@ -228,8 +226,7 @@ namespace
      **/
     void createAsyncPkgReadJobs( DirTree           * tree,
                                  const PkgInfoList & pkgList,
-                                 int                 maxParallelProcesses,
-                                 bool                verboseMissingPkgFiles )
+                                 int                 maxParallelProcesses )
     {
 	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses, true };
 
@@ -238,7 +235,7 @@ namespace
 	    QProcess * process = createReadFileListProcess( pkg );
 	    if ( process )
 	    {
-		tree->addBlockedJob( new AsyncPkgReadJob{ tree, pkg, verboseMissingPkgFiles, process } );
+		tree->addBlockedJob( new AsyncPkgReadJob{ tree, pkg, process } );
 		processStarter->add( process );
 	    }
 	}
@@ -265,16 +262,15 @@ void PkgReader::read( DirTree * tree, const PkgFilter & filter )
 
     int maxParallelProcesses;
     int minCachePkgListSize;
-    bool verboseMissingPkgFiles;
-    readSettings( maxParallelProcesses, minCachePkgListSize, verboseMissingPkgFiles );
+    readSettings( maxParallelProcesses, minCachePkgListSize );
 
     // Use a cache for the primary package manager if there are enough packages to make it worthwhile
     if ( pkgList.size() >= minCachePkgListSize )
-	createCachePkgReadJobs( tree, pkgList, verboseMissingPkgFiles );
+	createCachePkgReadJobs( tree, pkgList );
 
     // Otherwise, or for non-primary packages, use external process reads
     if ( !pkgList.isEmpty() )
-	createAsyncPkgReadJobs( tree, pkgList, maxParallelProcesses, verboseMissingPkgFiles );
+	createAsyncPkgReadJobs( tree, pkgList, maxParallelProcesses );
 }
 
 
@@ -328,7 +324,7 @@ namespace
     /**
      * Create a DirInfo or FileInfo node from a path and stat call.
      **/
-    FileInfo * createItem( const QString & path,
+/*    FileInfo * createItem( const QString & path,
                            const QString & name,
                            DirTree       * tree,
                            DirInfo       * parent )
@@ -344,7 +340,7 @@ namespace
 	else					// not directory
 	    return new FileInfo{ parent, tree, name, statInfo };
     }
-
+*/
 
     /**
      * Locate a direct child of a DirInfo by name.  Ignore dot-entries
@@ -379,37 +375,53 @@ void PkgReadJob::startReading()
 }
 
 
-FileInfo * PkgReadJob::createItem( const QString & path,
-                                   const QString & name,
-                                   DirInfo       * parent )
+FileInfo * PkgReadJob::addItem( const QString & path, const QString & name, DirInfo * parent )
 {
-    FileInfo * newItem = ::createItem( path, name, tree(), parent );
+    // logDebug() << "path: \"" << path << '"' << Qt::endl;
+
+    FileInfo * newItem = [ this, &path, &name, parent ]() -> FileInfo *
+    {
+	struct stat statInfo;
+	if ( stat( statInfo, path ) )
+	{
+	    if ( S_ISDIR( statInfo.st_mode ) )		// directory
+		return new DirInfo{ parent, tree(), name, statInfo };
+	    else					// not directory
+		return new FileInfo{ parent, tree(), name, statInfo };
+	}
+
+	// Create something, anything, if fstatat() failed
+	DirInfo * dir = new DirInfo{ parent, tree(), name };
+	switch (errno )
+	{
+	    case EACCES:
+		// No permissions at all, can't even be sure the file is there, uncommon but non-fatal
+		dir->setReadError( DirNoAccess );
+		// logDebug() << _pkg << ": permission denied for " << path << Qt::endl;
+		break;
+
+	    case ENOENT:
+		// File definitely not on disk, should be very rare
+		dir->setReadError( DirMissing );
+		// logDebug() << _pkg << ": missing " << path << Qt::endl;
+		break;
+
+	    default:
+		// Unexpected error, probably serious
+		dir->setReadError( DirError );
+		logWarning() << _pkg << ": couldn't stat " << path << Qt::endl;
+		break;
+	}
+	return dir;
+    }();
+
     if ( newItem )
     {
 	parent->insertChild( newItem );
 	tree()->childAddedNotify( newItem );
-	return newItem;
     }
 
-    if ( errno == EACCES )
-    {
-	// No permissions, uncommon (for a package!) but non-fatal error
-	//logDebug() << _pkg << ": permission denied for " << path << Qt::endl;
-	parent->setReadError( DirPermissionDenied );
-    }
-    else if ( errno != ENOENT )
-    {
-	// Unexpected error, probably serious
-	logError() << _pkg << ": can't stat " << path << Qt::endl;
-	parent->setReadError( DirError );
-    }
-    else if ( _verboseMissingPkgFiles )
-    {
-	// Packaged file not present, log it
-	logWarning() << _pkg << " missing " << path << Qt::endl;
-    }
-
-    return nullptr;
+    return newItem;
 }
 
 
@@ -440,7 +452,7 @@ void PkgReadJob::addFiles( QStringList fileList )
 	    if ( fileListPath.size() == lastDirPath.size() + fileName.size() + 1 )
 	    {
 		// Can just create this item in the existing parent
-		createItem( fileListPath, fileName, lastDir );
+		addItem( fileListPath, fileName, lastDir );
 		continue;
 	    }
 	}
@@ -456,7 +468,7 @@ void PkgReadJob::addFiles( QStringList fileList )
 
 	    FileInfo * newParent = locateChild( parent, currentComponent );
 	    if ( !newParent )
-		newParent = createItem( currentPath, currentComponent, parent );
+		newParent = addItem( currentPath, currentComponent, parent );
 
 	    if ( newParent && newParent->isDirInfo() )
 	    {
@@ -473,9 +485,8 @@ void PkgReadJob::addFiles( QStringList fileList )
 
 AsyncPkgReadJob::AsyncPkgReadJob( DirTree   * tree,
                                   PkgInfo   * pkg,
-                                  bool        verboseMissingPkgFiles,
                                   QProcess  * readFileListProcess ):
-    PkgReadJob{ tree, pkg, verboseMissingPkgFiles }
+    PkgReadJob{ tree, pkg }
 {
     CHECK_PTR( readFileListProcess );
 
@@ -519,7 +530,7 @@ void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus e
 
 
 
-QStringList CachePkgReadJob::fileList()
+QStringList CachePkgReadJob::fileList() const
 {
     if ( _fileListCache )
     {

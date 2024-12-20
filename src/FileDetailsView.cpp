@@ -581,8 +581,9 @@ namespace
 
 	showSubtreeInfo( ui, dir );
 
-	setDirBlockVisibility( ui, !isPseudoDir );
-	if ( !isPseudoDir )
+	const bool showDirBlock = !isPseudoDir && !dir->readError();
+	setDirBlockVisibility( ui, showDirBlock );
+	if ( showDirBlock )
 	    showDirNodeInfo( ui, dir );
     }
 
@@ -785,6 +786,7 @@ QString FileDetailsView::readStateMsg( int readState )
 	case DirReading:       return tr( "[reading]" );
 	case DirPermissionDenied:
 	case DirNoAccess:      return tr( "[permission denied]" );
+	case DirMissing:       return tr( "[missing]" );
 	case DirError:         return tr( "[read error]" );
 	case DirOnRequestOnly: return tr( "[not read]" );
 	case DirAborted:       return tr( "[aborted]" );

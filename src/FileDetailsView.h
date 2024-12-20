@@ -20,10 +20,7 @@
 namespace QDirStat
 {
     class AdaptiveTimer;
-    class DirInfo;
     class FileInfo;
-    class FileInfoSet;
-    class PkgInfo;
 
     /**
      * Details view for the current selection (file, directory, multiple
