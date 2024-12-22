@@ -247,9 +247,9 @@ void MainWindow::readSettings()
 
     if ( detailsSplitterState.isEmpty() )
     {
-	// The window geometry isn't set yet, so just put in something vaguely workable
-	_ui->topViewsSplitter->setStretchFactor( 0, 1 );
-	_ui->topViewsSplitter->setStretchFactor( 1, 4 );
+	// The window geometry isn't set yet, so just set sensible defaults for the relative sizes
+	_ui->mainWinSplitter->setSizes( { 10000, 10000 } ); // equal sizes for the top and bottom panes
+	_ui->topViewsSplitter->setSizes( { 40000, 10000 } ); // 4:1 ratio for DirTree and FileDetailsPanel
     }
     else
     {
