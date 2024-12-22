@@ -280,7 +280,8 @@ namespace
      **/
     QString formatSelectionSummary( int selectionCount )
     {
-	if ( selectionCount == 1 ) return QObject::tr( "1 Selected Item" );
+	if ( selectionCount == 1 )
+	    return QObject::tr( "1 Selected Item" );
 
 	return QObject::tr( "%L1 Selected Items" ).arg( selectionCount );
     }
