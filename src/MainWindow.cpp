@@ -1015,7 +1015,7 @@ void MainWindow::currentItemChanged( FileInfo * newCurrent, const FileInfo * old
 	dumpSelectedItems();
     }
 
-    _ui->dirTreeView->setFocus(); // no point leaving focus on the treemap
+    focusDirTree(); // treemap doesn't accept focus
 
     updateActions();
 }

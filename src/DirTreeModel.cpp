@@ -21,7 +21,7 @@
 
 // Number of clusters up to which a file will be considered small and will also
 // display the allocated size like "(4k)".
-#define SMALL_FILE_CLUSTERS     2
+#define SMALL_FILE_CLUSTERS 2
 
 
 using namespace QDirStat;

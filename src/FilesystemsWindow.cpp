@@ -163,7 +163,7 @@ void FilesystemsWindow::populate()
 	if ( !_warnedAboutBtrfs && it->isBtrfs() )
 	{
 	    _warnedAboutBtrfs = true;
-	    PanelMessage::showFilesystemsMsg( this, _ui->vBox );
+	    PanelMessage::showFilesystemsMsg( _ui->vBox );
 	}
     }
 

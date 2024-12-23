@@ -19,6 +19,8 @@
 
 namespace QDirStat
 {
+    class MainWindow;
+
     /**
      * Message in a small panel with an icon, a bold face heading,
      * a message text, an optional "Details..." hyperlink
@@ -34,7 +36,7 @@ namespace QDirStat
 	/**
 	 * Constructor.  Private, use the static methods for access.
 	 **/
-	PanelMessage( QWidget * parent );
+	PanelMessage();
 
 
     public:
@@ -50,9 +52,9 @@ namespace QDirStat
 	 * maintain an internal static smart pointer to the panel so that only one panel
 	 * of each type is created.
 	 **/
-	static void showPermissionsMsg( QWidget * parent, QVBoxLayout * vBox );
-	static void showFilesystemsMsg( QWidget * parent, QVBoxLayout * vBox );
-	static void showRpmMsg( QWidget * parent, QVBoxLayout * vBox );
+	static void showPermissionsMsg( MainWindow * mainWin, QVBoxLayout * vBox );
+	static void showFilesystemsMsg( QVBoxLayout * vBox );
+	static void showRpmMsg( MainWindow * mainWin, QVBoxLayout * vBox );
 
 
     protected:
@@ -60,7 +62,7 @@ namespace QDirStat
 	/**
 	 * Show a panel message in the given container.
 	 **/
-	static PanelMessage * createMsg( QWidget * parent, QVBoxLayout * vBox );
+	static PanelMessage * createMsg( QVBoxLayout * vBox );
 
 
     private:

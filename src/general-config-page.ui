@@ -302,6 +302,7 @@
  <tabstops>
   <tabstop>urlInWindowTitleCheckBox</tabstop>
   <tabstop>crossFilesystemsCheckBox</tabstop>
+  <tabstop>elidePathsCheckBox</tabstop>
   <tabstop>useBoldForDominantCheckBox</tabstop>
   <tabstop>dirReadWarningCheckBox</tabstop>
   <tabstop>treeIconThemeComboBox</tabstop>

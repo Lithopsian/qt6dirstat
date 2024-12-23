@@ -252,8 +252,6 @@ bool DirInfo::hasAtticChildren() const
 
 void DirInfo::recalc()
 {
-    //logDebug() << this << " " << pkgInfoParent() << " " << isPkgInfo() << Qt::endl;
-
     initCounts();
 
     // Loop through the children including the dot entry;

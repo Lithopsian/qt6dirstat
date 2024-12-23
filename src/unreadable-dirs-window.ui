@@ -35,7 +35,10 @@
         </font>
        </property>
        <property name="text">
-        <string>Directories that could not be read</string>
+        <string>&amp;Directories that could not be read</string>
+       </property>
+       <property name="buddy">
+        <cstring>treeWidget</cstring>
        </property>
       </widget>
      </item>
