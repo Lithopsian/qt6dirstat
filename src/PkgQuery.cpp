@@ -119,17 +119,8 @@ const PkgManager * PkgQuery::getPrimary() const
 }
 
 
-const QString * PkgQuery::getOwningPackage( const QString & path )
+const QString * PkgQuery::getOwningPkg( const QString & path )
 {
-    const QString * cachePkg = _cache[ path ];
-    if ( cachePkg )
-    {
-#if VERBOSE_PKG_QUERY
-        logDebug() << "Cache: package " << cachePkg << " owns " << path << Qt::endl;
-#endif
-        return cachePkg;
-    }
-
     const QString pkg = [ &path ]( const PkgManagerList & pkgManagers )
     {
         for ( const PkgManager * pkgManager : pkgManagers )

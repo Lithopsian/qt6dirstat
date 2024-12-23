@@ -111,11 +111,20 @@ namespace QDirStat
 	    { instance()->_primaryPkgManager = pkgManager; }
 
 	/**
+	 * Return the owning package of a file if it is in the internal cache,
+	 * otherwise return 0.
+	 **/
+	static const QString * cachedOwningPkg( const QString & path )
+	    { return instance()->_cache[ path ]; }
+
+	/**
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
+	 *
+	 * Note that '_cache' is not searched.
 	 **/
 	static const QString * owningPkg( const QString & path )
-	    { return instance()->getOwningPackage( path ); }
+	    { return instance()->getOwningPkg( path ); }
 
 	/**
 	 * Return the list of installed packages.
@@ -153,9 +162,10 @@ namespace QDirStat
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
 	 *
-	 * The result is also inserted into the cache.
+	 * Note that '_cache' is not searched, but the result is inserted
+	 * into the cache.
 	 **/
-	const QString * getOwningPackage( const QString & path );
+	const QString * getOwningPkg( const QString & path );
 
 	/**
 	 * Return the list of installed packages.

@@ -301,15 +301,10 @@ namespace
 
 
     /**
-     * Set the owning package details for a file.  This happens
-     * asynchronously, triggered by AdaptiveTimer, although the external
-     * process itself runs synchronously after a variable delay.
+     * Set the owning package details for a file.
      **/
-    void updatePkgInfo( const Ui::FileDetailsView * ui, const QString & path, int lastPixel )
+    void setPkgInfo( const Ui::FileDetailsView * ui, const QString * pkg, int lastPixel )
     {
-	// logDebug() << "Updating pkg info for " << path << Qt::endl;
-
-	const QString * pkg = PkgQuery::owningPkg( path );
 	ui->filePackageCaption->setEnabled( !pkg->isEmpty() );
 	setLabelLimited( ui->filePackageLabel, *pkg, lastPixel );
     }
@@ -551,14 +546,26 @@ namespace
 	    }
 	    else if ( isSystemFile )
 	    {
-		// Submit a timed query to find the owning package, if any
-		QString delayHint{ pkgUpdateTimer->delayStage(), u'.' };
-		ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
+		const QString & url = file->url();
+		const QString * pkg = PkgQuery::cachedOwningPkg( url );
+		if ( pkg )
+		{
+		    //logDebug() << "Cache: " << pkg << " owns " << url << Qt::endl;
+		    setPkgInfo( ui, pkg, lastPixel );
+		}
+		else
+		{
+		    // Submit a timed query to find the owning package, if any
+		    QString delayHint{ pkgUpdateTimer->delayStage(), u'.' };
+		    ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
-		// Capture url by value because the FileInfo may be gone by the time the timer expires
-		const QString url = file->url();
-		const auto payload = [ ui, url, lastPixel ]() { updatePkgInfo( ui, url, lastPixel ); };
-		pkgUpdateTimer->request( payload );
+		    // Capture url by value because the FileInfo may be gone by the time the timer expires
+		    const auto payload = [ ui, url, lastPixel ]()
+		    {
+			setPkgInfo( ui, PkgQuery::owningPkg( url ), lastPixel );
+		    };
+		    pkgUpdateTimer->request( payload );
+		}
 
 		// Leave the caption unchanged for now as the most likely state is the same as the previous selection
 	    }
