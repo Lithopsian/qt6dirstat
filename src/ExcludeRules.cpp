@@ -42,7 +42,7 @@ QString ExcludeRule::formatPattern( PatternSyntax   patternSyntax,
 
 bool ExcludeRule::match( const QString & fullPath, const QString & fileName ) const
 {
-    if ( _checkAnyFileChild )  // use matchDirectChildren() for those rules
+    if ( _checkAnyFileChild ) // use matchDirectChildren() for those rules
 	return false;
 
     const QString & matchText = _useFullPath ? fullPath : fileName;

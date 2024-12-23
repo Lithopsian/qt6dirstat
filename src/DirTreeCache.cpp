@@ -121,6 +121,8 @@ namespace
 	// Optional fields
 	if ( item->isExcluded() )
 	    gzputs( cache, "\tunread: excluded" );
+	else if ( item->readState() == DirNoAccess )
+	    gzputs( cache, "\tunread: noaccess" );
 	else if ( item->readState() == DirPermissionDenied )
 	    gzputs( cache, "\tunread: permissions" );
 	else if ( item->readState() == DirError )
@@ -315,7 +317,7 @@ namespace
     {
 	if ( dir->readState() != DirOnRequestOnly )
 	{
-	    if ( !dir->readError() )
+	    if ( !dir->subtreeReadError() )
 		dir->setReadState( DirFinished );
 
 	    dir->finalizeLocal();
@@ -651,26 +653,29 @@ void CacheReader::addItem()
 	    {
 		dir->readJobAdded(); // balances the pending read jobs count
 
-		switch ( tolower( *unread_str ) )
+		const DirReadState readState = [ &dir, unread_str ]()
 		{
-		    case 'e':
-			dir->setExcluded();
-			dir->setReadState( DirOnRequestOnly );
-			break;
+		    switch ( tolower( *unread_str ) )
+		    {
+			case 'e':
+			    dir->setExcluded();
+			    return DirOnRequestOnly;
 
-		    case 'p':
-			dir->setReadState( DirPermissionDenied );
-			break;
+			case 'n':
+			    return DirNoAccess;
 
-		    case 'r':
-			dir->setReadState( DirError );
-			break;
+			case 'p':
+			    return DirPermissionDenied;
 
-		    case 'm':
-			dir->setReadState( DirOnRequestOnly );
-			break;
-		}
+			case 'm':
+			    return DirOnRequestOnly;
 
+			default:
+			    return DirError;
+		    }
+		}();
+
+		dir->setReadState( readState );
 		dir->finalizeLocal();
 		dir->readJobFinished( dir ); // propagates the unread count up the tree
 	    }

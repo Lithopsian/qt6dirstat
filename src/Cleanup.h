@@ -41,7 +41,7 @@ namespace QDirStat
 	{
 	    ShowAlways,
 	    ShowIfErrorOutput,
-	    ShowAfterTimeout,  // This includes ShowIfErrorOutput
+	    ShowAfterTimeout,  // this includes ShowIfErrorOutput
 	    ShowNever
 	};
 

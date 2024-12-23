@@ -40,9 +40,9 @@ namespace QDirStat
             _pkgManager{ pkgManager },
             _baseName{ name },
             _version{ version },
-            _arch{ arch },
-            _multiVersion{ false },
-            _multiArch{ false }
+            _arch{ arch }
+//            _multiVersion{ false },
+//            _multiArch{ false }
         {}
 
 
@@ -50,7 +50,7 @@ namespace QDirStat
 
         /**
          * Public constructor: used by the package managers for creating a
-         * package list. without a tree or parent until it is inserted by
+         * package list, without a tree or parent until it is inserted by
          * PkgReader.
          **/
         PkgInfo( const QString    & name,
@@ -97,23 +97,23 @@ namespace QDirStat
          * Return 'true' if this package is installed for more than one
          * architecture.
          **/
-        bool isMultiArch() const { return _multiArch; }
+//        bool isMultiArch() const { return _multiArch; }
 
         /**
          * Set the multiArch flag.
          **/
-        void setMultiArch( bool val = true ) { _multiArch = val; }
+//        void setMultiArch( bool val = true ) { _multiArch = val; }
 
         /**
          * Return 'true' if this package is installed in multiple versions
          * (but possibly for only one architecture).
          **/
-        bool isMultiVersion() const { return _multiVersion; }
+//        bool isMultiVersion() const { return _multiVersion; }
 
         /**
          * Set the multiVersion flag.
          **/
-        void setMultiVersion( bool val = true ) { _multiVersion = val; }
+//        void setMultiVersion( bool val = true ) { _multiVersion = val; }
 
         /**
          * Returns true if this is a PkgInfo object.
@@ -174,8 +174,8 @@ namespace QDirStat
         QString _version;
         QString _arch;
 
-        bool    _multiVersion :1;
-        bool    _multiArch    :1;
+//        bool    _multiVersion :1;
+//        bool    _multiArch    :1;
 
     };  // class PkgInfo
 

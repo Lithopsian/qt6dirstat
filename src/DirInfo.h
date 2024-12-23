@@ -169,7 +169,7 @@ namespace QDirStat
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
-	FileSize totalBlocks() override;
+//	FileSize totalBlocks() override;
 
 	/**
 	 * Returns the total number of children in this subtree, excluding this
@@ -441,11 +441,22 @@ namespace QDirStat
 	QLatin1String sizePrefix() const override;
 
 	/**
-	 * Set the state of the directory reading process.
+	 * Set the state of the directory reading process, except that a state
+	 * of DirAborted will not be overwritten by a state of DirFinished.
+	 *
 	 * See readState() for details.
 	 **/
 	void setReadState( DirReadState newReadState )
 	    { if ( _readState != DirAborted || newReadState != DirFinished ) _readState = newReadState; }
+
+	/**
+	 * Set the read state to an error state, generally DirError or
+	 * DirPermissionDenied.  The normal childAdded() totals calculation
+	 * cannot handle propagating error counts, so the item is marked dirty
+	 * and will have to be re-calculated.
+	 **/
+	void setReadError( DirReadState newReadState )
+	    { markAsDirty(); _readState = newReadState; }
 
 	/**
 	 * Return whether the current sort data, if any, matches the given
@@ -725,7 +736,7 @@ namespace QDirStat
 	FileCount      _errSubDirs;
 	FileSize       _totalSize;
 	FileSize       _totalAllocatedSize;
-	FileSize       _totalBlocks;
+//	FileSize       _totalBlocks;
 	time_t         _latestMTime;
 	time_t         _oldestFileMTime;
 

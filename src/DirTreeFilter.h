@@ -17,8 +17,8 @@
 
 namespace QDirStat
 {
+    class GlobalFileListCache;
     class PkgManager;
-    class PkgFileListCache;
 
     /**
      * Abstract base class to check if a filesystem object should be ignored
@@ -155,7 +155,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	DirTreePkgFilter( const PkgManager * pkgManager );
+	DirTreePkgFilter();
 
 	/**
 	 * Return 'true' if the filesystem object specified by 'path' should
@@ -168,7 +168,7 @@ namespace QDirStat
 
     private:
 
-	std::unique_ptr<PkgFileListCache> _fileListCache;
+	std::unique_ptr<GlobalFileListCache> _fileListCache;
 
     };	// class DirTreeFilter
 

@@ -49,8 +49,15 @@ DirTree * QDirStatApp::dirTree() const
 
 FileInfo * QDirStatApp::firstToplevel() const
 {
-    DirTree * tree = dirTree();
+    const DirTree * tree = dirTree();
     return tree ? tree->firstToplevel() : nullptr;
+}
+
+
+bool QDirStatApp::isPkgView() const
+{
+    const FileInfo * toplevel = firstToplevel();
+    return toplevel ? toplevel->isPkgInfo() : false;
 }
 
 

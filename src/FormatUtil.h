@@ -148,21 +148,13 @@ namespace QDirStat
      * Format a number in octal with a leading zero.
      **/
     inline QString formatOctal( int number )
-        { return '0' % QString::number( number, 8 ); }
+        { return '0' % QString{ "%1" }.arg( number, 3, 8, QChar{ '0' } ); }
 
     /**
      * Format a file stat mode as octal.
      **/
     inline QString octalMode( mode_t mode )
         { return formatOctal( ALLPERMS & mode ); }
-
-    /**
-     * Format the mode (the permissions bits) returned from the stat() system
-     * call in the commonly used formats, both symbolic and octal, e.g.
-     *           drwxr-xr-x  0755
-     **/
-    inline QString formatPermissions( mode_t mode )
-        { return symbolicMode( mode ) % "  "_L1 % formatOctal( ALLPERMS & mode ); }
 
     /**
      * Returns the string resized to the given width and padded with

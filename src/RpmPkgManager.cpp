@@ -7,9 +7,6 @@
  *              Ian Nartowicz
  */
 
-#define LONG_CMD_TIMEOUT_SEC    30	// for SysUtil.h
-#define DEFAULT_WARNING_SEC      7	// for SysUtil.h
-
 #include <iostream> // cerr/endl;
 
 #include <QElapsedTimer>
@@ -19,8 +16,8 @@
 #include "MainWindow.h"
 #include "PanelMessage.h"
 #include "PkgFileListCache.h"
+#include "PkgQuery.h"
 #include "QDirStatApp.h"
-#include "Settings.h"
 #include "SysUtil.h"
 
 
@@ -29,24 +26,6 @@ using namespace QDirStat;
 
 namespace
 {
-    /**
-     * Determine the path to the rpm command for this system - may not
-     * actually exist.
-     **/
-    const char * rpmCommand()
-    {
-	// Note that it is not enough to rely on a symlink /bin/rpm ->
-	// /usr/bin/rpm: While recent SUSE distros have that symlink (and maybe Red
-	// Hat and Fedora as well?), rpm as a secondary package manager on Ubuntu
-	// does not have such a link; they only have /usr/bin/rpm.
-	if ( SysUtil::haveCommand( "/usr/bin/rpm" ) )
-	    return "/usr/bin/rpm";
-
-	// Return something to try although it may not exist
-	return "/bin/rpm"; // for old SUSE / Red Hat distros
-    }
-
-
     /**
      * Show a warning that the RPM database should be rebuilt
      * ("sudo rpm --rebuilddb").
@@ -105,24 +84,21 @@ namespace
 } // namespace
 
 
-bool RpmPkgManager::isPrimaryPkgManager() const
+RpmPkgManager::RpmPkgManager()
 {
-    return SysUtil::tryRunCommand( rpmCommand(), { "-qf", rpmCommand() }, "^rpm.*" );
-}
-
-
-bool RpmPkgManager::isAvailable() const
-{
-    return SysUtil::haveCommand( rpmCommand() );
+    // Note that it is not enough to rely on a symlink /bin/rpm ->
+    // /usr/bin/rpm.  Always provide a string here, even if it doesn't exist.
+    _rpmCommand = SysUtil::haveCommand( "/usr/bin/rpm" ) ? "/usr/bin/rpm" : "/bin/rpm";
 }
 
 
 QString RpmPkgManager::owningPkg( const QString & path ) const
 {
     int exitCode;
-    const QString output = SysUtil::runCommand( rpmCommand(),
+    const QString output = SysUtil::runCommand( _rpmCommand,
                                                 { "-qf", "--queryformat", "%{name}", path },
-                                                &exitCode );
+                                                &exitCode,
+                                                PkgQuery::owningPkgTimeoutSecs() );
 
     if ( exitCode != 0 || output.contains( "not owned by any package"_L1 ) )
 	return QString{};
@@ -138,21 +114,14 @@ PkgInfoList RpmPkgManager::installedPkg() const
     timer.start();
 
     const QString output =
-	SysUtil::runCommand( rpmCommand(),
+	SysUtil::runCommand( _rpmCommand,
                              { "-qa", "--queryformat", "%{name} | %{version}-%{release} | %{arch}\n" },
-                             &exitCode,
-                             LONG_CMD_TIMEOUT_SEC );
+                             &exitCode );
 
-    if ( timer.hasExpired( _getPkgListWarningSec * 1000 ) )
+    if ( timer.hasExpired( PkgQuery::pkgListWarningSecs() * 1000 ) )
 	rebuildDbWarning();
 
     return exitCode == 0 ? parsePkgList( this, output ) : PkgInfoList{};
-}
-
-
-PkgCommand RpmPkgManager::fileListCommand( const PkgInfo * pkg ) const
-{
-    return PkgCommand{ rpmCommand(), QStringList{ "-ql", queryName( pkg ) } };
 }
 
 
@@ -181,14 +150,13 @@ QString RpmPkgManager::queryName( const PkgInfo * pkg ) const
 }
 
 
-PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
+PkgFileListCache * RpmPkgManager::createFileListCache() const
 {
     int exitCode;
     QString output =
-	SysUtil::runCommand( rpmCommand(),
+	SysUtil::runCommand( _rpmCommand,
                              { "-qa", "--qf", "[%{=NAME}-%{=VERSION}-%{=RELEASE}.%{=ARCH} | %{FILENAMES}\n]" },
-                             &exitCode,
-                             LONG_CMD_TIMEOUT_SEC );
+                             &exitCode );
 
     if ( exitCode != 0 )
 	return nullptr;
@@ -197,7 +165,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 
     //logDebug() << lines.size() << " output lines" << Qt::endl;
 
-    PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
+    PkgFileListCache * cache = new PkgFileListCache{};
 
     // Sample output:
     //
@@ -223,21 +191,7 @@ PkgFileListCache * RpmPkgManager::createFileListCache( PkgFileListCache::LookupT
 	}
     }
 
-    logDebug() << "file list cache finished." << Qt::endl;
+    //logDebug() << "file list cache finished." << Qt::endl;
 
     return cache;
-}
-
-
-void RpmPkgManager::readSettings()
-{
-    Settings settings;
-    settings.beginGroup( "Pkg" );
-    _getPkgListWarningSec = settings.value( "GetRpmPkgListWarningSec", DEFAULT_WARNING_SEC ).toInt();
-
-    // Write the value right back to the settings if it isn't there already:
-    // Since package manager objects are never destroyed, this can't
-    // reliably be done in the destructor.
-    settings.setDefaultValue( "GetRpmPkgListWarningSec", _getPkgListWarningSec );
-    settings.endGroup();
 }

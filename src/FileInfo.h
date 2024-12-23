@@ -54,9 +54,10 @@ namespace QDirStat
 	DirReading,		// Reading in progress
 	DirFinished,		// Reading finished and OK
 	DirOnRequestOnly,	// Will be read upon explicit request only (mount points)
-//	DirCached,		// Content was read from a cache, obsolete
 	DirAborted,		// Reading aborted upon user request
-	DirPermissionDenied,	// Insufficient permissions for reading
+	DirPermissionDenied,	// Insufficient permissions for reading children
+	DirNoAccess,		// Insufficient permissions for readng
+	DirMissing,		// Item in package not found on disk
 	DirError		// Error while reading
     };
 
@@ -176,7 +177,7 @@ namespace QDirStat
 	FileInfo( DirInfo       * parent,
 	          DirTree       * tree,
 	          const QString & filename ):
-	    FileInfo{ parent, tree, filename, 0, 0, 0, false, 0, 0, 0, false, 0, 1 }
+	    FileInfo{ parent, tree, filename, 0, 0, 0, true, 0, 0, 0, false, 0, 1 }
 	{}
 
 	/**
@@ -198,7 +199,7 @@ namespace QDirStat
 	 * Destructor.
 	 *
 	 * The destructor should also take care of unlinking this object from its
-	 * parent's children list, but regrettably that just doesn't work: At this
+	 * parent's children list, but regrettably that just doesn't work: at this
 	 * point (within the destructor) parts of the object are already destroyed,
 	 * e.g., the virtual table - virtual methods don't work any more. Thus,
 	 * somebody from outside must call unlinkChild() just prior to the actual
@@ -494,7 +495,7 @@ namespace QDirStat
 	 *
 	 * Derived classes that have children should overwrite this.
 	 **/
-	virtual FileSize totalBlocks() { return _blocks; }
+//	virtual FileSize totalBlocks() { return _blocks; }
 
 	/**
 	 * Returns the total number of children in this subtree, excluding this
@@ -803,10 +804,25 @@ namespace QDirStat
 	virtual DirReadState readState() const { return DirFinished; }
 
 	/**
-	 * Check if readState() is anything that indicates an error reading the
-	 * directory, i.e. DirError or DirPermissionDenied.
+	 * Check if readState() indicates that a subtree could not be read:
+	 * either a directory with insufficient permissions to read its
+	 * children; or an error with reading the item itself.
+	 * subtree:
 	 **/
-	bool readError() const { return readState() == DirError || readState() == DirPermissionDenied; }
+	bool subtreeReadError() const
+	    { return readState() == DirError ||
+	             readState() == DirMissing ||
+	             readState() == DirNoAccess ||
+	             readState() == DirPermissionDenied; }
+
+	/**
+	 * Check if readState() indicates that the item could not be read,
+	 * either for insufficient permissions or an unknown other error.
+	 **/
+	bool readError() const
+	    { return readState() == DirError ||
+	             readState() == DirMissing ||
+	             readState() == DirNoAccess; }
 
 	/**
 	 * Return a prefix for the total size (and similar accumulated fields)
@@ -835,7 +851,7 @@ namespace QDirStat
 	 * Returns true if this is a PkgInfo object.
 	 *
 	 * This default implementation always returns 'false'. Derived classes
-	 * (in particular, those derived from PkgInfo) should overwrite this.
+	 * (in particular, PkgInfo) should overwrite this.
 	 **/
 	virtual bool isPkgInfo() const { return false; }
 

@@ -13,6 +13,7 @@
 #include "DpkgPkgManager.h"
 #include "Exception.h"
 #include "PkgFileListCache.h"
+#include "PkgQuery.h"
 #include "SysUtil.h"
 
 
@@ -78,26 +79,18 @@ namespace
 	return ( realpath != pathInfo && !realpath.isEmpty() ) ? realpath % '/' % filename : pathname;
     }
 
-    /**
-     * Return the command for the dpkg manager program.
-     **/
-    const char * dpkgCommand()
-    {
-	return "/usr/bin/dpkg";
-    }
-
 
     /**
      * Runs dpkg -S against the given path and returns the output.
      *
      * exitCode indicates the success or failure of the command.
     */
-    QString runDpkg( const QString & path, int &exitCode, bool logError )
+    QString runDpkg( const QString & path, int & exitCode, bool logError, int timeoutSecs )
     {
-	return SysUtil::runCommand( dpkgCommand(),
+	return SysUtil::runCommand( DpkgPkgManager::dpkgCommand(),
 	                            { "-S", path },
 	                            &exitCode,
-	                            5,		// better not to lock the whole program for 15 seconds
+	                            timeoutSecs,
 	                            false,	// don't log command
 	                            false,	// don't log output
 	                            logError );
@@ -122,7 +115,7 @@ namespace
 	const QString pathResolved = resolvePath( path );
 
 	int exitCode;
-	const QString output = runDpkg( path, exitCode, true ); // don't ignore error codes
+	const QString output = runDpkg( path, exitCode, true, PkgQuery::owningPkgTimeoutSecs() );
 	if ( exitCode != 0 )
 	    return QString{};
 
@@ -330,23 +323,13 @@ namespace
 } // namespace
 
 
-bool DpkgPkgManager::isPrimaryPkgManager() const
-{
-    return SysUtil::tryRunCommand( dpkgCommand(), { "-S", dpkgCommand() }, "^dpkg:.*" );
-}
-
-
-bool DpkgPkgManager::isAvailable() const
-{
-    return SysUtil::haveCommand( dpkgCommand() );
-}
-
-
 QString DpkgPkgManager::owningPkg( const QString & path ) const
 {
+    const int timeoutSecs = PkgQuery::owningPkgTimeoutSecs();
+
     // Try first with the full (possibly symlinked) path
     int exitCode;
-    const QString fullPathOutput = runDpkg( path, exitCode, false ); // error code likely, ignore
+    const QString fullPathOutput = runDpkg( path, exitCode, false, timeoutSecs );
     if ( exitCode == 0 )
     {
 	const QString package = searchOwningPkg( path, fullPathOutput );
@@ -357,7 +340,7 @@ QString DpkgPkgManager::owningPkg( const QString & path ) const
     // Search again just by filename in case part of the directory path is symlinked
     // (this may produce a lot of rows)
     const QFileInfo fileInfo{ path };
-    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false ); // error code likely, ignore
+    const QString filenameOutput = runDpkg( fileInfo.fileName(), exitCode, false, timeoutSecs );
     if ( exitCode != 0 )
 	return QString{};
 
@@ -402,7 +385,7 @@ QStringList DpkgPkgManager::parseFileList( const QString & output ) const
 	    if ( fields.size() == 2 && !divertedFile.isEmpty() )
 		fileList << resolvePath( divertedFile );
 	}
-	else if ( line != "/."_L1 && !isPackageDivert( line ) )
+	else if ( !line.isEmpty() && line != "/."_L1 && !isPackageDivert( line ) )
 	{
 	    fileList << resolvePath( line );
 	}
@@ -432,19 +415,19 @@ QString DpkgPkgManager::queryName( const PkgInfo * pkg ) const
 }
 
 
-PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::LookupType lookupType ) const
+PkgFileListCache * DpkgPkgManager::createFileListCache() const
 {
     int exitCode;
-    QString output = runDpkg( "*", exitCode, true ); // don't ignore error codes
+    QString output = runDpkg( "*", exitCode, true, 30 ); // log error codes
     if ( exitCode != 0 )
 	return nullptr;
 
     const QStringList lines = output.split( u'\n', Qt::SkipEmptyParts );
-#if VERBOSE_PACKAGES
+#if 1
     logDebug() << lines.size() << " output lines" << Qt::endl;
 #endif
 
-    PkgFileListCache * cache = new PkgFileListCache{ this, lookupType };
+    PkgFileListCache * cache = new PkgFileListCache{};
 
     // Sample output:
     //
@@ -552,7 +535,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache( PkgFileListCache::Lookup
 	}
     }
 
-    logDebug() << "file list cache finished." << Qt::endl;
+    //logDebug() << "file list cache finished." << Qt::endl;
 
     return cache;
 }

@@ -122,7 +122,7 @@ void DirInfo::initCounts()
 
     _totalSize           = size();
     _totalAllocatedSize  = allocatedSize();
-    _totalBlocks         = blocks();
+//    _totalBlocks         = blocks();
     _totalItems          = 0;
     _totalSubDirs        = 0;
     _totalFiles          = 0;
@@ -264,7 +264,7 @@ void DirInfo::recalc()
 	++_childCount;
 	_totalSize           += it->totalSize();
 	_totalAllocatedSize  += it->totalAllocatedSize();
-	_totalBlocks         += it->totalBlocks();
+//	_totalBlocks         += it->totalBlocks();
 	_totalItems          += it->totalItems();
 	_totalSubDirs        += it->totalSubDirs();
 	_errSubDirs          += it->errSubDirs();
@@ -276,13 +276,13 @@ void DirInfo::recalc()
 	if ( !it->isDotEntry() )
 	    ++_totalItems;
 
+	if ( it->subtreeReadError() )
+	    ++_errSubDirs;
+
 	if ( it->isDir() )
 	{
 	    // Count this as a sub-directory
 	    ++_totalSubDirs;
-
-	    if ( it->readError() )
-		++_errSubDirs;
 	}
 	else
 	{
@@ -338,13 +338,13 @@ FileSize DirInfo::totalAllocatedSize()
     return _totalAllocatedSize;
 }
 
-
+/*
 FileSize DirInfo::totalBlocks()
 {
     ensureClean();
     return _totalBlocks;
 }
-
+*/
 
 FileCount DirInfo::totalItems()
 {
@@ -511,23 +511,25 @@ void DirInfo::childAdded( FileInfo * newChild )
 	// Don't propagate the other counts from ignored items to non-ignored ancestors
 	if ( !newChild->isIgnored() || isIgnored() || isAttic() )
 	{
+	    const FileSize size          = newChild->size();
+	    const FileSize allocatedSize = newChild->allocatedSize();
+
 	    // Watch for overflows at the top-level directory which should have the biggest numbers
 	    if ( parent() && parent() == tree()->root() )
 	    {
 		if ( _totalItems == FileCountMax )
 		    THROW( TooManyFilesException{} );
 
-		if ( _totalSize          > FileSizeMax - newChild->size() ||
-		     _totalAllocatedSize > FileSizeMax - newChild->allocatedSize() )
+		if ( _totalSize > FileSizeMax - size || _totalAllocatedSize > FileSizeMax - allocatedSize )
 		    THROW( FilesystemTooBigException{} );
 	    }
 
 	    if ( newChild->mtime() > _latestMTime )
 		_latestMTime = newChild->mtime();
 
-	    _totalSize          += newChild->size();
-	    _totalAllocatedSize += newChild->allocatedSize();
-	    _totalBlocks        += newChild->blocks();
+	    _totalSize          += size;
+	    _totalAllocatedSize += allocatedSize;
+//	    _totalBlocks        += newChild->blocks();
 	    ++_totalItems;
 
 	    if ( newChild->parent() == this )
@@ -649,7 +651,7 @@ void DirInfo::readJobFinished( DirInfo * dir )
     if ( _sortInfo && _sortInfo->_sortedCol == ReadJobsCol )
 	dropSortCache();
 
-    if ( dir && dir != this && dir->readError() )
+    if ( dir && dir != this && dir->subtreeReadError() )
 	++_errSubDirs;
 
     if ( parent() )
@@ -671,12 +673,13 @@ QLatin1String DirInfo::sizePrefix() const
     switch ( _readState )
     {
 	case DirError:
-	case DirAborted:
+	case DirMissing:
+	case DirNoAccess:
 	case DirPermissionDenied:
+	case DirAborted:
 	    return "> "_L1;
 
 	case DirFinished:
-//	case DirCached:
 	    if ( _errSubDirs > 0 )
 		return "> "_L1;
 	    break;

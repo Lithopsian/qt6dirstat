@@ -33,8 +33,7 @@
 #include "OpenDirDialog.h"
 #include "OpenPkgDialog.h"
 #include "PanelMessage.h"
-#include "PkgManager.h"
-#include "PkgQuery.h"
+#include "PkgInfo.h"
 #include "QDirStatApp.h"
 #include "SelectionModel.h"
 #include "Settings.h"
@@ -86,6 +85,10 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->menubar->setCornerWidget( new QLabel{ MENUBAR_VERSION } );
     _updateTimer.setInterval( UPDATE_MILLISEC );
 
+    // Disable Pkg and Unpkg until package managers have been detected
+    _ui->actionOpenPkg->setEnabled( false );
+    _ui->actionOpenUnpkg->setEnabled( false );
+
     // QDirStatApp needs to be given MainWindow, DirTreeModel, and SelectionModel pointers
     // Before this, the app() getters will return 0
     // After this (ie. once MainWindow is constructed), they will always return a non-zero pointer
@@ -120,8 +123,6 @@ MainWindow::MainWindow( bool slowUpdate ):
     _ui->toolBar->setMovable( false );
 #endif
 
-    checkPkgManagerSupport();
-
     updateActions();
 }
 
@@ -136,25 +137,6 @@ MainWindow::~MainWindow()
     QDirStatApp::resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
-}
-
-
-void MainWindow::checkPkgManagerSupport()
-{
-    if ( !PkgQuery::haveGetInstalledPkgSupport() || !PkgQuery::haveFileListSupport() )
-    {
-	logInfo() << "No package manager support for getting installed packages or file lists" << Qt::endl;
-
-	_ui->actionOpenPkg->setEnabled( false );
-    }
-
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    if ( !pkgManager || !pkgManager->supportsFileListCache() )
-    {
-	logInfo() << "No package manager support for getting a file lists cache" << Qt::endl;
-
-	_ui->actionOpenUnpkg->setEnabled( false );
-    }
 }
 
 
@@ -265,9 +247,9 @@ void MainWindow::readSettings()
 
     if ( detailsSplitterState.isEmpty() )
     {
-	// The window geometry isn't set yet, so just put in something vaguely workable
-	_ui->topViewsSplitter->setStretchFactor( 0, 1 );
-	_ui->topViewsSplitter->setStretchFactor( 1, 4 );
+	// The window geometry isn't set yet, so just set sensible defaults for the relative sizes
+	_ui->mainWinSplitter->setSizes( { 10000, 10000 } ); // equal sizes for the top and bottom panes
+	_ui->topViewsSplitter->setSizes( { 40000, 10000 } ); // 4:1 ratio for DirTree and FileDetailsPanel
     }
     else
     {
@@ -516,7 +498,7 @@ void MainWindow::askOpenDir()
     if ( !path.isEmpty() )
     {
 	_historyButtons->clear();
-	tree->clear();
+	tree->prepare();
 	tree->reset();
 	tree->setCrossFilesystems( crossFilesystems );
 	openDir( path );
@@ -531,10 +513,7 @@ void MainWindow::askOpenPkg()
 
     if ( !cancelled )
     {
-	_historyButtons->clear();
-	DirTree * tree = app()->dirTree();
-	tree->prepare();
-	tree->reset();
+	app()->dirTree()->reset();
 	readPkg( pkgFilter );
     }
 }
@@ -544,12 +523,14 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
 {
     // logInfo() << "URL: " << pkgFilter.url() << Qt::endl;
 
+    DirTree * tree = app()->dirTree();
+    tree->clear();
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
     pkgQuerySetup();
     BusyPopup msg{ tr( "Reading package database..." ) };
 
-    app()->dirTree()->readPkg( pkgFilter );
+    tree->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
 }
 
@@ -564,6 +545,7 @@ void MainWindow::pkgQuerySetup()
     _ui->fileDetailsView->clear();
     ActionManager::swapActions( _ui->toolBar, _ui->actionRefreshAll, _ui->actionStopReading );
     enableDirPermissionsMsg();
+    _historyButtons->clear();
 }
 
 
@@ -774,7 +756,7 @@ void MainWindow::showCurrent( FileInfo * item )
 	QString msg = QString{ "%1  (%2%3)" }
 	    .arg( item->debugUrl(), item->sizePrefix(), formatSize( item->totalSize() ) );
 
-	if ( item->readState() == DirPermissionDenied || item->readState() == DirError )
+	if ( item->readState() != DirFinished )
 	    msg += "  " + _ui->fileDetailsView->readStateMsg( item->readState() );
 
 	_ui->statusBar->showMessage( msg );

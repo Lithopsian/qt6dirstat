@@ -14,7 +14,7 @@
 #include <QSharedPointer>
 
 #include "DirReadJob.h"
-#include "PkgInfo.h" // PkgInfoList
+#include "PkgInfo.h"
 
 
 namespace QDirStat
@@ -60,22 +60,6 @@ namespace QDirStat
          **/
         void read( DirTree * tree, const PkgFilter & filter );
 
-        /**
-         * Read parameters from the settings file.
-         **/
-        void readSettings();
-
-
-    private:
-
-        /**
-         * These can be set manually in the [Pkg] section of the config file at
-         * ~/.config/QDirStat/QDirStat.config.
-         **/
-        int  _maxParallelProcesses;
-        int  _minCachePkgListSize;
-        bool _verboseMissingPkgFiles;
-
     };  // class PkgReader
 
 
@@ -95,19 +79,15 @@ namespace QDirStat
     public:
 
         /**
-         * Constructor: Prepare to read the file list of existing PkgInfo node
+         * Constructor: prepare to read the file list of existing PkgInfo node
          * 'pkg' and create a DirInfo or FileInfo node for each item in the
          * file list below 'pkg'.
 
-         * process.  Reading is then started from the outside with
-         * startReading().
+         * Reading is then started from the outside with startReading().
          **/
-        PkgReadJob( DirTree   * tree,
-                    PkgInfo   * pkg,
-                    bool        verboseMissingPkgFiles ):
+        PkgReadJob( DirTree * tree, PkgInfo * pkg ):
             DirReadJob{ tree, pkg },
-            _pkg{ pkg },
-            _verboseMissingPkgFiles{ verboseMissingPkgFiles }
+            _pkg{ pkg }
         {}
 
         /**
@@ -138,7 +118,7 @@ namespace QDirStat
          * using a background process (AsyncPkgReader) or a file list cache
          * (CachePkgReader).
          **/
-        virtual QStringList fileList();
+        virtual QStringList fileList() const = 0;
 
         /**
          * Obtain information about the file or directory specified in
@@ -146,23 +126,21 @@ namespace QDirStat
          * is appropriate) from that information. Use FileInfo::isDirInfo()
          * to find out which.
          *
-         * If the underlying syscall fails, this returns 0.
+         * If the underlying syscall fails, a DirInfo object is created with
+         * the relevant error read state and very limited information.
          **/
-        FileInfo * createItem( const QString & path,
-                               const QString & name,
-                               DirInfo       * parent );
+        FileInfo * addItem( const QString & path, const QString & name, DirInfo * parent );
 
         /**
          * Add all files belonging to 'path' to this package.
          * Create all directories as needed.
          **/
-        void addFiles( const QStringList & fileIst );
+        void addFiles( QStringList fileList );
 
 
     private:
 
         PkgInfo * _pkg;
-        bool      _verboseMissingPkgFiles;
 
     };  // class PkgReadJob
 
@@ -200,7 +178,6 @@ namespace QDirStat
          **/
         AsyncPkgReadJob( DirTree   * tree,
                          PkgInfo   * pkg,
-                         bool        verboseMissingPkgFiles,
                          QProcess  * readFileListProcess );
 
 
@@ -209,8 +186,7 @@ namespace QDirStat
         /**
          * Notification that the attached read file list process is finished.
          **/
-        void readFileListFinished( int                  exitCode,
-                                   QProcess::ExitStatus exitStatus );
+        void readFileListFinished( int exitCode, QProcess::ExitStatus exitStatus );
 
 
     protected:
@@ -220,7 +196,7 @@ namespace QDirStat
          *
          * Reimplemented from PkgReadJob.
          **/
-        QStringList fileList() override { return _fileList; }
+        QStringList fileList() const override { return _fileList; }
 
 
     private:
@@ -249,9 +225,8 @@ namespace QDirStat
          **/
         CachePkgReadJob( DirTree           * tree,
                          PkgInfo           * pkg,
-                         bool                verboseMissingPkgFiles,
                          PkgFileListCachePtr fileListCache ):
-            PkgReadJob{ tree, pkg, verboseMissingPkgFiles },
+            PkgReadJob{ tree, pkg },
             _fileListCache{ fileListCache }
         {}
 
@@ -263,7 +238,7 @@ namespace QDirStat
          *
          * Reimplemented from PkgReadJob.
          **/
-        QStringList fileList() override;
+        QStringList fileList() const override;
 
 
     private:

@@ -30,7 +30,6 @@ namespace QDirStat
     class FileDetailsView;
     class HistoryButtons;
     class PkgFilter;
-    class PkgManager;
     class TreemapView;
     class UnpkgSettings;
 
@@ -135,6 +134,18 @@ namespace QDirStat
          * Return a pointer to the FileDetailsView panel widget.
          **/
         FileDetailsView * fileDetailsView() const { return _ui->fileDetailsView; }
+
+        /**
+         * Enable the action for a packaged read.
+         **/
+        void enableOpenPkg()
+            { _ui->actionOpenPkg->setEnabled( true ); }
+
+        /**
+         * Enable the action for an unpackage dread.
+         **/
+        void enableOpenUnpkg()
+            { _ui->actionOpenUnpkg->setEnabled( true ); }
 
 
     public slots:
@@ -608,12 +619,6 @@ namespace QDirStat
         void applyFutureSelection();
 
         /**
-         * Check for package manager support and enable or disable some of the
-         * related actions in the menus accordingly.
-         **/
-        void checkPkgManagerSupport();
-
-        /**
          * Apply the exclude rules from 'unpkgSettings' to the DirTree.
          **/
         void setUnpkgExcludeRules( const UnpkgSettings & unpkgSettings );
@@ -623,8 +628,7 @@ namespace QDirStat
          * - Ignore all files that belong to an installed package
          * - Ignore all file patterns ("*.pyc" etc.) the user wishes to ignore
          **/
-        void setUnpkgFilters( const UnpkgSettings & unpkgSettings,
-                              const PkgManager    * pkgManager );
+        void setUnpkgFilters( const UnpkgSettings & unpkgSettings );
 
         /**
          * Apply the cross-filesystem settings to the tree.

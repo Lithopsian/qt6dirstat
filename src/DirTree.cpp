@@ -9,6 +9,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QMultiHash>
 
 #include "DirTree.h"
 #include "Attic.h"
@@ -21,6 +22,7 @@
 #include "FormatUtil.h"
 #include "MountPoints.h"
 #include "PkgFilter.h"
+#include "PkgQuery.h"
 #include "PkgReader.h"
 #include "SysUtil.h"
 
@@ -286,8 +288,9 @@ bool DirTree::isToplevel( const FileInfo * item ) const
 
 void DirTree::prepare()
 {
-    MountPoints::reload();
     clear();
+    MountPoints::reload();
+    PkgQuery::clearOwningPkgCache();
 }
 
 
@@ -524,7 +527,7 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	return;
 
     // Create a map to group the items by parent
-    QMultiMap<DirInfo *, FileInfo *>parentMap;
+    QMultiHash<DirInfo *, FileInfo *>parentMap;
     for ( FileInfo * subtree : subtrees )
     {
 	// Check if the item has already been deleted, by us or someone else

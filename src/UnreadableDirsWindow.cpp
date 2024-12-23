@@ -68,23 +68,42 @@ namespace
 
     /**
      * Recursively find unreadable directories in 'subtree' and add an
-     * entry to 'treeWidget' for each one.
+     * entry to 'unreadableDirs' for each one.  'unreadableDirs' is a QSet to
+     * avoid duplicates.
+     *
+     * In the most common case, DirPermissionDenied, a directory does not allow
+     * access to its children and it is added to 'unreadableDirs'.
+     *
+     * In the less common cases of DirError, DirMissing, and DirNoAccess, a
+     * directory allows access to an item, but stat() fails to fetch
+     * information about it.  Since there would be no information to display
+     * about such items, see if the parent can be accessed and add the parent.
+     * If the parent itself cannot be accessed, an ancestor of it will already
+     * have been added.
      **/
-    void populateRecursive( FileInfo * subtree, QTreeWidget * treeWidget )
+    void populateRecursive( QSet<const DirInfo *> & unreadableDirs, FileInfo * subtree )
     {
 	if ( !subtree || !subtree->isDirInfo() )
 	    return;
 
-	DirInfo * dir = subtree->toDirInfo();
-	if ( dir->readError() )
-	    treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
+	const DirInfo * dir = subtree->toDirInfo();
+	if ( dir->readState() == DirPermissionDenied )
+	{
+	    unreadableDirs << dir;
+	}
+	else if ( dir->readError() )
+	{
+	    const DirInfo * parent = dir->parent();
+	    if ( parent && !parent->readError() )
+		unreadableDirs << parent;
+	}
 
 	// Recurse through any subdirectories
 	for ( DirInfoIterator it{ subtree }; *it; ++it )
-	    populateRecursive( *it, treeWidget );
+	    populateRecursive( unreadableDirs, *it );
 
 	// Dot entries can't contain unreadable dirs, but attics can
-	populateRecursive( dir->attic(), treeWidget );
+	populateRecursive( unreadableDirs, subtree->attic() );
     }
 
 } // namespace
@@ -136,7 +155,11 @@ void UnreadableDirsWindow::populate()
 
     //logDebug() << "Locating all unreadable dirs" << Qt::endl;
 
-    populateRecursive( app()->firstToplevel(), _ui->treeWidget );
+    QSet<const DirInfo *> unreadableDirs;
+    populateRecursive( unreadableDirs, app()->firstToplevel() );
+
+    for ( const DirInfo * dir : asConst( unreadableDirs ) )
+	_ui->treeWidget->addTopLevelItem( new UnreadableDirsItem{ dir } );
 
     const int rowCount = _ui->treeWidget->topLevelItemCount();
     _ui->totalLabel->setText( rowCount > 1 ? tr( "%L1 directories" ).arg( rowCount ) : QString{} );
@@ -177,7 +200,6 @@ UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
 QVariant UnreadableDirsItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are likely to be long and elided
-//    if ( role != Qt::ToolTipRole || column != UD_PathCol )
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 

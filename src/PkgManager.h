@@ -10,17 +10,25 @@
 #ifndef PkgManager_h
 #define PkgManager_h
 
-#include "PkgInfo.h"          // PkgInfoList
-#include "PkgFileListCache.h" // lookup types
+#include <QProcess>
+
+#include "PkgInfo.h" // PkgInfoList
 
 
 namespace QDirStat
 {
+    class PkgFileListCache;
+
+
+    /**
+     * Simple pair structure for passing a program name and list of arguments,
+     * typically to be used for running an extermal process.
+     **/
     struct PkgCommand
     {
-	QString command;
+	const char * program{ nullptr };
 	QStringList args;
-	bool isEmpty() const { return command.isEmpty(); }
+	bool isEmpty() const { return !program; }
     };
 
 
@@ -28,10 +36,9 @@ namespace QDirStat
      * Abstract base class for all package managers.
      *
      * Concrete implementation classes:
-     *
-     *	 - DpkgPkgManager
-     *	 - RpmPkgManager
-     *	 - PacManPkgManager
+     *	DpkgPkgManager
+     *	RpmPkgManager
+     *	PacManPkgManager
      **/
     class PkgManager
     {
@@ -53,63 +60,46 @@ namespace QDirStat
 	virtual QLatin1String name() const = 0;
 
 	/**
-	 * Check if this package manager is active as a primary package manager
-	 * on the currently running system.
+	 * Start a process to check whether this is a primary or secondary
+	 * package manager.  If the relevant program does not exist, then no
+	 * process if created, bo entries are created in PkgQuery, and this
+	 * function returns false.
 	 *
-	 * Derived classes are required to implement this.
+	 * The process consists of a command that will test if the package
+	 * manager binary is provided by a package in the package manager
+	 * itself.  Derived classes are required to implement functions to
+	 * return relevant the program and arguments, and a regular expression
+	 * to test for the expected output.
 	 *
-	 * Remember that a system might support installing 'foreign' package
-	 * managers; for example, on Debian / Ubuntu you can also install the
-	 * 'rpm' package. It is strongly advised to do a more sophisticated
-	 * test here than just checking if a certain executable (like
-	 * /usr/bin/dpkg or /usr/bin/rpm) exists.
+	 * If the regular expression matches, then this is considered to be a
+	 * primary package manager.  The (probably just one ) primary package
+	 * manager is used to create a cache of packages and filenames that can
+	 * be for packaged and unpackaged queries.
 	 *
-	 * The PkgQuery class will only execute this once at its startup phase,
-	 * so this information does not need to be cached.
+	 * If the program exists, but the output does not match, then it is
+	 * considered to be a secondary package manager.  Secondary package
+	 * managers are queried for lists of packages, owning packages, etc.
+	 *
+	 * When the process finishes, a signal handler will add this package
+	 * to the relevant list in PkgQuery and '_process' will be deleted.
 	 **/
-	virtual bool isPrimaryPkgManager() const = 0;
+	bool check();
 
 	/**
-	 * Check if this package manager is available on the currently running
-	 * system, even if just as a secondary package manager. This is a
-	 * weaker check than isPrimaryPkgPanager(); just checking if the
-	 * relevant binary exists and is executable (use haveCommand() for
-	 * that) is sufficient.
-	 *
-	 * This means that this can be used as a secondary package manager; it
-	 * does not manage itself, but maybe it manages some other 'foreign'
-	 * packages.
-	 *
-	 * For example, if you install rpm.deb on Ubuntu, /usr/bin/rpm belongs
-	 * to the rpm.deb package, unlike on a SUSE system where it belongs to
-	 * the rpm.rpm package. Still, it probably manages some packages
-	 * (albeit not itself) on such an Ubuntu system which might be useful
-	 * for the purposes of this PkgQuery class.
+	 * Wait until the primary package manager checking process has
+	 * finished, or the timeout is exceeded.  Returns whether the process
+	 * finishes successfully. If '_process' is null, for example it was
+	 * never set or has been reset by the finished() signal handler, then
+	 * true is returned immediately.
 	 **/
-	virtual bool isAvailable() const = 0;
+	bool waitForPrimary()
+	    { return _process ? _process->waitForFinished() : true; }
 
 	/**
 	 * Return the owning package of a file or directory with full path
 	 * 'path' or an empty string if it is not owned by any package.
 	 **/
 	virtual QString owningPkg( const QString & path ) const = 0;
-
-	//-----------------------------------------------------------------
-	//                    Optional Features
-	//-----------------------------------------------------------------
-
-	/**
-	 * Return the list of files and directories owned by a package.
-	 **/
-	QStringList fileList( const PkgInfo * pkg ) const;
-
-	/**
-	 * Return 'true' if this package manager supports getting the list of
-	 * installed packages.
-	 *
-	 * The default implementation returns 'false'.
-	 **/
-	virtual bool supportsGetInstalledPkg() const { return false; }
 
 	/**
 	 * Return the list of installed packages.
@@ -122,16 +112,6 @@ namespace QDirStat
 	 * The default implementation returns nothing.
 	 **/
 	virtual PkgInfoList installedPkg() const { return PkgInfoList{}; }
-
-	/**
-	 * Return 'true' if this package manager supports getting the file list
-	 * for a package.
-	 *
-	 * The default implementation returns 'false'.
-	 *
-	 ** See also supportsFileListCache().
-	 **/
-	virtual bool supportsFileList() const { return false; }
 
 	/**
 	 * Return the command and arguments for getting the list of files and
@@ -155,33 +135,75 @@ namespace QDirStat
 	    { return QStringList{}; }
 
 	/**
-	 * Return 'true' if this package manager supports building a file list
-	 * cache for getting all file lists for all packages.
-	 *
-	 * The default implementation returns 'false'.
-	 **/
-	virtual bool supportsFileListCache() const { return false; }
-
-	/**
 	 * Create a file list cache with the specified lookup type for all
 	 * installed packages. This is an expensive operation.  Must be
 	 * reimplemented by derived classes.
 	 *
 	 * This is a best-effort approach; the cache might still not contain
 	 * all desired packages. Check with PkgFileListCache::contains() and
-	 * use PkgManager::fileList() as a fallback.
+	 * use PkgManager::fileListCommand() as a fallback.
 	 *
 	 * Ownership of the cache is transferred to the caller; make sure to
 	 * delete it when you are done with it.
 	 **/
-	virtual PkgFileListCache * createFileListCache( PkgFileListCache::LookupType ) const
+	virtual PkgFileListCache * createFileListCache() const
 	    { return nullptr; }
 
 	/**
-	 * Return a name suitable for a detailed queries for 'pkg'.
+	 * Return a name suitable for detailed queries for 'pkg'.
 	 */
 	virtual QString queryName( const PkgInfo * pkg ) const
 	    { return pkg->name(); }
+
+
+    protected:
+
+	/**
+	 * Return a command to determine whether this is an installed primary
+	 * or secondary package manager.  Derived classes must implement this.
+	 **/
+	virtual PkgCommand isPrimaryCommand() const = 0;
+
+	/**
+	 * Return a regular expression to test the output of isPrimaryCommand()
+	 * to determine if it is an installed primary package manager.  Derived
+	 * classes must implement this.
+	 **/
+	virtual QString isPrimaryRegExp() const = 0;
+
+	/**
+	 * Return 'true' if this package manager supports getting the list of
+	 * installed packages.  Implies that the function installedPkg() is
+	 * defined
+	 *
+	 * The default implementation returns 'false'.
+	 **/
+	virtual bool supportsGetInstalledPkg() const { return false; }
+
+	/**
+	 * Return 'true' if this package manager supports getting the file list
+	 * for a package; implies that the functions fileListCommand() and
+	 * parseFileList() are defined.
+	 *
+	 * The default implementation returns 'false'.
+	 *
+	 ** See also supportsFileListCache().
+	 **/
+	virtual bool supportsFileList() const { return false; }
+
+	/**
+	 * Return 'true' if this package manager supports building a file list
+	 * cache for getting all file lists for all packages: implies that the
+	 * function createFileListCache() is defined.
+	 *
+	 * The default implementation returns 'false'.
+	 **/
+	virtual bool supportsFileListCache() const { return false; }
+
+
+    private:
+
+	QProcess * _process{ nullptr };
 
     };	// class PkgManager
 

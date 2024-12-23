@@ -18,7 +18,6 @@
 #include "Exception.h"
 #include "ExcludeRules.h"
 #include "HistoryButtons.h"
-#include "PkgManager.h"
 #include "PkgQuery.h"
 #include "QDirStatApp.h"
 
@@ -28,20 +27,10 @@ using namespace QDirStat;
 
 void MainWindow::askOpenUnpkg()
 {
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-
-    if ( !pkgManager )
-    {
-	logError() << "No supported primary package manager" << Qt::endl;
-	return;
-    }
-
     OpenUnpkgDialog dialog{ this };
-
     if ( dialog.exec() == QDialog::Accepted )
     {
 	app()->dirTree()->prepare();
-	_historyButtons->clear();
 	showUnpkgFiles( dialog.values() );
     }
 }
@@ -55,20 +44,20 @@ void MainWindow::showUnpkgFiles( const QString & url )
 
 void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 {
+    pkgQuerySetup();
+
     unpkgSettings.dump();
 
-    const PkgManager * pkgManager = PkgQuery::primaryPkgManager();
-    if ( !pkgManager )
+    if ( !_ui->actionOpenUnpkg->isEnabled() )
     {
-	logWarning() << "No supported primary package manager" << Qt::endl;
+	logWarning() << "No package managers supporting file list cache" << Qt::endl;
 	return;
     }
 
-    pkgQuerySetup();
     BusyPopup msg{ tr( "Reading package database..." ) };
 
     setUnpkgExcludeRules( unpkgSettings );
-    setUnpkgFilters( unpkgSettings, pkgManager );
+    setUnpkgFilters( unpkgSettings );
     setUnpkgCrossFilesystems( unpkgSettings );
 
     // Start reading the directory
@@ -102,13 +91,12 @@ void MainWindow::setUnpkgExcludeRules( const UnpkgSettings & unpkgSettings )
 }
 
 
-void MainWindow::setUnpkgFilters( const UnpkgSettings & unpkgSettings,
-                                  const PkgManager    * pkgManager )
+void MainWindow::setUnpkgFilters( const UnpkgSettings & unpkgSettings )
 {
     // Filter for ignoring all files from all installed packages
     DirTree * tree = app()->dirTree();
     tree->clearFilters();
-    tree->addFilter( new DirTreePkgFilter{ pkgManager } );
+    tree->addFilter( new DirTreePkgFilter{} );
 
     // Add the filters for each file pattern the user explicitly requested to ignore
     for ( const QString & pattern : unpkgSettings.ignorePatterns() )

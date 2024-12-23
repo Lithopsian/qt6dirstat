@@ -19,7 +19,7 @@
 #include <QStringBuilder>
 
 
-#define COMMAND_TIMEOUT_SEC 15
+#define COMMAND_TIMEOUT_SEC 30
 
 
 namespace QDirStat
@@ -66,16 +66,11 @@ namespace QDirStat
 	    { return faccessat( AT_FDCWD, command.toUtf8(), X_OK, AT_EACCESS ) == 0; }
 
 	/**
-	 * Try running a command and compare it against an expected result.
-	 * Return true if the command output matches the regular expression
-	 * 'expectedResult', false if it doesn't.
-	 *
-	 * Log the command that is executed if 'logCommand' is true,
-	 * log the command's output if 'logOutput' is true.
+	 * Return a QProcess pointer, created from program 'command' and
+	 * arguments 'args'.  The process is set to use a C environment and
+	 * produced merged output.  It is not started.
 	 **/
-	bool tryRunCommand( const char        * command,
-	                    const QStringList & args,
-	                    const QString     & expectedResult );
+	QProcess * commandProcess( const QString & command, const QStringList & args );
 
 	/**
 	 * Run a command with arguments 'args' and return its output. If
@@ -93,25 +88,13 @@ namespace QDirStat
 	 * other interpreted languages. If that is desired, wrap the command
 	 * into "/bin/sh -c".
 	 **/
-	QString runCommand( const QString     & command,
+	QString runCommand( const QString     & program,
 	                    const QStringList & args,
 	                    int               * exitCode_ret = nullptr,
 	                    int                 timeoutSec   = COMMAND_TIMEOUT_SEC,
 	                    bool                logCommand   = true,
 	                    bool                logOutput    = false,
 	                    bool                logError     = true );
-
-	/**
-	 * Return a QProcessEnvironment object with the C locale added.  This
-	 * is necessary when running some commands to avoid problems trying
-	 * to parse localised output.
-	 **/
-	inline QProcessEnvironment cProcessEnvironment()
-	{
-	    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-	    env.insert( "LANG", "C" ); // Prevent output in translated languages
-	    return env;
-	}
 
 	/**
 	 * Check if this program runs with root privileges, i.e. with effective

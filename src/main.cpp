@@ -11,6 +11,7 @@
 
 #include "Logger.h"
 #include "MainWindow.h"
+#include "PkgQuery.h"
 #include "QDirStatApp.h"
 #include "Settings.h"
 #include "Version.h"
@@ -96,7 +97,7 @@ namespace
 
 
     /**
-     * Create MainWindow, call the requested functions, and run the
+     * Create MainWindow, call the requested function, and run the
      * application event loop.
      *
      * Note that MainWindow is destroyed when this function exits.
@@ -104,6 +105,7 @@ namespace
     void mainLoop( bool slowUpdate, bool openCache, bool dontAsk, const QStringList & argList )
     {
 	QDirStat::MainWindow mainWin{ slowUpdate };
+	QDirStat::PkgQuery::init();
 	mainWin.show();
 
 	if ( !argList.isEmpty() )

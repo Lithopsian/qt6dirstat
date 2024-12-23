@@ -11,7 +11,8 @@
 
 #include "DirTreeFilter.h"
 #include "Logger.h"
-#include "PkgManager.h"
+#include "PkgFileListCache.h"
+#include "PkgQuery.h"
 
 
 #define VERBOSE_MATCH 0
@@ -55,7 +56,6 @@ bool DirTreePatternFilter::ignore( const QString & path ) const
 
 
 
-
 bool DirTreeSuffixFilter::ignore( const QString & path ) const
 {
     const bool match = path.endsWith( _suffix );
@@ -71,12 +71,11 @@ bool DirTreeSuffixFilter::ignore( const QString & path ) const
 
 
 
-DirTreePkgFilter::DirTreePkgFilter( const PkgManager * pkgManager ):
+DirTreePkgFilter::DirTreePkgFilter():
     DirTreeFilter{},
-    _fileListCache{ pkgManager->createFileListCache( PkgFileListCache::LookupGlobal ) }
+    _fileListCache{ PkgQuery::fileList() }
 {
-    //logInfo() << "Creating file list cache with " << pkgManager->name() << Qt::endl;
-    //logInfo() << "Done." << Qt::endl;
+    logInfo() << _fileListCache->size() << " files in filter" << Qt::endl;
 }
 
 
