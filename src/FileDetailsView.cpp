@@ -527,7 +527,7 @@ namespace
                           const FileInfo            * file,
                           int                         lastPixel )
     {
-	// If this is in a package view, then we know it is a packaged file
+	// A package ancestor will be the owning package
 	const PkgInfo * pkg = file->pkgInfoParent();
 
 	// Packaged files are always system files
@@ -546,28 +546,28 @@ namespace
 	    }
 	    else if ( isSystemFile )
 	    {
-		const QString & url = file->url();
-		const QString * pkg = PkgQuery::cachedOwningPkg( url );
-		if ( pkg )
+		const QString url = file->url();
+		const QString * pkgName = PkgQuery::cachedOwningPkg( url );
+		if ( pkgName )
 		{
 		    //logDebug() << "Cache: " << pkg << " owns " << url << Qt::endl;
-		    setPkgInfo( ui, pkg, lastPixel );
+		    setPkgInfo( ui, pkgName, lastPixel );
 		}
 		else
 		{
-		    // Submit a timed query to find the owning package, if any
+		    // Make the label hint at the asynchronous request
 		    QString delayHint{ pkgUpdateTimer->delayStage(), u'.' };
 		    ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
-		    // Capture url by value because the FileInfo may be gone by the time the timer expires
+		    // Submit a timed query to find the owning package, if any
 		    const auto payload = [ ui, url, lastPixel ]()
 		    {
 			setPkgInfo( ui, PkgQuery::owningPkg( url ), lastPixel );
 		    };
 		    pkgUpdateTimer->request( payload );
-		}
 
-		// Leave the caption unchanged for now as the most likely state is the same as the previous selection
+		    // Leave the caption enabled state unchanged for now as it will usually stay the same
+		}
 	    }
 	}
 	else // No supported package manager found
@@ -869,12 +869,7 @@ void FileDetailsView::resizeEvent( QResizeEvent * )
     if ( layout )
 	_lastPixel = contentsRect().right() - layout->contentsMargins().right() - layout->spacing();
 
-    // Grab any package name because showDetails() may blank it and wait for a process to update it
-    const QString tooltipText = _ui->filePackageLabel->toolTip();
-    const QString fullText = tooltipText.isEmpty() ? _ui->filePackageLabel->text() : tooltipText;
-
-    // Refresh the whole panel and put the package name back before anyone notices
+    // Refresh the whole panel since the current labels may be elided with no easy way to know the full string
     showDetails();
-    setLabelLimited( _ui->filePackageLabel, fullText, _lastPixel );
 }
 
