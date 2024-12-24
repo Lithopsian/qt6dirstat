@@ -382,7 +382,7 @@ namespace
 	const QString msg = subtreeMsg( dir );
 	if ( msg.isEmpty() )
 	{
-	    // No special msg -> show summary fields
+	    // No special msg -> show subtree fields
 	    const QLatin1String prefix = dir->sizePrefix();
 	    setSizeLabel ( ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
 	    setSizeLabel ( ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
@@ -395,13 +395,15 @@ namespace
 	}
 	else
 	{
-	    // Special msg -> show it and clear all summary fields
-	    ui->dirTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all subtree fields
+	    clearLabel( ui->dirTotalSizeLabel );
 	    clearLabel( ui->dirAllocatedLabel );
 	    clearLabel( ui->dirItemCountLabel );
 	    clearLabel( ui->dirFileCountLabel );
 	    clearLabel( ui->dirSubDirCountLabel );
 	    clearLabel( ui->dirLatestMTimeLabel );
+
+	    ui->dirTotalSizeLabel->setText( msg );
 	}
     }
 
@@ -587,7 +589,7 @@ namespace
 	const QString msg = subtreeMsg( pkg );
 	if ( msg.isEmpty() )
 	{
-	    // No special msg -> show summary fields
+	    // No special msg -> show package fields
 	    const QLatin1String prefix = pkg->sizePrefix();
 	    setSizeLabel ( ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
 	    setSizeLabel ( ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
@@ -597,12 +599,14 @@ namespace
 	}
 	else
 	{
-	    // Special msg -> show it and clear all summary fields
-	    ui->pkgTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all package fields
+	    clearLabel( ui->pkgTotalSizeLabel );
 	    clearLabel( ui->pkgAllocatedLabel );
 	    clearLabel( ui->pkgItemCountLabel );
 	    clearLabel( ui->pkgFileCountLabel );
 	    clearLabel( ui->pkgSubDirCountLabel );
+
+	    ui->pkgTotalSizeLabel->setText( msg );
 	}
 
 	setTimeLabel( ui->pkgLatestMTimeLabel, pkg->latestMTime() );
@@ -621,6 +625,7 @@ namespace
 	const QString msg = subtreeMsg( pkg );
 	if ( msg.isEmpty() )
 	{
+	    // No special msg -> show sumnmary fields
 	    const QLatin1String prefix = pkg->sizePrefix();
 	    setSizeLabel ( ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
 	    setSizeLabel ( ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
@@ -630,11 +635,14 @@ namespace
 	}
 	else
 	{
-	    ui->pkgSummaryTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all summary fields
+	    clearLabel( ui->pkgSummaryTotalSizeLabel );
 	    clearLabel( ui->pkgSummaryAllocatedLabel );
 	    clearLabel( ui->pkgSummaryItemCountLabel );
 	    clearLabel( ui->pkgSummaryFileCountLabel );
 	    clearLabel( ui->pkgSummarySubDirCountLabel );
+
+	    ui->pkgSummaryTotalSizeLabel->setText( msg );
 	}
 
 	setTimeLabel( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
