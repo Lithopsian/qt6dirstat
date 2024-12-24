@@ -23,11 +23,11 @@ namespace QDirStat
     class FileInfo;
 
     /**
-     * Details view for the current selection (file, directory, multiple
-     * objects).
+     * Details view for the current selection (file, directory, package, or
+     * multiple objects).
      *
-     * This shows detailed information such as sizes, permissions, mtime
-     * etc. depending on what type of object and how many of them are selected.
+     * This shows detailed information such as sizes, permissions, mtime,
+     * etc., depending on what type of object and how many of them are selected.
      **/
     class FileDetailsView final : public QStackedWidget
     {

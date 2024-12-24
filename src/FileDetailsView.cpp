@@ -321,47 +321,12 @@ namespace
 
 
     /**
-     * Show the visibility of the system file labels.
-     **/
-    void setSystemFileWarningVisibility( const Ui::FileDetailsView * ui, bool visible )
-    {
-	ui->fileSystemFileWarning->setVisible( visible );
-	ui->fileSystemFileWarningSpacer->setVisible( visible );
-    }
-
-
-    /**
-     * Show the visibility of the file package block of labels.
+     * Show the visibility of the file package label and caption.
      **/
     void setFilePkgBlockVisibility( const Ui::FileDetailsView * ui, bool visible )
     {
 	ui->filePackageCaption->setVisible( visible );
 	ui->filePackageLabel->setVisible( visible );
-    }
-
-
-    /**
-     * Show the visibility of the directory block of labels.
-     **/
-    void setDirBlockVisibility( const Ui::FileDetailsView * ui, bool visible )
-    {
-	ui->dirDirectoryHeading->setVisible( visible );
-
-	ui->dirOwnSizeCaption->setVisible( visible );
-	ui->dirUserCaption->setVisible( visible );
-	ui->dirGroupCaption->setVisible( visible );
-	ui->dirPermissionsCaption->setVisible( visible );
-	ui->dirMTimeCaption->setVisible( visible );
-
-	ui->dirOwnSizeLabel->setVisible( visible );
-	ui->dirUserLabel->setVisible( visible );
-	ui->dirGroupLabel->setVisible( visible );
-	ui->dirPermissionsLabel->setVisible( visible );
-	ui->dirMTimeLabel->setVisible( visible );
-
-	// A dot entry cannot have directory children
-	ui->dirSubDirCountCaption->setVisible( visible );
-	ui->dirSubDirCountLabel->setVisible( visible );
     }
 
 
@@ -532,7 +497,7 @@ namespace
 
 	// Packaged files are always system files
 	const bool isSystemFile = pkg || SystemFileChecker::isSystemFile( file );
-	setSystemFileWarningVisibility( ui, isSystemFile );
+	ui->fileSystemFileWarning->setVisible( isSystemFile );
 
 	if ( PkgQuery::foundSupportedPkgManager() )
 	{
@@ -541,8 +506,7 @@ namespace
 	    if ( pkg )
 	    {
 		// We already know the package ...
-		ui->filePackageCaption->setEnabled( true );
-		ui->filePackageLabel->setText( pkg->name() );
+		setPkgInfo( ui, &pkg->name(), lastPixel );
 	    }
 	    else if ( isSystemFile )
 	    {
@@ -603,7 +567,7 @@ namespace
 	showSubtreeInfo( ui, dir );
 
 	const bool showDirBlock = !isPseudoDir && !dir->readError();
-	setDirBlockVisibility( ui, showDirBlock );
+	ui->dirDirectoryGrid->setVisible( showDirBlock );
 	if ( showDirBlock )
 	    showDirNodeInfo( ui, dir );
     }
@@ -757,10 +721,14 @@ void FileDetailsView::showDetails()
 	showFileInfoSet( ui(), sel.normalized() );
 	setCurrentPage( _ui->selectionSummaryPage );
     }
-    else if ( !sel.isEmpty() )
-	showDetails( sel.first() );
-    else
+    else if ( sel.isEmpty() )
+    {
 	showDetails( app()->selectionModel()->currentItem() );
+    }
+    else
+    {
+	showDetails( sel.first() );
+    }
 }
 
 
@@ -843,8 +811,7 @@ void FileDetailsView::setCurrentPage( QWidget * page )
     while ( count() > 0 )
 	removeWidget( widget( 0 ) );
 
-    addWidget( page );
-    setCurrentWidget( page );
+    setCurrentIndex( addWidget( page ) ); // should always be zero, but set it anyway
 }
 
 

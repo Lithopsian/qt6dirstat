@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
+<ui version="4.0" connectslotsbyname="false">
  <class>MimeCategoryConfigPage</class>
  <widget class="QWidget" name="MimeCategoryConfigPage">
   <property name="geometry">
@@ -186,12 +186,6 @@
             </item>
             <item>
              <widget class="QPlainTextEdit" name="caseInsensitivePatterns">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -296,19 +290,6 @@
           </widget>
           <widget class="QWidget" name="layoutWidget2">
            <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
             <item>
              <widget class="QCheckBox" name="squarifiedCheckBox">
               <property name="toolTip">
