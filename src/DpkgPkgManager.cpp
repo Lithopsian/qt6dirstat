@@ -423,7 +423,7 @@ PkgFileListCache * DpkgPkgManager::createFileListCache() const
 	return nullptr;
 
     const QStringList lines = output.split( u'\n', Qt::SkipEmptyParts );
-#if 1
+#if VERBOSE_PACKAGES
     logDebug() << lines.size() << " output lines" << Qt::endl;
 #endif
 
@@ -535,7 +535,9 @@ PkgFileListCache * DpkgPkgManager::createFileListCache() const
 	}
     }
 
-    //logDebug() << "file list cache finished." << Qt::endl;
+#if VERBOSE_PACKAGES
+    logDebug() << "file list cache finished." << Qt::endl;
+#endif
 
     return cache;
 }

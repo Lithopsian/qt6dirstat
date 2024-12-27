@@ -129,6 +129,8 @@ namespace
      **/
     void fixFileOwner( const UsedFileList & filenames )
     {
+	logDebug() << Qt::endl;
+
 	const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 	const QString sudoUid = env.value( "SUDO_UID", QString{} );
 	const QString sudoGid = env.value( "SUDO_GID", QString{} );
@@ -147,8 +149,10 @@ namespace
 	    return;
 	}
 
+	logDebug() << homeDir << Qt::endl;
 	for ( const QString & filename : filenames )
 	{
+	    logDebug() << filename << Qt::endl;
 	    if ( filename.startsWith( homeDir ) )
 	    {
 		const gid_t gid = sudoGid.toInt();
@@ -163,7 +167,7 @@ namespace
 		}
 		else
 		{
-#if 0
+#if 1
 		    logDebug() << "Success: chown " << filename
 			       << " to UID "  << uid
 			       << " and GID " << gid

@@ -406,24 +406,6 @@ DirSize DirInfo::childCount()
     return _childCount;
 }
 
-/*
-DirSize DirInfo::countChildren()
-{
-    // logDebug() << this << Qt::endl;
-
-    _childCount = 0;
-
-    _childCount += std::count_if( begin( this ), end( this ), []( auto ) { return true; } );
-
-    if ( _dotEntry )
-	++_childCount;
-
-    if ( _attic )
-	++_childCount;
-
-    return _childCount;
-}
-*/
 
 bool DirInfo::isFinished() const
 {

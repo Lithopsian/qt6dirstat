@@ -322,27 +322,6 @@ namespace
 
 
     /**
-     * Create a DirInfo or FileInfo node from a path and stat call.
-     **/
-/*    FileInfo * createItem( const QString & path,
-                           const QString & name,
-                           DirTree       * tree,
-                           DirInfo       * parent )
-    {
-	// logDebug() << "path: \"" << path << '"' << Qt::endl;
-
-	struct stat statInfo;
-	if ( !stat( statInfo, path ) ) // fstatat() failed
-	    return nullptr;
-
-	if ( S_ISDIR( statInfo.st_mode ) )	// directory
-	    return new DirInfo{ parent, tree, name, statInfo };
-	else					// not directory
-	    return new FileInfo{ parent, tree, name, statInfo };
-    }
-*/
-
-    /**
      * Locate a direct child of a DirInfo by name.  Ignore dot-entries
      * since they will never match a real pathname.
      **/

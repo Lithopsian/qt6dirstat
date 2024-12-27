@@ -108,36 +108,6 @@ void SelectionModel::propagateSelectionChanged( const QItemSelection &,
     emit selectionChangedItems( selectedItems() );
 }
 
-/*
-void SelectionModel::selectItem( FileInfo * item )
-{
-    extendSelection( item,
-                     true ); // clear
-}
-
-
-void SelectionModel::extendSelection( FileInfo * item, bool clear )
-{
-    if ( item )
-    {
-	const QModelIndex index = _dirTreeModel->modelIndex( item );
-	if ( index.isValid() )
-	{
-	    logDebug() << "Selecting " << item << Qt::endl;
-	    SelectionFlags flags = Select | Rows;
-
-	    if ( clear )
-		flags |= Clear;
-
-	    select( index, flags ); // emits selectionChanged()
-	}
-    }
-    else if ( clear )
-    {
-	clearSelection(); // emits selectionChanged()
-    }
-}
-*/
 
 void SelectionModel::setSelectedItems( const FileInfoSet & selectedItems )
 {

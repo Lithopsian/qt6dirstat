@@ -84,11 +84,6 @@ namespace QDirStat
 	 **/
 	void addNormalMountPoints();
 
-	/**
-	 * Select the item representing the parent mount point of 'path'.
-	 **/
-//	void selectParentMountPoint( const QString & path );
-
 
     signals:
 

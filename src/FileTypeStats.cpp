@@ -94,7 +94,9 @@ FileTypeStats::FileTypeStats( FileInfo * subtree )
 #endif
     }
 
+#if VERBOSE_STATS
     logDebug() << _patterns.size() << " patterns in " << _categories.size() << " categories" << Qt::endl;
+#endif
 }
 
 

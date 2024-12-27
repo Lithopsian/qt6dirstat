@@ -69,7 +69,7 @@ namespace QDirStat
 	 * There is one current item (mostly for the keyboard focus), but there
 	 * can be any number of selected items.
 	 *
-	 * The current item can change the selection: In the tree view in
+	 * The current item can change the selection: in the tree view in
 	 * 'extended selection' mode, [Shift]+[Click] extends the range of
 	 * selected items (and makes the clicked item the current item),
 	 * [Ctrl]+[Click] toggles the selected state of an item (and makes it
@@ -136,25 +136,6 @@ namespace QDirStat
 	 * and this messes up things like parent highlighting.
 	 **/
 	void clear() override;
-
-	/**
-	 * Replace the current selection with one item.
-	 * If this item is 0, everything is deselected.
-	 * This does NOT change the current item.
-	 **/
-//	void selectItem( FileInfo * item );
-
-	/**
-	 * Extend the current selection with one item: Add this item to the set
-	 * of selected items. If this item is 0, the selection remains
-	 * unchanged.
-	 *
-	 * This does NOT change the current item.
-	 *
-	 * If 'clear' is 'true', this will clear the old selection first, so
-	 * this has the same effect as selectItem().
-	 **/
-//	void extendSelection( FileInfo * item, bool clear = false );
 
 	/**
 	 * Search the dir tree for an item with the specified path and, if

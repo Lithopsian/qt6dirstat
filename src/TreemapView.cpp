@@ -430,7 +430,7 @@ void TreemapView::treemapFinished()
         if ( futureResult )
         {
             // Rare, but it is possible that the build is cancelled, but the thread has already finished
-            logDebug() << "completed treemap has been cancelled, delete tiles" << Qt::endl;
+            //logDebug() << "completed treemap has been cancelled, delete tiles" << Qt::endl;
             delete futureResult;
         }
 
