@@ -31,7 +31,11 @@ namespace
 	QEventLoop eventLoop;
 	QObject::connect( busyPopup, &BusyPopup::painted, &eventLoop, &QEventLoop::quit );
 	QTimer::singleShot( 1000, &eventLoop, &QEventLoop::quit );
+	logDebug() << Qt::endl;
 	eventLoop.exec();
+	logDebug() << Qt::endl;
+	eventLoop.processEvents(); // make sure the main window gets reset to blank panels
+	logDebug() << Qt::endl;
     }
 
 } // namespace
@@ -40,7 +44,7 @@ namespace
 BusyPopup::BusyPopup( const QString & text ):
     QLabel{ text, app()->mainWindow(), Qt::SplashScreen }
 {
-    setMargin( 15 );
+    setMargin( 16 );
     setWindowTitle( QString{} );
     show();
     processEvents( this );
@@ -52,10 +56,12 @@ bool BusyPopup::event( QEvent * event )
     switch ( event->type() )
     {
 	case QEvent::Paint:
+	    // Signal to exit the BusyPopup event loop
 	    emit painted();
 	    break;
 
 	case QEvent::Show:
+	    // Try to put the popup in the middle of the main window
 	    if ( parentWidget() )
 	    {
 		const int x = ( parentWidget()->width()  - width()  ) / 2;
