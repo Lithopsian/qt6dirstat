@@ -80,8 +80,6 @@ FileInfo::FileInfo( DirInfo           * parent,
     _gid{ statInfo.st_gid },
     _mtime{ statInfo.st_mtime }
 {
-    if ( _device == 0 )
-	logDebug() << filename << Qt::endl;
     if ( isSpecial() )
     {
 	_size          = 0;

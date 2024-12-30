@@ -321,47 +321,12 @@ namespace
 
 
     /**
-     * Show the visibility of the system file labels.
-     **/
-    void setSystemFileWarningVisibility( const Ui::FileDetailsView * ui, bool visible )
-    {
-	ui->fileSystemFileWarning->setVisible( visible );
-	ui->fileSystemFileWarningSpacer->setVisible( visible );
-    }
-
-
-    /**
-     * Show the visibility of the file package block of labels.
+     * Show the visibility of the file package label and caption.
      **/
     void setFilePkgBlockVisibility( const Ui::FileDetailsView * ui, bool visible )
     {
 	ui->filePackageCaption->setVisible( visible );
 	ui->filePackageLabel->setVisible( visible );
-    }
-
-
-    /**
-     * Show the visibility of the directory block of labels.
-     **/
-    void setDirBlockVisibility( const Ui::FileDetailsView * ui, bool visible )
-    {
-	ui->dirDirectoryHeading->setVisible( visible );
-
-	ui->dirOwnSizeCaption->setVisible( visible );
-	ui->dirUserCaption->setVisible( visible );
-	ui->dirGroupCaption->setVisible( visible );
-	ui->dirPermissionsCaption->setVisible( visible );
-	ui->dirMTimeCaption->setVisible( visible );
-
-	ui->dirOwnSizeLabel->setVisible( visible );
-	ui->dirUserLabel->setVisible( visible );
-	ui->dirGroupLabel->setVisible( visible );
-	ui->dirPermissionsLabel->setVisible( visible );
-	ui->dirMTimeLabel->setVisible( visible );
-
-	// A dot entry cannot have directory children
-	ui->dirSubDirCountCaption->setVisible( visible );
-	ui->dirSubDirCountLabel->setVisible( visible );
     }
 
 
@@ -417,7 +382,7 @@ namespace
 	const QString msg = subtreeMsg( dir );
 	if ( msg.isEmpty() )
 	{
-	    // No special msg -> show summary fields
+	    // No special msg -> show subtree fields
 	    const QLatin1String prefix = dir->sizePrefix();
 	    setSizeLabel ( ui->dirTotalSizeLabel,   dir->totalSize(),          prefix );
 	    setSizeLabel ( ui->dirAllocatedLabel,   dir->totalAllocatedSize(), prefix );
@@ -430,13 +395,15 @@ namespace
 	}
 	else
 	{
-	    // Special msg -> show it and clear all summary fields
-	    ui->dirTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all subtree fields
+	    clearLabel( ui->dirTotalSizeLabel );
 	    clearLabel( ui->dirAllocatedLabel );
 	    clearLabel( ui->dirItemCountLabel );
 	    clearLabel( ui->dirFileCountLabel );
 	    clearLabel( ui->dirSubDirCountLabel );
 	    clearLabel( ui->dirLatestMTimeLabel );
+
+	    ui->dirTotalSizeLabel->setText( msg );
 	}
     }
 
@@ -527,12 +494,12 @@ namespace
                           const FileInfo            * file,
                           int                         lastPixel )
     {
-	// If this is in a package view, then we know it is a packaged file
+	// A package ancestor will be the owning package
 	const PkgInfo * pkg = file->pkgInfoParent();
 
 	// Packaged files are always system files
 	const bool isSystemFile = pkg || SystemFileChecker::isSystemFile( file );
-	setSystemFileWarningVisibility( ui, isSystemFile );
+	ui->fileSystemFileWarning->setVisible( isSystemFile );
 
 	if ( PkgQuery::foundSupportedPkgManager() )
 	{
@@ -541,33 +508,32 @@ namespace
 	    if ( pkg )
 	    {
 		// We already know the package ...
-		ui->filePackageCaption->setEnabled( true );
-		ui->filePackageLabel->setText( pkg->name() );
+		setPkgInfo( ui, &pkg->name(), lastPixel );
 	    }
 	    else if ( isSystemFile )
 	    {
-		const QString & url = file->url();
-		const QString * pkg = PkgQuery::cachedOwningPkg( url );
-		if ( pkg )
+		const QString url = file->url();
+		const QString * pkgName = PkgQuery::cachedOwningPkg( url );
+		if ( pkgName )
 		{
 		    //logDebug() << "Cache: " << pkg << " owns " << url << Qt::endl;
-		    setPkgInfo( ui, pkg, lastPixel );
+		    setPkgInfo( ui, pkgName, lastPixel );
 		}
 		else
 		{
-		    // Submit a timed query to find the owning package, if any
+		    // Make the label hint at the asynchronous request
 		    QString delayHint{ pkgUpdateTimer->delayStage(), u'.' };
 		    ui->filePackageLabel->setText( delayHint.replace( u'.', ". "_L1 ) );
 
-		    // Capture url by value because the FileInfo may be gone by the time the timer expires
+		    // Submit a timed query to find the owning package, if any
 		    const auto payload = [ ui, url, lastPixel ]()
 		    {
 			setPkgInfo( ui, PkgQuery::owningPkg( url ), lastPixel );
 		    };
 		    pkgUpdateTimer->request( payload );
-		}
 
-		// Leave the caption unchanged for now as the most likely state is the same as the previous selection
+		    // Leave the caption enabled state unchanged for now as it will usually stay the same
+		}
 	    }
 	}
 	else // No supported package manager found
@@ -603,7 +569,7 @@ namespace
 	showSubtreeInfo( ui, dir );
 
 	const bool showDirBlock = !isPseudoDir && !dir->readError();
-	setDirBlockVisibility( ui, showDirBlock );
+	ui->dirDirectoryGrid->setVisible( showDirBlock );
 	if ( showDirBlock )
 	    showDirNodeInfo( ui, dir );
     }
@@ -623,7 +589,7 @@ namespace
 	const QString msg = subtreeMsg( pkg );
 	if ( msg.isEmpty() )
 	{
-	    // No special msg -> show summary fields
+	    // No special msg -> show package fields
 	    const QLatin1String prefix = pkg->sizePrefix();
 	    setSizeLabel ( ui->pkgTotalSizeLabel,   pkg->totalSize(),          prefix );
 	    setSizeLabel ( ui->pkgAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
@@ -633,12 +599,14 @@ namespace
 	}
 	else
 	{
-	    // Special msg -> show it and clear all summary fields
-	    ui->pkgTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all package fields
+	    clearLabel( ui->pkgTotalSizeLabel );
 	    clearLabel( ui->pkgAllocatedLabel );
 	    clearLabel( ui->pkgItemCountLabel );
 	    clearLabel( ui->pkgFileCountLabel );
 	    clearLabel( ui->pkgSubDirCountLabel );
+
+	    ui->pkgTotalSizeLabel->setText( msg );
 	}
 
 	setTimeLabel( ui->pkgLatestMTimeLabel, pkg->latestMTime() );
@@ -657,6 +625,7 @@ namespace
 	const QString msg = subtreeMsg( pkg );
 	if ( msg.isEmpty() )
 	{
+	    // No special msg -> show sumnmary fields
 	    const QLatin1String prefix = pkg->sizePrefix();
 	    setSizeLabel ( ui->pkgSummaryTotalSizeLabel,   pkg->totalSize(),          prefix );
 	    setSizeLabel ( ui->pkgSummaryAllocatedLabel,   pkg->totalAllocatedSize(), prefix );
@@ -666,11 +635,14 @@ namespace
 	}
 	else
 	{
-	    ui->pkgSummaryTotalSizeLabel->setText( msg );
+	    // Special msg -> show it and clear all summary fields
+	    clearLabel( ui->pkgSummaryTotalSizeLabel );
 	    clearLabel( ui->pkgSummaryAllocatedLabel );
 	    clearLabel( ui->pkgSummaryItemCountLabel );
 	    clearLabel( ui->pkgSummaryFileCountLabel );
 	    clearLabel( ui->pkgSummarySubDirCountLabel );
+
+	    ui->pkgSummaryTotalSizeLabel->setText( msg );
 	}
 
 	setTimeLabel( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
@@ -757,10 +729,14 @@ void FileDetailsView::showDetails()
 	showFileInfoSet( ui(), sel.normalized() );
 	setCurrentPage( _ui->selectionSummaryPage );
     }
-    else if ( !sel.isEmpty() )
-	showDetails( sel.first() );
-    else
+    else if ( sel.isEmpty() )
+    {
 	showDetails( app()->selectionModel()->currentItem() );
+    }
+    else
+    {
+	showDetails( sel.first() );
+    }
 }
 
 
@@ -843,8 +819,7 @@ void FileDetailsView::setCurrentPage( QWidget * page )
     while ( count() > 0 )
 	removeWidget( widget( 0 ) );
 
-    addWidget( page );
-    setCurrentWidget( page );
+    setCurrentIndex( addWidget( page ) ); // should always be zero, but set it anyway
 }
 
 
@@ -869,12 +844,7 @@ void FileDetailsView::resizeEvent( QResizeEvent * )
     if ( layout )
 	_lastPixel = contentsRect().right() - layout->contentsMargins().right() - layout->spacing();
 
-    // Grab any package name because showDetails() may blank it and wait for a process to update it
-    const QString tooltipText = _ui->filePackageLabel->toolTip();
-    const QString fullText = tooltipText.isEmpty() ? _ui->filePackageLabel->text() : tooltipText;
-
-    // Refresh the whole panel and put the package name back before anyone notices
+    // Refresh the whole panel since the current labels may be elided with no easy way to know the full string
     showDetails();
-    setLabelLimited( _ui->filePackageLabel, fullText, _lastPixel );
 }
 

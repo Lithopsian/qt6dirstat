@@ -54,6 +54,9 @@
            <height>0</height>
           </size>
          </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
          <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
@@ -201,6 +204,9 @@
        </item>
        <item>
         <widget class="QTableView" name="bucketsTable">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
          <attribute name="horizontalHeaderHighlightSections">
           <bool>false</bool>
          </attribute>
@@ -239,6 +245,9 @@
        </item>
        <item>
         <widget class="QTableView" name="percentileTable">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -253,6 +262,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QScrollArea" name="scrollArea">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -261,8 +273,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>500</width>
-            <height>532</height>
+            <width>276</width>
+            <height>658</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -284,7 +296,7 @@
                 <string>Median-Percentiles.md</string>
                </property>
                <property name="text">
-                <string>Median, Quartiles and Percentiles</string>
+                <string>&amp;Median, Quartiles and Percentiles</string>
                </property>
                <property name="description">
                 <string>Basic statistics terms explained in a way that everybody can understand.</string>
@@ -297,7 +309,7 @@
                 <string>Histograms-in-General.md</string>
                </property>
                <property name="text">
-                <string>Histograms in General</string>
+                <string>Histograms in &amp;General</string>
                </property>
                <property name="description">
                 <string>What is a histogram? What is it good for?</string>
@@ -324,7 +336,7 @@
                 <string>File-Size-Histogram.md</string>
                </property>
                <property name="text">
-                <string>The File Size Histogram</string>
+                <string>The File &amp;Size Histogram</string>
                </property>
                <property name="description">
                 <string>QDirStat's &quot;File Size&quot; histogram in particular: What is it? What does it tell you?</string>
@@ -337,7 +349,7 @@
                 <string>Overflow-Area.md</string>
                </property>
                <property name="text">
-                <string>The Overflow Area</string>
+                <string>The Overflow &amp;Area</string>
                </property>
                <property name="description">
                 <string>Explaining the &quot;Cut off&quot; panel with the pie charts at the right side of the histogram.</string>
@@ -350,7 +362,7 @@
                 <string>Histogram-Options.md</string>
                </property>
                <property name="text">
-                <string>Histogram Options</string>
+                <string>Histogram &amp;Options</string>
                </property>
                <property name="description">
                 <string>Explanation of the sliders, input fields and buttons in the panel that opens when you click the &quot;Options&quot; button below the histogram.</string>
@@ -370,7 +382,7 @@
                 <string>Buckets-Table.md</string>
                </property>
                <property name="text">
-                <string>The Buckets Table</string>
+                <string>The Buc&amp;kets Table</string>
                </property>
                <property name="description">
                 <string>Explanation of the table on the &quot;Buckets&quot; table in this dialog.</string>
@@ -383,7 +395,7 @@
                 <string>Percentiles-Table.md</string>
                </property>
                <property name="text">
-                <string>The Percentiles Table</string>
+                <string>The Percentiles &amp;Table</string>
                </property>
                <property name="description">
                 <string>Explanation of the table on the &quot;Percentiles&quot; page in this dialog.</string>

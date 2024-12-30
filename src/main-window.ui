@@ -99,6 +99,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
@@ -122,6 +125,9 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="QDirStat::TreemapView" name="treemapView">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
@@ -136,6 +142,9 @@
         </property>
        </widget>
        <widget class="QScrollArea" name="bottomFileDetailsPanel">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="visible">
          <bool>false</bool>
         </property>
@@ -1056,6 +1065,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dirTreeView</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

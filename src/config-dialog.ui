@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>281</width>
+    <height>56</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Qt6DirStat Configuration</string>
   </property>

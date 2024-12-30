@@ -220,10 +220,9 @@ namespace QDirStat
 	 * but not the file children of the dot entry.  If it has an attic,
 	 * that attic is counted.
 	 *
-	 * This method uses a cached value whenever possible, so it is usually
-	 * considerably faster than the unconditional countChildren() method.
-	 * The const overload does not check _summaryDirty and always returns
-	 * the cached value.
+	 * This method uses a cached value whenever possible, but may have to
+	 * do a recalc() in some cases. The const overload does not check
+	 * _summaryDirty and always returns the cached value.
 	 *
 	 * Reimplemented - inherited from FileInfo.
 	 **/
@@ -677,11 +676,6 @@ namespace QDirStat
 	 * Drop all cached information about children sorting for this object.
 	 **/
 	void dropSortCache() { delete _sortInfo; _sortInfo = nullptr; }
-
-	/**
-	 * Count the children unconditionally and update _childCount.
-	 **/
-//	DirSize countChildren();
 
 	/**
 	 * Check the 'ignored' state of this item and set the '_isIgnored' flag

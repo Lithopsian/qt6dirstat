@@ -161,6 +161,15 @@ namespace QDirStat
          **/
         void showUnreadableDirs();
 
+        /**
+         * Set focus to the tree view.
+         *
+         * Note that this may be called from a destructor and _ui may no longer
+         * exist.
+         **/
+        void focusDirTree()
+            { if ( _ui ) _ui->dirTreeView->setFocus(); }
+
 
     protected slots:
 

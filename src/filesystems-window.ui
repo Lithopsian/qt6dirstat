@@ -119,6 +119,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>fsTree</tabstop>
+  <tabstop>normalCheckBox</tabstop>
+  <tabstop>refreshButton</tabstop>
+  <tabstop>readButton</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

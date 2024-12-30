@@ -65,9 +65,9 @@ SearchFilter::SearchFilter( const QString & pattern,
     if ( _filterMode == Auto )
     {
         _filterMode = guessFilterMode( _pattern, _defaultFilterMode );
-        #if 0
+#if 0
             logDebug() << "using filter mode " << toString( _filterMode ) << " from \"" << _pattern << "\"" << Qt::endl;
-        #endif
+#endif
     }
 
     QRegularExpression::PatternOptions patternOptions;
