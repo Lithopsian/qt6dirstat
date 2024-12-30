@@ -121,7 +121,9 @@ namespace QDirStat
 
         /**
          * Create a .trashinfo file for a file or directory 'path' that will be
-         * named 'targetName' (the unique name) in the trash dir.
+         * named 'targetName' (the unique name) in the trash dir.  If possible,
+         * this is done in exclusive mode so the trashinfo name is gauranteed
+         * to be unique, but no attempt is made to retry if this fails.
          *
          * This might throw a FileException.
          **/
@@ -145,9 +147,16 @@ namespace QDirStat
     protected:
 
         /**
-         * Return the path of the "info" subdirectory of this trash dir.
+         * Return the path of the "info" subdirectory of this trash directory.
          **/
-        QString infoPath() const { return _path % QLatin1String{ "/info" }; }
+        QString infoDir() const
+            { return _path % QLatin1String{ "/info" }; }
+
+        /**
+         * Return the path of a trashinfo file for this trash directory.
+         **/
+        QString infoPath( const QString & target) const
+            { return infoDir() % '/' % target % QLatin1String( ".trashinfo" ); }
 
 
     private:
@@ -155,6 +164,17 @@ namespace QDirStat
         QString _path;
 
     };  // class TrashDir
+
+
+    /**
+     * Print a QModelIndex of this model in text form to a debug stream.
+     **/
+    inline QTextStream & operator<<( QTextStream & stream, const TrashDir * trashDir )
+    {
+        stream << "TrashDir: " << trashDir->path();
+
+	return stream;
+    }
 
 }       // namespace QDirStat
 

@@ -33,16 +33,14 @@ namespace
     void ensureDirExists( const QString & path )
     {
 	const QDir dir{ path };
-
 	if ( !dir.exists() )
 	{
 	    logInfo() << "mkdir " << path << Qt::endl;
 
-	    const int result = mkdir( path.toUtf8(), 0700 );
-	    if ( result < 0 )
+	    if ( mkdir( path.toUtf8(), 0700 ) < 0 )
 	    {
 		const QString what{ "Could not create directory %1: %2" };
-		THROW( ( FileException{ path, what.arg( path ).arg( formatErrno() ) } ) );
+		THROW( ( FileException{ path, what.arg( path, formatErrno() ) } ) );
 	    }
 	}
     }
@@ -54,12 +52,11 @@ namespace
     dev_t device( const QString & path )
     {
 	struct stat statBuf;
-	const int result = stat( path.toUtf8(), &statBuf );
-	if ( result < 0 )
+	if ( stat( path.toUtf8(), &statBuf ) < 0 )
 	{
 	    logError() << "stat( " << path << " ) failed: " << formatErrno() << Qt::endl;
 
-	    return static_cast< dev_t >( -1 );
+	    return static_cast<dev_t>( -1 );
 	}
 
 	return statBuf.st_dev;
@@ -88,7 +85,7 @@ namespace
 	    path = nextPath;
 	}
 
-	return "/";
+	return "";
     }
 
 
@@ -100,9 +97,7 @@ namespace
 	QString trashPath = topDir % "/.Trash"_L1;
 
 	struct stat statBuf;
-	const int result = stat( trashPath.toUtf8(), &statBuf );
-
-	if ( result < 0 )
+	if ( stat( trashPath.toUtf8(), &statBuf ) < 0 )
 	{
 	    if ( errno != ENOENT ) // No such file or directory
 	    {
@@ -185,7 +180,6 @@ Trash::Trash()
 {
     // Best guess for the home trash path
     const QString homePath  = QDir::homePath();
-    const dev_t homeDevice  = device( homePath );
     const QString homeTrash = [ &homePath ]()
     {
 	const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString{} );
@@ -206,7 +200,7 @@ Trash::Trash()
     }
 
     // Store it even if it is null
-    _trashDirs[ homeDevice ] = _homeTrashDir;
+    _trashDirs[ device( homePath ) ] = _homeTrashDir;
 }
 
 
@@ -235,7 +229,6 @@ bool Trash::trash( const QString & path )
     try
     {
 	TrashDir * dir = trashDir( path );
-
 	if ( !dir )
 	    return false;
 
@@ -246,8 +239,6 @@ bool Trash::trash( const QString & path )
     catch ( const FileException & ex )
     {
 	CAUGHT( ex );
-	logError() << "Move to trash failed for " << path << Qt::endl;
-
 	return false;
     }
 
@@ -282,8 +273,8 @@ TrashDir::TrashDir( const QString & path ):
 {
     // Will throw if a directory doesn't exist and cannot be created
     ensureDirExists( path        );
+    ensureDirExists( infoDir()   );
     ensureDirExists( filesPath() );
-    ensureDirExists( infoPath()  );
 
     // logDebug() << "Created TrashDir " << path << Qt::endl;
 }
@@ -291,10 +282,17 @@ TrashDir::TrashDir( const QString & path ):
 
 void TrashDir::createTrashInfo( const QString & path, const QString & targetName )
 {
-    QFile trashInfo{ infoPath() % '/' % targetName % ".trashinfo"_L1 };
+    QFile trashInfo{ infoPath( targetName ) };
 
-    if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) )
-	THROW( ( FileException{ trashInfo.fileName(), "Can't open "_L1 % trashInfo.fileName() } ) );
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 11, 0 )
+    if ( !trashInfo.open( QIODevice::NewOnly | QIODevice::Text ) ) // O_EXCL access
+#else
+    if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) ) // NewOnly not available, so just open
+#endif
+    {
+	const QString msg{ "Can't open %1: %2" };
+	THROW( ( FileException{ trashInfo.fileName(), msg.arg( trashInfo.fileName(), formatErrno() ) } ) );
+    }
 
     QTextStream str{ &trashInfo };
     str << "[Trash Info]" << Qt::endl;
@@ -311,5 +309,12 @@ void TrashDir::move( const QString & path, const QString & targetName )
     // QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
     const bool success = file.rename( targetPath );
     if ( !success )
-	THROW( ( FileException{ path, QString{ "Could not move %1 to %2" }.arg( path, targetPath ) } ) );
+    {
+	const QString msg{ "Could not move %1 to %2: %3" };
+	THROW( ( FileException{ path, msg.arg( path, targetPath, formatErrno() ) } ) );
+
+	// Don't leave trashinfo files lying around with no corresponding trashed file
+	QFile trashInfo{ infoPath( targetName ) };
+	trashInfo.remove();
+    }
 }

@@ -138,8 +138,8 @@ namespace
 
 
     /**
-     * Add all the packages to the DirTree, including the 'package
-     * summary' root.
+     * Add all the packages to the DirTree, as children of a top-level package
+     * summary.
      **/
     void addToTree( DirTree * tree, const PkgInfoList & pkgList )
     {
@@ -213,7 +213,7 @@ namespace
 
 	logInfo() << "File list cache created with "
 	          << pkgList.size() - nonCachePkgList.size() << " packages and "
-	          << fileListCache->size() << " files" << Qt::endl;
+	          << fileListCache->size() << " pathnames" << Qt::endl;
 
 	// Return any remaining packages to be processed asynchronously
 	pkgList.swap( nonCachePkgList );

@@ -31,11 +31,8 @@ namespace
 	QEventLoop eventLoop;
 	QObject::connect( busyPopup, &BusyPopup::painted, &eventLoop, &QEventLoop::quit );
 	QTimer::singleShot( 1000, &eventLoop, &QEventLoop::quit );
-	logDebug() << Qt::endl;
 	eventLoop.exec();
-	logDebug() << Qt::endl;
 	eventLoop.processEvents(); // make sure the main window gets reset to blank panels
-	logDebug() << Qt::endl;
     }
 
 } // namespace
