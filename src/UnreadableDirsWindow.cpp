@@ -11,8 +11,6 @@
 #include <QPointer>
 
 #include "UnreadableDirsWindow.h"
-#include "Attic.h"
-#include "DirTree.h"
 #include "DirTreeModel.h"
 #include "FileInfoIterator.h"
 #include "FormatUtil.h"

@@ -21,11 +21,6 @@
 
 namespace QDirStat
 {
-    class DirTree;
-    class FileInfo;
-    class FileTypeStats;
-    class MimeCategory;
-
     enum UnreadableDirectories
     {
 	UD_PathCol,
