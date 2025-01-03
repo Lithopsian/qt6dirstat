@@ -14,6 +14,7 @@
 #include <QProcess>
 #include <QVector>
 
+#include "Logger.h"
 
 namespace QDirStat
 {
@@ -22,8 +23,7 @@ namespace QDirStat
      * the number of processes running in parallel. Whenever a process
      * finishes, the next one from the list is started.
      *
-     * When all processes are started and the 'autoDelete' flag is set, this
-     * class will delete itself.
+     * When all processes have been started, this class will delete itself.
      **/
     class ProcessStarter final : public QObject
     {
@@ -34,26 +34,23 @@ namespace QDirStat
         /**
          * Constructor.
          **/
-        ProcessStarter( int maxParallel, bool autoDelete, QObject * parent = nullptr ):
+        ProcessStarter( int maxParallel, QObject * parent = nullptr ):
             QObject{ parent },
-            _maxParallel{ maxParallel },
-            _autoDelete{ autoDelete }
+            _maxParallel{ maxParallel }
         {}
 
         /**
          * Add a process to the _waiting list. This class does not take
-         * ownership of 'process'.
+         * ownership of 'process', and it must be destroyed explicitly.
          **/
         void add( QProcess * process );
 
         /**
-         * Begin starting processes.
-         *
-         * If 'autoDelete' is set, make sure to call this AFTER all processes
-         * are added; otherwise this object might be deleted already when the
-         * first processes finish very quickly.
+         * Notification that no more processes will be submitted to this
+         * ProcessStarter.  It will delete itself once all the currently-queued
+         * processes have been started (but not necessarily finished).
          **/
-        void start();
+        void noMoreProcesses();
 
 
     protected slots:
@@ -75,8 +72,7 @@ namespace QDirStat
     private:
 
         int  _maxParallel;
-        bool _autoDelete;
-        bool _started{ false };
+        bool _autoDelete{ false};
 
         QVector<QProcess *> _running;
         QVector<QProcess *> _waiting;

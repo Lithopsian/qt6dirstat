@@ -14,16 +14,6 @@
 using namespace QDirStat;
 
 
-void ProcessStarter::start()
-{
-//    logDebug() << "Starting. Processes in queue: " << _waiting.count() << Qt::endl;
-//    logDebug() << "Maximum parallel processes: " << _maxParallel << Qt::endl;
-
-    _started = true;
-    startProcesses();
-}
-
-
 void ProcessStarter::add( QProcess * process )
 {
     CHECK_PTR( process );
@@ -33,8 +23,18 @@ void ProcessStarter::add( QProcess * process )
     connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
              this,    &ProcessStarter::processFinished );
 
-    if ( _started )
-        startProcesses();
+    startProcesses();
+}
+
+
+void ProcessStarter::noMoreProcesses()
+{
+//    logDebug() << "Starting. Processes in queue: " << _waiting.count() << Qt::endl;
+//    logDebug() << "Maximum parallel processes: " << _maxParallel << Qt::endl;
+
+    _autoDelete = true;
+
+    startProcesses();
 }
 
 
@@ -49,6 +49,9 @@ void ProcessStarter::startProcesses()
             _running.append( process );
         }
     }
+
+    if ( _waiting.isEmpty() && _autoDelete )
+        deleteLater();
 }
 
 
@@ -62,13 +65,7 @@ void ProcessStarter::processFinished( int, QProcess::ExitStatus )
     }
 
     _running.removeAll( process );
-    _waiting.removeAll( process ); // It shouldn't be in _waiting; just making sure
+    _waiting.removeAll( process ); // it shouldn't be in _waiting; just making sure
 
-    if ( _started )
-    {
-        if ( !_waiting.isEmpty() )
-            startProcesses();
-        else if ( _autoDelete )
-            deleteLater();
-    }
+    startProcesses();
 }

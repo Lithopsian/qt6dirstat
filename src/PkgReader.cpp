@@ -228,7 +228,7 @@ namespace
                                  const PkgInfoList & pkgList,
                                  int                 maxParallelProcesses )
     {
-	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses, true };
+	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses };
 
 	for ( PkgInfo * pkg : pkgList )
 	{
@@ -240,7 +240,7 @@ namespace
 	    }
 	}
 
-	processStarter->start();
+	processStarter->noMoreProcesses();
     }
 
 } // namespace
