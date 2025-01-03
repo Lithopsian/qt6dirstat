@@ -326,10 +326,10 @@ void TrashDir::move( const QString & path, const QString & targetName )
     const bool success = QFile{ path }.rename( targetPath );
     if ( !success )
     {
-	const QString msg{ "Could not move %1 to %2: %3" };
-	THROW( ( FileException{ path, msg.arg( path, targetPath, formatErrno() ) } ) );
-
 	// Don't leave trashinfo files lying around with no corresponding trashed file
 	QFile{ infoPath( targetName ) }.remove();
+
+	const QString msg{ "Could not move %1 to %2: %3" };
+	THROW( ( FileException{ path, msg.arg( path, targetPath, formatErrno() ) } ) );
     }
 }
