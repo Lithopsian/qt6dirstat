@@ -50,7 +50,7 @@ void ProcessStarter::startProcesses()
         }
     }
 
-    if ( _waiting.isEmpty() && _autoDelete )
+    if ( _running.isEmpty() && _waiting.isEmpty() && _autoDelete )
         deleteLater();
 }
 
