@@ -16,11 +16,12 @@
 #include <QTreeWidgetItem>
 
 #include "ui_unreadable-dirs-window.h"
-#include "Subtree.h"
 
 
 namespace QDirStat
 {
+    class DirInfo;
+
     enum UnreadableDirectories
     {
 	UD_PathCol,
@@ -63,7 +64,7 @@ namespace QDirStat
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
-	UnreadableDirsWindow( QWidget *	parent = nullptr );
+	UnreadableDirsWindow( QWidget * parent = nullptr );
 
 	/**
 	 * Destructor.

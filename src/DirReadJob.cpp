@@ -311,7 +311,6 @@ void DirReadJob::finished()
 
 
 
-
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
                                   DirInfo * dir,
                                   bool      applyFileChildExcludeRules ):

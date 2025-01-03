@@ -39,6 +39,7 @@
 #include "Settings.h"
 #include "SignalBlocker.h"
 #include "SysUtil.h"
+#include "TrashWindow.h"
 #include "UnreadableDirsWindow.h"
 #include "Version.h"
 
@@ -803,7 +804,7 @@ void MainWindow::cleanupFinished( int errorCount )
     // Note that this is not called for actions that are not owned by the
     // CleanupCollection such as _ui->actionMoveToTrash().
 
-    //logDebug() << "Error count: " << errorCount << Qt::endl;
+    logDebug() << "Error count: " << errorCount << Qt::endl;
 
     const QString msg = [ errorCount ]()
     {
@@ -942,6 +943,14 @@ void MainWindow::showFileAgeStats()
 }
 
 
+void MainWindow::showTrash()
+{
+    BusyPopup msg{ tr( "Searching Trash directories..." ) };
+
+    TrashWindow::populateSharedInstance();
+}
+
+
 void MainWindow::showFilesystems()
 {
     FilesystemsWindow::populateSharedInstance( this );
@@ -1066,7 +1075,7 @@ void MainWindow::updateActions()
     const auto actions = _ui->menuDiscover->actions();
     for ( QAction * action : actions )
     {
-	if ( action != _ui->actionShowFilesystems )
+	if ( action != _ui->actionShowFilesystems && action != _ui->actionShowTrash )
 	    action->setEnabled( isTree );
     }
 

@@ -10,6 +10,10 @@
 #ifndef Trash_h
 #define Trash_h
 
+#include <unistd.h> // getuid()
+
+#include "Typedefs.h" // _L1
+
 
 namespace QDirStat
 {
@@ -69,6 +73,71 @@ namespace QDirStat
          * of this class.
          **/
 //        static void empty();
+
+        /**
+         * Return the path of the files directory for the trash directory
+         * 'trashDir'.
+         **/
+        static QString homeTrash( const QString & homePath );
+
+        /**
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
+         **/
+        static QString trashRoot( const QString & topDir )
+            { return topDir % "/.Trash"_L1; }
+
+        /**
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
+         **/
+        static QString mainTrashPath( const QString & trashRoot )
+            { return trashRoot % '/' % QString::number( getuid() ); }
+
+        /**
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
+         **/
+        static QString userTrashPath( const QString & trashRoot )
+            { return trashRoot % '-' % QString::number( getuid() ); }
+
+        /**
+         * Return the path of the files directory for the trash directory
+         * 'trashDir'.
+         **/
+        static QString filesDirPath( const QString & trashDir )
+            { return trashDir % "/files"_L1; }
+
+        /**
+         * Return the path of the info directory for the trash directory
+         * 'trashDir'.
+         **/
+        static QString infoDirPath( const QString & trashDir )
+            { return trashDir % "/info"_L1; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
+        static QString trashEntryPath( const QString & trashDir, const QString & filesEntry )
+            { return filesDirPath( trashDir ) % '/' % filesEntry; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
+        static QString trashInfoPath( const QString & trashDir, const QString & filesEntry )
+            { return infoDirPath( trashDir ) % '/' % filesEntry % ".trashinfo"_L1; }
+
+        /**
+         * Return whether 'trashRoot' is a directory (not a symlink) and has
+         * the sticky bit (and execute permission) set.
+         *
+         * Note that if the lstat() call fails, including because the directory
+         * does not exist, this function returns false.  errno must be checked
+         * to distinguish the reason for the failure.
+         **/
+        static bool isValidMainTrash( const QString & trashRoot );
 
 
     protected:
@@ -141,7 +210,26 @@ namespace QDirStat
         /**
          * Return the path of the "files" subdirectory of this trash dir.
          **/
-        QString filesPath() const { return _path % QLatin1String{ "/files" }; }
+        QString filesDirPath() const { return Trash::filesDirPath( _path ); }
+
+        /**
+         * Return the tag (first line) of a trashinfo file.
+         **/
+        static QLatin1String trashInfoTag()
+            { return "[Trash Info]"_L1; }
+
+        /**
+         * Return the path (second line) field name of a trashinfo file.
+         **/
+        static QLatin1String trashInfoPathTag()
+            { return "Path="_L1; }
+
+        /**
+         * Return the deletion date (third line) field name of a trashinfo
+         * file.
+         **/
+        static QLatin1String trashInfoDateTag()
+            { return "DeletionDate="_L1; }
 
 
     protected:
@@ -149,14 +237,12 @@ namespace QDirStat
         /**
          * Return the path of the "info" subdirectory of this trash directory.
          **/
-        QString infoDir() const
-            { return _path % QLatin1String{ "/info" }; }
+        QString infoDirPath() const { return Trash::infoDirPath( _path ); }
 
         /**
          * Return the path of a trashinfo file for this trash directory.
          **/
-        QString infoPath( const QString & target) const
-            { return infoDir() % '/' % target % QLatin1String( ".trashinfo" ); }
+        QString infoPath( const QString & target) const { return Trash::trashInfoPath( _path, target ); }
 
 
     private:
@@ -167,13 +253,13 @@ namespace QDirStat
 
 
     /**
-     * Print a QModelIndex of this model in text form to a debug stream.
+     * Print a TrashDir path to 'stream'.
      **/
     inline QTextStream & operator<<( QTextStream & stream, const TrashDir * trashDir )
     {
         stream << "TrashDir: " << trashDir->path();
 
-	return stream;
+        return stream;
     }
 
 }       // namespace QDirStat

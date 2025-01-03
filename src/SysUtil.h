@@ -31,12 +31,12 @@ namespace QDirStat
     {
 	/**
 	 * Return the flags to use with fstatat():
-	 * - AT_SYMLINK_NOFOLLOW means that the call behaves link lstat(), that
+	 * - AT_SYMLINK_NOFOLLOW means that the call behaves like lstat(), that
 	 * is it returns information about symbolic links, and not about the
 	 * target of the link;
 	 * - AT_NO_AUTOMOUNT means that directories with auto-mounts should not
 	 * be mounted, and information is returned about the directory itself
-	 * unless it is already mounted.  This flag did not exists before
+	 * unless it is already mounted.  This flag did not exist before
 	 * kernel 2.6.38, was ignored starting with kernel 3.1, and became the
 	 * default with kernel 4.11, so almost pointless.
 	 **/
@@ -58,7 +58,24 @@ namespace QDirStat
 	    { return fstatat( AT_FDCWD, path.toUtf8(), &statInfo, statFlags() ); }
 
 	/**
-	 * Return true if the specified command is available and executable.
+	 * Return true if 'file' exists (and is visible to the current user).
+	 **/
+	inline bool exists( const char * file )
+	    { return faccessat( AT_FDCWD, file, F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	inline bool exists( const QString & file )
+	    { return faccessat( AT_FDCWD, file.toUtf8(), F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+
+	/**
+	 * Return true if the current user has access to files in 'dir'.
+	 **/
+	inline bool canAccess( const char * dir )
+	    { return faccessat( AT_FDCWD, dir, R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	inline bool canAccess( const QString & dir )
+	    { return faccessat( AT_FDCWD, dir.toUtf8(), R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+
+	/**
+	 * Return true if 'command' is available and executable (possibly at a
+	 * symlink target).
 	 **/
 	inline bool haveCommand( const char * command )
 	    { return faccessat( AT_FDCWD, command, X_OK, AT_EACCESS ) == 0; }

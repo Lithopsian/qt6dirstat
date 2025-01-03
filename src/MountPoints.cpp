@@ -173,10 +173,11 @@ namespace
         if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), mountPointMap ) )
         {
             mountPoint->setDuplicate();
-
-            //logInfo() << "Found duplicate mount of " << mountPoint->device()
-            //          << " at " << mountPoint->path()
-            //          << Qt::endl;
+#if 0
+            logInfo() << "Found duplicate mount of " << mountPoint->device()
+                      << " at " << mountPoint->path()
+                      << Qt::endl;
+#endif
         }
 
         if ( mountPoint->isSnapPackage() )

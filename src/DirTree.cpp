@@ -368,7 +368,7 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	{
 	    // Check the item is still accessible on disk
 	    // Pseudo-dirs (shouldn't be here) will implicitly fail the check
-	    while ( faccessat( AT_FDCWD, item->url().toUtf8(), F_OK, AT_SYMLINK_NOFOLLOW ) != 0 )
+	    while ( SysUtil::exists( item->url() ) )
 	    {
 		if ( item == root() || item->parent() == root() )
 		{
