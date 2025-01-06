@@ -31,6 +31,10 @@ namespace QDirStat
      * with any of them, i.e., files or directories moved to this trash can should
      * appear in the desktop's native trashcan implementation (the window you get
      * when you click on the trashcan icon on the desktop or in the file manager).
+     *
+     * Note that, starting in 5.15, Qt has a function QFile::moveToTrash() which
+     * would completely repace this class, but it doesn't appear to work 100%
+     * correctly.  For example, trashing broken symlinks always fails.
      **/
     class Trash final
     {
@@ -57,22 +61,6 @@ namespace QDirStat
          * Return 'true' on success, 'false' on error.
          **/
         bool trash( const QString & path );
-
-        /**
-         * Restore a file or directory from the trash to its original location.
-         * Return 'true' on success, 'false' on error.
-         **/
-//        static bool restore( const QString & path );
-
-        /**
-         * Empty the trash can, i.e. delete all its contents permanently.
-         *
-         * This does not just affect files or directories moved to the trash with
-         * this class, but everything in all known trash directories, i.e. all
-         * trash directories that were used during the life time of the singleton
-         * of this class.
-         **/
-//        static void empty();
 
         /**
          * Return the path of the files directory for the trash directory
@@ -126,8 +114,15 @@ namespace QDirStat
          * Return the path of the trashinfo file corresponding to an entry
          * 'filesEntry'.
          **/
+        static QLatin1String trashInfoSuffix()
+            { return ".trashinfo"_L1; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
         static QString trashInfoPath( const QString & trashDir, const QString & filesEntry )
-            { return infoDirPath( trashDir ) % '/' % filesEntry % ".trashinfo"_L1; }
+            { return infoDirPath( trashDir ) % '/' % filesEntry % trashInfoSuffix(); }
 
         /**
          * Return whether 'trashRoot' is a directory (not a symlink) and has
@@ -161,13 +156,13 @@ namespace QDirStat
     /**
      * One trash directory. There might be several on a system:
      *
-     * - One in the user's home directory in $XDG_DATA_HOME/Trash
+     * - one in the user's home directory in $XDG_DATA_HOME/Trash
      *   or ~/.local/share/Trash if $XDG_DATA_HOME is not set or empty
      *
-     * - One in the toplevel directory (the mount point) of each filesystem:
+     * - one in the toplevel directory (the mount point) of each filesystem:
      *   $TOPLEVEL/.Trash/$UID
      *
-     * - If $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
+     * - if $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
      *   $TOPLEVEL/.Trash-$UID
      **/
     class TrashDir final
@@ -213,6 +208,11 @@ namespace QDirStat
         QString filesDirPath() const { return Trash::filesDirPath( _path ); }
 
         /**
+         * Return the path of the "info" subdirectory of this trash directory.
+         **/
+        QString infoDirPath() const { return Trash::infoDirPath( _path ); }
+
+        /**
          * Return the tag (first line) of a trashinfo file.
          **/
         static QLatin1String trashInfoTag()
@@ -233,11 +233,6 @@ namespace QDirStat
 
 
     protected:
-
-        /**
-         * Return the path of the "info" subdirectory of this trash directory.
-         **/
-        QString infoDirPath() const { return Trash::infoDirPath( _path ); }
 
         /**
          * Return the path of a trashinfo file for this trash directory.

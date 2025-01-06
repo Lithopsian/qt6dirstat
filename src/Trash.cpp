@@ -15,6 +15,7 @@
 #include <QProcessEnvironment>
 #include <QStringBuilder>
 #include <QTextStream>
+#include <QUrl>
 
 #include "Trash.h"
 #include "Exception.h"
@@ -301,7 +302,7 @@ void TrashDir::createTrashInfo( const QString & path, const QString & targetName
 
     QTextStream str{ &trashInfo };
     str << trashInfoTag() << Qt::endl;
-    str << trashInfoPathTag() << path << Qt::endl;
+    str << trashInfoPathTag() << QUrl::toPercentEncoding( path ) << Qt::endl;
     str << trashInfoDateTag() << QDateTime::currentDateTime().toString( Qt::ISODate ) << Qt::endl;
 }
 
