@@ -7,7 +7,7 @@
  *              Ian Nartowicz
  */
 
-#include <sys/stat.h> // mkdir(), lstat(), struct stat, S_ISDIR(), etc.
+#include <sys/stat.h> // mkdir(), struct stat, S_ISDIR(), etc.
 
 #include <QDir>
 #include <QDateTime>
@@ -18,6 +18,7 @@
 
 #include "Trash.h"
 #include "Exception.h"
+#include "SysUtil.h"
 
 
 using namespace QDirStat;
@@ -50,15 +51,15 @@ namespace
      **/
     dev_t device( const QString & path )
     {
-	struct stat statBuf;
-	if ( stat( path.toUtf8(), &statBuf ) < 0 )
+	struct stat statInfo;
+	if ( SysUtil::stat( path, statInfo ) < 0 )
 	{
 	    logError() << "stat( " << path << " ) failed: " << formatErrno() << Qt::endl;
 
 	    return static_cast<dev_t>( -1 );
 	}
 
-	return statBuf.st_dev;
+	return statInfo.st_dev;
     }
 
 
@@ -138,18 +139,23 @@ namespace
 
 
     /**
-     * Create a name for 'path' that is unique within 'filesDir'.
-     * If the simple name 'path' already exists, then append a number
-     * to the filename base to create a unique filename.
+     * Create a name for 'path' that is unique within 'dir', both within the
+     * paths directory and the info directory. If the simple name 'path'
+     * already exists, then append a number to the filename base to create a
+     * unique filename.
      **/
-    QString uniqueName( const QString & path, const QString & filesPath )
+    QString uniqueName( const QString & path, TrashDir * dir )
     {
+	const QString filesPath = dir->filesDirPath();
 	const QDir filesDir{ filesPath };
+
+	const QString infoPath = dir->infoDirPath();
+	const QDir infoDir{ infoPath };
 
 	const QFileInfo file{ path };
 	QString name = file.fileName();
 
-	for ( int i = 1; filesDir.exists( name ); ++i )
+	for ( int i = 1; filesDir.exists( name ) || infoDir.exists( name % Trash::trashInfoSuffix() ); ++i )
 	{
 	    const QString baseName = file.baseName();
 	    const QString suffix   = file.completeSuffix();
@@ -228,7 +234,7 @@ bool Trash::trash( const QString & path )
 	if ( !dir )
 	    return false;
 
-	const QString targetName = uniqueName( path, dir->filesDirPath() );
+	const QString targetName = uniqueName( path, dir );
 	dir->createTrashInfo( path, targetName );
 	dir->move( path, targetName );
     }
@@ -243,29 +249,11 @@ bool Trash::trash( const QString & path )
     return true;
 }
 
-/*
-bool Trash::restore( const QString & )
-{
-    // TO DO
-    // TO DO
-    // TO DO
-
-    return true;
-}
-
-
-void Trash::empty()
-{
-    // TO DO
-    // TO DO
-    // TO DO
-}
-*/
 
 bool Trash::isValidMainTrash( const QString & trashRoot )
 {
     struct stat statInfo;
-    if ( lstat( trashRoot.toUtf8(), &statInfo ) != 0 )
+    if ( SysUtil::stat( trashRoot, statInfo ) != 0 )
 	return false;
 
     const mode_t mode = statInfo.st_mode;
