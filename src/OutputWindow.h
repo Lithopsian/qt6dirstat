@@ -250,7 +250,8 @@ namespace QDirStat
          * Obtain the process to use from sender(). Return 0 if this is not a
          * QProcess.
          **/
-        QProcess * senderProcess( const char * callingFunctionName ) const;
+        QProcess * senderProcess() const
+            { return qobject_cast<QProcess *>( sender() ); }
 
         /**
          * Try to start the next inactive process, if there is any.

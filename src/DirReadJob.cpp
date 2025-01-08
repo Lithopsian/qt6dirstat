@@ -327,7 +327,7 @@ void LocalDirReadJob::startReading()
     // logDebug() << dir() << Qt::endl;
 
     // Directories without 'x' permission can be opened here, but stat will fail on the contents
-    DIR * diskDir = ::opendir( _dirName.toUtf8() );
+    DIR * diskDir = opendir( _dirName.toUtf8() );
     if ( !diskDir )
     {
 	switch ( errno )

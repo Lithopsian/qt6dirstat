@@ -240,6 +240,7 @@ namespace
 	    }
 	}
 
+	// Tell the ProcessStarter it is allowed to die now
 	processStarter->noMoreProcesses();
     }
 
@@ -479,6 +480,9 @@ void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus e
     // Always get this job out of the blocked queue and clean up the file list process
     tree()->unblock( this );
     QProcess * senderProcess = qobject_cast<QProcess *>( sender() );
+    if ( !senderProcess)
+	return;
+
     senderProcess->deleteLater();
 
     if ( exitStatus == QProcess::CrashExit )

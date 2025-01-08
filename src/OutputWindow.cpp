@@ -165,30 +165,9 @@ void OutputWindow::addStderr( const QString & output )
 }
 
 
-QProcess * OutputWindow::senderProcess( const char * function ) const
-{
-    QObject * signalSender = sender();
-    if ( !signalSender )
-    {
-	logError() << "NULL sender() in " << function << Qt::endl;
-	return nullptr;
-    }
-
-    QProcess * process = qobject_cast<QProcess *>( signalSender );
-    if ( !process )
-    {
-	logError() << "Expecting QProcess as sender() in " << function
-	           <<" , got " << signalSender->metaObject()->className() << Qt::endl;
-	return nullptr;
-    }
-
-    return process;
-}
-
-
 void OutputWindow::readStdout()
 {
-    QProcess * process = senderProcess( __func__ );
+    QProcess * process = senderProcess();
     if ( process )
 	addStdout( QString{ process->readAllStandardOutput() } );
 }
@@ -196,7 +175,7 @@ void OutputWindow::readStdout()
 
 void OutputWindow::readStderr()
 {
-    QProcess * process = senderProcess( __func__ );
+    QProcess * process = senderProcess();
     if ( process )
 	addStderr( QString{ process->readAllStandardError() } );
 }
@@ -211,7 +190,7 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
     //logDebug() << "Process finished normally with exit code " << exitCode << Qt::endl;
     addCommandLine( tr( "Process finished with exit code %1." ).arg( exitCode ) );
 
-    QProcess * process = senderProcess( __func__ );
+    QProcess * process = senderProcess();
     if ( process )
     {
 	processFinished( process );
@@ -244,7 +223,7 @@ void OutputWindow::processError( QProcess::ProcessError error )
 	addStderr( msg );
     }
 
-    QProcess * process = senderProcess( __func__ );
+    QProcess * process = senderProcess();
     if ( process )
 	processFinished( process );
 
