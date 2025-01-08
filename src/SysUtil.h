@@ -52,6 +52,8 @@ namespace QDirStat
 	 * command.  Symlinks are not followed and, as far as is possible,
 	 * auto-mounts are not mounted.
 	 **/
+	inline int stat( int dirFd, const char * path, struct stat & statInfo )
+	    { return fstatat( dirFd, path, &statInfo, statFlags() ); }
 	inline int stat( int dirFd, const QString & path, struct stat & statInfo )
 	    { return fstatat( dirFd, path.toUtf8(), &statInfo, statFlags() ); }
 	inline int stat( const QString & path, struct stat & statInfo )
@@ -139,17 +141,6 @@ namespace QDirStat
 	QString homeDir( uid_t uid );
 
 	/**
-	 * Read the (first level) target of a symbolic link. Unlike
-	 * symlinkTarget(), this does not make any assumptions of name
-	 * encoding in the filesystem; it just uses bytes.
-	 *
-	 * This is a more user-friendly version of readlink(2).
-	 *
-	 * This returns an empty QByteArray if 'path' is not a symlink.
-	 **/
-	QByteArray readLink( const QByteArray & path );
-
-	/**
 	 * Return the (first level) target of a symbolic link, i.e. the path
 	 * that the link points to. That target may again be a symlink;
 	 * this function does not follow multiple levels of symlinks.
@@ -158,8 +149,7 @@ namespace QDirStat
 	 *
 	 * This function assumes UTF-8 encoding of names in the filesystem.
 	 **/
-	inline QString symlinkTarget( const QString & path )
-	    { return readLink( path.toUtf8() ); }
+	QString symlinkTarget( const QString & path );
 
 	/**
 	 * Return the last path component of a file name.
