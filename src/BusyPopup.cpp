@@ -38,8 +38,8 @@ namespace
 } // namespace
 
 
-BusyPopup::BusyPopup( const QString & text ):
-    QLabel{ text, app()->mainWindow(), Qt::SplashScreen }
+BusyPopup::BusyPopup( const QString & text, QWidget * parent ):
+    QLabel{ text, parent ? parent : app()->mainWindow(), Qt::SplashScreen }
 {
     setMargin( 16 );
     setWindowTitle( QString{} );

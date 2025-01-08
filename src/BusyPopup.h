@@ -43,7 +43,7 @@ namespace QDirStat
 	 * Show the label and spin an event loop unitl the label has been
 	 * painted.
 	 **/
-	BusyPopup( const QString & text );
+	BusyPopup( const QString & text, QWidget * parent = nullptr );
 
 	/**
 	 * Event handler. Reimplemented from QWidget.
