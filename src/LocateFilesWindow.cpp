@@ -278,10 +278,8 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case LL_SizeCol:  return _size  < other.size();
 	case LL_MTimeCol: return _mtime < other.mtime();
-	case LL_PathCol:  return _path  < other.path();
-	default:                 return QTreeWidgetItem::operator<( rawOther );
+	default:          return QTreeWidgetItem::operator<( rawOther );
     }
 
 
 }
-

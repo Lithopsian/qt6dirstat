@@ -209,8 +209,14 @@ namespace QDirStat
 	static QString primaryFileName();
 
 	/**
-	 * Set the owner of all used config files to the correct one if this
-	 * program was started with 'sudo'.
+	 * If the application is running wuth sudo and config files in the
+	 * home directory of the original user are being used, set the owner of
+	 * all used config files to the original user.
+	 *
+	 * This is necessary in relatively rare cases where programs running as
+	 * root have kept some or all of the environment of the calling user.
+	 * This used to happen by default in Ubunutu until 19.10.  Config files
+	 * that get written in these cases become owned by root.
 	 **/
 	static void fixFileOwners();
 

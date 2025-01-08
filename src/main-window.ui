@@ -293,7 +293,9 @@
     <addaction name="actionFileSizeStats"/>
     <addaction name="actionFileTypeStats"/>
     <addaction name="actionFileAgeStats"/>
+    <addaction name="separator"/>
     <addaction name="actionShowFilesystems"/>
+    <addaction name="actionShowTrash"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1038,6 +1040,14 @@
    </property>
    <property name="shortcut">
     <string>F8</string>
+   </property>
+  </action>
+  <action name="actionShowTrash">
+   <property name="text">
+    <string>Show Tras&amp;h</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
  </widget>

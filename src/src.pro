@@ -121,6 +121,7 @@ SOURCES =   main.cpp			\
 	    SysUtil.cpp			\
 	    SystemFileChecker.cpp	\
 	    Trash.cpp			\
+	    TrashWindow.cpp		\
 	    TreeWalker.cpp		\
 	    TreemapTile.cpp		\
 	    TreemapView.cpp		\
@@ -154,6 +155,8 @@ HEADERS =   QDirStatApp.h		\
 	    ExcludeRules.h		\
 	    ExcludeRulesConfigPage.h	\
 	    ExistingDirValidator.h	\
+	    FileAgeStats.h		\
+	    FileAgeStatsWindow.h	\
 	    FileDetailsView.h		\
 	    FileInfo.h			\
 	    FileInfoIterator.h		\
@@ -166,11 +169,15 @@ HEADERS =   QDirStatApp.h		\
 	    FileSizeStatsWindow.h	\
 	    FileSystemsWindow.h		\
 	    FileTypeStats.h		\
+	    FileTypeStatsWindow.h	\
 	    FindFilesDialog.h		\
+	    FormatUtil.h		\
 	    GeneralConfigPage.h		\
 	    HeaderTweaker.h		\
 	    HistogramItems.h		\
 	    HistogramView.h		\
+	    History.h			\
+	    HistoryButtons.h		\
 	    ListEditor.h		\
 	    LocateFileTypeWindow.h	\
 	    LocateFilesWindow.h		\
@@ -208,18 +215,13 @@ HEADERS =   QDirStatApp.h		\
 	    SysUtil.h			\
 	    SystemFileChecker.h		\
 	    Trash.h			\
+	    TrashWindow.h		\
 	    TreemapTile.h		\
+	    TreemapView.h		\
+	    TreeWalker.h		\
+	    Typedefs.h			\
 	    UnpkgSettings.cpp		\
 	    UnreadableDirsWindow.h	\
-	    FileAgeStats.h		\
-	    FileAgeStatsWindow.h	\
-	    FileTypeStatsWindow.h	\
-	    FormatUtil.h		\
-	    History.h			\
-	    HistoryButtons.h		\
-	    TreeWalker.h		\
-	    TreemapView.h		\
-	    Typedefs.h			\
 	    Version.h			\
 	    Wildcard.h
 
@@ -243,6 +245,7 @@ FORMS =	    main-window.ui		   \
 	    open-unpkg-dialog.ui	   \
 	    output-window.ui		   \
 	    panel-message.ui		   \
+	    trash-window.ui		   \
 	    unreadable-dirs-window.ui
 
 

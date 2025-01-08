@@ -76,6 +76,7 @@ void MainWindow::connectMenuActions()
     connectAction( _ui->actionFileTypeStats,      &MainWindow::showFileTypeStats );
     connectAction( _ui->actionFileAgeStats,       &MainWindow::showFileAgeStats );
     connectAction( _ui->actionShowFilesystems,    &MainWindow::showFilesystems );
+    connectAction( _ui->actionShowTrash,          &MainWindow::showTrash );
 
     // Help menu
     connectAction( _ui->actionHelp,               &MainWindow::openActionUrl );

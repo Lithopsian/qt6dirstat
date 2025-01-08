@@ -804,7 +804,7 @@ void MainWindow::cleanupFinished( int errorCount )
     // Note that this is not called for actions that are not owned by the
     // CleanupCollection such as _ui->actionMoveToTrash().
 
-    logDebug() << "Error count: " << errorCount << Qt::endl;
+    //logDebug() << "Error count: " << errorCount << Qt::endl;
 
     const QString msg = [ errorCount ]()
     {
