@@ -54,8 +54,6 @@ namespace QDirStat
 	 **/
 	inline int stat( int dirFd, const char * path, struct stat & statInfo )
 	    { return fstatat( dirFd, path, &statInfo, statFlags() ); }
-	inline int stat( int dirFd, const QString & path, struct stat & statInfo )
-	    { return fstatat( dirFd, path.toUtf8(), &statInfo, statFlags() ); }
 	inline int stat( const QString & path, struct stat & statInfo )
 	    { return fstatat( AT_FDCWD, path.toUtf8(), &statInfo, statFlags() ); }
 
