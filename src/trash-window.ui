@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Trash</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icons/trashcan.png</normaloff>:/icons/trashcan.png</iconset>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
@@ -43,6 +47,9 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
@@ -92,7 +99,7 @@
        <item>
         <widget class="QPushButton" name="restoreButton">
          <property name="toolTip">
-          <string>Restore the selected entries </string>
+          <string>Restore the selected entries to their original directories</string>
          </property>
          <property name="text">
           <string>Re&amp;store</string>
@@ -129,6 +136,38 @@
     <string>Ctrl+A</string>
    </property>
   </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>&amp;Delete selected items</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Del</string>
+   </property>
+  </action>
+  <action name="actionRestore">
+   <property name="text">
+    <string>Re&amp;store selected items</string>
+   </property>
+   <property name="shortcut">
+    <string>Enter</string>
+   </property>
+  </action>
+  <action name="actionEmpty">
+   <property name="text">
+    <string>&amp;Empty Trash</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Del</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="icons.qrc"/>
@@ -163,6 +202,86 @@
     <hint type="destinationlabel">
      <x>343</x>
      <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidget</sender>
+   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
+   <receiver>restoreButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>247</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRefresh</sender>
+   <signal>triggered()</signal>
+   <receiver>refreshButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>51</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDelete</sender>
+   <signal>triggered()</signal>
+   <receiver>deleteButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEmpty</sender>
+   <signal>triggered()</signal>
+   <receiver>emptyButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRestore</sender>
+   <signal>triggered()</signal>
+   <receiver>restoreButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>247</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>

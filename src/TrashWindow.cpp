@@ -14,6 +14,7 @@
 #include <QAbstractButton>
 #include <QDateTime>
 #include <QHeaderView>
+#include <QMessageBox>
 #include <QPointer>
 #include <QScrollBar>
 #include <QThread>
@@ -116,7 +117,13 @@ namespace
      **/
     bool deletePath( const QString & path )
     {
-	 return QDir{ path }.removeRecursively();
+	QFileInfo fileInfo{ path };
+	if ( fileInfo.isDir() )
+	    return QDir{ path }.removeRecursively();
+	else if ( fileInfo.exists() )
+	    return QFile{ path }.remove();
+	else
+	    return true;
     }
 
 
@@ -146,7 +153,7 @@ namespace
      * fails, try to directly delete 'entryName', which may be a file or
      * directory.
      **/
-    void moveToExpunged( const char * oldDirPath, const char * expungedDirPath, const char * entryName )
+    bool moveToExpunged( const char * oldDirPath, const char * expungedDirPath, const char * entryName )
     {
 	const QByteArray delimiter{ "/" };
 	if ( rename( oldDirPath + delimiter + entryName, expungedDirPath + delimiter + entryName ) != 0 )
@@ -155,8 +162,10 @@ namespace
 	    logWarning() << "Failed to move " << oldFilePath << " to 'qexpunged': "
 	                 << formatErrno() << ". Attempting to delete in place." << Qt::endl;
 
-	    deletePath( oldFilePath );
+	    return deletePath( oldFilePath );
 	}
+
+	return true;
     }
 
 
@@ -257,39 +266,6 @@ namespace
 
 
     /**
-     * Total up the sizes of all the iterms and update the heading label.
-     **/
-    void calculateTotalSize( QTreeWidget * treeWidget, QLabel * heading )
-    {
-	const QString headingText = [ treeWidget ]()
-	{
-	    const FileCount items = treeWidget->topLevelItemCount();
-
-	    FileSize totalSize = 0;
-	    for ( QTreeWidgetItemIterator it{ treeWidget }; *it; ++it )
-		totalSize += static_cast<const TrashItem *>( *it )->totalSize();
-
-	    if ( items == 0 )
-		return QObject::tr( "Trash is empty" );
-
-	    const QString itemsCount =
-		items == 1 ? QObject::tr( "1 item: " ) : QObject::tr( "%L1 items: " ).arg( items );
-
-	    return QString{ itemsCount % formatSize( totalSize ) };
-	}();
-	heading->setText( headingText );
-
-	// Increase the column width if necessary to fit the new contents
-	QHeaderView * headerView = treeWidget->header();
-	const int originalSectionWidth = headerView->sectionSize( TW_SizeCol );
-	headerView->setSectionResizeMode( TW_SizeCol, QHeaderView::ResizeToContents );
-	const int newSectionWidth = headerView->sectionSize( TW_SizeCol );
-	headerView->setSectionResizeMode( TW_SizeCol, QHeaderView::Interactive );
-	headerView->resizeSection( TW_SizeCol, qMax( originalSectionWidth, newSectionWidth ) );
-    }
-
-
-    /**
      * Add widget items for all entries found in the "files" directory of the
      * trash directory 'dir'.  If 'dir' does not exist or cannot be accessed,
      * this function will silently do nothing.
@@ -330,35 +306,6 @@ namespace
 
 
     /**
-     * Populate the tree: locate all trash folders for the current user
-     * and list entries from those folders.
-     **/
-    void populateTrashDirs( QTreeWidget * treeWidget, QLabel * heading )
-    {
-	//logDebug() << "Locating Trash ..." << Qt::endl;
-
-	treeWidget->setSortingEnabled( false );
-	treeWidget->clear();
-
-	// Use ProcessStarter to limit the number of 'du' processes spawned at once
-	ProcessStarter * processStarter = new ProcessStarter{ QThread::idealThreadCount() };
-	QObject::connect( processStarter, &ProcessStarter::destroyed,
-	                  treeWidget,     [ treeWidget, heading ]()
-	                                  { calculateTotalSize( treeWidget, heading ); } );
-
-	const QStringList trashRootPaths = trashRoots();
-	for ( const QString & trashRootPath : trashRootPaths )
-	    populateTrashDir( treeWidget, trashRootPath, processStarter );
-
-	// Tell the ProcessStarter it is allowed to die now
-	processStarter->noMoreProcesses();
-
-	heading->setText( QObject::tr( "Calculating Trash total size..." ) );
-	treeWidget->setSortingEnabled( true );
-    }
-
-
-    /**
      * Try to remove a .trashinfo file.  If the remove failed using Qt, throw
      * off an external process to see if the OS can do any better.  The trash
      * entry has already been processed, so either the .trashinfo file will
@@ -389,9 +336,10 @@ TrashWindow::TrashWindow( QWidget * parent ):
 
     initTree( _ui->treeWidget );
     Settings::readWindowSettings( this, "TrashWindow" );
+    ActionManager::actionHotkeys( this, "TrashWindow" );
 
     connect( _ui->treeWidget,    &QTreeWidget::itemSelectionChanged,
-             this,               &TrashWindow::updateActions );
+             this,               &TrashWindow::enableActions );
 
     connect( _ui->refreshButton, &QAbstractButton::clicked,
              this,               &TrashWindow::refresh );
@@ -405,11 +353,11 @@ TrashWindow::TrashWindow( QWidget * parent ):
     connect( _ui->emptyButton,   &QAbstractButton::clicked,
              this,               &TrashWindow::empty );
 
+    connect( _ui->treeWidget,    &QTreeWidget::customContextMenuRequested,
+             this,               &TrashWindow::contextMenu);
+
     connect( ActionManager::cleanupCollection(), &CleanupCollection::trashFinished,
              this,                               &TrashWindow::refresh );
-
-    // Global select-all keyboard shortcut, so ctrl-A works even when the tree doesn't have focus
-    addAction( _ui->actionSelectAll );
 }
 
 
@@ -432,6 +380,60 @@ TrashWindow * TrashWindow::sharedInstance()
 }
 
 
+void TrashWindow::populateTree()
+{
+    //logDebug() << "Locating Trash items ..." << Qt::endl;
+
+    _ui->treeWidget->setSortingEnabled( false );
+    _ui->treeWidget->clear();
+
+    // Use ProcessStarter to limit the number of 'du' processes spawned at once
+    ProcessStarter * processStarter = new ProcessStarter{ QThread::idealThreadCount() };
+    QObject::connect( processStarter, &ProcessStarter::destroyed,
+                      this,           &TrashWindow::calculateTotalSize );
+
+    const QStringList trashRootPaths = trashRoots();
+    for ( const QString & trashRootPath : trashRootPaths )
+	populateTrashDir( _ui->treeWidget, trashRootPath, processStarter );
+
+    // Tell the ProcessStarter it is allowed to die now
+    processStarter->noMoreProcesses();
+
+    _ui->heading->setText( QObject::tr( "Calculating Trash total size..." ) );
+    _ui->treeWidget->setSortingEnabled( true );
+}
+
+
+void TrashWindow::calculateTotalSize()
+{
+    const QString headingText = [ this ]()
+    {
+	const FileCount items = _ui->treeWidget->topLevelItemCount();
+
+	FileSize totalSize = 0;
+	for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
+	    totalSize += static_cast<const TrashItem *>( *it )->totalSize();
+
+	if ( items == 0 )
+	    return QObject::tr( "Trash is empty" );
+
+	const QString itemsCount =
+	    items == 1 ? QObject::tr( "1 item: " ) : QObject::tr( "%L1 items: " ).arg( items );
+
+	return QString{ itemsCount % formatSize( totalSize ) };
+    }();
+    _ui->heading->setText( headingText );
+
+    // Increase the column width if necessary to fit the new contents
+    QHeaderView * headerView = _ui->treeWidget->header();
+    const int originalSectionWidth = headerView->sectionSize( TW_SizeCol );
+    headerView->setSectionResizeMode( TW_SizeCol, QHeaderView::ResizeToContents );
+    const int newSectionWidth = headerView->sectionSize( TW_SizeCol );
+    headerView->setSectionResizeMode( TW_SizeCol, QHeaderView::Interactive );
+    headerView->resizeSection( TW_SizeCol, qMax( originalSectionWidth, newSectionWidth ) );
+}
+
+
 void TrashWindow::refresh()
 {
     // Do a full populate if the list is currently empty; it will resize the columns and select item 0
@@ -451,9 +453,9 @@ void TrashWindow::refresh()
     // Remember the scrollbar position to make refreshes as seemless as possible
     const int scrollbarPosition = _ui->treeWidget->verticalScrollBar()->value();
 
-    populateTrashDirs( _ui->treeWidget, _ui->heading );
+    populateTree();
 
-    // Block signals so updateActions() isn't called thousands of times
+    // Block signals so enableActions() isn't called thousands of times
     SignalBlocker( _ui->treeWidget );
 
     // Optimisation so this isn't very slow when most items of a long list are selected
@@ -472,7 +474,7 @@ void TrashWindow::refresh()
 
     _ui->treeWidget->verticalScrollBar()->setValue( scrollbarPosition );
 
-    updateActions();
+    enableActions();
 }
 
 
@@ -491,9 +493,11 @@ void TrashWindow::deleteSelected()
     for ( const QString & trashRootPath : trashRootPaths )
 	deleteExpunged( TrashWindow::expungedDirPath( trashRootPath ) );
 
-    setCurrentItem( _ui->treeWidget, oldCurrentIndex );
-    calculateTotalSize( _ui->treeWidget, _ui->heading );
-    updateActions();
+    if ( _ui->treeWidget->selectedItems().isEmpty() )
+	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
+
+    calculateTotalSize();
+    enableActions();
 }
 
 
@@ -504,13 +508,25 @@ void TrashWindow::restoreSelected()
     // Remember the current item position to reset after this operation removes the selected items
     const int oldCurrentIndex = currentIndex( _ui->treeWidget );
 
-    const QList<QTreeWidgetItem *> selectedItems = _ui->treeWidget->selectedItems();
-    for ( QTreeWidgetItem * item : selectedItems )
-	static_cast<TrashItem *>( item )->restoreItem();
+    int buttonResponse = QMessageBox::NoButton;
 
-    setCurrentItem( _ui->treeWidget, oldCurrentIndex );
-    calculateTotalSize( _ui->treeWidget, _ui->heading );
-    updateActions();
+    const QList<QTreeWidgetItem *> selectedItems = _ui->treeWidget->selectedItems();
+    const bool singleItem = selectedItems.size() == 1;
+    for ( QTreeWidgetItem * item : selectedItems )
+    {
+	const int button = static_cast<TrashItem *>( item )->restoreItem( singleItem, buttonResponse );
+	if ( button == QMessageBox::Abort )
+	    break;
+
+	if ( button == QMessageBox::YesToAll || button == QMessageBox::NoToAll )
+	    buttonResponse = button;
+    }
+
+    if ( _ui->treeWidget->selectedItems().isEmpty() )
+	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
+
+    calculateTotalSize();
+    enableActions();
 }
 
 
@@ -536,7 +552,7 @@ void TrashWindow::empty()
 
 void TrashWindow::populate()
 {
-    populateTrashDirs( _ui->treeWidget, _ui->heading );
+    populateTree();
     show();
 
     // Make sure something is selected, even if this window is not the active one
@@ -544,17 +560,70 @@ void TrashWindow::populate()
 
     resizeTreeColumns( _ui->treeWidget );
 
-    updateActions();
+    enableActions();
 }
 
 
-void TrashWindow::updateActions()
+void TrashWindow::enableActions()
 {
     _ui->emptyButton->setEnabled( _ui->treeWidget->topLevelItemCount() );
 
-    const bool selectedItems = !_ui->treeWidget->selectedItems().isEmpty();
-    _ui->deleteButton->setEnabled( selectedItems );
-    _ui->restoreButton->setEnabled( selectedItems );
+    const QList<QTreeWidgetItem *> selectedItems = _ui->treeWidget->selectedItems();
+    const bool itemSelected = !selectedItems.isEmpty();
+    _ui->deleteButton->setEnabled( itemSelected );
+    _ui->restoreButton->setEnabled( itemSelected );
+
+    for ( const QTreeWidgetItem * item : selectedItems )
+    {
+	// Don't allow restore of known "broken" trash items
+	if ( item->foreground( TW_NameCol ) == app()->dirTreeModel()->dirReadErrColor() )
+	{
+	    _ui->restoreButton->setEnabled( false );
+	    return;
+	}
+    }
+}
+
+
+void TrashWindow::contextMenu( const QPoint & pos )
+{
+    QMenu menu;
+    menu.addAction( _ui->actionRefresh );
+
+    if ( _ui->emptyButton->isEnabled() )
+	menu.addAction( _ui->actionSelectAll );
+
+    const bool deleteEnabled  = _ui->deleteButton->isEnabled();
+    const bool restoreEnabled = _ui->restoreButton->isEnabled();
+
+    if ( deleteEnabled || restoreEnabled )
+    {
+	menu.addSeparator();
+
+	if ( deleteEnabled )
+	    menu.addAction( _ui->actionDelete );
+
+	if ( restoreEnabled )
+	    menu.addAction( _ui->actionRestore );
+    }
+
+    if ( _ui->emptyButton->isEnabled() )
+    {
+	menu.addSeparator();
+	menu.addAction( _ui->actionEmpty );
+    }
+
+    menu.exec( _ui->treeWidget->mapToGlobal( pos ) );
+}
+
+
+void TrashWindow::keyPressEvent( QKeyEvent * event )
+{
+    // Let return/enter trigger itemActivated instead of buttons that don't have focus
+    if ( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter )
+	return;
+
+    QDialog::keyPressEvent( event );
 }
 
 
@@ -696,30 +765,84 @@ void TrashItem::deleteItem()
     const QByteArray expungedDirStr = TrashWindow::expungedDirPath( _trashRoot ).toUtf8();
     ensureExpunged( expungedDirStr );
 
-    const QString infoName = _entryName % Trash::trashInfoSuffix();
-    moveToExpunged( Trash::infoDirPath( _trashRoot ).toUtf8(), expungedDirStr, infoName.toUtf8() );
-    moveToExpunged( Trash::filesDirPath( _trashRoot ).toUtf8(), expungedDirStr, _entryName.toUtf8() );
+    if ( moveToExpunged( Trash::filesDirPath( _trashRoot ).toUtf8(), expungedDirStr, _entryName.toUtf8() ) )
+    {
+	// If the "files" entry was moved, try to move its corresponding .trashinfo file
+	const QString infoName = _entryName % Trash::trashInfoSuffix();
+	moveToExpunged( Trash::infoDirPath( _trashRoot ).toUtf8(), expungedDirStr, infoName.toUtf8() );
 
-    delete this;
+	// Even if the .trashinfo file is stuck, it won't show up any more
+	delete this;
+    }
 }
 
 
-void TrashItem::restoreItem()
+int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 {
-    const QString trashEntryPath = Trash::trashEntryPath( _trashRoot, _entryName );
-    const QString restorePath{ text( TW_DirCol ) % '/' % text( TW_NameCol ) };
+    const QString restoreDirPath = text( TW_DirCol );
+    const QString restoreFileName = text( TW_NameCol );
+    if ( !SysUtil::exists( restoreDirPath ) )
+    {
+	logInfo() << restoreDirPath << " no longer exists - attempt to recreate" << Qt::endl;
+	QDir{ restoreDirPath }.mkpath( "." );
+    }
 
-    QFile trashEntry{ trashEntryPath };
+    const QString restorePath{ restoreDirPath % '/' % restoreFileName };
+    if ( SysUtil::exists( restorePath ) )
+    {
+	if ( buttonResponse == QMessageBox::NoToAll )
+	    return buttonResponse;
+
+	if ( buttonResponse != QMessageBox::YesToAll )
+	{
+	    const QString title = tr( "Cannot restore " ) % restoreFileName;
+	    const QString msg = tr( "'%1' already exists." ).arg( restorePath );
+	    QMessageBox::StandardButtons buttons{ QMessageBox::Yes | QMessageBox::No };
+	    if ( !singleItem )
+		buttons |= { QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Abort };
+	    QMessageBox box{ QMessageBox::Question, title, pad( msg, 50 ), buttons, trashWindow() };
+	    box.setInformativeText( tr( "Replace? Existing item will be permanently deleted." ) );
+	    if ( !singleItem )
+		box.button( QMessageBox::Abort )->setToolTip( tr( "Stop restoring items" ) );
+
+	    const int button = box.exec();
+	    if ( button == QMessageBox::No || button == QMessageBox::NoToAll || button == QMessageBox::Abort )
+		return button;
+
+	    if ( button == QMessageBox::YesToAll )
+		buttonResponse = button;
+	}
+
+	deletePath( restorePath );
+    }
+
+    QFile trashEntry{ Trash::trashEntryPath( _trashRoot, _entryName ) };
     if ( !trashEntry.rename( restorePath ) )
     {
-	logInfo() << "Failed to move " << trashEntryPath << " to " << restorePath
-	          << ": " << trashEntry.errorString() << Qt::endl;
-	return;
+	const QString title = tr( "Restore failed" );
+	const QString msg = tr( "Cannot move '%1' to '%2':" ).arg( restoreFileName, restoreDirPath );
+	const QMessageBox::StandardButtons buttons = singleItem ? QMessageBox::Ok : QMessageBox::Abort;
+	QMessageBox box{ QMessageBox::Warning, title, pad( msg, 50 ), buttons, trashWindow() };
+	box.setInformativeText( trashEntry.errorString() );
+	if ( !singleItem )
+	{
+	    QPushButton * button = box.addButton( tr( "&Continue" ), QMessageBox::AcceptRole );
+	    button->setToolTip( tr( "Skip this item and continue to restore other selected items" ) );
+	    box.button( QMessageBox::Abort )->setToolTip( tr( "Stop restoring items" ) );
+	}
+
+	const int button = box.exec();
+	if ( button == QMessageBox::Abort )
+	    return button;
+
+	return buttonResponse;
     }
 
     removeTrashInfoFile( _trashRoot, _entryName );
 
     delete this;
+
+    return buttonResponse;
 }
 
 

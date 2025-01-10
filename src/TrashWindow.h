@@ -104,6 +104,11 @@ namespace QDirStat
     protected slots:
 
 	/**
+	 * Total up the sizes of all the items and update the heading label.
+	 **/
+	void calculateTotalSize();
+
+	/**
 	 * Clear and re-populate the window.
 	 *
 	 * To make the refresh as seemless as possible, the selected items are
@@ -135,7 +140,12 @@ namespace QDirStat
 	/**
 	 * Enabled or disable actions based on the current selection.
 	 **/
-	void updateActions();
+	void enableActions();
+
+	/**
+	 * Custom context menu signalled for the tree.
+	 **/
+	void contextMenu( const QPoint & pos );
 
 
     protected:
@@ -145,6 +155,19 @@ namespace QDirStat
 	 * to match the data as much as possible.
 	 **/
 	void populate();
+
+	/**
+	 * Populate the tree: locate all trash folders for the current user
+	 * and list entries from those folders.
+	 **/
+	void populateTree();
+
+	/**
+	 * Key press event for detecting enter/return.
+	 *
+	 * Reimplemented from QWidget.
+	 **/
+	void keyPressEvent( QKeyEvent * event ) override;
 
 
     private:
@@ -218,10 +241,16 @@ namespace QDirStat
 	 * called with a BusyPopup showing and the delete statements are often
 	 * the slowest part of the delete.
 	 **/
-	void restoreItem();
+	int restoreItem( bool singleItem, int buttonResponse );
 
 
     protected:
+
+	/**
+	 * Override the model data, just for the tooltip for the path
+	 * column.
+	 **/
+	QWidget * trashWindow() const { return treeWidget()->parentWidget(); }
 
 	/**
 	 * Override the model data, just for the tooltip for the path
