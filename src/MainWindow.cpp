@@ -477,7 +477,8 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     updateWindowTitle( QString() );
     app()->dirTree()->sendFinished();
 
-    QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ),
+    QMessageBox errorPopup{ QMessageBox::Warning,
+                            tr( "Error" ),
                             pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) };
     errorPopup.setDetailedText( ex.what() );
     errorPopup.exec();

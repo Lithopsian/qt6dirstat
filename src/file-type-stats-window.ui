@@ -142,6 +142,14 @@
     <string>F2</string>
    </property>
   </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="icons.qrc"/>
@@ -175,6 +183,22 @@
     </hint>
     <hint type="destinationlabel">
      <x>266</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRefresh</sender>
+   <signal>triggered()</signal>
+   <receiver>refreshButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>51</x>
      <y>316</y>
     </hint>
    </hints>
