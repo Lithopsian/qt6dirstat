@@ -37,13 +37,13 @@ namespace QDirStat
     public:
 
 	/**
-	 * Create a BusyPopup with the specified text.  This always uses
-	 * the main window as its parent.
+	 * Create a BusyPopup label displaying 'text'.  The parent is expectred
+	 * to be a window and the label will be centred on that window.
 	 *
 	 * Show the label and spin an event loop unitl the label has been
 	 * painted.
 	 **/
-	BusyPopup( const QString & text, QWidget * parent = nullptr );
+	BusyPopup( const QString & text, QWidget * parent );
 
 	/**
 	 * Event handler. Reimplemented from QWidget.

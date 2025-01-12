@@ -72,6 +72,7 @@ namespace
 	set( TW_DirCol,     Qt::AlignLeft,    QObject::tr( "Original Directory" ) );
 
 	tree->sortByColumn( TW_NameCol, Qt::AscendingOrder );
+	tree->setFocus();
     }
 
 
@@ -113,6 +114,16 @@ namespace
 
 
     /**
+     * Spawn an external process in the background to recursively remove 'path'
+     * and any children.
+     **/
+    void rmPath( const QString & path )
+    {
+	QProcess::startDetached( "rm", { "-rf", path } );
+    }
+
+
+    /**
      * Delete 'path', which may be a directory or file.
      **/
     bool deletePath( const QString & path )
@@ -141,7 +152,7 @@ namespace
 	if ( !deletePath( expungedDirPath ) )
 	{
 	    logWarning() << "Qt failed to delete 'qexpunged', try to spawn 'rm -rf' process" << Qt::endl;
-	    QProcess::startDetached( "rm", { "-rf", expungedDirPath } );
+	    rmPath( expungedDirPath );
 	}
     }
 
@@ -192,11 +203,10 @@ namespace
 	    return entry;
 	};
 
-	const QByteArray expungedDirStr = expungedDirPath.toUtf8();
-
 	struct dirent * entry = readdirEntry();
 	if ( entry )
 	{
+	    const QByteArray expungedDirStr = expungedDirPath.toUtf8();
 	    ensureExpunged( expungedDirStr );
 
 	    do
@@ -316,8 +326,8 @@ namespace
 	const QString trashInfoPath = Trash::trashInfoPath ( trashRoot, entryName );
 	if ( !QFile{ trashInfoPath }.remove() )
 	{
-	    logWarning() << "Qt failed to delete " << trashInfoPath << " - try 'rm -f'" << Qt::endl;
-	    QProcess::startDetached( "rm", { "-f", trashInfoPath } );
+	    logWarning() << "Qt failed to delete " << trashInfoPath << " - try 'rm -rf'" << Qt::endl;
+	    rmPath( trashInfoPath );
 	}
     }
 
@@ -408,12 +418,11 @@ void TrashWindow::calculateTotalSize()
 {
     const QString headingText = [ this ]()
     {
-	const FileCount items = _ui->treeWidget->topLevelItemCount();
-
 	FileSize totalSize = 0;
 	for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
 	    totalSize += static_cast<const TrashItem *>( *it )->totalSize();
 
+	const FileCount items = _ui->treeWidget->topLevelItemCount();
 	if ( items == 0 )
 	    return QObject::tr( "Trash is empty" );
 
@@ -424,7 +433,7 @@ void TrashWindow::calculateTotalSize()
     }();
     _ui->heading->setText( headingText );
 
-    // Increase the column width if necessary to fit the new contents
+    // Increase the column width if necessary to fit the new contents, but don't shrink it
     QHeaderView * headerView = _ui->treeWidget->header();
     const int originalSectionWidth = headerView->sectionSize( TW_SizeCol );
     headerView->setSectionResizeMode( TW_SizeCol, QHeaderView::ResizeToContents );

@@ -16,6 +16,7 @@
 #include "FileSearchFilter.h"
 #include "FormatUtil.h"
 #include "LocateFilesWindow.h"
+#include "MainWindow.h"
 #include "QDirStatApp.h"
 #include "TreeWalker.h"
 
@@ -89,7 +90,7 @@ void DiscoverActions::discoverHardLinkedFiles()
 
 void DiscoverActions::discoverBrokenSymlinks()
 {
-    BusyPopup msg{ QObject::tr( "Checking symlinks..." ) };
+    BusyPopup msg{ QObject::tr( "Checking symlinks..." ), app()->mainWindow() };
     discoverFiles( new BrokenSymlinksTreeWalker{},
                    LL_PathCol,
                    Qt::AscendingOrder,

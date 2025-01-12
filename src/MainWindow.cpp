@@ -530,7 +530,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
     pkgQuerySetup();
-    BusyPopup msg{ tr( "Reading package database..." ) };
+    BusyPopup msg{ tr( "Reading package database..." ), this };
 
     tree->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
@@ -946,7 +946,7 @@ void MainWindow::showFileAgeStats()
 
 void MainWindow::showTrash()
 {
-    BusyPopup msg{ tr( "Searching Trash directories..." ) };
+    BusyPopup msg{ tr( "Searching Trash directories..." ), this };
 
     TrashWindow::populateSharedInstance();
 }

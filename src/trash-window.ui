@@ -22,7 +22,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
      <item>
       <widget class="QLabel" name="headingIcon">
        <property name="pixmap">
@@ -32,14 +32,33 @@
      </item>
      <item>
       <widget class="QLabel" name="heading">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
          <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
-       <property name="buddy">
-        <cstring>treeWidget</cstring>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="emptyButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Remove all trash items from all accessible trash directories and permanently delete them</string>
+       </property>
+       <property name="text">
+        <string>Empty Trash</string>
        </property>
       </widget>
      </item>
@@ -91,9 +110,6 @@
          <property name="text">
           <string>&amp;Delete</string>
          </property>
-         <property name="shortcut">
-          <string>Del</string>
-         </property>
         </widget>
        </item>
        <item>
@@ -107,16 +123,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QPushButton" name="emptyButton">
-       <property name="toolTip">
-        <string>Remove all trash items from all accessible trash directories and permanently delete them</string>
-       </property>
-       <property name="text">
-        <string>&amp;Empty</string>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">

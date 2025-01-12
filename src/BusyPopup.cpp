@@ -13,7 +13,6 @@
 #include "BusyPopup.h"
 #include "Logger.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"
 
 
 using namespace QDirStat;
@@ -39,7 +38,7 @@ namespace
 
 
 BusyPopup::BusyPopup( const QString & text, QWidget * parent ):
-    QLabel{ text, parent ? parent : app()->mainWindow(), Qt::SplashScreen }
+    QLabel{ text, parent, Qt::SplashScreen }
 {
     setMargin( 16 );
     setWindowTitle( QString{} );

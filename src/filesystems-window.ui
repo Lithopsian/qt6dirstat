@@ -107,9 +107,6 @@
        <property name="text">
         <string>Rea&amp;d</string>
        </property>
-       <property name="default">
-        <bool>true</bool>
-       </property>
       </widget>
      </item>
      <item>
@@ -126,6 +123,7 @@
  <tabstops>
   <tabstop>fsTree</tabstop>
   <tabstop>normalCheckBox</tabstop>
+  <tabstop>refreshButton</tabstop>
   <tabstop>readButton</tabstop>
  </tabstops>
  <resources>

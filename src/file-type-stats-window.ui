@@ -85,9 +85,6 @@
          <property name="text">
           <string>&amp;Locate by Type</string>
          </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
         </widget>
        </item>
        <item>
