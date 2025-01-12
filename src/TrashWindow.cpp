@@ -502,6 +502,7 @@ void TrashWindow::deleteSelected()
     for ( const QString & trashRootPath : trashRootPaths )
 	deleteExpunged( TrashWindow::expungedDirPath( trashRootPath ) );
 
+    // If everything was restored (and the items deleted), then select the closest neighbour
     if ( _ui->treeWidget->selectedItems().isEmpty() )
 	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
 
@@ -527,10 +528,12 @@ void TrashWindow::restoreSelected()
 	if ( button == QMessageBox::Abort )
 	    break;
 
+	// Remember message box responses yes-to-all and no-to-all
 	if ( button == QMessageBox::YesToAll || button == QMessageBox::NoToAll )
 	    buttonResponse = button;
     }
 
+    // If everything was restored (and the items deleted), then select the closest neighbour
     if ( _ui->treeWidget->selectedItems().isEmpty() )
 	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
 
@@ -604,7 +607,6 @@ void TrashWindow::contextMenu( const QPoint & pos )
 
     const bool deleteEnabled  = _ui->deleteButton->isEnabled();
     const bool restoreEnabled = _ui->restoreButton->isEnabled();
-
     if ( deleteEnabled || restoreEnabled )
     {
 	menu.addSeparator();
@@ -655,10 +657,12 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     const auto error = [ this, &set ]( const QString & msg )
     {
 	setIcon( TW_NameCol, app()->dirTreeModel()->unreadableDirIcon() );
+
+	const QColor errorTextColor = app()->dirTreeModel()->dirReadErrColor();
 	set( TW_NameCol, Qt::AlignLeft, replaceCrLf( _entryName ) );
-	setForeground( TW_NameCol, app()->dirTreeModel()->dirReadErrColor() );
+	setForeground( TW_NameCol, errorTextColor );
 	set( TW_DirCol,  Qt::AlignLeft, msg );
-	setForeground( TW_DirCol, app()->dirTreeModel()->dirReadErrColor() );
+	setForeground( TW_DirCol, errorTextColor );
     };
 
     struct stat statInfo;
@@ -670,6 +674,9 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     }
 
     const bool isDir = S_ISDIR( statInfo.st_mode );
+    _totalSize = statInfo.st_size;
+    set( TW_SizeCol, Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
+
     if ( isDir )
     {
 	// The process will be killed if the window is closed, although it will spam the log about it
@@ -705,24 +712,20 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
 	return;
     }
 
-    _totalSize = statInfo.st_size;
-
     const QString mTime = mTimeLine.mid( TrashDir::trashInfoDateTag().size() );
 #if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
     _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toTime_t();
 #else
     _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toSecsSinceEpoch();
 #endif
+    set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
     const QString path = pathLine.mid( TrashDir::trashInfoPathTag().size() );
     QString name;
     QString originalDir;
     SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
-
-    set( TW_NameCol,    Qt::AlignLeft,  replaceCrLf( name ) );
-    set( TW_SizeCol,    Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
-    set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
-    set( TW_DirCol,     Qt::AlignLeft,  replaceCrLf( originalDir ) );
+    set( TW_NameCol, Qt::AlignLeft,  replaceCrLf( name ) );
+    set( TW_DirCol,  Qt::AlignLeft,  replaceCrLf( originalDir ) );
 
     const FileInfo fileInfo{ nullptr, nullptr, name, statInfo };
     setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );

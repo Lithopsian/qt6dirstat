@@ -268,8 +268,8 @@ namespace QDirStat
 
 	QString  _trashRoot;
 	QString  _entryName;
-	FileSize _totalSize;
-	time_t   _deletedMTime;
+	FileSize _totalSize{ 0 };
+	time_t   _deletedMTime{ 0 };
 
     };	// class FilesystemItem
 
