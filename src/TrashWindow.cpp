@@ -747,14 +747,14 @@ void TrashItem::processFinished( int exitCode, QProcess::ExitStatus exitStatus )
 
     if ( exitStatus == QProcess::CrashExit )
     {
-	// No output, just use the directory own size
+	// No useful output, just leave the directory own size
 	logError() << "'du' process crashed for " << _entryName << " in " << _trashRoot << Qt::endl;
     }
     else
     {
 	if ( exitCode != 0 )
 	{
-	    // du returns 1 for all errors, most likely permissions warnings, and may still return a size
+	    // du returns 1 for all errors, most likely permissions warnings, but may still return a size
 	    logWarning() << "'du' process exit code " << exitCode
 	                  << " for " << _entryName << " in " << _trashRoot << Qt::endl;
 	}
@@ -783,7 +783,7 @@ void TrashItem::deleteItem()
 	const QString infoName = _entryName % Trash::trashInfoSuffix();
 	moveToExpunged( Trash::infoDirPath( _trashRoot ).toUtf8(), expungedDirStr, infoName.toUtf8() );
 
-	// Even if the .trashinfo file is stuck, it won't show up any more
+	// Even if the .trashinfo file is still there, it won't show up in the tree any more
 	delete this;
     }
 }
@@ -860,7 +860,7 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 
 QVariant TrashItem::data( int column, int role ) const
 {
-    // This is just for the tooltip on columns that are likely to be long and elided
+    // This is just for the tooltip on columns that are elided and don't otherwise have a tooltip
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 

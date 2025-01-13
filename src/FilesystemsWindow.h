@@ -163,8 +163,7 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Override the model data, just for the tooltips for the device
-	 * and mount point columns.
+	 * Override the model data for the tooltips of elided columns.
 	 **/
 	QVariant data( int column, int role ) const override;
 

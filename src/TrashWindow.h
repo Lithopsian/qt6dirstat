@@ -109,7 +109,10 @@ namespace QDirStat
 	void calculateTotalSize();
 
 	/**
-	 * Clear and re-populate the window.
+	 * Clear and re-populate the window.  This is expected to be relatively
+	 * fast since all the relevant trash files will have been read
+	 * previously and are likely to still be cached, so no BusyPopup is
+	 * shown.
 	 *
 	 * To make the refresh as seemless as possible, the selected items are
 	 * stored and re-applied after the items are re-populated.  The
@@ -118,22 +121,34 @@ namespace QDirStat
 	void refresh();
 
 	/**
-	 * Permanently delete the selected items.
+	 * Permanently delete the selected items.  This is done by calling each
+	 * selected item to move its trash entry and trashinfo file into
+	 * a "qexpunged" directory, and then deleting all "qexpunged"
+	 * directories.  The directory delete operation may be relatively slow,
+	 * and the tree item deletion even slower, so a BusyPopup message is
+	 * shown during the entire operation.
 	 **/
 	void deleteSelected();
 
 	/**
-	 * Restore the selected items.
+	 * Restore the selected items to their original locations.  This is
+	 * done by calling each selected item to move the trash entry to its
+	 * original location and remove the corresponding trashinfo file.
+	 * Although the move and delete should be fast, the delete of the tree
+	 * items and subsequent repaints can be relatively slow and a BusyPopup
+	 * message is displayed during the entire operation.
 	 **/
 	void restoreSelected();
 
 	/**
 	 * Empty all Trash directories for the current user.  The method used
 	 * us to move all the files and trashinfo files in each Trash directory
-	 * into a "qexpunged" directory, and then delete that directory.  The
-	 * initial move should be very fast to reduce the chances of collisions
-	 * with further trash operations.  The subsequent delete may be rather
-	 * slow.
+	 * into a "qexpunged" directory, and then delete that directory.
+	 *
+	 * The initial move is very fast to reduce the chances of collisions
+	 * with further trash operations.  The subsequent delete may be
+	 * relatively slow and a BusyPopup message is shown during the entire
+	 * operation.
 	 **/
 	void empty();
 
@@ -153,6 +168,11 @@ namespace QDirStat
 	/**
 	 * Populate the window, select the first item, and resize the columns
 	 * to match the data as much as possible.
+	 *
+	 * Note that although this operation will be relatively slow if there
+	 * are many uncached trash entries, no BusyPopup is shown.  The called
+	 * is expected to use a BusyPopup since the application will be blocked
+	 * until the populate completes.
 	 **/
 	void populate();
 
@@ -187,7 +207,9 @@ namespace QDirStat
 
 
     /**
-     * Item class for the deleted items list.
+     * Item class for one trash entry.  This inherits both QTreeWidgetItem
+     * (which is not a QObject) and QObject so that it can send and receive
+     * a QProcess::finished signal.
      **/
     class TrashItem final : public QObject, public QTreeWidgetItem
     {
@@ -213,48 +235,69 @@ namespace QDirStat
 	 **/
 	FileSize totalSize() const { return _totalSize; }
 
-	void processFinished( int exitCode, QProcess::ExitStatus exitStatus );
-
 	/**
 	 * Permanently delete this trash item and the corresponding trashinfo
-	 * file.  This TrashItem then deletes itself.
+	 * file.  This TrashItem then deletes itself.  This may fail, primarily
+	 * for lack of permissions to the trash directories which is a highly
+	 * unexpected situation.  The only output in this case is a log
+	 * message and the trash entry will not be removed from the tree.
 	 *
 	 * Note that the object delete is intentionally synchronous.  This
-	 * function is  called with a BusyPopup showing and the delete
-	 * statements are often the slowest part of the delete.
+	 * function is called with a BusyPopup showing and the delete
+	 * statements are often the slowest part of the operation.
 	 **/
 	void deleteItem();
 
 	/**
-	 * Restore this trash item to its original location.  This will fail if
-	 * an item already exists with the same name, if the original directory
-	 * no longer exists, or if the current user has insufficient
-	 * permissions.  If the restore succeeds, the corresponding trashinfo
-	 * file is removed and this TrashItem deletes itself.
+	 * Restore this trash item to its original location.  To avoid common
+	 * reasons why this might fail, the parent directory and all its
+	 * ancestors are created if necessary (and possible).  If a file or
+	 * directory already exists with the same name as this item, the user
+	 * is queried for whether to replace it.  The restore still might fail
+	 * if if there are insufficient permissions to create the parent,
+	 * remove an exiting item, or create the new one. If the restore
+	 * succeeds, the corresponding trashinfo file is removed and this
+	 * TrashItem deletes itself.
+	 *
+	 * The return value is a StandardButton enum, either as provided in
+	 * 'buttonResponse' or as returned from a message box when user input
+	 * is requested.
 	 *
 	 * Note that QFile:rename() is used rather than the simpler C rename().
 	 * This matches the corresponding moveToTrash function, which will
-	 * copy-and-delete plain files on different filesystems.  Importantly,
-	 * it will also fail if the restored file already exists.
+	 * copy-and-delete plain files on different filesystems.
 	 *
 	 * Note that the delete is intentionally synchronous.  This function is
 	 * called with a BusyPopup showing and the delete statements are often
-	 * the slowest part of the delete.
+	 * the slowest part of the operation.
 	 **/
 	int restoreItem( bool singleItem, int buttonResponse );
+
+
+    protected slots:
+
+	/**
+	 * Parse the output of a du command.  This is expected to be a single
+	 * line starting with a series of plain digits representing the size in
+	 * bytes.
+	 *
+	 * The parsed value should always be greater than zero, being either
+	 * the own size of a directory (ie. 4kB) or the total size of the
+	 * directory and all its contents.  A value of zero indicates a failure
+	 * and is ignored.
+	 **/
+	void processFinished( int exitCode, QProcess::ExitStatus exitStatus );
 
 
     protected:
 
 	/**
-	 * Override the model data, just for the tooltip for the path
-	 * column.
+	 * Return the window widget that displays and owns this item.
 	 **/
 	QWidget * trashWindow() const { return treeWidget()->parentWidget(); }
 
 	/**
-	 * Override the model data, just for the tooltip for the path
-	 * column.
+	 * Override the model data for the tooltips of elided columns.
 	 **/
 	QVariant data( int column, int role ) const override;
 

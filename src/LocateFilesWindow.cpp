@@ -256,7 +256,7 @@ LocateListItem::LocateListItem( FileInfo * item ):
 
 QVariant LocateListItem::data( int column, int role ) const
 {
-    // This is just for the tooltip on columns that are likely to be long and elided
+    // This is just for the tooltip for elided values in the path column
     if ( role != Qt::ToolTipRole || column != LL_PathCol )
 	return QTreeWidgetItem::data( column, role );
 

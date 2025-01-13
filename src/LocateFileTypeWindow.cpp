@@ -247,7 +247,7 @@ PatternSearchResultItem::PatternSearchResultItem( const QString & path,
 
 QVariant PatternSearchResultItem::data( int column, int role ) const
 {
-    // This is just for the tooltip on columns that are likely to be long and elided
+    // This is just for the tooltip for elided values in the directory column
     if ( role != Qt::ToolTipRole || column != PSR_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
