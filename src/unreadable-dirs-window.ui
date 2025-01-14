@@ -35,7 +35,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&amp;Directories that could not be read</string>
+        <string notr="true">&amp;Directories that could not be read</string>
        </property>
        <property name="buddy">
         <cstring>treeWidget</cstring>
@@ -80,7 +80,7 @@
      <item>
       <widget class="QLabel" name="totalLabel">
        <property name="text">
-        <string>2 directories</string>
+        <string notr="true">2 directories</string>
        </property>
       </widget>
      </item>

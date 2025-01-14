@@ -72,7 +72,7 @@
      <item>
       <widget class="QLabel" name="resultsLabel">
        <property name="text">
-        <string>42 results</string>
+        <string notr="true">42 results</string>
        </property>
       </widget>
      </item>
