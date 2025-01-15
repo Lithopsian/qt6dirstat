@@ -565,6 +565,8 @@ void TrashWindow::empty()
 void TrashWindow::populate()
 {
     populateTree();
+
+    //Show after populating, or it hides the BusyPopup
     show();
 
     // Make sure something is selected, even if this window is not the active one
@@ -585,9 +587,9 @@ void TrashWindow::enableActions()
     _ui->deleteButton->setEnabled( itemSelected );
     _ui->restoreButton->setEnabled( itemSelected );
 
+    // Can't restore known "broken" trash items
     for ( const QTreeWidgetItem * item : selectedItems )
     {
-	// Don't allow restore of known "broken" trash items
 	if ( item->foreground( TW_NameCol ) == app()->dirTreeModel()->dirReadErrColor() )
 	{
 	    _ui->restoreButton->setEnabled( false );
@@ -693,7 +695,7 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     if ( !infoFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
     {
 	logWarning() << "Can't open " << trashInfoPath << ": " << infoFile.errorString() << Qt::endl;
-	error( tr( "Can't read trashinfo file" ) );
+	error( tr( "Can't read .trashinfo file" ) );
 	return;
     }
 
@@ -708,7 +710,7 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
 	 !mTimeLine.startsWith( TrashDir::trashInfoDateTag() ) )
     {
 	logWarning() << trashInfoPath << " format invalid" << Qt::endl;
-	error( tr( "Invalid trashinfo file format" ) );
+	error( tr( "Invalid .trashinfo file format" ) );
 	return;
     }
 
