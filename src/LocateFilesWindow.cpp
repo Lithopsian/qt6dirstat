@@ -256,7 +256,7 @@ LocateListItem::LocateListItem( FileInfo * item ):
 
 QVariant LocateListItem::data( int column, int role ) const
 {
-    // This is just for the tooltip on columns that are likely to be long and elided
+    // This is just for the tooltip for elided values in the path column
     if ( role != Qt::ToolTipRole || column != LL_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
@@ -278,10 +278,8 @@ bool LocateListItem::operator<( const QTreeWidgetItem & rawOther ) const
     {
 	case LL_SizeCol:  return _size  < other.size();
 	case LL_MTimeCol: return _mtime < other.mtime();
-	case LL_PathCol:  return _path  < other.path();
-	default:                 return QTreeWidgetItem::operator<( rawOther );
+	default:          return QTreeWidgetItem::operator<( rawOther );
     }
 
 
 }
-

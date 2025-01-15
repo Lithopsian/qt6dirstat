@@ -10,6 +10,10 @@
 #ifndef Trash_h
 #define Trash_h
 
+#include <unistd.h> // getuid()
+
+#include "Typedefs.h" // _L1
+
 
 namespace QDirStat
 {
@@ -27,6 +31,10 @@ namespace QDirStat
      * with any of them, i.e., files or directories moved to this trash can should
      * appear in the desktop's native trashcan implementation (the window you get
      * when you click on the trashcan icon on the desktop or in the file manager).
+     *
+     * Note that, starting in 5.15, Qt has a function QFile::moveToTrash() which
+     * would completely repace this class, but it doesn't appear to work 100%
+     * correctly.  For example, trashing broken symlinks always fails.
      **/
     class Trash final
     {
@@ -55,20 +63,76 @@ namespace QDirStat
         bool trash( const QString & path );
 
         /**
-         * Restore a file or directory from the trash to its original location.
-         * Return 'true' on success, 'false' on error.
+         * Return the path of the files directory for the trash directory
+         * 'trashDir'.
          **/
-//        static bool restore( const QString & path );
+        static QString homeTrash( const QString & homePath );
 
         /**
-         * Empty the trash can, i.e. delete all its contents permanently.
-         *
-         * This does not just affect files or directories moved to the trash with
-         * this class, but everything in all known trash directories, i.e. all
-         * trash directories that were used during the life time of the singleton
-         * of this class.
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
          **/
-//        static void empty();
+        static QString trashRoot( const QString & topDir )
+            { return topDir % "/.Trash"_L1; }
+
+        /**
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
+         **/
+        static QString mainTrashPath( const QString & trashRoot )
+            { return trashRoot % '/' % QString::number( getuid() ); }
+
+        /**
+         * Return the path of the main trash directory for a filesystem with
+         * top directory 'topDir'.
+         **/
+        static QString userTrashPath( const QString & trashRoot )
+            { return trashRoot % '-' % QString::number( getuid() ); }
+
+        /**
+         * Return the path of the files directory for the trash directory
+         * 'trashDir'.
+         **/
+        static QString filesDirPath( const QString & trashDir )
+            { return trashDir % "/files"_L1; }
+
+        /**
+         * Return the path of the info directory for the trash directory
+         * 'trashDir'.
+         **/
+        static QString infoDirPath( const QString & trashDir )
+            { return trashDir % "/info"_L1; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
+        static QString trashEntryPath( const QString & trashDir, const QString & filesEntry )
+            { return filesDirPath( trashDir ) % '/' % filesEntry; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
+        static QLatin1String trashInfoSuffix()
+            { return ".trashinfo"_L1; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
+        static QString trashInfoPath( const QString & trashDir, const QString & filesEntry )
+            { return infoDirPath( trashDir ) % '/' % filesEntry % trashInfoSuffix(); }
+
+        /**
+         * Return whether 'trashRoot' is a directory (not a symlink) and has
+         * the sticky bit (and execute permission) set.
+         *
+         * Note that if the lstat() call fails, including because the directory
+         * does not exist, this function returns false.  errno must be checked
+         * to distinguish the reason for the failure.
+         **/
+        static bool isValidMainTrash( const QString & trashRoot );
 
 
     protected:
@@ -92,13 +156,13 @@ namespace QDirStat
     /**
      * One trash directory. There might be several on a system:
      *
-     * - One in the user's home directory in $XDG_DATA_HOME/Trash
+     * - one in the user's home directory in $XDG_DATA_HOME/Trash
      *   or ~/.local/share/Trash if $XDG_DATA_HOME is not set or empty
      *
-     * - One in the toplevel directory (the mount point) of each filesystem:
+     * - one in the toplevel directory (the mount point) of each filesystem:
      *   $TOPLEVEL/.Trash/$UID
      *
-     * - If $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
+     * - if $TOPLEVEL/.Trash does not exist or does not pass some checks, one in
      *   $TOPLEVEL/.Trash-$UID
      **/
     class TrashDir final
@@ -121,7 +185,9 @@ namespace QDirStat
 
         /**
          * Create a .trashinfo file for a file or directory 'path' that will be
-         * named 'targetName' (the unique name) in the trash dir.
+         * named 'targetName' (the unique name) in the trash dir.  If possible,
+         * this is done in exclusive mode so the trashinfo name is gauranteed
+         * to be unique, but no attempt is made to retry if this fails.
          *
          * This might throw a FileException.
          **/
@@ -139,15 +205,39 @@ namespace QDirStat
         /**
          * Return the path of the "files" subdirectory of this trash dir.
          **/
-        QString filesPath() const { return _path % QLatin1String{ "/files" }; }
+        QString filesDirPath() const { return Trash::filesDirPath( _path ); }
+
+        /**
+         * Return the path of the "info" subdirectory of this trash directory.
+         **/
+        QString infoDirPath() const { return Trash::infoDirPath( _path ); }
+
+        /**
+         * Return the tag (first line) of a trashinfo file.
+         **/
+        static QLatin1String trashInfoTag()
+            { return "[Trash Info]"_L1; }
+
+        /**
+         * Return the path (second line) field name of a trashinfo file.
+         **/
+        static QLatin1String trashInfoPathTag()
+            { return "Path="_L1; }
+
+        /**
+         * Return the deletion date (third line) field name of a trashinfo
+         * file.
+         **/
+        static QLatin1String trashInfoDateTag()
+            { return "DeletionDate="_L1; }
 
 
     protected:
 
         /**
-         * Return the path of the "info" subdirectory of this trash dir.
+         * Return the path of a trashinfo file for this trash directory.
          **/
-        QString infoPath() const { return _path % QLatin1String{ "/info" }; }
+        QString infoPath( const QString & target) const { return Trash::trashInfoPath( _path, target ); }
 
 
     private:
@@ -155,6 +245,17 @@ namespace QDirStat
         QString _path;
 
     };  // class TrashDir
+
+
+    /**
+     * Print a TrashDir path to 'stream'.
+     **/
+    inline QTextStream & operator<<( QTextStream & stream, const TrashDir * trashDir )
+    {
+        stream << "TrashDir: " << trashDir->path();
+
+        return stream;
+    }
 
 }       // namespace QDirStat
 

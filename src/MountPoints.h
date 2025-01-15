@@ -392,8 +392,9 @@ namespace QDirStat
     {
     public:
 
-	MountPointIterator( bool all ):
+	MountPointIterator( bool all, bool duplicates = false ):
 	    _all{ all },
+	    _duplicates{ duplicates },
 	    _end{ MountPoints::cend() },
 	    _current{ find( MountPoints::cbegin() ) }
 	{}
@@ -409,11 +410,18 @@ namespace QDirStat
 
 	/**
 	 * Find the next mount point that is "normal", starting
-	 * from 'item', or any mount point if '_all' is true.
+	 * from 'item', or any mount point if '_all' is true,
+	 * or a duplicate mount point if '_duplicates' is true.
+	 *
+	 * _all is self-explanatory.
+	 * _duplicates can be used when _all is false but it is desired to
+	 * include bind mounts, which Trash needs.
 	 **/
 	MountPointMap::const_iterator find( MountPointMap::const_iterator current )
 	{
-	    while ( !_all && current != _end && !current.value()->isNormalMountPoint() )
+	    while ( current != _end &&
+	            !_all && !current.value()->isNormalMountPoint() &&
+		    ( !_duplicates || !current.value()->isDuplicate() ) )
 		++current;
 	    return current;
 	}
@@ -422,6 +430,7 @@ namespace QDirStat
     private:
 
 	bool _all;
+	bool _duplicates;
 
 	MountPointMap::const_iterator _end;
 	MountPointMap::const_iterator _current;

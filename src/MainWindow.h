@@ -339,6 +339,11 @@ namespace QDirStat
         void showFilesystems();
 
         /**
+         * Show all files in trash.
+         **/
+        void showTrash();
+
+        /**
          * Change the main window layout when triggered by an action.  The layout name
          * is found from the QAction data.
          **/

@@ -39,12 +39,12 @@ namespace
 QProcess * SysUtil::commandProcess( const QString & program, const QStringList & args )
 {
 
-    QProcess * process = new QProcess;
+    QProcess * process = new QProcess{};
 
     process->setProgram( program );
     process->setArguments( args );
     process->setProcessEnvironment( cProcessEnvironment() );
-    process->setProcessChannelMode( QProcess::MergedChannels ); // combine stdout and stderr
+    process->setProcessChannelMode( QProcess::MergedChannels ); // combine stderr into stdout
 
     return process;
 }
@@ -118,8 +118,10 @@ QString SysUtil::runCommand( const QString     & program,
 }
 
 
-QByteArray SysUtil::readLink( const QByteArray & path )
+QString SysUtil::symlinkTarget( const QString & pathIn )
 {
+    QByteArray path = pathIn.toUtf8();
+
 #ifdef PATH_MAX
     const int maxLen = PATH_MAX;
 #else
@@ -134,7 +136,7 @@ QByteArray SysUtil::readLink( const QByteArray & path )
     while ( len == buf.size() ) {
 	// readlink(2) will fill our buffer and not necessarily terminate with NUL;
 	if ( buf.size() >= maxLen )
-	    return QByteArray{};
+	    return QString{};
 
 	// double the size and try again
 	buf.resize( buf.size() * 2 );
@@ -142,7 +144,7 @@ QByteArray SysUtil::readLink( const QByteArray & path )
     }
 
     if (len == -1)
-	return QByteArray{};
+	return QString{};
 
     buf.resize( len );
     return buf;

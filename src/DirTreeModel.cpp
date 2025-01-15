@@ -900,7 +900,7 @@ QVariant DirTreeModel::columnIcon( FileInfo * item, int col ) const
 }
 
 
-QIcon DirTreeModel::itemTypeIcon( FileInfo * item ) const
+QIcon DirTreeModel::itemTypeIcon( const FileInfo * item ) const
 {
     if ( !item )
         return QIcon{};

@@ -133,6 +133,13 @@ namespace QDirStat
 	void cleanupFinished( int errorCount );
 
 	/**
+	 * Emitted when the one or more items have been moved to Trash.
+	 *
+	 * Note that this signal is emitted even if all the moves failed.
+	 **/
+	void trashFinished();
+
+	/**
 	 * Emitted after a cleanup is completed when the refresh policy
 	 * is AssumeDeleted.  There will be no refresh, so this is the only
 	 * indication that the tree is now stable.  The childDeleted signal

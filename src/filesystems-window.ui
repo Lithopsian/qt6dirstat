@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Mounted Filesystems</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icons/bind-mount.png</normaloff>:/icons/bind-mount.png</iconset>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
@@ -94,17 +98,14 @@
      <item>
       <widget class="QPushButton" name="refreshButton">
        <property name="text">
-        <string>Re&amp;fresh</string>
+        <string>&amp;Refresh</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="readButton">
        <property name="text">
-        <string>&amp;Read</string>
-       </property>
-       <property name="default">
-        <bool>true</bool>
+        <string>Rea&amp;d</string>
        </property>
       </widget>
      </item>

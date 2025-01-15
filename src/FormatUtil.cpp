@@ -85,19 +85,22 @@ QString QDirStat::symbolicMode( mode_t mode )
     }();
 
     // User
+    const bool isXUsr = mode & S_IXUSR;
     const QChar uRead    = ( mode & S_IRUSR ) ? u'r' : u'-';
     const QChar uWrite   = ( mode & S_IWUSR ) ? u'w' : u'-';
-    const QChar uExecute = ( mode & S_ISUID ) ? u's' : ( mode & S_IXUSR ) ? u'x' : u'-';
+    const QChar uExecute = ( mode & S_ISUID ) ? isXUsr ? u's' : u'S' : isXUsr ? u'x' : u'-';
 
     // Group
+    const bool isXGrp = mode & S_IXGRP;
     const QChar gRead    = ( mode & S_IRGRP ) ? u'r' : u'-';
     const QChar gWrite   = ( mode & S_IWGRP ) ? u'w' : u'-';
-    const QChar gExecute = ( mode & S_ISGID ) ? u's' : ( mode & S_IXGRP ) ? u'x' : u'-';
+    const QChar gExecute = ( mode & S_ISGID ) ? isXGrp ? u's' : u'S' : isXGrp ? u'x' : u'-';
 
     // Other
+    const bool isXOth = mode & S_IXOTH;
     const QChar oRead    = ( mode & S_IROTH ) ? u'r' : u'-';
     const QChar oWrite   = ( mode & S_IWOTH ) ? u'w' : u'-';
-    const QChar oExecute = ( mode & S_ISVTX ) ? u't' : ( mode & S_IXOTH ) ? u'x' : u'-';
+    const QChar oExecute = ( mode & S_ISVTX ) ? isXOth ? u't' : u'T' : isXOth ? u'x' : u'-';
 
     return type % uRead % uWrite % uExecute % gRead % gWrite % gExecute % oRead % oWrite % oExecute;
 }

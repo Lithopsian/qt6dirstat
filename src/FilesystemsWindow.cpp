@@ -259,8 +259,7 @@ FilesystemItem::FilesystemItem( MountPoint * mountPoint ):
 
 QVariant FilesystemItem::data( int column, int role ) const
 {
-    // This is just for the tooltip on columns that are likely to be long and elided
-//    if ( role != Qt::ToolTipRole || ( column != FS_DeviceCol && column != FS_MountPathCol ) )
+    // This is just for the tooltip on columns that are elided and don't otherwise have a tooltip
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 

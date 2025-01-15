@@ -440,21 +440,32 @@ void FileTypeStatsWindow::enableActions()
 
 void FileTypeStatsWindow::contextMenu( const QPoint & pos )
 {
-    // See if the right click was actually on an item
-    if ( !_ui->treeWidget->itemAt( pos ) )
-	return;
-
-    // The clicked item will always be the current item now
-    const PatternCategory * patternCategory = currentItemPattern();
-    if ( !patternCategory )
-	return;
-
-    _ui->actionLocate->setText( tr( "&Locate files matching " ) % patternCategory->pattern );
-    _ui->actionSizeStats->setText( tr( "&Size statistics matching " ) % patternCategory->pattern );
-
     QMenu menu;
-    menu.addAction( _ui->actionLocate );
-    menu.addAction( _ui->actionSizeStats );
+    menu.addAction( _ui->actionRefresh );
+
+    // See if the right click was actually on an item
+    if ( _ui->treeWidget->itemAt( pos ) )
+    {
+	// The clicked item will always be the current item now
+	const PatternCategory * patternCategory = currentItemPattern();
+	if ( patternCategory )
+	{
+	    const QString & pattern    = patternCategory->pattern;
+	    const bool      hasPattern = !pattern.isEmpty();
+	    const QString locateText =
+		hasPattern ? tr( "&Locate files matching " ) % pattern : tr( "&Locate files" );
+	    _ui->actionLocate->setText( locateText );
+
+	    const QString sizeStatsText =
+		hasPattern ? tr( "&Size statistics matching " ) % pattern : tr( "&Size statistics" );
+	    _ui->actionSizeStats->setText( sizeStatsText );
+
+	    menu.addSeparator();
+	    menu.addAction( _ui->actionLocate );
+	    menu.addAction( _ui->actionSizeStats );
+	}
+    }
+
     menu.exec( _ui->treeWidget->mapToGlobal( pos ) );
 }
 

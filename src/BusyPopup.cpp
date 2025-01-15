@@ -13,7 +13,6 @@
 #include "BusyPopup.h"
 #include "Logger.h"
 #include "MainWindow.h"
-#include "QDirStatApp.h"
 
 
 using namespace QDirStat;
@@ -31,18 +30,15 @@ namespace
 	QEventLoop eventLoop;
 	QObject::connect( busyPopup, &BusyPopup::painted, &eventLoop, &QEventLoop::quit );
 	QTimer::singleShot( 1000, &eventLoop, &QEventLoop::quit );
-	logDebug() << Qt::endl;
 	eventLoop.exec();
-	logDebug() << Qt::endl;
 	eventLoop.processEvents(); // make sure the main window gets reset to blank panels
-	logDebug() << Qt::endl;
     }
 
 } // namespace
 
 
-BusyPopup::BusyPopup( const QString & text ):
-    QLabel{ text, app()->mainWindow(), Qt::SplashScreen }
+BusyPopup::BusyPopup( const QString & text, QWidget * parent ):
+    QLabel{ text, parent, Qt::SplashScreen }
 {
     setMargin( 16 );
     setWindowTitle( QString{} );

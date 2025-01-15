@@ -54,7 +54,7 @@ void MainWindow::showUnpkgFiles( const UnpkgSettings & unpkgSettings )
 	return;
     }
 
-    BusyPopup msg{ tr( "Reading package database..." ) };
+    BusyPopup msg{ tr( "Reading package database..." ), this };
 
     setUnpkgExcludeRules( unpkgSettings );
     setUnpkgFilters( unpkgSettings );

@@ -30,11 +30,11 @@ namespace
      * Return the full name including path of 'entryName' in directory
      * 'dirName', accounting for the leading "/".
      **/
-    QString fullName( const QString & dirName, const QString & entryName )
+    QString fullName( const QString & dirName, const QByteArray & entryName )
     {
 	// Avoid leading // when in root dir
 	if ( dirName == "/"_L1 )
-	    return '/' % entryName;
+	    return '/' + entryName;
 
 	return dirName % '/' % entryName;
     }
@@ -129,14 +129,14 @@ namespace
      * mount point is expensive), so the result of this check is cached for
      * all files in this job/directory.
      **/
-    IsNtfs handleNtfsHardLinks( IsNtfs          isNtfs,
-                                const QString & dir,
+    IsNtfs handleNtfsHardLinks( IsNtfs             isNtfs,
+                                const QString    & dir,
 #if VERBOSE_NTFS_HARD_LINKS
-                                const QString & name,
+                                const QByteArray & name,
 #else
-                                const QString &,
+                                const QByteArray &,
 #endif
-                                struct stat   & statInfo )
+                                struct stat      & statInfo )
     {
 	if ( isNtfs == NotChecked )
 	{
@@ -311,7 +311,6 @@ void DirReadJob::finished()
 
 
 
-
 LocalDirReadJob::LocalDirReadJob( DirTree * tree,
                                   DirInfo * dir,
                                   bool      applyFileChildExcludeRules ):
@@ -328,7 +327,7 @@ void LocalDirReadJob::startReading()
     // logDebug() << dir() << Qt::endl;
 
     // Directories without 'x' permission can be opened here, but stat will fail on the contents
-    DIR * diskDir = ::opendir( _dirName.toUtf8() );
+    DIR * diskDir = opendir( _dirName.toUtf8() );
     if ( !diskDir )
     {
 	switch ( errno )
@@ -359,19 +358,19 @@ void LocalDirReadJob::startReading()
     // by i-number on disk, so (at least with rotational disks) seek times
     // are minimized by this strategy.
     //
-    // We need a QMultiMap, not just a map: If a file has multiple hard links
+    // We need a QMultiMap, not just a map: if a file has multiple hard links
     // in the same directory, a QMap would store only one of them, all others
     // would go missing in the DirTree.
-    QMultiMap<ino_t, QString> entryMap;
+    QMultiMap<ino_t, QByteArray> entryMap;
     struct dirent * entry;
     while ( ( entry = readdir( diskDir ) ) )
     {
-	const QString entryName = QString::fromUtf8( entry->d_name );
-	if ( entryName != "."_L1 && entryName != ".."_L1 )
+	const QByteArray entryName = entry->d_name;
+	if ( entryName != "." && entryName != ".." )
 	    entryMap.insert( entry->d_ino, entryName );
     }
 
-    for ( const QString & entryName : asConst( entryMap ) )
+    for ( const QByteArray & entryName : asConst( entryMap ) )
     {
 	const QString fullEntryName = fullName( _dirName, entryName );
 
@@ -384,7 +383,7 @@ void LocalDirReadJob::startReading()
 	    }
 	    else  // non-directory child
 	    {
-		if ( entryName == QLatin1String{ DEFAULT_CACHE_NAME } ) // .qdirstat.cache.gz found
+		if ( entryName == DEFAULT_CACHE_NAME ) // .qdirstat.cache.gz found
 		{
 		    //logDebug() << "Found cache file " << DEFAULT_CACHE_NAME << Qt::endl;
 

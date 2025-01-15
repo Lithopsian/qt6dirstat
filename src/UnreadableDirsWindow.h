@@ -16,15 +16,11 @@
 #include <QTreeWidgetItem>
 
 #include "ui_unreadable-dirs-window.h"
-#include "Subtree.h"
 
 
 namespace QDirStat
 {
-    class DirTree;
-    class FileInfo;
-    class FileTypeStats;
-    class MimeCategory;
+    class DirInfo;
 
     enum UnreadableDirectories
     {
@@ -68,7 +64,7 @@ namespace QDirStat
 	 *
 	 * Note that this widget will destroy itself upon window close.
 	 **/
-	UnreadableDirsWindow( QWidget *	parent = nullptr );
+	UnreadableDirsWindow( QWidget * parent = nullptr );
 
 	/**
 	 * Destructor.
@@ -133,8 +129,7 @@ namespace QDirStat
     protected:
 
 	/**
-	 * Override the model data, just for the tooltip for the path
-	 * column.
+	 * Override the model data for the tooltips of elided columns.
 	 **/
 	QVariant data( int column, int role ) const override;
 

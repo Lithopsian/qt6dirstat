@@ -138,8 +138,8 @@ namespace
 
 
     /**
-     * Add all the packages to the DirTree, including the 'package
-     * summary' root.
+     * Add all the packages to the DirTree, as children of a top-level package
+     * summary.
      **/
     void addToTree( DirTree * tree, const PkgInfoList & pkgList )
     {
@@ -213,7 +213,7 @@ namespace
 
 	logInfo() << "File list cache created with "
 	          << pkgList.size() - nonCachePkgList.size() << " packages and "
-	          << fileListCache->size() << " files" << Qt::endl;
+	          << fileListCache->size() << " pathnames" << Qt::endl;
 
 	// Return any remaining packages to be processed asynchronously
 	pkgList.swap( nonCachePkgList );
@@ -228,7 +228,7 @@ namespace
                                  const PkgInfoList & pkgList,
                                  int                 maxParallelProcesses )
     {
-	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses, true };
+	ProcessStarter * processStarter = new ProcessStarter{ maxParallelProcesses };
 
 	for ( PkgInfo * pkg : pkgList )
 	{
@@ -240,7 +240,8 @@ namespace
 	    }
 	}
 
-	processStarter->start();
+	// Tell the ProcessStarter it is allowed to die now
+	processStarter->noMoreProcesses();
     }
 
 } // namespace
@@ -479,6 +480,9 @@ void AsyncPkgReadJob::readFileListFinished( int exitCode, QProcess::ExitStatus e
     // Always get this job out of the blocked queue and clean up the file list process
     tree()->unblock( this );
     QProcess * senderProcess = qobject_cast<QProcess *>( sender() );
+    if ( !senderProcess)
+	return;
+
     senderProcess->deleteLater();
 
     if ( exitStatus == QProcess::CrashExit )

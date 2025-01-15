@@ -39,6 +39,7 @@
 #include "Settings.h"
 #include "SignalBlocker.h"
 #include "SysUtil.h"
+#include "TrashWindow.h"
 #include "UnreadableDirsWindow.h"
 #include "Version.h"
 
@@ -476,7 +477,8 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     updateWindowTitle( QString() );
     app()->dirTree()->sendFinished();
 
-    QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ),
+    QMessageBox errorPopup{ QMessageBox::Warning,
+                            tr( "Error" ),
                             pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) };
     errorPopup.setDetailedText( ex.what() );
     errorPopup.exec();
@@ -528,7 +530,7 @@ void MainWindow::readPkg( const PkgFilter & pkgFilter )
     _futureSelection.setUrl( PkgInfo::pkgSummaryUrl() );
     updateWindowTitle( pkgFilter.url() );
     pkgQuerySetup();
-    BusyPopup msg{ tr( "Reading package database..." ) };
+    BusyPopup msg{ tr( "Reading package database..." ), this };
 
     tree->readPkg( pkgFilter );
     app()->selectionModel()->setCurrentItem( app()->firstToplevel() );
@@ -942,6 +944,14 @@ void MainWindow::showFileAgeStats()
 }
 
 
+void MainWindow::showTrash()
+{
+    BusyPopup msg{ tr( "Searching Trash directories..." ), this };
+
+    TrashWindow::populateSharedInstance();
+}
+
+
 void MainWindow::showFilesystems()
 {
     FilesystemsWindow::populateSharedInstance( this );
@@ -1066,7 +1076,7 @@ void MainWindow::updateActions()
     const auto actions = _ui->menuDiscover->actions();
     for ( QAction * action : actions )
     {
-	if ( action != _ui->actionShowFilesystems )
+	if ( action != _ui->actionShowFilesystems && action != _ui->actionShowTrash )
 	    action->setEnabled( isTree );
     }
 

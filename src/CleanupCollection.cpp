@@ -525,6 +525,8 @@ void CleanupCollection::moveToTrash()
     outputWindow->showAfterTimeout();
 
     // Move all selected items to trash
+    QEventLoop eventLoop;
+    int count = 0;
     for ( const FileInfo * item : selectedItems )
     {
 	if ( _trash->trash( item->path() ) )
@@ -532,12 +534,16 @@ void CleanupCollection::moveToTrash()
 	else
 	    outputWindow->addStderr( tr( "Move to trash failed for " ) % item->path() );
 
-	// Give the output window a chance to display before this loop completes
-	QEventLoop eventLoop;
-	eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
+	// Give the output window a chance to display progress
+	if ( ++count > 10 )
+	{
+	    count = 0;
+	    eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
+	}
     }
 
     outputWindow->noMoreProcesses();
+    emit trashFinished();
 }
 
 

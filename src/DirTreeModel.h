@@ -107,7 +107,7 @@ namespace QDirStat
 	 * Return the icon indicate an item's type (file, directory etc.)
 	 * or a null icon if the type cannot be determined.
 	 **/
-	QIcon itemTypeIcon( FileInfo * item ) const;
+	QIcon itemTypeIcon( const FileInfo * item ) const;
 
 	/**
 	 * Open a pkg URL: Read installed packages that match the specified

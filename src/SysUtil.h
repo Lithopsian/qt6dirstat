@@ -31,12 +31,12 @@ namespace QDirStat
     {
 	/**
 	 * Return the flags to use with fstatat():
-	 * - AT_SYMLINK_NOFOLLOW means that the call behaves link lstat(), that
+	 * - AT_SYMLINK_NOFOLLOW means that the call behaves like lstat(), that
 	 * is it returns information about symbolic links, and not about the
 	 * target of the link;
 	 * - AT_NO_AUTOMOUNT means that directories with auto-mounts should not
 	 * be mounted, and information is returned about the directory itself
-	 * unless it is already mounted.  This flag did not exists before
+	 * unless it is already mounted.  This flag did not exist before
 	 * kernel 2.6.38, was ignored starting with kernel 3.1, and became the
 	 * default with kernel 4.11, so almost pointless.
 	 **/
@@ -52,13 +52,30 @@ namespace QDirStat
 	 * command.  Symlinks are not followed and, as far as is possible,
 	 * auto-mounts are not mounted.
 	 **/
-	inline int stat( int dirFd, const QString & path, struct stat & statInfo )
-	    { return fstatat( dirFd, path.toUtf8(), &statInfo, statFlags() ); }
+	inline int stat( int dirFd, const char * path, struct stat & statInfo )
+	    { return fstatat( dirFd, path, &statInfo, statFlags() ); }
 	inline int stat( const QString & path, struct stat & statInfo )
 	    { return fstatat( AT_FDCWD, path.toUtf8(), &statInfo, statFlags() ); }
 
 	/**
-	 * Return true if the specified command is available and executable.
+	 * Return true if 'file' exists (and is visible to the current user).
+	 **/
+	inline bool exists( const char * file )
+	    { return faccessat( AT_FDCWD, file, F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	inline bool exists( const QString & file )
+	    { return faccessat( AT_FDCWD, file.toUtf8(), F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+
+	/**
+	 * Return true if the current user has access to files in 'dir'.
+	 **/
+	inline bool canAccess( const char * dir )
+	    { return faccessat( AT_FDCWD, dir, R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	inline bool canAccess( const QString & dir )
+	    { return faccessat( AT_FDCWD, dir.toUtf8(), R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+
+	/**
+	 * Return true if 'command' is available and executable (possibly at a
+	 * symlink target).
 	 **/
 	inline bool haveCommand( const char * command )
 	    { return faccessat( AT_FDCWD, command, X_OK, AT_EACCESS ) == 0; }
@@ -122,17 +139,6 @@ namespace QDirStat
 	QString homeDir( uid_t uid );
 
 	/**
-	 * Read the (first level) target of a symbolic link. Unlike
-	 * symlinkTarget(), this does not make any assumptions of name
-	 * encoding in the filesystem; it just uses bytes.
-	 *
-	 * This is a more user-friendly version of readlink(2).
-	 *
-	 * This returns an empty QByteArray if 'path' is not a symlink.
-	 **/
-	QByteArray readLink( const QByteArray & path );
-
-	/**
 	 * Return the (first level) target of a symbolic link, i.e. the path
 	 * that the link points to. That target may again be a symlink;
 	 * this function does not follow multiple levels of symlinks.
@@ -141,8 +147,7 @@ namespace QDirStat
 	 *
 	 * This function assumes UTF-8 encoding of names in the filesystem.
 	 **/
-	inline QString symlinkTarget( const QString & path )
-	    { return readLink( path.toUtf8() ); }
+	QString symlinkTarget( const QString & path );
 
 	/**
 	 * Return the last path component of a file name.
