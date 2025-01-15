@@ -77,6 +77,24 @@ namespace QDirStat
 	 **/
 	void closeAllExcept( const QModelIndex & branch );
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+	/**
+	 * Re-display the whole viewport as rows are updated during a read.
+	 * This is necessary because of optimisations introduced in Qt6 that
+	 * attempt to restrict re-paints only to the portion of the updated
+	 * data visual rectangle that is visible in the viewport.  This fails
+	 * because the first-level children are not picked up by the view if
+	 * they are expanded too early, and the row order changes as the rows
+	 * are updated.  Passing an invalid model index range to the
+	 * dataChanged() signal would achieve the same result, but starting in
+	 * Qt 6.9, that spams the log.
+	 *
+	 * Note that this is only strictly necessary when the indexes form a
+	 * valid range, but that should always be the case for us.
+	 **/
+	void dataChanged( const QModelIndex &, const QModelIndex &, const QList<int> & ) override
+	    { viewport()->update(); }
+#endif
 
     protected slots:
 
