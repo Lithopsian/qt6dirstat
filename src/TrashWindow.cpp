@@ -134,7 +134,9 @@ namespace
      **/
     int currentIndex( QTreeWidget * treeWidget )
     {
-	return treeWidget->indexOfTopLevelItem( treeWidget->currentItem() );
+	const auto selectedItems = treeWidget->selectedItems();
+	const auto item = selectedItems.isEmpty() ? treeWidget->currentItem() : selectedItems.first();
+	return treeWidget->indexOfTopLevelItem( item );
     }
 
 
