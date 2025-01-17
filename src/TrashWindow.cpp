@@ -44,7 +44,45 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return whether '
+     * Returns whether
+     **/
+    bool validTrashinfo( const QString & tagLine, const QString & pathLine, const QString & mTimeLine )
+    {
+	if ( tagLine != TrashDir::trashInfoTag() )
+	    return false;
+
+	if ( pathLine.size() <= TrashDir::trashInfoPathTag().size() )
+	    return false;
+
+	if ( !pathLine.startsWith( TrashDir::trashInfoPathTag() ) )
+	    return false;
+
+	if ( mTimeLine.size() <= TrashDir::trashInfoDateTag().size() )
+	    return false;
+
+	if ( !mTimeLine.startsWith( TrashDir::trashInfoDateTag() ) )
+	    return false;
+
+	return true;
+    }
+
+
+    /**
+     * Return 'mTime' converted to the number of seconds since 1970.  'mTime'
+     * is expected to be a string in ISO date format.
+     **/
+    time_t stringToMTime( const QString & mTime )
+    {
+#if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
+	return QDateTime::fromString( mTime, Qt::ISODate ).toTime_t();
+#else
+	return QDateTime::fromString( mTime, Qt::ISODate ).toSecsSinceEpoch();
+#endif
+    }
+
+
+    /**
+     * Return whether 'entryName' is "." or "..".
      **/
     bool isDotOrDotDot( const char * entryName )
     {
@@ -96,7 +134,9 @@ namespace
      **/
     int currentIndex( QTreeWidget * treeWidget )
     {
-	return treeWidget->indexOfTopLevelItem( treeWidget->currentItem() );
+	const auto selectedItems = treeWidget->selectedItems();
+	const auto item = selectedItems.isEmpty() ? treeWidget->currentItem() : selectedItems.first();
+	return treeWidget->indexOfTopLevelItem( item );
     }
 
 
@@ -565,6 +605,8 @@ void TrashWindow::empty()
 void TrashWindow::populate()
 {
     populateTree();
+
+    // Show after populating, or it hides the BusyPopup
     show();
 
     // Make sure something is selected, even if this window is not the active one
@@ -585,9 +627,9 @@ void TrashWindow::enableActions()
     _ui->deleteButton->setEnabled( itemSelected );
     _ui->restoreButton->setEnabled( itemSelected );
 
+    // Can't restore known "broken" trash items
     for ( const QTreeWidgetItem * item : selectedItems )
     {
-	// Don't allow restore of known "broken" trash items
 	if ( item->foreground( TW_NameCol ) == app()->dirTreeModel()->dirReadErrColor() )
 	{
 	    _ui->restoreButton->setEnabled( false );
@@ -693,7 +735,7 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     if ( !infoFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
     {
 	logWarning() << "Can't open " << trashInfoPath << ": " << infoFile.errorString() << Qt::endl;
-	error( tr( "Can't read trashinfo file" ) );
+	error( tr( "Can't read .trashinfo file" ) );
 	return;
     }
 
@@ -701,31 +743,22 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     const QString tagLine   = in.readLine();
     const QString pathLine  = in.readLine();
     const QString mTimeLine = in.readLine();
-    if ( tagLine != TrashDir::trashInfoTag() ||
-	 pathLine.size() <= TrashDir::trashInfoPathTag().size() ||
-	 !pathLine.startsWith( TrashDir::trashInfoPathTag() ) ||
-	 mTimeLine.size() <= TrashDir::trashInfoDateTag().size() ||
-	 !mTimeLine.startsWith( TrashDir::trashInfoDateTag() ) )
+    if ( !validTrashinfo( tagLine, pathLine, mTimeLine ) )
     {
 	logWarning() << trashInfoPath << " format invalid" << Qt::endl;
-	error( tr( "Invalid trashinfo file format" ) );
+	error( tr( "Invalid .trashinfo file format" ) );
 	return;
     }
 
-    const QString mTime = mTimeLine.mid( TrashDir::trashInfoDateTag().size() );
-#if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
-    _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toTime_t();
-#else
-    _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toSecsSinceEpoch();
-#endif
+    _deletedMTime = stringToMTime( mTimeLine.mid( TrashDir::trashInfoDateTag().size() ) );
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
     const QString path = pathLine.mid( TrashDir::trashInfoPathTag().size() );
     QString name;
     QString originalDir;
     SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
-    set( TW_NameCol, Qt::AlignLeft,  replaceCrLf( name ) );
-    set( TW_DirCol,  Qt::AlignLeft,  replaceCrLf( originalDir ) );
+    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( name ) );
+    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( originalDir ) );
 
     const FileInfo fileInfo{ nullptr, nullptr, name, statInfo };
     setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );
