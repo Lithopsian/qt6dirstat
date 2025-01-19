@@ -359,56 +359,55 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
     if ( !_root )
 	return;
 
-    // Make a list of items that are still accessible in the real world
+    // Make a list of directories that are still accessible in the real world
     FileInfoSet items;
     for ( FileInfo * item : refreshSet )
     {
-	// During a refresh, some items may already have been deleted
-	if ( item && item->checkMagicNumber() )
-	{
-	    // Check the item is still accessible on disk
-	    // Pseudo-dirs (shouldn't be here) will implicitly fail the check
-	    while ( !SysUtil::exists( item->url() ) )
-	    {
-		if ( item == root() || item->parent() == root() )
-		{
-		    // just try a full refresh, it will throw if even that isn't accessible any more
-		    //logDebug() << item->parent() << " " << _root << Qt::endl;
-		    refresh( item->toDirInfo() );
-		    return;
-		}
+	// Magic number checks here are likely redundant because nothing has been done yet
+	if ( !item || !item->checkMagicNumber() )
+	    continue;
 
-		// Desperately try the parent of items that no longer exist
-		item = item->parent();
+	// Parents of pseudo-dirs and plain files are refreshed
+	if ( !item->isDirInfo() || item->isPseudoDir() )
+	{
+	    item = item->parent();
+	    if ( !item || !item->checkMagicNumber() )
+		continue;
+	}
+
+	// Check the item is still accessible on disk
+	while ( !SysUtil::exists( item->url() ) )
+	{
+	    if ( item == root() || item->parent() == root() )
+	    {
+		// just try a full refresh, it will throw if even that isn't accessible any more
+		//logDebug() << item->parent() << " " << _root << Qt::endl;
+		refresh( item->toDirInfo() );
+		return;
 	    }
 
-	    // Add an item that we have full access to
-	    items << item;
+	    // Desperately try the parent of items that no longer exist
+	    item = item->parent();
 	}
+
+	// Add an item that we have full access to
+	items << item;
     }
 
     // Refresh the subtrees that we have left
     const auto normalizedItems = items.normalized();
     for ( FileInfo * item : normalizedItems )
     {
-	// Need to check the magic number here again because a previous
-	// iteration step might have made the item invalid already
+	// Check magic numbers again here in case a previous iteration deleted it ...
+	// ... although the checks and normalisation steps should avoid this
 	if ( item->checkMagicNumber() )
-	{
-	    if ( item->isDirInfo() )
-		refresh( item->toDirInfo() );
-	    else if ( item->parent() )
-		refresh( item->parent() );
-	}
+	    refresh( item->toDirInfo() );
     }
 }
 
 
 void DirTree::refresh( DirInfo * subtree )
 {
-    if ( subtree->isPseudoDir() )
-	subtree = subtree->parent();
-
     if ( subtree == root() || subtree->parent() == root() )
     {
 	// Refresh all (from first toplevel)
