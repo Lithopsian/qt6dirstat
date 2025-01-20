@@ -651,6 +651,7 @@ void DirTreeModel::loadIcons()
     _charDeviceIcon    = QIcon( iconDir % "char-device.png"_L1    );
     _specialIcon       = QIcon( iconDir % "special.png"_L1        );
     _pkgIcon           = QIcon( iconDir % "folder-pkg.png"_L1     );
+    _atticIcon = _dirIcon;
 }
 
 

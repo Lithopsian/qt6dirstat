@@ -231,11 +231,6 @@ namespace QDirStat
 	const QIcon & mountPointIcon() const { return _mountPointIcon; }
 
 	/**
-	 * Return the resource path of the network mount point icon.
-	 **/
-	const QIcon & networkIcon() const { return _networkIcon; }
-
-	/**
 	 * Set the icon size of a QTreeView's items based on the configured
 	 * DirTree icon size.
 	 **/
@@ -497,7 +492,6 @@ namespace QDirStat
 	QIcon  _symlinkIcon;
 	QIcon  _unreadableDirIcon;
 	QIcon  _mountPointIcon;
-	QIcon  _networkIcon;
 	QIcon  _stopIcon;
 	QIcon  _excludedIcon;
 	QIcon  _blockDeviceIcon;
