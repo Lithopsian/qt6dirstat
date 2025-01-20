@@ -37,6 +37,7 @@ multiple patterns;
 - symbolic links are now supported for dpkg packages, essential for many Debian and Ubuntu
 installations with merged /usr directories, and the fairly uncommon diversions are also
 supported;
+- there is a dialog to show and manipulate trash directories, including emptying and restoring items;
 - a number of crashes and freezes have been fixed, as well as lot of less serious problems;
 - configurability is much improved with: an extra tab in the settings dialog for the Treemap; the
 settings on the general tab taking effect without having to restart the program; the toolbars can
