@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>558</height>
+    <width>563</width>
+    <height>586</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -281,32 +281,17 @@ Only Cleanups with icons appear in the main toolbar</string>
           </item>
           <item>
            <widget class="QToolBox" name="toolBox">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>260</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Options, refresh policy, output window policy, and command shell</string>
-            </property>
-            <property name="statusTip">
-             <string/>
             </property>
             <widget class="QWidget" name="optionsPage">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>256</width>
-               <height>122</height>
+               <width>232</width>
+               <height>127</height>
               </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Recurse, confirmation, and refresh policy options</string>
@@ -383,6 +368,19 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </item>
                </layout>
               </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="worksForPage">
@@ -390,15 +388,9 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>183</width>
-               <height>86</height>
+               <width>250</width>
+               <height>131</height>
               </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Works for directories, files, pseudo-entries</string>
@@ -437,6 +429,19 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </property>
                </widget>
               </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="outputWindowPage">
@@ -444,15 +449,9 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>238</width>
-               <height>123</height>
+               <width>250</width>
+               <height>131</height>
               </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Output window display policy</string>
@@ -563,6 +562,19 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </item>
                </layout>
               </item>
+              <item>
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="shellPage">
@@ -570,15 +582,9 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>224</width>
-               <height>77</height>
+               <width>250</width>
+               <height>131</height>
               </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="toolTip">
               <string>Execution shell for commands</string>
@@ -638,6 +644,19 @@ Only Cleanups with icons appear in the main toolbar</string>
                  <bool>true</bool>
                 </property>
                </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
