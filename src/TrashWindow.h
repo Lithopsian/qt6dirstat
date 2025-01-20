@@ -189,6 +189,14 @@ namespace QDirStat
 	 **/
 	void keyPressEvent( QKeyEvent * event ) override;
 
+	/**
+	 * Detect theme changes.  The window is refreshed if there is a palette
+	 * change, in case there are any error rows.
+	 *
+	 * Reimplemented from QWidget.
+	 **/
+	void changeEvent( QEvent * event ) override;
+
 
     private:
 

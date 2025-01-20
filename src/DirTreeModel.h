@@ -216,19 +216,16 @@ namespace QDirStat
 	void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override;
 
 	/**
-	 * Return the resource path of the directory icon.
+	 * Tree icon getters.
 	 **/
-	const QIcon & dirIcon() const { return _dirIcon; }
-
-	/**
-	 * Return the resource path of the unreadable directory icon.
-	 **/
+	const QIcon & dirIcon()           const { return _dirIcon; }
 	const QIcon & unreadableDirIcon() const { return _unreadableDirIcon; }
-
-	/**
-	 * Return the resource path of the mount point icon.
-	 **/
-	const QIcon & mountPointIcon() const { return _mountPointIcon; }
+	const QIcon & mountPointIcon()    const { return _mountPointIcon; }
+	const QIcon & fileIcon()          const { return _fileIcon; }
+	const QIcon & symlinkIcon()       const { return _symlinkIcon; }
+	const QIcon & blockDeviceIcon()   const { return _blockDeviceIcon; }
+	const QIcon & charDeviceIcon()    const { return _charDeviceIcon; }
+	const QIcon & specialIcon()       const { return _specialIcon; }
 
 	/**
 	 * Set the icon size of a QTreeView's items based on the configured
