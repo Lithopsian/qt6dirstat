@@ -633,6 +633,7 @@ namespace
 	    setCountLabel( ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );
 	    setCountLabel( ui->pkgSummaryFileCountLabel,   pkg->totalFiles(),         prefix );
 	    setCountLabel( ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs(),       prefix );
+	    setTimeLabel ( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
 	}
 	else
 	{
@@ -642,11 +643,11 @@ namespace
 	    clearLabel( ui->pkgSummaryItemCountLabel );
 	    clearLabel( ui->pkgSummaryFileCountLabel );
 	    clearLabel( ui->pkgSummarySubDirCountLabel );
+	    clearLabel( ui->pkgSummaryLatestMTimeLabel );
 
 	    ui->pkgSummaryTotalSizeLabel->setText( msg );
 	}
 
-	setTimeLabel( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
     }
 
 
