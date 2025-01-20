@@ -24,7 +24,7 @@ namespace QDirStat
      *
      * This is a thin wrapper around TreeView that takes care about basic setup
      * and configuration of the tree view and adds support for synchronizing
-     * current / selected items between the DirTree, the DirTreeMap and this
+     * current / selected items between the DirTree, the DirTreeModel and this
      * DirTreeView.
      **/
     class DirTreeView final : public QTreeView
@@ -76,6 +76,22 @@ namespace QDirStat
 	 * Close (collapse) all branches except the one that 'branch' is in.
 	 **/
 	void closeAllExcept( const QModelIndex & branch );
+
+	/**
+	 * Update the viewport to show changes in the visible rows.  This
+	 * includes moved rows as well as changes to the column data.
+	 *
+	 * When there are relatively few rows (less than a thousand), the
+	 * entire tree is layed out.  This becomes too slow for many rows and
+	 * a simpler approch is used: update the sizes of the columns and then
+	 * re-paint the visible viewport.  This shows the correct data for each
+	 * row, but may not update the child indicator when rows are moved, but
+	 * allows updates to complete in a sensible timeframe when, for
+	 * example, the tree is opened several levels deep, or in a package
+	 * view when there are over a thousand top-level items.
+	 *
+	 **/
+	void rowsChanged( const QModelIndex & index );
 
 
     protected slots:

@@ -78,17 +78,17 @@ void DirTreeView::readSettings()
     const auto barDefaultColors = []()
     {
 	return ColorList{ QColor{   0,   0, 255 },
-			  QColor{  34,  34, 255 },
-			  QColor{  68,  68, 255 },
-			  QColor{  85,  85, 255 },
-			  QColor{ 102, 102, 255 },
-			  QColor{ 119, 119, 255 },
-			  QColor{ 136, 136, 255 },
-			  QColor{ 153, 153, 255 },
-			  QColor{ 170, 170, 255 },
-			  QColor{ 187, 187, 255 },
-			  QColor{ 204, 204, 255 },
-			};
+	                  QColor{  34,  34, 255 },
+	                  QColor{  68,  68, 255 },
+	                  QColor{  85,  85, 255 },
+	                  QColor{ 102, 102, 255 },
+	                  QColor{ 119, 119, 255 },
+	                  QColor{ 136, 136, 255 },
+	                  QColor{ 153, 153, 255 },
+	                  QColor{ 170, 170, 255 },
+	                  QColor{ 187, 187, 255 },
+	                  QColor{ 204, 204, 255 },
+	                };
     };
 
     Settings settings;
@@ -254,6 +254,23 @@ void DirTreeView::expandItem( FileInfo * item )
 	const QModelIndex index = model->modelIndex( item );
 	if ( index.isValid() )
 	    expand( index );
+    }
+}
+
+
+void DirTreeView::rowsChanged( const QModelIndex & index )
+{
+    const int uniformHeight = rowHeight( index );
+    if ( uniformHeight == 0 || viewportSizeHint().height() / uniformHeight < 1000 )
+    {
+	// Lay out the whole tree if it isn't too big
+	scheduleDelayedItemsLayout();
+    }
+    else
+    {
+	// Just a quick and dirty update to the visible row column sizes and data
+	updateGeometries();
+	viewport()->update();
     }
 }
 
