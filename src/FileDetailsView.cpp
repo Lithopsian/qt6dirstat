@@ -655,6 +655,7 @@ namespace
      **/
     void showFileInfoSet( const Ui::FileDetailsView * ui, const FileInfoSet & sel )
     {
+	QLatin1String prefix;
 	FileCount fileCount        = 0;
 	FileCount dirCount         = 0;
 	FileCount subtreeFileCount = 0;
@@ -663,6 +664,9 @@ namespace
 	{
 	    if ( item->isDirInfo() )
 	    {
+		const QLatin1String dirPrefix = item->sizePrefix();
+		if ( !dirPrefix.isEmpty() )
+		    prefix = dirPrefix;
 		++dirCount;
 		subtreeFileCount += item->totalFiles();
 	    }
@@ -683,11 +687,11 @@ namespace
 
 	ui->selHeading->setText( formatSelectionSummary( sel.count() ) );
 
-	setSizeLabel ( ui->selTotalSizeLabel,        sel.totalSize()          );
-	setSizeLabel ( ui->selAllocatedLabel,        sel.totalAllocatedSize() );
-	setCountLabel( ui->selFileCountLabel,        fileCount                );
-	setCountLabel( ui->selDirCountLabel,         dirCount                 );
-	setCountLabel( ui->selSubtreeFileCountLabel, subtreeFileCount         );
+	setSizeLabel ( ui->selTotalSizeLabel,        sel.totalSize(),          prefix );
+	setSizeLabel ( ui->selAllocatedLabel,        sel.totalAllocatedSize(), prefix );
+	setCountLabel( ui->selFileCountLabel,        fileCount,                prefix );
+	setCountLabel( ui->selDirCountLabel,         dirCount,                 prefix );
+	setCountLabel( ui->selSubtreeFileCountLabel, subtreeFileCount,         prefix );
     }
 
 } // namespace
