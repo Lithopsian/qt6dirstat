@@ -9,7 +9,7 @@
 
 #include <dirent.h> // opendir(), etc
 #include <stdio.h> // rename()
-#include <sys/stat.h> // struct stat, mkdir()
+#include <sys/stat.h> // struct stat, mkdir(), S_ISDIR, etc.
 
 #include <QAbstractButton>
 #include <QDateTime>
@@ -24,7 +24,6 @@
 #include "BusyPopup.h"
 #include "CleanupCollection.h"
 #include "DirTreeModel.h"
-#include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -44,7 +43,24 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Returns whether
+     * Returns an icon to represent the type of item.  These closely match the
+     * icons used in the main tree, but are derived here directly from the
+     * st_mode.
+     **/
+    const QIcon & itemTypeIcon( mode_t mode )
+    {
+	if ( S_ISDIR(  mode ) ) return app()->dirTreeModel()->dirIcon();
+	if ( S_ISREG(  mode ) ) return app()->dirTreeModel()->fileIcon();
+	if ( S_ISLNK(  mode ) ) return app()->dirTreeModel()->symlinkIcon();
+	if ( S_ISBLK(  mode ) ) return app()->dirTreeModel()->blockDeviceIcon();
+	if ( S_ISCHR(  mode ) ) return app()->dirTreeModel()->charDeviceIcon();
+
+	return app()->dirTreeModel()->specialIcon();
+    }
+
+
+    /**
+     * Returns whether the three lines form a valid .trashinfo file.
      **/
     bool validTrashinfo( const QString & tagLine, const QString & pathLine, const QString & mTimeLine )
     {
@@ -460,7 +476,7 @@ void TrashWindow::calculateTotalSize()
     {
 	FileSize totalSize = 0;
 	for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
-	    totalSize += static_cast<const TrashItem *>( *it )->totalSize();
+	    totalSize += static_cast<const TrashItem *>(*it)->totalSize();
 
 	const FileCount items = _ui->treeWidget->topLevelItemCount();
 	if ( items == 0 )
@@ -516,7 +532,7 @@ void TrashWindow::refresh()
     for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
     {
 	const bool selected =
-	    selectedItemEntries.contains( static_cast<const TrashItem *>( *it )->trashEntry() );
+	    selectedItemEntries.contains( static_cast<const TrashItem *>(*it)->trashEntry() );
 	if ( ( selectAll && !selected ) || ( !selectAll && selected ) )
 	    (*it)->setSelected( selected );
     }
@@ -680,6 +696,16 @@ void TrashWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
+void TrashWindow::changeEvent( QEvent * event )
+{
+    const auto type = event->type();
+    if ( type == QEvent::PaletteChange )
+	refresh();
+
+    QDialog::changeEvent( event );
+}
+
+
 
 
 TrashItem::TrashItem( ProcessStarter * processStarter,
@@ -750,6 +776,8 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
 	return;
     }
 
+    setIcon( TW_NameCol, itemTypeIcon( statInfo.st_mode ) );
+
     _deletedMTime = stringToMTime( mTimeLine.mid( TrashDir::trashInfoDateTag().size() ) );
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
@@ -759,9 +787,6 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
     set( TW_NameCol, Qt::AlignLeft, replaceCrLf( name ) );
     set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( originalDir ) );
-
-    const FileInfo fileInfo{ nullptr, nullptr, name, statInfo };
-    setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );
 
     if ( text( TW_NameCol ) != name )
 	setToolTip( TW_NameCol, name );
