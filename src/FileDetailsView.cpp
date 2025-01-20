@@ -560,6 +560,7 @@ namespace
 	ui->mountPointIcon->setVisible( isMountPoint );
 	ui->dotEntryIcon->setVisible( dir->isDotEntry() && !readError );
 	ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !readError );
+	ui->dirIcon->setEnabled( !dir->isAttic() );
 
 	setDirInfoType( ui->dirTypeLabel, dir );
 
