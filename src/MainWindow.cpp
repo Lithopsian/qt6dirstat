@@ -929,15 +929,15 @@ void MainWindow::openConfigDialog()
 }
 
 
-void MainWindow::showFileTypeStats()
-{
-    FileTypeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
-}
-
-
 void MainWindow::showFileSizeStats()
 {
     FileSizeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
+}
+
+
+void MainWindow::showFileTypeStats()
+{
+    FileTypeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
 }
 
 

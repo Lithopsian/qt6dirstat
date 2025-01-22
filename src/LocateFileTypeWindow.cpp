@@ -220,9 +220,7 @@ bool LocateFileTypeWindow::event( QEvent * event )
 
 
 
-PatternSearchResultItem::PatternSearchResultItem( const QString & path,
-                                                int             count,
-                                                FileSize        totalSize ):
+PatternSearchResultItem::PatternSearchResultItem( const QString & path, int count, FileSize totalSize ):
     QTreeWidgetItem{ UserType },
     _path{ path },
     _count{ count },
