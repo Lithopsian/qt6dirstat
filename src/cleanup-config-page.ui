@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>563</width>
-    <height>586</height>
+    <width>515</width>
+    <height>587</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -258,9 +258,12 @@ will be executed once for each selected item</string>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>0</width>
+                <width>12</width>
                 <height>24</height>
                </size>
               </property>
@@ -281,6 +284,12 @@ Only Cleanups with icons appear in the main toolbar</string>
           </item>
           <item>
            <widget class="QToolBox" name="toolBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="toolTip">
              <string>Options, refresh policy, output window policy, and command shell</string>
             </property>
@@ -290,7 +299,7 @@ Only Cleanups with icons appear in the main toolbar</string>
                <x>0</x>
                <y>0</y>
                <width>232</width>
-               <height>127</height>
+               <height>146</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -300,10 +309,16 @@ Only Cleanups with icons appear in the main toolbar</string>
               <string>Options</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_9">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_8">
+                <property name="spacing">
+                 <number>5</number>
+                </property>
                 <property name="bottomMargin">
-                 <number>8</number>
+                 <number>12</number>
                 </property>
                 <item>
                  <widget class="QCheckBox" name="recurseCheckBox">
@@ -329,6 +344,9 @@ Only Cleanups with icons appear in the main toolbar</string>
               </item>
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_2">
+                <property name="spacing">
+                 <number>5</number>
+                </property>
                 <item>
                  <widget class="QLabel" name="refreshPolicyCaption">
                   <property name="text">
@@ -341,6 +359,12 @@ Only Cleanups with icons appear in the main toolbar</string>
                 </item>
                 <item>
                  <widget class="QComboBox" name="refreshPolicyComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;p style='white-space:pre'&gt;This specifies if and how the directory tree should be re-read&lt;br/&gt;from disk after the cleanup action is finished.&lt;/p&gt;</string>
                   </property>
@@ -388,7 +412,7 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>250</width>
+               <width>229</width>
                <height>131</height>
               </rect>
              </property>
@@ -449,8 +473,8 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>250</width>
-               <height>131</height>
+               <width>229</width>
+               <height>163</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -460,8 +484,14 @@ Only Cleanups with icons appear in the main toolbar</string>
               <string>Output Window</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <item>
                <layout class="QGridLayout" name="outputWindowPageGridLayout" columnstretch="0,1">
+                <property name="spacing">
+                 <number>5</number>
+                </property>
                 <item row="0" column="0">
                  <widget class="QLabel" name="outputWindowPolicyCaption">
                   <property name="text">
@@ -495,8 +525,14 @@ Only Cleanups with icons appear in the main toolbar</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="2" column="1" alignment="Qt::AlignLeft">
                  <widget class="QDoubleSpinBox" name="outputWindowTimeoutSpinBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;p style='white-space:pre'&gt;The delay before an output window is shown for this Cleanup.&lt;br/&gt;If the command finishes with no error before the timeout,&lt;br/&gt;then no window is shown,&lt;/p&gt;</string>
                   </property>
@@ -520,8 +556,14 @@ Only Cleanups with icons appear in the main toolbar</string>
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="1">
+                <item row="0" column="1" alignment="Qt::AlignLeft">
                  <widget class="QComboBox" name="outputWindowPolicyComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>If and when to open a window for the output of the Cleanup command</string>
                   </property>
@@ -582,8 +624,8 @@ Only Cleanups with icons appear in the main toolbar</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>250</width>
-               <height>131</height>
+               <width>229</width>
+               <height>122</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -605,8 +647,14 @@ Only Cleanups with icons appear in the main toolbar</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item alignment="Qt::AlignLeft">
                  <widget class="QComboBox" name="shellComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;p style='white-space:pre'&gt;Select a shell here or enter your favourite one.&lt;br/&gt;&lt;br/&gt;Each command is executed with a shell and the &quot;-c&quot; option.&lt;br/&gt;&lt;br/&gt;Shells may behave differently for wildcards and special characters.&lt;br/&gt;&lt;br/&gt;If you are setting this up for other users, stay on the safe side and select a shell&lt;br/&gt;with a well-known behaviour like /bin/bash.&lt;/p&gt;</string>
                   </property>
@@ -712,6 +760,7 @@ Only Cleanups with icons appear in the main toolbar</string>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
   <include location="icons.qrc"/>
+  <include location="../../../../home/iann/.designer/backup/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
