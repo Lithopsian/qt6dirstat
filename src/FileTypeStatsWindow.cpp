@@ -254,8 +254,6 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
-
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );
 	headerItem->setText( FT_CountCol,           QObject::tr( "Files" ) );
@@ -272,7 +270,8 @@ namespace
 
 	tree->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
 
-	PercentBarDelegate::createStatsDelegates( tree, FT_CountPercentBarCol, FT_SizePercentBarCol );
+	const int height = app()->dirTreeModel()->dirTreeIconSize().height();
+	PercentBarDelegate::createStatsDelegates( tree, height, FT_CountPercentBarCol, FT_SizePercentBarCol );
     }
 
 } // namespace

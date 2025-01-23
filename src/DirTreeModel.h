@@ -229,6 +229,12 @@ namespace QDirStat
 //	const QIcon & specialIcon()       const { return _specialIcon; }
 
 	/**
+	 * Returns the configured tree icon size.
+	 **/
+	QSize dirTreeIconSize() const
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
+
+	/**
 	 * Set the icon size of a QTreeView's items based on the configured
 	 * DirTree icon size.
 	 **/
@@ -362,12 +368,6 @@ namespace QDirStat
 	 **/
 	static DirTreeItemSize dirTreeItemSize( const QString & treeIconDir )
 	    { return treeIconDir.contains( "medium"_L1 ) ? DTIS_Medium : DTIS_Small; }
-
-	/**
-	 * Returns the configured tree icon size.
-	 **/
-	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
 
 	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about

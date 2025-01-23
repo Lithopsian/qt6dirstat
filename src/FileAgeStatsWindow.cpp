@@ -107,9 +107,6 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	// Set the row height based on the configured DirTree icon height
-	app()->dirTreeModel()->setTreeIconSize( tree );
-
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( YL_YearMonthCol,       QObject::tr( "Year" ) );
 	headerItem->setText( YL_FilesCountCol,      QObject::tr( "Files" ) );
@@ -125,7 +122,8 @@ namespace
 
 	tree->sortByColumn( YL_YearMonthCol, Qt::DescendingOrder );
 
-	PercentBarDelegate::createStatsDelegates( tree, YL_FilesPercentBarCol, YL_SizePercentBarCol );
+	const int height = app()->dirTreeModel()->dirTreeIconSize().height();
+	PercentBarDelegate::createStatsDelegates( tree, height, YL_FilesPercentBarCol, YL_SizePercentBarCol );
     }
 
 
