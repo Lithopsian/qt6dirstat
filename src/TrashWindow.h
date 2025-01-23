@@ -153,7 +153,10 @@ namespace QDirStat
 	void empty();
 
 	/**
-	 * Enabled or disable actions based on the current selection.
+	 * Enable or disable actions based on the current selection.  Actually,
+	 * buttons are enabled or disabled in this function and corresponding
+	 * actions and these are examined to enabled corresponding actions when
+	 * a context menu is being generated.
 	 **/
 	void enableActions();
 
@@ -170,20 +173,22 @@ namespace QDirStat
 	 * to match the data as much as possible.
 	 *
 	 * Note that although this operation will be relatively slow if there
-	 * are many uncached trash entries, no BusyPopup is shown.  The called
+	 * are many uncached trash entries, no BusyPopup is shown.  The caller
 	 * is expected to use a BusyPopup since the application will be blocked
-	 * until the populate completes.
+	 * until the populate call completes.
 	 **/
 	void populate();
 
 	/**
-	 * Populate the tree: locate all trash folders for the current user
-	 * and list entries from those folders.
+	 * Populate the tree: locate all trash folders for the current user and
+	 * create tree items for trash entries from those folders.
 	 **/
 	void populateTree();
 
 	/**
-	 * Key press event for detecting enter/return.
+	 * Key press event for detecting enter/return.  These keys are reserved
+	 * for activating tree widget items instead of buttons when the focus
+	 * is in the tree.
 	 *
 	 * Reimplemented from QWidget.
 	 **/
@@ -226,7 +231,15 @@ namespace QDirStat
     public:
 
 	/**
-	 * Constructor.
+	 * Constructor.  This object calls stat on 'entryName' and attempts to
+	 * read the corresponding .trashinfo file under 'trashDir'.  A FileInfo
+	 * object is created to determine the allocated size using the same
+	 * methodology used in the rest of the application.  For a directory,
+	 * an external process is then started to asynchronously determine the
+	 * total allocated size of that subtree.  Symlinks with no allocated
+	 * blocks will be shown with the size from st_size, that it the length
+	 * of the target pathname.  The FileInfo object is also used to obtain
+	 * an icon matching the type of filesystem object.
 	 **/
 	TrashItem( ProcessStarter * processStarter,
 	           const QString  & trashDir,

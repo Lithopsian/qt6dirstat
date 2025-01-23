@@ -216,16 +216,17 @@ namespace QDirStat
 	void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override;
 
 	/**
-	 * Tree icon getters.
+	 * Tree icon getters.  It is generally easier to call itemTypeIcon()
+	 * with a FileInfo object.
 	 **/
 	const QIcon & dirIcon()           const { return _dirIcon; }
 	const QIcon & unreadableDirIcon() const { return _unreadableDirIcon; }
-	const QIcon & mountPointIcon()    const { return _mountPointIcon; }
-	const QIcon & fileIcon()          const { return _fileIcon; }
-	const QIcon & symlinkIcon()       const { return _symlinkIcon; }
-	const QIcon & blockDeviceIcon()   const { return _blockDeviceIcon; }
-	const QIcon & charDeviceIcon()    const { return _charDeviceIcon; }
-	const QIcon & specialIcon()       const { return _specialIcon; }
+//	const QIcon & mountPointIcon()    const { return _mountPointIcon; }
+//	const QIcon & fileIcon()          const { return _fileIcon; }
+//	const QIcon & symlinkIcon()       const { return _symlinkIcon; }
+//	const QIcon & blockDeviceIcon()   const { return _blockDeviceIcon; }
+//	const QIcon & charDeviceIcon()    const { return _charDeviceIcon; }
+//	const QIcon & specialIcon()       const { return _specialIcon; }
 
 	/**
 	 * Set the icon size of a QTreeView's items based on the configured
@@ -414,8 +415,9 @@ namespace QDirStat
 	void beginRemoveRows( const QModelIndex & parent, int first, int last );
 
 	//
-	// Reimplemented from QAbstractItemModel: note that these are public in
-	// the base class.
+	// Reimplemented from QAbstractItemModel.
+	//
+	// Note that these are public in the base class.
 	//
 
 	/**

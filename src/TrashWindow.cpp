@@ -24,6 +24,7 @@
 #include "BusyPopup.h"
 #include "CleanupCollection.h"
 #include "DirTreeModel.h"
+#include "FileInfo.h"
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -47,7 +48,7 @@ namespace
      * icons used in the main tree, but are derived here directly from the
      * st_mode.
      **/
-    const QIcon & itemTypeIcon( mode_t mode )
+/*    const QIcon & itemTypeIcon( mode_t mode )
     {
 	if ( S_ISDIR(  mode ) ) return app()->dirTreeModel()->dirIcon();
 	if ( S_ISREG(  mode ) ) return app()->dirTreeModel()->fileIcon();
@@ -57,7 +58,7 @@ namespace
 
 	return app()->dirTreeModel()->specialIcon();
     }
-
+*/
 
     /**
      * Returns whether the three lines form a valid .trashinfo file.
@@ -742,19 +743,20 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     }
 
     const bool isDir = S_ISDIR( statInfo.st_mode );
-    _totalSize = statInfo.st_size;
-    set( TW_SizeCol, Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
-
     if ( isDir )
     {
 	// The process will be killed if the window is closed, although it will spam the log about it
 	QProcess * process = new QProcess{ this };
 	process->setProgram( "du" );
-	process->setArguments( { "-bs", Trash::trashEntryPath( trashRoot, _entryName ) } );
+	process->setArguments( { "-sB 1", Trash::trashEntryPath( trashRoot, _entryName ) } );
 	connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
                  this,    &TrashItem::processFinished );
 	processStarter->add( process );
     }
+
+    const FileInfo fileInfo{ nullptr, app()->dirTree(), QString{}, statInfo };
+    _totalSize = fileInfo.allocatedSize();
+    set( TW_SizeCol, Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
 
     const QString trashInfoPath = Trash::trashInfoPath( trashRoot, _entryName );
     QFile infoFile{ trashInfoPath };
@@ -776,7 +778,7 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
 	return;
     }
 
-    setIcon( TW_NameCol, itemTypeIcon( statInfo.st_mode ) );
+    setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );
 
     _deletedMTime = stringToMTime( mTimeLine.mid( TrashDir::trashInfoDateTag().size() ) );
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
