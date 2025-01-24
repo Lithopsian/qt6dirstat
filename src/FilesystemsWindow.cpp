@@ -74,7 +74,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
+//	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FS_DeviceCol,    QObject::tr( "Device" ) );
@@ -153,6 +153,7 @@ FilesystemsWindow * FilesystemsWindow::sharedInstance( QWidget * parent )
 void FilesystemsWindow::populate()
 {
     clear();
+    _ui->fsTree->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     MountPoints::reload();
 

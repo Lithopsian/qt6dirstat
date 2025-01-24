@@ -119,8 +119,6 @@ namespace
 	    headerItem->setTextAlignment( col, alignment | Qt::AlignVCenter );
 	};
 
-	app()->dirTreeModel()->setTreeIconSize( tree );
-
 	set( TW_NameCol,    Qt::AlignLeft,    QObject::tr( "Name" ) );
 	set( TW_SizeCol,    Qt::AlignHCenter, QObject::tr( "Size" ) );
 	set( TW_DeletedCol, Qt::AlignHCenter, QObject::tr( "Date Deleted" ) );
@@ -453,6 +451,7 @@ void TrashWindow::populateTree()
 
     _ui->treeWidget->setSortingEnabled( false );
     _ui->treeWidget->clear();
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     // Use ProcessStarter to limit the number of 'du' processes spawned at once
     ProcessStarter * processStarter = new ProcessStarter{ QThread::idealThreadCount() };
@@ -559,7 +558,7 @@ void TrashWindow::deleteSelected()
     for ( const QString & trashRootPath : trashRootPaths )
 	deleteExpunged( TrashWindow::expungedDirPath( trashRootPath ) );
 
-    // If everything was restored (and the items deleted), then select the closest neighbour
+    // If everything was deleted, then select the closest remaining neighbour
     if ( _ui->treeWidget->selectedItems().isEmpty() )
 	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
 
@@ -645,9 +644,10 @@ void TrashWindow::enableActions()
     _ui->restoreButton->setEnabled( itemSelected );
 
     // Can't restore known "broken" trash items
+    const QColor & errColor = app()->dirTreeModel()->dirReadErrColor();
     for ( const QTreeWidgetItem * item : selectedItems )
     {
-	if ( item->foreground( TW_NameCol ) == app()->dirTreeModel()->dirReadErrColor() )
+	if ( item->foreground( TW_NameCol ).color() == errColor )
 	{
 	    _ui->restoreButton->setEnabled( false );
 	    return;
@@ -745,7 +745,7 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     const bool isDir = S_ISDIR( statInfo.st_mode );
     if ( isDir )
     {
-	// The process will be killed if the window is closed, although it will spam the log about it
+	// The process will be killed if this item is destroyed, although it will spam the log about it
 	QProcess * process = new QProcess{ this };
 	process->setProgram( "du" );
 	process->setArguments( { "-sB 1", Trash::trashEntryPath( trashRoot, _entryName ) } );

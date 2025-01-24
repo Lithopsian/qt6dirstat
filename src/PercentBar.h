@@ -61,6 +61,12 @@ namespace QDirStat
 	{}
 
 	/**
+	 * Set the size hint height for the bar.
+	 **/
+	void setHeight( int height )
+	    { _sizeHint.setHeight( height ); }
+
+	/**
 	 * Paint one cell in the view.
 	 *
 	 * Inherited from QStyledItemDelegate.
@@ -78,6 +84,13 @@ namespace QDirStat
 	 **/
 	QSize sizeHint( const QStyleOptionViewItem &, const QModelIndex & ) const override
 	    { return _sizeHint; }
+
+	/**
+	 * Return the item delegate for 'col' in 'view', cast to a
+	 * PercentBarDelegate pointer.
+	 **/
+	static PercentBarDelegate * delegateForColumn( QAbstractItemView * view, int col )
+	    { return static_cast<PercentBarDelegate *>( view->itemDelegateForColumn( col ) ); }
 
 	/**
 	 * Create two PercentBarDelegates from configuration settings and
@@ -101,10 +114,10 @@ namespace QDirStat
 
     private:
 
-	const QSize     _sizeHint;
+	QSize           _sizeHint;
 	const QColor    _barBackground;
 	const ColorList _fillColors;
-	int             _indentation;
+	const int       _indentation;
 
     };	// class PercentBarDelegate
 

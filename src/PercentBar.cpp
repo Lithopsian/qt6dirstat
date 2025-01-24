@@ -141,10 +141,9 @@ void PercentBarDelegate::createStatsDelegates( QTreeWidget * treeWidget, int hei
     settings.endGroup();
 
     // Delegates for the two percent bars
-    const QSize size{ width, height };
-    const auto filesDelegate = new PercentBarDelegate{ treeWidget, size, background, filesColors };
+    const auto filesDelegate = new PercentBarDelegate{ treeWidget, { width, height }, background, filesColors };
     treeWidget->setItemDelegateForColumn( filesCol, filesDelegate );
 
-    const auto sizeDelegate = new PercentBarDelegate{ treeWidget, size, background, sizeColors };
+    const auto sizeDelegate = new PercentBarDelegate{ treeWidget, { width, height }, background, sizeColors };
     treeWidget->setItemDelegateForColumn( sizeCol, sizeDelegate );
 }

@@ -17,7 +17,6 @@
 #include <QIcon>
 #include <QPalette>
 #include <QTimer>
-#include <QTreeView>
 
 #include "DataColumns.h"
 #include "Typedefs.h" // _L1
@@ -233,13 +232,6 @@ namespace QDirStat
 	 **/
 	QSize dirTreeIconSize() const
 	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
-
-	/**
-	 * Set the icon size of a QTreeView's items based on the configured
-	 * DirTree icon size.
-	 **/
-	void setTreeIconSize( QTreeView * tree ) const
-	    { tree->setIconSize( dirTreeIconSize() ); }
 
 
     signals:

@@ -288,6 +288,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initTree( _ui->treeWidget );
+    enableActions( false );
 
     Settings::readWindowSettings( this, "FileTypeStatsWindow" );
     ActionManager::actionHotkeys( this, "FileTypeStatsWindow" );
@@ -377,7 +378,10 @@ void FileTypeStatsWindow::syncedPopulate()
 void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 {
     _ui->treeWidget->clear();
-    enableActions( false );
+
+    const int newHeight = app()->dirTreeModel()->dirTreeIconSize().height();
+    PercentBarDelegate::delegateForColumn( _ui->treeWidget, FT_CountPercentBarCol )->setHeight( newHeight );
+    PercentBarDelegate::delegateForColumn( _ui->treeWidget, FT_SizePercentBarCol  )->setHeight( newHeight );
 
     if ( !newSubtree )
 	return;

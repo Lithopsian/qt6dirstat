@@ -54,7 +54,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
+//	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( PSR_CountCol,     QObject::tr( "Files" ) );
@@ -132,6 +132,8 @@ void LocateFileTypeWindow::populate( const WildcardCategory & wildcardCategory, 
     _subtree = fileInfo;
 
     _ui->treeWidget->clear();
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
+
     populateRecursive( fileInfo ? fileInfo : _subtree() );
 
     const int count = _ui->treeWidget->topLevelItemCount();

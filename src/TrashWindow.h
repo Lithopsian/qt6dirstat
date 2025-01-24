@@ -18,7 +18,7 @@
 #include <QTreeWidgetItem>
 
 #include "ui_trash-window.h"
-#include "Typedefs.h" //FileSize
+#include "Typedefs.h" // _L1, FileSize
 
 
 namespace QDirStat
