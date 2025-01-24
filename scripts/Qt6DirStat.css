@@ -33,12 +33,6 @@ QTableView>::section
 /* can't specify a border because it makes the selected row invisible (Qt bug) */
 }
 
-#FileAgeStatsWindow #treeWidget::item,
-#FileTypeStatsWindow #treeWidget::item
-{
-    padding: 1px;
-}
-
 #scrollAreaWidgetContents
 {
     background: palette(base);
