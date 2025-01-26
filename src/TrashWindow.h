@@ -96,10 +96,6 @@ namespace QDirStat
 	static void populateSharedInstance()
 	    { sharedInstance()->populate(); }
 
-	static QLatin1String expungedDirName() { return "qexpunged"_L1; }
-	static QString expungedDirPath( const QString & trashRoot )
-	    { return trashRoot % '/' % expungedDirName(); }
-
 
     protected slots:
 
@@ -180,8 +176,8 @@ namespace QDirStat
 	void populate();
 
 	/**
-	 * Populate the tree: locate all trash folders for the current user and
-	 * create tree items for trash entries from those folders.
+	 * Populate the tree: locate all trash directories for the current user and
+	 * create tree items for trash entries from those directories.
 	 **/
 	void populateTree();
 
