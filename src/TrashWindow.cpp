@@ -9,10 +9,11 @@
 
 #include <dirent.h> // opendir(), etc
 #include <stdio.h> // rename()
-#include <sys/stat.h> // struct stat, mkdir()
+#include <sys/stat.h> // struct stat, mkdir(), S_ISDIR, etc.
 
 #include <QAbstractButton>
 #include <QDateTime>
+#include <QDir>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QPointer>
@@ -28,7 +29,6 @@
 #include "FormatUtil.h"
 #include "Logger.h"
 #include "MainWindow.h"
-#include "MountPoints.h"
 #include "QDirStatApp.h"
 #include "ProcessStarter.h"
 #include "SelectionModel.h"
@@ -44,7 +44,56 @@ using namespace QDirStat;
 namespace
 {
     /**
-     * Return whether '
+     * Return the full path if a "qexpunged" directory in 'trashRoot'.  This
+     * directory is used to temporarily store items during delete and empty
+     * operations: the items can be very quickly moved to "qexpunged" to
+     * reduce the chances of colliding with other trash operations ir being
+     * interrupted, and then the whole directory can be removed afterwards.
+     **/
+    QString expungedDirPath( const QString & trashRoot )
+	{ return trashRoot % '/' % "qexpunged"_L1; }
+
+
+    /**
+     * Returns whether three lines of text form a valid .trashinfo file.
+     **/
+    bool validTrashinfo( const QString & tagLine, const QString & pathLine, const QString & mTimeLine )
+    {
+	if ( tagLine != TrashDir::trashInfoTag() )
+	    return false;
+
+	if ( pathLine.size() <= TrashDir::trashInfoPathTag().size() )
+	    return false;
+
+	if ( !pathLine.startsWith( TrashDir::trashInfoPathTag() ) )
+	    return false;
+
+	if ( mTimeLine.size() <= TrashDir::trashInfoDateTag().size() )
+	    return false;
+
+	if ( !mTimeLine.startsWith( TrashDir::trashInfoDateTag() ) )
+	    return false;
+
+	return true;
+    }
+
+
+    /**
+     * Return 'mTime' converted to the number of seconds since 1970.  'mTime'
+     * is expected to be a string in ISO date format.
+     **/
+    time_t stringToMTime( const QString & mTime )
+    {
+#if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
+	return QDateTime::fromString( mTime, Qt::ISODate ).toTime_t();
+#else
+	return QDateTime::fromString( mTime, Qt::ISODate ).toSecsSinceEpoch();
+#endif
+    }
+
+
+    /**
+     * Return whether 'entryName' is "." or "..".
      **/
     bool isDotOrDotDot( const char * entryName )
     {
@@ -63,8 +112,6 @@ namespace
 	    headerItem->setText( col, title );
 	    headerItem->setTextAlignment( col, alignment | Qt::AlignVCenter );
 	};
-
-	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	set( TW_NameCol,    Qt::AlignLeft,    QObject::tr( "Name" ) );
 	set( TW_SizeCol,    Qt::AlignHCenter, QObject::tr( "Size" ) );
@@ -96,7 +143,9 @@ namespace
      **/
     int currentIndex( QTreeWidget * treeWidget )
     {
-	return treeWidget->indexOfTopLevelItem( treeWidget->currentItem() );
+	const auto selectedItems = treeWidget->selectedItems();
+	const auto item = selectedItems.isEmpty() ? treeWidget->currentItem() : selectedItems.first();
+	return treeWidget->indexOfTopLevelItem( item );
     }
 
 
@@ -221,61 +270,6 @@ namespace
 
 
     /**
-     * Returns whether the trash directory, as well as the "files" and "info"
-     * directories, and their contents, can be read and modified.
-     **/
-    bool isTrashAccessible( const QString & trashPath )
-    {
-	if ( !SysUtil::canAccess( trashPath ) )
-	    return false;
-
-	if ( !SysUtil::canAccess( Trash::filesDirPath( trashPath ) ) )
-	    return false;
-
-	if ( !SysUtil::canAccess( Trash::infoDirPath( trashPath ) ) )
-	    return false;
-
-	return true;
-    }
-
-
-    /**
-     * Return a list of all the trash directories found.  This may include the
-     * one in the users's home directory and any at the top level of mounted
-     * filesystems.  Only valid trash directories in which both the files and
-     * info directories exist and are accessible will be returned.
-     **/
-    QStringList trashRoots()
-    {
-	QStringList trashRoots;
-
-	const QString homeTrashPath = Trash::homeTrash( QDir::homePath() );
-	if ( isTrashAccessible( homeTrashPath ) )
-	    trashRoots << homeTrashPath;
-
-	MountPoints::reload();
-
-	for ( MountPointIterator it{ false, true }; *it; ++it )
-	{
-	    const QString trashRoot = Trash::trashRoot( it->path() == u'/' ? QString{} : it->path() );
-
-	    if ( Trash::isValidMainTrash( trashRoot ) )
-	    {
-		const QString mainTrashPath = Trash::mainTrashPath( trashRoot );
-		if ( isTrashAccessible( mainTrashPath ) )
-		    trashRoots << mainTrashPath;
-	    }
-
-	    const QString userTrashPath = Trash::userTrashPath( trashRoot );
-	    if ( isTrashAccessible( userTrashPath ) )
-		trashRoots << userTrashPath;
-	}
-
-	return trashRoots;
-    }
-
-
-    /**
      * Add widget items for all entries found in the "files" directory of the
      * trash directory 'dir'.  If 'dir' does not exist or cannot be accessed,
      * this function will silently do nothing.
@@ -396,13 +390,14 @@ void TrashWindow::populateTree()
 
     _ui->treeWidget->setSortingEnabled( false );
     _ui->treeWidget->clear();
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     // Use ProcessStarter to limit the number of 'du' processes spawned at once
     ProcessStarter * processStarter = new ProcessStarter{ QThread::idealThreadCount() };
     QObject::connect( processStarter, &ProcessStarter::destroyed,
                       this,           &TrashWindow::calculateTotalSize );
 
-    const QStringList trashRootPaths = trashRoots();
+    const QStringList trashRootPaths = Trash::trashRoots();
     for ( const QString & trashRootPath : trashRootPaths )
 	populateTrashDir( _ui->treeWidget, trashRootPath, processStarter );
 
@@ -420,7 +415,7 @@ void TrashWindow::calculateTotalSize()
     {
 	FileSize totalSize = 0;
 	for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
-	    totalSize += static_cast<const TrashItem *>( *it )->totalSize();
+	    totalSize += static_cast<const TrashItem *>(*it)->totalSize();
 
 	const FileCount items = _ui->treeWidget->topLevelItemCount();
 	if ( items == 0 )
@@ -476,7 +471,7 @@ void TrashWindow::refresh()
     for ( QTreeWidgetItemIterator it{ _ui->treeWidget }; *it; ++it )
     {
 	const bool selected =
-	    selectedItemEntries.contains( static_cast<const TrashItem *>( *it )->trashEntry() );
+	    selectedItemEntries.contains( static_cast<const TrashItem *>(*it)->trashEntry() );
 	if ( ( selectAll && !selected ) || ( !selectAll && selected ) )
 	    (*it)->setSelected( selected );
     }
@@ -498,11 +493,11 @@ void TrashWindow::deleteSelected()
     for ( QTreeWidgetItem * item : selectedItems )
 	static_cast<TrashItem *>( item )->deleteItem();
 
-    const QStringList trashRootPaths = trashRoots();
+    const QStringList trashRootPaths = Trash::trashRoots();
     for ( const QString & trashRootPath : trashRootPaths )
-	deleteExpunged( TrashWindow::expungedDirPath( trashRootPath ) );
+	deleteExpunged( expungedDirPath( trashRootPath ) );
 
-    // If everything was restored (and the items deleted), then select the closest neighbour
+    // If everything was deleted, then select the closest remaining neighbour
     if ( _ui->treeWidget->selectedItems().isEmpty() )
 	setCurrentItem( _ui->treeWidget, oldCurrentIndex );
 
@@ -547,15 +542,15 @@ void TrashWindow::empty()
     BusyPopup msg{ QObject::tr( "Emptying Trash..." ), this };
 
     // Loop through all accessible trash directories
-    const QStringList trashRootPaths = trashRoots();
+    const QStringList trashRootPaths = Trash::trashRoots();
     for ( const QString & trashRootPath : trashRootPaths )
     {
-	const QString expungedDirPath = TrashWindow::expungedDirPath( trashRootPath );
+	const QString expungedDir = expungedDirPath( trashRootPath );
 
-	moveAllToExpunged( Trash::filesDirPath( trashRootPath ), expungedDirPath );
-	moveAllToExpunged( Trash::infoDirPath( trashRootPath ), expungedDirPath );
+	moveAllToExpunged( Trash::filesDirPath( trashRootPath ), expungedDir );
+	moveAllToExpunged( Trash::infoDirPath( trashRootPath ), expungedDir );
 
-	deleteExpunged( expungedDirPath );
+	deleteExpunged( expungedDir );
     }
 
     populate();
@@ -565,6 +560,8 @@ void TrashWindow::empty()
 void TrashWindow::populate()
 {
     populateTree();
+
+    // Show after populating, or it hides the BusyPopup
     show();
 
     // Make sure something is selected, even if this window is not the active one
@@ -585,10 +582,11 @@ void TrashWindow::enableActions()
     _ui->deleteButton->setEnabled( itemSelected );
     _ui->restoreButton->setEnabled( itemSelected );
 
+    // Can't restore known "broken" trash items
+    const QColor & errColor = app()->dirTreeModel()->dirReadErrColor();
     for ( const QTreeWidgetItem * item : selectedItems )
     {
-	// Don't allow restore of known "broken" trash items
-	if ( item->foreground( TW_NameCol ) == app()->dirTreeModel()->dirReadErrColor() )
+	if ( item->foreground( TW_NameCol ).color() == errColor )
 	{
 	    _ui->restoreButton->setEnabled( false );
 	    return;
@@ -638,6 +636,16 @@ void TrashWindow::keyPressEvent( QKeyEvent * event )
 }
 
 
+void TrashWindow::changeEvent( QEvent * event )
+{
+    const auto type = event->type();
+    if ( type == QEvent::PaletteChange )
+	refresh();
+
+    QDialog::changeEvent( event );
+}
+
+
 
 
 TrashItem::TrashItem( ProcessStarter * processStarter,
@@ -674,26 +682,27 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     }
 
     const bool isDir = S_ISDIR( statInfo.st_mode );
-    _totalSize = statInfo.st_size;
-    set( TW_SizeCol, Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
-
     if ( isDir )
     {
-	// The process will be killed if the window is closed, although it will spam the log about it
+	// The process will be killed if this item is destroyed, although it will spam the log about it
 	QProcess * process = new QProcess{ this };
 	process->setProgram( "du" );
-	process->setArguments( { "-bs", Trash::trashEntryPath( trashRoot, _entryName ) } );
+	process->setArguments( { "-sB 1", Trash::trashEntryPath( trashRoot, _entryName ) } );
 	connect( process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ),
                  this,    &TrashItem::processFinished );
 	processStarter->add( process );
     }
+
+    const FileInfo fileInfo{ nullptr, app()->dirTree(), QString{}, statInfo };
+    _totalSize = fileInfo.allocatedSize();
+    set( TW_SizeCol, Qt::AlignRight, isDir ? "..." : formatSize( _totalSize ) );
 
     const QString trashInfoPath = Trash::trashInfoPath( trashRoot, _entryName );
     QFile infoFile{ trashInfoPath };
     if ( !infoFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
     {
 	logWarning() << "Can't open " << trashInfoPath << ": " << infoFile.errorString() << Qt::endl;
-	error( tr( "Can't read trashinfo file" ) );
+	error( tr( "Can't read .trashinfo file" ) );
 	return;
     }
 
@@ -701,34 +710,24 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     const QString tagLine   = in.readLine();
     const QString pathLine  = in.readLine();
     const QString mTimeLine = in.readLine();
-    if ( tagLine != TrashDir::trashInfoTag() ||
-	 pathLine.size() <= TrashDir::trashInfoPathTag().size() ||
-	 !pathLine.startsWith( TrashDir::trashInfoPathTag() ) ||
-	 mTimeLine.size() <= TrashDir::trashInfoDateTag().size() ||
-	 !mTimeLine.startsWith( TrashDir::trashInfoDateTag() ) )
+    if ( !validTrashinfo( tagLine, pathLine, mTimeLine ) )
     {
 	logWarning() << trashInfoPath << " format invalid" << Qt::endl;
-	error( tr( "Invalid trashinfo file format" ) );
+	error( tr( "Invalid .trashinfo file format" ) );
 	return;
     }
 
-    const QString mTime = mTimeLine.mid( TrashDir::trashInfoDateTag().size() );
-#if QT_VERSION < QT_VERSION_CHECK( 5, 8, 0 )
-    _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toTime_t();
-#else
-    _deletedMTime = QDateTime::fromString( mTime, Qt::ISODate ).toSecsSinceEpoch();
-#endif
+    setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );
+
+    _deletedMTime = stringToMTime( mTimeLine.mid( TrashDir::trashInfoDateTag().size() ) );
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
     const QString path = pathLine.mid( TrashDir::trashInfoPathTag().size() );
     QString name;
     QString originalDir;
     SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
-    set( TW_NameCol, Qt::AlignLeft,  replaceCrLf( name ) );
-    set( TW_DirCol,  Qt::AlignLeft,  replaceCrLf( originalDir ) );
-
-    const FileInfo fileInfo{ nullptr, nullptr, name, statInfo };
-    setIcon( TW_NameCol, app()->dirTreeModel()->itemTypeIcon( &fileInfo ) );
+    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( name ) );
+    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( originalDir ) );
 
     if ( text( TW_NameCol ) != name )
 	setToolTip( TW_NameCol, name );
@@ -774,7 +773,7 @@ void TrashItem::processFinished( int exitCode, QProcess::ExitStatus exitStatus )
 
 void TrashItem::deleteItem()
 {
-    const QByteArray expungedDirStr = TrashWindow::expungedDirPath( _trashRoot ).toUtf8();
+    const QByteArray expungedDirStr = expungedDirPath( _trashRoot ).toUtf8();
     ensureExpunged( expungedDirStr );
 
     if ( moveToExpunged( Trash::filesDirPath( _trashRoot ).toUtf8(), expungedDirStr, _entryName.toUtf8() ) )

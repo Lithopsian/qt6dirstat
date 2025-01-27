@@ -237,7 +237,7 @@
          <item>
           <widget class="QCheckBox" name="percentileFilterCheckBox">
            <property name="text">
-            <string>Show &amp;all percentiles</string>
+            <string>Show &amp;all percentile rows</string>
            </property>
           </widget>
          </item>

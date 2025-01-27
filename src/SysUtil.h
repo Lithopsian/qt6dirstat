@@ -171,7 +171,7 @@ namespace QDirStat
 	 * Both 'path_ret' and 'name_ret' are return parameters and will be
 	 * modified by this function.
 	 *
-	 * If 'path' is root (ie. "/") 'basPath_ret' is empty and
+	 * If 'path' is root (ie. "/") 'path_ret' is empty and
 	 * 'name_ret' = "/".  If 'path' has no "/" characters, then
 	 * 'name_ret' = 'path' and 'path_ret' is empty.  Otherwise
 	 * 'path_ret' contains the initial portion of 'path' up to and

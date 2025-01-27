@@ -560,6 +560,7 @@ namespace
 	ui->mountPointIcon->setVisible( isMountPoint );
 	ui->dotEntryIcon->setVisible( dir->isDotEntry() && !readError );
 	ui->dirIcon->setVisible( !dir->isMountPoint() && !dir->isDotEntry() && !readError );
+	ui->dirIcon->setEnabled( !dir->isAttic() );
 
 	setDirInfoType( ui->dirTypeLabel, dir );
 
@@ -632,6 +633,7 @@ namespace
 	    setCountLabel( ui->pkgSummaryItemCountLabel,   pkg->totalItems(),         prefix );
 	    setCountLabel( ui->pkgSummaryFileCountLabel,   pkg->totalFiles(),         prefix );
 	    setCountLabel( ui->pkgSummarySubDirCountLabel, pkg->totalSubDirs(),       prefix );
+	    setTimeLabel ( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
 	}
 	else
 	{
@@ -641,11 +643,11 @@ namespace
 	    clearLabel( ui->pkgSummaryItemCountLabel );
 	    clearLabel( ui->pkgSummaryFileCountLabel );
 	    clearLabel( ui->pkgSummarySubDirCountLabel );
+	    clearLabel( ui->pkgSummaryLatestMTimeLabel );
 
 	    ui->pkgSummaryTotalSizeLabel->setText( msg );
 	}
 
-	setTimeLabel( ui->pkgSummaryLatestMTimeLabel, pkg->latestMTime() );
     }
 
 
@@ -654,6 +656,7 @@ namespace
      **/
     void showFileInfoSet( const Ui::FileDetailsView * ui, const FileInfoSet & sel )
     {
+	QLatin1String prefix;
 	FileCount fileCount        = 0;
 	FileCount dirCount         = 0;
 	FileCount subtreeFileCount = 0;
@@ -662,6 +665,9 @@ namespace
 	{
 	    if ( item->isDirInfo() )
 	    {
+		const QLatin1String dirPrefix = item->sizePrefix();
+		if ( !dirPrefix.isEmpty() )
+		    prefix = dirPrefix;
 		++dirCount;
 		subtreeFileCount += item->totalFiles();
 	    }
@@ -682,11 +688,11 @@ namespace
 
 	ui->selHeading->setText( formatSelectionSummary( sel.count() ) );
 
-	setSizeLabel ( ui->selTotalSizeLabel,        sel.totalSize()          );
-	setSizeLabel ( ui->selAllocatedLabel,        sel.totalAllocatedSize() );
-	setCountLabel( ui->selFileCountLabel,        fileCount                );
-	setCountLabel( ui->selDirCountLabel,         dirCount                 );
-	setCountLabel( ui->selSubtreeFileCountLabel, subtreeFileCount         );
+	setSizeLabel ( ui->selTotalSizeLabel,        sel.totalSize(),          prefix );
+	setSizeLabel ( ui->selAllocatedLabel,        sel.totalAllocatedSize(), prefix );
+	setCountLabel( ui->selFileCountLabel,        fileCount,                prefix );
+	setCountLabel( ui->selDirCountLabel,         dirCount,                 prefix );
+	setCountLabel( ui->selSubtreeFileCountLabel, subtreeFileCount,         prefix );
     }
 
 } // namespace

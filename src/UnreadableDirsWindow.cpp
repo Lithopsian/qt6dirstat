@@ -47,8 +47,6 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
-
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( UD_PathCol,  QObject::tr( "Directory" ) );
 	headerItem->setText( UD_UserCol,  QObject::tr( "User" ) );
@@ -150,6 +148,7 @@ UnreadableDirsWindow * UnreadableDirsWindow::sharedInstance()
 void UnreadableDirsWindow::populate()
 {
     _ui->treeWidget->clear();
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     //logDebug() << "Locating all unreadable dirs" << Qt::endl;
 

@@ -74,7 +74,7 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
+//	app()->dirTreeModel()->setTreeIconSize( tree );
 
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( LL_SizeCol,  QObject::tr( "Total Size" ) );
@@ -175,6 +175,7 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
     // logDebug() << "populating with " << fileInfo << Qt::endl;
 
     _ui->treeWidget->clear();
+    _ui->treeWidget->setIconSize( app()->dirTreeModel()->dirTreeIconSize() );
 
     _subtree = fileInfo;
     _treeWalker->prepare( fileInfo );

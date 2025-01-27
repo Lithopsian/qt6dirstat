@@ -254,8 +254,6 @@ namespace
      **/
     void initTree( QTreeWidget * tree )
     {
-	app()->dirTreeModel()->setTreeIconSize( tree );
-
 	QTreeWidgetItem * headerItem = tree->headerItem();
 	headerItem->setText( FT_NameCol,            QObject::tr( "Name" ) );
 	headerItem->setText( FT_CountCol,           QObject::tr( "Files" ) );
@@ -272,7 +270,8 @@ namespace
 
 	tree->sortByColumn( FT_TotalSizeCol, Qt::DescendingOrder );
 
-	PercentBarDelegate::createStatsDelegates( tree, FT_CountPercentBarCol, FT_SizePercentBarCol );
+	const int height = app()->dirTreeModel()->dirTreeIconSize().height();
+	PercentBarDelegate::createStatsDelegates( tree, height, FT_CountPercentBarCol, FT_SizePercentBarCol );
     }
 
 } // namespace
@@ -289,6 +288,7 @@ FileTypeStatsWindow::FileTypeStatsWindow( QWidget * parent ):
     _ui->setupUi( this );
 
     initTree( _ui->treeWidget );
+    enableActions( false );
 
     Settings::readWindowSettings( this, "FileTypeStatsWindow" );
     ActionManager::actionHotkeys( this, "FileTypeStatsWindow" );
@@ -378,7 +378,10 @@ void FileTypeStatsWindow::syncedPopulate()
 void FileTypeStatsWindow::populate( FileInfo * newSubtree )
 {
     _ui->treeWidget->clear();
-    enableActions( false );
+
+    const int newHeight = app()->dirTreeModel()->dirTreeIconSize().height();
+    PercentBarDelegate::delegateForColumn( _ui->treeWidget, FT_CountPercentBarCol )->setHeight( newHeight );
+    PercentBarDelegate::delegateForColumn( _ui->treeWidget, FT_SizePercentBarCol  )->setHeight( newHeight );
 
     if ( !newSubtree )
 	return;

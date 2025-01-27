@@ -165,9 +165,7 @@ namespace QDirStat
 	/**
 	 * Constructor.
 	 **/
-	PatternSearchResultItem( const QString & path,
-	                        int             count,
-	                        FileSize        totalSize );
+	PatternSearchResultItem( const QString & path, int count, FileSize totalSize );
 
 	/**
 	 * Getters for the item properties.

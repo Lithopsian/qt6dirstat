@@ -268,7 +268,7 @@ void FileSizeStatsWindow::populate( FileInfo * fileInfo, const WildcardCategory 
     _wildcardCategory = wildcardCategory;
 
     // Confusing and pointless to exclude (or not) symlinks for a file-type-based dataset
-    const bool filteredResults = wildcardCategory.isEmpty();
+    const bool filteredResults = !wildcardCategory.isEmpty();
     _ui->excludeSymlinksCheckBox->setEnabled( !filteredResults );
     if ( filteredResults )
 	_ui->excludeSymlinksCheckBox->setChecked( false );

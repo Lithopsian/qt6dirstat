@@ -16,9 +16,7 @@
 #include <QGuiApplication>
 #include <QIcon>
 #include <QPalette>
-#include <QSet>
 #include <QTimer>
-#include <QTreeView>
 
 #include "DataColumns.h"
 #include "Typedefs.h" // _L1
@@ -108,22 +106,6 @@ namespace QDirStat
 	 * or a null icon if the type cannot be determined.
 	 **/
 	QIcon itemTypeIcon( const FileInfo * item ) const;
-
-	/**
-	 * Open a pkg URL: Read installed packages that match the specified
-	 * PkgFilter and their file lists from the system's package manager(s).
-	 *
-	 * Note that PkgFilter has a constructor that takes a QString and
-	 * uses PkgFilter::Auto as the default filter mode to determine the
-	 * filter mode from any special characters present in the URL, e.g.
-	 *
-	 * "Pkg:/"                     -> PkgFilter::SelectAll
-	 * contains "*" or "?"         -> PkgFilter::Wildcard
-	 * contains "^" or "$" or ".*" -> PkgFilter::RegExp
-	 * "Pkg:/=foo"                 -> PkgFilter::ExactMatch
-	 * otherwise                   -> PkgFilter::StartsWith
-	 **/
-//	void readPkg( const PkgFilter & pkgFilter );
 
 	/**
 	 * Open a pkg URL: read installed packages that match the specified
@@ -230,35 +212,53 @@ namespace QDirStat
 	/**
 	 * Sort the model.
 	 **/
-	void sort( int column,
-	           Qt::SortOrder order = Qt::AscendingOrder ) override;
+	void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override;
 
 	/**
-	 * Return the resource path of the directory icon.
+	 * Tree icon getters.  It is generally easier to call itemTypeIcon()
+	 * with a FileInfo object.
 	 **/
-	const QIcon & dirIcon() const { return _dirIcon; }
-
-	/**
-	 * Return the resource path of the unreadable directory icon.
-	 **/
+	const QIcon & dirIcon()           const { return _dirIcon; }
 	const QIcon & unreadableDirIcon() const { return _unreadableDirIcon; }
+//	const QIcon & mountPointIcon()    const { return _mountPointIcon; }
+//	const QIcon & fileIcon()          const { return _fileIcon; }
+//	const QIcon & symlinkIcon()       const { return _symlinkIcon; }
+//	const QIcon & blockDeviceIcon()   const { return _blockDeviceIcon; }
+//	const QIcon & charDeviceIcon()    const { return _charDeviceIcon; }
+//	const QIcon & specialIcon()       const { return _specialIcon; }
 
 	/**
-	 * Return the resource path of the mount point icon.
+	 * Returns the configured tree icon size.
 	 **/
-	const QIcon & mountPointIcon() const { return _mountPointIcon; }
+	QSize dirTreeIconSize() const
+	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
+
+
+    signals:
 
 	/**
-	 * Return the resource path of the network mount point icon.
+	 * Notify the view that the visible row data has changed. Unlike
+	 * dataChanged(), there is no attempt to identify which rows have
+	 * changed because a change in the number of read jobs in one row may
+	 * change its sort position and move other rows.  It is very difficult
+	 * to detect when rows move in this way and would result in multiple
+	 * signals.
+	 *
+	 * Only one signal is sent per update tick and the view will re-paint
+	 * the whole visible viewport, or lay out the whole tree.  An index is
+	 * passed purely to allow the view to calculate a row height and
+	 * determine the number of (expended) rows.
+	 *
+	 * Note that Qt5 used to re-paint the whole viewport, so sending
+	 * individual row dataChanged signals worked (except for the child
+	 * indicator) although it was slow.  Qt6 was optimised to only paint
+	 * the rectangle containing the single row in each signal, which
+	 * didn't work for us.  In addition, the Qt6 approach was very slow
+	 * with large numbers of rows (typically more than a few hundred) and a
+	 * later change was made to fall back to the Qt5 behaviour when there
+	 * were too many rows.
 	 **/
-	const QIcon & networkIcon() const { return _networkIcon; }
-
-	/**
-	 * Set the icon size of a QTreeView's items based on
-	 * the configured DirTree icon size.
-	 **/
-	void setTreeIconSize( QTreeView * tree ) const
-	    { tree->setIconSize( dirTreeIconSize() ); }
+	void rowsChanged( const QModelIndex & index );
 
 #if 0
     public slots:
@@ -290,13 +290,10 @@ namespace QDirStat
 	void readingFinished();
 
 	/**
-	 * Send all pending updates to the connected views, triggered from
-	 * the update timer.  The list of pending updates can be long and
-	 * not necessarily unique, but most entries are filtered out as
-	 * not being "touched".  The dataChanged() signal is sent for the
-	 * items that have been touched and so might be visible.
+	 * Signal the view to update.  This is called from a timer whenever
+	 * there is an ongoing read.
 	 **/
-	void sendPendingUpdates();
+	void updateView();
 
 	/**
 	 * Notification that items are going to be deleted from the tree.
@@ -365,12 +362,6 @@ namespace QDirStat
 	    { return treeIconDir.contains( "medium"_L1 ) ? DTIS_Medium : DTIS_Small; }
 
 	/**
-	 * Returns the configured tree icon size.
-	 **/
-	QSize dirTreeIconSize() const
-	    { return _dirIcon.actualSize( QSize{ 1024, 1024 } ); }
-
-	/**
 	 * Notify the view (with beginInsertRows() and endInsertRows()) about
 	 * new children (all the children of 'dir'). This might become
 	 * recursive if any of those children in turn are already finished.
@@ -386,21 +377,6 @@ namespace QDirStat
 	 * Update the persistent indexes with current row after sorting etc.
 	 **/
 	void updatePersistentIndexes();
-
-	/**
-	 * Delayed update of the data fields in the view for 'dir':
-	 * Store 'dir' and all its ancestors in _pendingUpdates.
-	 *
-	 * The updates will be sent several times per second to the views with
-	 * 'sendPendingUpdates()'.
-	 **/
-	void delayedUpdate( DirInfo * dir );
-
-	/**
-	 * Invalidate all persistent indexes in 'subtree'. 'includeParent'
-	 * indicates if 'subtree' itself will become invalid.
-	 **/
-//	void invalidatePersistent( const FileInfo * subtree, bool includeParent );
 
 	/**
 	 * Return the icon to be displayed in the tree for this item.
@@ -431,7 +407,9 @@ namespace QDirStat
 	void beginRemoveRows( const QModelIndex & parent, int first, int last );
 
 	//
-	// Reimplemented from QAbstractItemModel:
+	// Reimplemented from QAbstractItemModel.
+	//
+	// Note that these are public in the base class.
 	//
 
 	/**
@@ -484,7 +462,6 @@ namespace QDirStat
 	DataColumn      _sortCol{ ReadJobsCol };
 	Qt::SortOrder   _sortOrder{ Qt::DescendingOrder };
 
-	QSet<DirInfo *> _pendingUpdates;
 	QTimer          _updateTimer;
 	int             _updateTimerMillisec;
 	int             _slowUpdateMillisec;
@@ -506,7 +483,6 @@ namespace QDirStat
 	QIcon  _symlinkIcon;
 	QIcon  _unreadableDirIcon;
 	QIcon  _mountPointIcon;
-	QIcon  _networkIcon;
 	QIcon  _stopIcon;
 	QIcon  _excludedIcon;
 	QIcon  _blockDeviceIcon;

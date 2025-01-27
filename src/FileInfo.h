@@ -389,7 +389,6 @@ namespace QDirStat
 	 * the file.  Some file systems may not report allocations in complete
 	 * blocks, so round up to the number of blocks required to hold the
 	 * allocation.
-	 *
 	 **/
 	static FileSize blocksFromSize( FileSize allocatedSize )
 	    { return std::ceil( 1.0 * allocatedSize / STD_BLOCK_SIZE ); }
@@ -452,19 +451,17 @@ namespace QDirStat
 	/**
 	 * Returns the total size in bytes of this subtree.
 	 *
-	 * This is a specialised const (read-only) getter that
-	 * returns the total allocated size if it is non-zero,
-	 * otherwise the total size.  This "size" is suitable for
-	 * callers such as TreemapTile that always want a non-zero
-	 * size and are are working on a subtree that has clean
-	 * summaries and cannot become dirty (or will be abandoned
-	 * if it does).
+	 * This is a specialised const (read-only) getter that returns the
+	 * total allocated size if it is non-zero, otherwise the total size.
+	 * This "size" is suitable for callers such as TreemapTile that always
+	 * want a non-zero size and are working on a subtree that has clean
+	 * summaries and cannot become dirty (or will be abandoned if it does).
 	 *
 	 **/
 	FileSize itemTotalSize() const
 	{
-		const FileSize alloc = totalAllocatedSizeConst();
-		return alloc ? alloc : totalSizeConst();
+	    const FileSize alloc = totalAllocatedSizeConst();
+	    return alloc ? alloc : totalSizeConst();
 	}
 
 	//

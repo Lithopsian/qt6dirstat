@@ -11,11 +11,9 @@
 #include "DirInfo.h"
 #include "DirTree.h"
 #include "Exception.h"
-#include "ExcludeRules.h"
 #include "FileInfoIterator.h"
 #include "FileInfoSet.h"
 #include "FormatUtil.h"
-#include "PkgFilter.h"
 #include "Settings.h"
 
 
@@ -498,7 +496,7 @@ DirTreeModel::DirTreeModel( QObject * parent ):
     _updateTimer.setInterval( _updateTimerMillisec );
 
     connect( &_updateTimer, &QTimer::timeout,
-             this,          &DirTreeModel::sendPendingUpdates );
+             this,          &DirTreeModel::updateView );
 }
 
 
@@ -605,6 +603,9 @@ void DirTreeModel::createTree()
     connect( _tree, &DirTree::startingRefresh,
              this,  &DirTreeModel::startingRead );
 
+    connect( _tree, &DirTree::startingRefresh,
+             this,  &DirTreeModel::updateView, Qt::QueuedConnection );
+
     connect( _tree, &DirTree::finished,
              this,  &DirTreeModel::readingFinished );
 
@@ -650,6 +651,7 @@ void DirTreeModel::loadIcons()
     _charDeviceIcon    = QIcon( iconDir % "char-device.png"_L1    );
     _specialIcon       = QIcon( iconDir % "special.png"_L1        );
     _pkgIcon           = QIcon( iconDir % "folder-pkg.png"_L1     );
+    _atticIcon = _dirIcon;
 }
 
 
@@ -719,7 +721,7 @@ int DirTreeModel::rowCount( const QModelIndex & parentIndex ) const
 	{
 	    case DirQueued:
 	    case DirReading:
-		// Better keep it simple: Don't report any children until they are complete
+		// Better keep it simple: don't report any children until they are complete
 		break;
 
 	    case DirError:
@@ -928,13 +930,13 @@ QIcon DirTreeModel::itemTypeIcon( const FileInfo * item ) const
 void DirTreeModel::startingRead()
 {
     _updateTimer.start();
+//    QTimer::singleShot( 0, this, &DirTreeModel::updateView );
 }
 
 
 void DirTreeModel::readJobFinished( DirInfo * dir )
 {
     // logDebug() << dir << Qt::endl;
-    delayedUpdate( dir );
 
     if ( !anyAncestorBusy( dir ) )
 	newChildrenNotify( dir );
@@ -974,54 +976,29 @@ void DirTreeModel::newChildrenNotify( DirInfo * dir )
 	if ( it->readState() != DirReading && it->readState() != DirQueued )
 	    newChildrenNotify( *it );
     }
+
+    dir->clearTouched();
 }
 
 
-void DirTreeModel::delayedUpdate( DirInfo * dir )
+void DirTreeModel::updateView()
 {
-    while ( dir && dir != _tree->root() )
-    {
-	if ( dir->isTouched() )
-	    _pendingUpdates.insert( dir );
-
-	dir = dir->parent();
-    }
-}
-
-
-void DirTreeModel::sendPendingUpdates()
-{
-    //logDebug() << "Sending " << _pendingUpdates.size() << " updates" << Qt::endl;
-
-    for ( DirInfo * dir : asConst( _pendingUpdates ) )
-    {
-	// Not checking the magic numbers as they turn out to be unreliable after a tree clear
-	// as the next read may overwrite the same memory with new FileInfos -
-	// so just make sure we never get here with stale pointers
-	if ( dir && dir != _tree->root() && dir->isTouched() )
-	{
-	    const int row = rowNumber( dir );
-	    const QModelIndex topLeft     = createIndex( row, 0, dir );
-	    const QModelIndex bottomRight = createIndex( row, DataColumns::lastCol(), dir );
-	    emit dataChanged( topLeft, bottomRight );
-
-	    //logDebug() << "Data changed for " << dir << Qt::endl;
-
-	    // If the view is still interested in this dir, it will fetch data, and touch again
-	    dir->clearTouched();
-	}
-    }
-
-    _pendingUpdates.clear();
+    // logDebug() << "Rows changed" << Qt::endl;
+    emit rowsChanged( createIndex( 0, 0, _tree->firstToplevel() ) );
 }
 
 
 void DirTreeModel::readingFinished()
 {
-    // Just abandon any remaining updates
-    // The whole display is going to get refreshed when it is sorted
+    // Stop updating the viewport
     _updateTimer.stop();
-    _pendingUpdates.clear();
+
+    // Update the view in case it hasn't been fully painted and the sort isn't changing
+    if ( _sortCol != ReadJobsCol )
+    {
+	emit layoutAboutToBeChanged();
+	emit layoutChanged();
+    }
 
     // dumpPersistentIndexList( persistentIndexList() );
     // dumpChildren( _tree->root() );
@@ -1053,7 +1030,6 @@ void DirTreeModel::updatePersistentIndexes()
 void DirTreeModel::beginResetModel()
 {
     _updateTimer.stop();
-    _pendingUpdates.clear(); // these are dangerous if they arrive from a dead tree
 
     QAbstractItemModel::beginResetModel();
 }

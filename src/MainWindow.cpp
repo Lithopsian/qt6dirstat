@@ -162,6 +162,9 @@ void MainWindow::connectSignals( DirTree        * dirTree,
     connect( dirTreeModel,             &DirTreeModel::layoutChanged,
              this,                     &MainWindow::layoutChanged );
 
+    connect( dirTreeModel,             &DirTreeModel::rowsChanged,
+             _ui->dirTreeView,         &DirTreeView::rowsChanged );
+
     connect( selectionModel,           &SelectionModel::currentBranchChanged,
              _ui->dirTreeView,         &DirTreeView::closeAllExcept );
 
@@ -343,11 +346,6 @@ void MainWindow::busyDisplay()
     closeChildren();
 
     _updateTimer.start();
-
-    // Sort by ReadJobsCol (aka PercentBarCol) during the read
-    SignalBlocker signalBlocker{ app()->dirTreeModel() };
-    const int sortCol = DataColumns::toViewCol( ReadJobsCol );
-    _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
 }
 
 
@@ -384,11 +382,16 @@ void MainWindow::startingReading()
 {
     busyDisplay();
 
+    // Sort by ReadJobsCol (aka PercentBarCol) during normal full reads
+    SignalBlocker signalBlocker{ app()->dirTreeModel() };
+    const int sortCol = DataColumns::toViewCol( ReadJobsCol );
+    _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
+
     // Open this here, so it doesn't get done for refresh selected
     // And don't do it for package reads because so many toplevel packages slow things down
     if ( !PkgInfo::isPkgUrl( app()->dirTree()->url() ) )
 	// After a short delay so there is a tree to open
-	QTimer::singleShot( 0, [ this ]() { expandTreeToLevel( 1 ); } );
+	QTimer::singleShot( 0, _ui->actionExpandTreeLevel1, &QAction::trigger );
 }
 
 
@@ -926,15 +929,15 @@ void MainWindow::openConfigDialog()
 }
 
 
-void MainWindow::showFileTypeStats()
-{
-    FileTypeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
-}
-
-
 void MainWindow::showFileSizeStats()
 {
     FileSizeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
+}
+
+
+void MainWindow::showFileTypeStats()
+{
+    FileTypeStatsWindow::populateSharedInstance( this, app()->currentDirInfo() );
 }
 
 

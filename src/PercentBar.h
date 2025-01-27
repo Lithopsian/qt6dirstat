@@ -21,27 +21,24 @@
 namespace QDirStat
 {
     /**
-     * Item delegate class to paint the percent bar in the PercentBarCol.
+     * Item delegate class to paint a percent bar in a tree column. This is a
+     * generic class that can be used for all kinds of QTreeView-derived
+     * widgets, including the simplistic QTreeWidget.
      *
-     * This is a generic class that can be used for all kinds of QTreeView-
-     * derived widgets, including the simplistic QTreeWidget.
-     *
-     * This delegate can handle one percent bar in one column; but you can
-     * install multiple of them, one for each column that should get a percent
-     * bar.
+     * This delegate handles one percent bar in one column; but you can install
+     * multiple delegates, one for each column that should get a percent bar.
      *
      * The percent value is obtained from the RawDataRole and the percent bar
-     * is rendered with that value.  No bar will be displayed
-     * if the QVariant() returned is invalid or the float derived from it is
-     * less than zero.
+     * is rendered with that value.  No bar will be displayed if the QVariant()
+     * returned is invalid or the float derived from it is less than zero.
      *
      * Example:
      *
      *    60.0%    ->   [======    ]
      *
-     * The percent bar is indented using the value obtained from the TreeLevelRole
-     * and the tree indentation, and a  different color may be used for each
-     * indentation level.
+     * The percent bar is indented using the value obtained from the
+     * TreeLevelRole and the tree indentation, and a different configurable
+     * color may be used for each indentation level.
      **/
     class PercentBarDelegate final : public QStyledItemDelegate
     {
@@ -53,15 +50,21 @@ namespace QDirStat
 	 * Constructor.
 	 **/
 	PercentBarDelegate( QTreeView * treeView,
-	                    int         barWidth,
+	                    QSize       barSize,
 	                    QColor      barBackground,
 	                    ColorList   fillColors ):
 	    QStyledItemDelegate{ treeView },
-	    _sizeHintWidth{ barWidth },
+	    _sizeHint{ barSize },
 	    _barBackground{ barBackground },
 	    _fillColors{ fillColors },
 	    _indentation{ treeView->indentation() }
 	{}
+
+	/**
+	 * Set the size hint height for the bar.
+	 **/
+	void setHeight( int height )
+	    { _sizeHint.setHeight( height ); }
 
 	/**
 	 * Paint one cell in the view.
@@ -73,26 +76,35 @@ namespace QDirStat
 	            const QModelIndex          & index ) const override;
 
 	/**
-	 * Return a size hint for one cell in the view.
+	 * Return a size hint for one cell in the view.  This is fixed in the
+	 * constructor and is used to determine the (minimum, uniform) row
+	 * height and the automatic width of the percent bar columns.
 	 *
 	 * Inherited from QStyledItemDelegate.
 	 **/
-	QSize sizeHint( const QStyleOptionViewItem & option,
-	                const QModelIndex          & index) const override;
+	QSize sizeHint( const QStyleOptionViewItem &, const QModelIndex & ) const override
+	    { return _sizeHint; }
+
+	/**
+	 * Return the item delegate for 'col' in 'view', cast to a
+	 * PercentBarDelegate pointer.
+	 **/
+	static PercentBarDelegate * delegateForColumn( QAbstractItemView * view, int col )
+	    { return static_cast<PercentBarDelegate *>( view->itemDelegateForColumn( col ) ); }
 
 	/**
 	 * Create two PercentBarDelegates from configuration settings and
-	 * add them to the 'filesCol' and 'sizeCol' columns of 'tree'.
+	 * add them to the 'filesCol' and 'sizeCol' columns of 'tree'.  The
+	 * sizeHint height of the bars will be 'height' and the width will be
+	 * a configured value.
 	 **/
-	static void createStatsDelegates( QTreeWidget * treeWidget, int filesCol, int sizeCol );
+	static void createStatsDelegates( QTreeWidget * treeWidget, int height, int filesCol, int sizeCol );
 
 
     protected:
 
 	/**
 	 * Paint a percent bar into a widget.
-	 *
-	 * 'indentPixel' is the number of pixels to indent the bar.
 	 **/
 	void paintPercentBar( QPainter                   * painter,
 	                      const QStyleOptionViewItem & option,
@@ -102,10 +114,10 @@ namespace QDirStat
 
     private:
 
-	int               _sizeHintWidth;
-	const QColor      _barBackground;
-	const ColorList   _fillColors;
-	int               _indentation;
+	QSize           _sizeHint;
+	const QColor    _barBackground;
+	const ColorList _fillColors;
+	const int       _indentation;
 
     };	// class PercentBarDelegate
 

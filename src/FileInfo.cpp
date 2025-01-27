@@ -24,7 +24,7 @@
 // bytes less than the byte size - it may be due to intelligent fragment
 // handling.
 #define FRAGMENT_SIZE 2048
-
+#define VERBOSE_FILEINFO 0
 
 using namespace QDirStat;
 
@@ -109,7 +109,7 @@ FileInfo::FileInfo( DirInfo           * parent,
 	// allow for intelligent fragment handling
 	_isSparseFile = isFile() && _blocks >= 0 && _allocatedSize + FRAGMENT_SIZE < _size;
 
-#if 0
+#if VERBOSE_FILEINFO
 	if ( _isSparseFile )
 	    logDebug() << "Found sparse file: " << this
 	               << "    Byte size: "     << formatSize( _size )
@@ -118,7 +118,7 @@ FileInfo::FileInfo( DirInfo           * parent,
 	               << Qt::endl;
 #endif
 
-#if 0
+#if VERBOSE_FILEINFO
 	if ( isFile() && _links > 1 )
 	    logDebug() << _links << " hard links: " << this << Qt::endl;
 #endif

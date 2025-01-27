@@ -23,6 +23,7 @@
 #include "SelectionModel.h"
 #include "Settings.h"
 #include "StdCleanup.h"
+#include "SysUtil.h"
 #include "Trash.h"
 
 
@@ -529,10 +530,18 @@ void CleanupCollection::moveToTrash()
     int count = 0;
     for ( const FileInfo * item : selectedItems )
     {
-	if ( _trash->trash( item->path() ) )
-	    outputWindow->addStdout( tr( "Moved to trash: " ) % item->path() );
+	const QString fullPath = item->path();
+	QString dirPath;
+	QString filePath;
+	SysUtil::splitPath( fullPath, dirPath, filePath );
+	if ( !SysUtil::canAccess( dirPath ) )
+	    outputWindow->addStderr( tr( "Permission denied: " ) % fullPath );
+	else if ( _trash->isInTrashDir( fullPath ) )
+	    outputWindow->addStderr( tr( "Cannot trash items in trash directory: " ) % fullPath );
+	else if ( !_trash->trash( item->path() ) )
+	    outputWindow->addStderr( tr( "Move to trash failed for " ) % fullPath );
 	else
-	    outputWindow->addStderr( tr( "Move to trash failed for " ) % item->path() );
+	    outputWindow->addStdout( tr( "Moved to trash: " ) % fullPath );
 
 	// Give the output window a chance to display progress
 	if ( ++count > 10 )

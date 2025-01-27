@@ -60,21 +60,6 @@ void PercentBarDelegate::paint( QPainter                   * painter,
 }
 
 
-QSize PercentBarDelegate::sizeHint( const QStyleOptionViewItem & option,
-                                    const QModelIndex          & index) const
-{
-    QSize size = QStyledItemDelegate::sizeHint( option, index );
-
-    if ( !index.isValid() )
-	return size;
-
-    size.setWidth( _sizeHintWidth );
-    size.setHeight( qMax( size.height(), MIN_PERCENT_BAR_HEIGHT ) );
-
-    return size;
-}
-
-
 void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
                                           const QStyleOptionViewItem & option,
                                           const QModelIndex          & index,
@@ -137,13 +122,13 @@ void PercentBarDelegate::paintPercentBar( QPainter                   * painter,
 }
 
 
-void PercentBarDelegate::createStatsDelegates( QTreeWidget * treeWidget, int filesCol, int sizeCol )
+void PercentBarDelegate::createStatsDelegates( QTreeWidget * treeWidget, int height, int filesCol, int sizeCol )
 {
     Settings settings;
 
     settings.beginGroup( "StatsPercentBars" );
 
-    const int       width       = settings.value         ( "Width",       120  ).toInt();
+    const int       width       = settings.value         ( "Width",       120 ).toInt();
     const QColor    background  = settings.colorValue    ( "Background",  QColor{ 160, 160, 160 } );
     const ColorList filesColors = settings.colorListValue( "FilesColors", { 0xbb0000, 0x00aa00 }  );
     const ColorList sizeColors  = settings.colorListValue( "SizeColors",  { 0xee0000, 0x00cc00 }  );
@@ -156,9 +141,9 @@ void PercentBarDelegate::createStatsDelegates( QTreeWidget * treeWidget, int fil
     settings.endGroup();
 
     // Delegates for the two percent bars
-    const auto filesDelegate = new PercentBarDelegate{ treeWidget, width, background, filesColors };
+    const auto filesDelegate = new PercentBarDelegate{ treeWidget, { width, height }, background, filesColors };
     treeWidget->setItemDelegateForColumn( filesCol, filesDelegate );
 
-    const auto sizeDelegate = new PercentBarDelegate{ treeWidget, width, background, sizeColors };
+    const auto sizeDelegate = new PercentBarDelegate{ treeWidget, { width, height }, background, sizeColors };
     treeWidget->setItemDelegateForColumn( sizeCol, sizeDelegate );
 }
