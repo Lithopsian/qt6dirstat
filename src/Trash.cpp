@@ -8,14 +8,14 @@
  */
 
 #include <sys/stat.h> // mkdir(), struct stat, S_ISDIR(), etc.
+#include <stdio.h> // FILE, fdopen, etc.
 #include <unistd.h> // getuid()
 
 #include <QDateTime>
 #include <QDir>
-#include <QFile>
+#include <QFileInfo>
 #include <QProcessEnvironment>
 #include <QStringBuilder>
-#include <QTextStream>
 #include <QUrl>
 
 #include "Trash.h"
@@ -333,71 +333,138 @@ namespace
     }
 
 
-    void createTrashInfo( const QString & path, const QString & infoPath )
+    /**
+     * Create an entry name for 'name', formed by adding the number 'i' to the
+     * base name of 'name', followed by any suffix.  Any unique name would be
+     * acceptable, but this makes it a little nicer to look at.
+     **/
+    QString makeEntryName( const QString & name, int i )
     {
-	QFile trashInfo{ infoPath };
+	if ( i == 0 )
+	    return name;
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 11, 0 )
-	if ( !trashInfo.open( QIODevice::NewOnly | QIODevice::Text ) ) // O_EXCL access
-#else
-	if ( !trashInfo.open( QIODevice::WriteOnly | QIODevice::Text ) ) // NewOnly not available, so just open
-#endif
-	{
-	    const QString fileName = trashInfo.fileName();
-	    const QString msg{ "Can't open %1: %2" };
-	    THROW( ( FileException{ fileName, msg.arg( fileName, trashInfo.errorString() ) } ) );
-	}
+	// This split happens for every i increment, but i = 0 will be the most common case
+	const auto lastDotIndex = name.lastIndexOf( u'.' );
+	const QString baseName = lastDotIndex > 0 ? name.left( lastDotIndex ) : name;
+	const QString suffix   = lastDotIndex > 0 ? name.mid( lastDotIndex ) : QString{};
 
-	QTextStream str{ &trashInfo };
-	str << TrashDir::trashInfoTag() << '\n';
-	str << TrashDir::trashInfoPathTag() << QUrl::toPercentEncoding( path ) << '\n';
-	str << TrashDir::trashInfoDateTag() << QDateTime::currentDateTime().toString( Qt::ISODate ) << '\n';
-    }
-
-
-    void moveToTrash( const QString & path, const QString & targetPath, const QString & infoPath )
-    {
-	// QFile::rename will try to move, then try to copy-and-delete, but this will fail for directories
-	QFile pathFile{ path };
-	const bool success = pathFile.rename( targetPath );
-	if ( !success )
-	{
-	    // Don't leave trashinfo files lying around with no corresponding trashed file
-	    QFile{ infoPath }.remove();
-
-	    const QString msg{ "Could not move %1 to %2: %3" };
-	    THROW( ( FileException{ path, msg.arg( path, targetPath, pathFile.errorString() ) } ) );
-	}
+	return QString{ "%1_%2%3" }.arg( baseName ).arg( i ).arg( suffix );
     }
 
 
     /**
-     * Create a name for 'path' that is unique within '_path', both within the
-     * paths directory and the info directory. If the filename of 'path'
-     * already exists, then append a number to the filename base to create a
-     * unique filename.
+     * Write to fd, an open trashinfo file.  The current date/time is used and
+     * the original path 'path'.  The function returns whether the information
+     * was successfully written to 'fd'.
      **/
-    QString uniqueName( const QString & path, const QString & filesDirPath, const QString & infoDirPath )
+    bool writeTrashInfo( int fd, const QString & path )
     {
-	const QFileInfo file{ path };
-	const QDir filesDir{ filesDirPath };
-	const QDir infoDir{ infoDirPath };
-
-	QString name = file.fileName();
-	for ( int i = 1; filesDir.exists( name ) || infoDir.exists( name % Trash::trashInfoSuffix() ); ++i )
+	FILE * fp = fdopen( fd, "w" );
+	if ( !fp )
 	{
-	    // Only calculate the base and suffix in the uncommon case where the entry name exists
-	    name = QString{ "%1_%2" }.arg( file.baseName() ).arg( i );
-
-	    const QString suffix = file.completeSuffix();
-	    if ( !suffix.isEmpty() )
-		name += '.' % suffix;
+	    close( fd );
+	    return false;
 	}
 
-	return name;
+	QTextStream str{ fp, QIODevice::WriteOnly | QIODevice::Text };
+	str << TrashDir::trashInfoTag() << '\n';
+	str << TrashDir::trashInfoPathTag() << QUrl::toPercentEncoding( path, "/" ) << '\n';
+	str << TrashDir::trashInfoDateTag() << QDateTime::currentDateTime().toString( Qt::ISODate ) << Qt::endl;
+
+//	if ( fprintf( fp, "%s\n%s%s\n%s%s\n",
+//	              TrashDir::trashInfoTag().latin1(),
+//	              TrashDir::trashInfoPathTag().latin1(),
+//	              QUrl::toPercentEncoding( path, "/" ).constData(),
+//	              TrashDir::trashInfoDateTag().latin1(),
+//	              QDateTime::currentDateTime().toString( Qt::ISODate ).toUtf8().constData() ) < 0 )
+//	{
+//	    fclose( fp );
+//	    return false;
+//	}
+
+	if ( fclose( fp ) != 0 )
+	    return false;
+
+	return true;
     }
 
-}
+
+    /**
+     * Create a trashinfo file and move 'path' to the corresponding entry name
+     * in 'filesDirPath'.  The entry name is constructed to be unique, both in
+     * 'filesDirPath' and 'infoDirPath'.  This is done using O_CREAT and O_EXCL
+     * to prevent races.
+     *
+     * One special case is where the terminal component of 'path' is long
+     * enough that appending ".trashinfo" and any numerals added to it makes it
+     * too long.  The filename is simply truncated until it is short enough,
+     * brutal but hopefully very rare.
+     *
+     * If there is already a trash entry with the chosen name (but obviously
+     * there wasn't a trashinfo file for it), that trash entry will be
+     * overwritten.
+     *
+     * Note that some C file I/O functions are used, partly because Qt could
+     * not open a QFile with the equivalent of Q_EXCL until 5.11, partly for
+     * speed.
+     **/
+    void moveToTrash( const QString & path, const QString & filesDirPath, const QString & infoDirPath )
+    {
+	QString pathDir;
+	QString name;
+	SysUtil::splitPath( path, pathDir, name );
+
+	// Loop until we manage to open a trashinfo file that didn't exist before
+	int i = 0;
+	while ( true )
+	{
+	    const QString entryName = makeEntryName( name, i );
+	    const QString trashinfoPath{ infoDirPath % '/' % entryName % Trash::trashInfoSuffix() };
+	    const QByteArray trashinfoStr = trashinfoPath.toUtf8();
+
+	    const int fd = open( trashinfoStr, O_CREAT | O_EXCL | O_WRONLY, 0600 );
+	    if ( fd >= 0 )
+	    {
+		const auto throwException = [ &path, &trashinfoStr ]( const QString & msg )
+		{
+		    const QString fullMsg = msg % ": " % formatErrno();
+		    unlink( trashinfoStr );
+		    THROW( ( FileException{ path, fullMsg } ) );
+		};
+
+		const QString targetPath{ filesDirPath % '/' % entryName };
+
+		if ( !writeTrashInfo( fd, path ) )
+		    throwException( QString{ "Could not write %1" }.arg( trashinfoPath ) );
+
+		if ( rename( path.toUtf8(), targetPath.toUtf8() ) != 0 )
+		    throwException( QString{ "Could not move %1 to %2" }.arg( path, targetPath ) );
+
+		return; // SUCCESS
+	    }
+	    else if ( errno == EEXIST )
+	    {
+		// That trashinfo file already exists, try a bigger number
+		++i;
+	    }
+	    else if ( errno == ENAMETOOLONG )
+	    {
+		// Sanity check, this would be very odd
+		if ( name.size() < 2 )
+		    return;
+
+		// Just chop one character at a time, slow but this is going to be very rare
+		name.chop( 1 );
+	    }
+	    else
+	    {
+		const QString msg{ "Could not create trashinfo %1: %2" };
+		THROW( ( FileException{ path, msg.arg( trashinfoPath, formatErrno() ) } ) );
+	    }
+	}
+    }
+
+} // namespace
 
 
 TrashDir::TrashDir( const QString & path ):
@@ -414,10 +481,5 @@ TrashDir::TrashDir( const QString & path ):
 
 void TrashDir::trash( const QString & path )
 {
-    const QString filesDir = filesDirPath();
-    const QString targetName = uniqueName( path, filesDir, infoDirPath() );
-    const QString infoFilePath = infoPath( targetName );
-
-    createTrashInfo( path, infoFilePath );
-    moveToTrash( path, filesDir % '/' % targetName, infoFilePath );
+    moveToTrash( path, filesDirPath(), infoDirPath() );
 }

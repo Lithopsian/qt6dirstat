@@ -779,7 +779,7 @@ void TrashItem::deleteItem()
     if ( moveToExpunged( Trash::filesDirPath( _trashRoot ).toUtf8(), expungedDirStr, _entryName.toUtf8() ) )
     {
 	// If the "files" entry was moved, try to move its corresponding .trashinfo file
-	const QString infoName = _entryName % Trash::trashInfoSuffix();
+	const QString infoName = Trash::trashInfoName( _entryName );
 	moveToExpunged( Trash::infoDirPath( _trashRoot ).toUtf8(), expungedDirStr, infoName.toUtf8() );
 
 	// Even if the .trashinfo file is still there, it won't show up in the tree any more

@@ -99,6 +99,13 @@ namespace QDirStat
          * Return the path of the trashinfo file corresponding to an entry
          * 'filesEntry'.
          **/
+        static QString trashInfoName( const QString & entryName )
+            { return entryName % ".trashinfo"_L1; }
+
+        /**
+         * Return the path of the trashinfo file corresponding to an entry
+         * 'filesEntry'.
+         **/
         static QString trashInfoPath( const QString & trashDir, const QString & filesEntry )
             { return infoDirPath( trashDir ) % '/' % filesEntry % trashInfoSuffix(); }
 
@@ -182,16 +189,11 @@ namespace QDirStat
          * 'path' to a uniquely-named entry  in the "files" directory for this
          * TrashDir.
          *
-         * If possible (ie. after 5.11), the .trashinfo file is opened in
-         * exclusive mode, but it is still possible for another trash operation
-         * to use the target name first.  An exception will be thrown if this
-         * happens, or the attempted trash fails for any other reason.  The
-         * caller is expected to ensure as far as possible that the operation
-         * can succeed, and to catch any exceptions.
-         *
-         * If 'path' is on a different device to '_path', Qt will attempt to
-         * copy to the target, but this will only succeed if 'path' is a file,
-         * not a directory.
+         * The .trashinfo file is opened in exclusive mode, to prevent races
+         * with other trash operations.  An exception will be thrown if the
+         * attempted trash fails unexpectedly.  The caller is expected to
+         * ensure as far as possible that the operation can succeed, and to
+         * catch any exceptions.
          **/
         void trash( const QString & path );
 
@@ -226,12 +228,6 @@ namespace QDirStat
          * Return the path of the "info" subdirectory of this trash directory.
          **/
         QString infoDirPath() const { return Trash::infoDirPath( _path ); }
-
-        /**
-         * Return the path of a trashinfo file for this trash directory.
-         **/
-        QString infoPath( const QString & target) const
-            { return Trash::trashInfoPath( _path, target ); }
 
 
     private:
