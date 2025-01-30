@@ -526,6 +526,7 @@ void CleanupCollection::moveToTrash()
     outputWindow->showAfterTimeout();
 
     // Move all selected items to trash
+    QString msg;
     QEventLoop eventLoop;
     int count = 0;
     for ( const FileInfo * item : selectedItems )
@@ -535,13 +536,13 @@ void CleanupCollection::moveToTrash()
 	QString filePath;
 	SysUtil::splitPath( fullPath, dirPath, filePath );
 	if ( !SysUtil::canAccess( dirPath ) )
-	    outputWindow->addStderr( tr( "Permission denied: " ) % fullPath );
+	    outputWindow->addStderr( tr( "Cannot move %1 to trash: permission denied." ).arg( fullPath ) );
 	else if ( _trash->isInTrashDir( fullPath ) )
-	    outputWindow->addStderr( tr( "Cannot trash items in trash directory: " ) % fullPath );
-	else if ( !_trash->trash( item->path() ) )
-	    outputWindow->addStderr( tr( "Move to trash failed for " ) % fullPath );
+	    outputWindow->addStderr( tr( "Cannot move %1 to trash: is in trash directory." ).arg( fullPath ) );
+	else if ( !_trash->trash( item->path(), msg ) )
+	    outputWindow->addStderr( tr( "%1.\nMove to trash failed for %2." ).arg( msg, fullPath ) );
 	else
-	    outputWindow->addStdout( tr( "Moved to trash: " ) % fullPath );
+	    outputWindow->addStdout( tr( "Moved %1 to trash." ).arg( fullPath ) );
 
 	// Give the output window a chance to display progress
 	if ( ++count > 10 )
