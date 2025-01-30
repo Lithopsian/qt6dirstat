@@ -30,6 +30,16 @@ using namespace QDirStat;
 namespace
 {
     /**
+     * Returns all trash root paths, including those that don't exist or are
+     * not accessible.
+     **/
+    QStringList allTrashRoots()
+    {
+	return Trash::trashRoots( true );
+    }
+
+
+    /**
      * Returns whether the trash directory, as well as the "files" and "info"
      * directories, and their contents, can be read and modified.
      **/
@@ -49,7 +59,7 @@ namespace
 
 
     /**
-     * Return the device of file or directory 'path'.
+     * Return the device number of file or directory 'path'.
      **/
     dev_t device( const QString & path )
     {
@@ -69,12 +79,13 @@ namespace
      * Return the path of the files directory for the trash directory
      * 'trashDir'.
      **/
-    QString homeTrash( const QString & homePath )
+    QString homeTrash()
     {
-	const auto homeTrashParent = [ &homePath ]()
+	const auto homeTrashParent = []()
 	{
-	    const QString xdgHome = QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString{} );
-	    return xdgHome.isEmpty() ? homePath % "/.local/share"_L1 : xdgHome;
+	    const QString xdgHome =
+		QProcessEnvironment::systemEnvironment().value( "XDG_DATA_HOME", QString{} );
+	    return xdgHome.isEmpty() ? QDir::homePath() % "/.local/share"_L1 : xdgHome;
 	};
 
 	return homeTrashParent() % "/Trash"_L1;
@@ -82,8 +93,8 @@ namespace
 
 
     /**
-     * Return the path of the main trash directory for a filesystem with
-     * top directory 'topDir'.
+     * Return the path of the main trash directory for 'trashRoot'
+     * (ie. /.Trash/1000).
      **/
     QString mainTrash( const QString & trashRoot )
     {
@@ -92,8 +103,8 @@ namespace
 
 
     /**
-     * Return the path of the main trash directory for a filesystem with
-     * top directory 'topDir'.
+     * Return the path of the user trash directory for 'trashRoot'
+     * (ie. /.Trash-1000).
      **/
     QString userTrash( const QString & trashRoot )
     {
@@ -102,8 +113,8 @@ namespace
 
 
     /**
-     * Find the toplevel directory (the mount point) for the device that 'path'
-     * is on.
+     * Find the toplevel directory (the mount point) for the device that
+     * 'rawPath' (or its symlink target) is on.
      **/
     QString toplevel( const QString & rawPath, dev_t dev )
     {
@@ -128,6 +139,49 @@ namespace
     }
 
 
+    /**
+     * Return whether 'trashRoot' is a directory (not a symlink) and has
+     * the sticky bit (and execute permission) set.
+     *
+     * Note that if the lstat() call fails, including because the directory
+     * does not exist, this function returns false.  errno must be checked
+     * to distinguish the reason for the failure.
+     **/
+    bool isValidMainTrash( const QString & trashRoot )
+    {
+	struct stat statInfo;
+	if ( SysUtil::stat( trashRoot, statInfo ) != 0 )
+	    return false;
+
+	errno = 0; // no system error set, but might still return false
+
+	const mode_t mode = statInfo.st_mode;
+	if ( !S_ISDIR( mode ) )
+	{
+	    logWarning() << trashRoot << " is not a directory" << Qt::endl;
+	    return false;
+	}
+
+	if ( !( mode & S_ISVTX ) )
+	{
+	    logWarning() << "Sticky bit not set on " << trashRoot << Qt::endl;
+	    return false;
+	}
+
+	return true;
+    }
+
+
+    /**
+     * Attempt to create a (non-home) TrashDir object for 'path'.  'dev' is
+     * the device number for 'path'.  The trash directory is located at
+     * $TOPDIR/.Trash/$UID or $TOPDIR/.Trash-$UID.  $TOPDIR is the highest
+     * level directory still on device 'dev'.
+     *
+     * The directory is created by attempting to construct a TrashDir object.
+     * This throws an exception if the directory cannot be created and this
+     * function then returns 0.
+     **/
     TrashDir * createTrashDir( const QString & path, dev_t dev )
     {
 	const QString trashPath = [ &path, dev ]()
@@ -136,16 +190,18 @@ namespace
 
 	    // Check if there is $TOPDIR/.Trash
 	    const QString trashRoot = Trash::trashRoot( topDir );
-	    if ( Trash::isValidMainTrash( trashRoot ) )
+	    if ( isValidMainTrash( trashRoot ) )
 	    {
 		// Use $TOPDIR/.Trash/$UID
 		return mainTrash( trashRoot );
 	    }
 
+	    // not an error if $TOPDIR/.Trash doesn't exist
 	    if ( errno != ENOENT )
 	    {
-		// stat() failed for some other reason (not "no such file or directory")
-		logError() << "stat failed for " << trashRoot << ": " << formatErrno() << Qt::endl;
+		if ( errno != 0 )
+		    logError() << "stat failed for " << trashRoot << ": " << formatErrno() << Qt::endl;
+
 		return QString{};
 	    }
 
@@ -177,63 +233,74 @@ namespace
 } // namespace
 
 
-Trash::Trash()
+Trash::Trash():
+    _homeTrashPath{ homeTrash() },
+    _homeTrashDev{ device( _homeTrashPath ) }
 {
-    // Best guess for the home trash path
-    const QString homePath  = QDir::homePath();
-    const QString homeTrashPath = homeTrash( homePath );
+    createHomeTrashDir();
+}
 
+
+void Trash::createHomeTrashDir()
+{
     // new TrashDir can throw, although very unlikely for the home device
     try
     {
-	_homeTrashDir = new TrashDir{ homeTrashPath };
+	_trashDirs[ _homeTrashDev ] = new TrashDir{ _homeTrashPath };
     }
     catch ( const FileException & ex )
     {
 	CAUGHT( ex );
-	logWarning() << "Cannot create home trash dir " << homeTrashPath << Qt::endl;
-
-	_homeTrashDir = nullptr;
     }
-
-    // Store it even if it is null
-    _trashDirs[ device( homePath ) ] = _homeTrashDir;
 }
 
 
 TrashDir * Trash::trashDir( const QString & path )
 {
+    // Usually use the trash directory on the same device as 'path'
     const dev_t dev = device( path );
-
     if ( _trashDirs.contains( dev ) )
 	return _trashDirs[ dev ];
 
-    TrashDir * newTrashDir = createTrashDir( path, dev );
-    if ( newTrashDir )
+    // If a TrashDir for 'dev' hasn't been created yet, do it now (but not the home trash)
+    if ( dev != _homeTrashDev )
     {
-	_trashDirs[ dev ] = newTrashDir;
-	return newTrashDir;
+	TrashDir * newTrashDir = createTrashDir( path, dev );
+	if ( newTrashDir )
+	{
+	    _trashDirs[ dev ] = newTrashDir;
+	    return newTrashDir;
+	}
+
+	// Cannot create a $TOPDIR trash, so try to use the home trash
+	logWarning() << "Falling back to home trash dir: " << _homeTrashPath << Qt::endl;
     }
 
-    logWarning() << "Falling back to home trash dir: " << _homeTrashDir->path() << Qt::endl;
+    // The home trash directory should always exist, but in case it doesn't, try again to create it
+    if ( !_trashDirs.contains( _homeTrashDev ) )
+	createHomeTrashDir();
 
-    return _homeTrashDir;
+    return _trashDirs.value( _homeTrashDev, nullptr );
 }
 
 
-bool Trash::trash( const QString & path )
+bool Trash::trash( const QString & path, QString & msg )
 {
     try
     {
 	TrashDir * dir = trashDir( path );
 	if ( !dir )
+	{
+	    msg = QObject::tr( "No trash directory for %1" ).arg( path );
 	    return false;
+	}
 
 	dir->trash( path );
     }
     catch ( const FileException & ex )
     {
 	CAUGHT( ex );
+	msg = ex.what();
 	return false;
     }
 
@@ -243,12 +310,12 @@ bool Trash::trash( const QString & path )
 }
 
 
-QStringList Trash::trashRoots()
+QStringList Trash::trashRoots( bool allRoots )
 {
     QStringList trashRoots;
 
-    const QString homeTrashPath = homeTrash( QDir::homePath() );
-    if ( isTrashAccessible( homeTrashPath ) )
+    const QString homeTrashPath = homeTrash();
+    if ( allRoots || isTrashAccessible( homeTrashPath ) )
 	trashRoots << homeTrashPath;
 
     MountPoints::reload();
@@ -260,12 +327,12 @@ QStringList Trash::trashRoots()
 	if ( isValidMainTrash( trashRootPath ) )
 	{
 	    const QString mainTrashPath = mainTrash( trashRootPath );
-	    if ( isTrashAccessible( mainTrashPath ) )
+	    if ( allRoots || isTrashAccessible( mainTrashPath ) )
 		trashRoots << mainTrashPath;
 	}
 
 	const QString userTrashPath = userTrash( trashRootPath );
-	if ( isTrashAccessible( userTrashPath ) )
+	if ( allRoots || isTrashAccessible( userTrashPath ) )
 	    trashRoots << userTrashPath;
     }
 
@@ -273,39 +340,20 @@ QStringList Trash::trashRoots()
 }
 
 
-bool Trash::isInTrashDir( const QString & path )
+bool Trash::isTrashDir( const QString & path )
 {
-    const QStringList trashRootPaths = trashRoots();
+    const QString comparePath{ path % '/' };
+
+    const QStringList trashRootPaths = allTrashRoots();
     for ( const QString & trashRootPath : trashRootPaths )
     {
-	if ( path.startsWith( trashRootPath ) )
+	// Is path in the subtree of trashRootPath, or is trashRootPath within the subtree of path
+	const QString compareTrashRoot{ trashRootPath % '/' };
+	if ( comparePath.startsWith( compareTrashRoot ) || compareTrashRoot.startsWith( comparePath ) )
 	    return true;
     }
 
     return false;
-}
-
-
-bool Trash::isValidMainTrash( const QString & trashRoot )
-{
-    struct stat statInfo;
-    if ( SysUtil::stat( trashRoot, statInfo ) != 0 )
-	return false;
-
-    const mode_t mode = statInfo.st_mode;
-    if ( !S_ISDIR( mode ) )
-    {
-	logWarning() << trashRoot << " is not a directory" << Qt::endl;
-	return false;
-    }
-
-    if ( !( mode & S_ISVTX ) || !( mode & S_IXOTH ) )
-    {
-	logWarning() << "Sticky bit not set " << trashRoot << Qt::endl;
-	return false;
-    }
-
-    return true;
 }
 
 
@@ -366,6 +414,7 @@ namespace
 	    return false;
 	}
 
+	// Using QTextStream handles EOL mappings (for Windows!) and is simpler, but still reasonably fast
 	QTextStream str{ fp, QIODevice::WriteOnly | QIODevice::Text };
 	str << TrashDir::trashInfoTag() << '\n';
 	str << TrashDir::trashInfoPathTag() << QUrl::toPercentEncoding( path, "/" ) << '\n';
@@ -427,7 +476,7 @@ namespace
 	    {
 		const auto throwException = [ &path, &trashinfoStr ]( const QString & msg )
 		{
-		    const QString fullMsg = msg % ": " % formatErrno();
+		    const QString fullMsg = QString{ "%1: %2" }.arg( msg, formatErrno() );
 		    unlink( trashinfoStr );
 		    THROW( ( FileException{ path, fullMsg } ) );
 		};
@@ -475,7 +524,7 @@ TrashDir::TrashDir( const QString & path ):
     ensureDirExists( infoDirPath()  );
     ensureDirExists( filesDirPath() );
 
-    // logDebug() << "Created TrashDir " << path << Qt::endl;
+    // logDebug() << "Created TrashDir " << this << Qt::endl;
 }
 
 

@@ -17,7 +17,7 @@ namespace QDirStat
 {
     class TrashDir;
 
-    typedef QMap<dev_t, TrashDir *> TrashDirMap;
+    typedef QHash<dev_t, TrashDir *> TrashDirMap;
 
     /**
      * This class implements the XDG Trash specification:
@@ -39,7 +39,8 @@ namespace QDirStat
     public:
 
         /**
-         * Constructor.
+         * Constructor.  Attempts to identify, and create if necessary, the
+         * home trash directory that should exist.
          **/
         Trash();
 
@@ -55,10 +56,11 @@ namespace QDirStat
         Trash & operator=( const Trash & ) = delete;
 
         /**
-         * Throw a file or directory into the trash.
-         * Return 'true' on success, 'false' on error.
+         * Throw a file or directory into the trash.  Returns 'true' on
+         * success, 'false' on error.  If the call fails, 'msg' will contain
+         * details.
          **/
-        bool trash( const QString & path );
+        bool trash( const QString & path, QString & msg );
 
         /**
          * Return the path of the main trash directory for a filesystem with
@@ -110,36 +112,36 @@ namespace QDirStat
             { return infoDirPath( trashDir ) % '/' % filesEntry % trashInfoSuffix(); }
 
         /**
-         * Return a list of all the trash directories found.  This may include the
-         * one in the users's home directory and any at the top level of mounted
-         * filesystems.  Only valid trash directories in which both the files and
-         * info directories exist and are accessible will be returned.
-         **/
-        static QStringList trashRoots();
-
-        /**
-         * Return whether 'path' is in any trash directory.  This includes
-         * anywhere within a trash entry directory tree or in the "info"
-         * directory, as well as the trash root, "files", and "info"
-         * directories themselves.
-         **/
-        static bool isInTrashDir( const QString & path );
-
-        /**
-         * Return whether 'trashRoot' is a directory (not a symlink) and has
-         * the sticky bit (and execute permission) set.
+         * Return a list of all the trash directories found.  This may include
+         * the one in the users's home directory and any at the top level of
+         * mounted filesystems.
          *
-         * Note that if the lstat() call fails, including because the directory
-         * does not exist, this function returns false.  errno must be checked
-         * to distinguish the reason for the failure.
+         * If 'allRoots' is false, only valid trash directories in which both
+         * the files and info directories exist and are accessible will be
+         * returned.
          **/
-        static bool isValidMainTrash( const QString & trashRoot );
+        static QStringList trashRoots( bool allRoots = false );
+
+        /**
+         * Return whether 'path' is in any trash directory or any trash
+         * directory in in 'path'.
+         *
+         * Note that this function will return false for valid trash dirs for
+         * other users, and these may then be trashed (usually only by root).
+         **/
+        static bool isTrashDir( const QString & path );
 
 
     protected:
 
         /**
-         * Return the trash dir for 'path', creating it if necsssary and falling
+         * Attempt to locate or create a home trash directory for
+         * '_homeTrashPath'.
+         **/
+        void createHomeTrashDir();
+
+        /**
+         * Return the trash dir for 'path', creating it if necessary and falling
          * back to the home trash dir if necessary.
          **/
         TrashDir * trashDir( const QString & path );
@@ -147,8 +149,9 @@ namespace QDirStat
 
     private:
 
-        TrashDir    * _homeTrashDir;
-        TrashDirMap   _trashDirs;
+        QString     _homeTrashPath;
+        dev_t       _homeTrashDev;
+        TrashDirMap _trashDirs;
 
     };  // class Trash
 

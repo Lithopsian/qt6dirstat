@@ -537,8 +537,8 @@ void CleanupCollection::moveToTrash()
 	SysUtil::splitPath( fullPath, dirPath, filePath );
 	if ( !SysUtil::canAccess( dirPath ) )
 	    outputWindow->addStderr( tr( "Cannot move %1 to trash: permission denied." ).arg( fullPath ) );
-	else if ( _trash->isInTrashDir( fullPath ) )
-	    outputWindow->addStderr( tr( "Cannot move %1 to trash: is in trash directory." ).arg( fullPath ) );
+	else if ( _trash->isTrashDir( fullPath ) )
+	    outputWindow->addStderr( tr( "Cannot move a trash directory to trash: %1." ).arg( fullPath ) );
 	else if ( !_trash->trash( item->path(), msg ) )
 	    outputWindow->addStderr( tr( "%1.\nMove to trash failed for %2." ).arg( msg, fullPath ) );
 	else
