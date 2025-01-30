@@ -22,7 +22,7 @@ namespace QDirStat
     /**
      * This class implements the XDG Trash specification:
      *
-     *     http://standards.freedesktop.org/trash-spec/trashspec-1.0.html
+     *     https://specifications.freedesktop.org/trash-spec/1.0/
      *
      * Basically, this is a desktop trashcan that works just like the trashcan in
      * KDE, Gnome, Xfce and other major Linux desktops. It should integrate well

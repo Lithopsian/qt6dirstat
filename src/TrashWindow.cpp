@@ -755,7 +755,7 @@ void TrashItem::processFinished( int exitCode, QProcess::ExitStatus exitStatus )
 	{
 	    // du returns 1 for all errors, most likely permissions warnings, but may still return a size
 	    logWarning() << "'du' process exit code " << exitCode
-	                  << " for " << _entryName << " in " << _trashRoot << Qt::endl;
+	                 << " for " << _entryName << " in " << _trashRoot << Qt::endl;
 	}
 
 	const QString output = QString::fromUtf8( senderProcess->readAllStandardOutput() );
