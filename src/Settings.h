@@ -24,7 +24,7 @@
 namespace QDirStat
 {
     typedef QSet<QString> UsedFileList;
-    typedef QMap<int, QLatin1String> SettingsEnumMapping;
+    typedef QHash<int, QLatin1String> SettingsEnumMapping;
 
     /**
      * Specialized QSettings subclass for generic settings, i.e. the main
