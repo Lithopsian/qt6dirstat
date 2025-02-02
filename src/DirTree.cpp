@@ -526,7 +526,7 @@ void DirTree::deleteSubtrees( const FileInfoSet & subtrees )
 	return;
 
     // Create a map to group the items by parent
-    QMultiHash<DirInfo *, FileInfo *>parentMap;
+    QMultiMap<DirInfo *, FileInfo *>parentMap;
     for ( FileInfo * subtree : subtrees )
     {
 	// Check if the item has already been deleted, by us or someone else

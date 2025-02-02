@@ -31,7 +31,11 @@ namespace QDirStat
      * expression will always be the last pair in a list.
      **/
     typedef QHash<QString, const MimeCategory *>  ExactMatches;
+#if QT_VERSION < QT_VERSION_CHECK( 5, 7, 0 )
+    typedef QMultiMap<QString, WildcardCategory> SuffixMatches;
+#else
     typedef QMultiHash<QString, WildcardCategory> SuffixMatches;
+#endif
     typedef QVector<const MimeCategory *>         MimeCategoryList;
     typedef MimeCategoryList::const_iterator      MimeCategoryIterator;
     typedef QVector<WildcardCategory>             WildcardList;
