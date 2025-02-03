@@ -13,6 +13,7 @@
 
 #include "CleanupCollection.h"
 #include "Cleanup.h"
+#include "DirInfo.h"
 #include "DirTree.h"
 #include "Exception.h"
 #include "FileInfo.h"
@@ -178,6 +179,40 @@ namespace
 	         { Cleanup::ShowAfterTimeout,  "ShowAfterTimeout"_L1  },
 	         { Cleanup::ShowNever,         "ShowNever"_L1         },
 	       };
+    }
+
+
+    /**
+     * For a list of items to be refreshed, find an item that will still be in
+     * the tree after refreshing is finished.  This is basically the
+     * lowest-level item that is an ancestor of all the items to be refreshed.
+     * Make that item the current item.
+     **/
+    void prepareForRefresh( SelectionModel * selectionModel, const FileInfoSet & refreshSet )
+    {
+	FileInfo * currentItem = selectionModel->currentItem();
+	FileInfo * newCurrent = currentItem ? currentItem : refreshSet.first();
+
+	if ( newCurrent )
+	{
+	    DirInfo * dir = newCurrent->isDirInfo() ? newCurrent->toDirInfo() : newCurrent->parent();
+
+	    if ( dir && dir->isPseudoDir() )
+		dir = dir->parent();
+
+	    // Move up the tree from the current item as long as there is an
+	    // ancestor (but not that item itself) in the refreshSet
+	    while ( dir && refreshSet.containsAncestorOf( dir ) )
+		dir = dir->parent();
+
+	    if ( dir != dir->tree()->root() )
+	    {
+		if ( selectionModel->verbose() )
+		    logDebug() << "Selecting " << dir << Qt::endl;
+
+		selectionModel->updateCurrentBranch( dir );
+	    }
+	}
     }
 
 } // namespace
@@ -526,20 +561,19 @@ void CleanupCollection::moveToTrash()
     outputWindow->showAfterTimeout();
 
     // Move all selected items to trash
-    QString msg;
     QEventLoop eventLoop;
     int count = 0;
     for ( const FileInfo * item : selectedItems )
     {
 	const QString fullPath = item->path();
-	QString dirPath;
-	QString filePath;
-	SysUtil::splitPath( fullPath, dirPath, filePath );
-	if ( !SysUtil::canAccess( dirPath ) )
+	outputWindow->addStdout( tr( "Moving %1 to trash..." ).arg( fullPath ) );
+
+	QString msg;
+	if ( !SysUtil::canAccess( SysUtil::parentDir( fullPath ) ) )
 	    outputWindow->addStderr( tr( "Cannot move %1 to trash: permission denied." ).arg( fullPath ) );
 	else if ( _trash->isTrashDir( fullPath ) )
 	    outputWindow->addStderr( tr( "Cannot move a trash directory to trash: %1." ).arg( fullPath ) );
-	else if ( !_trash->trash( item->path(), msg ) )
+	else if ( !_trash->trash( fullPath, msg ) )
 	    outputWindow->addStderr( tr( "%1.\nMove to trash failed for %2." ).arg( msg, fullPath ) );
 	else
 	    outputWindow->addStdout( tr( "Moved %1 to trash." ).arg( fullPath ) );
@@ -559,7 +593,7 @@ void CleanupCollection::moveToTrash()
 
 void CleanupCollection::createRefresher( OutputWindow * outputWindow, const FileInfoSet & refreshSet )
 {
-    _selectionModel->prepareForRefresh( refreshSet );
+    prepareForRefresh( _selectionModel, refreshSet );
     Refresher * refresher = new Refresher{ this, refreshSet };
 
     connect( outputWindow, &OutputWindow::lastProcessFinished,

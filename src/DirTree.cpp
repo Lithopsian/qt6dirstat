@@ -367,8 +367,8 @@ void DirTree::refresh( const FileInfoSet & refreshSet )
 	if ( !item || !item->checkMagicNumber() )
 	    continue;
 
-	// Parents of pseudo-dirs and plain files are refreshed
-	if ( !item->isDirInfo() || item->isPseudoDir() )
+	// Refresh the parents of pseudo-dirs and plain files
+	while ( !item->isDirInfo() || item->isPseudoDir() )
 	{
 	    item = item->parent();
 	    if ( !item || !item->checkMagicNumber() )
@@ -736,17 +736,16 @@ void DirTree::setIgnoreHardLinks( bool ignore )
 
 bool DirTree::crossingFilesystems( const DirInfo * parent, const DirInfo * child )
 {
-    /**
-     * Return the device name that 'dir' is on if it's a mount point.
-     * This uses MountPoints which reads /proc/mounts.
-     **/
-    const auto device = []( const DirInfo * dir ) { return MountPoints::device( dir->url() ); };
-
     // If the device numbers match then we're definitely not crossing
     if ( parent->device() == child->device() )
 	return false;
 
-    // See if there is an entry in the mountpoint list for 'child'
+    /**
+     * Return the device name that 'dir' is on if it's a mount point.
+     **/
+    const auto device = []( const DirInfo * dir ) { return MountPoints::device( dir->url() ); };
+
+    // See if child is a mountpoint
     const QString childDevice  = device( child );
     if ( childDevice.isEmpty() )
 	return false;

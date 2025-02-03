@@ -185,34 +185,6 @@ void SelectionModel::updateCurrentBranch( FileInfo * newItem )
 }
 
 
-void SelectionModel::prepareForRefresh( const FileInfoSet & refreshSet )
-{
-    FileInfo * current = _currentItem ? _currentItem : refreshSet.first();
-
-    if ( current )
-    {
-	DirInfo * dir = current->isDirInfo() ? current->toDirInfo() : current->parent();
-
-	if ( dir && dir->isPseudoDir() )
-	    dir = dir->parent();
-
-	// Go one directory up from the current item as long as there is an
-	// ancestor (but not that item itself) in the refreshSet.
-	while ( dir && refreshSet.containsAncestorOf( dir ) )
-	    dir = dir->parent();
-
-	if ( dir != dir->tree()->root() )
-	{
-	    if ( _verbose )
-		logDebug() << "Selecting " << dir << Qt::endl;
-
-	    updateCurrentBranch( dir );
-	}
-    }
-
-}
-
-
 void SelectionModel::deletingChildNotify( FileInfo * deletedChild )
 {
     _selectedItemsDirty = true;
