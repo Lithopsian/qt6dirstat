@@ -20,7 +20,7 @@
 using namespace QDirStat;
 
 
-#define VERBOSE_DIVERSIONS 1
+#define VERBOSE_DIVERSIONS 0
 #define VERBOSE_PACKAGES   0
 
 
