@@ -413,7 +413,8 @@ namespace QDirStat
 	 * from 'item', or any mount point if '_all' is true,
 	 * or a duplicate mount point if '_duplicates' is true.
 	 *
-	 * _all is self-explanatory.
+	 * _all includes system mounts, duplicate mounts, unmounted autofs
+	 * mount-points, and snap packages.
 	 * _duplicates can be used when _all is false but it is desired to
 	 * include bind mounts, which Trash needs.
 	 **/

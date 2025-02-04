@@ -17,7 +17,8 @@
 
 
 #define LSBLK_TIMEOUT_SEC 10
-#define USE_PROC_MOUNTS   1
+#define VERBOSE_MOUNTS     0
+#define USE_PROC_MOUNTS    1
 
 
 using namespace QDirStat;
@@ -173,18 +174,20 @@ namespace
         if ( !mountPoint->isSystemMount() && isDeviceMounted( mountPoint->device(), mountPointMap ) )
         {
             mountPoint->setDuplicate();
-#if 0
+#if VERBOSE_MOUNTS
             logInfo() << "Found duplicate mount of " << mountPoint->device()
                       << " at " << mountPoint->path()
                       << Qt::endl;
 #endif
         }
 
+#if VERBOSE_MOUNTS
         if ( mountPoint->isSnapPackage() )
         {
             const QString pkgName = mountPoint->path().section( u'/', 1, 1, QString::SectionSkipEmpty );
             logInfo() << "Found snap package \"" << pkgName << "\" at " << mountPoint->path() << Qt::endl;
         }
+#endif
     }
 
 } // namespace
