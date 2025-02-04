@@ -221,18 +221,18 @@ void MainWindow::readSettings()
 
     restoreState( settings.value("State").toByteArray());
 
+    _urlInWindowTitle           = settings.value( "UrlInWindowTitle",         false ).toBool();
+    _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
     _statusBarTimeout           = settings.value( "StatusBarTimeoutMillisec",  3000 ).toInt();
     _longStatusBarTimeout       = settings.value( "LongStatusBarTimeout",     30000 ).toInt();
-    _urlInWindowTitle           = settings.value( "UrlInWindowTitle",         false ).toBool();
     const QString layoutName    = settings.value( "Layout",                   "L2"  ).toString();
-    _showDirPermissionsMsg      = settings.value( "ShowDirPermissionsMsg",    true  ).toBool();
 
+    _ui->fileDetailsView->setElideToFit      ( settings.value( "FileDetailsElide",   false ).toBool() );
     _ui->actionVerboseSelection->setChecked  ( settings.value( "VerboseSelection",   false ).toBool() );
     _ui->treemapView->setUseTreemapHover     ( settings.value( "UseTreemapHover",    false ).toBool() );
     _ui->actionShowMenuBar->setChecked       ( settings.value( "ShowMenuBar",        true  ).toBool() );
     _ui->actionShowStatusBar->setChecked     ( settings.value( "ShowStatusBar",      true  ).toBool() );
     _ui->actionDetailsWithTreemap->setChecked( settings.value( "DetailsWithTreemap", false ).toBool() );
-    _ui->fileDetailsView->setElideToFit      ( settings.value( "FileDetailsElide",   false ).toBool() );
 
     settings.endGroup();
 
@@ -262,6 +262,11 @@ void MainWindow::readSettings()
     }
 
     initLayouts( layoutName );
+
+    settings.beginGroup( "Trash" );
+    _onlyUseHomeTrashDir = settings.value( "OnlyUseHomeTrashDir", false ).toBool();
+    _copyAndDeleteTrash  = settings.value( "CopyAndDeleteTrash",  false ).toBool();
+    settings.endGroup();
 }
 
 
@@ -291,6 +296,11 @@ void MainWindow::writeSettings()
     settings.beginGroup( "MainWindow-Subwindows" );
     settings.setValue( "MainSplitter",    _ui->mainWinSplitter->saveState()  );
     settings.setValue( "DetailsSplitter", visibleSplitter->saveState() );
+    settings.endGroup();
+
+    settings.beginGroup( "Trash" );
+    settings.setValue( "OnlyUseHomeTrashDir",      _onlyUseHomeTrashDir                       );
+    settings.setValue( "CopyAndDeleteTrash",       _copyAndDeleteTrash                        );
     settings.endGroup();
 
     writeLayoutSettings();  // see MainWindowLayout.cpp

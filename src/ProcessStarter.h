@@ -14,7 +14,6 @@
 #include <QProcess>
 #include <QVector>
 
-#include "Logger.h"
 
 namespace QDirStat
 {
