@@ -14,13 +14,16 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QProcessEnvironment>
 #include <QStringBuilder>
 #include <QUrl>
 
 #include "Trash.h"
 #include "Exception.h"
+#include "MainWindow.h"
 #include "MountPoints.h"
+#include "QDirStatApp.h"
 #include "SysUtil.h"
 
 
@@ -182,7 +185,7 @@ namespace
      * This throws an exception if the directory cannot be created and this
      * function then returns 0.
      **/
-    TrashDir * createTrashDir( const QString & path, dev_t dev )
+    TrashDir * createToplevelTrashDir( const QString & path, dev_t dev )
     {
 	const QString trashPath = [ &path, dev ]()
 	{
@@ -243,7 +246,7 @@ Trash::Trash():
 
 void Trash::createHomeTrashDir()
 {
-    // new TrashDir can throw, although very unlikely for the home device
+    // TrashDir constructor can throw, although very unlikely for the home device
     try
     {
 	_trashDirs[ _homeTrashDev ] = new TrashDir{ _homeTrashPath };
@@ -257,15 +260,24 @@ void Trash::createHomeTrashDir()
 
 TrashDir * Trash::trashDir( const QString & path )
 {
-    // Usually use the trash directory on the same device as 'path'
-    const dev_t dev = device( path );
+    const dev_t dev = [ this, &path ]()
+    {
+	// If configured, force using only the home trash directory
+	if ( app()->mainWindow()->onlyUseHomeTrashDir() )
+	    return _homeTrashDev;
+
+	// Or get st_dev from stat( path )
+	return device( path );
+    }();
+
+    // Use any previously-used TrashDir for 'dev'
     if ( _trashDirs.contains( dev ) )
 	return _trashDirs[ dev ];
 
-    // If a TrashDir for 'dev' hasn't been created yet, do it now (but not the home trash)
+    // If a TrashDir for 'dev' hasn't been created yet, do it now (only for non-home devices)
     if ( dev != _homeTrashDev )
     {
-	TrashDir * newTrashDir = createTrashDir( path, dev );
+	TrashDir * newTrashDir = createToplevelTrashDir( path, dev );
 	if ( newTrashDir )
 	{
 	    _trashDirs[ dev ] = newTrashDir;
@@ -291,7 +303,7 @@ bool Trash::trash( const QString & path, QString & msg )
 	TrashDir * dir = trashDir( path );
 	if ( !dir )
 	{
-	    msg = QObject::tr( "No trash directory for %1" ).arg( path );
+	    msg = QObject::tr( "No trash directory for '%1'" ).arg( path );
 	    return false;
 	}
 
@@ -357,6 +369,48 @@ bool Trash::isTrashDir( const QString & path )
 }
 
 
+bool Trash::move( const QString & path, const QString targetPath, QString & msg, bool copyAndDelete )
+{
+    // Standard move, only works on single filesystem
+    if ( rename( path.toUtf8(), targetPath.toUtf8() ) == 0 )
+	return true;
+
+    // Anything other than a cross-device exception with copyAndDelete specified is fatal
+    if ( errno != EXDEV || !copyAndDelete )
+    {
+	msg = QObject::tr( "Failed to move '%1' to '%2': %3" ).arg( path, targetPath, formatErrno() );
+	return false;
+    }
+
+    // Attempt copy and delete
+    if ( QProcess::execute( "cp", { "-a", path, targetPath } ) == 0 )
+    {
+	// Copy succeeded, try to remove the original subtree
+	if ( QProcess::execute( "rm", { "-rf", path } ) == 0 )
+	    return true;
+
+	msg = QObject::tr( "Unable to remove '%1' after copying to '%2'" ).arg( path, targetPath );
+
+	// Can't remove (all of) the original subtree, copy back to ensure it is all there
+	if ( QProcess::execute( "cp", { "-na", targetPath, path } ) != 0  )
+	{
+	    msg = QObject::tr( "Unable to replace '%1' after failing to remove - full original is at '%2'" )
+	          .arg( path, targetPath );
+	    return false;
+	}
+    }
+    else
+    {
+	msg = QObject::tr( "Unable to copy '%1' to '%2'" ).arg( path, targetPath );
+    }
+
+    // Failed to copy or remove original, remove anything left at the target
+    QProcess::execute( "rm", { "-rf", targetPath } );
+
+    return false;
+}
+
+
 
 
 namespace
@@ -374,7 +428,7 @@ namespace
 
 	    if ( mkdir( path.toUtf8(), 0700 ) < 0 )
 	    {
-		const QString what{ "Could not create directory %1: %2" };
+		const QString what = QObject::tr( "Could not create directory '%1': %2" );
 		THROW( ( FileException{ path, what.arg( path, formatErrno() ) } ) );
 	    }
 	}
@@ -414,7 +468,7 @@ namespace
 	    return false;
 	}
 
-	// Using QTextStream handles EOL mappings (for Windows!) and is simpler, but still reasonably fast
+	// QTextStream handles EOL mappings (for Windows!) and is simple but still reasonably fast
 	QTextStream str{ fp, QIODevice::WriteOnly | QIODevice::Text };
 	str << TrashDir::trashInfoTag() << '\n';
 	str << TrashDir::trashInfoPathTag() << QUrl::toPercentEncoding( path, "/" ) << '\n';
@@ -459,9 +513,7 @@ namespace
      **/
     void moveToTrash( const QString & path, const QString & filesDirPath, const QString & infoDirPath )
     {
-	QString pathDir;
-	QString name;
-	SysUtil::splitPath( path, pathDir, name );
+	QString name = SysUtil::baseName( path );
 
 	// Loop until we manage to open a trashinfo file that didn't exist before
 	int i = 0;
@@ -474,20 +526,22 @@ namespace
 	    const int fd = open( trashinfoStr, O_CREAT | O_EXCL | O_WRONLY, 0600 );
 	    if ( fd >= 0 )
 	    {
-		const auto throwException = [ &path, &trashinfoStr ]( const QString & msg )
-		{
-		    const QString fullMsg = QString{ "%1: %2" }.arg( msg, formatErrno() );
-		    unlink( trashinfoStr );
-		    THROW( ( FileException{ path, fullMsg } ) );
-		};
-
 		const QString targetPath{ filesDirPath % '/' % entryName };
 
 		if ( !writeTrashInfo( fd, path ) )
-		    throwException( QString{ "Could not write %1" }.arg( trashinfoPath ) );
+		{
+		    const QString msg =
+			QObject::tr( "Could not write '%1': %2" ).arg( trashinfoPath, formatErrno() );
+		    unlink( trashinfoStr );
+		    THROW( ( FileException{ path, msg } ) );
+		}
 
-		if ( rename( path.toUtf8(), targetPath.toUtf8() ) != 0 )
-		    throwException( QString{ "Could not move %1 to %2" }.arg( path, targetPath ) );
+		QString msg;
+		if ( !Trash::move( path, targetPath, msg, app()->mainWindow()->copyAndDeleteTrash() ) )
+		{
+		    unlink( trashinfoStr );
+		    THROW( ( FileException{ path, msg } ) );
+		}
 
 		return; // SUCCESS
 	    }
@@ -507,7 +561,7 @@ namespace
 	    }
 	    else
 	    {
-		const QString msg{ "Could not create trashinfo %1: %2" };
+		const QString msg = QObject::tr( "Could not create trashinfo '%1': %2" );
 		THROW( ( FileException{ path, msg.arg( trashinfoPath, formatErrno() ) } ) );
 	    }
 	}

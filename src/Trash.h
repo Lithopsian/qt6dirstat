@@ -31,7 +31,7 @@ namespace QDirStat
      * when you click on the trashcan icon on the desktop or in the file manager).
      *
      * Note that, starting in 5.15, Qt has a function QFile::moveToTrash() which
-     * would completely repace this class, but it doesn't appear to work 100%
+     * could completely repace this class, but it doesn't appear to work 100%
      * correctly.  For example, trashing broken symlinks always fails.
      **/
     class Trash final
@@ -116,8 +116,8 @@ namespace QDirStat
          * the one in the users's home directory and any at the top level of
          * mounted filesystems.
          *
-         * If 'allRoots' is false, only valid trash directories in which both
-         * the files and info directories exist and are accessible will be
+         * If 'allRoots' is false, only trash directories in which both the
+         * files and info directories exist and are accessible will be
          * returned.
          **/
         static QStringList trashRoots( bool allRoots = false );
@@ -130,6 +130,28 @@ namespace QDirStat
          * other users, and these may then be trashed (usually only by root).
          **/
         static bool isTrashDir( const QString & path );
+
+        /**
+         * Try to move 'path' to 'targetPath', first using rename().  If that
+         * fails with errno=EXDEV (invalid cross-device link) and
+         * 'copyAndDelete' is specified, by copying and deleting.  If false is
+         * returned then 'msg' will contain some hint as to why.
+         *
+         * There is no C copy function, and none until C++17, so use an external
+         * process.  This is considered successful if the process completes with an
+         * exit code of 0.  Similarly, there is no low-level function to remove a
+         * directory and all of its contents.  Qt can do this, but "rm -rf" is more
+         * reliable.
+         *
+         * If the copy or delete, which may have performed a partial copy or
+         * delete, fails, then make sure that all the contents at 'path' are still
+         * in place and that 'targetPath' is completely removed.  Short of some
+         * bizarre circumstance such as the permissions being changed or the device
+         * becoming full while the operation is happening, this should leave
+         * everything unchanged.  In an extremely rare worst case, a partial
+         * subtree may remain at 'path' and the full subtree at 'targetPath'.
+         **/
+        static bool move( const QString & path, const QString targetPath, QString & msg, bool copyAndDelete );
 
 
     protected:
@@ -149,6 +171,7 @@ namespace QDirStat
 
     private:
 
+        bool        _copyAndDelete;
         QString     _homeTrashPath;
         dev_t       _homeTrashDev;
         TrashDirMap _trashDirs;

@@ -827,14 +827,12 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 	deletePath( restorePath );
     }
 
-    QFile trashEntry{ Trash::trashEntryPath( _trashRoot, _entryName ) };
-    if ( !trashEntry.rename( restorePath ) )
+    QString msg;
+    if ( !Trash::move( Trash::trashEntryPath( _trashRoot, _entryName ), restorePath, msg, true ) )
     {
 	const QString title = tr( "Restore failed" );
-	const QString msg = tr( "Cannot move '%1' to '%2':" ).arg( restoreFileName, restoreDirPath );
 	const QMessageBox::StandardButtons buttons = singleItem ? QMessageBox::Ok : QMessageBox::Abort;
-	QMessageBox box{ QMessageBox::Warning, title, pad( msg, 50 ), buttons, trashWindow() };
-	box.setInformativeText( trashEntry.errorString() );
+	QMessageBox box{ QMessageBox::Warning, title, msg, buttons, trashWindow() };
 	if ( !singleItem )
 	{
 	    QPushButton * button = box.addButton( tr( "&Continue" ), QMessageBox::AcceptRole );
