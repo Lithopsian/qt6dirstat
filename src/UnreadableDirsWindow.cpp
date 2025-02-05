@@ -200,6 +200,6 @@ QVariant UnreadableDirsItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 
-    const QString tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole ).toString();
-    return tooltipText.isEmpty() ? tooltipForElided( this, column, 1 ) : tooltipText;
+    const QVariant tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole );
+    return tooltipText.isValid() ? tooltipText : tooltipForElided( this, column, 1 );
 }
