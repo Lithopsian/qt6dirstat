@@ -184,7 +184,7 @@ void LocateFilesWindow::populate( FileInfo * fileInfo )
     showResultsCount( _ui->treeWidget->topLevelItemCount(), _treeWalker->overflow(), _ui->resultsLabel );
 
     // Force a redraw of the header from the status tip
-    _ui->heading->setStatusTip( _headingText.arg( fileInfo ? fileInfo->url() : QString{} ) );
+    _ui->heading->setStatusTip( _headingText.arg( fileInfo ? replaceCrLf( fileInfo->url() ) : QString{} ) );
     showElidedLabel( _ui->heading, this );
 
     // Select the first row after a delay so it (and its signals) doesn't slow down the list showing
@@ -261,7 +261,11 @@ QVariant LocateListItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole || column != LL_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
-    return hasLineBreak( _path ) ? _path : tooltipForElided( this, LL_PathCol, 0 );
+    if ( !hasLineBreak( _path ) )
+	return tooltipForElided( this, LL_PathCol, 0 );
+
+    QString path{ _path };
+    return pathTooltip( path );
 }
 
 
