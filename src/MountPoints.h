@@ -224,7 +224,7 @@ namespace QDirStat
     };	// class MountPoint
 
 
-    typedef QHash<QString, MountPoint *>   MountPointMap;
+    typedef QMap<QString, MountPoint *> MountPointMap; // QMap so the mountpoints are ordered
 
 
     /**

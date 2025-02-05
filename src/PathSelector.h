@@ -29,8 +29,7 @@ namespace QDirStat
 	 * Constructor for a simple path list item.
 	 * Use QListWidgetItem::setIcon() to set an icon.
 	 **/
-	PathSelectorItem( const QString & path,
-	                  QListWidget   * parent = nullptr ):
+	PathSelectorItem( const QString & path, QListWidget * parent = nullptr ):
 	    QListWidgetItem{ path, parent },
 	    _path{ path }
 	{}
