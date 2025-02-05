@@ -251,7 +251,11 @@ QVariant PatternSearchResultItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole || column != PSR_PathCol )
 	return QTreeWidgetItem::data( column, role );
 
-    return hasLineBreak( _path ) ? _path : tooltipForElided( this, PSR_PathCol, 0 );
+    if ( !hasLineBreak( _path ) )
+	return tooltipForElided( this, PSR_PathCol, 0 );
+
+    QString path{ _path };
+    return pathTooltip( path );
 }
 
 
