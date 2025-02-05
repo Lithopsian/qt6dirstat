@@ -551,40 +551,57 @@ void CleanupCollection::moveToTrash()
 {
     const FileInfoSet selectedItems = _selectionModel->selectedItems();
 
-    // Prepare output window
+    // Prepare output window, to auto-close
     OutputWindow * outputWindow = new OutputWindow{ app()->activeWindow(), true };
 
-    // Prepare refresher
-    createRefresher( outputWindow, selectedItems.parents() );
-
-    // Don't show window for quick and successful trashes
+    // Don't show window at all for quick and successful trashes
     outputWindow->showAfterTimeout();
 
     // Move all selected items to trash
     QEventLoop eventLoop;
-    int count = 0;
+    int loopCount = 0;
+    int trashCount = 0;
     for ( const FileInfo * item : selectedItems )
     {
 	const QString fullPath = item->path();
-	outputWindow->addStdout( tr( "Moving %1 to trash..." ).arg( fullPath ) );
-
 	QString msg;
+
 	if ( !SysUtil::canAccess( SysUtil::parentDir( fullPath ) ) )
 	    outputWindow->addStderr( tr( "Cannot move %1 to trash: permission denied." ).arg( fullPath ) );
 	else if ( _trash->isTrashDir( fullPath ) )
 	    outputWindow->addStderr( tr( "Cannot move a trash directory to trash: %1." ).arg( fullPath ) );
-	else if ( !_trash->trash( fullPath, msg ) )
-	    outputWindow->addStderr( tr( "%1.\nMove to trash failed for %2." ).arg( msg, fullPath ) );
 	else
-	    outputWindow->addStdout( tr( "Moved %1 to trash." ).arg( fullPath ) );
+	{
+	    outputWindow->addStdout( tr( "Moving %1 to trash..." ).arg( fullPath ) );
+
+	    if ( _trash->trash( fullPath, msg ) )
+	    {
+		++trashCount;
+		outputWindow->addStdout( tr( "...moved %1 to trash." ).arg( fullPath ) );
+	    }
+	    else
+	    {
+		outputWindow->addStderr( msg );
+		outputWindow->addStderr( tr( "Move to trash failed for %2." ).arg( fullPath ) );
+	    }
+	}
 
 	// Give the output window a chance to display progress
-	if ( ++count > 10 )
+	if ( ++loopCount > 10 )
 	{
-	    count = 0;
+	    loopCount = 0;
 	    eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
 	}
     }
+
+    // Show a summary if there were multiple items
+    const auto totalCount = selectedItems.size();
+    if ( totalCount > 1 )
+	outputWindow->addStdout( tr( "Moved %1 of %2 items to trash." ).arg( trashCount ).arg( totalCount ) );
+
+    // Only refresh if something was actually moved to trash
+    if ( trashCount > 0 )
+	createRefresher( outputWindow, selectedItems.parents() );
 
     outputWindow->noMoreProcesses();
     emit trashFinished();
