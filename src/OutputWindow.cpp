@@ -402,7 +402,7 @@ void OutputWindow::readSettings()
     _terminalBackground  = settings.colorValue( "TerminalBackground", QColor{ Qt::black        } );
     _commandTextColor    = settings.colorValue( "CommandTextColor",   QColor{ Qt::white        } );
     _stdoutColor         = settings.colorValue( "StdoutTextColor",    QColor{ 0xff, 0xaa, 0x00 } );
-    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor{ Qt::red          } );
+    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor{ 0xff, 0x00, 0x55 } );
     _terminalDefaultFont = settings.fontValue ( "TerminalFont",       _ui->terminal->font()      );
 
     settings.setDefaultValue( "TerminalBackground", _terminalBackground  );
