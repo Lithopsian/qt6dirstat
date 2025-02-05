@@ -723,16 +723,14 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
     const QString path = pathLine.mid( TrashDir::trashInfoPathTag().size() );
-    QString name;
-    QString originalDir;
-    SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
-    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( name ) );
-    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( originalDir ) );
+    SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), _originalDir, _name );
+    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( _name ) );
+    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( _originalDir ) );
 
-    if ( text( TW_NameCol ) != name )
-	setToolTip( TW_NameCol, name );
-    if ( text( TW_DirCol ) != originalDir )
-	setToolTip( TW_DirCol, originalDir );
+    if ( text( TW_NameCol ) != _name )
+	setToolTip( TW_NameCol, pathTooltip( _name ) );
+    if ( text( TW_DirCol ) != _originalDir )
+	setToolTip( TW_DirCol, pathTooltip( _originalDir ) );
 }
 
 
@@ -790,15 +788,13 @@ void TrashItem::deleteItem()
 
 int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 {
-    const QString restoreDirPath = text( TW_DirCol );
-    const QString restoreFileName = text( TW_NameCol );
-    if ( !SysUtil::exists( restoreDirPath ) )
+    if ( !SysUtil::exists( _originalDir ) )
     {
-	logInfo() << restoreDirPath << " no longer exists - attempt to recreate" << Qt::endl;
-	QDir{ restoreDirPath }.mkpath( "." );
+	logInfo() << _originalDir << " no longer exists - attempt to recreate" << Qt::endl;
+	QDir{ _originalDir }.mkpath( "." );
     }
 
-    const QString restorePath{ restoreDirPath % '/' % restoreFileName };
+    const QString restorePath{ _originalDir % '/' % _name };
     if ( SysUtil::exists( restorePath ) )
     {
 	if ( buttonResponse == QMessageBox::NoToAll )
@@ -806,8 +802,8 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 
 	if ( buttonResponse != QMessageBox::YesToAll )
 	{
-	    const QString title = tr( "Cannot restore " ) % restoreFileName;
-	    const QString msg = tr( "'%1' already exists." ).arg( restorePath );
+	    const QString title = tr( "Cannot restore " ) % _name;
+	    const QString msg = tr( "'%1' already exists." ).arg( replaceCrLf( restorePath ) );
 	    QMessageBox::StandardButtons buttons{ QMessageBox::Yes | QMessageBox::No };
 	    if ( !singleItem )
 		buttons |= { QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Abort };
@@ -832,7 +828,7 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
     {
 	const QString title = tr( "Restore failed" );
 	const QMessageBox::StandardButtons buttons = singleItem ? QMessageBox::Ok : QMessageBox::Abort;
-	QMessageBox box{ QMessageBox::Warning, title, msg, buttons, trashWindow() };
+	QMessageBox box{ QMessageBox::Warning, title, replaceCrLf( msg ), buttons, trashWindow() };
 	if ( !singleItem )
 	{
 	    QPushButton * button = box.addButton( tr( "&Continue" ), QMessageBox::AcceptRole );
@@ -861,8 +857,8 @@ QVariant TrashItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 
-    const QString tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole ).toString();
-    return tooltipText.isEmpty() ? tooltipForElided( this, column, 1 ) : tooltipText;
+    const QVariant tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole );
+    return tooltipText.isValid() ? tooltipText : tooltipForElided( this, column, 1 );
 }
 
 
