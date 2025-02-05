@@ -436,7 +436,7 @@ namespace
 	if ( isSymlink )
 	{
 	    // Shorten long targets that include a path component to the base name
-	    QString fullTarget  = file->symlinkTarget();
+	    QString fullTarget = file->symlinkTarget();
 	    const bool shorten = fullTarget.length() > MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' );
 	    const QString shortTarget{ shorten ? "…/" % SysUtil::baseName( fullTarget ) : fullTarget };
 	    setLabelLimited( ui->fileLinkLabel, shortTarget, lastPixel ); // don't set tooltip yet
