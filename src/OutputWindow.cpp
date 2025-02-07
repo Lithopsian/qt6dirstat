@@ -207,8 +207,8 @@ void OutputWindow::processError( QProcess::ProcessError error )
     {
 	switch ( error )
 	{
-	    case QProcess::FailedToStart: return tr( "Error: Process failed to start." );
-	    case QProcess::Timedout:      return tr( "Error: Process timed out." );
+	    case QProcess::FailedToStart: return tr( "Error: process failed to start." );
+	    case QProcess::Timedout:      return tr( "Error: process timed out." );
 	    case QProcess::ReadError:     return tr( "Error reading output from the process." );
 	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
 	    case QProcess::UnknownError:  return tr( "Unknown error." );
