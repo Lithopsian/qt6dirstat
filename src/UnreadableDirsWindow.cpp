@@ -181,7 +181,9 @@ UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    set( UD_PathCol,  Qt::AlignLeft,  replaceCrLf( dir->url() ) );
+    const QString url = dir->url();
+
+    set( UD_PathCol,  Qt::AlignLeft,  replaceCrLf( url ) );
     set( UD_UserCol,  Qt::AlignLeft,  dir->userName() );
     set( UD_GroupCol, Qt::AlignLeft,  dir->groupName() );
     set( UD_PermCol,  Qt::AlignRight, dir->symbolicPermissions() );
@@ -189,8 +191,8 @@ UnreadableDirsItem::UnreadableDirsItem( const DirInfo * dir ):
 
     setIcon( UD_PathCol, app()->dirTreeModel()->unreadableDirIcon() );
 
-    if ( text( UD_PathCol ) != dir->url() )
-	setToolTip( UD_PathCol, dir->url() );
+    if ( hasLineBreak( url ) )
+	setToolTip( UD_PathCol, pathTooltip( url ) );
 }
 
 

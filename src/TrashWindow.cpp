@@ -656,12 +656,6 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     _trashRoot { trashRoot },
     _entryName { entryName }
 {
-    const auto setTooltip = [ this ]( TrashCols column, const QString & path )
-    {
-	QString tooltip{ path }; // make it plain we are not modifying the original path
-	setToolTip( column, pathTooltip( tooltip ) ); // prevent rich text and allow string breaking
-    };
-
     const auto set = [ this ]( TrashCols col, Qt::Alignment alignment, const QString & text )
     {
 	setText( col, text );
@@ -733,11 +727,11 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     set( TW_NameCol, Qt::AlignLeft, replaceCrLf( _name ) );
     set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( _originalDir ) );
 
-    if ( text( TW_NameCol ) != _name )
-	setTooltip( TW_NameCol, _name );
+    if ( hasLineBreak( _name ) )
+	setToolTip( TW_NameCol, pathTooltip( _name ) );
 
-    if ( text( TW_DirCol ) != _originalDir )
-	setTooltip( TW_DirCol, _originalDir );
+    if ( hasLineBreak( _originalDir ) )
+	setToolTip( TW_DirCol, pathTooltip( _originalDir ) );
 }
 
 

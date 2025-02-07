@@ -153,14 +153,7 @@ QString QDirStat::monthAbbreviation( short month )
 }
 
 
-QString QDirStat::replaceCrLf( const QString & text )
-{
-//    return QString{ text }.replace( QRegularExpression{ "\r|\n" }, " " );
-    return QString{ text }.replace( u'\r', u' ' ).replace( u'\n', u' ' );
-}
-
-
-QString & QDirStat::pathTooltip( QString & path )
+QString QDirStat::pathTooltip( QString path )
 {
     // Add possible line break points in case a tooltip with no spaces is wider than the screen
     for ( int i = 25; i < path.size(); i += 25 )
@@ -252,10 +245,7 @@ void QDirStat::tooltipForElided( QRect                      visualRect,
 		return modelTooltip;
 
 	    if ( visualRect.width() < sizeHint.width() || visualRect.height() < sizeHint.height() )
-	    {
-		QString text = model->data( index, Qt::DisplayRole ).toString();
-		return pathTooltip( text );
-	    }
+		return pathTooltip( model->data( index, Qt::DisplayRole ).toString() );
 
 	    return QString{};
 	}();

@@ -254,8 +254,7 @@ QVariant PatternSearchResultItem::data( int column, int role ) const
     if ( !hasLineBreak( _path ) )
 	return tooltipForElided( this, PSR_PathCol, 0 );
 
-    QString path{ _path };
-    return pathTooltip( path );
+    return pathTooltip( _path );
 }
 
 

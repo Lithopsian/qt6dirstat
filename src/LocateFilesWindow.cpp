@@ -264,8 +264,7 @@ QVariant LocateListItem::data( int column, int role ) const
     if ( !hasLineBreak( _path ) )
 	return tooltipForElided( this, LL_PathCol, 0 );
 
-    QString path{ _path };
-    return pathTooltip( path );
+    return pathTooltip( _path );
 }
 
 

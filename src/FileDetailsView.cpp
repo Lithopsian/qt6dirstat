@@ -120,7 +120,7 @@ namespace
      * If the label is elided or contains a line-breaking character, then
      * a tooltip is set containing the original full text.
      **/
-    void setLabelLimited( QLabel * label, QString text, int lastPixel )
+    void setLabelLimited( QLabel * label, const QString & text, int lastPixel )
     {
 	const bool lineBreak = hasLineBreak( text );
 	const QString cleanedText = replaceCrLf( text );
@@ -436,7 +436,7 @@ namespace
 	if ( isSymlink )
 	{
 	    // Shorten long targets that include a path component to the base name
-	    QString fullTarget = file->symlinkTarget();
+	    const QString fullTarget = file->symlinkTarget();
 	    const bool shorten = fullTarget.length() > MAX_SYMLINK_TARGET_LEN && fullTarget.contains( u'/' );
 	    const QString shortTarget{ shorten ? "…/" % SysUtil::baseName( fullTarget ) : fullTarget };
 	    setLabelLimited( ui->fileLinkLabel, shortTarget, lastPixel ); // don't set tooltip yet

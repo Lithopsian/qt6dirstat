@@ -254,7 +254,8 @@ namespace QDirStat
      * There is also a function to replace ampersands and horizontal
      * tab characters, necessary for text to be displayed in a menu.
      **/
-    QString replaceCrLf( const QString & text );
+    inline QString replaceCrLf( const QString & text )
+        { return QString{ text }.replace( u'\r', u' ' ).replace( u'\n', u' ' ); }
 
     /**
      * Replace ampersands and horizontal tab characters in 'text' and
@@ -303,7 +304,8 @@ namespace QDirStat
         { return horizontalAdvance( font, u'x' ) / 2; }
 
     /**
-     * Returns a reference to 'path', possibly modified.
+     * Returns a copy of 'path', possibly modified to make it suitable
+     * for display in a tooltip.
      *
      * Zero-width spaces are inserted at regular intervals to allow
      * long paths to line-break naturally even if they don't contain
@@ -314,10 +316,13 @@ namespace QDirStat
      * prevent them being identified as html tags.  Tooltips shown
      * as (html-escaped) rich text wrap at a very narrow width,
      * unsuitable for displaying paths and inconsistent with paths
-     * that are shown as plain text.  This is usually unnecessary
-     * for labels, which can be forced to display as plain text.
+     * that are shown as plain text, and may also show variable fonts,
+     * bold, etc.
+     *
+     * This function is usually unnecessary for labels, which can be forced to
+     * display as plain text regardless of the contents.
      **/
-    QString & pathTooltip( QString & path );
+    QString pathTooltip( QString path );
 
     /**
      * Elide 'text' to fit between the start position of 'label' and
