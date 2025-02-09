@@ -151,33 +151,19 @@ QString SysUtil::symlinkTarget( const QString & pathIn )
 }
 
 
-QString SysUtil::baseName( const QString & fileName )
+void SysUtil::splitPath( const QString & fullPath, QString & path_ret, QString & name_ret )
 {
-    //logDebug() << fileName << Qt::endl;
-    const int delimiterIndex = fileName.lastIndexOf( u'/' );
-    if ( delimiterIndex < 0 )
-	return fileName;
-
-    return fileName.mid( delimiterIndex + 1 );
-}
-
-
-void SysUtil::splitPath( const QString & fileNameWithPath,
-                         QString       & path_ret, // return parameter
-                         QString       & name_ret )    // return parameter
-{
-    const int delimiterIndex = fileNameWithPath.lastIndexOf ( u'/' );
-    if ( delimiterIndex < 0 || delimiterIndex == fileNameWithPath.size() - 1 )
+    const int delimiterIndex = fullPath.lastIndexOf ( u'/' );
+    if ( delimiterIndex <= 0 )
     {
 	// Paths ending in "/" (notably root) or paths without any "/"
 	path_ret = QString();
-	name_ret = fileNameWithPath;
-
+	name_ret = fullPath;
 	return;
     }
 
-    path_ret = fileNameWithPath.left( qMax( 1, delimiterIndex ) ); // at least "/"
-    name_ret = fileNameWithPath.mid( delimiterIndex + 1 ); // everything after the last "/"
+    path_ret = fullPath.left( qMax( 1, delimiterIndex ) ); // at least "/"
+    name_ret = fullPath.mid( delimiterIndex + 1 ); // everything after the last "/"
 }
 
 QString SysUtil::userName( uid_t uid )

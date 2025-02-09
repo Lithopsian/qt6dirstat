@@ -39,9 +39,9 @@ namespace
     bool isLocalDiversion( const QString & line )
 	{ return line.startsWith( "local diversion"_L1 ); }
     bool isDiversionFrom( const QString & line )
-	{ return isDiversion( line ) && line.contains( "from: "_L1 ); }
+	{ return isDiversion( line ) && line.contains( " from: "_L1 ); }
     bool isDiversionTo( const QString & line )
-	{ return isDiversion( line ) && line.contains( "to: "_L1 ); }
+	{ return isDiversion( line ) && line.contains( " to: "_L1 ); }
     bool isDivertedBy( const QString & line )
 	{ return line.startsWith( "diverted by"_L1 ) || line.startsWith( "locally diverted"_L1 ); }
     bool isPackageDivert( const QString & line )

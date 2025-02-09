@@ -58,20 +58,32 @@ namespace QDirStat
 	    { return fstatat( AT_FDCWD, path.toUtf8(), &statInfo, statFlags() ); }
 
 	/**
+	 * Return the flags to use with faccessat():
+	 * - AT_EACCESS means to make the check using effective the user and
+	 * group IDs, rather than the real IDs, so the check closely mimics
+	 * whether an actual operation will succeed;
+	 * - AT_SYMLINK_NOFOLLOW means that the call behaves like lstat(), that
+	 * is it returns information about symbolic links, and not about the
+	 * target of the link.
+	 **/
+	inline int accessFlags()
+	    { return AT_EACCESS | AT_SYMLINK_NOFOLLOW; }
+
+	/**
 	 * Return true if 'file' exists (and is visible to the current user).
 	 **/
 	inline bool exists( const char * file )
-	    { return faccessat( AT_FDCWD, file, F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	    { return faccessat( AT_FDCWD, file, F_OK, accessFlags() ) == 0; }
 	inline bool exists( const QString & file )
-	    { return faccessat( AT_FDCWD, file.toUtf8(), F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	    { return faccessat( AT_FDCWD, file.toUtf8(), F_OK, accessFlags() ) == 0; }
 
 	/**
 	 * Return true if the current user has access to files in 'dir'.
 	 **/
 	inline bool canAccess( const char * dir )
-	    { return faccessat( AT_FDCWD, dir, R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	    { return faccessat( AT_FDCWD, dir, R_OK | W_OK | X_OK, accessFlags()) == 0; }
 	inline bool canAccess( const QString & dir )
-	    { return faccessat( AT_FDCWD, dir.toUtf8(), R_OK | W_OK | X_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW ) == 0; }
+	    { return faccessat( AT_FDCWD, dir.toUtf8(), R_OK | W_OK | X_OK, accessFlags() ) == 0; }
 
 	/**
 	 * Return true if 'command' is available and executable (possibly at a
@@ -150,7 +162,27 @@ namespace QDirStat
 	QString symlinkTarget( const QString & path );
 
 	/**
-	 * Return the last path component of a file name.
+	 * Return the path of the directory containing 'fullPath'.
+	 *
+	 * Examples:
+	 *
+	 *	   "/home/bob/foo.txt"	-> "/home/bob"
+	 *	   "foo.txt"		-> ""
+	 *	   "/usr/bin"		-> "/usr"
+	 *
+	 * Note that if 'fullPath' doesn't contain "/" or is "/" (ie. root)
+	 * then this function will return an empty string.  If 'fullPath' ends
+	 * with "/" then this function will return 'fullPath', but without the
+	 * "/".
+	 **/
+	inline QString parentDir( const QString & fullPath )
+	{
+	    const int delimiterIndex = fullPath.lastIndexOf( u'/' );
+	    return delimiterIndex < 0 ? QString{} : fullPath.left( qMax( 1, delimiterIndex ) );
+	}
+
+	/**
+	 * Return the last path component of 'fullPath'.
 	 *
 	 * Examples:
 	 *
@@ -158,11 +190,15 @@ namespace QDirStat
 	 *	   "foo.txt"		-> "foo.txt"
 	 *	   "/usr/bin"		-> "bin"
 	 *
-	 * Note that if 'fileName' ends with "/" then this function will
+	 * Note that if 'fullPath' ends with "/" then this function will
 	 * return an empty string.  This will normally only happen for
 	 * root (ie. "/").
 	 **/
-	QString baseName( const QString & fileName );
+	inline QString baseName( const QString & fullPath )
+	{
+	    const int delimiterIndex = fullPath.lastIndexOf( u'/' );
+	    return delimiterIndex < 0 ? fullPath : fullPath.mid( delimiterIndex + 1 );
+	}
 
 	/**
 	 * Split a path up into its base path (everything up to the last path
@@ -178,9 +214,7 @@ namespace QDirStat
 	 * including the last "/" character and 'name_ret' contains the portion
 	 * of 'path' after the last "/" character to the end of the string.
 	 **/
-	void splitPath( const QString & fileNameWithPath,
-                        QString       & path_ret,   // return parameter
-                        QString       & name_ret ); // return parameter
+	void splitPath( const QString & fullPath, QString & path_ret, QString & name_ret );
 
 	/**
 	 * Return the user name of the owner.

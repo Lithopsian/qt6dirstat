@@ -88,21 +88,6 @@ namespace QDirStat
 	 **/
 	void setSelectedItems( const FileInfoSet & selectedItems );
 
-	/**
-	 * Prepare refreshing a set of items: Select a suitable item that will
-	 * still be in the tree after refreshing is finished.
-	 *
-	 * This is done in preparation of refreshing subtrees after cleanup
-	 * actions are finished. Refreshing subtrees means deleting the items
-	 * in the subtrees.
-	 *
-	 * 'refreshSet' is the set of items that will be refreshed. Depending
-	 * on the refresh policy in a cleanup action, this might be the items
-	 * on which the cleanup action is performed, or their respective
-	 * parents.
-	 **/
-	void prepareForRefresh( const FileInfoSet & refreshSet );
-
 
     signals:
 

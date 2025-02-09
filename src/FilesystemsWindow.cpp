@@ -264,7 +264,8 @@ QVariant FilesystemItem::data( int column, int role ) const
     if ( role != Qt::ToolTipRole )
 	return QTreeWidgetItem::data( column, role );
 
-    return tooltipForElided( this, column, column == FS_DeviceCol ? 1 : 0 );
+    const int treeLevel = column == FS_DeviceCol ? 1 : 0;
+    return tooltipForElided( this, column, treeLevel );
 }
 
 

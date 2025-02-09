@@ -723,16 +723,15 @@ TrashItem::TrashItem( ProcessStarter * processStarter,
     set( TW_DeletedCol, Qt::AlignRight, formatTime( _deletedMTime ) );
 
     const QString path = pathLine.mid( TrashDir::trashInfoPathTag().size() );
-    QString name;
-    QString originalDir;
-    SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), originalDir, name );
-    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( name ) );
-    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( originalDir ) );
+    SysUtil::splitPath( QUrl::fromPercentEncoding( path.toLatin1() ), _originalDir, _name );
+    set( TW_NameCol, Qt::AlignLeft, replaceCrLf( _name ) );
+    set( TW_DirCol,  Qt::AlignLeft, replaceCrLf( _originalDir ) );
 
-    if ( text( TW_NameCol ) != name )
-	setToolTip( TW_NameCol, name );
-    if ( text( TW_DirCol ) != originalDir )
-	setToolTip( TW_DirCol, originalDir );
+    if ( hasLineBreak( _name ) )
+	setToolTip( TW_NameCol, pathTooltip( _name ) );
+
+    if ( hasLineBreak( _originalDir ) )
+	setToolTip( TW_DirCol, pathTooltip( _originalDir ) );
 }
 
 
@@ -755,7 +754,7 @@ void TrashItem::processFinished( int exitCode, QProcess::ExitStatus exitStatus )
 	{
 	    // du returns 1 for all errors, most likely permissions warnings, but may still return a size
 	    logWarning() << "'du' process exit code " << exitCode
-	                  << " for " << _entryName << " in " << _trashRoot << Qt::endl;
+	                 << " for " << _entryName << " in " << _trashRoot << Qt::endl;
 	}
 
 	const QString output = QString::fromUtf8( senderProcess->readAllStandardOutput() );
@@ -779,7 +778,7 @@ void TrashItem::deleteItem()
     if ( moveToExpunged( Trash::filesDirPath( _trashRoot ).toUtf8(), expungedDirStr, _entryName.toUtf8() ) )
     {
 	// If the "files" entry was moved, try to move its corresponding .trashinfo file
-	const QString infoName = _entryName % Trash::trashInfoSuffix();
+	const QString infoName = Trash::trashInfoName( _entryName );
 	moveToExpunged( Trash::infoDirPath( _trashRoot ).toUtf8(), expungedDirStr, infoName.toUtf8() );
 
 	// Even if the .trashinfo file is still there, it won't show up in the tree any more
@@ -790,15 +789,13 @@ void TrashItem::deleteItem()
 
 int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 {
-    const QString restoreDirPath = text( TW_DirCol );
-    const QString restoreFileName = text( TW_NameCol );
-    if ( !SysUtil::exists( restoreDirPath ) )
+    if ( !SysUtil::exists( _originalDir ) )
     {
-	logInfo() << restoreDirPath << " no longer exists - attempt to recreate" << Qt::endl;
-	QDir{ restoreDirPath }.mkpath( "." );
+	logInfo() << _originalDir << " no longer exists - attempt to recreate" << Qt::endl;
+	QDir{ _originalDir }.mkpath( "." );
     }
 
-    const QString restorePath{ restoreDirPath % '/' % restoreFileName };
+    const QString restorePath{ _originalDir % '/' % _name };
     if ( SysUtil::exists( restorePath ) )
     {
 	if ( buttonResponse == QMessageBox::NoToAll )
@@ -806,8 +803,8 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 
 	if ( buttonResponse != QMessageBox::YesToAll )
 	{
-	    const QString title = tr( "Cannot restore " ) % restoreFileName;
-	    const QString msg = tr( "'%1' already exists." ).arg( restorePath );
+	    const QString title = tr( "Cannot restore " ) % _name;
+	    const QString msg = tr( "'%1' already exists." ).arg( replaceCrLf( restorePath ) );
 	    QMessageBox::StandardButtons buttons{ QMessageBox::Yes | QMessageBox::No };
 	    if ( !singleItem )
 		buttons |= { QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Abort };
@@ -827,14 +824,12 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 	deletePath( restorePath );
     }
 
-    QFile trashEntry{ Trash::trashEntryPath( _trashRoot, _entryName ) };
-    if ( !trashEntry.rename( restorePath ) )
+    QString msg;
+    if ( !Trash::move( Trash::trashEntryPath( _trashRoot, _entryName ), restorePath, msg, true ) )
     {
 	const QString title = tr( "Restore failed" );
-	const QString msg = tr( "Cannot move '%1' to '%2':" ).arg( restoreFileName, restoreDirPath );
 	const QMessageBox::StandardButtons buttons = singleItem ? QMessageBox::Ok : QMessageBox::Abort;
-	QMessageBox box{ QMessageBox::Warning, title, pad( msg, 50 ), buttons, trashWindow() };
-	box.setInformativeText( trashEntry.errorString() );
+	QMessageBox box{ QMessageBox::Warning, title, replaceCrLf( msg ), buttons, trashWindow() };
 	if ( !singleItem )
 	{
 	    QPushButton * button = box.addButton( tr( "&Continue" ), QMessageBox::AcceptRole );
@@ -860,11 +855,11 @@ int TrashItem::restoreItem( bool singleItem, int buttonResponse )
 QVariant TrashItem::data( int column, int role ) const
 {
     // This is just for the tooltip on columns that are elided and don't otherwise have a tooltip
-    if ( role != Qt::ToolTipRole )
-	return QTreeWidgetItem::data( column, role );
+    const QVariant data = QTreeWidgetItem::data( column, role );
+    if ( role != Qt::ToolTipRole || data.isValid() )
+	return data;
 
-    const QString tooltipText = QTreeWidgetItem::data( column, Qt::ToolTipRole ).toString();
-    return tooltipText.isEmpty() ? tooltipForElided( this, column, 1 ) : tooltipText;
+    return tooltipForElided( this, column, 1 );
 }
 
 

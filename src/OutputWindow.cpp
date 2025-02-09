@@ -207,8 +207,8 @@ void OutputWindow::processError( QProcess::ProcessError error )
     {
 	switch ( error )
 	{
-	    case QProcess::FailedToStart: return tr( "Error: Process failed to start." );
-	    case QProcess::Timedout:      return tr( "Error: Process timed out." );
+	    case QProcess::FailedToStart: return tr( "Error: process failed to start." );
+	    case QProcess::Timedout:      return tr( "Error: process timed out." );
 	    case QProcess::ReadError:     return tr( "Error reading output from the process." );
 	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
 	    case QProcess::UnknownError:  return tr( "Unknown error." );
@@ -402,7 +402,7 @@ void OutputWindow::readSettings()
     _terminalBackground  = settings.colorValue( "TerminalBackground", QColor{ Qt::black        } );
     _commandTextColor    = settings.colorValue( "CommandTextColor",   QColor{ Qt::white        } );
     _stdoutColor         = settings.colorValue( "StdoutTextColor",    QColor{ 0xff, 0xaa, 0x00 } );
-    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor{ Qt::red          } );
+    _stderrColor         = settings.colorValue( "StdErrTextColor",    QColor{ 0xff, 0x00, 0x55 } );
     _terminalDefaultFont = settings.fontValue ( "TerminalFont",       _ui->terminal->font()      );
 
     settings.setDefaultValue( "TerminalBackground", _terminalBackground  );

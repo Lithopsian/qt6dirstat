@@ -121,6 +121,19 @@ namespace QDirStat
         void setLongStatusBarTimeout( int newValue ) { _longStatusBarTimeout = newValue; }
 
         /**
+         * The setting for whether to only use home trash directories.
+         **/
+        bool onlyUseHomeTrashDir() const { return _onlyUseHomeTrashDir; }
+        void setOnlyUseHomeTrashDir( bool newValue ) { _onlyUseHomeTrashDir = newValue; }
+
+        /**
+         * The setting for whether to use copy-and-delete for trashing between
+         * different filesystems.
+         **/
+        bool copyAndDeleteTrash() const { return _copyAndDeleteTrash; }
+        void setCopyAndDeleteTrash( bool newValue ) { _copyAndDeleteTrash = newValue; }
+
+        /**
          * Open an URL (directory or package URL).
          **/
         void openUrl( const QString & url );
@@ -697,7 +710,10 @@ namespace QDirStat
 
         bool             _showDirPermissionsMsg;
         bool             _enableDirPermissionsMsg{ false };
+
         bool             _urlInWindowTitle;
+        bool             _onlyUseHomeTrashDir;
+        bool             _copyAndDeleteTrash;
 
         QTimer           _updateTimer;
         int              _statusBarTimeout;

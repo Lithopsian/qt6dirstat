@@ -40,6 +40,8 @@ namespace
         ui->useTreemapHoverCheckBox->setChecked   ( mainWindow->treemapView()->useTreemapHover() );
         ui->statusBarShortTimeoutSpinBox->setValue( mainWindow->statusBarTimeout() / 1000.0 );
         ui->statusBarLongTimeoutSpinBox->setValue ( mainWindow->longStatusBarTimeout() / 1000.0 );
+        ui->homeTrashCheckBox->setChecked         ( mainWindow->onlyUseHomeTrashDir() );
+        ui->copyAndDeleteCheckBox->setChecked     ( mainWindow->copyAndDeleteTrash() );
 
         // Use word-joiner character to stop unwanted line breaks
         const QString joinedFileName = Settings::primaryFileName().replace( u'/', "/⁠" );
@@ -78,6 +80,8 @@ void GeneralConfigPage::applyChanges()
     mainWindow->treemapView()->setUseTreemapHover( _ui->useTreemapHoverCheckBox->isChecked() );
     mainWindow->setStatusBarTimeout              ( 1000 * _ui->statusBarShortTimeoutSpinBox->value() );
     mainWindow->setLongStatusBarTimeout          ( 1000 * _ui->statusBarLongTimeoutSpinBox->value() );
+    mainWindow->setOnlyUseHomeTrashDir           ( _ui->homeTrashCheckBox->isChecked() );
+    mainWindow->setCopyAndDeleteTrash            ( _ui->copyAndDeleteCheckBox->isChecked() );
 
     // Only do this relativcely expensive operation if the value has changed
     const bool elideToFit = _ui->elidePathsCheckBox->isChecked();

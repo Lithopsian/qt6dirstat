@@ -333,7 +333,7 @@ namespace
      *   %p expands to item->path() (in single quotes), i.e. the item's
      *   full path name.
      *
-     *     '/usr/local/bin'	      for that directory
+     *     '/usr/local/bin'       for that directory
      *     '/usr/local/bin/doit'  for a file within it
      *
      *   %n expands to item->name() (in single quotes), i.e. the last
@@ -349,11 +349,9 @@ namespace
      *    '/usr/local/bin'	for a file /usr/local/bin/doit
      *    '/usr/local/bin'	for directory /usr/local/bin.
      *
+     *   %terminal	"konsole" or "gnome-terminal" or "xfce4-terminal" ...
      *
-     *   %terminal	  "konsole" or "gnome-terminal" or "xfce4-terminal" ...
-     *
-     *   %filemanager "konqueror" or "nautilus" or "thunar" ...
-     *
+     *   %filemanager	"konqueror" or "nautilus" or "thunar" ...
      *
      * For commands that are to be executed from within the 'Clean up'
      * menu, you might specify something like:

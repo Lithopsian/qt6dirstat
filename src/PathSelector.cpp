@@ -20,8 +20,7 @@
 using namespace QDirStat;
 
 
-PathSelectorItem::PathSelectorItem( MountPoint  * mountPoint,
-                                    QListWidget * parent ):
+PathSelectorItem::PathSelectorItem( MountPoint * mountPoint, QListWidget * parent ):
     QListWidgetItem{ parent },
     _path{ mountPoint->path() }
 {

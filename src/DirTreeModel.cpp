@@ -364,11 +364,8 @@ namespace
 	switch ( col )
 	{
 	    case NameCol:
-	    {
 		// CR/LF will have been removed from the root name display role so provide the original
-		QString name = item->name();
-		return hasLineBreak( name ) ? pathTooltip( name ) : QVariant{};
-	    }
+		return hasLineBreak( item->name() ) ? pathTooltip( item->name() ) : QVariant{};
 
 	    case PercentBarCol:
 		return formatPercentQVariant( item->subtreeAllocatedPercent() );
