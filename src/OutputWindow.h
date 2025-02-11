@@ -52,7 +52,7 @@ namespace QDirStat
          * Constructor.  Initialises the dialog window, buttons, actions,
          * and settings.  The class is created with an empty process list.
          **/
-        OutputWindow( QWidget * parent, bool autoClose );
+        OutputWindow( QWidget * parent, const QString & title );
 
         /**
          * Destructor.  Saves the window geometry, empties the process
@@ -105,6 +105,40 @@ namespace QDirStat
         void showAfterTimeout( int timeoutMillisec = 0 );
 
         /**
+         * Add one or more lines of stdout to show in the output area. This
+         * is typically displayed in amber, but the colour is configurable.
+         **/
+        void addStdout( const QString & output );
+
+        /**
+         * Add one or more lines of stderr to show in the output area. This
+         * is typically displayed in red, but the colour is configurable.
+         **/
+        void addStderr( const QString & output );
+
+        /**
+         * Enable or disable the kill button.  Only windows with ongoing
+         * Cleanup or Trash activity need an enabled kill button.
+         **/
+        void enableKillButton()  { _ui->killButton->setEnabled( true ); }
+        void disableKillButton() { _ui->killButton->setEnabled( false ); }
+
+        /**
+         * Close if there are no more processes and there is no error to show.
+         **/
+        void closeIfDone();
+
+        /**
+         * Enable the window closing automatically when there are no errors.
+         **/
+        void enableAutoClose()  { _ui->autoCloseCheckBox->setChecked( true ); }
+
+        /**
+         * Return whether the kill button has been pressed.
+         **/
+        bool killed() const { return _killedAll; }
+
+        /**
          * Return the default window show timeout in milliseconds.  This is
          * used by CleanupConfigPage as well as within this class.
          **/
@@ -138,21 +172,6 @@ namespace QDirStat
          * of all processes this OutputWindow watched.
          **/
         void lastProcessFinished( int totalErrorCount );
-
-
-    public slots:
-
-        /**
-         * Add one or more lines of stdout to show in the output area. This
-         * is typically displayed in amber, but the colour is configurable.
-         **/
-        void addStdout( const QString & output );
-
-        /**
-         * Add one or more lines of stderr to show in the output area. This
-         * is typically displayed in red, but the colour is configurable.
-         **/
-        void addStderr( const QString & output );
 
 
     protected slots:
@@ -218,14 +237,8 @@ namespace QDirStat
             { _ui->terminal->clear(); }
 
         /**
-         * Set the auto-close checkbox to the given state.
-         **/
-        void setAutoClose( bool autoClose )
-            { _ui->autoCloseCheckBox->setChecked( autoClose ); }
-
-        /**
-         * Enable or disable actions based on the internal status of this
-         * object.
+         * Enable the kill button when there are still active processes for
+         * this window, otherwise disable it.
          **/
         void updateActions()
             { _ui->killButton->setEnabled( hasActiveProcess() ); }
@@ -240,11 +253,6 @@ namespace QDirStat
          * Remove a finished process and signal it is done.
          **/
         void processFinished( QProcess * process );
-
-        /**
-         * Close if there are no more processes and there is no error to show.
-         **/
-        void closeIfDone();
 
         /**
          * Obtain the process to use from sender(). Return 0 if this is not a

@@ -208,7 +208,7 @@ namespace QDirStat
 	SelectionModel          * _selectionModel;
 	QToolBar                * _toolBar;
 	QMenu                   * _menu;
-	QWidget                 * _activeOutputWindow{ nullptr };
+	OutputWindow            * _activeOutputWindow{ nullptr };
 
     };	// class CleanupCollection
 

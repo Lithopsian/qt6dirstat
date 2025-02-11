@@ -414,8 +414,7 @@ namespace
 	if ( shell.isEmpty() )
 	{
 	    outputWindow->show(); // Regardless of user settings
-	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action" ) );
-	    logError() << "ERROR: No usable shell" << Qt::endl;
+	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action.\n" ) );
 	    return;
 	}
 
@@ -503,11 +502,11 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 
 	if ( !SysUtil::haveCommand( shell ) )
 	{
-	    errMsg = tr( "ERROR: Shell %1 is not executable" ).arg( shell );
+	    errMsg = tr( "ERROR: Shell %1 is not executable.\n" ).arg( shell );
 	    shell = defaultShell();
 
 	    if ( !shell.isEmpty() )
-		errMsg += '\n' % tr( "Using fallback " ) % shell;
+		errMsg += tr( "Using fallback %1.\n" ).arg( shell );
 	}
     }
 

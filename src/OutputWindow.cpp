@@ -36,7 +36,8 @@ namespace
 	format.setForeground( QBrush{ textColor } );
 	cursor.setCharFormat( format );
 
-	cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
+//	cursor.insertText( rawText.endsWith( u'\n' ) ? rawText : rawText % '\n' );
+	cursor.insertText( rawText );
     }
 
 
@@ -59,10 +60,12 @@ namespace
 }
 
 
-OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
+OutputWindow::OutputWindow( QWidget * parent, const QString & title ):
     QDialog{ parent },
     _ui{ new Ui::OutputWindow }
 {
+    setWindowTitle( title );
+
     _ui->setupUi( this );
     _ui->actionZoomIn->setShortcuts( QKeySequence::ZoomIn );
     _ui->actionZoomOut->setShortcuts( QKeySequence::ZoomOut );
@@ -71,7 +74,6 @@ OutputWindow::OutputWindow( QWidget * parent, bool autoClose ):
     //logDebug() << "Creating with parent " << parent << Qt::endl;
     readSettings();
 
-    setAutoClose( autoClose );
     clearOutput();
 
     connect( _ui->zoomInButton,    &QPushButton::clicked,
@@ -188,7 +190,7 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 	return;
 
     //logDebug() << "Process finished normally with exit code " << exitCode << Qt::endl;
-    addCommandLine( tr( "Process finished with exit code %1." ).arg( exitCode ) );
+    addStdout( tr( "Process finished with exit code %1.\n" ).arg( exitCode ) );
 
     QProcess * process = senderProcess();
     if ( process )
@@ -203,24 +205,25 @@ void OutputWindow::processFinishedSlot( int exitCode, QProcess::ExitStatus exitS
 
 void OutputWindow::processError( QProcess::ProcessError error )
 {
-    const QString msg = [ error ]()
+    const auto msg = [ error ]()
     {
 	switch ( error )
 	{
-	    case QProcess::FailedToStart: return tr( "Error: process failed to start." );
-	    case QProcess::Timedout:      return tr( "Error: process timed out." );
-	    case QProcess::ReadError:     return tr( "Error reading output from the process." );
-	    case QProcess::WriteError:    return tr( "Error writing data to the process." );
-	    case QProcess::UnknownError:  return tr( "Unknown error." );
-	    case QProcess::Crashed:       return tr( "Crashed" );
+	    case QProcess::FailedToStart: return tr( "Error: process failed to start.\n" );
+	    case QProcess::Timedout:      return tr( "Error: process timed out.\n" );
+	    case QProcess::ReadError:     return tr( "Error reading output from the process.\n" );
+	    case QProcess::WriteError:    return tr( "Error writing data to the process.\n" );
+	    case QProcess::UnknownError:  return tr( "Unknown error.\n" );
+	    case QProcess::Crashed:       return tr( "Crashed.\n" );
 	    default:                      return QString{};
 	}
-    }();
+    };
 
-    if ( !msg.isEmpty() )
+    if ( !_killedAll )
     {
-	logError() << msg << Qt::endl;
-	addStderr( msg );
+	const QString errorMsg = msg();
+	if ( !errorMsg.isEmpty() )
+	    addStderr( errorMsg );
     }
 
     QProcess * process = senderProcess();
@@ -307,7 +310,10 @@ void OutputWindow::killAll()
     _processList.clear();
 
     _killedAll = true;
-    addCommandLine( killCount == 1 ? tr( "Process killed." ) : tr( "Killed %L1 processes." ).arg( killCount ) );
+    _ui->autoCloseCheckBox->setChecked( false );
+
+    if ( killCount > 0 )
+	addStdout( killCount == 1 ? tr( "Process killed.\n" ) : tr( "Killed %L1 processes.\n" ).arg( killCount ) );
 }
 
 
@@ -342,11 +348,11 @@ void OutputWindow::startNextProcess()
 	const QString dir = process->workingDirectory();
 	if ( dir != _lastWorkingDir )
 	{
-	    addCommandLine( "cd "_L1 % dir );
+	    addCommandLine( QString{ "cd %1\n" }.arg( dir ) );
 	    _lastWorkingDir = dir;
 	}
 
-	addCommandLine( command( process ) );
+	addCommandLine( command( process ) % '\n' );
 	logInfo() << "Starting: " << process << Qt::endl;
 
 	process->start();

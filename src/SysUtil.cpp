@@ -38,7 +38,6 @@ namespace
 
 QProcess * SysUtil::commandProcess( const QString & program, const QStringList & args )
 {
-
     QProcess * process = new QProcess{};
 
     process->setProgram( program );

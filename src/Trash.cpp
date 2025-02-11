@@ -23,6 +23,7 @@
 #include "Exception.h"
 #include "MainWindow.h"
 #include "MountPoints.h"
+#include "OutputWindow.h"
 #include "QDirStatApp.h"
 #include "SysUtil.h"
 
@@ -39,6 +40,30 @@ namespace
     QStringList allTrashRoots()
     {
 	return Trash::trashRoots( true );
+    }
+
+
+    /**
+     * Return whether 'path' is in any trash directory or any trash directory
+     * in in 'path'.  The known trash directories are listed in
+     * 'trashRootPaths'.
+     *
+     * Note that this function will return false for valid trash dirs for other
+     * users, and these may then be trashed (usually only by root).
+     **/
+    bool isTrashDir( const QStringList & trashRootPaths, const QString & path )
+    {
+	const QString comparePath{ path % '/' };
+
+	for ( const QString & trashRootPath : trashRootPaths )
+	{
+	    // Is path in the subtree of trashRootPath, or is trashRootPath within the subtree of path
+	    const QString compareTrashRoot{ trashRootPath % '/' };
+	    if ( comparePath.startsWith( compareTrashRoot ) || compareTrashRoot.startsWith( comparePath ) )
+		return true;
+	}
+
+	return false;
     }
 
 
@@ -203,7 +228,7 @@ namespace
 	    if ( errno != ENOENT )
 	    {
 		if ( errno != 0 )
-		    logError() << "stat failed for " << trashRoot << ": " << formatErrno() << Qt::endl;
+		    logError() << "stat failed for '" << trashRoot << "': " << formatErrno() << Qt::endl;
 
 		return QString{};
 	    }
@@ -231,6 +256,30 @@ namespace
 	}
 
 	return newTrashDir;
+    }
+
+
+    /**
+     * Execute an external process and return the exit code.
+     *
+     * An event loop is run periodically to allow such things as output window
+     * messages to show, or the user to interact with the application.
+     **/
+    int executeProcess( const QString & program, const QStringList & args )
+    {
+	QProcess process;
+	process.start( program, args );
+
+	while ( process.state() != QProcess::NotRunning )
+	{
+	    process.waitForFinished( 100 );
+	    QCoreApplication::processEvents();
+	}
+
+	if ( process.exitStatus() == QProcess::CrashExit )
+	    return -1;
+
+	return process.exitCode();
     }
 
 } // namespace
@@ -322,6 +371,64 @@ bool Trash::trash( const QString & path, QString & msg )
 }
 
 
+int Trash::moveToTrash( const QStringList & itemPaths, OutputWindow * outputWindow )
+{
+    const QStringList trashRootPaths = allTrashRoots();
+
+    int loopCount = 0;
+    int trashCount = 0;
+    for ( const QString & fullPath : itemPaths )
+    {
+	// Give the output window a chance to display progress and pick up user input
+	if ( ++loopCount > 10 )
+	{
+	    loopCount = 0;
+	    QCoreApplication::processEvents();
+	}
+
+	// Stop trashing if the kill button has been clicked
+	if ( outputWindow->killed() )
+	{
+	    outputWindow->addStdout( QObject::tr( "Move to Trash cancelled.\n" ) );
+	    break;
+	}
+
+	if ( !SysUtil::canAccess( SysUtil::parentDir( fullPath ) ) )
+	{
+	    const QString out{ QObject::tr( "Cannot move %1 to trash: permission denied.\n" ).arg( fullPath ) };
+	    outputWindow->addStderr( out );
+	}
+	else if ( isTrashDir( trashRootPaths, fullPath ) )
+	{
+	    const QString out{ QObject::tr( "Cannot move %1 to trash: permission denied.\n" ).arg( fullPath ) };
+	    outputWindow->addStderr( out );
+	}
+	else
+	{
+	    outputWindow->addStdout( QObject::tr( "Moving %1 to trash..." ).arg( fullPath ) );
+	    QTimer progressTimer{ outputWindow };
+	    QObject::connect( &progressTimer, &QTimer::timeout,
+	                      [ outputWindow ](){ outputWindow->addStdout( "." ); } );
+	    progressTimer.start( 2000 );
+
+	    QString msg;
+	    if ( trash( fullPath, msg ) )
+	    {
+		++trashCount;
+		outputWindow->addStdout( QObject::tr( "\n...moved %1 to trash.\n" ).arg( fullPath ) );
+	    }
+	    else
+	    {
+		const QString out{ QObject::tr( "\n%1\nMove to trash failed for %2.\n" ).arg( msg, fullPath ) };
+		outputWindow->addStderr( out );
+	    }
+	}
+    }
+
+    return trashCount;
+}
+
+
 QStringList Trash::trashRoots( bool allRoots )
 {
     QStringList trashRoots;
@@ -352,23 +459,6 @@ QStringList Trash::trashRoots( bool allRoots )
 }
 
 
-bool Trash::isTrashDir( const QString & path )
-{
-    const QString comparePath{ path % '/' };
-
-    const QStringList trashRootPaths = allTrashRoots();
-    for ( const QString & trashRootPath : trashRootPaths )
-    {
-	// Is path in the subtree of trashRootPath, or is trashRootPath within the subtree of path
-	const QString compareTrashRoot{ trashRootPath % '/' };
-	if ( comparePath.startsWith( compareTrashRoot ) || compareTrashRoot.startsWith( comparePath ) )
-	    return true;
-    }
-
-    return false;
-}
-
-
 bool Trash::move( const QString & path, const QString targetPath, QString & msg, bool copyAndDelete )
 {
     // Standard move, only works on single filesystem
@@ -383,16 +473,16 @@ bool Trash::move( const QString & path, const QString targetPath, QString & msg,
     }
 
     // Attempt copy and delete
-    if ( QProcess::execute( "cp", { "-a", path, targetPath } ) == 0 )
+    if ( executeProcess( "cp", { "-a", path, targetPath } ) == 0 )
     {
 	// Copy succeeded, try to remove the original subtree
-	if ( QProcess::execute( "rm", { "-rf", path } ) == 0 )
+	if ( executeProcess( "rm", { "-rf", path } ) == 0 )
 	    return true;
 
 	msg = QObject::tr( "Unable to remove '%1' after copying to '%2'" ).arg( path, targetPath );
 
 	// Can't remove (all of) the original subtree, copy back to ensure it is all there
-	if ( QProcess::execute( "cp", { "-na", targetPath, path } ) != 0  )
+	if ( executeProcess( "cp", { "-na", targetPath, path } ) != 0  )
 	{
 	    msg = QObject::tr( "Unable to replace '%1' after failing to remove - full original is at '%2'" )
 	          .arg( path, targetPath );
@@ -405,7 +495,7 @@ bool Trash::move( const QString & path, const QString targetPath, QString & msg,
     }
 
     // Failed to copy or remove original, remove anything left at the target
-    QProcess::execute( "rm", { "-rf", targetPath } );
+    executeProcess( "rm", { "-rf", targetPath } );
 
     return false;
 }

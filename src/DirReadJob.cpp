@@ -338,8 +338,8 @@ void LocalDirReadJob::startReading()
 		break;
 
 	    default:
-		const QString msg{ "Unable to read directory %1 (errno=%2)" };
-		logWarning() << msg.arg( _dirName ).arg( errno ) << Qt::endl;
+		const QString msg{ "Unable to read directory %1: %2" };
+		logWarning() << msg.arg( _dirName, formatErrno() ) << Qt::endl;
 		dir()->finishReading( DirError );
 		break;
 	}

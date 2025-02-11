@@ -27,9 +27,8 @@ void Refresher::refresh()
     {
 	//logDebug() << "Refreshing " << _items.size() << " items" << Qt::endl;
 
-	// Only attempt to refresh if the first item at least is still valid
+	// Only attempt to refresh if the first item at least is still valid and there isn't another refresh
 	const FileInfo * item = _items.first();
-	if ( item && item->checkMagicNumber() && item->tree() )
 	{
 	    // This can throw when refreshing the root if it is no longer accessible
 	    try
