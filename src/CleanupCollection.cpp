@@ -559,7 +559,7 @@ void CleanupCollection::moveToTrash()
     _activeOutputWindow->enableAutoClose();
 
     // Prepare the refresher now, in case the selected items get destroyed
-    const FileInfoSet selectedItems = _selectionModel->selectedItems();
+    const FileInfoSet selectedItems = _selectionModel->selectedItems().normalized();
     Refresher refresher{ _activeOutputWindow, selectedItems.parents() };
 
     // Make a list of the item paths in case an item is deleted during the operation
