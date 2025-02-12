@@ -206,9 +206,9 @@ namespace
      * $TOPDIR/.Trash/$UID or $TOPDIR/.Trash-$UID.  $TOPDIR is the highest
      * level directory still on device 'dev'.
      *
-     * The directory is created by attempting to construct a TrashDir object.
-     * This throws an exception if the directory cannot be created and this
-     * function then returns 0.
+     * The directory is created by attempting to construct a TrashDir object,
+     * which throws if the directory cannot be created and this function then
+     * returns 0.
      **/
     TrashDir * createToplevelTrashDir( const QString & path, dev_t dev )
     {
@@ -282,6 +282,25 @@ namespace
 	return process.exitCode();
     }
 
+
+    /**
+     * Remove null and home fallback entries from the TrashDirs map after a
+     * moveToTrash operation on a list of selected items.  These trash
+     * directories do not exist on disk and could not be created; the next time
+     * that moveToTrash is called, these will be tried again in case they were
+     * created or permissions were changed.
+     **/
+    void removeTemporaryTrashDirs( TrashDirMap & trashDirMap, dev_t homeTrashDev )
+    {
+	TrashDir * homeTrashDir = trashDirMap.value( homeTrashDev, nullptr );
+	const auto homeKeys = trashDirMap.keys( homeTrashDir );
+	for ( const auto key : homeKeys )
+	{
+	    if ( homeTrashDir == nullptr || key != homeTrashDev )
+		trashDirMap.remove( key );
+	}
+    }
+
 } // namespace
 
 
@@ -295,7 +314,7 @@ TrashDir * Trash::trashDir( const QString & path )
 {
     const dev_t dev = [ this, &path ]()
     {
-	// If configured, force using only the home trash directory
+	// If configured, force using the home trash directory
 	if ( app()->mainWindow()->onlyUseHomeTrashDir() )
 	    return _homeTrashDev;
 
@@ -307,13 +326,15 @@ TrashDir * Trash::trashDir( const QString & path )
     if ( _trashDirs.contains( dev ) )
 	return _trashDirs[ dev ];
 
-    // If a TrashDir for 'dev' hasn't been created yet, try to do it now (only for non-home devices)
+    // If a TrashDir for 'dev' hasn't been created yet, try to do it now
     if ( dev != _homeTrashDev )
     {
 	TrashDir * newTrashDir = createToplevelTrashDir( path, dev );
 	if ( newTrashDir )
 	{
+	    // Remember this TrashDir to use for 'dev' paths in the future
 	    _trashDirs[ dev ] = newTrashDir;
+
 	    return newTrashDir;
 	}
 
@@ -331,25 +352,31 @@ TrashDir * Trash::trashDir( const QString & path )
 	}
 	catch ( const FileException & ex )
 	{
+	    // Use null for now to avoid re-failing for every item in this batch
+	    _trashDirs[ _homeTrashDev ] = nullptr;
 	    CAUGHT( ex );
 	}
     }
 
-    return _trashDirs.value( _homeTrashDev, nullptr );
+    // There is a home TrashDir now, even if null, so remember it for 'dev'
+    TrashDir * homeTrashDir = _trashDirs[ _homeTrashDev ];
+    _trashDirs[ dev ] = homeTrashDir;
+
+    return homeTrashDir;
 }
 
 
 bool Trash::trash( const QString & path, QString & msg )
 {
+    TrashDir * dir = trashDir( path );
+    if ( !dir )
+    {
+	msg = QObject::tr( "No trash directory for '%1'" ).arg( path );
+	return false;
+    }
+
     try
     {
-	TrashDir * dir = trashDir( path );
-	if ( !dir )
-	{
-	    msg = QObject::tr( "No trash directory for '%1'" ).arg( path );
-	    return false;
-	}
-
 	dir->trash( path );
     }
     catch ( const FileException & ex )
@@ -394,7 +421,7 @@ int Trash::moveToTrash( const QStringList & itemPaths, OutputWindow * outputWind
 	}
 	else if ( isTrashDir( trashRootPaths, fullPath ) )
 	{
-	    const QString out{ QObject::tr( "Cannot move %1 to trash: permission denied.\n" ).arg( fullPath ) };
+	    const QString out{ QObject::tr( "Cannot move a trash directory to trash: %1.\n" ).arg( fullPath ) };
 	    outputWindow->addStderr( out );
 	}
 	else
@@ -418,6 +445,8 @@ int Trash::moveToTrash( const QStringList & itemPaths, OutputWindow * outputWind
 	    }
 	}
     }
+
+    removeTemporaryTrashDirs( _trashDirs, _homeTrashDev );
 
     return trashCount;
 }
@@ -473,8 +502,6 @@ bool Trash::move( const QString & path, const QString targetPath, QString & msg,
 	if ( executeProcess( "rm", { "-rf", path } ) == 0 )
 	    return true;
 
-	msg = QObject::tr( "Unable to remove '%1' after copying to '%2'" ).arg( path, targetPath );
-
 	// Can't remove (all of) the original subtree, copy back to ensure it is all there
 	if ( executeProcess( "cp", { "-na", targetPath, path } ) != 0  )
 	{
@@ -482,6 +509,8 @@ bool Trash::move( const QString & path, const QString targetPath, QString & msg,
 	          .arg( path, targetPath );
 	    return false;
 	}
+
+	msg = QObject::tr( "Unable to remove '%1' after copying to '%2'" ).arg( path, targetPath );
     }
     else
     {
@@ -529,7 +558,7 @@ namespace
 	if ( i == 0 )
 	    return name;
 
-	// This split happens for every i increment, but i = 0 will be the most common case
+	// This split is re-done for every i increment, but i = 0 will be the most common case
 	const auto lastDotIndex = name.lastIndexOf( u'.' );
 	const QString baseName = lastDotIndex > 0 ? name.left( lastDotIndex ) : name;
 	const QString suffix   = lastDotIndex > 0 ? name.mid( lastDotIndex ) : QString{};
@@ -610,8 +639,6 @@ namespace
 	    const int fd = open( trashinfoStr, O_CREAT | O_EXCL | O_WRONLY, 0600 );
 	    if ( fd >= 0 )
 	    {
-		const QString targetPath{ filesDirPath % '/' % entryName };
-
 		if ( !writeTrashInfo( fd, path ) )
 		{
 		    const QString msg =
@@ -621,6 +648,7 @@ namespace
 		}
 
 		QString msg;
+		const QString targetPath{ filesDirPath % '/' % entryName };
 		if ( !Trash::move( path, targetPath, msg, app()->mainWindow()->copyAndDeleteTrash() ) )
 		{
 		    unlink( trashinfoStr );
@@ -638,7 +666,7 @@ namespace
 	    {
 		// Sanity check, this would be very odd
 		if ( name.size() < 2 )
-		    return;
+		    THROW( ( FileException{ path, QObject::tr( "Name too long: '%1'" ).arg( name ) } ) );
 
 		// Just chop one character at a time, slow but this is going to be very rare
 		name.chop( 1 );
