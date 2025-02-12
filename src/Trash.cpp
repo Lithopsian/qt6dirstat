@@ -288,23 +288,7 @@ namespace
 Trash::Trash():
     _homeTrashPath{ homeTrash() },
     _homeTrashDev{ device( _homeTrashPath ) }
-{
-    createHomeTrashDir();
-}
-
-
-void Trash::createHomeTrashDir()
-{
-    // TrashDir constructor can throw, although very unlikely for the home device
-    try
-    {
-	_trashDirs[ _homeTrashDev ] = new TrashDir{ _homeTrashPath };
-    }
-    catch ( const FileException & ex )
-    {
-	CAUGHT( ex );
-    }
-}
+{}
 
 
 TrashDir * Trash::trashDir( const QString & path )
@@ -319,11 +303,11 @@ TrashDir * Trash::trashDir( const QString & path )
 	return device( path );
     }();
 
-    // Use any previously-used TrashDir for 'dev'
+    // See if there is a TrashDir previously created for 'dev'
     if ( _trashDirs.contains( dev ) )
 	return _trashDirs[ dev ];
 
-    // If a TrashDir for 'dev' hasn't been created yet, do it now (only for non-home devices)
+    // If a TrashDir for 'dev' hasn't been created yet, try to do it now (only for non-home devices)
     if ( dev != _homeTrashDev )
     {
 	TrashDir * newTrashDir = createToplevelTrashDir( path, dev );
@@ -337,9 +321,19 @@ TrashDir * Trash::trashDir( const QString & path )
 	logWarning() << "Falling back to home trash dir: " << _homeTrashPath << Qt::endl;
     }
 
-    // The home trash directory should always exist, but in case it doesn't, try again to create it
+    // Try to create a TrashDir (and possibly the trash directory) for home if it doesn't already exist
     if ( !_trashDirs.contains( _homeTrashDev ) )
-	createHomeTrashDir();
+    {
+	// TrashDir constructor can throw, although very unlikely for the home device
+	try
+	{
+	    _trashDirs[ _homeTrashDev ] = new TrashDir{ _homeTrashPath };
+	}
+	catch ( const FileException & ex )
+	{
+	    CAUGHT( ex );
+	}
+    }
 
     return _trashDirs.value( _homeTrashDev, nullptr );
 }
