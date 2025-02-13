@@ -26,7 +26,7 @@ namespace QDirStat
      **/
     struct PkgCommand
     {
-	const char * program{ nullptr };
+	const char * program;
 	QStringList args;
 	bool isEmpty() const { return !program; }
     };
@@ -123,7 +123,7 @@ namespace QDirStat
 	 * The default implementation returns nothing.
 	 **/
 	virtual PkgCommand fileListCommand( const PkgInfo * ) const
-	    { return PkgCommand{}; };
+	    { return PkgCommand{ nullptr, {} }; };
 
 	/**
 	 * Parse the output of the file list command and return a list of

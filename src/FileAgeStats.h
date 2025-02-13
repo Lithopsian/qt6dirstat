@@ -23,13 +23,12 @@ namespace QDirStat
      * File count and size statistics for one year or one month.
      *
      * Note that this struct is small enough and simple enough that
-     * it shouldn't normally be passed by const reference.
+     * it should generally be passed by value.
      **/
     struct YearMonthStats
     {
         FileCount count{ 0 };
-        FileSize  size{ 0 };
-
+        FileSize  size { 0 };
     };  // struct YearMonthStats
 
 
