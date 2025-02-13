@@ -555,7 +555,7 @@ void CacheReader::addItem()
     // Blocks: only stored for sparse files, otherwise just guess from the file size
     const FileSize blocks = blocks_str ?
                             strtoll( blocks_str, 0, 10 ) :
-                            static_cast<FileSize>( std::ceil( 1.0 * alloc ) / STD_BLOCK_SIZE );
+                            static_cast<FileSize>( std::ceil( 1.0 * alloc / STD_BLOCK_SIZE ) );
 
     // Links
     const int links = links_str ? atoi( links_str ) : 1;
