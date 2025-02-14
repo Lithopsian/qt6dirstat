@@ -307,7 +307,7 @@ namespace QDirStat
 	/**
 	 * Return whether 'length' has the bit 'lengths[length]' set to true.
 	 **/
-	bool testBit( const QBitArray & lengths, qsizetype length ) const
+	bool testBit( const QBitArray & lengths, QString::size_type length ) const
 	    { return length < lengths.size() && lengths.testBit( length ); }
 
 

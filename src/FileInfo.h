@@ -391,7 +391,7 @@ namespace QDirStat
 	 * allocation.
 	 **/
 	static FileSize blocksFromSize( FileSize allocatedSize )
-	    { return std::ceil( 1.0 * allocatedSize / STD_BLOCK_SIZE ); }
+	    { return std::ceil( 1.0l * allocatedSize / STD_BLOCK_SIZE ); }
 
 	/**
 	 * The file size in bytes without taking multiple hard links into

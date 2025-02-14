@@ -177,7 +177,7 @@ namespace QDirStat
 	 **/
 	inline QString parentDir( const QString & fullPath )
 	{
-	    const int delimiterIndex = fullPath.lastIndexOf( u'/' );
+	    const auto delimiterIndex = fullPath.lastIndexOf( u'/' );
 	    return delimiterIndex < 0 ? QString{} : fullPath.left( qMax( 1, delimiterIndex ) );
 	}
 
@@ -196,7 +196,7 @@ namespace QDirStat
 	 **/
 	inline QString baseName( const QString & fullPath )
 	{
-	    const int delimiterIndex = fullPath.lastIndexOf( u'/' );
+	    const auto delimiterIndex = fullPath.lastIndexOf( u'/' );
 	    return delimiterIndex < 0 ? fullPath : fullPath.mid( delimiterIndex + 1 );
 	}
 

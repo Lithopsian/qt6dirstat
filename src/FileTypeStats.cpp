@@ -42,8 +42,8 @@ namespace
 	    return true;
 
 	// Forget suffixes with too many non-word characters
-	const int len = suffix.size();
-	const int unusual = suffix.count( matchUnusual );
+	const QString::size_type len = suffix.size();
+	const QString::size_type unusual = suffix.count( matchUnusual );
 	if ( 3 * unusual > len || unusual > 3 )
 	    return true;
 
@@ -66,8 +66,8 @@ namespace
                                const QRegularExpression & matchInvalid )
     {
 	// Ignore leading and trailing dots and any suffix longer than 32 characters
-	const int lastDot = filename.lastIndexOf( u'.' );
-	const int lastIndex = filename.size() - 1;
+	const QString::size_type lastDot = filename.lastIndexOf( u'.' );
+	const QString::size_type lastIndex = filename.size() - 1;
 	if ( lastDot <= 0 || lastDot + 32 < lastIndex || lastDot == lastIndex )
 	    return QString{};
 

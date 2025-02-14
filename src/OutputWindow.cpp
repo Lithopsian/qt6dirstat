@@ -298,7 +298,7 @@ void OutputWindow::resetZoom()
 
 void OutputWindow::killAll()
 {
-    const int killCount = _processList.size();
+    const auto killCount = _processList.size();
 
     for ( QProcess * process : asConst( _processList ) )
     {

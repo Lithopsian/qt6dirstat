@@ -99,9 +99,9 @@ namespace QDirStat
          * Return the percentage of 'count' or 'size' wrt the total.
          **/
         float countPercent( FileCount count ) const
-            { return _totalCount == 0 ? 100.0 : 100.0f * count / _totalCount; }
+            { return _totalCount == 0 ? 100 : 100 * ( 1.0 * count / _totalCount ); }
         float sizePercent( FileSize size ) const
-            { return _totalSize == 0 ? 100.0 : 100.0f * size / _totalSize; }
+            { return _totalSize == 0 ? 100 : 100 * ( 1.0 * size / _totalSize ); }
 
         /**
          * Return a unique value for the combination 'year' and 'month', to

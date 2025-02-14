@@ -72,7 +72,7 @@ QString PacManPkgManager::owningPkg( const QString & path ) const
     // name.
 
     output.remove( QRegularExpression{ "^.*is owned by " } );
-    const int firstSpaceIndex = output.indexOf( u' ' );
+    const auto firstSpaceIndex = output.indexOf( u' ' );
     const QString pkg = firstSpaceIndex < 0 ? output : output.left( firstSpaceIndex );
 
     return pkg;

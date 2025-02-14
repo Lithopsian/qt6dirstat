@@ -45,7 +45,7 @@ namespace
      **/
     bool isWildcardSuffix( const QString & pattern )
     {
-	const int suffixStartIndex = pattern.lastIndexOf( "*."_L1 );
+	const auto suffixStartIndex = pattern.lastIndexOf( "*."_L1 );
 	if ( suffixStartIndex < 1 || suffixStartIndex >= pattern.size() - 2 )
 	    return false;
 

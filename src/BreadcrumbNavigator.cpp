@@ -43,7 +43,7 @@ namespace
     {
 	logNewline();
 
-	for ( int i=0; i < breadcrumbs.size(); ++i )
+	for ( QVector::size_type i=0; i < breadcrumbs.size(); ++i )
 	{
 	    const Breadcrumb & crumb = breadcrumbs[ i ];
 
@@ -90,13 +90,13 @@ namespace
      **/
     Breadcrumb * pickLongBreadcrumb( BreadcrumbList & breadcrumbs )
     {
-	int maxLen = 1; // only return crumbs with more than one character
+	QString::size_type maxLen = 1; // only return crumbs with more than one character
 
 	Breadcrumb * longestCrumb = nullptr;
 
 	for ( Breadcrumb & crumb : breadcrumbs )
 	{
-	    const int nameLength = crumb.displayName().size();
+	    const QString::size_type nameLength = crumb.displayName().size();
 	    if ( nameLength > maxLen )
 	    {
 		longestCrumb = &crumb;

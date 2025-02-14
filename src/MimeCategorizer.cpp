@@ -39,7 +39,7 @@ namespace
 	// Add this pattern with no wildcards into a hash map
 	keys.insert( key, category );
 
-	// Mark the length pf this pattern so we only try to match filenames wih the right length
+	// Mark the length of this pattern so we only try to match filenames wih the right length
 	const auto length = key.size();
 	if ( length >= lengths.size() )
 	    lengths.resize( length + 1 );
@@ -225,7 +225,7 @@ const MimeCategory * MimeCategorizer::category( const QString & filename,
     }
 
     // Find the longest filename suffix, ignoring any leading dot
-    int dotIndex = filename.indexOf( u'.', 1 );
+    auto dotIndex = filename.indexOf( u'.', 1 );
 
     while ( dotIndex >= 0 )
     {
@@ -395,7 +395,7 @@ void MimeCategorizer::addWildcardSuffixKeys( const MimeCategory * category )
     // Return the portion of 'pattern' after the "*."
     const auto getSuffix = []( const QString & pattern )
     {
-	const int delimiterIndex = pattern.lastIndexOf( "*."_L1 );
+	const auto delimiterIndex = pattern.lastIndexOf( "*."_L1 );
 	return delimiterIndex < 0 ? pattern : pattern.mid( delimiterIndex );
     };
 

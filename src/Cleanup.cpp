@@ -57,7 +57,7 @@ namespace
 	if ( paths.isEmpty() )
 	    return true;
 
-	const int firstSpaceIndex = app.indexOf( u' ' );
+	const auto firstSpaceIndex = app.indexOf( u' ' );
 	const QString appName = firstSpaceIndex < 0 ? app : app.left( firstSpaceIndex );
 
 	for ( const QString & appPath : paths )
@@ -394,7 +394,7 @@ namespace
 
 	if ( !item->isDir() && !item->isPseudoDir() )
 	{
-	    const int lastSlashIndex = dir.lastIndexOf( u'/' );
+	    const auto lastSlashIndex = dir.lastIndexOf( u'/' );
 	    if ( lastSlashIndex >= 0 )
 		dir.truncate( lastSlashIndex );
 	}

@@ -522,8 +522,8 @@ FileTypeItem::FileTypeItem( const QString   & name,
 	setTextAlignment( col, alignment | Qt::AlignVCenter );
     };
 
-    const float countPercent = parentCount ? 100.0f * _count / parentCount : 100.0f;
-    const float sizePercent = parentSize ? 100.0f * _totalSize / parentSize : 100.0f;
+    const float countPercent = parentCount ? 100.0 * _count / parentCount : 100;
+    const float sizePercent = parentSize ? 100.0 * _totalSize / parentSize : 100;
 
     set( FT_NameCol,         Qt::AlignLeft,  name );
     set( FT_CountCol,        Qt::AlignRight, formatCount( _count ) );

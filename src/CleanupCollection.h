@@ -80,6 +80,9 @@ namespace QDirStat
 
 	/**
 	 * Return the number of cleanup actions in this collection.
+	 *
+	 * Note that this is narrowing in Qt6, but the list is strictly limited to
+	 * fit in an int.
 	 **/
 	int size() const { return _cleanupList.size(); }
 
