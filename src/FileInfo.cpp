@@ -57,7 +57,7 @@ namespace
      **/
     float percent( FileSize size, FileSize parentSize)
     {
-	return parentSize == 0 ? 0.0 : 100.0 * size / parentSize;
+	return parentSize == 0 ? 0.0f : 100.0 * size / parentSize;
     }
 
 } // namespace
@@ -137,7 +137,7 @@ FileSize FileInfo::size() const
     const FileSize size = _isSparseFile ? _allocatedSize : _size;
 
     if ( _links > 1 && !_tree->ignoreHardLinks() && isFile() )
-	return size / _links;
+	return size / _links; // integer division!
 
     return size;
 }
@@ -148,7 +148,7 @@ FileSize FileInfo::allocatedSize() const
     const FileSize size = _allocatedSize;
 
     if ( _links > 1 && !_tree->ignoreHardLinks() && isFile() )
-	return size / _links;
+	return size / _links; // integer division!
 
     return size;
 }

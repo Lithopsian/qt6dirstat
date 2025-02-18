@@ -39,13 +39,14 @@ namespace
      * statistics.  This is configurable by manually editing the config
      * file.
      **/
-    int yearsWithMonths()
+    short yearsWithMonths()
     {
 	const int defaultValue = 5;
 
 	Settings settings;
 	settings.beginGroup( "FileAgeStatsWindow" );
-	const int yearsWithMonths = settings.value( "YearsWithMonths", defaultValue ).toInt();
+	const short yearsWithMonths =
+	    qMin( settings.value( "YearsWithMonths", defaultValue ).toInt(), SHRT_MAX );
 	settings.setDefaultValue( "YearsWithMonths", defaultValue );
 	settings.endGroup();
 
@@ -167,9 +168,9 @@ namespace
 		const YearMonthStats monthStats = stats.monthStats( year, month );
 
 		const FileCount count        = monthStats.count;
-		const float     countPercent = yearCount == 0 ? 100.0f : 100.0f * count / yearCount;
+		const float     countPercent = yearCount == 0 ? 100 : 100.0 * count / yearCount;
 		const FileSize  size         = monthStats.size;
-		const float     sizePercent  = yearSize == 0 ? 100.0f : 100.0f * size / yearSize;
+		const float     sizePercent  = yearSize == 0 ? 100 : 100.0 * size / yearSize;
 
 		item->addChild( new YearListItem{ year, month, count, countPercent, size, sizePercent } );
 	    }

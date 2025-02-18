@@ -183,7 +183,7 @@ namespace QDirStat
     struct WildcardCategory
     {
 	Wildcard wildcard;
-	const MimeCategory * category{ nullptr };
+	const MimeCategory * category;
 	bool isEmpty() const { return wildcard.isEmpty() && !category; }
 	bool matches( const FileInfo * item ) const;
     };

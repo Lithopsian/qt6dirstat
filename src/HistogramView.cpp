@@ -86,7 +86,7 @@ namespace
      **/
     double percent( qint64 count, qint64 total )
     {
-	return total ? 100.0 * count / total : 0.0;
+	return total ? 100.0l * count / total : 0.0;
     }
 
 

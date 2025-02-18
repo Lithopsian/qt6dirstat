@@ -122,6 +122,9 @@ namespace QDirStat
          *
          * You can iterate over the history stack from 0 to size() - 1.
          * 0 is the oldest item.
+         *
+         * Note that this is narrowing in Qt6, but the number of items is
+         * limited to far less than any int can hold.
          **/
         int size() const { return _items.size(); }
 

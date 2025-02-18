@@ -287,7 +287,6 @@ namespace
 
 	const int filesDirFd = dirfd( diskDir );
 
-	QEventLoop eventLoop;
 	int count = 0;
 
 	struct dirent * entry;
@@ -297,7 +296,7 @@ namespace
 	    if ( ++count > 100 )
 	    {
 		count = 0;
-		eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
+		QCoreApplication::processEvents( QEventLoop::ExcludeUserInputEvents );
 	    }
 
 	    if ( !isDotOrDotDot( entry->d_name ) )

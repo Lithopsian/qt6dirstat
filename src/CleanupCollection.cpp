@@ -321,7 +321,10 @@ void CleanupCollection::execute()
 	return;
     }
 
-    OutputWindow * outputWindow = new OutputWindow{ activeWindow, cleanup->outputWindowAutoClose() };
+    OutputWindow * outputWindow =
+	new OutputWindow{ activeWindow, tr( "Cleanup Output" ) };
+    if ( cleanup->outputWindowAutoClose() )
+	outputWindow->enableAutoClose();
     if ( cleanup->refreshPolicy() != Cleanup::NoRefresh )
 	_activeOutputWindow = outputWindow;
     emit startingCleanup( cleanup->cleanTitle() );
@@ -549,62 +552,38 @@ void CleanupCollection::writeSettings( const CleanupList & newCleanups)
 
 void CleanupCollection::moveToTrash()
 {
-    const FileInfoSet selectedItems = _selectionModel->selectedItems();
-
-    // Prepare output window, to auto-close
-    OutputWindow * outputWindow = new OutputWindow{ app()->activeWindow(), true };
-
     // Don't show window at all for quick and successful trashes
-    outputWindow->showAfterTimeout();
+    _activeOutputWindow = new OutputWindow{ app()->activeWindow(), QObject::tr( "Move to Trash Output" ) };
+    _activeOutputWindow->showAfterTimeout();
+    _activeOutputWindow->enableKillButton();
+    _activeOutputWindow->enableAutoClose();
 
-    // Move all selected items to trash
-    QEventLoop eventLoop;
-    int loopCount = 0;
-    int trashCount = 0;
+    // Prepare the refresher now, in case the selected items get destroyed
+    const FileInfoSet selectedItems = _selectionModel->selectedItems().normalized();
+    Refresher refresher{ _activeOutputWindow, selectedItems.parents() };
+
+    // Make a list of the item paths in case an item is deleted during the operation
+    QStringList itemPaths;
     for ( const FileInfo * item : selectedItems )
-    {
-	const QString fullPath = item->path();
-	QString msg;
-
-	if ( !SysUtil::canAccess( SysUtil::parentDir( fullPath ) ) )
-	    outputWindow->addStderr( tr( "Cannot move %1 to trash: permission denied." ).arg( fullPath ) );
-	else if ( _trash->isTrashDir( fullPath ) )
-	    outputWindow->addStderr( tr( "Cannot move a trash directory to trash: %1." ).arg( fullPath ) );
-	else
-	{
-	    outputWindow->addStdout( tr( "Moving %1 to trash..." ).arg( fullPath ) );
-
-	    if ( _trash->trash( fullPath, msg ) )
-	    {
-		++trashCount;
-		outputWindow->addStdout( tr( "...moved %1 to trash." ).arg( fullPath ) );
-	    }
-	    else
-	    {
-		outputWindow->addStderr( msg );
-		outputWindow->addStderr( tr( "Move to trash failed for %2." ).arg( fullPath ) );
-	    }
-	}
-
-	// Give the output window a chance to display progress
-	if ( ++loopCount > 10 )
-	{
-	    loopCount = 0;
-	    eventLoop.processEvents( QEventLoop::ExcludeUserInputEvents );
-	}
-    }
+	itemPaths << item->path();
+    const int trashCount = _trash->moveToTrash( itemPaths, _activeOutputWindow );
 
     // Show a summary if there were multiple items
     const auto totalCount = selectedItems.size();
     if ( totalCount > 1 )
-	outputWindow->addStdout( tr( "Moved %1 of %2 items to trash." ).arg( trashCount ).arg( totalCount ) );
+    {
+	const QString msg{ tr( "Moved %1 of %2 items to trash.\n" ).arg( trashCount ).arg( totalCount ) };
+	_activeOutputWindow->addStdout( msg );
+    }
 
     // Only refresh if something was actually moved to trash
     if ( trashCount > 0 )
-	createRefresher( outputWindow, selectedItems.parents() );
+	refresher.refresh();
 
-    outputWindow->noMoreProcesses();
+    _activeOutputWindow->noMoreProcesses();
     emit trashFinished();
+    _activeOutputWindow->disableKillButton();
+    _activeOutputWindow = nullptr;
 }
 
 

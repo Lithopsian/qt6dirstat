@@ -27,10 +27,6 @@ namespace QDirStat
      **/
     struct ColumnLayout
     {
-	ColumnLayout( const QString & name ):
-	    name{ name }
-	{}
-
 	QString        name;
 	DataColumnList columns;
 

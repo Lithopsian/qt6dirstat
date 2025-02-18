@@ -35,7 +35,7 @@ namespace
     {
 	logDebug() << "Children of " << parent << Qt::endl;
 
-	for ( int i=0; i < children.size(); ++i )
+	for ( FileCount i=0; i < children.size(); ++i )
 	    logDebug() << "    #" << i << ": " << children.at(i) << Qt::endl;
     }
 

@@ -15,6 +15,7 @@
 
 namespace QDirStat
 {
+    class OutputWindow;
     class TrashDir;
 
     typedef QHash<dev_t, TrashDir *> TrashDirMap;
@@ -56,11 +57,11 @@ namespace QDirStat
         Trash & operator=( const Trash & ) = delete;
 
         /**
-         * Throw a file or directory into the trash.  Returns 'true' on
-         * success, 'false' on error.  If the call fails, 'msg' will contain
-         * details.
+         * Move the subtrees listed in 'itemPaths' to trash and return the
+         * number of items (a whole subtree is one "item") successfully moved.
+         * Progress and diagnostic messages are sent to 'outputWindow'.
          **/
-        bool trash( const QString & path, QString & msg );
+        int moveToTrash( const QStringList & itemPaths, OutputWindow * outputWindow );
 
         /**
          * Return the path of the main trash directory for a filesystem with
@@ -123,15 +124,6 @@ namespace QDirStat
         static QStringList trashRoots( bool allRoots = false );
 
         /**
-         * Return whether 'path' is in any trash directory or any trash
-         * directory in in 'path'.
-         *
-         * Note that this function will return false for valid trash dirs for
-         * other users, and these may then be trashed (usually only by root).
-         **/
-        static bool isTrashDir( const QString & path );
-
-        /**
          * Try to move 'path' to 'targetPath', first using rename().  If that
          * fails with errno=EXDEV (invalid cross-device link) and
          * 'copyAndDelete' is specified, by copying and deleting.  If false is
@@ -157,21 +149,34 @@ namespace QDirStat
     protected:
 
         /**
-         * Attempt to locate or create a home trash directory for
-         * '_homeTrashPath'.
-         **/
-        void createHomeTrashDir();
-
-        /**
-         * Return the trash dir for 'path', creating it if necessary and falling
-         * back to the home trash dir if necessary.
+         * Return the trash dir for 'path', creating it if necessary and
+         * falling back to the home trash dir if necessary.
+         *
+         * A list of already-existing TrashDirs is mapped by device number; the
+         * list of queried for either the device number of 'path' or the home
+         * device number if configured.  If found, that TrashDir is used,
+         * otherwise a new TrashDir object is created.
+         *
+         * If a home trash directory is not found and cannot be created, null
+         * is stored in the map and used for all items in the current list
+         * being moved to trash.  If a top-level trash directory cannot be
+         * found or created, then the home trash directory will be used as a
+         * fallback, even if it is null, for all items in the current list.
+         * These null and fallback map entries will be removed when the current
+         * moveToTrash operation is complete so that the next operation attempts
+         * to find or create the trash directories again.
          **/
         TrashDir * trashDir( const QString & path );
+
+        /**
+         * Move a file or directory into the trash.  Returns 'true' on success,
+         * 'false' on error.  If the call fails, 'msg' will contain details.
+         **/
+        bool trash( const QString & path, QString & msg );
 
 
     private:
 
-        bool        _copyAndDelete;
         QString     _homeTrashPath;
         dev_t       _homeTrashDev;
         TrashDirMap _trashDirs;
@@ -224,7 +229,7 @@ namespace QDirStat
         void trash( const QString & path );
 
         /**
-         * Return the tag (first line) of a trashinfo file.
+         * Return the header tag (first line) of a trashinfo file.
          **/
         static QLatin1String trashInfoTag()
             { return "[Trash Info]"_L1; }

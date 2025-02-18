@@ -278,7 +278,7 @@ namespace
     /**
      * Return a string summarizing multiple selected items.
      **/
-    QString formatSelectionSummary( int selectionCount )
+    QString formatSelectionSummary( FileCount selectionCount )
     {
 	if ( selectionCount == 1 )
 	    return QObject::tr( "1 Selected Item" );

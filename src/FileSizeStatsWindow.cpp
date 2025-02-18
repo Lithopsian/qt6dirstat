@@ -332,7 +332,7 @@ void FileSizeStatsWindow::initHistogram()
 
 void FileSizeStatsWindow::setPercentileTable()
 {
-    const double nominalCount = 1.0 * _stats->size() / _stats->maxPercentile();
+    const double nominalCount = 1.0l * _stats->size() / _stats->maxPercentile();
     const int precision = [ nominalCount ]()
     {
 	if ( nominalCount == 0 || nominalCount >= 10 ) return 0;
@@ -389,7 +389,7 @@ void FileSizeStatsWindow::autoPercentileRange()
 
     // Find the threshold values for the low and high outliers
     const FileSize minVal = qMax( q1Value - iqr, _stats->minValue() );
-    const FileSize maxVal = ( 3.0 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
+    const FileSize maxVal = ( 3 * iqr + q3Value > maxValue ) ? maxValue : ( 3 * iqr + q3Value );
 
     // Find the highest percentile that has a value less than minVal
     int startPercentile = _stats->minPercentile();

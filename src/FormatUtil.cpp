@@ -44,7 +44,7 @@ QString QDirStat::formatSize( FileSize lSize, int precision )
     }
 
     int    unitIndex = 0;
-    double size      = lSize / 1024.0;
+    double size      = lSize / 1024.0l;
 
     // Restrict to three digits before the decimal point, if possible
     while ( size >= 1000.0 && unitIndex < units.size() - 1 )
@@ -156,7 +156,7 @@ QString QDirStat::monthAbbreviation( short month )
 QString QDirStat::pathTooltip( QString path )
 {
     // Add possible line break points in case a tooltip with no spaces is wider than the screen
-    for ( int i = 25; i < path.size(); i += 25 )
+    for ( QString::size_type i = 25; i < path.size(); i += 25 )
 	path.insert( i, u'\u200B' ); // zero-width space
 
     // Stop the tooltip being treated as rich text even if it contains html

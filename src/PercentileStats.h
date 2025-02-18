@@ -224,8 +224,11 @@ namespace QDirStat
 	    { return std::min( std::ceil( 2 * std::cbrt( n ) ), max ); }
 
 	/**
-	 * Return the number of buckets for the current list of bucket
-	 * counts.
+	 * Return the number of buckets for the current list of bucket counts.
+	 *
+	 * Note that converting size() to int will be narrowing in Qt6, but
+	 * the actual list size is restricted to an int, and in practice much
+	 * less than that.
 	 **/
 	int bucketsCount() const { return _bucketCounts.size(); }
 

@@ -71,7 +71,7 @@ namespace
      **/
     int lastIndexOf( const QStringList & stack, const QString & needle, Qt::CaseSensitivity cs )
     {
-        for ( int i = stack.size()-1; i >= 0; --i)
+        for ( auto i = stack.size()-1; i >= 0; --i)
         {
             if ( needle.compare( stack.at(i), cs ) == 0 )
                 return i;

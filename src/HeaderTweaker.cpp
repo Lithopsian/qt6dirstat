@@ -162,7 +162,7 @@ namespace
 	 **/
 	const auto createColumnLayout = [ &layouts ]( const QString & layoutName )
 	{
-	    layouts[ layoutName ] = new ColumnLayout{ layoutName };
+	    layouts[ layoutName ] = new ColumnLayout{ layoutName, {} };
 	};
 
 	// Layout L1: Short

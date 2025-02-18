@@ -34,17 +34,10 @@ namespace QDirStat
      **/
     struct Breadcrumb
     {
-	Breadcrumb( const QString & path = QString{} ):
-	    pathComponent{ path }
-	{}
-
 	QString pathComponent;
 	QString elidedName;   // Empty or elided version of pathComponent
 	QString url;
-
-	const QString & displayName() const
-	    { return elidedName.isNull() ? pathComponent : elidedName; }
-
+	const QString & displayName() const { return elidedName.isNull() ? pathComponent : elidedName; }
     };	// struct Breadcrumb
 
 

@@ -38,7 +38,6 @@ namespace
 
 QProcess * SysUtil::commandProcess( const QString & program, const QStringList & args )
 {
-
     QProcess * process = new QProcess{};
 
     process->setProgram( program );
@@ -153,7 +152,7 @@ QString SysUtil::symlinkTarget( const QString & pathIn )
 
 void SysUtil::splitPath( const QString & fullPath, QString & path_ret, QString & name_ret )
 {
-    const int delimiterIndex = fullPath.lastIndexOf ( u'/' );
+    const auto delimiterIndex = fullPath.lastIndexOf ( u'/' );
     if ( delimiterIndex <= 0 )
     {
 	// Paths ending in "/" (notably root) or paths without any "/"

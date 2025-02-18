@@ -57,7 +57,7 @@ namespace
 	if ( paths.isEmpty() )
 	    return true;
 
-	const int firstSpaceIndex = app.indexOf( u' ' );
+	const auto firstSpaceIndex = app.indexOf( u' ' );
 	const QString appName = firstSpaceIndex < 0 ? app : app.left( firstSpaceIndex );
 
 	for ( const QString & appPath : paths )
@@ -394,7 +394,7 @@ namespace
 
 	if ( !item->isDir() && !item->isPseudoDir() )
 	{
-	    const int lastSlashIndex = dir.lastIndexOf( u'/' );
+	    const auto lastSlashIndex = dir.lastIndexOf( u'/' );
 	    if ( lastSlashIndex >= 0 )
 		dir.truncate( lastSlashIndex );
 	}
@@ -414,8 +414,7 @@ namespace
 	if ( shell.isEmpty() )
 	{
 	    outputWindow->show(); // Regardless of user settings
-	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action" ) );
-	    logError() << "ERROR: No usable shell" << Qt::endl;
+	    outputWindow->addStderr( QObject::tr( "No usable shell - aborting cleanup action.\n" ) );
 	    return;
 	}
 
@@ -503,11 +502,11 @@ QString Cleanup::chooseShell( OutputWindow * outputWindow ) const
 
 	if ( !SysUtil::haveCommand( shell ) )
 	{
-	    errMsg = tr( "ERROR: Shell %1 is not executable" ).arg( shell );
+	    errMsg = tr( "ERROR: Shell %1 is not executable.\n" ).arg( shell );
 	    shell = defaultShell();
 
 	    if ( !shell.isEmpty() )
-		errMsg += '\n' % tr( "Using fallback " ) % shell;
+		errMsg += tr( "Using fallback %1.\n" ).arg( shell );
 	}
     }
 
