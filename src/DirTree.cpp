@@ -624,10 +624,9 @@ FileInfo * DirTree::locate( const QString & url ) const
 }
 
 
-bool DirTree::writeCache( const QString & cacheFileName )
+void DirTree::writeCache( const QString & cacheFileName )
 {
-    CacheWriter writer{ cacheFileName, this };
-    return writer.ok();
+    CacheReader::writeCache( cacheFileName, this );
 }
 
 

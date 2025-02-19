@@ -18,6 +18,9 @@
 #include "Typedefs.h"   // FileSize
 
 
+#define DEFAULT_CACHE_NAME ".qdirstat.cache.gz"
+
+
 namespace QDirStat
 {
     class DirInfo;
@@ -395,11 +398,10 @@ namespace QDirStat
 	bool isBusy() const { return _isBusy; }
 
 	/**
-	 * Write the complete tree to a cache file.
-	 *
-	 * Returns true if OK, false if there was an error.
+	 * Write the complete tree to a cache file.  This will throw if there is
+	 * a fatal error.
 	 **/
-	bool writeCache( const QString & cacheFileName );
+	void writeCache( const QString & cacheFileName );
 
 	/**
 	 * Read a cache file.

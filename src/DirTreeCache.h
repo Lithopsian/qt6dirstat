@@ -19,7 +19,6 @@
 #include "Typedefs.h" //FileSize
 
 
-#define DEFAULT_CACHE_NAME	".qdirstat.cache.gz"
 #define CACHE_FORMAT_VERSION	"2.1"
 #define MAX_CACHE_LINE_LEN	5000  // 4096 plus some
 #define MAX_FIELDS_PER_LINE	32
@@ -31,42 +30,10 @@ namespace QDirStat
     class DirTree;
     class FileInfo;
 
-    class CacheWriter final
-    {
-    public:
-
-	/**
-	 * Write 'tree' to file 'fileName' in gzip format (using zlib).
-	 *
-	 * Check CacheWriter::ok() to see if writing the cache file went OK.
-	 **/
-	CacheWriter( const QString & fileName, DirTree * tree ):
-	    _ok{ writeCache( fileName, tree ) }
-	{}
-
-	/**
-	 * Returns true if writing the cache file went OK.
-	 **/
-	bool ok() const { return _ok; }
-
-
-    protected:
-
-	/**
-	 * Write cache file in gzip format.
-	 * Returns 'true' if OK, 'false' upon error.
-	 **/
-	static bool writeCache( const QString & fileName, const DirTree * tree );
-
-
-    private:
-
-	bool _ok;
-
-    };	// class CacheWriter
-
-
-
+    /**
+     * Class for handling cache files, which contain information describing a
+     * filesystem or a subtree of a filesystem.
+     **/
     class CacheReader final
     {
 	/**
@@ -114,6 +81,12 @@ namespace QDirStat
 	CacheReader & operator=( const CacheReader & ) = delete;
 
 	/**
+	 * Write cache file in gzip format.
+	 * Returns 'true' if OK, 'false' upon error.
+	 **/
+	static void writeCache( const QString & fileName, const DirTree * tree );
+
+	/**
 	 * Read at most maxLines from the cache file (check with eof() if the
 	 * end of file is reached yet) or the entire file (if maxLines is 0).
 	 *
@@ -131,11 +104,6 @@ namespace QDirStat
 	 * Returns true if reading the cache file went OK.
 	 **/
 	bool ok() const { return _ok; }
-
-	/**
-	 * Returns the tree associated with this reader.
-	 **/
-//	DirTree * tree() const { return _tree; }
 
 
     protected:
@@ -185,7 +153,7 @@ namespace QDirStat
 	    { return QUrl{ "foo:"_L1 % cleanPath( rawPath ) }.path(); }
 
 	/**
-	 * Clean a path: Replace duplicate (or triplicate or more) slashes with
+	 * Clean a path: replace duplicate (or triplicate or more) slashes with
 	 * just one. QUrl doesn't seem to handle those well.
 	 **/
 	QString cleanPath( const QString & rawPath ) const

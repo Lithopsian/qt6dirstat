@@ -165,22 +165,20 @@ namespace
 
 
 
-bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
+void CacheReader::writeCache( const QString & fileName, const DirTree * tree )
 {
-    if ( !tree || !tree->root() )
-	return false;
+    if ( !tree )
+	return;
 
-    if ( !tree->firstToplevel()->isDirInfo() )
-    {
-	logWarning() << "No toplevel directory, can't write a valid cache file" << Qt::endl;
-	return false;
-    }
+    const FileInfo * firstToplevel = tree->firstToplevel();
+    if ( !firstToplevel || !firstToplevel->isDirInfo() )
+	return;
 
     gzFile cache = gzopen( fileName.toUtf8().constData(), "w" );
     if ( cache == 0 )
     {
 	logError() << "Can't open " << fileName << ": " << formatErrno() << Qt::endl;
-	return false;
+	throw( SysCallFailedException{ "gzopen", fileName } );
     }
 
     gzprintf( cache,
@@ -190,10 +188,13 @@ bool CacheWriter::writeCache( const QString & fileName, const DirTree * tree )
              "# Type\tpath                              \tsize\tuid\tgid\tmode\tmtime\t\talloc\t\t<optional fields>\n"
              "\n",
              CACHE_FORMAT_VERSION );
-    writeTree( cache, tree->firstToplevel() );
-    gzclose( cache );
+    writeTree( cache, firstToplevel );
 
-    return true;
+    if ( gzclose( cache ) != Z_OK )
+    {
+	logError() << "Can't close " << fileName << ": " << formatErrno() << Qt::endl;
+	throw( SysCallFailedException{ "gzclose", fileName } );
+    }
 }
 
 
@@ -761,7 +762,10 @@ void CacheReader::checkHeader()
     // or	    [kdirstat <version> cache file]
 
     if ( _fieldsCount != 4 )
+    {
 	_ok = false;
+	logError() << "Invalid header field count: " << _fieldsCount << Qt::endl;
+    }
 
     if ( _ok )
     {
@@ -770,7 +774,7 @@ void CacheReader::checkHeader()
 	       strcmp( field( 3 ), "file]"     ) != 0 )
 	{
 	    _ok = false;
-	    logError() << "Line " << _lineNo << ": Unknown file format" << Qt::endl;
+	    logError() << "Invalid header format" << Qt::endl;
 	}
     }
 
@@ -780,13 +784,8 @@ void CacheReader::checkHeader()
 
 	// currently not checking version number
 	// for future use
-
 	if ( !_ok )
-	{
-	    logError() << "Line " << _lineNo
-	               << ": incompatible cache file version " << version
-	               << Qt::endl;
-	}
+	    logError() << "Incompatible cache file version " << version << Qt::endl;
     }
 
     //logDebug() << "Cache file header check OK: " << _ok << Qt::endl;
@@ -797,8 +796,6 @@ bool CacheReader::readLine()
 {
     if ( !_ok || !_cache )
 	return false;
-
-//    _fieldsCount = 0;
 
     char * line;
 
