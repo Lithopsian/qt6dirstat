@@ -247,7 +247,7 @@ namespace
 	{
 	    newTrashDir = new TrashDir{ trashPath };
 	}
-	catch ( const FileException & ex )
+	catch ( const SysCallFailedException & ex )
 	{
 	    CAUGHT( ex );
 	    logWarning() << "Failed to create trash directory " << trashPath << Qt::endl;
@@ -350,7 +350,7 @@ TrashDir * Trash::trashDir( const QString & path )
 	{
 	    _trashDirs[ _homeTrashDev ] = new TrashDir{ _homeTrashPath };
 	}
-	catch ( const FileException & ex )
+	catch ( const SysCallFailedException & ex )
 	{
 	    // Use null for now to avoid re-failing for every item in this batch
 	    _trashDirs[ _homeTrashDev ] = nullptr;
@@ -379,7 +379,7 @@ bool Trash::trash( const QString & path, QString & msg )
     {
 	dir->trash( path );
     }
-    catch ( const FileException & ex )
+    catch ( const Exception & ex )
     {
 	CAUGHT( ex );
 	msg = ex.what();
@@ -542,7 +542,7 @@ namespace
 	    if ( mkdir( path.toUtf8(), 0700 ) < 0 )
 	    {
 		const QString what = QObject::tr( "Could not create directory '%1': %2" );
-		THROW( ( FileException{ path, what.arg( path, formatErrno() ) } ) );
+		THROW( ( SysCallFailedException{ "mkdir", path } ) );
 	    }
 	}
     }
@@ -674,7 +674,7 @@ namespace
 	    else
 	    {
 		const QString msg = QObject::tr( "Could not create trashinfo '%1': %2" );
-		THROW( ( FileException{ path, msg.arg( trashinfoPath, formatErrno() ) } ) );
+		THROW( ( SysCallFailedException{ "open", path } ) );
 	    }
 	}
     }
