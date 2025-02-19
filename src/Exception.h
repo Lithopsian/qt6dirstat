@@ -101,8 +101,7 @@ class SysCallFailedException final : public Exception
 {
 public:
 
-    SysCallFailedException( const QString & sysCall,
-                            const QString & resourceName ):
+    SysCallFailedException( const QString & sysCall, const QString & resourceName ):
 	Exception{ errMsg( sysCall, resourceName ) },
 	_resourceName{ resourceName }
     {}

@@ -497,7 +497,8 @@ namespace QDirStat
         /**
          * Show progress text in the status bar for a few seconds.
          **/
-        void showProgress( const QString & text );
+        void showProgress( const QString & text )
+            { _ui->statusBar->showMessage( text, _statusBarTimeout ); }
 
         /**
          * Return whether verbose selection is enabled.
