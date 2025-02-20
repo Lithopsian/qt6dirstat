@@ -16,8 +16,6 @@
 #include <QStringBuilder>
 #include <QUrl>
 
-#include "Typedefs.h" //FileSize
-
 
 #define CACHE_FORMAT_VERSION	"2.1"
 #define MAX_CACHE_LINE_LEN	5000  // 4096 plus some
@@ -144,13 +142,11 @@ namespace QDirStat
 	    { return no >= 0 && no < _fieldsCount ? _fields[ no ] : nullptr; }
 
 	/**
-	 * Return an unescaped version of 'rawPath'.
-	 *
-	 * Using a protocol part avoids directory names with a colon ":"
-	 * being cut off because it looks like a URL protocol.
+	 * Return 'rawPath' with percent-encoded characters decoded (and
+	 * multiple slashes converted to single slashes).
 	 **/
-	QString unescapedPath( const QString & rawPath ) const
-	    { return QUrl{ "foo:"_L1 % cleanPath( rawPath ) }.path(); }
+	QString decodedPath( const char * rawPath ) const
+	    { return cleanPath( QUrl::fromPercentEncoding( rawPath ) ); }
 
 	/**
 	 * Clean a path: replace duplicate (or triplicate or more) slashes with
