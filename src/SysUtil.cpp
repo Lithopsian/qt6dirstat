@@ -153,7 +153,7 @@ QString SysUtil::symlinkTarget( const QString & pathIn )
 void SysUtil::splitPath( const QString & fullPath, QString & path_ret, QString & name_ret )
 {
     const auto delimiterIndex = fullPath.lastIndexOf ( u'/' );
-    if ( delimiterIndex <= 0 )
+    if ( delimiterIndex < 0 || delimiterIndex == fullPath.size() - 1 )
     {
 	// Paths ending in "/" (notably root) or paths without any "/"
 	path_ret = QString();
