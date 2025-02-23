@@ -51,8 +51,8 @@ namespace QDirStat
 	 * return that path. If the user cancelled the dialog, this returns an
 	 * empty string.
 	 *
-	 * 'crossFilesystems' (if non-null) returns the "cross filesystems"
-	 * flag of the dialog.
+	 * 'crossFilesystems' returns whether the "cross filesystems" checkbox is
+	 * checked.
 	 **/
 	static QString askOpenDir( QWidget * parent, bool & crossFilesystems );
 

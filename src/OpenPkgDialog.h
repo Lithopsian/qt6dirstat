@@ -44,13 +44,13 @@ namespace QDirStat
 
 	/**
 	 * Open an "open package" dialog and wait for the user to enter
-	 * values.
+	 * values.  Returns whether the dialog was accepted (true) or
+	 * cancelled (false) by the user.
          *
-         * 'cancelled_ret' is a return parameter that (if non-null) is set to
-	 * 'true' if the user cancelled the dialog.
+         * If the dialog was cancelled, 'pkgFilter' will be an empty filter.
+	 * Otherwise it will contain the filter configured in the dialog.
 	 **/
-	static PkgFilter askPkgFilter( bool    * cancelled_ret,
-	                               QWidget * parent = nullptr   );
+	static bool askPkgFilter( PkgFilter & pkgFilter );
 
 	/**
 	 * The package filter the user entered.

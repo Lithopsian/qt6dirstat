@@ -38,10 +38,10 @@ namespace QDirStat
      * the objects that it holds.
      *
      * Note that the instance guarantees to return object pointers for
-     * MainWindow, DirTreeModel, SelectionModel, and DirTree (ownded by
+     * MainWindow, DirTreeModel, SelectionModel, and DirTree (owned by
      * DirTreeModel), but it will only do so after they have been set using
      * setModels().  They will become invalid once MainWindow and its
-     * children are destroyed and should not be accessed.
+     * children are destroyed and will be reset to 0.
      **/
     class QDirStatApp final : public QApplication
     {

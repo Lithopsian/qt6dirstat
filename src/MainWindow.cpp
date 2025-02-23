@@ -18,13 +18,11 @@
 #include "ConfigDialog.h"
 #include "DataColumns.h"
 #include "DirTree.h"
-#include "DirTreeCache.h"
 #include "DirTreeModel.h"
 #include "Exception.h"
 #include "FormatUtil.h"
 #include "FileAgeStatsWindow.h"
 #include "FileDetailsView.h"
-#include "FileSearchFilter.h"
 #include "FileSizeStatsWindow.h"
 #include "FilesystemsWindow.h"
 #include "FileTypeStatsWindow.h"
@@ -95,7 +93,7 @@ MainWindow::MainWindow( bool slowUpdate ):
     // After this (ie. once MainWindow is constructed), they will always return a non-zero pointer
     DirTreeModel * dirTreeModel = new DirTreeModel{ this };
     SelectionModel * selectionModel = new SelectionModel{ dirTreeModel, this };
-    QDirStatApp::setModels( this, dirTreeModel, selectionModel );
+    app()->setModels( this, dirTreeModel, selectionModel );
 
     if ( slowUpdate )
         dirTreeModel->setSlowUpdate();
@@ -135,7 +133,7 @@ MainWindow::~MainWindow()
     writeSettings();
 
     // Reset the app() model pointers since the models will be destroyed
-    QDirStatApp::resetModels();
+    app()->resetModels();
 
     //logDebug() << "Main window destroyed" << Qt::endl;
 }
@@ -394,8 +392,7 @@ void MainWindow::startingReading()
 
     // Sort by ReadJobsCol (aka PercentBarCol) during normal full reads
     SignalBlocker signalBlocker{ app()->dirTreeModel() };
-    const int sortCol = DataColumns::toViewCol( ReadJobsCol );
-    _ui->dirTreeView->sortByColumn( sortCol, Qt::DescendingOrder );
+    _ui->dirTreeView->sortByColumn( DataColumns::toViewCol( ReadJobsCol ), Qt::DescendingOrder );
 
     // Open this here, so it doesn't get done for refresh selected
     // And don't do it for package reads because so many toplevel packages slow things down
@@ -475,7 +472,6 @@ void MainWindow::openDir( const QString & url )
     {
 	CAUGHT( ex );
 	showOpenDirErrorPopup( ex );
-//	askOpenDir();
     }
 
     updateActions();
@@ -490,9 +486,8 @@ void MainWindow::showOpenDirErrorPopup( const SysCallFailedException & ex )
     updateWindowTitle( QString() );
     app()->dirTree()->sendFinished();
 
-    QMessageBox errorPopup{ QMessageBox::Warning,
-                            tr( "Error" ),
-                            pad( tr( "Could not open directory " ) + ex.resourceName(), 50 ) };
+    const QString text = pad( tr( "Could not open directory " ) + ex.resourceName(), 50 );
+    QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ), text };
     errorPopup.setDetailedText( ex.what() );
     errorPopup.exec();
 }
@@ -523,10 +518,8 @@ void MainWindow::askOpenDir()
 
 void MainWindow::askOpenPkg()
 {
-    bool cancelled;
-    PkgFilter pkgFilter = OpenPkgDialog::askPkgFilter( &cancelled );
-
-    if ( !cancelled )
+    PkgFilter pkgFilter;
+    if ( OpenPkgDialog::askPkgFilter( pkgFilter ) )
     {
 	app()->dirTree()->reset();
 	readPkg( pkgFilter );
@@ -610,7 +603,6 @@ void MainWindow::refreshAll()
 	{
 	    CAUGHT( ex );
 	    showOpenDirErrorPopup( ex );
-//	    askOpenDir();
 	}
     }
 
@@ -665,11 +657,7 @@ void MainWindow::applyFutureSelection()
 	//logDebug() << "Using future selection: " << sel << Qt::endl;
 
         app()->selectionModel()->setCurrentItem( sel, true);  // select
-
-	// A bit annoying to open every refreshed directory, so just the top level
-//        if ( sel->parent() == app()->dirTree()->root() )
-            _ui->dirTreeView->expandItem( sel );
-
+	_ui->dirTreeView->expandItem( sel );
 	_ui->dirTreeView->scrollToCurrent(); // center the selected item
     }
 
@@ -707,9 +695,8 @@ void MainWindow::readCache( const QString & cacheFileName )
 
 void MainWindow::askReadCache()
 {
-    const QString fileName = QFileDialog::getOpenFileName( this, // parent
-                                                           tr( "Select QDirStat cache file" ),
-                                                           DEFAULT_CACHE_NAME );
+    const QString fileName =
+	QFileDialog::getOpenFileName( this, tr( "Select QDirStat cache file" ), DEFAULT_CACHE_NAME );
     if ( fileName.isEmpty() )
 	return;
 
@@ -724,17 +711,24 @@ void MainWindow::askReadCache()
 
 void MainWindow::askWriteCache()
 {
-    const QString fileName = QFileDialog::getSaveFileName( this, // parent
-                                                           tr( "Enter name for QDirStat cache file"),
-                                                           DEFAULT_CACHE_NAME );
+    const QString fileName =
+	QFileDialog::getSaveFileName( this, tr( "Enter name for QDirStat cache file"), DEFAULT_CACHE_NAME );
     if ( fileName.isEmpty() )
 	return;
 
-    const bool ok = app()->dirTree()->writeCache( fileName );
-    if ( ok )
+    try
+    {
+	app()->dirTree()->writeCache( fileName );
 	showProgress( tr( "Directory tree written to file " ) + fileName );
-    else
-	QMessageBox::warning( this, tr( "Error" ), tr( "ERROR writing cache file " ) + fileName );
+    }
+    catch ( const SysCallFailedException & ex )
+    {
+	CAUGHT( ex );
+	const QString text = pad( tr( "Could not write cache file " ) + fileName, 50 );
+	QMessageBox errorPopup{ QMessageBox::Warning, tr( "Error" ), text };
+	errorPopup.setDetailedText(ex.what() );
+	errorPopup.exec();
+    }
 }
 
 
@@ -752,12 +746,6 @@ void MainWindow::updateWindowTitle( const QString & url )
 }
 
 
-void MainWindow::showProgress( const QString & text )
-{
-    _ui->statusBar->showMessage( text, _statusBarTimeout );
-}
-
-
 void MainWindow::showElapsedTime()
 {
     showProgress( tr( "Reading... " ) + formatMillisec( _stopWatch.elapsed() ) );
@@ -768,13 +756,11 @@ void MainWindow::showCurrent( FileInfo * item )
 {
     if ( item )
     {
-	QString msg = QString{ "%1  (%2%3)" }
-	    .arg( item->debugUrl(), item->sizePrefix(), formatSize( item->totalSize() ) );
-
-	if ( item->readState() != DirFinished )
-	    msg += "  " + _ui->fileDetailsView->readStateMsg( item->readState() );
-
-	_ui->statusBar->showMessage( msg );
+	const QString size = formatSize( item->totalSize() );
+	const QString msg = QString{ item->readState() == DirFinished ?
+	                    "%1  (%2%3)" :
+	                    "%1  (%2%3)  " + _ui->fileDetailsView->readStateMsg( item->readState() ) };
+	_ui->statusBar->showMessage( msg.arg( item->debugUrl(), item->sizePrefix(), size ) );
     }
     else
     {
